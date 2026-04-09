@@ -11,7 +11,17 @@
       "Bash(npx create-expo-app:*)",
       "Bash(npm install:*)",
       "Bash(npx expo:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(php -r ':*)",
+      "Bash(curl -s http://localhost:8000/api/v1/places)",
+      "Bash(python -m json.tool)",
+      "Bash(curl -s http://localhost:8000/api/v1/places/1)",
+      "Bash(ls C:/Users/Simon/moi-order/moi-order-frontend/*.env*)",
+      "Bash(ls C:/Users/Simon/moi-order/moi-order-frontend/.env*)",
+      "Bash(curl:*)",
+      "Bash(ipconfig)",
+      "Bash(cmd.exe:*)",
+      "Bash(powershell.exe:*)"
     ]
   }
 }

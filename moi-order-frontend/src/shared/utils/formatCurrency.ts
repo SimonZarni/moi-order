@@ -1,11 +1,11 @@
 /**
  * Principle: SRP — pure formatting utility, no side effects.
- * Converts integer cents to a localised currency string.
+ * Formats an integer price (whole currency units) to a localised currency string.
  */
-export function formatCurrency(cents: number, currency: string = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
+export function formatCurrency(amount: number, currency: string = 'THB'): string {
+  return new Intl.NumberFormat('th-TH', {
     style: 'currency',
     currency,
-    minimumFractionDigits: 2,
-  }).format(cents / 100);
+    minimumFractionDigits: 0,
+  }).format(amount);
 }

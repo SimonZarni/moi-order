@@ -1,0 +1,103 @@
+import apiClient from '@/shared/api/client';
+import { ApiResponse, PaginatedResponse, ServiceSubmission } from '@/types/models';
+import { ImagePickerAsset } from 'expo-image-picker';
+
+export interface CompanyRegistrationPayload {
+  idempotencyKey:    string;
+  serviceTypeId:     number;
+  fullName:          string;
+  phone:             string;
+  passportBioPage:   ImagePickerAsset;
+  visaPage:          ImagePickerAsset;
+  identityCardFront: ImagePickerAsset;
+  identityCardBack:  ImagePickerAsset;
+  tm30:              ImagePickerAsset;
+}
+
+export async function submitCompanyRegistration(
+  payload: CompanyRegistrationPayload,
+): Promise<ServiceSubmission> {
+  const form = new FormData();
+  form.append('idempotency_key',  payload.idempotencyKey);
+  form.append('service_type_id',  String(payload.serviceTypeId));
+  form.append('full_name',        payload.fullName);
+  form.append('phone',            payload.phone);
+
+  const appendImage = (key: string, asset: ImagePickerAsset): void => {
+    form.append(key, {
+      uri:  asset.uri,
+      type: asset.mimeType ?? 'image/jpeg',
+      name: `${key}.jpg`,
+    } as unknown as Blob);
+  };
+
+  appendImage('passport_bio_page',   payload.passportBioPage);
+  appendImage('visa_page',           payload.visaPage);
+  appendImage('identity_card_front', payload.identityCardFront);
+  appendImage('identity_card_back',  payload.identityCardBack);
+  appendImage('tm30',                payload.tm30);
+
+  const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
+    '/api/v1/submissions/company-registration',
+    form,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
+  return response.data.data;
+}
+
+export interface NinetyDayReportPayload {
+  idempotencyKey: string;
+  serviceTypeId: number;
+  fullName: string;
+  phone: string;
+  passportBioPage: ImagePickerAsset;
+  visaPage: ImagePickerAsset;
+  oldSlip: ImagePickerAsset;
+}
+
+export async function submitNinetyDayReport(
+  payload: NinetyDayReportPayload,
+): Promise<ServiceSubmission> {
+  const form = new FormData();
+  form.append('idempotency_key', payload.idempotencyKey);
+  form.append('service_type_id', String(payload.serviceTypeId));
+  form.append('full_name', payload.fullName);
+  form.append('phone', payload.phone);
+
+  form.append('passport_bio_page', {
+    uri:  payload.passportBioPage.uri,
+    type: payload.passportBioPage.mimeType ?? 'image/jpeg',
+    name: 'passport_bio_page.jpg',
+  } as unknown as Blob);
+
+  form.append('visa_page', {
+    uri:  payload.visaPage.uri,
+    type: payload.visaPage.mimeType ?? 'image/jpeg',
+    name: 'visa_page.jpg',
+  } as unknown as Blob);
+
+  form.append('old_slip', {
+    uri:  payload.oldSlip.uri,
+    type: payload.oldSlip.mimeType ?? 'image/jpeg',
+    name: 'old_slip.jpg',
+  } as unknown as Blob);
+
+  const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
+    '/api/v1/submissions/90-day-report',
+    form,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
+  return response.data.data;
+}
+
+export async function fetchSubmissions(page: number): Promise<PaginatedResponse<ServiceSubmission>> {
+  const response = await apiClient.get<PaginatedResponse<ServiceSubmission>>('/api/v1/submissions', {
+    params: { page },
+  });
+  return response.data;
+}
+
+export async function fetchSubmission(id: number): Promise<ServiceSubmission> {
+  const response = await apiClient.get<ApiResponse<ServiceSubmission>>(`/api/v1/submissions/${id}`);
+  return response.data.data;
+}
