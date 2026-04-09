@@ -1,0 +1,78 @@
+import React from 'react';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { useOtherServicesScreen } from '@/features/otherServices/hooks/useOtherServicesScreen';
+import { styles } from './OtherServicesScreen.styles';
+
+export function OtherServicesScreen(): React.JSX.Element {
+  const { services, isLoading, isError, handleSelectService, handleBack } =
+    useOtherServicesScreen();
+
+  return (
+    <SafeAreaView style={styles.root} edges={['top']}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <Pressable
+            style={styles.backBtn}
+            onPress={handleBack}
+            accessibilityLabel="Go back"
+            accessibilityRole="button"
+          >
+            <Text style={styles.backArrow}>‹</Text>
+            <Text style={styles.backLabel}>Home</Text>
+          </Pressable>
+          <Text style={styles.headerTitle}>Other Services</Text>
+          <Text style={styles.headerSubtitle}>
+            Additional immigration and registration services.
+          </Text>
+        </View>
+
+        <View style={styles.body}>
+          <Text style={styles.sectionLabel}>Available Services</Text>
+
+          {isLoading && (
+            <View style={styles.centered}>
+              <ActivityIndicator color="#224e4a" size="large" />
+            </View>
+          )}
+
+          {isError && (
+            <View style={styles.centered}>
+              <Text style={styles.errorText}>Unable to load services. Please try again.</Text>
+            </View>
+          )}
+
+          {!isLoading && !isError && services.length === 0 && (
+            <View style={styles.centered}>
+              <Text style={styles.emptyText}>No other services available at the moment.</Text>
+            </View>
+          )}
+
+          {services.map((service) => (
+            <Pressable
+              key={service.id}
+              style={({ pressed }) => [styles.serviceCard, { opacity: pressed ? 0.88 : 1 }]}
+              onPress={() => handleSelectService(service)}
+              accessibilityLabel={`${service.name_en} service`}
+              accessibilityRole="button"
+            >
+              <View style={styles.serviceCardContent}>
+                <Text style={styles.serviceCardTitle}>{service.name_en}</Text>
+                <Text style={styles.serviceCardSubtitle}>{service.name}</Text>
+                {service.types.length > 0 && (
+                  <Text style={styles.serviceCardPrice}>
+                    ฿{service.types[0]!.price.toLocaleString('th-TH')}
+                  </Text>
+                )}
+              </View>
+              <View style={styles.serviceCardArrow}>
+                <Text style={styles.serviceCardArrowText}>›</Text>
+              </View>
+            </Pressable>
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}

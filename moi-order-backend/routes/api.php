@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Public routes — intentionally unauthenticated
-Route::prefix('v1')->middleware(['throttle:auth'])->group(
+Route::prefix('v1')->middleware(['throttle:api'])->group(
     base_path('routes/api/public.php')
 );
 
