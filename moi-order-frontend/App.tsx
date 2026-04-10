@@ -2,6 +2,8 @@
  * Principle: SRP — entry point wires providers + auth-aware navigation only; zero business logic.
  * Auth restore: on mount, reads token from SecureStore → calls /me → populates authStore.
  *   Shows a blank teal splash while initialising to avoid flash of wrong screen.
+ * Guest access: all screens are always mounted. Auth guard lives in form-submission
+ *   coordinator hooks (redirect to Login on submit when unauthenticated).
  * Provider order (outermost → innermost):
  *   SafeAreaProvider → QueryClientProvider → NavigationContainer → Stack
  */
@@ -12,6 +14,9 @@ import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { enableScreens } from 'react-native-screens';
+
+enableScreens(true);
 
 import { setMemoryToken } from '@/shared/api/client';
 import { fetchMe } from '@/shared/api/auth';
@@ -26,6 +31,8 @@ import { NinetyDayReportScreen } from '@/features/ninetyDayReport/screens/Ninety
 import { NinetyDayReportFormScreen } from '@/features/ninetyDayReport/screens/NinetyDayReportFormScreen';
 import { OtherServicesScreen } from '@/features/otherServices/screens/OtherServicesScreen';
 import { CompanyRegistrationFormScreen } from '@/features/companyRegistration/screens/CompanyRegistrationFormScreen';
+import { OrdersScreen } from '@/features/orders/screens/OrdersScreen';
+import { OrderDetailScreen } from '@/features/orders/screens/OrderDetailScreen';
 import { PlaceDetailScreen } from '@/features/places/screens/PlaceDetailScreen';
 import { PlacesScreen } from '@/features/places/screens/PlacesScreen';
 
@@ -37,14 +44,15 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 2,
-      staleTime: CACHE_TTL.USER_DATA,
+      staleTime: CACHE_TTL.USER_DATA,   // 5 min — no refetch on screen focus
+      gcTime:    10 * 60 * 1000,        // 10 min — keep unmounted screen data in memory
     },
   },
 });
 
 export default function App(): React.JSX.Element {
   const [isInitializing, setIsInitializing] = useState(true);
-  const { isLoggedIn, setUser } = useAuthStore();
+  const { setUser } = useAuthStore();
 
   useEffect(() => {
     async function restoreSession(): Promise<void> {
@@ -56,7 +64,7 @@ export default function App(): React.JSX.Element {
           setUser(user, token);
         }
       } catch {
-        // Token expired or invalid — clear silently; user will see Login.
+        // Token expired or invalid — clear silently; user browses as guest.
         await SecureStore.deleteItemAsync(TOKEN_KEY).catch(() => {});
       } finally {
         setIsInitializing(false);
@@ -77,26 +85,22 @@ export default function App(): React.JSX.Element {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <NavigationContainer>
+          {/* All screens always available — form screens guard auth at submit time. */}
           <Stack.Navigator
-            initialRouteName={isLoggedIn ? 'Home' : 'Login'}
+            initialRouteName="Home"
             screenOptions={{ headerShown: false, animation: 'fade' }}
           >
-            {isLoggedIn ? (
-              <>
-                <Stack.Screen name="Home"               component={HomeScreen} />
-                <Stack.Screen name="NinetyDayReport"    component={NinetyDayReportScreen} />
-                <Stack.Screen name="NinetyDayReportForm"       component={NinetyDayReportFormScreen} />
-                <Stack.Screen name="OtherServices"             component={OtherServicesScreen} />
-                <Stack.Screen name="CompanyRegistrationForm"   component={CompanyRegistrationFormScreen} />
-                <Stack.Screen name="Places"                    component={PlacesScreen} />
-                <Stack.Screen name="PlaceDetail"        component={PlaceDetailScreen} />
-              </>
-            ) : (
-              <>
-                <Stack.Screen name="Login"    component={LoginScreen} />
-                <Stack.Screen name="Register" component={RegisterScreen} />
-              </>
-            )}
+            <Stack.Screen name="Home"                      component={HomeScreen} />
+            <Stack.Screen name="Orders"                    component={OrdersScreen} />
+            <Stack.Screen name="OrderDetail"               component={OrderDetailScreen} />
+            <Stack.Screen name="Login"                     component={LoginScreen} />
+            <Stack.Screen name="Register"                  component={RegisterScreen} />
+            <Stack.Screen name="NinetyDayReport"           component={NinetyDayReportScreen} />
+            <Stack.Screen name="NinetyDayReportForm"       component={NinetyDayReportFormScreen} />
+            <Stack.Screen name="OtherServices"             component={OtherServicesScreen} />
+            <Stack.Screen name="CompanyRegistrationForm"   component={CompanyRegistrationFormScreen} />
+            <Stack.Screen name="Places"                    component={PlacesScreen} />
+            <Stack.Screen name="PlaceDetail"               component={PlaceDetailScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </QueryClientProvider>

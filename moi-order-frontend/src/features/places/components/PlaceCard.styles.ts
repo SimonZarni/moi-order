@@ -5,100 +5,105 @@ import { radius } from '@/shared/theme/radius';
 import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 
+const GOLD = '#b08d57';
+
 export const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colours.card,
+  // Outer wrapper: owns shadow — no overflow:hidden so Android elevation shows
+  shadowWrap: {
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.md,
     borderRadius: radius.xl,
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.sm + spacing.xs,   // 12 — tighter gap between cards
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(34,78,74,0.12)',
-    shadowColor: colours.dark,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
+    backgroundColor: colours.backgroundDark,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 7,
   },
 
-  // ── Image ─────────────────────────────────────────────────────────────────
-  imageContainer: {
-    position: 'relative',
-    height: 108,
+  // Inner Pressable: clips image + gradient to rounded corners
+  card: {
+    height: 160,
+    borderRadius: radius.xl,
+    overflow: 'hidden',
+    backgroundColor: colours.backgroundDark,
+    justifyContent: 'flex-end',
   },
+
+  // ── Full-bleed image ──────────────────────────────────────────────────────
   image: {
-    width: '100%',
-    height: 108,
-    resizeMode: 'cover',
+    ...StyleSheet.absoluteFillObject,
   },
-  imagePlaceholder: {
-    width: '100%',
-    height: 108,
-    backgroundColor: colours.infoBg,
+
+  // ── No-image fallback ─────────────────────────────────────────────────────
+  imageFallback: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#0f2422',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  // Category badge sits on the image — visually merges image and content
-  badge: {
+  imageFallbackIcon: {
+    fontSize: 44,
+    opacity: 0.2,
+  },
+
+  // ── Gradient overlay ──────────────────────────────────────────────────────
+  gradient: {
+    ...StyleSheet.absoluteFillObject,
+  },
+
+  // ── Category badge — top left ─────────────────────────────────────────────
+  categoryBadge: {
     position: 'absolute',
-    bottom: spacing.sm,
+    top: spacing.sm,
     left: spacing.sm,
-    backgroundColor: colours.primary,
+    backgroundColor: 'rgba(0,0,0,0.38)',
     borderRadius: radius.full,
-    paddingHorizontal: spacing.sm + spacing.xs,  // 12
     paddingVertical: 3,
+    paddingHorizontal: spacing.sm,
+    borderWidth: 1,
+    borderColor: `${colours.tertiary}88`,
   },
-  badgeText: {
-    color: colours.white,
-    fontSize: typography.xs,
+  categoryText: {
+    fontSize: 9,
     fontWeight: '700',
-    letterSpacing: 0.6,
+    color: colours.tertiary,
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
   },
 
-  // ── Content ───────────────────────────────────────────────────────────────
-  content: {
-    paddingHorizontal: spacing.sm + spacing.xs,  // 12
-    paddingTop: spacing.sm + spacing.xs,          // 12
-    paddingBottom: spacing.sm + spacing.xs,       // 12
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.xs,
+  // ── Bottom content ────────────────────────────────────────────────────────
+  bottomContent: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
   },
   name: {
-    flex: 1,
-    fontSize: typography.md,
-    fontWeight: '700',
-    color: colours.textOnLight,
-    letterSpacing: -0.2,
-  },
-  arrow: {
-    fontSize: typography.lg,
-    color: colours.tertiary,
-    fontWeight: '300',
-    marginLeft: spacing.xs,
+    fontSize: typography.md + 1,
+    fontWeight: '800',
+    color: colours.white,
+    letterSpacing: -0.3,
+    marginBottom: 4,
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  city: {
+  metaCity: {
     fontSize: typography.xs,
-    color: colours.textMuted,
+    color: 'rgba(255,255,255,0.65)',
     fontWeight: '500',
   },
   metaDot: {
     width: 3,
     height: 3,
     borderRadius: 2,
-    backgroundColor: colours.tertiary,
+    backgroundColor: GOLD,
     marginHorizontal: spacing.xs,
-    opacity: 0.5,
+    opacity: 0.7,
   },
-  hours: {
+  metaHours: {
     fontSize: typography.xs,
-    color: colours.textMuted,
+    color: 'rgba(255,255,255,0.5)',
     flex: 1,
   },
 });

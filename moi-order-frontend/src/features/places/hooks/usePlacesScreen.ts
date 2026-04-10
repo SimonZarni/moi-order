@@ -1,8 +1,12 @@
 import { useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { usePlaces } from '@/features/places/hooks/usePlaces';
+import { fetchPlaceDetail } from '@/shared/api/places';
+import { CACHE_TTL } from '@/shared/constants/config';
+import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { Place } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 import { ApiError } from '@/types/models';
@@ -17,10 +21,12 @@ export interface UsePlacesScreenResult {
   handleEndReached: () => void;
   handleRefresh: () => void;
   handlePlacePress: (placeId: number) => void;
+  handleBack: () => void;
 }
 
 export function usePlacesScreen(): UsePlacesScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const queryClient = useQueryClient();
   const {
     places,
     isLoading,
@@ -44,10 +50,20 @@ export function usePlacesScreen(): UsePlacesScreenResult {
 
   const handlePlacePress = useCallback(
     (placeId: number) => {
+      // Prefetch detail immediately on press — data may be ready before screen mounts
+      queryClient.prefetchQuery({
+        queryKey: QUERY_KEYS.PLACES.DETAIL(placeId),
+        queryFn:  () => fetchPlaceDetail(placeId),
+        staleTime: CACHE_TTL.USER_DATA,
+      });
       navigation.navigate('PlaceDetail', { placeId });
     },
-    [navigation],
+    [navigation, queryClient],
   );
+
+  const handleBack = useCallback((): void => {
+    navigation.navigate('Home');
+  }, [navigation]);
 
   return {
     places,
@@ -59,5 +75,6 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     handleEndReached,
     handleRefresh,
     handlePlacePress,
+    handleBack,
   };
 }

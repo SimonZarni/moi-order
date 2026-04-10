@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -43,9 +44,20 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
         <View style={styles.heroContainer}>
           {coverImage !== null && (
             <Pressable onPress={() => handleImagePress(0)} accessibilityLabel="View cover image" accessibilityRole="imagebutton">
-              <Image source={{ uri: coverImage.url }} style={styles.heroImage} />
+              <Image
+                source={{ uri: coverImage.url }}
+                style={styles.heroImage}
+                contentFit="cover"
+                cachePolicy="disk"
+                transition={200}
+              />
             </Pressable>
           )}
+          <Pressable style={styles.heroBackBtn} onPress={handleBack}
+            accessibilityLabel="Go back to places" accessibilityRole="button">
+            <Text style={styles.heroBackArrow}>‹</Text>
+            <Text style={styles.heroBackLabel}>Places</Text>
+          </Pressable>
         </View>
 
         {/* ── § 1  Identity ────────────────────────────────── */}
@@ -133,7 +145,13 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
                   accessibilityLabel="View image"
                   accessibilityRole="imagebutton"
                 >
-                  <Image source={{ uri: item.url }} style={styles.galleryImage} />
+                  <Image
+                    source={{ uri: item.url }}
+                    style={styles.galleryImage}
+                    contentFit="cover"
+                    cachePolicy="disk"
+                    transition={150}
+                  />
                 </Pressable>
               )}
               horizontal

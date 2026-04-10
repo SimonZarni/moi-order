@@ -44,11 +44,38 @@ export const styles = StyleSheet.create({
   // ── Hero ──────────────────────────────────────────────────────────────────
   heroContainer: {
     position: 'relative',
+    minHeight: 60,
   },
   heroImage: {
     width: '100%',
     height: 300,
-    resizeMode: 'cover',
+  },
+  // Floating back button overlaid on hero image (top-left)
+  heroBackBtn: {
+    position: 'absolute',
+    top: spacing.sm,
+    left: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(0,0,0,0.38)',
+    borderRadius: radius.full,
+    paddingVertical: spacing.xs + 2,
+    paddingHorizontal: spacing.sm + 2,
+    minHeight: 36,
+    zIndex: 10,
+  },
+  heroBackArrow: {
+    fontSize: 22,
+    color: colours.tertiary,
+    lineHeight: 26,
+    fontWeight: '300',
+  },
+  heroBackLabel: {
+    fontSize: typography.sm,
+    fontWeight: '600',
+    color: colours.tertiary,
+    letterSpacing: 0.2,
   },
   // ── Section 1 — Identity card (pulls up over hero) ───────────────────────
   identityCard: {

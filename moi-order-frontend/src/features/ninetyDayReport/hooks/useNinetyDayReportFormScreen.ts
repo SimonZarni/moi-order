@@ -7,6 +7,7 @@ import * as Crypto from 'expo-crypto';
 
 import { useNinetyDayReportForm, UseNinetyDayReportFormResult } from './useNinetyDayReportForm';
 import { submitNinetyDayReport } from '@/shared/api/submissions';
+import { useAuthStore } from '@/shared/store/authStore';
 import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 import { MESSAGES } from '@/shared/constants/messages';
@@ -34,6 +35,7 @@ export function useNinetyDayReportFormScreen(): UseNinetyDayReportFormScreenResu
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteParams>();
   const { serviceTypeId, serviceTypeName, serviceTypeNameEn, price } = route.params;
+  const { isLoggedIn } = useAuthStore();
 
   const {
     form,
@@ -109,9 +111,13 @@ export function useNinetyDayReportFormScreen(): UseNinetyDayReportFormScreenResu
   });
 
   const handleSubmit = useCallback((): void => {
+    if (!isLoggedIn) {
+      navigation.navigate('Login');
+      return;
+    }
     setBannerError('');
     if (validate()) mutate();
-  }, [validate, mutate]);
+  }, [isLoggedIn, navigation, validate, mutate]);
 
   const handleBack = useCallback((): void => {
     navigation.goBack();

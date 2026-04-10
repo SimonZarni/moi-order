@@ -42,7 +42,7 @@ class SubmissionController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $submissions = ServiceSubmission::with(['serviceType'])
+        $submissions = ServiceSubmission::with(['serviceType.service'])
             ->forUser($request->user()->id)
             ->latest()
             ->paginate(20);

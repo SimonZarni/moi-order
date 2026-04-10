@@ -9,21 +9,36 @@ import { RootStackParamList } from '@/types/navigation';
 
 export interface UseHomeScreenResult {
   user: User | null;
+  isLoggedIn: boolean;
   handleNavigateToNinetyDayReport: () => void;
+  handleNavigateToTickets: () => void;
+  handleNavigateToPlaces: () => void;
   handleNavigateToOtherServices: () => void;
+  handleNavigateToLogin: () => void;
   handleLogout: () => void;
 }
 
 export function useHomeScreen(): UseHomeScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { user, clearAuth } = useAuthStore();
+  const { user, isLoggedIn, clearAuth } = useAuthStore();
 
   const handleNavigateToNinetyDayReport = useCallback((): void => {
     navigation.navigate('NinetyDayReport');
   }, [navigation]);
 
+  // Placeholder — Tickets screen does not exist yet.
+  const handleNavigateToTickets = useCallback((): void => {}, []);
+
+  const handleNavigateToPlaces = useCallback((): void => {
+    navigation.navigate('Places');
+  }, [navigation]);
+
   const handleNavigateToOtherServices = useCallback((): void => {
     navigation.navigate('OtherServices');
+  }, [navigation]);
+
+  const handleNavigateToLogin = useCallback((): void => {
+    navigation.navigate('Login');
   }, [navigation]);
 
   const handleLogout = useCallback((): void => {
@@ -32,5 +47,14 @@ export function useHomeScreen(): UseHomeScreenResult {
     clearAuth();
   }, [clearAuth]);
 
-  return { user, handleNavigateToNinetyDayReport, handleNavigateToOtherServices, handleLogout };
+  return {
+    user,
+    isLoggedIn,
+    handleNavigateToNinetyDayReport,
+    handleNavigateToTickets,
+    handleNavigateToPlaces,
+    handleNavigateToOtherServices,
+    handleNavigateToLogin,
+    handleLogout,
+  };
 }
