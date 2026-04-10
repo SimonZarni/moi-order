@@ -1,8 +1,10 @@
 import React from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Pressable, Text, View } from 'react-native';
 
-import { styles } from './PlaceCard.styles';
 import { Place } from '@/types/models';
+import { styles } from './PlaceCard.styles';
 
 interface PlaceCardProps {
   place: Place;
@@ -11,40 +13,54 @@ interface PlaceCardProps {
 
 export function PlaceCard({ place, onPress }: PlaceCardProps): React.JSX.Element {
   return (
-    <Pressable
-      style={styles.container}
-      onPress={() => onPress(place.id)}
-      accessibilityLabel={`View details for ${place.name_en}`}
-      accessibilityRole="button"
-    >
-      {/* Image with category badge overlaid at bottom-left */}
-      <View style={styles.imageContainer}>
+    <View style={styles.shadowWrap}>
+      <Pressable
+        style={({ pressed }) => [styles.card, { opacity: pressed ? 0.88 : 1 }]}
+        onPress={() => onPress(place.id)}
+        accessibilityLabel={`View details for ${place.name_en}`}
+        accessibilityRole="button"
+      >
+        {/* Full-bleed background image */}
         {place.cover_image !== null ? (
-          <Image source={{ uri: place.cover_image }} style={styles.image} />
+          <Image
+            source={{ uri: place.cover_image }}
+            style={styles.image}
+            contentFit="cover"
+            cachePolicy="disk"
+            transition={200}
+          />
         ) : (
-          <View style={styles.imagePlaceholder} />
+          <View style={styles.imageFallback}>
+            <Text style={styles.imageFallbackIcon}>📍</Text>
+          </View>
         )}
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{place.category.name_en}</Text>
-        </View>
-      </View>
 
-      {/* Compact content: name + meta */}
-      <View style={styles.content}>
-        <View style={styles.nameRow}>
-          <Text style={styles.name} numberOfLines={1}>{place.name_my}</Text>
-          <Text style={styles.arrow}>›</Text>
+        {/* Dark gradient rising from bottom */}
+        <LinearGradient
+          colors={['transparent', 'rgba(0,0,0,0.30)', 'rgba(0,0,0,0.82)']}
+          locations={[0, 0.4, 1]}
+          style={styles.gradient}
+        />
+
+        {/* Category badge — top left */}
+        <View style={styles.categoryBadge}>
+          <Text style={styles.categoryText}>{place.category.name_en}</Text>
         </View>
-        <View style={styles.metaRow}>
-          <Text style={styles.city}>{place.city}</Text>
-          {place.opening_hours !== null && (
-            <>
-              <View style={styles.metaDot} />
-              <Text style={styles.hours} numberOfLines={1}>{place.opening_hours}</Text>
-            </>
-          )}
+
+        {/* Place name + meta — bottom */}
+        <View style={styles.bottomContent}>
+          <Text style={styles.name} numberOfLines={1}>{place.name_en}</Text>
+          <View style={styles.metaRow}>
+            <Text style={styles.metaCity}>{place.city}</Text>
+            {place.opening_hours !== null && (
+              <>
+                <View style={styles.metaDot} />
+                <Text style={styles.metaHours} numberOfLines={1}>{place.opening_hours}</Text>
+              </>
+            )}
+          </View>
         </View>
-      </View>
-    </Pressable>
+      </Pressable>
+    </View>
   );
 }

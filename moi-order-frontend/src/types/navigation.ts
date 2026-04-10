@@ -5,6 +5,8 @@ export type RootStackParamList = {
 
   // ── Main app (authenticated) ────────────────────────────────────────────
   Home: undefined;
+  Orders: undefined;
+  OrderDetail: { submissionId: number };
   NinetyDayReport: undefined;
   NinetyDayReportForm: {
     serviceTypeId: number;

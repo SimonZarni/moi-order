@@ -57,6 +57,12 @@ export interface ServiceType {
   name: string;
   name_en: string;
   price: number; // satangs
+  // Present only when the parent service relation is loaded (detail endpoint)
+  service?: {
+    id: number;
+    name: string;
+    name_en: string;
+  };
 }
 
 export interface Service {

@@ -10,6 +10,7 @@ import {
   UseCompanyRegistrationFormResult,
 } from './useCompanyRegistrationForm';
 import { submitCompanyRegistration } from '@/shared/api/submissions';
+import { useAuthStore } from '@/shared/store/authStore';
 import { MESSAGES } from '@/shared/constants/messages';
 import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
@@ -37,6 +38,7 @@ export function useCompanyRegistrationFormScreen(): UseCompanyRegistrationFormSc
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteParams>();
   const { serviceTypeId, price } = route.params;
+  const { isLoggedIn } = useAuthStore();
 
   const {
     form,
@@ -103,9 +105,13 @@ export function useCompanyRegistrationFormScreen(): UseCompanyRegistrationFormSc
   });
 
   const handleSubmit = useCallback((): void => {
+    if (!isLoggedIn) {
+      navigation.navigate('Login');
+      return;
+    }
     setBannerError('');
     if (validate()) mutate();
-  }, [validate, mutate]);
+  }, [isLoggedIn, navigation, validate, mutate]);
 
   const handleBack = useCallback((): void => { navigation.goBack(); }, [navigation]);
 

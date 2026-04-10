@@ -2,6 +2,7 @@ import React from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { useOtherServicesScreen } from '@/features/otherServices/hooks/useOtherServicesScreen';
 import { styles } from './OtherServicesScreen.styles';
 
@@ -13,15 +14,18 @@ export function OtherServicesScreen(): React.JSX.Element {
     <SafeAreaView style={styles.root} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
+          <View style={styles.orbLarge} />
+          <View style={styles.orbSmall} />
           <Pressable
             style={styles.backBtn}
             onPress={handleBack}
-            accessibilityLabel="Go back"
+            accessibilityLabel="Go back to home"
             accessibilityRole="button"
           >
             <Text style={styles.backArrow}>‹</Text>
             <Text style={styles.backLabel}>Home</Text>
           </Pressable>
+          <Text style={styles.headerEyebrow}>Registration & More</Text>
           <Text style={styles.headerTitle}>Other Services</Text>
           <Text style={styles.headerSubtitle}>
             Additional immigration and registration services.
@@ -73,6 +77,7 @@ export function OtherServicesScreen(): React.JSX.Element {
           ))}
         </View>
       </ScrollView>
+      <FloatingTabBar />
     </SafeAreaView>
   );
 }

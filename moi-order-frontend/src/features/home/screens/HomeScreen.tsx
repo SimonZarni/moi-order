@@ -1,89 +1,115 @@
 import React from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, Text, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { useHomeScreen } from '@/features/home/hooks/useHomeScreen';
 import { styles } from './HomeScreen.styles';
 
 export function HomeScreen(): React.JSX.Element {
-  const { user, handleNavigateToNinetyDayReport, handleNavigateToOtherServices, handleLogout } = useHomeScreen();
+  const {
+    user,
+    isLoggedIn,
+    handleNavigateToNinetyDayReport,
+    handleNavigateToTickets,
+    handleNavigateToPlaces,
+    handleNavigateToOtherServices,
+    handleNavigateToLogin,
+    handleLogout,
+  } = useHomeScreen();
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}>
 
-        {/* Hero */}
+        {/* ── Hero ── */}
         <View style={styles.hero}>
+          {/* Decorative orbs */}
+          <View style={styles.orbLarge} />
+          <View style={styles.orbSmall} />
+
           <View style={styles.heroTopRow}>
-            <Text style={styles.brandLabel}>MOI Order</Text>
-            <Pressable
-              style={styles.logoutBtn}
-              onPress={handleLogout}
-              accessibilityLabel="Sign out"
-              accessibilityRole="button"
-            >
-              <Text style={styles.logoutText}>Sign Out</Text>
+            <View style={styles.brandRow}>
+              <View style={styles.brandDot} />
+              <Text style={styles.brandLabel}>MOI Order</Text>
+            </View>
+            {isLoggedIn ? (
+              <Pressable style={styles.authBtn} onPress={handleLogout}
+                accessibilityLabel="Sign out" accessibilityRole="button">
+                <Text style={styles.authBtnText}>Sign Out</Text>
+              </Pressable>
+            ) : (
+              <Pressable style={styles.authBtn} onPress={handleNavigateToLogin}
+                accessibilityLabel="Sign in" accessibilityRole="button">
+                <Text style={styles.authBtnText}>Sign In</Text>
+              </Pressable>
+            )}
+          </View>
+
+          <View style={styles.heroTextBlock}>
+            <Text style={styles.heroGreeting}>
+              {user !== null ? `Hello, ${user.name.split(' ')[0]}` : 'Welcome'}
+            </Text>
+            <Text style={styles.heroTitle} numberOfLines={1} adjustsFontSizeToFit>
+              Your all-in-one <Text style={styles.heroTitleAccent}>app</Text>
+            </Text>
+          </View>
+        </View>
+
+        {/* ── Body ── */}
+        <View style={styles.body}>
+          <View style={styles.sectionLabelRow}>
+            <Text style={styles.sectionLabel}>Our Services</Text>
+            <View style={styles.sectionLine} />
+          </View>
+
+          {/* Row 1 */}
+          <View style={styles.gridRow}>
+            <Pressable style={[styles.card, styles.cardAccentSage]}
+              onPress={handleNavigateToNinetyDayReport}
+              accessibilityLabel="90-Day Report service" accessibilityRole="button">
+              <Text style={[styles.cardTag, styles.tagSage]}>Immigration</Text>
+              <Text style={styles.cardTitle}>90-Day{'\n'}Report</Text>
+              <Text style={styles.cardSubtitle}>รายงานตัว 90 วัน</Text>
+              <Text style={styles.cardIcon}>📅</Text>
+            </Pressable>
+
+            <Pressable style={[styles.card, styles.cardAccentSlate, styles.cardDimmed]}
+              onPress={handleNavigateToTickets}
+              accessibilityLabel="Tickets — coming soon" accessibilityRole="button" disabled>
+              <View style={styles.soonPill}><Text style={styles.soonText}>Soon</Text></View>
+              <Text style={[styles.cardTag, styles.tagSlate]}>Support</Text>
+              <Text style={styles.cardTitle}>Tickets</Text>
+              <Text style={styles.cardSubtitle}>Track requests</Text>
+              <Text style={styles.cardIcon}>🎫</Text>
             </Pressable>
           </View>
-          <Text style={styles.heroGreeting}>
-            {user !== null ? `Hello, ${user.name.split(' ')[0]}` : 'Welcome'}
-          </Text>
-          <Text style={styles.heroTitle}>
-            Immigration{'\n'}
-            <Text style={styles.heroTitleAccent}>Services</Text>, Simplified.
-          </Text>
+
+          {/* Row 2 */}
+          <View style={styles.gridRow}>
+            <Pressable style={[styles.card, styles.cardAccentGold]}
+              onPress={handleNavigateToPlaces}
+              accessibilityLabel="Places — immigration offices" accessibilityRole="button">
+              <Text style={[styles.cardTag, styles.tagGold]}>Explore</Text>
+              <Text style={styles.cardTitle}>Places</Text>
+              <Text style={styles.cardSubtitle}>Immigration offices</Text>
+              <Text style={styles.cardIcon}>📍</Text>
+            </Pressable>
+
+            <Pressable style={[styles.card, styles.cardAccentTeal]}
+              onPress={handleNavigateToOtherServices}
+              accessibilityLabel="Other services" accessibilityRole="button">
+              <Text style={[styles.cardTag, styles.tagTeal]}>Registration</Text>
+              <Text style={styles.cardTitle}>Other{'\n'}Services</Text>
+              <Text style={styles.cardSubtitle}>Company & more</Text>
+              <Text style={styles.cardIcon}>⚡</Text>
+            </Pressable>
+          </View>
         </View>
 
-        {/* Body */}
-        <View style={styles.body}>
-          <Text style={styles.sectionLabel}>Our Services</Text>
-
-          {/* 90-Day Report card */}
-          <Pressable
-            style={styles.serviceCard}
-            onPress={handleNavigateToNinetyDayReport}
-            accessibilityLabel="90-Day Report service"
-            accessibilityRole="button"
-          >
-            <View style={styles.serviceCardContent}>
-              <View style={styles.serviceCardBadge}>
-                <Text style={styles.serviceCardBadgeText}>Immigration</Text>
-              </View>
-              <Text style={styles.serviceCardTitle}>90-Day Report</Text>
-              <Text style={styles.serviceCardSubtitle}>รายงานตัว 90 วัน</Text>
-              <View style={styles.serviceCardTypesRow}>
-                {['Default', 'Big Visa', 'Big Visa / Region'].map((type) => (
-                  <View key={type} style={styles.serviceCardTypeTag}>
-                    <Text style={styles.serviceCardTypeTagText}>{type}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-            <View style={styles.serviceCardArrow}>
-              <Text style={styles.serviceCardArrowText}>›</Text>
-            </View>
-          </Pressable>
-
-          {/* Other Services card */}
-          <Pressable
-            style={styles.otherServicesCard}
-            onPress={handleNavigateToOtherServices}
-            accessibilityLabel="Other services"
-            accessibilityRole="button"
-          >
-            <View style={styles.serviceCardContent}>
-              <View style={styles.otherServicesBadge}>
-                <Text style={styles.otherServicesBadgeText}>Registration &amp; More</Text>
-              </View>
-              <Text style={styles.otherServicesTitle}>Other Services</Text>
-              <Text style={styles.otherServicesSubtitle}>Company registration and more</Text>
-            </View>
-            <View style={styles.otherServicesArrow}>
-              <Text style={styles.otherServicesArrowText}>›</Text>
-            </View>
-          </Pressable>
-        </View>
       </ScrollView>
+      <FloatingTabBar />
     </SafeAreaView>
   );
 }

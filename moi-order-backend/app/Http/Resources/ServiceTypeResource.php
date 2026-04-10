@@ -21,6 +21,14 @@ class ServiceTypeResource extends JsonResource
             'name'    => $this->name,
             'name_en' => $this->name_en,
             'price'   => $this->price, // satangs
+            'service' => $this->when(
+                $this->relationLoaded('service'),
+                fn () => [
+                    'id'      => $this->service->id,
+                    'name'    => $this->service->name,
+                    'name_en' => $this->service->name_en,
+                ],
+            ),
         ];
     }
 }
