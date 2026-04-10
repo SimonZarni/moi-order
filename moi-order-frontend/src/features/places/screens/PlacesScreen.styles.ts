@@ -22,6 +22,7 @@ export const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     paddingBottom: spacing.xl,
     overflow: 'hidden',
+    minHeight: 180,
   },
 
   // Decorative orbs
@@ -98,13 +99,17 @@ export const styles = StyleSheet.create({
   },
 
   bodyGap: {
-    height: spacing.lg,
+    height: spacing.xl,
     backgroundColor: colours.backgroundLight,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    marginTop: -spacing.xl,
   },
 
   // ── List ──────────────────────────────────────────────────────────────────
   list: {
     paddingBottom: TAB_BAR_CLEARANCE,
+    backgroundColor: colours.backgroundLight,
   },
 
   // ── State views (loading / error — rendered inside hero layout) ────────────

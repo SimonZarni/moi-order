@@ -22,6 +22,7 @@ export const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     paddingBottom: spacing.xl,
     overflow: 'hidden',
+    minHeight: 180,
   },
 
   // Decorative orbs

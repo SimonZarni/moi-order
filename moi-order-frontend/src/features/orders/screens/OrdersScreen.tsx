@@ -95,7 +95,7 @@ export function OrdersScreen(): React.JSX.Element {
   if (!isLoggedIn) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        <View style={styles.hero}>{heroContent}</View>
+        {header}
         <View style={styles.guestWrap}>
           <Text style={styles.guestIcon}>📋</Text>
           <Text style={styles.guestTitle}>Sign in to view orders</Text>
@@ -115,7 +115,7 @@ export function OrdersScreen(): React.JSX.Element {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        <View style={styles.hero}>{heroContent}</View>
+        {header}
         <View style={styles.stateBox}>
           <ActivityIndicator size="large" color={styles.spinner.color} />
         </View>
@@ -127,7 +127,7 @@ export function OrdersScreen(): React.JSX.Element {
   if (isError) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        <View style={styles.hero}>{heroContent}</View>
+        {header}
         <View style={styles.stateBox}>
           <Text style={styles.stateIcon}>⚠</Text>
           <Text style={styles.stateTitle}>Could not load orders</Text>
