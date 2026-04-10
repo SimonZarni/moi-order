@@ -1,14 +1,15 @@
 import { StyleSheet } from 'react-native';
 
 import { colours } from '@/shared/theme/colours';
+import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { radius } from '@/shared/theme/radius';
 import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 
-const GOLD = '#b08d57';
-
 export const styles = StyleSheet.create({
-  // Outer wrapper: owns shadow — no overflow:hidden so Android elevation shows
+  // Outer wrapper: owns shadow — no overflow:hidden so Android elevation shows.
+  // Intentionally heavier than shadows.heavy (0.22 vs 0.13) because the card
+  // sits on a light list background and needs strong depth against the image.
   shadowWrap: {
     marginHorizontal: spacing.lg,
     marginBottom: spacing.md,
@@ -33,6 +34,7 @@ export const styles = StyleSheet.create({
   // ── Full-bleed image ──────────────────────────────────────────────────────
   image: {
     ...StyleSheet.absoluteFillObject,
+    backgroundColor: colours.backgroundDark,
   },
 
   // ── No-image fallback ─────────────────────────────────────────────────────
@@ -65,7 +67,7 @@ export const styles = StyleSheet.create({
     borderColor: `${colours.tertiary}88`,
   },
   categoryText: {
-    fontSize: 9,
+    fontSize: typography.xxs,
     fontWeight: '700',
     color: colours.tertiary,
     letterSpacing: 1.2,
@@ -97,7 +99,7 @@ export const styles = StyleSheet.create({
     width: 3,
     height: 3,
     borderRadius: 2,
-    backgroundColor: GOLD,
+    backgroundColor: editorialPalette.gold,
     marginHorizontal: spacing.xs,
     opacity: 0.7,
   },

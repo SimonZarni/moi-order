@@ -6,6 +6,7 @@ const GALLERY_IMAGE_WIDTH = (SCREEN_WIDTH - 32 - 8) / 2; // 32 = 2×spacing.md, 
 
 import { colours } from '@/shared/theme/colours';
 import { radius } from '@/shared/theme/radius';
+import { shadows } from '@/shared/theme/shadows';
 import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 
@@ -77,18 +78,15 @@ export const styles = StyleSheet.create({
     color: colours.tertiary,
     letterSpacing: 0.2,
   },
+
   // ── Section 1 — Identity card (pulls up over hero) ───────────────────────
   identityCard: {
     marginHorizontal: spacing.md,
-    marginTop: -(spacing.xl),   // -32: overlaps bottom of hero
+    marginTop: -(spacing.xl), // -32: overlaps bottom of hero
     backgroundColor: colours.card,
     borderRadius: radius.xl,
     padding: spacing.md,
-    shadowColor: colours.dark,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.13,
-    shadowRadius: 16,
-    elevation: 7,
+    ...shadows.heavy,
   },
   categoryBadge: {
     alignSelf: 'flex-start',
@@ -142,11 +140,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.card,
     borderRadius: radius.xl,
     padding: spacing.md,
-    shadowColor: colours.dark,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
+    ...shadows.light,
   },
   // Uppercase spaced label used at the top of every section card
   sectionLabel: {

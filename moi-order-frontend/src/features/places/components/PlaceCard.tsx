@@ -27,7 +27,7 @@ export function PlaceCard({ place, onPress }: PlaceCardProps): React.JSX.Element
             style={styles.image}
             contentFit="cover"
             cachePolicy="disk"
-            transition={200}
+            transition={0}
           />
         ) : (
           <View style={styles.imageFallback}>

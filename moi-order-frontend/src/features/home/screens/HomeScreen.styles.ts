@@ -1,16 +1,12 @@
 import { StyleSheet } from 'react-native';
 
 import { colours } from '@/shared/theme/colours';
+import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { radius } from '@/shared/theme/radius';
+import { shadows } from '@/shared/theme/shadows';
 import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 import { TAB_BAR_CLEARANCE } from '@/shared/components/FloatingTabBar/FloatingTabBar.styles';
-
-// Card accent colours — editorial palette, harmonised with brand teal
-const SAGE   = '#52796f';
-const SLATE  = '#64748b';
-const GOLD   = '#b08d57';
-const TEAL   = '#6b9e94';
 
 export const styles = StyleSheet.create({
   root: {
@@ -31,9 +27,9 @@ export const styles = StyleSheet.create({
   // Decorative background orbs (pure shape, no blur — conveys depth)
   orbLarge: {
     position: 'absolute',
-    width: 220,
-    height: 220,
-    borderRadius: 110,
+    width: 200,
+    height: 200,
+    borderRadius: radius.orbLarge,
     backgroundColor: colours.tertiary,
     opacity: 0.07,
     top: -70,
@@ -41,9 +37,9 @@ export const styles = StyleSheet.create({
   },
   orbSmall: {
     position: 'absolute',
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: 80,
+    height: 80,
+    borderRadius: radius.orbSmall,
     backgroundColor: colours.tertiary,
     opacity: 0.05,
     bottom: 12,
@@ -117,8 +113,8 @@ export const styles = StyleSheet.create({
   body: {
     flex: 1,
     backgroundColor: colours.backgroundLight,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    borderTopLeftRadius: radius.sheet,
+    borderTopRightRadius: radius.sheet,
     marginTop: -spacing.xl,
     paddingTop: spacing.lg,
     paddingHorizontal: spacing.lg,
@@ -159,39 +155,33 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.card,
     borderRadius: radius.xl,
     borderTopWidth: 2.5,
-    borderTopColor: SAGE, // default; overridden per variant
+    borderTopColor: editorialPalette.sage, // default; overridden per variant
     padding: spacing.md,
     minHeight: 148,
-    // iOS shadow
-    shadowColor: colours.dark,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    // Android
-    elevation: 4,
+    ...shadows.medium,
   },
   cardDimmed: {
     opacity: 0.45,
   },
 
   // Card accent border variants
-  cardAccentSage:  { borderTopColor: SAGE },
-  cardAccentSlate: { borderTopColor: SLATE },
-  cardAccentGold:  { borderTopColor: GOLD },
-  cardAccentTeal:  { borderTopColor: TEAL },
+  cardAccentSage:  { borderTopColor: editorialPalette.sage },
+  cardAccentSlate: { borderTopColor: editorialPalette.slate },
+  cardAccentGold:  { borderTopColor: editorialPalette.gold },
+  cardAccentTeal:  { borderTopColor: editorialPalette.teal },
 
   // Card text
   cardTag: {
-    fontSize: 9,
+    fontSize: typography.xxs,
     fontWeight: '700',
     letterSpacing: 1.2,
     textTransform: 'uppercase',
     marginBottom: spacing.xs,
   },
-  tagSage:  { color: SAGE },
-  tagSlate: { color: SLATE },
-  tagGold:  { color: GOLD },
-  tagTeal:  { color: TEAL },
+  tagSage:  { color: editorialPalette.sage },
+  tagSlate: { color: editorialPalette.slate },
+  tagGold:  { color: editorialPalette.gold },
+  tagTeal:  { color: editorialPalette.teal },
 
   cardTitle: {
     fontSize: typography.lg,
@@ -213,7 +203,7 @@ export const styles = StyleSheet.create({
     bottom: 6,
     right: 8,
     fontSize: 46,
-    opacity: 0.13,
+    opacity: 0.8,
   },
 
   // ── Coming-soon pill ──────────────────────────────────────────────────────

@@ -43,8 +43,8 @@ export const styles = StyleSheet.create({
   card: {
     flex: 1,
     backgroundColor: colours.backgroundLight,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    borderTopLeftRadius: radius.sheet,
+    borderTopRightRadius: radius.sheet,
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.xl,
     paddingBottom: spacing.xxl,
@@ -62,63 +62,13 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
 
-  // ── Banner ────────────────────────────────────────────────────────────────
-  banner: {
-    backgroundColor: 'rgba(197,0,15,0.08)',
-    borderRadius: radius.md,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    marginBottom: spacing.md,
-  },
-  bannerText: {
-    fontSize: typography.sm,
-    color: colours.danger,
-    fontWeight: '500',
-  },
-
-  // ── Field ─────────────────────────────────────────────────────────────────
-  fieldGroup: {
-    marginBottom: spacing.md,
-  },
-  label: {
-    fontSize: typography.xs,
-    fontWeight: '700',
-    color: colours.secondary,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    marginBottom: spacing.xs,
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colours.white,
-    borderRadius: radius.lg,
-    borderWidth: 1.5,
-    borderColor: colours.inputBorder,
-    paddingHorizontal: spacing.md,
-    height: 52,
-  },
-  inputWrapperError: {
-    borderColor: colours.danger,
-  },
-  input: {
-    flex: 1,
-    fontSize: typography.md,
-    color: colours.textOnLight,
-    paddingVertical: 0,
-  },
+  // ── Password eye toggle (rightElement passed to FormField) ─────────────────
   eyeBtn: {
     padding: spacing.xs,
   },
   eyeText: {
     fontSize: typography.sm,
     color: colours.tertiary,
-  },
-  fieldError: {
-    fontSize: typography.xs,
-    color: colours.danger,
-    marginTop: 4,
-    marginLeft: spacing.xs,
   },
 
   // ── Submit ────────────────────────────────────────────────────────────────
