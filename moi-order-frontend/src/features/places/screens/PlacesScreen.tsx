@@ -1,19 +1,27 @@
 import React from 'react';
-import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
+import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
+import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { PlaceCard } from '@/features/places/components/PlaceCard';
+import { PlacesSearchBar } from '@/features/places/components/PlacesSearchBar';
 import { usePlacesScreen } from '@/features/places/hooks/usePlacesScreen';
 import { Place } from '@/types/models';
 import { styles } from './PlacesScreen.styles';
 
 export function PlacesScreen(): React.JSX.Element {
   const {
-    places,
+    filteredPlaces,
+    categories,
     isLoading,
     isError,
     isFetchingNextPage,
+    query,
+    selectedCategory,
+    handleQueryChange,
+    handleCategorySelect,
     handleEndReached,
     handleRefresh,
     handlePlacePress,
@@ -22,23 +30,26 @@ export function PlacesScreen(): React.JSX.Element {
 
   const header = (
     <>
-    <View style={styles.hero}>
-      <View style={styles.orbLarge} />
-      <View style={styles.orbSmall} />
-
-      <Pressable style={styles.backBtn} onPress={handleBack}
-        accessibilityLabel="Go back to home" accessibilityRole="button">
-        <Text style={styles.backArrow}>‹</Text>
-        <Text style={styles.backLabel}>Back</Text>
-      </Pressable>
-
-      <View style={styles.heroTextBlock}>
-        <Text style={styles.heroEyebrow}>Explore</Text>
-        <Text style={styles.heroTitle}>Places</Text>
-        <Text style={styles.heroSubtitle}>Immigration offices & services</Text>
-      </View>
-    </View>
-    <View style={styles.bodyGap} />
+      <HeroHeader
+        accentColor={editorialPalette.gold}
+        onBack={handleBack}
+        backLabel="Back"
+        titleNode={
+          <Text style={styles.heroInlineTitle}>
+            <Text style={styles.heroInlineTitleAccent}>Explore </Text>
+            Places
+          </Text>
+        }
+        subtitle="Immigration offices & services"
+      />
+      <PlacesSearchBar
+        query={query}
+        onQueryChange={handleQueryChange}
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategorySelect={handleCategorySelect}
+      />
+      <View style={styles.bodyGap} />
     </>
   );
 
@@ -71,10 +82,17 @@ export function PlacesScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <FlatList
-        data={places}
+        data={filteredPlaces}
         keyExtractor={(item: Place) => String(item.id)}
         renderItem={({ item }) => <PlaceCard place={item} onPress={handlePlacePress} />}
         ListHeaderComponent={header}
+        ListEmptyComponent={
+          <View style={styles.stateBox}>
+            <Text style={styles.stateIcon}>🔍</Text>
+            <Text style={styles.stateTitle}>No places found</Text>
+            <Text style={styles.stateSubtitle}>Try a different search or category</Text>
+          </View>
+        }
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.4}
         onRefresh={handleRefresh}

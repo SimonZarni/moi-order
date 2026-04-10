@@ -3,6 +3,8 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
+import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
+import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { useOtherServicesScreen } from '@/features/otherServices/hooks/useOtherServicesScreen';
 import { styles } from './OtherServicesScreen.styles';
 
@@ -13,31 +15,21 @@ export function OtherServicesScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View style={styles.orbLarge} />
-          <View style={styles.orbSmall} />
-          <Pressable
-            style={styles.backBtn}
-            onPress={handleBack}
-            accessibilityLabel="Go back to home"
-            accessibilityRole="button"
-          >
-            <Text style={styles.backArrow}>‹</Text>
-            <Text style={styles.backLabel}>Home</Text>
-          </Pressable>
-          <Text style={styles.headerEyebrow}>Registration & More</Text>
-          <Text style={styles.headerTitle}>Other Services</Text>
-          <Text style={styles.headerSubtitle}>
-            Additional immigration and registration services.
-          </Text>
-        </View>
+        <HeroHeader
+          accentColor={editorialPalette.teal}
+          eyebrow="Registration & More"
+          title="Other Services"
+          subtitle="Additional immigration and registration services."
+          onBack={handleBack}
+          backLabel="Home"
+        />
 
         <View style={styles.body}>
           <Text style={styles.sectionLabel}>Available Services</Text>
 
           {isLoading && (
             <View style={styles.centered}>
-              <ActivityIndicator color="#224e4a" size="large" />
+              <ActivityIndicator color={editorialPalette.teal} size="large" />
             </View>
           )}
 

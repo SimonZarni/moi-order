@@ -3,6 +3,8 @@ import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
+import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
+import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { useOrdersScreen } from '@/features/orders/hooks/useOrdersScreen';
 import { ServiceSubmission } from '@/types/models';
 import { styles, STATUS_COLOURS } from './OrdersScreen.styles';
@@ -67,27 +69,16 @@ export function OrdersScreen(): React.JSX.Element {
     handleBack,
   } = useOrdersScreen();
 
-  const heroContent = (
-    <>
-      <View style={styles.orbLarge} />
-      <View style={styles.orbSmall} />
-      <Pressable style={styles.backBtn} onPress={handleBack}
-        accessibilityLabel="Go back to home" accessibilityRole="button">
-        <Text style={styles.backArrow}>‹</Text>
-        <Text style={styles.backLabel}>Back</Text>
-      </Pressable>
-      <View style={styles.heroTextBlock}>
-        <Text style={styles.heroEyebrow}>My Activity</Text>
-        <Text style={styles.heroTitle}>Orders</Text>
-        <Text style={styles.heroSubtitle}>Your service submissions</Text>
-      </View>
-    </>
-  );
-
-  // Hero + light gap so the first card doesn't crowd the dark section
   const header = (
     <>
-      <View style={styles.hero}>{heroContent}</View>
+      <HeroHeader
+        accentColor={editorialPalette.amber}
+        eyebrow="My Activity"
+        title="Orders"
+        subtitle="Your service submissions"
+        onBack={handleBack}
+        backLabel="Back"
+      />
       <View style={styles.bodyGap} />
     </>
   );

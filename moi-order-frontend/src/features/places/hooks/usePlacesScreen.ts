@@ -4,20 +4,27 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { usePlaces } from '@/features/places/hooks/usePlaces';
+import { usePlacesSearch } from '@/features/places/hooks/usePlacesSearch';
 import { fetchPlaceDetail } from '@/shared/api/places';
 import { CACHE_TTL } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
-import { Place } from '@/types/models';
+import { Category, Place, ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
-import { ApiError } from '@/types/models';
 
 export interface UsePlacesScreenResult {
-  places: Place[];
+  // Data
+  filteredPlaces: Place[];
+  categories: Category[];
   isLoading: boolean;
   isError: boolean;
   error: ApiError | null;
-  hasNextPage: boolean;
   isFetchingNextPage: boolean;
+  // Search / filter state
+  query: string;
+  selectedCategory: number | null;
+  // Handlers
+  handleQueryChange: (text: string) => void;
+  handleCategorySelect: (id: number | null) => void;
   handleEndReached: () => void;
   handleRefresh: () => void;
   handlePlacePress: (placeId: number) => void;
@@ -27,6 +34,7 @@ export interface UsePlacesScreenResult {
 export function usePlacesScreen(): UsePlacesScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const queryClient = useQueryClient();
+
   const {
     places,
     isLoading,
@@ -37,6 +45,15 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     fetchNextPage,
     refetch,
   } = usePlaces();
+
+  const {
+    query,
+    selectedCategory,
+    filteredPlaces,
+    categories,
+    handleQueryChange,
+    handleCategorySelect,
+  } = usePlacesSearch(places);
 
   const handleEndReached = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -50,7 +67,6 @@ export function usePlacesScreen(): UsePlacesScreenResult {
 
   const handlePlacePress = useCallback(
     (placeId: number) => {
-      // Prefetch detail immediately on press — data may be ready before screen mounts
       queryClient.prefetchQuery({
         queryKey: QUERY_KEYS.PLACES.DETAIL(placeId),
         queryFn:  () => fetchPlaceDetail(placeId),
@@ -66,12 +82,16 @@ export function usePlacesScreen(): UsePlacesScreenResult {
   }, [navigation]);
 
   return {
-    places,
+    filteredPlaces,
+    categories,
     isLoading,
     isError,
     error,
-    hasNextPage,
     isFetchingNextPage,
+    query,
+    selectedCategory,
+    handleQueryChange,
+    handleCategorySelect,
     handleEndReached,
     handleRefresh,
     handlePlacePress,

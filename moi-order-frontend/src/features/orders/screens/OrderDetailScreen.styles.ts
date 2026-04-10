@@ -1,14 +1,14 @@
 import { StyleSheet } from 'react-native';
 
 import { colours } from '@/shared/theme/colours';
+import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { radius } from '@/shared/theme/radius';
+import { shadows } from '@/shared/theme/shadows';
 import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 import { STATUS_COLOURS } from './OrdersScreen.styles';
 
 export { STATUS_COLOURS };
-
-const AMBER = '#c4813b';
 
 export const styles = StyleSheet.create({
   root: {
@@ -34,8 +34,8 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     width: 200,
     height: 200,
-    borderRadius: 100,
-    backgroundColor: AMBER,
+    borderRadius: radius.orbLarge,
+    backgroundColor: editorialPalette.amber,
     opacity: 0.07,
     top: -60,
     right: -40,
@@ -44,7 +44,7 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     width: 80,
     height: 80,
-    borderRadius: 40,
+    borderRadius: radius.orbSmall,
     backgroundColor: colours.tertiary,
     opacity: 0.05,
     bottom: 8,
@@ -82,9 +82,9 @@ export const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   heroEyebrow: {
-    fontSize: 9,
+    fontSize: typography.xxs,
     fontWeight: '700',
-    color: AMBER,
+    color: editorialPalette.amber,
     letterSpacing: 2.5,
     textTransform: 'uppercase',
     marginBottom: 4,
@@ -138,12 +138,8 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: colours.card,
     borderTopWidth: 2.5,
-    borderTopColor: AMBER,       // overridden inline per status
-    shadowColor: colours.dark,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 4,
+    borderTopColor: editorialPalette.amber, // overridden inline per status
+    ...shadows.medium,
   },
   statusCardLeft: {
     flex: 1,
@@ -172,13 +168,13 @@ export const styles = StyleSheet.create({
   statusCardValue: {
     fontSize: typography.lg,
     fontWeight: '800',
-    color: colours.textOnLight,  // overridden inline per status
+    color: colours.textOnLight, // overridden inline per status
     letterSpacing: -0.2,
   },
   statusCardPrice: {
     fontSize: typography.xl,
     fontWeight: '900',
-    color: AMBER,                // overridden inline per status
+    color: editorialPalette.amber, // overridden inline per status
     letterSpacing: -0.5,
   },
 
@@ -187,11 +183,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.card,
     borderRadius: radius.xl,
     overflow: 'hidden',
-    shadowColor: colours.dark,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 3,
+    ...shadows.medium,
   },
   infoRow: {
     flexDirection: 'row',
@@ -222,11 +214,7 @@ export const styles = StyleSheet.create({
   docCard: {
     backgroundColor: colours.card,
     borderRadius: radius.xl,
-    shadowColor: colours.dark,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 3,
+    ...shadows.medium,
   },
   docRow: {
     flexDirection: 'row',

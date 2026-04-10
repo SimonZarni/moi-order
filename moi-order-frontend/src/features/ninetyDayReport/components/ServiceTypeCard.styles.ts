@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native';
 
 import { colours } from '@/shared/theme/colours';
 import { radius } from '@/shared/theme/radius';
+import { shadows } from '@/shared/theme/shadows';
 import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 
@@ -15,12 +16,7 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.md,
     borderLeftWidth: 4,
     borderLeftColor: colours.primary,
-    // Shadow
-    shadowColor: colours.dark,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 8,
-    elevation: 3,
+    ...shadows.light,
   },
   content: {
     flex: 1,
