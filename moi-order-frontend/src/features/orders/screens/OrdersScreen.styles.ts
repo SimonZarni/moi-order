@@ -31,6 +31,7 @@ export const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     paddingBottom: spacing.xl,
     overflow: 'hidden',
+    minHeight: 180,
   },
   orbLarge: {
     position: 'absolute',
@@ -105,13 +106,17 @@ export const styles = StyleSheet.create({
   // Light spacer rendered inside ListHeaderComponent — creates breathing room
   // between the dark hero and the first card on the light background
   bodyGap: {
-    height: spacing.lg,
+    height: spacing.xl,
     backgroundColor: colours.backgroundLight,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    marginTop: -spacing.xl,
   },
 
   // ── List ──────────────────────────────────────────────────────────────────
   list: {
     paddingBottom: TAB_BAR_CLEARANCE,
+    backgroundColor: colours.backgroundLight,
   },
 
   // ── Order card ────────────────────────────────────────────────────────────

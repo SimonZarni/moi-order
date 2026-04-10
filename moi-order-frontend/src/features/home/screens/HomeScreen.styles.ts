@@ -17,12 +17,6 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colours.backgroundLight,
   },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: TAB_BAR_CLEARANCE,
-  },
 
   // ── Hero ──────────────────────────────────────────────────────────────────
   hero: {
@@ -31,6 +25,7 @@ export const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     paddingBottom: spacing.xl,
     overflow: 'hidden',
+    minHeight: 180,
   },
 
   // Decorative background orbs (pure shape, no blur — conveys depth)
@@ -122,12 +117,12 @@ export const styles = StyleSheet.create({
   body: {
     flex: 1,
     backgroundColor: colours.backgroundLight,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    marginTop: -spacing.sm,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    marginTop: -spacing.xl,
     paddingTop: spacing.lg,
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
+    paddingBottom: TAB_BAR_CLEARANCE,
     minHeight: 340,
   },
 
