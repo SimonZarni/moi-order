@@ -103,6 +103,12 @@ class ServiceSubmission extends Model
         return $this->hasOne(EmbassyBankDetail::class, 'submission_id');
     }
 
+    /** One-to-one: only set when the submission is for an embassy visa recommendation. */
+    public function embassyVisaRecommendationDetail(): HasOne
+    {
+        return $this->hasOne(EmbassyVisaRecommendationDetail::class, 'submission_id');
+    }
+
     public function documents(): HasMany
     {
         return $this->hasMany(SubmissionDocument::class, 'submission_id');
