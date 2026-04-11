@@ -32,6 +32,7 @@ import { NinetyDayReportFormScreen } from '@/features/ninetyDayReport/screens/Ni
 import { OtherServicesScreen } from '@/features/otherServices/screens/OtherServicesScreen';
 import { AirportFastTrackFormScreen } from '@/features/airportFastTrack/screens/AirportFastTrackFormScreen';
 import { EmbassyResidentialFormScreen } from '@/features/embassyResidential/screens/EmbassyResidentialFormScreen';
+import { EmbassyCarLicenseFormScreen } from '@/features/embassyCarLicense/screens/EmbassyCarLicenseFormScreen';
 import { CompanyRegistrationFormScreen } from '@/features/companyRegistration/screens/CompanyRegistrationFormScreen';
 import { OrdersScreen } from '@/features/orders/screens/OrdersScreen';
 import { OrderDetailScreen } from '@/features/orders/screens/OrderDetailScreen';
@@ -103,6 +104,7 @@ export default function App(): React.JSX.Element {
             <Stack.Screen name="CompanyRegistrationForm"   component={CompanyRegistrationFormScreen} />
             <Stack.Screen name="AirportFastTrackForm"      component={AirportFastTrackFormScreen} />
             <Stack.Screen name="EmbassyResidentialForm"    component={EmbassyResidentialFormScreen} />
+            <Stack.Screen name="EmbassyCarLicenseForm"     component={EmbassyCarLicenseFormScreen} />
             <Stack.Screen name="Places"                    component={PlacesScreen} />
             <Stack.Screen name="PlaceDetail"               component={PlaceDetailScreen} />
           </Stack.Navigator>

@@ -7,14 +7,14 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class EmbassyResidentialSeeder extends Seeder
+class EmbassyCarLicenseSeeder extends Seeder
 {
     public function run(): void
     {
         $serviceId = DB::table('services')->insertGetId([
-            'name'       => 'บริการที่พักสถานทูต',
-            'name_en'    => 'Embassy Residential Service',
-            'slug'       => 'embassy-residential-service',
+            'name'       => 'บริการใบขับขี่สถานทูต',
+            'name_en'    => 'Embassy Car License',
+            'slug'       => 'embassy-car-license',
             'is_active'  => true,
             'created_at' => now(),
             'updated_at' => now(),

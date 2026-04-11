@@ -27,6 +27,10 @@ export type RootStackParamList = {
     serviceTypeId: number;
     price: number;
   };
+  EmbassyCarLicenseForm: {
+    serviceTypeId: number;
+    price: number;
+  };
 
   // ── Existing public screens ─────────────────────────────────────────────
   Places: undefined;
