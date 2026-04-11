@@ -17,8 +17,9 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
   const {
     place, coverImage, galleryImages, viewerImages, viewerIndex,
     isLoading, isError,
+    isFavorited, isTogglingFavorite, isLoggedIn,
     handleBack, handleCallPhone, handleOpenWebsite, handleOpenMaps,
-    handleImagePress, handleViewAllImages, handleCloseImageViewer,
+    handleToggleFavorite, handleImagePress, handleViewAllImages, handleCloseImageViewer,
   } = usePlaceDetailScreen(placeId);
 
   if (isLoading) {
@@ -58,6 +59,20 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
             <Text style={styles.heroBackArrow}>‹</Text>
             <Text style={styles.heroBackLabel}>Places</Text>
           </Pressable>
+
+          {isLoggedIn && (
+            <Pressable
+              style={styles.heroFavBtn}
+              onPress={handleToggleFavorite}
+              disabled={isTogglingFavorite}
+              accessibilityLabel={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+              accessibilityRole="button"
+            >
+              <Text style={[styles.heroFavIcon, isFavorited && styles.heroFavIconActive]}>
+                {isFavorited ? '♥' : '♡'}
+              </Text>
+            </Pressable>
+          )}
         </View>
 
         {/* ── § 1  Identity ────────────────────────────────── */}

@@ -3,6 +3,8 @@ import { Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { usePlaceDetail } from '@/features/places/hooks/usePlaceDetail';
+import { usePlaceFavorite } from '@/features/places/hooks/usePlaceFavorite';
+import { useAuthStore } from '@/shared/store/authStore';
 import { Place, PlaceImage, ApiError } from '@/types/models';
 
 export interface UsePlaceDetailScreenResult {
@@ -16,10 +18,16 @@ export interface UsePlaceDetailScreenResult {
   isLoading: boolean;
   isError: boolean;
   error: ApiError | null;
+  /** Favorite state — only meaningful when isLoggedIn is true. */
+  isFavorited: boolean;
+  isTogglingFavorite: boolean;
+  /** Whether the current user is authenticated (gates heart button rendering). */
+  isLoggedIn: boolean;
   handleBack: () => void;
   handleCallPhone: () => void;
   handleOpenWebsite: () => void;
   handleOpenMaps: () => void;
+  handleToggleFavorite: () => void;
   handleImagePress: (index: number) => void;
   handleViewAllImages: () => void;
   handleCloseImageViewer: () => void;
@@ -27,10 +35,12 @@ export interface UsePlaceDetailScreenResult {
 
 export function usePlaceDetailScreen(placeId: number): UsePlaceDetailScreenResult {
   const navigation = useNavigation();
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const { place, isLoading, isError, error } = usePlaceDetail(placeId);
+  const { isFavorited, isToggling, handleToggle } = usePlaceFavorite(placeId);
   const [viewerIndex, setViewerIndex] = useState<number>(-1);
 
-  const coverImage  = useMemo(() => place?.images[0] ?? null, [place?.images]);
+  const coverImage    = useMemo(() => place?.images[0] ?? null, [place?.images]);
   const galleryImages = useMemo(() => place?.images.slice(1) ?? [], [place?.images]);
   // All images as { uri } — format expected by react-native-image-viewing
   const viewerImages = useMemo(
@@ -81,10 +91,14 @@ export function usePlaceDetailScreen(placeId: number): UsePlaceDetailScreenResul
     isLoading,
     isError,
     error,
+    isFavorited,
+    isTogglingFavorite: isToggling,
+    isLoggedIn,
     handleBack,
     handleCallPhone,
     handleOpenWebsite,
     handleOpenMaps,
+    handleToggleFavorite: handleToggle,
     handleImagePress,
     handleViewAllImages,
     handleCloseImageViewer,

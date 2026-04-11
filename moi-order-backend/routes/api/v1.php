@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CompanyRegistrationController;
+use App\Http\Controllers\Api\V1\FavoritePlaceController;
 use App\Http\Controllers\Api\V1\SubmissionController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,3 +19,7 @@ Route::get('/submissions',              [SubmissionController::class, 'index']);
 Route::get('/submissions/{id}',         [SubmissionController::class, 'show']);
 Route::post('/submissions/90-day-report',         [SubmissionController::class,         'store']);
 Route::post('/submissions/company-registration',  [CompanyRegistrationController::class, 'store']);
+
+// Favorites
+Route::get('/places/{placeId}/favorite',  [FavoritePlaceController::class, 'show']);
+Route::post('/places/{placeId}/favorite', [FavoritePlaceController::class, 'toggle']);

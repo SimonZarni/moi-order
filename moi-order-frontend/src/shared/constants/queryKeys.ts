@@ -4,6 +4,9 @@ export const QUERY_KEYS = {
     LIST:   ['places', 'list'] as const,
     DETAIL: (id: number) => ['places', 'detail', id] as const,
   },
+  FAVORITES: {
+    STATUS: (placeId: number) => ['favorites', 'status', placeId] as const,
+  },
   SERVICES: {
     LIST: ['services', 'list'] as const,
   },
