@@ -23,7 +23,6 @@ export function ServiceTypeCard({ type, onPress }: Props): React.JSX.Element {
       accessibilityRole="button"
     >
       <View style={styles.content}>
-        <Text style={styles.nameTh}>{type.name}</Text>
         <Text style={styles.nameEn}>{type.name_en}</Text>
         <View style={styles.priceRow}>
           <Text style={styles.priceCurrency}>฿</Text>

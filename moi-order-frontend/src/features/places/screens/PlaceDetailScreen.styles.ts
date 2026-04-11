@@ -81,6 +81,28 @@ export const styles = StyleSheet.create({
     color: colours.tertiary,
     letterSpacing: 0.2,
   },
+  // Floating heart button overlaid on hero image (top-right) — mirrors back button
+  heroFavBtn: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.md,
+    width: 36,
+    height: 36,
+    borderRadius: radius.full,
+    backgroundColor: 'rgba(0,0,0,0.38)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  heroFavIcon: {
+    fontSize: 18,
+    color: colours.white,
+    lineHeight: 22,
+  },
+  // Active (favorited) state: bright coral-red to pop against the dark overlay
+  heroFavIconActive: {
+    color: colours.destructive,
+  },
 
   // ── Section 1 — Identity card (pulls up over hero) ───────────────────────
   identityCard: {
