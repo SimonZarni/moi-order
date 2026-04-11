@@ -5,11 +5,13 @@ import { styles } from './DocumentPickerField.styles';
 
 interface DocumentPickerFieldProps {
   label: string;
-  icon: string;          // emoji shown before upload
+  icon: string;            // emoji shown before upload
   onPress: () => void;
   isUploaded: boolean;
-  error?: string;
+  error?: string | undefined;
   accessibilityLabel: string;
+  hint?: string | undefined;           // overrides default "Tap to select image"
+  uploadedHint?: string | undefined;   // overrides default "Image selected — tap to change"
 }
 
 export function DocumentPickerField({
@@ -19,6 +21,8 @@ export function DocumentPickerField({
   isUploaded,
   error,
   accessibilityLabel,
+  hint,
+  uploadedHint,
 }: DocumentPickerFieldProps): React.JSX.Element {
   const hasError = error != null && error.length > 0;
 
@@ -41,7 +45,9 @@ export function DocumentPickerField({
         <View style={styles.textCol}>
           <Text style={styles.title}>{label}</Text>
           <Text style={[styles.hint, isUploaded && styles.hintUploaded]}>
-            {isUploaded ? 'Image selected — tap to change' : 'Tap to select image'}
+            {isUploaded
+              ? (uploadedHint ?? 'Image selected — tap to change')
+              : (hint ?? 'Tap to select image')}
           </Text>
         </View>
       </Pressable>

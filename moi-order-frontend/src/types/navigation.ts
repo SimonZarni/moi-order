@@ -19,6 +19,14 @@ export type RootStackParamList = {
     serviceTypeId: number;
     price: number;
   };
+  AirportFastTrackForm: {
+    serviceTypeId: number;
+    price: number;
+  };
+  EmbassyResidentialForm: {
+    serviceTypeId: number;
+    price: number;
+  };
 
   // ── Existing public screens ─────────────────────────────────────────────
   Places: undefined;

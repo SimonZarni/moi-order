@@ -38,9 +38,9 @@ class FileStorageService implements FileStorageInterface
      *
      * @throws InvalidArgumentException if the MIME type is not allowed.
      */
-    public function store(UploadedFile $file, string $directory): string
+    public function store(UploadedFile $file, string $directory, array $allowedMimes = []): string
     {
-        $this->validateMime($file);
+        $this->validateMime($file, $allowedMimes);
 
         $extension = $file->extension();
         $filename  = Str::uuid()->toString().'.'.$extension;
@@ -76,13 +76,17 @@ class FileStorageService implements FileStorageInterface
 
     // ─── Private ─────────────────────────────────────────────────────────────
 
-    private function validateMime(UploadedFile $file): void
+    /**
+     * @param  array<string>  $allowedMimes  Per-call override; falls back to ALLOWED_MIMES when empty.
+     */
+    private function validateMime(UploadedFile $file, array $allowedMimes = []): void
     {
+        $list = empty($allowedMimes) ? self::ALLOWED_MIMES : $allowedMimes;
         $mime = $file->getMimeType(); // reads file content, not just extension
 
-        if (! in_array($mime, self::ALLOWED_MIMES, strict: true)) {
+        if (! in_array($mime, $list, strict: true)) {
             throw new InvalidArgumentException(
-                "Unsupported MIME type [{$mime}]. Allowed: ".implode(', ', self::ALLOWED_MIMES)
+                "Unsupported MIME type [{$mime}]. Allowed: ".implode(', ', $list)
             );
         }
     }

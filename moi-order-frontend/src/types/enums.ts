@@ -24,6 +24,8 @@ export const DOCUMENT_TYPE = {
   IdentityCardFront: 'identity_card_front',
   IdentityCardBack:  'identity_card_back',
   Tm30:              'tm30',
+  UpperBodyPhoto:    'upper_body_photo',
+  AirplaneTicket:    'airplane_ticket',
 } as const;
 
 export type DocumentType = (typeof DOCUMENT_TYPE)[keyof typeof DOCUMENT_TYPE];

@@ -79,6 +79,18 @@ class ServiceSubmission extends Model
         return $this->hasOne(CompanyRegistrationDetail::class, 'submission_id');
     }
 
+    /** One-to-one: only set when the submission is for an airport fast track. */
+    public function airportFastTrackDetail(): HasOne
+    {
+        return $this->hasOne(AirportFastTrackDetail::class, 'submission_id');
+    }
+
+    /** One-to-one: only set when the submission is for an embassy residential. */
+    public function embassyResidentialDetail(): HasOne
+    {
+        return $this->hasOne(EmbassyResidentialDetail::class, 'submission_id');
+    }
+
     public function documents(): HasMany
     {
         return $this->hasMany(SubmissionDocument::class, 'submission_id');

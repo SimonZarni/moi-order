@@ -43,6 +43,7 @@ export function useRegisterScreen(): UseRegisterScreenResult {
       register(form.name.trim(), form.email.trim(), form.password, form.passwordConfirmation),
     onSuccess: ({ user, token }) => {
       setUser(user, token);
+      navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
     },
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {

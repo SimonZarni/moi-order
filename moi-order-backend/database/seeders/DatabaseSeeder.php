@@ -26,6 +26,8 @@ class DatabaseSeeder extends Seeder
             FavoritePlaceSeeder::class,
             ServiceSeeder::class,
             CompanyRegistrationSeeder::class,
+            AirportFastTrackSeeder::class,
+            EmbassyResidentialSeeder::class,
         ]);
     }
 }

@@ -26,10 +26,19 @@ class ServiceSubmissionResource extends JsonResource
             'created_at'     => $this->created_at->toISOString(),
             'service_type'   => new ServiceTypeResource($this->whenLoaded('serviceType')),
             'detail' => $this->when(
-                $this->relationLoaded('ninetyDayReportDetail') || $this->relationLoaded('companyRegistrationDetail'),
+                $this->relationLoaded('ninetyDayReportDetail')
+                    || $this->relationLoaded('companyRegistrationDetail')
+                    || $this->relationLoaded('airportFastTrackDetail')
+                    || $this->relationLoaded('embassyResidentialDetail'),
                 fn () => [
-                    'full_name' => ($this->ninetyDayReportDetail ?? $this->companyRegistrationDetail)->full_name,
-                    'phone'     => ($this->ninetyDayReportDetail ?? $this->companyRegistrationDetail)->phone,
+                    'full_name' => ($this->ninetyDayReportDetail
+                        ?? $this->companyRegistrationDetail
+                        ?? $this->airportFastTrackDetail
+                        ?? $this->embassyResidentialDetail)->full_name,
+                    'phone'     => ($this->ninetyDayReportDetail
+                        ?? $this->companyRegistrationDetail
+                        ?? $this->airportFastTrackDetail
+                        ?? $this->embassyResidentialDetail)->phone,
                 ]
             ),
             'documents' => SubmissionDocumentResource::collection(

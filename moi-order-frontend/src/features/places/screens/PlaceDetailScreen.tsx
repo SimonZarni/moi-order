@@ -1,10 +1,11 @@
 import React from 'react';
 import { Image } from 'expo-image';
-import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { usePlaceDetailScreen } from '@/features/places/hooks/usePlaceDetailScreen';
+import { PlaceDetailSkeleton } from '@/features/places/components/PlaceDetailSkeleton';
 import { PlaceImageViewer } from '@/features/places/components/PlaceImageViewer';
 import { PlaceImage } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
@@ -23,7 +24,7 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
   } = usePlaceDetailScreen(placeId);
 
   if (isLoading) {
-    return <View style={styles.centered}><ActivityIndicator size="large" color={styles.spinner.color} /></View>;
+    return <PlaceDetailSkeleton />;
   }
 
   if (isError || place === null) {
