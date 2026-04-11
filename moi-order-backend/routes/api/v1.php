@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AirportFastTrackController;
+use App\Http\Controllers\Api\V1\EmbassyCarLicenseController;
 use App\Http\Controllers\Api\V1\EmbassyResidentialController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CompanyRegistrationController;
@@ -23,6 +24,7 @@ Route::post('/submissions/90-day-report',         [SubmissionController::class, 
 Route::post('/submissions/company-registration',  [CompanyRegistrationController::class, 'store']);
 Route::post('/submissions/airport-fast-track',    [AirportFastTrackController::class,    'store']);
 Route::post('/submissions/embassy-residential',   [EmbassyResidentialController::class,  'store']);
+Route::post('/submissions/embassy-car-license',   [EmbassyCarLicenseController::class,   'store']);
 
 // Favorites
 Route::get('/places/{placeId}/favorite',  [FavoritePlaceController::class, 'show']);

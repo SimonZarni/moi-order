@@ -60,6 +60,13 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(FileStorageInterface::class)
             )
         );
+
+        $this->app->bind(
+            \App\Services\EmbassyCarLicenseService::class,
+            fn ($app) => new \App\Services\EmbassyCarLicenseService(
+                $app->make(FileStorageInterface::class)
+            )
+        );
     }
 
     /**

@@ -12,6 +12,7 @@ const SLUG_TO_SCREEN: Partial<Record<string, keyof RootStackParamList>> = {
   'company-registration': 'CompanyRegistrationForm',
   'airport-fast-track':   'AirportFastTrackForm',
   'embassy-residential':  'EmbassyResidentialForm',
+  'embassy-car-license':  'EmbassyCarLicenseForm',
 };
 
 export interface UseOtherServicesScreenResult {
@@ -46,6 +47,11 @@ export function useOtherServicesScreen(): UseOtherServicesScreenResult {
       });
     } else if (screen === 'EmbassyResidentialForm') {
       navigation.navigate('EmbassyResidentialForm', {
+        serviceTypeId: firstType.id,
+        price:         firstType.price,
+      });
+    } else if (screen === 'EmbassyCarLicenseForm') {
+      navigation.navigate('EmbassyCarLicenseForm', {
         serviceTypeId: firstType.id,
         price:         firstType.price,
       });

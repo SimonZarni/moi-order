@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             CompanyRegistrationSeeder::class,
             AirportFastTrackSeeder::class,
             EmbassyResidentialSeeder::class,
+            EmbassyCarLicenseSeeder::class,
         ]);
     }
 }
