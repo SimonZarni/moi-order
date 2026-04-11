@@ -272,6 +272,47 @@ export async function submitEmbassyBank(
   return response.data.data;
 }
 
+export interface EmbassyVisaRecommendationPayload {
+  idempotencyKey:    string;
+  serviceTypeId:     number;
+  fullName:          string;
+  phone:             string;
+  passportBioPage:   ImagePickerAsset;
+  visaPage:          ImagePickerAsset;
+  identityCardFront: ImagePickerAsset;
+  identityCardBack:  ImagePickerAsset;
+}
+
+export async function submitEmbassyVisaRecommendation(
+  payload: EmbassyVisaRecommendationPayload,
+): Promise<ServiceSubmission> {
+  const form = new FormData();
+  form.append('idempotency_key',  payload.idempotencyKey);
+  form.append('service_type_id',  String(payload.serviceTypeId));
+  form.append('full_name',        payload.fullName);
+  form.append('phone',            payload.phone);
+
+  const appendImage = (key: string, asset: ImagePickerAsset): void => {
+    form.append(key, {
+      uri:  asset.uri,
+      type: asset.mimeType ?? 'image/jpeg',
+      name: `${key}.jpg`,
+    } as unknown as Blob);
+  };
+
+  appendImage('passport_bio_page',   payload.passportBioPage);
+  appendImage('visa_page',           payload.visaPage);
+  appendImage('identity_card_front', payload.identityCardFront);
+  appendImage('identity_card_back',  payload.identityCardBack);
+
+  const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
+    '/api/v1/submissions/embassy-visa-recommendation',
+    form,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
+  return response.data.data;
+}
+
 export async function fetchSubmissions(page: number): Promise<PaginatedResponse<ServiceSubmission>> {
   const response = await apiClient.get<PaginatedResponse<ServiceSubmission>>('/api/v1/submissions', {
     params: { page },

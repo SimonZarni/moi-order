@@ -35,6 +35,10 @@ export type RootStackParamList = {
     serviceTypeId: number;
     price: number;
   };
+  EmbassyVisaRecommendationForm: {
+    serviceTypeId: number;
+    price: number;
+  };
 
   // ── Existing public screens ─────────────────────────────────────────────
   Places: undefined;

@@ -12,8 +12,8 @@ function formatDate(iso: string): string {
   });
 }
 
-function formatPrice(satangs: number): string {
-  return `฿${(satangs / 100).toLocaleString('th-TH')}`;
+function formatPrice(baht: number): string {
+  return `฿${baht.toLocaleString('th-TH')}`;
 }
 
 const DOC_ICONS: Record<string, string> = {

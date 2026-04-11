@@ -13,8 +13,8 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-function formatPrice(satangs: number): string {
-  return `฿${(satangs / 100).toLocaleString('th-TH')}`;
+function formatPrice(baht: number): string {
+  return `฿${baht.toLocaleString('th-TH')}`;
 }
 
 interface OrderCardProps {

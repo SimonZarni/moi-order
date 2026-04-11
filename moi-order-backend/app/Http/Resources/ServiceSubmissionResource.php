@@ -31,14 +31,16 @@ class ServiceSubmissionResource extends JsonResource
                     || $this->relationLoaded('airportFastTrackDetail')
                     || $this->relationLoaded('embassyResidentialDetail')
                     || $this->relationLoaded('embassyCarLicenseDetail')
-                    || $this->relationLoaded('embassyBankDetail'),
+                    || $this->relationLoaded('embassyBankDetail')
+                    || $this->relationLoaded('embassyVisaRecommendationDetail'),
                 function () {
                     $detail = $this->ninetyDayReportDetail
                         ?? $this->companyRegistrationDetail
                         ?? $this->airportFastTrackDetail
                         ?? $this->embassyResidentialDetail
                         ?? $this->embassyCarLicenseDetail
-                        ?? $this->embassyBankDetail;
+                        ?? $this->embassyBankDetail
+                        ?? $this->embassyVisaRecommendationDetail;
 
                     return [
                         'full_name' => $detail->full_name,

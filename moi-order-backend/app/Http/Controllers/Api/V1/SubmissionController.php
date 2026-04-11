@@ -64,6 +64,7 @@ class SubmissionController extends Controller
             'embassyResidentialDetail',
             'embassyCarLicenseDetail',
             'embassyBankDetail',
+            'embassyVisaRecommendationDetail',
             'documents',
         ])
             ->forUser($request->user()->id)
