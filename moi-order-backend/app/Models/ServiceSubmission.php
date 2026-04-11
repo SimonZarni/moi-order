@@ -97,6 +97,12 @@ class ServiceSubmission extends Model
         return $this->hasOne(EmbassyCarLicenseDetail::class, 'submission_id');
     }
 
+    /** One-to-one: only set when the submission is for an embassy bank. */
+    public function embassyBankDetail(): HasOne
+    {
+        return $this->hasOne(EmbassyBankDetail::class, 'submission_id');
+    }
+
     public function documents(): HasMany
     {
         return $this->hasMany(SubmissionDocument::class, 'submission_id');

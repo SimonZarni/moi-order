@@ -29,17 +29,22 @@ class ServiceSubmissionResource extends JsonResource
                 $this->relationLoaded('ninetyDayReportDetail')
                     || $this->relationLoaded('companyRegistrationDetail')
                     || $this->relationLoaded('airportFastTrackDetail')
-                    || $this->relationLoaded('embassyResidentialDetail'),
-                fn () => [
-                    'full_name' => ($this->ninetyDayReportDetail
+                    || $this->relationLoaded('embassyResidentialDetail')
+                    || $this->relationLoaded('embassyCarLicenseDetail')
+                    || $this->relationLoaded('embassyBankDetail'),
+                function () {
+                    $detail = $this->ninetyDayReportDetail
                         ?? $this->companyRegistrationDetail
                         ?? $this->airportFastTrackDetail
-                        ?? $this->embassyResidentialDetail)->full_name,
-                    'phone'     => ($this->ninetyDayReportDetail
-                        ?? $this->companyRegistrationDetail
-                        ?? $this->airportFastTrackDetail
-                        ?? $this->embassyResidentialDetail)->phone,
-                ]
+                        ?? $this->embassyResidentialDetail
+                        ?? $this->embassyCarLicenseDetail
+                        ?? $this->embassyBankDetail;
+
+                    return [
+                        'full_name' => $detail->full_name,
+                        'phone'     => $detail->phone,
+                    ];
+                }
             ),
             'documents' => SubmissionDocumentResource::collection(
                 $this->whenLoaded('documents')

@@ -67,6 +67,13 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(FileStorageInterface::class)
             )
         );
+
+        $this->app->bind(
+            \App\Services\EmbassyBankService::class,
+            fn ($app) => new \App\Services\EmbassyBankService(
+                $app->make(FileStorageInterface::class)
+            )
+        );
     }
 
     /**

@@ -26,6 +26,7 @@ export const DOCUMENT_TYPE = {
   Tm30:              'tm30',
   UpperBodyPhoto:    'upper_body_photo',
   AirplaneTicket:    'airplane_ticket',
+  PassportSizePhoto: 'passport_size_photo',
 } as const;
 
 export type DocumentType = (typeof DOCUMENT_TYPE)[keyof typeof DOCUMENT_TYPE];

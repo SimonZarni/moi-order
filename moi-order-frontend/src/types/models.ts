@@ -87,6 +87,16 @@ export interface SubmissionDocument {
   signed_url: string;
 }
 
+export interface EmbassyBankDetail extends SubmissionDetail {
+  passport_no: string;
+  identity_card_no: string;
+  current_job: string | null;
+  company: string | null;
+  myanmar_address: string;
+  thai_address: string;
+  bank_name: string;
+}
+
 export interface ServiceSubmission {
   id: number;
   status: string;

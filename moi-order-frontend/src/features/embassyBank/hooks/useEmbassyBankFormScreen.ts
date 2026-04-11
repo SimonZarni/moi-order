@@ -6,25 +6,33 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Crypto from 'expo-crypto';
 
 import {
-  useEmbassyCarLicenseForm,
-  UseEmbassyCarLicenseFormResult,
-} from './useEmbassyCarLicenseForm';
-import { submitEmbassyCarLicense } from '@/shared/api/submissions';
+  useEmbassyBankForm,
+  UseEmbassyBankFormResult,
+} from './useEmbassyBankForm';
+import { submitEmbassyBank } from '@/shared/api/submissions';
 import { useAuthStore } from '@/shared/store/authStore';
 import { MESSAGES } from '@/shared/constants/messages';
 import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 
-type RouteParams = RouteProp<RootStackParamList, 'EmbassyCarLicenseForm'>;
+type RouteParams = RouteProp<RootStackParamList, 'EmbassyBankForm'>;
 
-export interface UseEmbassyCarLicenseFormScreenResult {
-  form: UseEmbassyCarLicenseFormResult['form'];
+export interface UseEmbassyBankFormScreenResult {
+  form: UseEmbassyBankFormResult['form'];
   price: number;
   isSubmitting: boolean;
   isSuccess: boolean;
   bannerError: string;
-  handleFullNameChange:          (value: string) => void;
-  handlePhoneChange:             (value: string) => void;
+  handleFullNameChange:          (v: string) => void;
+  handlePassportNoChange:        (v: string) => void;
+  handleIdentityCardNoChange:    (v: string) => void;
+  handleCurrentJobChange:        (v: string) => void;
+  handleCompanyChange:           (v: string) => void;
+  handleMyanmarAddressChange:    (v: string) => void;
+  handleThaiAddressChange:       (v: string) => void;
+  handlePhoneChange:             (v: string) => void;
+  handleBankNameChange:          (v: string) => void;
+  handlePickPassportSizePhoto:   () => Promise<void>;
   handlePickPassportBioPage:     () => Promise<void>;
   handlePickVisaPage:            () => Promise<void>;
   handlePickIdentityCardFront:   () => Promise<void>;
@@ -34,16 +42,24 @@ export interface UseEmbassyCarLicenseFormScreenResult {
   handleBack:   () => void;
 }
 
-export function useEmbassyCarLicenseFormScreen(): UseEmbassyCarLicenseFormScreenResult {
+export function useEmbassyBankFormScreen(): UseEmbassyBankFormScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const route = useRoute<RouteParams>();
+  const route      = useRoute<RouteParams>();
   const { serviceTypeId, price } = route.params;
   const { isLoggedIn } = useAuthStore();
 
   const {
     form,
     handleFullNameChange,
+    handlePassportNoChange,
+    handleIdentityCardNoChange,
+    handleCurrentJobChange,
+    handleCompanyChange,
+    handleMyanmarAddressChange,
+    handleThaiAddressChange,
     handlePhoneChange,
+    handleBankNameChange,
+    handlePassportSizePhotoChange,
     handlePassportBioPageChange,
     handleVisaPageChange,
     handleIdentityCardFrontChange,
@@ -51,7 +67,7 @@ export function useEmbassyCarLicenseFormScreen(): UseEmbassyCarLicenseFormScreen
     handleTm30Change,
     validate,
     applyApiError,
-  } = useEmbassyCarLicenseForm();
+  } = useEmbassyBankForm();
 
   const [bannerError, setBannerError] = useState('');
   const [isSuccess, setIsSuccess]     = useState(false);
@@ -76,21 +92,30 @@ export function useEmbassyCarLicenseFormScreen(): UseEmbassyCarLicenseFormScreen
     return result.assets[0] ?? null;
   }, []);
 
-  const handlePickPassportBioPage   = useCallback(async () => { const a = await pickImage(); if (a) handlePassportBioPageChange(a); },   [pickImage, handlePassportBioPageChange]);
-  const handlePickVisaPage          = useCallback(async () => { const a = await pickImage(); if (a) handleVisaPageChange(a); },          [pickImage, handleVisaPageChange]);
-  const handlePickIdentityCardFront = useCallback(async () => { const a = await pickImage(); if (a) handleIdentityCardFrontChange(a); }, [pickImage, handleIdentityCardFrontChange]);
-  const handlePickIdentityCardBack  = useCallback(async () => { const a = await pickImage(); if (a) handleIdentityCardBackChange(a); },  [pickImage, handleIdentityCardBackChange]);
-  const handlePickTm30              = useCallback(async () => { const a = await pickImage(); if (a) handleTm30Change(a); },              [pickImage, handleTm30Change]);
+  const handlePickPassportSizePhoto  = useCallback(async () => { const a = await pickImage(); if (a) handlePassportSizePhotoChange(a);  }, [pickImage, handlePassportSizePhotoChange]);
+  const handlePickPassportBioPage    = useCallback(async () => { const a = await pickImage(); if (a) handlePassportBioPageChange(a);    }, [pickImage, handlePassportBioPageChange]);
+  const handlePickVisaPage           = useCallback(async () => { const a = await pickImage(); if (a) handleVisaPageChange(a);           }, [pickImage, handleVisaPageChange]);
+  const handlePickIdentityCardFront  = useCallback(async () => { const a = await pickImage(); if (a) handleIdentityCardFrontChange(a);  }, [pickImage, handleIdentityCardFrontChange]);
+  const handlePickIdentityCardBack   = useCallback(async () => { const a = await pickImage(); if (a) handleIdentityCardBackChange(a);   }, [pickImage, handleIdentityCardBackChange]);
+  const handlePickTm30               = useCallback(async () => { const a = await pickImage(); if (a) handleTm30Change(a);               }, [pickImage, handleTm30Change]);
 
   // ── Submit ────────────────────────────────────────────────────────────────
 
   const { mutate, isPending: isSubmitting } = useMutation({
     mutationFn: () =>
-      submitEmbassyCarLicense({
+      submitEmbassyBank({
         idempotencyKey:    Crypto.randomUUID(),
         serviceTypeId,
         fullName:          form.fullName.trim(),
+        passportNo:        form.passportNo.trim(),
+        identityCardNo:    form.identityCardNo.trim(),
+        currentJob:        form.currentJob.trim() || null,
+        company:           form.company.trim()    || null,
+        myanmarAddress:    form.myanmarAddress.trim(),
+        thaiAddress:       form.thaiAddress.trim(),
         phone:             form.phone.trim(),
+        bankName:          form.bankName.trim(),
+        passportSizePhoto: form.passportSizePhoto!,
         passportBioPage:   form.passportBioPage!,
         visaPage:          form.visaPage!,
         identityCardFront: form.identityCardFront!,
@@ -125,7 +150,15 @@ export function useEmbassyCarLicenseFormScreen(): UseEmbassyCarLicenseFormScreen
     isSuccess,
     bannerError,
     handleFullNameChange,
+    handlePassportNoChange,
+    handleIdentityCardNoChange,
+    handleCurrentJobChange,
+    handleCompanyChange,
+    handleMyanmarAddressChange,
+    handleThaiAddressChange,
     handlePhoneChange,
+    handleBankNameChange,
+    handlePickPassportSizePhoto,
     handlePickPassportBioPage,
     handlePickVisaPage,
     handlePickIdentityCardFront,
