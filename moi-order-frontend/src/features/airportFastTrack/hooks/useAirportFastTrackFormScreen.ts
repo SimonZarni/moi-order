@@ -14,6 +14,7 @@ import { useAuthStore } from '@/shared/store/authStore';
 import { MESSAGES } from '@/shared/constants/messages';
 import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
+import { stripAsset } from '@/shared/utils/stripAsset';
 
 type RouteParams = RouteProp<RootStackParamList, 'AirportFastTrackForm'>;
 
@@ -65,9 +66,11 @@ export function useAirportFastTrackFormScreen(): UseAirportFastTrackFormScreenRe
       mediaTypes: ['images'],
       quality:    0.85,
       allowsEditing: false,
+      base64: false,
     });
     if (result.canceled || result.assets.length === 0) return null;
-    return result.assets[0] ?? null;
+    const asset = result.assets[0];
+    return asset != null ? stripAsset(asset) : null;
   }, []);
 
   const handlePickUpperBodyPhoto = useCallback(async (): Promise<void> => {
