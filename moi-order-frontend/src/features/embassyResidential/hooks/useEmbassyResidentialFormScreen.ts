@@ -59,10 +59,13 @@ export function useEmbassyResidentialFormScreen(): UseEmbassyResidentialFormScre
   // ── Image picker ─────────────────────────────────────────────────────────
 
   const pickImage = useCallback(async (): Promise<ImagePicker.ImagePickerAsset | null> => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      setBannerError('Photo library access is required to upload documents.');
-      return null;
+    const { granted } = await ImagePicker.getMediaLibraryPermissionsAsync();
+    if (!granted) {
+      const request = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!request.granted) {
+        setBannerError('Photo library access is required to upload documents.');
+        return null;
+      }
     }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],

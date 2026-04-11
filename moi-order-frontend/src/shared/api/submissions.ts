@@ -213,6 +213,65 @@ export async function submitEmbassyCarLicense(
   return response.data.data;
 }
 
+export interface EmbassyBankPayload {
+  idempotencyKey:    string;
+  serviceTypeId:     number;
+  fullName:          string;
+  passportNo:        string;
+  identityCardNo:    string;
+  currentJob:        string | null;
+  company:           string | null;
+  myanmarAddress:    string;
+  thaiAddress:       string;
+  phone:             string;
+  bankName:          string;
+  passportSizePhoto: ImagePickerAsset;
+  passportBioPage:   ImagePickerAsset;
+  visaPage:          ImagePickerAsset;
+  identityCardFront: ImagePickerAsset;
+  identityCardBack:  ImagePickerAsset;
+  tm30:              ImagePickerAsset;
+}
+
+export async function submitEmbassyBank(
+  payload: EmbassyBankPayload,
+): Promise<ServiceSubmission> {
+  const form = new FormData();
+  form.append('idempotency_key',  payload.idempotencyKey);
+  form.append('service_type_id',  String(payload.serviceTypeId));
+  form.append('full_name',        payload.fullName);
+  form.append('passport_no',      payload.passportNo);
+  form.append('identity_card_no', payload.identityCardNo);
+  if (payload.currentJob !== null) form.append('current_job', payload.currentJob);
+  if (payload.company    !== null) form.append('company',     payload.company);
+  form.append('myanmar_address',  payload.myanmarAddress);
+  form.append('thai_address',     payload.thaiAddress);
+  form.append('phone',            payload.phone);
+  form.append('bank_name',        payload.bankName);
+
+  const appendImage = (key: string, asset: ImagePickerAsset): void => {
+    form.append(key, {
+      uri:  asset.uri,
+      type: asset.mimeType ?? 'image/jpeg',
+      name: `${key}.jpg`,
+    } as unknown as Blob);
+  };
+
+  appendImage('passport_size_photo',  payload.passportSizePhoto);
+  appendImage('passport_bio_page',    payload.passportBioPage);
+  appendImage('visa_page',            payload.visaPage);
+  appendImage('identity_card_front',  payload.identityCardFront);
+  appendImage('identity_card_back',   payload.identityCardBack);
+  appendImage('tm30',                 payload.tm30);
+
+  const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
+    '/api/v1/submissions/embassy-bank',
+    form,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
+  return response.data.data;
+}
+
 export async function fetchSubmissions(page: number): Promise<PaginatedResponse<ServiceSubmission>> {
   const response = await apiClient.get<PaginatedResponse<ServiceSubmission>>('/api/v1/submissions', {
     params: { page },

@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             AirportFastTrackSeeder::class,
             EmbassyResidentialSeeder::class,
             EmbassyCarLicenseSeeder::class,
+            EmbassyBankSeeder::class,
         ]);
     }
 }

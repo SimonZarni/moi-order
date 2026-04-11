@@ -14,6 +14,7 @@ enum DocumentType: string
     case Tm30               = 'tm30';
     case UpperBodyPhoto     = 'upper_body_photo';
     case AirplaneTicket     = 'airplane_ticket';
+    case PassportSizePhoto  = 'passport_size_photo';
 
     public function label(): string
     {
@@ -26,6 +27,7 @@ enum DocumentType: string
             self::Tm30              => 'TM30',
             self::UpperBodyPhoto    => 'Upper Half Body Photo',
             self::AirplaneTicket    => 'Airplane Ticket',
+            self::PassportSizePhoto => 'Passport Size Photo',
         };
     }
 }

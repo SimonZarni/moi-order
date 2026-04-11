@@ -31,6 +31,10 @@ export type RootStackParamList = {
     serviceTypeId: number;
     price: number;
   };
+  EmbassyBankForm: {
+    serviceTypeId: number;
+    price: number;
+  };
 
   // ── Existing public screens ─────────────────────────────────────────────
   Places: undefined;

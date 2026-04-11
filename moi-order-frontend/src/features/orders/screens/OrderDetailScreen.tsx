@@ -20,9 +20,12 @@ const DOC_ICONS: Record<string, string> = {
   passport_bio_page:   '📄',
   visa_page:           '🪪',
   old_slip:            '📋',
-  identity_card_front: '🪪',
-  identity_card_back:  '🪪',
-  tm30:                '📋',
+  identity_card_front:  '🪪',
+  identity_card_back:   '🪪',
+  tm30:                 '📋',
+  upper_body_photo:     '🖼',
+  airplane_ticket:      '✈',
+  passport_size_photo:  '🖼',
 };
 
 export function OrderDetailScreen(): React.JSX.Element {
