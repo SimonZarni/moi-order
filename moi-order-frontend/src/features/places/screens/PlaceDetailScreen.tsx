@@ -22,7 +22,7 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
   } = usePlaceDetailScreen(placeId);
 
   if (isLoading) {
-    return <View style={styles.centered}><ActivityIndicator size="large" /></View>;
+    return <View style={styles.centered}><ActivityIndicator size="large" color={styles.spinner.color} /></View>;
   }
 
   if (isError || place === null) {

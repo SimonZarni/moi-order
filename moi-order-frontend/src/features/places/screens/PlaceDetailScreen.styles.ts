@@ -25,6 +25,9 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colours.backgroundLight,
   },
+  spinner: {
+    color: colours.tertiary,
+  } as unknown as { color: string },
   errorText: {
     fontSize: typography.md,
     color: colours.danger,
