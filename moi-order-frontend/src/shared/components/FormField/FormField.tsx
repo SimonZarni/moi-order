@@ -8,7 +8,7 @@ interface FormFieldProps {
   value: string;
   onChangeText: (text: string) => void;
   accessibilityLabel: string;
-  error?: string;
+  error?: string | undefined;
   placeholder?: string;
   keyboardType?: TextInputProps['keyboardType'];
   returnKeyType?: TextInputProps['returnKeyType'];

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\V1\AirportFastTrackController;
+use App\Http\Controllers\Api\V1\EmbassyResidentialController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CompanyRegistrationController;
 use App\Http\Controllers\Api\V1\FavoritePlaceController;
@@ -19,6 +21,8 @@ Route::get('/submissions',              [SubmissionController::class, 'index']);
 Route::get('/submissions/{id}',         [SubmissionController::class, 'show']);
 Route::post('/submissions/90-day-report',         [SubmissionController::class,         'store']);
 Route::post('/submissions/company-registration',  [CompanyRegistrationController::class, 'store']);
+Route::post('/submissions/airport-fast-track',    [AirportFastTrackController::class,    'store']);
+Route::post('/submissions/embassy-residential',   [EmbassyResidentialController::class,  'store']);
 
 // Favorites
 Route::get('/places/{placeId}/favorite',  [FavoritePlaceController::class, 'show']);

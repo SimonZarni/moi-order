@@ -15,8 +15,13 @@ interface FileStorageInterface
     /**
      * Store an uploaded file outside public/, UUID-named.
      * Returns the stored path (opaque — never expose to clients).
+     *
+     * @param  array<string>  $allowedMimes  Explicit MIME whitelist for this call.
+     *                                        Empty = default image-only list.
+     *                                        Callers declare what they accept; the
+     *                                        service does not widen the global default.
      */
-    public function store(UploadedFile $file, string $directory): string;
+    public function store(UploadedFile $file, string $directory, array $allowedMimes = []): string;
 
     /**
      * Generate a signed temporary URL for the given stored path.

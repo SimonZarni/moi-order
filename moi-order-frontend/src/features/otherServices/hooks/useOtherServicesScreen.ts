@@ -10,6 +10,8 @@ import { RootStackParamList } from '@/types/navigation';
 // OCP: new service = new entry here + new screen. No changes to OtherServicesScreen.
 const SLUG_TO_SCREEN: Partial<Record<string, keyof RootStackParamList>> = {
   'company-registration': 'CompanyRegistrationForm',
+  'airport-fast-track':   'AirportFastTrackForm',
+  'embassy-residential':  'EmbassyResidentialForm',
 };
 
 export interface UseOtherServicesScreenResult {
@@ -34,6 +36,16 @@ export function useOtherServicesScreen(): UseOtherServicesScreenResult {
 
     if (screen === 'CompanyRegistrationForm') {
       navigation.navigate('CompanyRegistrationForm', {
+        serviceTypeId: firstType.id,
+        price:         firstType.price,
+      });
+    } else if (screen === 'AirportFastTrackForm') {
+      navigation.navigate('AirportFastTrackForm', {
+        serviceTypeId: firstType.id,
+        price:         firstType.price,
+      });
+    } else if (screen === 'EmbassyResidentialForm') {
+      navigation.navigate('EmbassyResidentialForm', {
         serviceTypeId: firstType.id,
         price:         firstType.price,
       });

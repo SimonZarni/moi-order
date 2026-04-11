@@ -136,6 +136,15 @@ export function OrdersScreen(): React.JSX.Element {
         keyExtractor={(item: ServiceSubmission) => String(item.id)}
         renderItem={({ item }) => <OrderCard item={item} onPress={handleOrderPress} />}
         ListHeaderComponent={header}
+        ListEmptyComponent={
+          <View style={styles.emptyWrap}>
+            <Text style={styles.emptyIcon}>📭</Text>
+            <Text style={styles.emptyTitle}>No orders yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Your service submissions will{'\n'}appear here once you place an order.
+            </Text>
+          </View>
+        }
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.4}
         onRefresh={handleRefresh}

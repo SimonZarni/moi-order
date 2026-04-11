@@ -110,6 +110,33 @@ export const styles = StyleSheet.create({
     color: editorialPalette.amber,
   },
 
+  // ── Empty state (logged in, zero orders) ──────────────────────────────────
+  emptyWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xxl * 2,
+    paddingBottom: TAB_BAR_CLEARANCE,
+  },
+  emptyIcon: {
+    fontSize: 44,
+    marginBottom: spacing.md,
+    opacity: 0.35,
+  },
+  emptyTitle: {
+    fontSize: typography.lg,
+    fontWeight: '800',
+    color: colours.textOnLight,
+    marginBottom: 6,
+    letterSpacing: -0.3,
+  },
+  emptySubtitle: {
+    fontSize: typography.sm,
+    color: colours.textMuted,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+
   // ── Guest state ────────────────────────────────────────────────────────────
   guestWrap: {
     flex: 1,

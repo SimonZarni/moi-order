@@ -46,6 +46,20 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(FileStorageInterface::class)
             )
         );
+
+        $this->app->bind(
+            \App\Services\AirportFastTrackService::class,
+            fn ($app) => new \App\Services\AirportFastTrackService(
+                $app->make(FileStorageInterface::class)
+            )
+        );
+
+        $this->app->bind(
+            \App\Services\EmbassyResidentialService::class,
+            fn ($app) => new \App\Services\EmbassyResidentialService(
+                $app->make(FileStorageInterface::class)
+            )
+        );
     }
 
     /**
