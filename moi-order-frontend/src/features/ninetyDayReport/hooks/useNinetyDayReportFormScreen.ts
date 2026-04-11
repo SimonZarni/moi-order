@@ -11,6 +11,7 @@ import { useAuthStore } from '@/shared/store/authStore';
 import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 import { MESSAGES } from '@/shared/constants/messages';
+import { stripAsset } from '@/shared/utils/stripAsset';
 
 type RouteParams = RouteProp<RootStackParamList, 'NinetyDayReportForm'>;
 
@@ -66,9 +67,11 @@ export function useNinetyDayReportFormScreen(): UseNinetyDayReportFormScreenResu
       mediaTypes: ['images'],
       quality:    0.85,
       allowsEditing: false,
+      base64: false,
     });
     if (result.canceled || result.assets.length === 0) return null;
-    return result.assets[0] ?? null;
+    const asset = result.assets[0];
+    return asset != null ? stripAsset(asset) : null;
   }, []);
 
   const handlePickPassportBioPage = useCallback(async (): Promise<void> => {
@@ -90,7 +93,6 @@ export function useNinetyDayReportFormScreen(): UseNinetyDayReportFormScreenResu
 
   const { mutate, isPending: isSubmitting } = useMutation({
     mutationFn: () => {
-      // validate() guards ensure these are non-null before mutate() is called.
       return submitNinetyDayReport({
         idempotencyKey:  Crypto.randomUUID(),
         serviceTypeId,
