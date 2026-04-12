@@ -8,7 +8,9 @@ import { ServiceSubmission } from '@/types/models';
 export interface UseOrderDetailResult {
   submission: ServiceSubmission | null;
   isLoading: boolean;
+  isRefreshing: boolean;
   isError: boolean;
+  refetch: () => void;
 }
 
 export function useOrderDetail(submissionId: number): UseOrderDetailResult {
@@ -19,8 +21,10 @@ export function useOrderDetail(submissionId: number): UseOrderDetailResult {
   });
 
   return {
-    submission: query.data ?? null,
-    isLoading:  query.isLoading,
-    isError:    query.isError,
+    submission:   query.data ?? null,
+    isLoading:    query.isPending,
+    isRefreshing: query.isFetching && !query.isPending,
+    isError:      query.isError,
+    refetch:      query.refetch,
   };
 }

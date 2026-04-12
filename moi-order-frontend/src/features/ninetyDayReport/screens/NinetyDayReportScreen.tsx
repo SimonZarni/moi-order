@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
@@ -10,12 +10,17 @@ import { useNinetyDayReportScreen } from '@/features/ninetyDayReport/hooks/useNi
 import { styles } from './NinetyDayReportScreen.styles';
 
 export function NinetyDayReportScreen(): React.JSX.Element {
-  const { types, isLoading, isError, handleSelectType, handleBack } =
+  const { types, isLoading, isRefreshing, isError, handleRefresh, handleSelectType, handleBack } =
     useNinetyDayReportScreen();
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={editorialPalette.sage} />
+        }
+      >
         <HeroHeader
           accentColor={editorialPalette.sage}
           eyebrow="รายงานตัว 90 วัน"

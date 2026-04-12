@@ -20,14 +20,18 @@ const SLUG_TO_SCREEN: Partial<Record<string, keyof RootStackParamList>> = {
 export interface UseOtherServicesScreenResult {
   services: UseOtherServicesResult['services'];
   isLoading: boolean;
+  isRefreshing: boolean;
   isError: boolean;
+  handleRefresh: () => void;
   handleSelectService: (service: Service) => void;
   handleBack: () => void;
 }
 
 export function useOtherServicesScreen(): UseOtherServicesScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { services, isLoading, isError } = useOtherServices();
+  const { services, isLoading, isRefreshing, isError, refetch } = useOtherServices();
+
+  const handleRefresh = useCallback((): void => { refetch(); }, [refetch]);
 
   const handleSelectService = useCallback((service: Service): void => {
     const screen = SLUG_TO_SCREEN[service.slug];
@@ -74,5 +78,5 @@ export function useOtherServicesScreen(): UseOtherServicesScreenResult {
     navigation.goBack();
   }, [navigation]);
 
-  return { services, isLoading, isError, handleSelectService, handleBack };
+  return { services, isLoading, isRefreshing, isError, handleRefresh, handleSelectService, handleBack };
 }

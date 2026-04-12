@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useOrderDetailScreen } from '@/features/orders/hooks/useOrderDetailScreen';
@@ -29,7 +29,7 @@ const DOC_ICONS: Record<string, string> = {
 };
 
 export function OrderDetailScreen(): React.JSX.Element {
-  const { submission, isLoading, isError, handleBack } = useOrderDetailScreen();
+  const { submission, isLoading, isRefreshing, isError, handleRefresh, handleBack } = useOrderDetailScreen();
 
   const hero = (
     <View style={styles.hero}>
@@ -80,8 +80,14 @@ export function OrderDetailScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={styles.spinner.color} />
+        }
+      >
         {hero}
 
         <View style={styles.body}>

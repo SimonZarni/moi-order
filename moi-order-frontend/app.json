@@ -33,7 +33,14 @@
         {
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos for document uploads."
         }
-      ]
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to show distances to nearby places."
+        }
+      ],
+      "@react-native-community/datetimepicker"
     ]
   }
 }

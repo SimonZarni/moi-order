@@ -40,6 +40,7 @@ import { OrdersScreen } from '@/features/orders/screens/OrdersScreen';
 import { OrderDetailScreen } from '@/features/orders/screens/OrderDetailScreen';
 import { PlaceDetailScreen } from '@/features/places/screens/PlaceDetailScreen';
 import { PlacesScreen } from '@/features/places/screens/PlacesScreen';
+import { ProfileScreen } from '@/features/profile/screens/ProfileScreen';
 
 import { RootStackParamList } from '@/types/navigation';
 
@@ -111,6 +112,7 @@ export default function App(): React.JSX.Element {
             <Stack.Screen name="EmbassyVisaRecommendationForm"    component={EmbassyVisaRecommendationFormScreen} />
             <Stack.Screen name="Places"                    component={PlacesScreen} />
             <Stack.Screen name="PlaceDetail"               component={PlaceDetailScreen} />
+            <Stack.Screen name="Profile"                   component={ProfileScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </QueryClientProvider>

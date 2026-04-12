@@ -43,4 +43,7 @@ export type RootStackParamList = {
   // ── Existing public screens ─────────────────────────────────────────────
   Places: undefined;
   PlaceDetail: { placeId: number };
+
+  // ── Profile ──────────────────────────────────────────────────────────────
+  Profile: undefined;
 };

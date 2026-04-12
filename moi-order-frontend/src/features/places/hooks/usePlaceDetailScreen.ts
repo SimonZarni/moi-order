@@ -4,6 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 
 import { usePlaceDetail } from '@/features/places/hooks/usePlaceDetail';
 import { usePlaceFavorite } from '@/features/places/hooks/usePlaceFavorite';
+import { useUserLocation } from '@/shared/hooks/useUserLocation';
+import { formatDistance } from '@/shared/utils/formatDistance';
 import { useAuthStore } from '@/shared/store/authStore';
 import { Place, PlaceImage, ApiError } from '@/types/models';
 
@@ -16,6 +18,7 @@ export interface UsePlaceDetailScreenResult {
   /** Index of the tapped image within viewerImages. -1 = viewer closed. */
   viewerIndex: number;
   isLoading: boolean;
+  isRefreshing: boolean;
   isError: boolean;
   error: ApiError | null;
   /** Favorite state — only meaningful when isLoggedIn is true. */
@@ -23,6 +26,9 @@ export interface UsePlaceDetailScreenResult {
   isTogglingFavorite: boolean;
   /** Whether the current user is authenticated (gates heart button rendering). */
   isLoggedIn: boolean;
+  /** Formatted distance from the user's current location, or null if unavailable. */
+  distance: string | null;
+  handleRefresh: () => void;
   handleBack: () => void;
   handleCallPhone: () => void;
   handleOpenWebsite: () => void;
@@ -36,13 +42,21 @@ export interface UsePlaceDetailScreenResult {
 export function usePlaceDetailScreen(placeId: number): UsePlaceDetailScreenResult {
   const navigation = useNavigation();
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
-  const { place, isLoading, isError, error } = usePlaceDetail(placeId);
+  const { place, isLoading, isRefreshing, isError, error, refetch } = usePlaceDetail(placeId);
   const { isFavorited, isToggling, handleToggle } = usePlaceFavorite(placeId);
+  const { userCoords } = useUserLocation();
   const [viewerIndex, setViewerIndex] = useState<number>(-1);
 
   // images is only present on the detail response — guard against undefined
   const coverImage    = useMemo(() => place?.images?.[0] ?? null, [place?.images]);
   const galleryImages = useMemo(() => place?.images?.slice(1) ?? [], [place?.images]);
+  const distance = useMemo((): string | null => {
+    if (userCoords === null || !place || place.latitude === null || place.longitude === null) {
+      return null;
+    }
+    return formatDistance(userCoords.latitude, userCoords.longitude, place.latitude, place.longitude);
+  }, [userCoords, place]);
+
   // All images as { uri } — format expected by react-native-image-viewing
   const viewerImages = useMemo(
     () => (place?.images ?? []).map((img: PlaceImage) => ({ uri: img.url })),
@@ -60,6 +74,8 @@ export function usePlaceDetailScreen(placeId: number): UsePlaceDetailScreenResul
   const handleCloseImageViewer = useCallback(() => {
     setViewerIndex(-1);
   }, []);
+
+  const handleRefresh = useCallback(() => { refetch(); }, [refetch]);
 
   const handleBack = useCallback(() => {
     navigation.goBack();
@@ -90,11 +106,14 @@ export function usePlaceDetailScreen(placeId: number): UsePlaceDetailScreenResul
     viewerImages,
     viewerIndex,
     isLoading,
+    isRefreshing,
     isError,
     error,
     isFavorited,
     isTogglingFavorite: isToggling,
     isLoggedIn,
+    distance,
+    handleRefresh,
     handleBack,
     handleCallPhone,
     handleOpenWebsite,

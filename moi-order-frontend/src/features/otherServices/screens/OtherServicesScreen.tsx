@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
@@ -9,12 +9,17 @@ import { useOtherServicesScreen } from '@/features/otherServices/hooks/useOtherS
 import { styles } from './OtherServicesScreen.styles';
 
 export function OtherServicesScreen(): React.JSX.Element {
-  const { services, isLoading, isError, handleSelectService, handleBack } =
+  const { services, isLoading, isRefreshing, isError, handleRefresh, handleSelectService, handleBack } =
     useOtherServicesScreen();
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={editorialPalette.teal} />
+        }
+      >
         <HeroHeader
           accentColor={editorialPalette.teal}
           eyebrow="Registration & More"
