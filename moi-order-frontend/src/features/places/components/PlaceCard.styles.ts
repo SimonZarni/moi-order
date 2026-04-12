@@ -108,4 +108,9 @@ export const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.5)',
     flex: 1,
   },
+  metaDistance: {
+    fontSize: typography.xs,
+    color: editorialPalette.gold,
+    fontWeight: '600',
+  },
 });

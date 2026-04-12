@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
+import { OrderCardSkeleton } from '@/features/orders/components/OrderCardSkeleton';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { useOrdersScreen } from '@/features/orders/hooks/useOrdersScreen';
 import { ServiceSubmission } from '@/types/models';
@@ -108,9 +109,12 @@ export function OrdersScreen(): React.JSX.Element {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
         {header}
-        <View style={styles.stateBox}>
-          <ActivityIndicator size="large" color={styles.spinner.color} />
-        </View>
+        <OrderCardSkeleton />
+        <OrderCardSkeleton />
+        <OrderCardSkeleton />
+        <OrderCardSkeleton />
+        <OrderCardSkeleton />
+        <OrderCardSkeleton />
         <FloatingTabBar />
       </SafeAreaView>
     );

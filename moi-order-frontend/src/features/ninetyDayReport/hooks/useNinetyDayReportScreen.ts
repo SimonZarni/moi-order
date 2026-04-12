@@ -9,18 +9,22 @@ import { RootStackParamList } from '@/types/navigation';
 export interface UseNinetyDayReportScreenResult {
   types: ServiceType[];
   isLoading: boolean;
+  isRefreshing: boolean;
   isError: boolean;
+  handleRefresh: () => void;
   handleSelectType: (type: ServiceType) => void;
   handleBack: () => void;
 }
 
 export function useNinetyDayReportScreen(): UseNinetyDayReportScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { services, isLoading, isError } = useServices();
+  const { services, isLoading, isRefreshing, isError, refetch } = useServices();
 
   // Find the 90-day-report service and expose its types.
   const ninetyDayService = services.find((s) => s.slug === '90-day-report');
   const types = ninetyDayService?.types ?? [];
+
+  const handleRefresh = useCallback((): void => { refetch(); }, [refetch]);
 
   const handleSelectType = useCallback(
     (type: ServiceType): void => {
@@ -38,5 +42,5 @@ export function useNinetyDayReportScreen(): UseNinetyDayReportScreenResult {
     navigation.goBack();
   }, [navigation]);
 
-  return { types, isLoading, isError, handleSelectType, handleBack };
+  return { types, isLoading, isRefreshing, isError, handleRefresh, handleSelectType, handleBack };
 }

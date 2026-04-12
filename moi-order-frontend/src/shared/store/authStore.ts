@@ -16,6 +16,7 @@ interface AuthState {
   user: User | null;
   isLoggedIn: boolean;
   setUser: (user: User, token: string) => void;
+  updateUser: (user: User) => void;
   clearAuth: () => void;
 }
 
@@ -28,6 +29,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     // Persist token for app restart — fire-and-forget, never await in sync context.
     SecureStore.setItemAsync(TOKEN_KEY, token).catch(() => {});
     set({ user, isLoggedIn: true });
+  },
+
+  updateUser: (user: User): void => {
+    set({ user });
   },
 
   clearAuth: (): void => {

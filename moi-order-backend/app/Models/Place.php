@@ -34,6 +34,7 @@ class Place extends Model
         'opening_hours',
         'contact_phone',
         'website',
+        'google_map_url',
     ];
 
     protected function casts(): array

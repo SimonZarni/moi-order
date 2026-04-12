@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\EmbassyResidentialController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CompanyRegistrationController;
 use App\Http\Controllers\Api\V1\FavoritePlaceController;
+use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\SubmissionController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,10 @@ use Illuminate\Support\Facades\Route;
 // Auth — authenticated actions
 Route::post('/auth/logout', [AuthController::class, 'logout']);
 Route::get('/auth/me',      [AuthController::class, 'me']);
+
+// Profile
+Route::put('/profile',          [ProfileController::class, 'update']);
+Route::put('/profile/password', [ProfileController::class, 'changePassword']);
 
 // Submissions
 Route::get('/submissions',              [SubmissionController::class, 'index']);

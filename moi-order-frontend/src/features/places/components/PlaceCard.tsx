@@ -9,9 +9,10 @@ import { styles } from './PlaceCard.styles';
 interface PlaceCardProps {
   place: Place;
   onPress: (placeId: number) => void;
+  distance?: string | null;
 }
 
-export function PlaceCard({ place, onPress }: PlaceCardProps): React.JSX.Element {
+export function PlaceCard({ place, onPress, distance }: PlaceCardProps): React.JSX.Element {
   return (
     <View style={styles.shadowWrap}>
       <Pressable
@@ -56,6 +57,12 @@ export function PlaceCard({ place, onPress }: PlaceCardProps): React.JSX.Element
               <>
                 <View style={styles.metaDot} />
                 <Text style={styles.metaHours} numberOfLines={1}>{place.opening_hours}</Text>
+              </>
+            )}
+            {distance != null && (
+              <>
+                <View style={styles.metaDot} />
+                <Text style={styles.metaDistance}>{distance}</Text>
               </>
             )}
           </View>

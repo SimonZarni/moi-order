@@ -17,4 +17,7 @@ export const QUERY_KEYS = {
   AUTH: {
     ME: ['auth', 'me'] as const,
   },
+  PROFILE: {
+    ME: ['auth', 'me'] as const, // same key — profile re-uses the ME query
+  },
 } as const;

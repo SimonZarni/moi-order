@@ -1,10 +1,11 @@
 import React from 'react';
 import { Image } from 'expo-image';
-import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { usePlaceDetailScreen } from '@/features/places/hooks/usePlaceDetailScreen';
+import { colours } from '@/shared/theme/colours';
 import { PlaceDetailSkeleton } from '@/features/places/components/PlaceDetailSkeleton';
 import { PlaceImageViewer } from '@/features/places/components/PlaceImageViewer';
 import { PlaceImage } from '@/types/models';
@@ -17,9 +18,10 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
   const { placeId } = route.params;
   const {
     place, coverImage, galleryImages, viewerImages, viewerIndex,
-    isLoading, isError,
+    isLoading, isRefreshing, isError,
     isFavorited, isTogglingFavorite, isLoggedIn,
-    handleBack, handleCallPhone, handleOpenWebsite, handleOpenMaps,
+    distance,
+    handleRefresh, handleBack, handleCallPhone, handleOpenWebsite, handleOpenMaps,
     handleToggleFavorite, handleImagePress, handleViewAllImages, handleCloseImageViewer,
   } = usePlaceDetailScreen(placeId);
 
@@ -40,7 +42,13 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={colours.primary} />
+        }
+      >
 
         {/* ── Hero ────────────────────────────────────────── */}
         <View style={styles.heroContainer}>
@@ -113,6 +121,12 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
               <Text style={styles.infoIcon}>🌐</Text>
               <Text style={[styles.infoText, styles.infoLink]} numberOfLines={1}>{place.website}</Text>
             </Pressable>
+          )}
+          {distance !== null && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoIcon}>📏</Text>
+              <Text style={styles.infoText}>{distance} away</Text>
+            </View>
           )}
           {place.latitude !== null && (
             <Pressable style={styles.infoRow} onPress={handleOpenMaps} accessibilityLabel="Open in maps" accessibilityRole="button">

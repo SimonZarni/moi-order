@@ -37,6 +37,7 @@ class PlaceResource extends JsonResource
             'opening_hours'     => $this->opening_hours,
             'contact_phone'     => $this->contact_phone,
             'website'           => $this->website,
+            'google_map_url'    => $this->google_map_url,
             'category'          => new CategoryResource($this->whenLoaded('category')),
             'tags'              => TagResource::collection($this->whenLoaded('tags')),
             'images'            => PlaceImageResource::collection($this->whenLoaded('images')),

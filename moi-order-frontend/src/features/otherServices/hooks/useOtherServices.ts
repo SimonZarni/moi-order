@@ -10,18 +10,26 @@ const FEATURED_SLUG = '90-day-report';
 export interface UseOtherServicesResult {
   services: Service[];
   isLoading: boolean;
+  isRefreshing: boolean;
   isError: boolean;
+  refetch: () => void;
 }
 
 export function useOtherServices(): UseOtherServicesResult {
-  const { data, isLoading, isError } = useQuery({
+  const query = useQuery({
     queryKey: QUERY_KEYS.SERVICES.LIST,
     queryFn:  fetchServices,
     staleTime: CACHE_TTL.STATIC_DATA,
   });
 
   // Filter out the featured 90-day-report which has its own card on Home.
-  const services = (data ?? []).filter((s) => s.slug !== FEATURED_SLUG);
+  const services = (query.data ?? []).filter((s) => s.slug !== FEATURED_SLUG);
 
-  return { services, isLoading, isError };
+  return {
+    services,
+    isLoading:    query.isPending,
+    isRefreshing: query.isFetching && !query.isPending,
+    isError:      query.isError,
+    refetch:      query.refetch,
+  };
 }

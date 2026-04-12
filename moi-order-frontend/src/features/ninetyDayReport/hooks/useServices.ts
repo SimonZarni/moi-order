@@ -8,19 +8,23 @@ import { Service } from '@/types/models';
 export interface UseServicesResult {
   services: Service[];
   isLoading: boolean;
+  isRefreshing: boolean;
   isError: boolean;
+  refetch: () => void;
 }
 
 export function useServices(): UseServicesResult {
-  const { data, isLoading, isError } = useQuery({
+  const query = useQuery({
     queryKey: QUERY_KEYS.SERVICES.LIST,
     queryFn:  fetchServices,
     staleTime: CACHE_TTL.STATIC_DATA, // service catalog rarely changes
   });
 
   return {
-    services:  data ?? [],
-    isLoading,
-    isError,
+    services:     query.data ?? [],
+    isLoading:    query.isPending,
+    isRefreshing: query.isFetching && !query.isPending,
+    isError:      query.isError,
+    refetch:      query.refetch,
   };
 }

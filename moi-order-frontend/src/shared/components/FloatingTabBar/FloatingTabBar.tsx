@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useAuthStore } from '@/shared/store/authStore';
 import { RootStackParamList } from '@/types/navigation';
 import { styles } from './FloatingTabBar.styles';
 
@@ -25,16 +26,17 @@ const TABS: TabItem[] = [
   { route: 'Places', icon: '📍', label: 'Places'  },
   { route: 'Orders', icon: '📋', label: 'Orders'  },
   // Ensure 'Profile' exists in your RootStackParamList or add it here
-  { route: 'Profile' as keyof RootStackParamList, icon: '👤', label: 'Profile', disabled: true },
+  { route: 'Profile', icon: '👤', label: 'Profile' },
 ];
 
 export function FloatingTabBar(): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute();
   const insets = useSafeAreaInsets();
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
 
   const currentRoute = route.name as keyof RootStackParamList;
-  
+
   // Logic to keep the 'Home' tab highlighted when inside child screens
   const effectiveActive: keyof RootStackParamList = HOME_CHILD_ROUTES.includes(currentRoute)
     ? 'Home'
@@ -42,11 +44,19 @@ export function FloatingTabBar(): React.JSX.Element {
 
   function handlePress(tab: TabItem): void {
     if (tab.disabled) return;
-    if (tab.route === effectiveActive) return;
+    // Guard uses the real route, not effectiveActive — effectiveActive remaps child
+    // routes to 'Home' for highlighting, which would block navigation to Home itself.
+    if (tab.route === currentRoute) return;
+
+    // Profile tab requires auth — redirect guests to Login.
+    if (tab.route === 'Profile' && !isLoggedIn) {
+      navigation.navigate('Login' as any);
+      return;
+    }
 
     /**
-     * FIX: Use 'as any' here. 
-     * TypeScript struggles with the navigate overload because it can't 
+     * FIX: Use 'as any' here.
+     * TypeScript struggles with the navigate overload because it can't
      * verify if tab.route requires mandatory parameters at runtime.
      */
     navigation.navigate(tab.route as any);

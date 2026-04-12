@@ -36,6 +36,7 @@ export interface Place {
   opening_hours: string | null;
   contact_phone: string | null;
   website: string | null;
+  google_map_url: string | null;
   cover_image: string | null;
   category: Category;
   /** Only present on the detail endpoint (/places/:id). */
@@ -48,6 +49,7 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  date_of_birth: string | null;  // ISO date "YYYY-MM-DD"
   email_verified_at: string | null;
   created_at: string;
 }

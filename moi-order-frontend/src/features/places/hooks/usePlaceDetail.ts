@@ -8,6 +8,7 @@ import { Place, ApiError } from '@/types/models';
 export interface UsePlaceDetailResult {
   place: Place | null;
   isLoading: boolean;
+  isRefreshing: boolean;
   isError: boolean;
   error: ApiError | null;
   refetch: () => void;
@@ -27,6 +28,8 @@ export function usePlaceDetail(placeId: number): UsePlaceDetailResult {
     // the cached error state instantly on remount while the retry is already in
     // flight — causing a false "failed to load" flash before the retry succeeds.
     isLoading: query.isPending || (query.isError && query.isFetching),
+    // True during a background refetch (data already loaded) — drives RefreshControl.
+    isRefreshing: query.isFetching && !query.isPending,
     // Only surface the error once all retries are exhausted (not actively fetching).
     isError: query.isError && !query.isFetching,
     error: query.error as ApiError | null,
