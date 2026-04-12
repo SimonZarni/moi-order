@@ -40,11 +40,15 @@ class PlaceResource extends JsonResource
             'category'          => new CategoryResource($this->whenLoaded('category')),
             'tags'              => TagResource::collection($this->whenLoaded('tags')),
             'images'            => PlaceImageResource::collection($this->whenLoaded('images')),
-            // Convenience: signed URL of first image for list cards (null-safe)
-            'cover_image'       => $this->whenLoaded('images', function () use ($storage) {
+            // List endpoint loads the coverImage HasOne (1 row per place).
+            // Detail endpoint loads the full images collection.
+            // Both paths resolve to a signed URL here; the other returns null.
+            'cover_image'       => $this->whenLoaded('coverImage', function () use ($storage) {
+                return $this->coverImage ? $storage->url($this->coverImage->path) : null;
+            }, $this->whenLoaded('images', function () use ($storage) {
                 $first = $this->images->first();
                 return $first ? $storage->url($first->path) : null;
-            }),
+            })),
         ];
     }
 }

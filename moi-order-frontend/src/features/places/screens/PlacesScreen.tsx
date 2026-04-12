@@ -20,6 +20,7 @@ export function PlacesScreen(): React.JSX.Element {
     categories,
     isLoading,
     isError,
+    isRefreshing,
     isFetchingNextPage,
     query,
     selectedCategory,
@@ -101,7 +102,7 @@ export function PlacesScreen(): React.JSX.Element {
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.4}
         onRefresh={handleRefresh}
-        refreshing={false}
+        refreshing={isRefreshing}
         contentContainerStyle={styles.list}
         ListFooterComponent={
           isFetchingNextPage

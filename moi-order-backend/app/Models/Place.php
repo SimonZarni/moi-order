@@ -61,6 +61,15 @@ class Place extends Model
         return $this->hasMany(PlaceImage::class)->orderBy('sort_order');
     }
 
+    /**
+     * The single cover image (lowest sort_order).
+     * Used by the list endpoint so we load 1 row per place instead of all images.
+     */
+    public function coverImage(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(PlaceImage::class)->orderBy('sort_order');
+    }
+
     public function favoritedByUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'favorite_places')->withTimestamps();

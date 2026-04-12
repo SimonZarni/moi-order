@@ -16,6 +16,7 @@ export interface UseOrdersScreenResult {
   isLoading: boolean;
   isError: boolean;
   isLoggedIn: boolean;
+  isRefreshing: boolean;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   handleEndReached: () => void;
@@ -35,6 +36,7 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     submissions,
     isLoading,
     isError,
+    isRefreshing,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
@@ -72,6 +74,7 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     isLoading:          isLoggedIn && isLoading,
     isError:            isLoggedIn && isError,
     isLoggedIn,
+    isRefreshing:       isLoggedIn && isRefreshing,
     hasNextPage,
     isFetchingNextPage,
     handleEndReached,

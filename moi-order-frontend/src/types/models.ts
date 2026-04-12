@@ -38,8 +38,10 @@ export interface Place {
   website: string | null;
   cover_image: string | null;
   category: Category;
-  tags: Tag[];
-  images: PlaceImage[];
+  /** Only present on the detail endpoint (/places/:id). */
+  tags?: Tag[];
+  /** Only present on the detail endpoint (/places/:id). List uses cover_image instead. */
+  images?: PlaceImage[];
 }
 
 export interface User {
