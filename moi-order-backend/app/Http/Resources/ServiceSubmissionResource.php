@@ -42,6 +42,12 @@ class ServiceSubmissionResource extends JsonResource
                         ?? $this->embassyBankDetail
                         ?? $this->embassyVisaRecommendationDetail;
 
+                    // Guard: a submission may have relations eager-loaded but no
+                    // detail row yet (e.g. service type added after submission created).
+                    if ($detail === null) {
+                        return null;
+                    }
+
                     return [
                         'full_name' => $detail->full_name,
                         'phone'     => $detail->phone,
