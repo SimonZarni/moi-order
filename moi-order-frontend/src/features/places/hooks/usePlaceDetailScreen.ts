@@ -40,8 +40,9 @@ export function usePlaceDetailScreen(placeId: number): UsePlaceDetailScreenResul
   const { isFavorited, isToggling, handleToggle } = usePlaceFavorite(placeId);
   const [viewerIndex, setViewerIndex] = useState<number>(-1);
 
-  const coverImage    = useMemo(() => place?.images[0] ?? null, [place?.images]);
-  const galleryImages = useMemo(() => place?.images.slice(1) ?? [], [place?.images]);
+  // images is only present on the detail response — guard against undefined
+  const coverImage    = useMemo(() => place?.images?.[0] ?? null, [place?.images]);
+  const galleryImages = useMemo(() => place?.images?.slice(1) ?? [], [place?.images]);
   // All images as { uri } — format expected by react-native-image-viewing
   const viewerImages = useMemo(
     () => (place?.images ?? []).map((img: PlaceImage) => ({ uri: img.url })),

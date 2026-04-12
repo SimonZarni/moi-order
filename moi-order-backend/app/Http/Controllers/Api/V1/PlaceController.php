@@ -23,7 +23,9 @@ class PlaceController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $places = Place::with(['category', 'images'])
+        // coverImage: loads 1 row per place (HasOne, lowest sort_order).
+        // Previously `images` loaded every image for every place — ~5× the data.
+        $places = Place::with(['category', 'coverImage'])
             ->latest()
             ->paginate(perPage: 20);
 

@@ -17,6 +17,7 @@ export interface UsePlacesScreenResult {
   categories: Category[];
   isLoading: boolean;
   isError: boolean;
+  isRefreshing: boolean;
   error: ApiError | null;
   isFetchingNextPage: boolean;
   // Search / filter state
@@ -39,6 +40,7 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     places,
     isLoading,
     isError,
+    isRefreshing,
     error,
     hasNextPage,
     isFetchingNextPage,
@@ -86,6 +88,7 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     categories,
     isLoading,
     isError,
+    isRefreshing,
     error,
     isFetchingNextPage,
     query,

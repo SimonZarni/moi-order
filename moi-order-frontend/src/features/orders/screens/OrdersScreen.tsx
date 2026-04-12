@@ -61,6 +61,7 @@ export function OrdersScreen(): React.JSX.Element {
     isLoading,
     isError,
     isLoggedIn,
+    isRefreshing,
     isFetchingNextPage,
     handleEndReached,
     handleRefresh,
@@ -148,7 +149,7 @@ export function OrdersScreen(): React.JSX.Element {
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.4}
         onRefresh={handleRefresh}
-        refreshing={false}
+        refreshing={isRefreshing}
         contentContainerStyle={styles.list}
         ListFooterComponent={
           isFetchingNextPage

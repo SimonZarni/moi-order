@@ -126,7 +126,7 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
         <View style={styles.sectionCard}>
           <Text style={styles.sectionLabel}>Tags</Text>
           <View style={styles.tagRow}>
-            {place.tags.map((tag) => (
+            {(place.tags ?? []).map((tag) => (
               <View key={tag.id} style={styles.tag}>
                 <Text style={styles.tagText}>{tag.name_en}</Text>
               </View>
