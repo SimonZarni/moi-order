@@ -40,6 +40,9 @@ export type RootStackParamList = {
     price: number;
   };
 
+  // ── Payment ──────────────────────────────────────────────────────────────
+  Payment: { submissionId: number };
+
   // ── Existing public screens ─────────────────────────────────────────────
   Places: undefined;
   PlaceDetail: { placeId: number };

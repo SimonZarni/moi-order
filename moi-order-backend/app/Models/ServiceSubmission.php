@@ -42,13 +42,30 @@ class ServiceSubmission extends Model
 
     // ─── Domain methods ───────────────────────────────────────────────────────
 
+    /** Payment confirmed — move to Processing for admin to work on. */
+    public function markProcessing(): void
+    {
+        if ($this->status !== SubmissionStatus::PendingPayment) {
+            return;
+        }
+        $this->update(['status' => SubmissionStatus::Processing]);
+    }
+
+    /** Payment failed or expired — user can retry payment. */
+    public function markPaymentFailed(): void
+    {
+        if ($this->status->isTerminal()) {
+            return;
+        }
+        $this->update(['status' => SubmissionStatus::PaymentFailed]);
+    }
+
     /** Mark the submission complete. Admin-triggered; only callable once. */
     public function complete(): void
     {
         if ($this->status->isTerminal()) {
             return;
         }
-
         $this->update([
             'status'       => SubmissionStatus::Completed,
             'completed_at' => now(),
@@ -65,6 +82,12 @@ class ServiceSubmission extends Model
     public function serviceType(): BelongsTo
     {
         return $this->belongsTo(ServiceType::class);
+    }
+
+    /** The latest (most recent) payment attempt for this submission. */
+    public function payment(): HasOne
+    {
+        return $this->hasOne(Payment::class, 'submission_id')->latestOfMany();
     }
 
     /** One-to-one: only set when the submission is for a 90-day report. */

@@ -103,8 +103,8 @@ export function useNinetyDayReportFormScreen(): UseNinetyDayReportFormScreenResu
         oldSlip:         form.oldSlip!,
       });
     },
-    onSuccess: () => {
-      setIsSuccess(true);
+    onSuccess: (submission) => {
+      navigation.navigate('Payment', { submissionId: submission.id });
     },
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {

@@ -14,6 +14,9 @@ export const QUERY_KEYS = {
     LIST:   ['submissions', 'list'] as const,
     DETAIL: (id: number) => ['submissions', 'detail', id] as const,
   },
+  PAYMENTS: {
+    FOR_SUBMISSION: (submissionId: number) => ['payments', 'submission', submissionId] as const,
+  },
   AUTH: {
     ME: ['auth', 'me'] as const,
   },

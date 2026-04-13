@@ -6,22 +6,28 @@ namespace App\Enums;
 
 enum SubmissionStatus: string
 {
-    case Processing = 'processing';
-    case Completed  = 'completed';
+    case PendingPayment = 'pending_payment';
+    case Processing     = 'processing';
+    case Completed      = 'completed';
+    case PaymentFailed  = 'payment_failed';
 
     public function label(): string
     {
         return match($this) {
-            self::Processing => 'Processing',
-            self::Completed  => 'Completed',
+            self::PendingPayment => 'Pending Payment',
+            self::Processing     => 'Processing',
+            self::Completed      => 'Completed',
+            self::PaymentFailed  => 'Payment Failed',
         };
     }
 
     public function isTerminal(): bool
     {
         return match($this) {
-            self::Processing => false,
-            self::Completed  => true,
+            self::PendingPayment => false,
+            self::Processing     => false,
+            self::Completed      => true,
+            self::PaymentFailed  => false, // User can retry payment.
         };
     }
 }

@@ -101,6 +101,16 @@ export interface EmbassyBankDetail extends SubmissionDetail {
   bank_name: string;
 }
 
+export interface Payment {
+  id: number;
+  status: string;
+  status_label: string;
+  amount: number;      // satangs
+  currency: string;
+  qr_image_url: string | null;
+  expires_at: string | null;
+}
+
 export interface ServiceSubmission {
   id: number;
   status: string;
@@ -111,6 +121,7 @@ export interface ServiceSubmission {
   service_type: ServiceType;
   detail?: SubmissionDetail;
   documents?: SubmissionDocument[];
+  payment?: Payment;
 }
 
 // ── API wrappers ───────────────────────────────────────────────────────────
