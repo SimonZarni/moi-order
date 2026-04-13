@@ -24,7 +24,6 @@ export function PlacesScreen(): React.JSX.Element {
     isFetchingNextPage,
     query,
     selectedCategory,
-    getPlaceDistance,
     handleQueryChange,
     handleCategorySelect,
     handleEndReached,
@@ -92,7 +91,7 @@ export function PlacesScreen(): React.JSX.Element {
         data={filteredPlaces}
         keyExtractor={(item: Place) => String(item.id)}
         renderItem={({ item }) => (
-          <PlaceCard place={item} onPress={handlePlacePress} distance={getPlaceDistance(item)} />
+          <PlaceCard place={item} onPress={handlePlacePress} />
         )}
         ListHeaderComponent={header}
         ListEmptyComponent={

@@ -5,9 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { usePlaces } from '@/features/places/hooks/usePlaces';
 import { usePlacesSearch } from '@/features/places/hooks/usePlacesSearch';
-import { useUserLocation } from '@/shared/hooks/useUserLocation';
 import { fetchPlaceDetail } from '@/shared/api/places';
-import { formatDistance } from '@/shared/utils/formatDistance';
 import { CACHE_TTL } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { Category, Place, ApiError } from '@/types/models';
@@ -25,8 +23,6 @@ export interface UsePlacesScreenResult {
   // Search / filter state
   query: string;
   selectedCategory: number | null;
-  // Location
-  getPlaceDistance: (place: Place) => string | null;
   // Handlers
   handleQueryChange: (text: string) => void;
   handleCategorySelect: (id: number | null) => void;
@@ -39,8 +35,6 @@ export interface UsePlacesScreenResult {
 export function usePlacesScreen(): UsePlacesScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const queryClient = useQueryClient();
-  const { userCoords } = useUserLocation();
-
   const {
     places,
     isLoading,
@@ -84,16 +78,6 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     [navigation, queryClient],
   );
 
-  const getPlaceDistance = useCallback(
-    (place: Place): string | null => {
-      if (userCoords === null || place.latitude === null || place.longitude === null) {
-        return null;
-      }
-      return formatDistance(userCoords.latitude, userCoords.longitude, place.latitude, place.longitude);
-    },
-    [userCoords],
-  );
-
   const handleBack = useCallback((): void => {
     navigation.navigate('Home');
   }, [navigation]);
@@ -108,7 +92,6 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     isFetchingNextPage,
     query,
     selectedCategory,
-    getPlaceDistance,
     handleQueryChange,
     handleCategorySelect,
     handleEndReached,

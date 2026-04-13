@@ -20,7 +20,6 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
     place, coverImage, galleryImages, viewerImages, viewerIndex,
     isLoading, isRefreshing, isError,
     isFavorited, isTogglingFavorite, isLoggedIn,
-    distance,
     handleRefresh, handleBack, handleCallPhone, handleOpenWebsite, handleOpenMaps,
     handleToggleFavorite, handleImagePress, handleViewAllImages, handleCloseImageViewer,
   } = usePlaceDetailScreen(placeId);
@@ -121,12 +120,6 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
               <Text style={styles.infoIcon}>🌐</Text>
               <Text style={[styles.infoText, styles.infoLink]} numberOfLines={1}>{place.website}</Text>
             </Pressable>
-          )}
-          {distance !== null && (
-            <View style={styles.infoRow}>
-              <Text style={styles.infoIcon}>📏</Text>
-              <Text style={styles.infoText}>{distance} away</Text>
-            </View>
           )}
           {place.latitude !== null && (
             <Pressable style={styles.infoRow} onPress={handleOpenMaps} accessibilityLabel="Open in maps" accessibilityRole="button">
