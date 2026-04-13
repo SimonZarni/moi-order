@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\Webhook\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,3 +29,8 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(
 Route::prefix('admin/v1')->middleware(['auth:sanctum', 'throttle:admin'])->group(
     base_path('routes/api/admin_v1.php')
 );
+
+// Stripe webhook — no auth:sanctum; Stripe-Signature header IS the authentication.
+// intentionally public
+Route::post('/webhook/stripe', [StripeWebhookController::class, 'handle'])
+    ->middleware('throttle:60,1');

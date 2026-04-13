@@ -10,11 +10,22 @@ export type OrderStatus = (typeof ORDER_STATUS)[keyof typeof ORDER_STATUS];
 
 // Mirrors App\Enums\SubmissionStatus
 export const SUBMISSION_STATUS = {
-  Processing: 'processing',
-  Completed: 'completed',
+  PendingPayment: 'pending_payment',
+  Processing:     'processing',
+  Completed:      'completed',
+  PaymentFailed:  'payment_failed',
 } as const;
 
 export type SubmissionStatus = (typeof SUBMISSION_STATUS)[keyof typeof SUBMISSION_STATUS];
+
+// Mirrors App\Enums\PaymentStatus
+export const PAYMENT_STATUS = {
+  Pending:   'pending',
+  Succeeded: 'succeeded',
+  Failed:    'failed',
+} as const;
+
+export type PaymentStatus = (typeof PAYMENT_STATUS)[keyof typeof PAYMENT_STATUS];
 
 // Mirrors App\Enums\DocumentType
 export const DOCUMENT_TYPE = {

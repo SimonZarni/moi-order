@@ -5,12 +5,18 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Contracts\FileStorageInterface;
+use App\Contracts\PaymentGatewayInterface;
+use App\Events\PaymentConfirmed;
+use App\Listeners\MarkSubmissionProcessing;
 use App\Services\FileStorageService;
+use App\Services\StripePaymentService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
+use Stripe\StripeClient;
 
 /**
  * Principle: DIP — all bindings and infrastructure wiring centralised here.
@@ -74,6 +80,14 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(FileStorageInterface::class)
             )
         );
+
+        // DIP: bind Stripe adapter to the payment gateway contract.
+        // To switch provider: swap StripePaymentService for an OmisePaymentService here.
+        $this->app->bind(PaymentGatewayInterface::class, function (): StripePaymentService {
+            return new StripePaymentService(
+                new StripeClient(config('services.stripe.secret')),
+            );
+        });
     }
 
     /**
@@ -82,6 +96,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureRateLimiting();
+
+        Event::listen(PaymentConfirmed::class, MarkSubmissionProcessing::class);
     }
 
     private function configureRateLimiting(): void

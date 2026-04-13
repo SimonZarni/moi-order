@@ -96,7 +96,7 @@ export function useEmbassyVisaRecommendationFormScreen(): UseEmbassyVisaRecommen
         identityCardFront: form.identityCardFront!,
         identityCardBack:  form.identityCardBack!,
       }),
-    onSuccess: () => setIsSuccess(true),
+    onSuccess: (submission) => navigation.navigate('Payment', { submissionId: submission.id }),
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {
         applyApiError(error.errors);

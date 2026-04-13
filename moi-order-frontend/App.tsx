@@ -38,6 +38,7 @@ import { EmbassyVisaRecommendationFormScreen } from '@/features/embassyVisaRecom
 import { CompanyRegistrationFormScreen } from '@/features/companyRegistration/screens/CompanyRegistrationFormScreen';
 import { OrdersScreen } from '@/features/orders/screens/OrdersScreen';
 import { OrderDetailScreen } from '@/features/orders/screens/OrderDetailScreen';
+import { PaymentScreen } from '@/features/payment/screens/PaymentScreen';
 import { PlaceDetailScreen } from '@/features/places/screens/PlaceDetailScreen';
 import { PlacesScreen } from '@/features/places/screens/PlacesScreen';
 import { ProfileScreen } from '@/features/profile/screens/ProfileScreen';
@@ -99,6 +100,7 @@ export default function App(): React.JSX.Element {
             <Stack.Screen name="Home"                      component={HomeScreen} />
             <Stack.Screen name="Orders"                    component={OrdersScreen} />
             <Stack.Screen name="OrderDetail"               component={OrderDetailScreen} />
+            <Stack.Screen name="Payment"                   component={PaymentScreen} />
             <Stack.Screen name="Login"                     component={LoginScreen} />
             <Stack.Screen name="Register"                  component={RegisterScreen} />
             <Stack.Screen name="NinetyDayReport"           component={NinetyDayReportScreen} />

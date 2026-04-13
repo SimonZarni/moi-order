@@ -57,6 +57,7 @@ class ServiceSubmissionResource extends JsonResource
             'documents' => SubmissionDocumentResource::collection(
                 $this->whenLoaded('documents')
             ),
+            'payment' => new PaymentResource($this->whenLoaded('payment')),
         ];
     }
 }

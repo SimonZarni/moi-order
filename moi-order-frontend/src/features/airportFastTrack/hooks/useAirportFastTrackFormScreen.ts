@@ -95,7 +95,7 @@ export function useAirportFastTrackFormScreen(): UseAirportFastTrackFormScreenRe
         upperBodyPhoto: form.upperBodyPhoto!,
         airplaneTicket: form.airplaneTicket!,
       }),
-    onSuccess: () => setIsSuccess(true),
+    onSuccess: (submission) => navigation.navigate('Payment', { submissionId: submission.id }),
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {
         applyApiError(error.errors);

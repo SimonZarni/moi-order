@@ -100,7 +100,7 @@ export function useCompanyRegistrationFormScreen(): UseCompanyRegistrationFormSc
         identityCardBack:  form.identityCardBack!,
         tm30:              form.tm30!,
       }),
-    onSuccess: () => setIsSuccess(true),
+    onSuccess: (submission) => navigation.navigate('Payment', { submissionId: submission.id }),
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {
         applyApiError(error.errors);

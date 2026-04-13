@@ -56,7 +56,7 @@ class EmbassyVisaRecommendationService
                 'user_id'         => $dto->userId,
                 'service_type_id' => $serviceType->id,
                 'price_snapshot'  => $serviceType->price,
-                'status'          => SubmissionStatus::Processing,
+                'status'          => SubmissionStatus::PendingPayment,
                 'idempotency_key' => $dto->idempotencyKey,
             ]);
 
