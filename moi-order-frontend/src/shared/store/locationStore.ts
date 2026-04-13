@@ -10,7 +10,12 @@ export interface UserCoords {
   longitude: number;
 }
 
-type PermissionStatus = 'undetermined' | 'requesting' | 'granted' | 'denied';
+/**
+ * 'dismissed' — user tapped "No thanks" in the in-app prompt.
+ * We never call requestForegroundPermissionsAsync() for dismissed, so
+ * the OS dialog is never shown and there is no double-dialog issue.
+ */
+type PermissionStatus = 'undetermined' | 'requesting' | 'granted' | 'denied' | 'dismissed';
 
 interface LocationState {
   coords: UserCoords | null;
