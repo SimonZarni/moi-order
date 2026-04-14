@@ -58,10 +58,12 @@ class FileStorageService implements FileStorageInterface
     {
         try {
             return $this->disk->temporaryUrl($path, now()->addMinutes($minutesTtl));
-        } catch (\RuntimeException) {
-            // Local/public disk drivers do not support temporary URLs.
-            // Fall back to a permanent public URL (acceptable for local dev;
-            // in production swap the binding to an S3 adapter).
+        } catch (\Throwable) {
+            // S3 and local-disk-with-serve both support temporaryUrl().
+            // Any other driver falls back to a permanent URL.
+            // Catching \Throwable (not just \RuntimeException) guards against
+            // \InvalidArgumentException thrown when the storage.local route is
+            // missing after route:cache — see FilesystemServiceProvider::serveFiles().
             return $this->disk->url($path);
         }
     }

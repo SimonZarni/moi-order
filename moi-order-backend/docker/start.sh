@@ -12,7 +12,12 @@ fi
 
 # Laravel bootstrap
 php artisan config:cache
-php artisan route:cache
+# route:cache is intentionally omitted: the local-disk file-serving route
+# (storage.local) is registered as a Closure by FilesystemServiceProvider and
+# is skipped entirely when routes are cached, causing temporaryUrl() to throw
+# InvalidArgumentException("Route [storage.local] not defined.") → 500 on every
+# file-upload submission.  Once you switch FILESYSTEM_DISK=s3 the route is no
+# longer needed and route:cache can be re-enabled.
 php artisan view:cache
 php artisan migrate --force
 

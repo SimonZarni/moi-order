@@ -30,13 +30,21 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // DIP: bind the contract to the local-disk adapter.
-        // To switch to S3: swap FileStorageService for an S3FileStorageService here.
+        // DIP: bind the contract to the appropriate disk adapter.
+        //
+        // Production (FILESYSTEM_DISK=s3): uses S3 / R2 / any S3-compatible store.
+        //   temporaryUrl() is natively signed by the SDK — no Laravel route needed.
+        //   Set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION,
+        //   AWS_BUCKET (and optionally AWS_ENDPOINT for R2) in Render env vars.
+        //
+        // Local dev (FILESYSTEM_DISK=local): uses storage/app/private/ with
+        //   serve:true so Laravel signs and serves the files directly.
+        //   NOTE: do NOT run `php artisan route:cache` while using the local disk —
+        //   the storage.local Closure route is skipped when routes are cached,
+        //   causing temporaryUrl() to throw InvalidArgumentException → 500.
         $this->app->bind(FileStorageInterface::class, function () {
-            // 'local' disk → storage/app/private/ (outside web root) with serve:true.
-            // temporaryUrl() generates signed routes served by Laravel — no storage:link needed.
-            // In production: swap to an S3FileStorageService that natively signs URLs.
-            return new FileStorageService(Storage::disk('local'));
+            $diskName = config('filesystems.default', 'local');
+            return new FileStorageService(Storage::disk($diskName));
         });
 
         $this->app->bind(
