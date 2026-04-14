@@ -2,7 +2,6 @@ import React from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { DocumentPickerField } from '@/shared/components/DocumentPickerField/DocumentPickerField';
 import { ErrorBanner } from '@/shared/components/ErrorBanner/ErrorBanner';
 import { FormField } from '@/shared/components/FormField/FormField';
 import { useTestServiceFormScreen } from '@/features/testService/hooks/useTestServiceFormScreen';
@@ -16,7 +15,6 @@ export function TestServiceFormScreen(): React.JSX.Element {
     bannerError,
     handleFullNameChange,
     handlePhoneChange,
-    handlePickPhoto,
     handleSubmit,
     handleBack,
   } = useTestServiceFormScreen();
@@ -71,19 +69,6 @@ export function TestServiceFormScreen(): React.JSX.Element {
             placeholder="08x-xxx-xxxx"
             keyboardType="phone-pad"
             returnKeyType="done"
-          />
-
-          <Text style={styles.sectionTitle}>Photo</Text>
-
-          <DocumentPickerField
-            label="Photo"
-            icon="🖼️"
-            onPress={handlePickPhoto}
-            isUploaded={form.photo !== null}
-            error={form.errors['photo']}
-            hint="Tap to select a photo"
-            uploadedHint="Photo selected — tap to change"
-            accessibilityLabel="Upload photo"
           />
         </ScrollView>
 
