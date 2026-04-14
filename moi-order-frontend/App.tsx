@@ -35,6 +35,7 @@ import { EmbassyResidentialFormScreen } from '@/features/embassyResidential/scre
 import { EmbassyCarLicenseFormScreen } from '@/features/embassyCarLicense/screens/EmbassyCarLicenseFormScreen';
 import { EmbassyBankFormScreen } from '@/features/embassyBank/screens/EmbassyBankFormScreen';
 import { EmbassyVisaRecommendationFormScreen } from '@/features/embassyVisaRecommendation/screens/EmbassyVisaRecommendationFormScreen';
+import { TestServiceFormScreen } from '@/features/testService/screens/TestServiceFormScreen';
 import { CompanyRegistrationFormScreen } from '@/features/companyRegistration/screens/CompanyRegistrationFormScreen';
 import { OrdersScreen } from '@/features/orders/screens/OrdersScreen';
 import { OrderDetailScreen } from '@/features/orders/screens/OrderDetailScreen';
@@ -112,6 +113,7 @@ export default function App(): React.JSX.Element {
             <Stack.Screen name="EmbassyCarLicenseForm"     component={EmbassyCarLicenseFormScreen} />
             <Stack.Screen name="EmbassyBankForm"                  component={EmbassyBankFormScreen} />
             <Stack.Screen name="EmbassyVisaRecommendationForm"    component={EmbassyVisaRecommendationFormScreen} />
+            <Stack.Screen name="TestServiceForm"                  component={TestServiceFormScreen} />
             <Stack.Screen name="Places"                    component={PlacesScreen} />
             <Stack.Screen name="PlaceDetail"               component={PlaceDetailScreen} />
             <Stack.Screen name="Profile"                   component={ProfileScreen} />

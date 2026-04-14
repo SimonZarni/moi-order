@@ -313,6 +313,36 @@ export async function submitEmbassyVisaRecommendation(
   return response.data.data;
 }
 
+export interface TestServicePayload {
+  idempotencyKey: string;
+  serviceTypeId:  number;
+  fullName:       string;
+  phone:          string;
+  photo:          ImagePickerAsset;
+}
+
+export async function submitTestService(
+  payload: TestServicePayload,
+): Promise<ServiceSubmission> {
+  const form = new FormData();
+  form.append('idempotency_key', payload.idempotencyKey);
+  form.append('service_type_id', String(payload.serviceTypeId));
+  form.append('full_name',       payload.fullName);
+  form.append('phone',           payload.phone);
+  form.append('photo', {
+    uri:  payload.photo.uri,
+    type: payload.photo.mimeType ?? 'image/jpeg',
+    name: 'photo.jpg',
+  } as unknown as Blob);
+
+  const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
+    '/api/v1/submissions/test-service',
+    form,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
+  return response.data.data;
+}
+
 export async function fetchSubmissions(page: number): Promise<PaginatedResponse<ServiceSubmission>> {
   const response = await apiClient.get<PaginatedResponse<ServiceSubmission>>('/api/v1/submissions', {
     params: { page },

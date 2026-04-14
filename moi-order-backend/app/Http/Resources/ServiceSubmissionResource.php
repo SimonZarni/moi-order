@@ -32,7 +32,8 @@ class ServiceSubmissionResource extends JsonResource
                     || $this->relationLoaded('embassyResidentialDetail')
                     || $this->relationLoaded('embassyCarLicenseDetail')
                     || $this->relationLoaded('embassyBankDetail')
-                    || $this->relationLoaded('embassyVisaRecommendationDetail'),
+                    || $this->relationLoaded('embassyVisaRecommendationDetail')
+                    || $this->relationLoaded('testServiceDetail'),
                 function () {
                     $detail = $this->ninetyDayReportDetail
                         ?? $this->companyRegistrationDetail
@@ -40,7 +41,8 @@ class ServiceSubmissionResource extends JsonResource
                         ?? $this->embassyResidentialDetail
                         ?? $this->embassyCarLicenseDetail
                         ?? $this->embassyBankDetail
-                        ?? $this->embassyVisaRecommendationDetail;
+                        ?? $this->embassyVisaRecommendationDetail
+                        ?? $this->testServiceDetail;
 
                     // Guard: a submission may have relations eager-loaded but no
                     // detail row yet (e.g. service type added after submission created).

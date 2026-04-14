@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AirportFastTrackController;
+use App\Http\Controllers\Api\V1\TestServiceController;
 use App\Http\Controllers\Api\V1\EmbassyBankController;
 use App\Http\Controllers\Api\V1\EmbassyVisaRecommendationController;
 use App\Http\Controllers\Api\V1\EmbassyCarLicenseController;
@@ -35,6 +36,7 @@ Route::post('/submissions/embassy-residential',   [EmbassyResidentialController:
 Route::post('/submissions/embassy-car-license',   [EmbassyCarLicenseController::class,   'store']);
 Route::post('/submissions/embassy-bank',                  [EmbassyBankController::class,                  'store']);
 Route::post('/submissions/embassy-visa-recommendation',   [EmbassyVisaRecommendationController::class,    'store']);
+Route::post('/submissions/test-service',                  [TestServiceController::class,                   'store']);
 
 // Payments
 Route::post('/submissions/{id}/payment', [PaymentController::class, 'store']);
