@@ -4,34 +4,22 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Contracts\FileStorageInterface;
 use App\DTOs\CreateTestServiceDTO;
-use App\Enums\DocumentType;
 use App\Enums\SubmissionStatus;
 use App\Models\ServiceSubmission;
 use App\Models\ServiceType;
-use App\Models\SubmissionDocument;
 use App\Models\TestServiceDetail;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Principle: SRP — owns all business logic for test service submissions only.
- * Principle: DIP — depends on FileStorageInterface; never calls Storage::disk() directly.
  * Security: idempotency check prevents duplicate submissions on retry.
  *   price_snapshot captured from live ServiceType at transaction time.
+ * NOTE: file upload temporarily removed for debugging submission flow.
  */
 class TestService
 {
-    private const IMAGE_MIMES = [
-        'image/jpeg',
-        'image/png',
-        'image/webp',
-    ];
-
-    public function __construct(
-        private readonly FileStorageInterface $storage,
-    ) {}
+    public function __construct() {}
 
     public function create(CreateTestServiceDTO $dto): ServiceSubmission
     {
@@ -61,20 +49,7 @@ class TestService
                 'phone'         => $dto->phone,
             ]);
 
-            $this->storeDocument($submission->id, $dto->photo);
-
             return $submission->load(['serviceType.service', 'testServiceDetail', 'documents']);
         });
-    }
-
-    private function storeDocument(int $submissionId, UploadedFile $file): void
-    {
-        $path = $this->storage->store($file, 'submissions/documents', self::IMAGE_MIMES);
-
-        SubmissionDocument::create([
-            'submission_id' => $submissionId,
-            'document_type' => DocumentType::TestPhoto,
-            'file_path'     => $path,
-        ]);
     }
 }

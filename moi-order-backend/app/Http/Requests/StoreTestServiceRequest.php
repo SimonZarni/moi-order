@@ -6,11 +6,10 @@ namespace App\Http\Requests;
 
 use App\Models\ServiceType;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\File;
 
 /**
  * Principle: SRP — owns all validation + authorisation for a test service submission.
- * Principle: Security — MIME validated in rules(); service ownership validated in withValidator().
+ * Principle: Security — service ownership validated in withValidator().
  */
 class StoreTestServiceRequest extends FormRequest
 {
@@ -26,10 +25,6 @@ class StoreTestServiceRequest extends FormRequest
             'service_type_id' => ['required', 'integer', 'exists:service_types,id'],
             'full_name'       => ['required', 'string', 'max:255'],
             'phone'           => ['required', 'string', 'max:30'],
-            'photo'           => [
-                'required',
-                File::image()->max(10 * 1024), // 10 MB — images only
-            ],
         ];
     }
 
@@ -64,7 +59,6 @@ class StoreTestServiceRequest extends FormRequest
         return [
             'idempotency_key.uuid'   => 'The idempotency key must be a valid UUID.',
             'service_type_id.exists' => 'The selected service type does not exist.',
-            'photo.image'            => 'The photo must be an image file.',
         ];
     }
 
