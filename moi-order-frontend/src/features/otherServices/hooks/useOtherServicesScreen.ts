@@ -15,6 +15,7 @@ const SLUG_TO_SCREEN: Partial<Record<string, keyof RootStackParamList>> = {
   'embassy-car-license':  'EmbassyCarLicenseForm',
   'embassy-bank-service':         'EmbassyBankForm',
   'embassy-visa-recommendation':  'EmbassyVisaRecommendationForm',
+  'test-service':                 'TestServiceForm',
 };
 
 export interface UseOtherServicesScreenResult {
@@ -68,6 +69,11 @@ export function useOtherServicesScreen(): UseOtherServicesScreenResult {
       });
     } else if (screen === 'EmbassyVisaRecommendationForm') {
       navigation.navigate('EmbassyVisaRecommendationForm', {
+        serviceTypeId: firstType.id,
+        price:         firstType.price,
+      });
+    } else if (screen === 'TestServiceForm') {
+      navigation.navigate('TestServiceForm', {
         serviceTypeId: firstType.id,
         price:         firstType.price,
       });

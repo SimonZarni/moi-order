@@ -39,6 +39,10 @@ export type RootStackParamList = {
     serviceTypeId: number;
     price: number;
   };
+  TestServiceForm: {
+    serviceTypeId: number;
+    price: number;
+  };
 
   // ── Payment ──────────────────────────────────────────────────────────────
   Payment: { submissionId: number };
