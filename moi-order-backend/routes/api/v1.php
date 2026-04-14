@@ -39,8 +39,9 @@ Route::post('/submissions/embassy-visa-recommendation',   [EmbassyVisaRecommenda
 Route::post('/submissions/test-service',                  [TestServiceController::class,                   'store']);
 
 // Payments
-Route::post('/submissions/{id}/payment', [PaymentController::class, 'store']);
-Route::get('/submissions/{id}/payment',  [PaymentController::class, 'show']);
+Route::post('/submissions/{id}/payment',       [PaymentController::class, 'store']);
+Route::get('/submissions/{id}/payment',        [PaymentController::class, 'show']);
+Route::post('/submissions/{id}/payment/sync',  [PaymentController::class, 'sync']);
 
 // Favorites
 Route::get('/places/{placeId}/favorite',  [FavoritePlaceController::class, 'show']);

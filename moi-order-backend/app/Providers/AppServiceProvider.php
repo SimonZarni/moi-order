@@ -89,13 +89,6 @@ class AppServiceProvider extends ServiceProvider
             )
         );
 
-        $this->app->bind(
-            \App\Services\TestService::class,
-            fn ($app) => new \App\Services\TestService(
-                $app->make(FileStorageInterface::class)
-            )
-        );
-
         // DIP: bind Stripe adapter to the payment gateway contract.
         // To switch provider: swap StripePaymentService for an OmisePaymentService here.
         $this->app->bind(PaymentGatewayInterface::class, function (): StripePaymentService {

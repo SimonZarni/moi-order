@@ -59,4 +59,20 @@ class PaymentController extends Controller
 
         return response()->json(['data' => new PaymentResource($submission->payment)]);
     }
+
+    /**
+     * POST /api/v1/submissions/{id}/payment/sync
+     * Client-initiated Stripe status sync — fallback for missed or undelivered webhooks.
+     * Queries Stripe directly and applies any state transition; returns 200 always.
+     */
+    public function sync(int $id, Request $request): JsonResponse
+    {
+        $submission = ServiceSubmission::with('payment')
+            ->forUser($request->user()->id)
+            ->findOrFail($id);
+
+        $this->service->syncWithStripe($submission);
+
+        return response()->json(['synced' => true]);
+    }
 }

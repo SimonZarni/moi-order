@@ -21,4 +21,13 @@ interface PaymentGatewayInterface
      * @param  string $idempotencyKey Caller-supplied key to prevent duplicate intents.
      */
     public function createPromptPayIntent(int $amountSatangs, string $email, string $idempotencyKey): PaymentIntentDTO;
+
+    /**
+     * Retrieve the current status string of a PaymentIntent from the provider.
+     * Used for client-initiated sync when webhooks fail to deliver.
+     *
+     * @param  string $stripeIntentId  The provider's PaymentIntent ID.
+     * @return string                  Raw status (e.g. 'succeeded', 'canceled').
+     */
+    public function retrievePaymentIntentStatus(string $stripeIntentId): string;
 }

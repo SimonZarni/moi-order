@@ -20,6 +20,13 @@ class StripePaymentService implements PaymentGatewayInterface
         private readonly StripeClient $stripe,
     ) {}
 
+    public function retrievePaymentIntentStatus(string $stripeIntentId): string
+    {
+        $intent = $this->stripe->paymentIntents->retrieve($stripeIntentId);
+
+        return $intent->status;
+    }
+
     public function createPromptPayIntent(int $amountSatangs, string $email, string $idempotencyKey): PaymentIntentDTO
     {
         $intent = $this->stripe->paymentIntents->create(
