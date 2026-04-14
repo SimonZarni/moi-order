@@ -11,6 +11,12 @@ echo "listen.owner = www-data"  >> /usr/local/etc/php-fpm.d/www.conf
 echo "listen.group = www-data"  >> /usr/local/etc/php-fpm.d/www.conf
 echo "listen.mode = 0660"       >> /usr/local/etc/php-fpm.d/www.conf
 
+# Write Aiven CA cert if provided
+if [ -n "$AIVEN_CA_CERT" ]; then
+    echo "$AIVEN_CA_CERT" | base64 -d > /tmp/aiven-ca.crt
+    export MYSQL_ATTR_SSL_CA=/tmp/aiven-ca.crt
+fi
+
 # Laravel bootstrap
 php artisan config:cache
 php artisan route:cache
