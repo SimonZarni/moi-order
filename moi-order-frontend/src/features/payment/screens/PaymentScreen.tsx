@@ -12,6 +12,7 @@ export function PaymentScreen(): React.JSX.Element {
     submission,
     isCreating,
     isPaymentFailed,
+    isPaid,
     createError,
     handleBack,
     handleGoToOrders,
@@ -39,7 +40,23 @@ export function PaymentScreen(): React.JSX.Element {
       </View>
 
       <View style={styles.body}>
-        {isPaymentFailed ? (
+        {isPaid ? (
+          <View style={styles.successContainer}>
+            <Text style={styles.successIcon}>✓</Text>
+            <Text style={styles.successTitle}>Payment Successful</Text>
+            <Text style={styles.successSubtitle}>
+              Your payment has been confirmed.{'\n'}We'll start processing your order shortly.
+            </Text>
+            <Pressable
+              style={styles.btn}
+              onPress={handleGoToOrders}
+              accessibilityLabel="View my orders"
+              accessibilityRole="button"
+            >
+              <Text style={styles.btnText}>View Orders</Text>
+            </Pressable>
+          </View>
+        ) : isPaymentFailed ? (
           <View style={styles.failureContainer}>
             <Text style={styles.failureIcon}>✕</Text>
             <Text style={styles.failureTitle}>Payment Failed</Text>
