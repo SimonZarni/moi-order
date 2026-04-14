@@ -7,9 +7,11 @@ namespace App\Services;
 use App\Contracts\PaymentGatewayInterface;
 use App\Enums\PaymentStatus;
 use App\Enums\SubmissionStatus;
+use App\Events\PaymentConfirmed;
 use App\Models\Payment;
 use App\Models\ServiceSubmission;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
@@ -24,6 +26,66 @@ class PaymentService
     public function __construct(
         private readonly PaymentGatewayInterface $gateway,
     ) {}
+
+    /**
+     * Query Stripe directly for the PaymentIntent status and apply any state change.
+     * Called by the client when it returns to the foreground — fallback for missed webhooks.
+     * Mirrors the webhook handler logic so events/listeners fire identically.
+     */
+    public function syncWithStripe(ServiceSubmission $submission): void
+    {
+        $submission->loadMissing('payment');
+        $payment = $submission->payment;
+
+        if ($payment === null || $payment->status->isTerminal()) {
+            return; // Nothing to sync — already in a terminal state.
+        }
+
+        $stripeStatus = $this->gateway->retrievePaymentIntentStatus($payment->stripe_intent_id);
+
+        Log::info('payment.sync.stripe_status', [
+            'payment_id'    => $payment->id,
+            'stripe_status' => $stripeStatus,
+        ]);
+
+        if ($stripeStatus === 'succeeded') {
+            DB::transaction(function () use ($payment): void {
+                $locked = Payment::with('submission')
+                    ->where('id', $payment->id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($locked === null || $locked->status->isTerminal()) {
+                    return; // Idempotent — webhook may have already processed it.
+                }
+
+                $locked->markSucceeded([]);
+
+                Log::info('payment.sync.confirmed', ['payment_id' => $locked->id]);
+
+                event(new PaymentConfirmed($locked->submission));
+            });
+
+            return;
+        }
+
+        if (in_array($stripeStatus, ['canceled', 'payment_failed'], true)) {
+            DB::transaction(function () use ($payment, $submission): void {
+                $locked = Payment::where('id', $payment->id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($locked === null || $locked->status->isTerminal()) {
+                    return;
+                }
+
+                $locked->markFailed([]);
+                $submission->markPaymentFailed();
+
+                Log::info('payment.sync.failed', ['payment_id' => $locked->id]);
+            });
+        }
+    }
 
     /**
      * Return the active pending payment, or create a new one.

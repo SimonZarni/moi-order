@@ -4,25 +4,19 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
-use App\Enums\SubmissionStatus;
 use App\Events\PaymentConfirmed;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
 /**
  * Principle: SRP — one reaction: move submission to Processing on payment confirmation.
- * ShouldQueue: listener failure never rolls back the webhook transaction.
+ * Synchronous (no ShouldQueue): runs inside the same DB::transaction as markSucceeded,
+ *   keeping the payment status and submission status atomically consistent.
+ *   markProcessing() is idempotent — safe against duplicate webhook delivery.
  */
-class MarkSubmissionProcessing implements ShouldQueue
+class MarkSubmissionProcessing
 {
     public function handle(PaymentConfirmed $event): void
     {
-        $submission = $event->submission;
-
-        // Guard: already moved past this state (e.g. duplicate webhook delivery).
-        if ($submission->status !== SubmissionStatus::PendingPayment) {
-            return;
-        }
-
-        $submission->update(['status' => SubmissionStatus::Processing]);
+        // Tell-Don't-Ask: domain method owns the guard and transition.
+        $event->submission->markProcessing();
     }
 }
