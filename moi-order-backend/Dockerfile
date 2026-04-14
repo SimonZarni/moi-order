@@ -81,6 +81,9 @@ RUN { \
 # Copy built app from build stage
 COPY --from=build /var/www/html /var/www/html
 
+# PHP runtime settings (upload limits, memory)
+COPY docker/php.ini /usr/local/etc/php/conf.d/app.ini
+
 # Nginx config — proxies to PHP-FPM via unix socket
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 
