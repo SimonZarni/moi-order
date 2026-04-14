@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
@@ -24,7 +24,7 @@ export interface UsePaymentScreenResult {
 
 /**
  * Principle: SRP — coordinator for PaymentScreen; composes usePayment + navigation.
- * Navigates to Orders automatically once payment is confirmed (status = processing).
+ * Shows success state inline once payment is confirmed; user navigates to Orders manually.
  */
 export function usePaymentScreen(): UsePaymentScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -43,14 +43,6 @@ export function usePaymentScreen(): UsePaymentScreenResult {
   const isPaid          = submission?.status === SUBMISSION_STATUS.Processing
                        || submission?.status === SUBMISSION_STATUS.Completed;
   const isPaymentFailed = submission?.status === SUBMISSION_STATUS.PaymentFailed;
-
-  // Auto-navigate to Orders once payment is confirmed.
-  useEffect(() => {
-    if (!isPaid) return;
-    // Invalidate the submissions list so Orders screen reflects the new status.
-    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.SUBMISSIONS.LIST });
-    navigation.navigate('Orders');
-  }, [isPaid, navigation, queryClient]);
 
   const handleBack = useCallback((): void => {
     navigation.goBack();
