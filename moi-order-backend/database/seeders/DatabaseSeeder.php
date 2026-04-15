@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
             EmbassyCarLicenseSeeder::class,
             EmbassyBankSeeder::class,
             EmbassyVisaRecommendationSeeder::class,
+            TestServiceSeeder::class,
         ]);
     }
 }

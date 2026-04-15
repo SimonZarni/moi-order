@@ -58,4 +58,18 @@ return Application::configure(basePath: dirname(__DIR__))
             ], 403);
         });
 
+        $exceptions->render(function (\Throwable $e): JsonResponse {
+            Log::error('Unhandled exception', [
+                'class'   => get_class($e),
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+            ]);
+
+            return response()->json([
+                'message' => 'An unexpected error occurred.',
+                'code'    => 'internal',
+            ], 500);
+        });
+
     })->create();

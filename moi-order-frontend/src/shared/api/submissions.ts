@@ -40,7 +40,6 @@ export async function submitCompanyRegistration(
   const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
     '/api/v1/submissions/company-registration',
     form,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
   );
   return response.data.data;
 }
@@ -85,7 +84,6 @@ export async function submitNinetyDayReport(
   const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
     '/api/v1/submissions/90-day-report',
     form,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
   );
   return response.data.data;
 }
@@ -122,7 +120,6 @@ export async function submitAirportFastTrack(
   const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
     '/api/v1/submissions/airport-fast-track',
     form,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
   );
   return response.data.data;
 }
@@ -165,7 +162,6 @@ export async function submitEmbassyResidential(
   const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
     '/api/v1/submissions/embassy-residential',
     form,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
   );
   return response.data.data;
 }
@@ -208,7 +204,6 @@ export async function submitEmbassyCarLicense(
   const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
     '/api/v1/submissions/embassy-car-license',
     form,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
   );
   return response.data.data;
 }
@@ -267,7 +262,6 @@ export async function submitEmbassyBank(
   const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
     '/api/v1/submissions/embassy-bank',
     form,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
   );
   return response.data.data;
 }
@@ -308,7 +302,6 @@ export async function submitEmbassyVisaRecommendation(
   const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
     '/api/v1/submissions/embassy-visa-recommendation',
     form,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
   );
   return response.data.data;
 }
