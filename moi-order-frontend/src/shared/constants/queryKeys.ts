@@ -21,6 +21,14 @@ export const QUERY_KEYS = {
     ME: ['auth', 'me'] as const,
   },
   PROFILE: {
-    ME: ['auth', 'me'] as const, // same key — profile re-uses the ME query
+    ME: ['auth', 'me'] as const,
+  },
+  TICKETS: {
+    LIST:   ['tickets', 'list'] as const,
+    DETAIL: (id: number) => ['tickets', 'detail', id] as const,
+  },
+  TICKET_ORDERS: {
+    LIST:   ['ticket-orders', 'list'] as const,
+    DETAIL: (id: number) => ['ticket-orders', 'detail', id] as const,
   },
 } as const;

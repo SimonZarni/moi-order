@@ -124,6 +124,60 @@ export interface ServiceSubmission {
   payment?: Payment;
 }
 
+// ── Tickets ────────────────────────────────────────────────────────────────
+
+export interface TicketVariant {
+  id: number;
+  name: string;
+  description: string | null;
+  price: number; // whole THB
+  sort_order: number;
+}
+
+export interface Ticket {
+  id: number;
+  name: string;
+  highlight_description: string;
+  description: string;
+  google_maps_link: string;
+  address: string;
+  city: string;
+  province: string;
+  cover_image_url: string;
+  /** Present on list endpoint only (variants not loaded). */
+  starting_from_price?: number;
+  /** Present on detail endpoint only. */
+  variants?: TicketVariant[];
+}
+
+export interface TicketOrderItem {
+  id: number;
+  quantity: number;
+  price_snapshot: number; // whole THB
+  subtotal: number;       // whole THB
+  variant?: {
+    id: number;
+    name: string;
+  };
+}
+
+export interface TicketOrder {
+  id: number;
+  status: string;
+  status_label: string;
+  visit_date: string; // "YYYY-MM-DD"
+  total?: number;     // whole THB — present when items are loaded
+  completed_at: string | null;
+  created_at: string;
+  has_eticket: boolean;
+  ticket?: {
+    id: number;
+    name: string;
+  };
+  items?: TicketOrderItem[];
+  payment?: Payment;
+}
+
 // ── API wrappers ───────────────────────────────────────────────────────────
 
 export interface ApiResponse<T> {

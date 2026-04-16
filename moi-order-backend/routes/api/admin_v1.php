@@ -9,6 +9,9 @@ use App\Http\Controllers\Api\Admin\V1\AdminPlaceController;
 use App\Http\Controllers\Api\Admin\V1\AdminServiceController;
 use App\Http\Controllers\Api\Admin\V1\AdminSubmissionController;
 use App\Http\Controllers\Api\Admin\V1\AdminTagController;
+use App\Http\Controllers\Api\Admin\V1\AdminTicketController;
+use App\Http\Controllers\Api\Admin\V1\AdminTicketOrderController;
+use App\Http\Controllers\Api\Admin\V1\AdminTicketVariantController;
 use App\Http\Controllers\Api\Admin\V1\AdminUserController;
 use Illuminate\Support\Facades\Route;
 
@@ -83,6 +86,27 @@ Route::prefix('categories')->name('admin.categories.')->group(function (): void 
     // Restore requires withTrashed lookup — uses plain int $id, not route model binding
     Route::patch('/{id}/restore', [AdminCategoryController::class, 'restore'])->name('restore')
         ->whereNumber('id');
+});
+
+// ── Tickets + Variants + Ticket Orders ───────────────────────────────────────
+Route::prefix('tickets')->name('admin.tickets.')->group(function (): void {
+    Route::get('/',           [AdminTicketController::class, 'index'])->name('index');
+    Route::post('/',          [AdminTicketController::class, 'store'])->name('store');
+    Route::get('/{ticket}',   [AdminTicketController::class, 'show'])->name('show');
+    Route::put('/{ticket}',   [AdminTicketController::class, 'update'])->name('update');
+    Route::delete('/{ticket}',[AdminTicketController::class, 'destroy'])->name('destroy');
+
+    // Variant sub-resource
+    Route::get('/{ticket}/variants',                  [AdminTicketVariantController::class, 'index'])->name('variants.index');
+    Route::post('/{ticket}/variants',                 [AdminTicketVariantController::class, 'store'])->name('variants.store');
+    Route::put('/{ticket}/variants/{variant}',        [AdminTicketVariantController::class, 'update'])->name('variants.update');
+    Route::delete('/{ticket}/variants/{variant}',     [AdminTicketVariantController::class, 'destroy'])->name('variants.destroy');
+});
+
+Route::prefix('ticket-orders')->name('admin.ticket-orders.')->group(function (): void {
+    Route::get('/',                              [AdminTicketOrderController::class, 'index'])->name('index');
+    Route::get('/{ticketOrder}',                 [AdminTicketOrderController::class, 'show'])->name('show');
+    Route::post('/{ticketOrder}/eticket',        [AdminTicketOrderController::class, 'uploadEticket'])->name('eticket.store');
 });
 
 // ── Tags ──────────────────────────────────────────────────────────────────────

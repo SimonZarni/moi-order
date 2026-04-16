@@ -27,6 +27,16 @@ export const PAYMENT_STATUS = {
 
 export type PaymentStatus = (typeof PAYMENT_STATUS)[keyof typeof PAYMENT_STATUS];
 
+// Mirrors App\Enums\TicketOrderStatus
+export const TICKET_ORDER_STATUS = {
+  PendingPayment: 'pending_payment',
+  Processing:     'processing',
+  Completed:      'completed',
+  PaymentFailed:  'payment_failed',
+} as const;
+
+export type TicketOrderStatus = (typeof TICKET_ORDER_STATUS)[keyof typeof TICKET_ORDER_STATUS];
+
 // Mirrors App\Enums\DocumentType
 export const DOCUMENT_TYPE = {
   PassportBioPage:   'passport_bio_page',

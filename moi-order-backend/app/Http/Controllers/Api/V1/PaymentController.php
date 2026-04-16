@@ -37,7 +37,7 @@ class PaymentController extends Controller
         $alreadyExists = $submission->payment !== null
             && $submission->payment->status->value === 'pending';
 
-        $payment = $this->service->createForSubmission($submission);
+        $payment = $this->service->createForPayable($submission);
 
         return response()->json(
             ['data' => new PaymentResource($payment)],
@@ -67,7 +67,7 @@ class PaymentController extends Controller
      */
     public function sync(int $id, Request $request): JsonResponse
     {
-        $submission = ServiceSubmission::with('payment')
+        $submission = ServiceSubmission::with(['payment', 'user'])
             ->forUser($request->user()->id)
             ->findOrFail($id);
 

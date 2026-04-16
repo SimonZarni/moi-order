@@ -9,7 +9,7 @@ import { styles } from './PaymentScreen.styles';
 export function PaymentScreen(): React.JSX.Element {
   const {
     payment,
-    submission,
+    payableName,
     isCreating,
     isPaymentFailed,
     isPaid,
@@ -18,8 +18,7 @@ export function PaymentScreen(): React.JSX.Element {
     handleGoToOrders,
   } = usePaymentScreen();
 
-  const amountFormatted = formatCurrency(payment?.amount ?? submission?.price_snapshot ?? 0);
-  const serviceName     = submission?.service_type?.name ?? '';
+  const amountFormatted = formatCurrency(payment?.amount ?? 0);
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -34,8 +33,8 @@ export function PaymentScreen(): React.JSX.Element {
           <Text style={styles.backLabel}>Back</Text>
         </Pressable>
         <Text style={styles.headerTitle}>Pay with PromptPay</Text>
-        {serviceName !== '' && (
-          <Text style={styles.headerSubtitle}>{serviceName}</Text>
+        {payableName !== '' && (
+          <Text style={styles.headerSubtitle}>{payableName}</Text>
         )}
       </View>
 

@@ -104,7 +104,7 @@ export function useNinetyDayReportFormScreen(): UseNinetyDayReportFormScreenResu
       });
     },
     onSuccess: (submission) => {
-      navigation.navigate('Payment', { submissionId: submission.id });
+      navigation.navigate('Payment', { kind: 'submission', submissionId: submission.id });
     },
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {
