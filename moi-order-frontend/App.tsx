@@ -43,6 +43,10 @@ import { PaymentScreen } from '@/features/payment/screens/PaymentScreen';
 import { PlaceDetailScreen } from '@/features/places/screens/PlaceDetailScreen';
 import { PlacesScreen } from '@/features/places/screens/PlacesScreen';
 import { ProfileScreen } from '@/features/profile/screens/ProfileScreen';
+import { TicketsScreen } from '@/features/tickets/screens/TicketsScreen';
+import { TicketDetailScreen } from '@/features/tickets/screens/TicketDetailScreen';
+import { TicketDateSelectionScreen } from '@/features/tickets/screens/TicketDateSelectionScreen';
+import { TicketOrderDetailScreen } from '@/features/tickets/screens/TicketOrderDetailScreen';
 
 import { RootStackParamList } from '@/types/navigation';
 
@@ -117,6 +121,10 @@ export default function App(): React.JSX.Element {
             <Stack.Screen name="Places"                    component={PlacesScreen} />
             <Stack.Screen name="PlaceDetail"               component={PlaceDetailScreen} />
             <Stack.Screen name="Profile"                   component={ProfileScreen} />
+            <Stack.Screen name="Tickets"                   component={TicketsScreen} />
+            <Stack.Screen name="TicketDetail"              component={TicketDetailScreen} />
+            <Stack.Screen name="TicketDateSelection"       component={TicketDateSelectionScreen} />
+            <Stack.Screen name="TicketOrderDetail"         component={TicketOrderDetailScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </QueryClientProvider>
