@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -36,6 +36,9 @@ export function FloatingTabBar(): React.JSX.Element {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
 
   const currentRoute = route.name as keyof RootStackParamList;
+  // Tracks the last intended destination synchronously — useRoute() lags during
+  // animation so the old screen's tab bar would block rapid re-taps without this.
+  const pendingRoute = useRef<keyof RootStackParamList>(currentRoute);
 
   // Logic to keep the 'Home' tab highlighted when inside child screens
   const effectiveActive: keyof RootStackParamList = HOME_CHILD_ROUTES.includes(currentRoute)
@@ -44,9 +47,8 @@ export function FloatingTabBar(): React.JSX.Element {
 
   function handlePress(tab: TabItem): void {
     if (tab.disabled) return;
-    // Guard uses the real route, not effectiveActive — effectiveActive remaps child
-    // routes to 'Home' for highlighting, which would block navigation to Home itself.
-    if (tab.route === currentRoute) return;
+    if (tab.route === pendingRoute.current) return;
+    pendingRoute.current = tab.route;
 
     // Profile tab requires auth — redirect guests to Login.
     if (tab.route === 'Profile' && !isLoggedIn) {

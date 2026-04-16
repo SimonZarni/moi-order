@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Pressable, RefreshControl,
+  Alert, Pressable, RefreshControl,
   ScrollView, Text, TextInput, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -251,7 +251,7 @@ export function ProfileScreen(): React.JSX.Element {
           <View style={styles.card}>
             <Pressable
               style={styles.row}
-              onPress={() => {/* TODO: navigate to PrivacyPolicy screen */}}
+              onPress={() => Alert.alert('Coming Soon', 'Privacy Policy will be available in a future update.')}
               accessibilityLabel="Privacy Policy"
               accessibilityRole="button"
             >
@@ -264,7 +264,7 @@ export function ProfileScreen(): React.JSX.Element {
             <View style={styles.rowSeparator} />
             <Pressable
               style={styles.row}
-              onPress={() => {/* TODO: navigate to TermsAndConditions screen */}}
+              onPress={() => Alert.alert('Coming Soon', 'Terms & Conditions will be available in a future update.')}
               accessibilityLabel="Terms and Conditions"
               accessibilityRole="button"
             >
@@ -277,7 +277,7 @@ export function ProfileScreen(): React.JSX.Element {
             <View style={styles.rowSeparator} />
             <Pressable
               style={styles.row}
-              onPress={() => {/* TODO: navigate to PersonalDataProtectionAct screen */}}
+              onPress={() => Alert.alert('Coming Soon', 'Personal Data Protection Act information will be available in a future update.')}
               accessibilityLabel="Personal Data Protection Act"
               accessibilityRole="button"
             >
