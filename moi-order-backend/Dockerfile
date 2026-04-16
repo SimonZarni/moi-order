@@ -46,7 +46,7 @@ FROM php:8.3-fpm-alpine AS runtime
 
 WORKDIR /var/www/html
 
-# Nginx + supervisor to manage PHP-FPM + Nginx in one container
+# Nginx + supervisor
 RUN apk add --no-cache \
         bash \
         nginx \
@@ -67,15 +67,17 @@ RUN apk add --no-cache \
         pdo_mysql \
         zip
 
-# === CRITICAL FIX: Create and fix permissions for Nginx temp directories ===
+# === CRITICAL FIXES: Nginx temp directories + PHP-FPM socket ===
 RUN mkdir -p /var/lib/nginx/tmp/client_body \
              /var/lib/nginx/tmp/proxy \
              /var/lib/nginx/tmp/fastcgi \
              /tmp/client_body \
+             /var/run/php \
     && chown -R nginx:nginx /var/lib/nginx/tmp \
     && chmod -R 777 /var/lib/nginx/tmp \
     && chown -R nginx:nginx /tmp/client_body \
-    && chmod -R 777 /tmp
+    && chmod -R 777 /tmp \
+    && chown -R www-data:www-data /var/run/php
 
 # OPcache tuning for production
 RUN { \
@@ -90,10 +92,10 @@ RUN { \
 # Copy built app from build stage
 COPY --from=build /var/www/html /var/www/html
 
-# PHP runtime settings (upload limits, memory)
+# PHP runtime settings
 COPY docker/php.ini /usr/local/etc/php/conf.d/app.ini
 
-# PHP-FPM pool overrides
+# PHP-FPM pool config
 COPY docker/fpm-pool.conf /usr/local/etc/php-fpm.d/zz-app.conf
 
 # Nginx config
@@ -102,17 +104,16 @@ COPY docker/nginx.conf /etc/nginx/nginx.conf
 # Supervisor config
 COPY docker/supervisord.conf /etc/supervisord.conf
 
-# Writable directories for Laravel
+# Laravel writable directories
 RUN mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache
 
-# Railway injects PORT at runtime
 ENV PORT=8080
 
 EXPOSE 8080
 
-# Entrypoint script
+# Entrypoint
 COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
 
