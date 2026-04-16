@@ -29,7 +29,7 @@ const DOC_ICONS: Record<string, string> = {
 };
 
 export function OrderDetailScreen(): React.JSX.Element {
-  const { submission, isLoading, isRefreshing, isError, handleRefresh, handleBack } = useOrderDetailScreen();
+  const { submission, isLoading, isRefreshing, isError, canPay, handleRefresh, handleBack, handlePayNow } = useOrderDetailScreen();
 
   const hero = (
     <View style={styles.hero}>
@@ -112,6 +112,18 @@ export function OrderDetailScreen(): React.JSX.Element {
               {formatPrice(submission.price_snapshot)}
             </Text>
           </View>
+
+          {/* ── Pay Now ── */}
+          {canPay && (
+            <Pressable
+              style={styles.payNowBtn}
+              onPress={handlePayNow}
+              accessibilityLabel="Pay now"
+              accessibilityRole="button"
+            >
+              <Text style={styles.payNowBtnText}>Pay Now</Text>
+            </Pressable>
+          )}
 
           {/* ── Personal info ── */}
           {submission.detail !== undefined && (

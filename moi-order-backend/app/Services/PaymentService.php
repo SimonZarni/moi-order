@@ -93,9 +93,13 @@ class PaymentService
      */
     public function createForSubmission(ServiceSubmission $submission): Payment
     {
-        // Idempotency: if there is already a pending payment, return it.
+        // Idempotency: if there is already a non-expired pending payment, return it.
+        // An expired payment falls through so a fresh intent is created.
         $existing = Payment::where('submission_id', $submission->id)
             ->where('status', PaymentStatus::Pending)
+            ->where(function ($q): void {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
             ->first();
 
         if ($existing !== null) {
@@ -127,6 +131,7 @@ class PaymentService
                 'qr_image_url'     => $dto->qrImageUrl,
                 'stripe_payload'   => $dto->stripePayload,
                 'idempotency_key'  => $idempotencyKey,
+                'expires_at'       => $dto->expiresAt,
             ]);
         });
     }

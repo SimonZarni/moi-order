@@ -1,10 +1,11 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { useOrderDetail } from './useOrderDetail';
 import { RootStackParamList } from '@/types/navigation';
 import { ServiceSubmission } from '@/types/models';
+import { SUBMISSION_STATUS } from '@/types/enums';
 
 type RouteParams = RouteProp<RootStackParamList, 'OrderDetail'>;
 
@@ -13,8 +14,10 @@ export interface UseOrderDetailScreenResult {
   isLoading: boolean;
   isRefreshing: boolean;
   isError: boolean;
+  canPay: boolean;
   handleRefresh: () => void;
   handleBack: () => void;
+  handlePayNow: () => void;
 }
 
 export function useOrderDetailScreen(): UseOrderDetailScreenResult {
@@ -24,11 +27,18 @@ export function useOrderDetailScreen(): UseOrderDetailScreenResult {
 
   const { submission, isLoading, isRefreshing, isError, refetch } = useOrderDetail(submissionId);
 
+  const canPay = useMemo(
+    () => submission?.status === SUBMISSION_STATUS.PendingPayment,
+    [submission?.status],
+  );
+
   const handleRefresh = useCallback((): void => { refetch(); }, [refetch]);
 
-  const handleBack = useCallback((): void => {
-    navigation.goBack();
-  }, [navigation]);
+  const handleBack = useCallback((): void => { navigation.goBack(); }, [navigation]);
 
-  return { submission, isLoading, isRefreshing, isError, handleRefresh, handleBack };
+  const handlePayNow = useCallback((): void => {
+    navigation.navigate('Payment', { submissionId });
+  }, [navigation, submissionId]);
+
+  return { submission, isLoading, isRefreshing, isError, canPay, handleRefresh, handleBack, handlePayNow };
 }

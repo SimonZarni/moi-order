@@ -45,11 +45,17 @@ class StripePaymentService implements PaymentGatewayInterface
 
         $qrImageUrl = $intent->next_action?->promptpay_display_qr_code?->image_url_png ?? '';
 
+        $expiresAtTs = $intent->next_action?->promptpay_display_qr_code?->expires_at ?? null;
+        $expiresAt   = $expiresAtTs !== null
+            ? (new \DateTimeImmutable())->setTimestamp((int) $expiresAtTs)
+            : null;
+
         return new PaymentIntentDTO(
             stripeIntentId: $intent->id,
             clientSecret:   $intent->client_secret,
             qrImageUrl:     $qrImageUrl,
             stripePayload:  $intent->toArray(),
+            expiresAt:      $expiresAt,
         );
     }
 }
