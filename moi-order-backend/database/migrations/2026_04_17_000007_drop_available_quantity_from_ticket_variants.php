@@ -10,10 +10,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('ticket_variants', function (Blueprint $table): void {
-            $table->dropIndex(['available_quantity']);
-            $table->dropColumn('available_quantity');
-        });
+        if (Schema::hasColumn('ticket_variants', 'available_quantity')) {
+            Schema::table('ticket_variants', function (Blueprint $table): void {
+                $table->dropIndex(['available_quantity']);
+                $table->dropColumn('available_quantity');
+            });
+        }
     }
 
     public function down(): void
