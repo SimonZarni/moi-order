@@ -2,17 +2,11 @@ import React from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { formatDate } from '@/shared/utils/formatDate';
+import { formatPrice } from '@/shared/utils/formatCurrency';
 import { useTicketOrderDetailScreen } from '@/features/tickets/hooks/useTicketOrderDetailScreen';
 import { TicketOrderItem } from '@/types/models';
 import { styles, TICKET_STATUS_COLOURS } from './TicketOrderDetailScreen.styles';
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-
-function formatPrice(thb: number): string {
-  return `฿${thb.toLocaleString('th-TH')}`;
-}
 
 export function TicketOrderDetailScreen(): React.JSX.Element {
   const {
@@ -104,7 +98,12 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
 
           {/* ── Pay Now (pending / failed) ── */}
           {canPayNow && (
-            <Pressable style={styles.payNowBtn} onPress={handlePayNow} accessibilityLabel="Pay now" accessibilityRole="button">
+            <Pressable
+              style={({ pressed }) => [styles.payNowBtn, { opacity: pressed ? 0.8 : 1 }]}
+              onPress={handlePayNow}
+              accessibilityLabel="Pay now"
+              accessibilityRole="button"
+            >
               <Text style={styles.payNowBtnText}>Pay Now</Text>
             </Pressable>
           )}

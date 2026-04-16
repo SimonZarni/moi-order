@@ -3,18 +3,10 @@ import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useOrderDetailScreen } from '@/features/orders/hooks/useOrderDetailScreen';
+import { formatDate } from '@/shared/utils/formatDate';
+import { formatPrice } from '@/shared/utils/formatCurrency';
 import { SubmissionDocument } from '@/types/models';
 import { styles, STATUS_COLOURS } from './OrderDetailScreen.styles';
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-GB', {
-    day: 'numeric', month: 'short', year: 'numeric',
-  });
-}
-
-function formatPrice(baht: number): string {
-  return `฿${baht.toLocaleString('th-TH')}`;
-}
 
 const DOC_ICONS: Record<string, string> = {
   passport_bio_page:   '📄',
