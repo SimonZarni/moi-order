@@ -10,7 +10,7 @@ import { typography } from '@/shared/theme/typography';
 export const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colours.backgroundLight },
   scroll: { flex: 1 },
-  scrollContent: { paddingBottom: 120 },
+  scrollContent: { paddingBottom: 180 },
 
   // ── Cover image ───────────────────────────────────────────────────────────
   cover: { width: '100%', height: 220, backgroundColor: colours.backgroundDark },
@@ -23,14 +23,14 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: 'rgba(0,0,0,0.38)',
     borderRadius: radius.full,
     paddingVertical: spacing.xs + 2,
     paddingHorizontal: spacing.sm + 2,
     minHeight: 36,
   },
-  backArrow: { fontSize: 22, color: colours.white, lineHeight: 26, fontWeight: '300' },
-  backLabel: { fontSize: typography.sm, fontWeight: '600', color: colours.white, letterSpacing: 0.2 },
+  backArrow: { fontSize: 22, color: colours.tertiary, lineHeight: 26, fontWeight: '300' },
+  backLabel: { fontSize: typography.sm, fontWeight: '600', color: colours.tertiary, letterSpacing: 0.2 },
 
   // ── Info block ────────────────────────────────────────────────────────────
   infoBlock: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg },
