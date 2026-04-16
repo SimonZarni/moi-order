@@ -45,10 +45,13 @@ class PlaceResource extends JsonResource
             // Detail endpoint loads the full images collection.
             // Both paths resolve to a signed URL here; the other returns null.
             'cover_image'       => $this->whenLoaded('coverImage', function () use ($storage) {
-                return $this->coverImage ? $storage->url($this->coverImage->path) : null;
+                if (! $this->coverImage) return null;
+                $path = $this->coverImage->path;
+                return str_starts_with($path, 'http') ? $path : $storage->url($path);
             }, $this->whenLoaded('images', function () use ($storage) {
                 $first = $this->images->first();
-                return $first ? $storage->url($first->path) : null;
+                if (! $first) return null;
+                return str_starts_with($first->path, 'http') ? $first->path : $storage->url($first->path);
             })),
         ];
     }
