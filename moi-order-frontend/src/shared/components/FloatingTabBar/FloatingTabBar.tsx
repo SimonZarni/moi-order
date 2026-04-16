@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuthStore } from '@/shared/store/authStore';
 import { RootStackParamList } from '@/types/navigation';
-import { styles } from './FloatingTabBar.styles';
+import { styles, TAB_BAR_BOTTOM_OFFSET } from './FloatingTabBar.styles';
 
 /**
  * Routes that conceptually belong to the Home tab.
@@ -65,7 +65,7 @@ export function FloatingTabBar(): React.JSX.Element {
   }
 
   return (
-    <View style={[styles.container, { bottom: 14 + insets.bottom }]}>
+    <View style={[styles.container, { bottom: TAB_BAR_BOTTOM_OFFSET + insets.bottom }]}>
       {TABS.map((tab) => {
         const isActive = tab.route === effectiveActive;
         

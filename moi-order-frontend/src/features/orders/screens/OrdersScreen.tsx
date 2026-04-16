@@ -6,17 +6,11 @@ import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBa
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { OrderCardSkeleton } from '@/features/orders/components/OrderCardSkeleton';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
+import { formatDate } from '@/shared/utils/formatDate';
+import { formatPrice } from '@/shared/utils/formatCurrency';
 import { useOrdersScreen, OrdersTab } from '@/features/orders/hooks/useOrdersScreen';
 import { ServiceSubmission, TicketOrder } from '@/types/models';
 import { styles, STATUS_COLOURS } from './OrdersScreen.styles';
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-
-function formatPrice(baht: number): string {
-  return `฿${baht.toLocaleString('th-TH')}`;
-}
 
 interface OrderCardProps {
   item: ServiceSubmission;

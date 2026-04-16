@@ -5,13 +5,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
+import { formatPrice } from '@/shared/utils/formatCurrency';
 import { useTicketsScreen } from '@/features/tickets/hooks/useTicketsScreen';
 import { Ticket } from '@/types/models';
 import { styles } from './TicketsScreen.styles';
-
-function formatPrice(thb: number): string {
-  return `From ฿${thb.toLocaleString('th-TH')}`;
-}
 
 interface TicketCardProps {
   item: Ticket;
@@ -33,7 +30,7 @@ function TicketCard({ item, onPress }: TicketCardProps): React.JSX.Element {
         <View style={styles.cardFooter}>
           <Text style={styles.cardLocation}>{item.city}</Text>
           {item.starting_from_price !== undefined && (
-            <Text style={styles.cardPrice}>{formatPrice(item.starting_from_price)}</Text>
+            <Text style={styles.cardPrice}>From {formatPrice(item.starting_from_price)}</Text>
           )}
         </View>
       </View>

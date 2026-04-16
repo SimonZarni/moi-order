@@ -2,13 +2,10 @@ import React from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { formatPrice } from '@/shared/utils/formatCurrency';
 import { useTicketDetailScreen } from '@/features/tickets/hooks/useTicketDetailScreen';
 import { TicketVariant } from '@/types/models';
 import { styles } from './TicketDetailScreen.styles';
-
-function formatPrice(thb: number): string {
-  return `฿${thb.toLocaleString('th-TH')}`;
-}
 
 export function TicketDetailScreen(): React.JSX.Element {
   const insets = useSafeAreaInsets();

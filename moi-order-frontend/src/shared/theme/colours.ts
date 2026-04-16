@@ -52,6 +52,10 @@ export const colours = {
   // Destructive
   destructive: '#ff4961',
 
+  // Dividers / borders
+  divider:     'rgba(0,0,0,0.07)',
+  infoBorder:  'rgba(34,78,74,0.16)',
+
   // Utility
   white:       '#ffffff',
   transparent: 'transparent',

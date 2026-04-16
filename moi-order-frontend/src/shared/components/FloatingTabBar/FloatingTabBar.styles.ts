@@ -6,6 +6,8 @@ import { typography } from '@/shared/theme/typography';
 
 // Amount of bottom padding screens need to clear the floating bar
 export const TAB_BAR_CLEARANCE = 100;
+// Gap between floating bar and the bottom safe area edge
+export const TAB_BAR_BOTTOM_OFFSET = 14;
 
 export const styles = StyleSheet.create({
   // Outer pill — light background, floating
@@ -20,8 +22,7 @@ export const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 6,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.07)',
-    // Softer shadow befitting a light surface
+    borderColor: colours.divider,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.1,
@@ -40,9 +41,9 @@ export const styles = StyleSheet.create({
     gap: 3,
   },
   tabActive: {
-    backgroundColor: 'rgba(34,78,74,0.08)',   // primary teal tint
+    backgroundColor: colours.infoBg,
     borderWidth: 1,
-    borderColor: 'rgba(34,78,74,0.16)',
+    borderColor: colours.infoBorder,
   },
 
   // Icon — muted at rest, full opacity when active (emoji intrinsic colour)
