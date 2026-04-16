@@ -83,6 +83,10 @@ COPY --from=build /var/www/html /var/www/html
 # PHP runtime settings (upload limits, memory)
 COPY docker/php.ini /usr/local/etc/php/conf.d/app.ini
 
+# PHP-FPM pool overrides: enable catch_workers_output so Laravel stderr logs
+# appear in Railway deploy logs, and enforce upload limits at the pool level.
+COPY docker/fpm-pool.conf /usr/local/etc/php-fpm.d/zz-app.conf
+
 # Nginx config — proxies to PHP-FPM via unix socket
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 
