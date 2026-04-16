@@ -116,7 +116,7 @@ export function OrderDetailScreen(): React.JSX.Element {
           {/* ── Pay Now ── */}
           {canPay && (
             <Pressable
-              style={styles.payNowBtn}
+              style={({ pressed }) => [styles.payNowBtn, { opacity: pressed ? 0.8 : 1 }]}
               onPress={handlePayNow}
               accessibilityLabel="Pay now"
               accessibilityRole="button"

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTicketDetailScreen } from '@/features/tickets/hooks/useTicketDetailScreen';
 import { TicketVariant } from '@/types/models';
@@ -11,6 +11,7 @@ function formatPrice(thb: number): string {
 }
 
 export function TicketDetailScreen(): React.JSX.Element {
+  const insets = useSafeAreaInsets();
   const {
     ticket, isLoading, isError, selections,
     totalItems, totalPrice, canProceed,
@@ -98,7 +99,7 @@ export function TicketDetailScreen(): React.JSX.Element {
         ))}
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: 32 + insets.bottom }]}>
         <View style={styles.footerRow}>
           <Text style={styles.footerLabel}>{totalItems} ticket{totalItems !== 1 ? 's' : ''} selected</Text>
           <Text style={styles.footerTotal}>{formatPrice(totalPrice)}</Text>
