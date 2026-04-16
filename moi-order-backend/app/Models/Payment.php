@@ -6,12 +6,13 @@ namespace App\Models;
 
 use App\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Principle: SRP — owns one payment attempt record only.
  * Principle: Encapsulation — status transitions via domain method only.
+ * Principle: OCP — polymorphic payable allows new payable types without modifying this model.
  * Security: stripe_payload is write-once from webhook; never exposed via API.
  */
 class Payment extends Model
@@ -19,7 +20,8 @@ class Payment extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'submission_id',
+        'payable_type',
+        'payable_id',
         'stripe_intent_id',
         'amount',
         'currency',
@@ -60,8 +62,8 @@ class Payment extends Model
 
     // ─── Relationships ────────────────────────────────────────────────────────
 
-    public function submission(): BelongsTo
+    public function payable(): MorphTo
     {
-        return $this->belongsTo(ServiceSubmission::class);
+        return $this->morphTo();
     }
 }

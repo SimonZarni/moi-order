@@ -2,19 +2,20 @@ import { useCallback } from 'react';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
+
 import { usePayment } from './usePayment';
+import { useTicketOrderPayment } from './useTicketOrderPayment';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
-import { SUBMISSION_STATUS } from '@/types/enums';
-import { ApiError, Payment, ServiceSubmission } from '@/types/models';
+import { SUBMISSION_STATUS, TICKET_ORDER_STATUS } from '@/types/enums';
+import { ApiError, Payment, ServiceSubmission, TicketOrder } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 
 type RouteParams = RouteProp<RootStackParamList, 'Payment'>;
 
 export interface UsePaymentScreenResult {
   payment: Payment | undefined;
-  submission: ServiceSubmission | undefined;
+  payableName: string;
   isCreating: boolean;
-  isLoadingSubmission: boolean;
   createError: ApiError | null;
   isPaid: boolean;
   isPaymentFailed: boolean;
@@ -22,46 +23,63 @@ export interface UsePaymentScreenResult {
   handleGoToOrders: () => void;
 }
 
-/**
- * Principle: SRP — coordinator for PaymentScreen; composes usePayment + navigation.
- * Shows success state inline once payment is confirmed; user navigates to Orders manually.
- */
 export function usePaymentScreen(): UsePaymentScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const route      = useRoute<RouteParams>();
-  const { submissionId } = route.params;
+  const route = useRoute<RouteParams>();
   const queryClient = useQueryClient();
+  const params = route.params;
 
+  // ── Submission path ───────────────────────────────────────────────────────
+  const submissionId = params.kind === 'submission' ? params.submissionId : 0;
   const {
-    payment,
+    payment: submissionPayment,
     submission,
-    isCreating,
-    isLoadingSubmission,
-    createError,
+    isCreating: isCreatingSubmission,
+    createError: submissionCreateError,
   } = usePayment(submissionId);
 
-  const isPaid          = submission?.status === SUBMISSION_STATUS.Processing
-                       || submission?.status === SUBMISSION_STATUS.Completed;
-  const isPaymentFailed = submission?.status === SUBMISSION_STATUS.PaymentFailed;
+  // ── Ticket order path ─────────────────────────────────────────────────────
+  const ticketOrderId = params.kind === 'ticket_order' ? params.ticketOrderId : 0;
+  const {
+    payment: ticketPayment,
+    ticketOrder,
+    isCreating: isCreatingTicket,
+    createError: ticketCreateError,
+  } = useTicketOrderPayment(ticketOrderId);
 
-  const handleBack = useCallback((): void => {
-    navigation.goBack();
-  }, [navigation]);
+  // ── Derive unified values ─────────────────────────────────────────────────
+  const payment = params.kind === 'submission' ? submissionPayment : ticketPayment;
+
+  const isPaid = params.kind === 'submission'
+    ? (submission?.status === SUBMISSION_STATUS.Processing || submission?.status === SUBMISSION_STATUS.Completed)
+    : (ticketOrder?.status === TICKET_ORDER_STATUS.Processing || ticketOrder?.status === TICKET_ORDER_STATUS.Completed);
+
+  const isPaymentFailed = params.kind === 'submission'
+    ? submission?.status === SUBMISSION_STATUS.PaymentFailed
+    : ticketOrder?.status === TICKET_ORDER_STATUS.PaymentFailed;
+
+  const payableName = params.kind === 'submission'
+    ? (submission?.service_type?.name ?? '')
+    : (ticketOrder?.ticket?.name ?? '');
+
+  const isCreating = params.kind === 'submission' ? isCreatingSubmission : isCreatingTicket;
+  const createError = params.kind === 'submission' ? submissionCreateError : ticketCreateError;
+
+  const handleBack = useCallback((): void => { navigation.goBack(); }, [navigation]);
 
   const handleGoToOrders = useCallback((): void => {
-    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.SUBMISSIONS.LIST });
+    if (params.kind === 'submission') {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.SUBMISSIONS.LIST });
+    } else {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TICKET_ORDERS.LIST });
+    }
     navigation.navigate('Orders');
-  }, [navigation, queryClient]);
+  }, [navigation, queryClient, params.kind]);
 
   return {
-    payment,
-    submission,
-    isCreating,
-    isLoadingSubmission,
-    createError,
-    isPaid,
-    isPaymentFailed,
-    handleBack,
-    handleGoToOrders,
+    payment, payableName, isCreating,
+    createError: createError ?? null,
+    isPaid, isPaymentFailed,
+    handleBack, handleGoToOrders,
   };
 }

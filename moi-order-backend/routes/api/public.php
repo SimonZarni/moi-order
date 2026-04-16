@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\PlaceController;
 use App\Http\Controllers\Api\V1\ServiceController;
+use App\Http\Controllers\Api\V1\TicketController;
 use Illuminate\Support\Facades\Route;
 
 // intentionally public
@@ -22,3 +23,7 @@ Route::get('/places/{place}', [PlaceController::class, 'show']);
 
 // Services — public catalog (prices + types), no auth required
 Route::get('/services', [ServiceController::class, 'index']);
+
+// Tickets — public browsing, no auth required
+Route::get('/tickets', [TicketController::class, 'index']);
+Route::get('/tickets/{ticket}', [TicketController::class, 'show']);

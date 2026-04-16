@@ -25,18 +25,13 @@ class AdminPaymentResource extends JsonResource
             'qr_image_url'     => $this->qr_image_url,
             'expires_at'       => $this->expires_at?->toISOString(),
             'created_at'       => $this->created_at->toISOString(),
-            'submission'       => $this->when(
-                $this->relationLoaded('submission') && $this->submission !== null,
+            'payable_type' => $this->payable_type,
+            'payable_id'   => $this->payable_id,
+            'payable'      => $this->when(
+                $this->relationLoaded('payable') && $this->payable !== null,
                 fn () => [
-                    'id'   => $this->submission->id,
-                    'user' => $this->when(
-                        $this->submission->relationLoaded('user') && $this->submission->user !== null,
-                        fn () => [
-                            'id'    => $this->submission->user->id,
-                            'name'  => $this->submission->user->name,
-                            'email' => $this->submission->user->email,
-                        ]
-                    ),
+                    'id'   => $this->payable->getKey(),
+                    'type' => class_basename($this->payable_type),
                 ]
             ),
         ];

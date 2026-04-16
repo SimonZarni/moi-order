@@ -43,7 +43,7 @@ export function useTestServiceFormScreen(): UseTestServiceFormScreenResult {
         fullName:       form.fullName.trim(),
         phone:          form.phone.trim(),
       }),
-    onSuccess: (submission) => navigation.navigate('Payment', { submissionId: submission.id }),
+    onSuccess: (submission) => navigation.navigate('Payment', { kind: 'submission', submissionId: submission.id }),
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {
         applyApiError(error.errors);

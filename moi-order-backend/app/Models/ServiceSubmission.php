@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Contracts\PayableInterface;
 use App\Enums\SubmissionStatus;
+use App\Events\PaymentConfirmed;
 use Database\Factories\ServiceSubmissionFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -20,7 +23,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Principle: Tell-Don't-Ask — complete() sets status + timestamp in one call.
  * Security: price_snapshot is immutable after insert; never recomputed from live prices.
  */
-class ServiceSubmission extends Model
+class ServiceSubmission extends Model implements PayableInterface
 {
     /** @use HasFactory<ServiceSubmissionFactory> */
     use HasFactory, SoftDeletes;
@@ -41,6 +44,41 @@ class ServiceSubmission extends Model
             'status'         => SubmissionStatus::class,
             'completed_at'   => 'datetime',
         ];
+    }
+
+    // ─── PayableInterface ─────────────────────────────────────────────────────
+
+    public function getPayableAmountThb(): int
+    {
+        return $this->price_snapshot;
+    }
+
+    public function getPayableAmountSatangs(): int
+    {
+        return $this->price_snapshot * 100;
+    }
+
+    public function getPayableUserEmail(): string
+    {
+        $this->loadMissing('user');
+        return $this->user->email;
+    }
+
+    public function onPaymentConfirmed(): void
+    {
+        event(new PaymentConfirmed($this));
+    }
+
+    public function onPaymentFailed(): void
+    {
+        $this->markPaymentFailed();
+    }
+
+    public function resetForPaymentRetry(): void
+    {
+        if ($this->status === SubmissionStatus::PaymentFailed) {
+            $this->update(['status' => SubmissionStatus::PendingPayment]);
+        }
     }
 
     // ─── Domain methods ───────────────────────────────────────────────────────
@@ -88,9 +126,9 @@ class ServiceSubmission extends Model
     }
 
     /** The latest (most recent) payment attempt for this submission. */
-    public function payment(): HasOne
+    public function payment(): MorphOne
     {
-        return $this->hasOne(Payment::class, 'submission_id')->latestOfMany();
+        return $this->morphOne(Payment::class, 'payable')->latestOfMany();
     }
 
     /** One-to-one: only set when the submission is for a 90-day report. */

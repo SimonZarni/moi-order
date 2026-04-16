@@ -7,7 +7,10 @@ namespace App\Providers;
 use App\Contracts\FileStorageInterface;
 use App\Contracts\PaymentGatewayInterface;
 use App\Events\PaymentConfirmed;
+use App\Events\TicketOrderPaymentConfirmed;
 use App\Listeners\MarkSubmissionProcessing;
+use App\Listeners\MarkTicketOrderProcessing;
+use App\Services\TicketOrderService;
 use App\Services\FileStorageService;
 use App\Services\StripePaymentService;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -90,6 +93,13 @@ class AppServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(
+            TicketOrderService::class,
+            fn ($app) => new TicketOrderService(
+                $app->make(FileStorageInterface::class)
+            )
+        );
+
+        $this->app->bind(
             \App\Services\AdminPlaceService::class,
             fn ($app) => new \App\Services\AdminPlaceService(
                 $app->make(FileStorageInterface::class)
@@ -113,6 +123,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         Event::listen(PaymentConfirmed::class, MarkSubmissionProcessing::class);
+        Event::listen(TicketOrderPaymentConfirmed::class, MarkTicketOrderProcessing::class);
     }
 
     private function configureRateLimiting(): void

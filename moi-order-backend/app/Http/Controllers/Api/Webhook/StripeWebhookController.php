@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Webhook;
 
-use App\Events\PaymentConfirmed;
 use App\Models\Payment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -59,7 +58,7 @@ class StripeWebhookController extends Controller
     private function handleSucceeded(string $intentId, array $stripePayload): void
     {
         DB::transaction(function () use ($intentId, $stripePayload): void {
-            $payment = Payment::with('submission')
+            $payment = Payment::with('payable')
                 ->where('stripe_intent_id', $intentId)
                 ->lockForUpdate()
                 ->first();
@@ -72,14 +71,14 @@ class StripeWebhookController extends Controller
 
             Log::info('stripe.webhook.payment_succeeded', ['payment_id' => $payment->id]);
 
-            event(new PaymentConfirmed($payment->submission));
+            $payment->payable->onPaymentConfirmed();
         });
     }
 
     private function handleFailed(string $intentId, array $stripePayload): void
     {
         DB::transaction(function () use ($intentId, $stripePayload): void {
-            $payment = Payment::with('submission')
+            $payment = Payment::with('payable')
                 ->where('stripe_intent_id', $intentId)
                 ->lockForUpdate()
                 ->first();
@@ -89,7 +88,7 @@ class StripeWebhookController extends Controller
             }
 
             $payment->markFailed($stripePayload);
-            $payment->submission->markPaymentFailed();
+            $payment->payable->onPaymentFailed();
 
             Log::info('stripe.webhook.payment_failed', ['payment_id' => $payment->id]);
         });

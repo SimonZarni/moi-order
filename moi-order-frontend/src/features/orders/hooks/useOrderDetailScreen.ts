@@ -37,7 +37,7 @@ export function useOrderDetailScreen(): UseOrderDetailScreenResult {
   const handleBack = useCallback((): void => { navigation.goBack(); }, [navigation]);
 
   const handlePayNow = useCallback((): void => {
-    navigation.navigate('Payment', { submissionId });
+    navigation.navigate('Payment', { kind: 'submission', submissionId });
   }, [navigation, submissionId]);
 
   return { submission, isLoading, isRefreshing, isError, canPay, handleRefresh, handleBack, handlePayNow };

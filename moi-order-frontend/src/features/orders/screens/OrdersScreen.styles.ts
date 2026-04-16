@@ -32,6 +32,42 @@ export const styles = StyleSheet.create({
     marginTop: -spacing.xl,
   },
 
+  // ── Tabs ──────────────────────────────────────────────────────────────────
+  tabRow: {
+    flexDirection: 'row',
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: radius.full,
+    padding: 3,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+    borderRadius: radius.full,
+  },
+  tabActive: {
+    backgroundColor: colours.card,
+    ...shadows.medium,
+  },
+  tabText: {
+    fontSize: typography.xs,
+    fontWeight: '700',
+    color: colours.textMuted,
+    letterSpacing: 0.5,
+  },
+  tabTextActive: {
+    color: colours.textOnLight,
+  },
+
+  // ── Ticket order card ─────────────────────────────────────────────────────
+  ticketCardDate: {
+    fontSize: typography.xs,
+    fontWeight: '700',
+    color: editorialPalette.gold,
+  },
+
   // ── List ──────────────────────────────────────────────────────────────────
   list: {
     paddingBottom: TAB_BAR_CLEARANCE,

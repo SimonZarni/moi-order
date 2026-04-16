@@ -45,7 +45,19 @@ export type RootStackParamList = {
   };
 
   // ── Payment ──────────────────────────────────────────────────────────────
-  Payment: { submissionId: number };
+  Payment:
+    | { kind: 'submission'; submissionId: number }
+    | { kind: 'ticket_order'; ticketOrderId: number };
+
+  // ── Tickets ──────────────────────────────────────────────────────────────
+  Tickets: undefined;
+  TicketDetail: { ticketId: number };
+  TicketDateSelection: {
+    ticketId: number;
+    /** JSON-encoded Record<variantId, quantity> */
+    selectionsJson: string;
+  };
+  TicketOrderDetail: { ticketOrderId: number };
 
   // ── Existing public screens ─────────────────────────────────────────────
   Places: undefined;
