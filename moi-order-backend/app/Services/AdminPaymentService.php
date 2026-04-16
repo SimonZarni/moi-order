@@ -6,16 +6,31 @@ namespace App\Services;
 
 use App\Http\Requests\Admin\AdminPaymentIndexRequest;
 use App\Models\Payment;
+use App\Models\ServiceSubmission;
+use App\Models\TicketOrder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * Principle: SRP — admin payment read logic only. Payments are never mutated by admin.
  */
 class AdminPaymentService
 {
+    private function withPayable(): array
+    {
+        return [
+            'payable' => function (MorphTo $query): void {
+                $query->morphWith([
+                    ServiceSubmission::class => ['user', 'serviceType.service'],
+                    TicketOrder::class       => ['ticket'],
+                ]);
+            },
+        ];
+    }
+
     public function index(AdminPaymentIndexRequest $request): LengthAwarePaginator
     {
-        $query = Payment::with(['submission.user', 'submission.serviceType.service'])
+        $query = Payment::with($this->withPayable())
             ->latest();
 
         if ($request->filled('status')) {
@@ -35,6 +50,6 @@ class AdminPaymentService
 
     public function show(Payment $payment): Payment
     {
-        return $payment->load(['submission.user', 'submission.serviceType.service']);
+        return $payment->load($this->withPayable());
     }
 }

@@ -20,8 +20,8 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(
     base_path('routes/api/public.php')
 );
 
-// User API routes
-Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(
+// User API routes — token must carry the 'user' ability
+Route::prefix('v1')->middleware(['auth:sanctum', 'abilities:user', 'throttle:api'])->group(
     base_path('routes/api/v1.php')
 );
 
@@ -30,8 +30,8 @@ Route::prefix('admin/v1')->middleware(['throttle:auth'])->group(
     base_path('routes/api/admin_public.php')
 );
 
-// Admin authenticated routes — auth:sanctum resolves user, admin.auth asserts is_admin
-Route::prefix('admin/v1')->middleware(['auth:sanctum', 'admin.auth', 'throttle:admin'])->group(
+// Admin authenticated routes — token must carry the 'admin' ability; admin.auth asserts is_admin
+Route::prefix('admin/v1')->middleware(['auth:sanctum', 'abilities:admin', 'admin.auth', 'throttle:admin'])->group(
     base_path('routes/api/admin_v1.php')
 );
 

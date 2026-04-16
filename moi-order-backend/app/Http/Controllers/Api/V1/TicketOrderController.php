@@ -35,7 +35,7 @@ class TicketOrderController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $orders = TicketOrder::with('ticket')
+        $orders = TicketOrder::with(['ticket', 'items.variant'])
             ->forUser($request->user()->id)
             ->orderByDesc('created_at')
             ->paginate(20);

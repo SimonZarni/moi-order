@@ -33,7 +33,7 @@ class AuthService
             ]);
         }
 
-        $token = $user->createToken('user-auth', ['*'])->plainTextToken;
+        $token = $user->createToken('user-auth', ['user'], now()->addDays(30))->plainTextToken;
 
         return ['user' => $user, 'token' => $token];
     }
@@ -49,7 +49,7 @@ class AuthService
             'password' => Hash::make($dto->password),
         ]);
 
-        $token = $user->createToken('user-auth', ['*'])->plainTextToken;
+        $token = $user->createToken('user-auth', ['user'], now()->addDays(30))->plainTextToken;
 
         return ['user' => $user, 'token' => $token];
     }

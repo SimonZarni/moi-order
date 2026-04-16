@@ -2,6 +2,13 @@ import apiClient from '@/shared/api/client';
 import { ApiResponse, PaginatedResponse, ServiceSubmission } from '@/types/models';
 import { ImagePickerAsset } from 'expo-image-picker';
 
+function requireMimeType(asset: ImagePickerAsset): string {
+  if (asset.mimeType == null) {
+    throw new Error('Could not determine image type. Please try selecting the image again.');
+  }
+  return asset.mimeType;
+}
+
 export interface CompanyRegistrationPayload {
   idempotencyKey:    string;
   serviceTypeId:     number;
@@ -26,7 +33,7 @@ export async function submitCompanyRegistration(
   const appendImage = (key: string, asset: ImagePickerAsset): void => {
     form.append(key, {
       uri:  asset.uri,
-      type: asset.mimeType ?? 'image/jpeg',
+      type: requireMimeType(asset),
       name: `${key}.jpg`,
     } as unknown as Blob);
   };
@@ -66,19 +73,19 @@ export async function submitNinetyDayReport(
 
   form.append('passport_bio_page', {
     uri:  payload.passportBioPage.uri,
-    type: payload.passportBioPage.mimeType ?? 'image/jpeg',
+    type: requireMimeType(payload.passportBioPage),
     name: 'passport_bio_page.jpg',
   } as unknown as Blob);
 
   form.append('visa_page', {
     uri:  payload.visaPage.uri,
-    type: payload.visaPage.mimeType ?? 'image/jpeg',
+    type: requireMimeType(payload.visaPage),
     name: 'visa_page.jpg',
   } as unknown as Blob);
 
   form.append('old_slip', {
     uri:  payload.oldSlip.uri,
-    type: payload.oldSlip.mimeType ?? 'image/jpeg',
+    type: requireMimeType(payload.oldSlip),
     name: 'old_slip.jpg',
   } as unknown as Blob);
 
@@ -111,7 +118,7 @@ export async function submitAirportFastTrack(
   const appendImage = (key: string, asset: ImagePickerAsset): void => {
     form.append(key, {
       uri:  asset.uri,
-      type: asset.mimeType ?? 'image/jpeg',
+      type: requireMimeType(asset),
       name: `${key}.jpg`,
     } as unknown as Blob);
   };
@@ -151,7 +158,7 @@ export async function submitEmbassyResidential(
   const appendImage = (key: string, asset: ImagePickerAsset): void => {
     form.append(key, {
       uri:  asset.uri,
-      type: asset.mimeType ?? 'image/jpeg',
+      type: requireMimeType(asset),
       name: `${key}.jpg`,
     } as unknown as Blob);
   };
@@ -194,7 +201,7 @@ export async function submitEmbassyCarLicense(
   const appendImage = (key: string, asset: ImagePickerAsset): void => {
     form.append(key, {
       uri:  asset.uri,
-      type: asset.mimeType ?? 'image/jpeg',
+      type: requireMimeType(asset),
       name: `${key}.jpg`,
     } as unknown as Blob);
   };
@@ -252,7 +259,7 @@ export async function submitEmbassyBank(
   const appendImage = (key: string, asset: ImagePickerAsset): void => {
     form.append(key, {
       uri:  asset.uri,
-      type: asset.mimeType ?? 'image/jpeg',
+      type: requireMimeType(asset),
       name: `${key}.jpg`,
     } as unknown as Blob);
   };
@@ -295,7 +302,7 @@ export async function submitEmbassyVisaRecommendation(
   const appendImage = (key: string, asset: ImagePickerAsset): void => {
     form.append(key, {
       uri:  asset.uri,
-      type: asset.mimeType ?? 'image/jpeg',
+      type: requireMimeType(asset),
       name: `${key}.jpg`,
     } as unknown as Blob);
   };
