@@ -26,7 +26,9 @@ class TicketResource extends JsonResource
             'city'                  => $this->city,
             'province'              => $this->province,
             'cover_image_url'       => $this->cover_image_path !== null
-                ? app(\App\Contracts\FileStorageInterface::class)->url($this->cover_image_path)
+                ? (str_starts_with($this->cover_image_path, 'http')
+                    ? $this->cover_image_path
+                    : app(\App\Contracts\FileStorageInterface::class)->url($this->cover_image_path))
                 : null,
             'starting_from_price'   => $this->when(
                 ! $this->relationLoaded('activeVariants'),
