@@ -11,6 +11,7 @@ if [ -n "$AIVEN_CA_CERT" ]; then
 fi
 
 # Laravel bootstrap
+php artisan storage:link --force
 php artisan config:cache
 # route:cache is intentionally omitted: the local-disk file-serving route
 # (storage.local) is registered as a Closure by FilesystemServiceProvider and
