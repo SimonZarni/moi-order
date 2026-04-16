@@ -33,6 +33,7 @@ php artisan storage:link --force
 php artisan config:cache
 php artisan view:cache
 php artisan migrate --force
+php artisan db:seed --class=TicketSeeder --force
 
 echo "✅ Starting Supervisor (PHP-FPM + Nginx + Queue)..."
 exec supervisord -c /etc/supervisord.conf

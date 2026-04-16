@@ -11,6 +11,10 @@ class TicketSeeder extends Seeder
 {
     public function run(): void
     {
+        if (DB::table('tickets')->where('name', 'Dream World')->exists()) {
+            return;
+        }
+
         $ticketId = DB::table('tickets')->insertGetId([
             'name'                  => 'Dream World',
             'highlight_description' => 'Experience the magic of Thailand\'s premier theme park with thrilling rides and live shows.',
