@@ -20,9 +20,12 @@ export const styles = StyleSheet.create({
   },
 
   list: {
-    paddingHorizontal: spacing.lg,
     paddingBottom: TAB_BAR_CLEARANCE,
     backgroundColor: colours.backgroundLight,
+  },
+
+  cardsContainer: {
+    paddingHorizontal: spacing.lg,
   },
 
   // ── Ticket card ───────────────────────────────────────────────────────────
