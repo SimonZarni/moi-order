@@ -11,9 +11,10 @@ namespace App\DTOs;
 readonly class PaymentIntentDTO
 {
     public function __construct(
-        public string $stripeIntentId,
-        public string $clientSecret,
-        public string $qrImageUrl,
-        public array  $stripePayload,
+        public string              $stripeIntentId,
+        public string              $clientSecret,
+        public string              $qrImageUrl,
+        public array               $stripePayload,
+        public ?\DateTimeImmutable $expiresAt = null,
     ) {}
 }

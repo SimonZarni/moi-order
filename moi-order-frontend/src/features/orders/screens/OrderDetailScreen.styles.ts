@@ -178,6 +178,22 @@ export const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
 
+  // ── Pay Now ────────────────────────────────────────────────────────────────
+  payNowBtn: {
+    backgroundColor: editorialPalette.amber,
+    borderRadius: radius.lg,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.lg,
+  },
+  payNowBtnText: {
+    fontSize: typography.md,
+    fontWeight: '800',
+    color: colours.white,
+    letterSpacing: 0.4,
+  },
+
   // ── Info card ──────────────────────────────────────────────────────────────
   infoCard: {
     backgroundColor: colours.card,
