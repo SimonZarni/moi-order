@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# Substitute $PORT into nginx config at runtime (Render sets this env var)
+# Substitute $PORT into nginx config at runtime (injected by Railway/Render)
 sed -i "s/__PORT__/${PORT:-8080}/" /etc/nginx/nginx.conf
 
 # Write Aiven CA cert if provided

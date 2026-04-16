@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\ServiceTypeFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,7 +18,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class ServiceType extends Model
 {
-    use SoftDeletes;
+    /** @use HasFactory<ServiceTypeFactory> */
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'service_id',

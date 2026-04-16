@@ -4,26 +4,29 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\DTOs\LoginDTO;
-use App\DTOs\RegisterDTO;
+use App\DTOs\AdminLoginDTO;
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Principle: SRP — owns authentication business logic only.
- * Principle: Security — passwords hashed with bcrypt (Laravel default, cost≥12).
- *   Invalid credentials surface as a 422 ValidationException on the email field
- *   (standard Laravel convention — avoids exposing which field was wrong via 401).
- *   Tokens created with explicit abilities. Current token deleted on logout.
+ * Principle: SRP — owns admin authentication logic only. Separate from user AuthService.
+ * Principle: Security:
+ *   - Wrong credentials → 422 ValidationException on email field (same as user auth;
+ *     avoids leaking which field was wrong via 401).
+ *   - Non-admin account → 403 AuthorizationException AFTER credential check
+ *     (timing-safe: always validate password first, then check role).
+ *   - Token ability 'admin' (not '*') — explicit least-privilege.
  */
-class AuthService
+class AdminAuthService
 {
     /**
      * @return array{user: User, token: string}
-     * @throws ValidationException when credentials do not match.
+     * @throws ValidationException      when credentials do not match.
+     * @throws AuthorizationException   when the account is not an admin.
      */
-    public function login(LoginDTO $dto): array
+    public function login(AdminLoginDTO $dto): array
     {
         $user = User::where('email', $dto->email)->first();
 
@@ -33,23 +36,13 @@ class AuthService
             ]);
         }
 
-        $token = $user->createToken('user-auth', ['*'])->plainTextToken;
+        // Check admin role only AFTER password verification — prevents timing-based
+        // enumeration of admin vs non-admin accounts.
+        if (! $user->isAdmin()) {
+            throw new AuthorizationException('Admin access required.');
+        }
 
-        return ['user' => $user, 'token' => $token];
-    }
-
-    /**
-     * @return array{user: User, token: string}
-     */
-    public function register(RegisterDTO $dto): array
-    {
-        $user = User::create([
-            'name'     => $dto->name,
-            'email'    => $dto->email,
-            'password' => Hash::make($dto->password),
-        ]);
-
-        $token = $user->createToken('user-auth', ['*'])->plainTextToken;
+        $token = $user->createToken('admin-auth', ['admin'])->plainTextToken;
 
         return ['user' => $user, 'token' => $token];
     }

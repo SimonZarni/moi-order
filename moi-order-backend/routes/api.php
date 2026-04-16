@@ -25,8 +25,13 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(
     base_path('routes/api/v1.php')
 );
 
-// Admin API routes
-Route::prefix('admin/v1')->middleware(['auth:sanctum', 'throttle:admin'])->group(
+// Admin public routes (login only) — intentionally unauthenticated
+Route::prefix('admin/v1')->middleware(['throttle:auth'])->group(
+    base_path('routes/api/admin_public.php')
+);
+
+// Admin authenticated routes — auth:sanctum resolves user, admin.auth asserts is_admin
+Route::prefix('admin/v1')->middleware(['auth:sanctum', 'admin.auth', 'throttle:admin'])->group(
     base_path('routes/api/admin_v1.php')
 );
 

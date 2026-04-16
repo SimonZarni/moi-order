@@ -95,7 +95,7 @@ RUN mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cac
     && chmod -R 775 storage bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache
 
-# Render injects PORT at runtime; default 8080 for local testing
+# Railway (and Render) inject PORT at runtime; default 8080 for local testing
 ENV PORT=8080
 
 EXPOSE 8080

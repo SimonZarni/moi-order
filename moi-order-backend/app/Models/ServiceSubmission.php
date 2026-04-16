@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\SubmissionStatus;
+use Database\Factories\ServiceSubmissionFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -20,7 +22,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class ServiceSubmission extends Model
 {
-    use SoftDeletes;
+    /** @use HasFactory<ServiceSubmissionFactory> */
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'user_id',
