@@ -33,6 +33,7 @@ class User extends Authenticatable
         'email',
         'password',
         'date_of_birth',
+        'is_admin',
     ];
 
     /**
@@ -57,7 +58,19 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
             'date_of_birth'     => 'date:Y-m-d',
+            'is_admin'          => 'boolean',
         ];
+    }
+
+    // ─── Domain methods ───────────────────────────────────────────────────────
+
+    /**
+     * Principle: Tell-Don't-Ask — consumers ask the model, not the raw flag.
+     * Principle: Encapsulation — is_admin detail stays inside the model.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->is_admin === true;
     }
 
     // ─── Relationships ────────────────────────────────────────────────────────
