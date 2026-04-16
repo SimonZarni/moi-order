@@ -93,24 +93,23 @@ class PaymentService
      * Return the active non-expired pending payment, or create a new one.
      * Handles first-time creation and retry after failure or expiry.
      *
+     * Security: double-checked locking prevents concurrent requests from creating
+     * two Stripe PaymentIntents for the same order. The Stripe call happens outside
+     * the DB transaction to avoid holding a lock during a network round-trip. If a
+     * race is lost inside the transaction, the orphaned Stripe intent expires naturally.
+     *
      * @param PayableInterface&Model $payable
      */
     public function createForPayable(PayableInterface&Model $payable): Payment
     {
-        // Idempotency: if there is already a non-expired pending payment, return it.
-        // An expired payment falls through so a fresh intent is created.
-        $existing = Payment::where('payable_type', $payable->getMorphClass())
-            ->where('payable_id', $payable->getKey())
-            ->where('status', PaymentStatus::Pending)
-            ->where(function ($q): void {
-                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
-            })
-            ->first();
-
+        // Fast path — no lock needed for the common case.
+        $existing = $this->findPendingPayment($payable);
         if ($existing !== null) {
             return $existing;
         }
 
+        // Create the Stripe intent BEFORE opening a DB transaction so we never hold
+        // a row lock during a network call.
         $idempotencyKey = Str::uuid()->toString();
 
         $dto = $this->gateway->createPromptPayIntent(
@@ -120,6 +119,15 @@ class PaymentService
         );
 
         return DB::transaction(function () use ($payable, $dto, $idempotencyKey): Payment {
+            // Re-check with a row lock — serialises concurrent requests that both
+            // passed the fast-path check above.
+            $existing = $this->findPendingPayment($payable, lockForUpdate: true);
+            if ($existing !== null) {
+                // Another request won the race; our Stripe intent is orphaned and
+                // will expire automatically via Stripe's PaymentIntent TTL.
+                return $existing;
+            }
+
             // Reset payable to pending_payment on a retry (was payment_failed).
             $payable->resetForPaymentRetry();
 
@@ -136,5 +144,19 @@ class PaymentService
                 'expires_at'       => $dto->expiresAt,
             ]);
         });
+    }
+
+    private function findPendingPayment(PayableInterface&Model $payable, bool $lockForUpdate = false): ?Payment
+    {
+        $query = Payment::where('payable_type', $payable->getMorphClass())
+            ->where('payable_id', $payable->getKey())
+            ->where('status', PaymentStatus::Pending)
+            ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()));
+
+        if ($lockForUpdate) {
+            $query->lockForUpdate();
+        }
+
+        return $query->first();
     }
 }

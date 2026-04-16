@@ -11,6 +11,7 @@ use App\Models\Ticket;
 use App\Models\TicketOrder;
 use App\Models\TicketVariant;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -29,7 +30,7 @@ class TicketOrderService
 
     public function create(CreateTicketOrderDTO $dto, User $user): TicketOrder
     {
-        // Idempotency: return an existing order for the same client-supplied key.
+        // Fast-path idempotency check — avoids entering the transaction on retries.
         $existing = TicketOrder::where('idempotency_key', $dto->idempotencyKey)
             ->where('user_id', $user->id)
             ->first();
@@ -38,44 +39,53 @@ class TicketOrderService
             return $existing->load('items.variant', 'ticket');
         }
 
-        return DB::transaction(function () use ($dto, $user): TicketOrder {
-            $variantIds = array_column($dto->items, 'variantId');
+        try {
+            return DB::transaction(function () use ($dto, $user): TicketOrder {
+                $variantIds = array_column($dto->items, 'variantId');
 
-            // Lock variants to snapshot prices and validate they belong to the ticket.
-            $variants = TicketVariant::whereIn('id', $variantIds)
-                ->where('ticket_id', $dto->ticketId)
-                ->where('is_active', true)
-                ->lockForUpdate()
-                ->get()
-                ->keyBy('id');
+                // Lock variants to snapshot prices and validate they belong to the ticket.
+                $variants = TicketVariant::whereIn('id', $variantIds)
+                    ->where('ticket_id', $dto->ticketId)
+                    ->where('is_active', true)
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id');
 
-            foreach ($dto->items as $item) {
-                if (! $variants->has($item->variantId)) {
-                    throw new \DomainException('ticket.variant_unavailable');
+                foreach ($dto->items as $item) {
+                    if (! $variants->has($item->variantId)) {
+                        throw new \DomainException('ticket.variant_unavailable');
+                    }
                 }
-            }
 
-            $order = TicketOrder::create([
-                'user_id'         => $user->id,
-                'ticket_id'       => $dto->ticketId,
-                'visit_date'      => $dto->visitDate,
-                'status'          => TicketOrderStatus::PendingPayment,
-                'idempotency_key' => $dto->idempotencyKey,
-            ]);
-
-            foreach ($dto->items as $item) {
-                $variant = $variants->get($item->variantId);
-                $order->items()->create([
-                    'ticket_variant_id' => $variant->id,
-                    'quantity'          => $item->quantity,
-                    'price_snapshot'    => $variant->price,
+                $order = TicketOrder::create([
+                    'user_id'         => $user->id,
+                    'ticket_id'       => $dto->ticketId,
+                    'visit_date'      => $dto->visitDate,
+                    'status'          => TicketOrderStatus::PendingPayment,
+                    'idempotency_key' => $dto->idempotencyKey,
                 ]);
-            }
 
-            Log::info('ticket_order.created', ['order_id' => $order->id, 'user_id' => $user->id]);
+                foreach ($dto->items as $item) {
+                    $variant = $variants->get($item->variantId);
+                    $order->items()->create([
+                        'ticket_variant_id' => $variant->id,
+                        'quantity'          => $item->quantity,
+                        'price_snapshot'    => $variant->price,
+                    ]);
+                }
 
-            return $order->load('items.variant', 'ticket');
-        });
+                Log::info('ticket_order.created', ['order_id' => $order->id, 'user_id' => $user->id]);
+
+                return $order->load('items.variant', 'ticket');
+            });
+        } catch (UniqueConstraintViolationException) {
+            // A concurrent request with the same idempotency key beat us to the insert.
+            // Return the order they created — this request is a safe duplicate.
+            return TicketOrder::where('idempotency_key', $dto->idempotencyKey)
+                ->where('user_id', $user->id)
+                ->with('items.variant', 'ticket')
+                ->firstOrFail();
+        }
     }
 
     /**
