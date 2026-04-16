@@ -74,13 +74,12 @@ export function HomeScreen(): React.JSX.Element {
               <Text style={styles.cardIcon}>📅</Text>
             </Pressable>
 
-            <Pressable style={[styles.card, styles.cardAccentSlate, styles.cardDimmed]}
+            <Pressable style={[styles.card, styles.cardAccentSlate]}
               onPress={handleNavigateToTickets}
-              accessibilityLabel="Tickets — coming soon" accessibilityRole="button" disabled>
-              <View style={styles.soonPill}><Text style={styles.soonText}>Soon</Text></View>
-              <Text style={[styles.cardTag, styles.tagSlate]}>Support</Text>
+              accessibilityLabel="Tickets" accessibilityRole="button">
+              <Text style={[styles.cardTag, styles.tagSlate]}>Attractions</Text>
               <Text style={styles.cardTitle}>Tickets</Text>
-              <Text style={styles.cardSubtitle}>Track requests</Text>
+              <Text style={styles.cardSubtitle}>Theme parks & more</Text>
               <Text style={styles.cardIcon}>🎫</Text>
             </Pressable>
           </View>

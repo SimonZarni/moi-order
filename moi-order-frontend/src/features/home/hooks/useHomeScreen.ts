@@ -26,8 +26,9 @@ export function useHomeScreen(): UseHomeScreenResult {
     navigation.navigate('NinetyDayReport');
   }, [navigation]);
 
-  // Placeholder — Tickets screen does not exist yet.
-  const handleNavigateToTickets = useCallback((): void => {}, []);
+  const handleNavigateToTickets = useCallback((): void => {
+    navigation.navigate('Tickets');
+  }, [navigation]);
 
   const handleNavigateToPlaces = useCallback((): void => {
     navigation.navigate('Places');
