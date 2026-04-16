@@ -92,7 +92,11 @@ export function TicketsScreen(): React.JSX.Element {
       <FlatList
         data={tickets}
         keyExtractor={(item: Ticket) => String(item.id)}
-        renderItem={({ item }) => <TicketCard item={item} onPress={handleTicketPress} />}
+        renderItem={({ item }) => (
+          <View style={styles.cardsContainer}>
+            <TicketCard item={item} onPress={handleTicketPress} />
+          </View>
+        )}
         ListHeaderComponent={header}
         contentContainerStyle={styles.list}
         onEndReached={handleEndReached}
