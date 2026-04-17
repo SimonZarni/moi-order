@@ -24,12 +24,12 @@ export async function submitDynamic(
   form.append('service_type_id', String(payload.serviceTypeId));
 
   for (const [key, value] of Object.entries(payload.fields)) {
-    form.append(key, value);
+    form.append(`fields[${key}]`, value);
   }
 
   if (payload.files !== undefined) {
     for (const [key, asset] of Object.entries(payload.files)) {
-      form.append(key, {
+      form.append(`files[${key}]`, {
         uri:  asset.uri,
         type: requireMimeType(asset),
         name: `${key}.jpg`,
