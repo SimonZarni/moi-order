@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTOs\AdminCreateUserDTO;
 use App\DTOs\AdminUpdateUserDTO;
+use App\Exceptions\DomainException;
 use App\Http\Requests\Admin\AdminUserIndexRequest;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -52,6 +54,37 @@ class AdminUserService
             'email'         => $dto->email,
             'date_of_birth' => $dto->dateOfBirth,
         ], fn ($v) => $v !== null));
+
+        return $user->fresh();
+    }
+
+    public function store(AdminCreateUserDTO $dto): User
+    {
+        return User::create([
+            'name'          => $dto->name,
+            'email'         => $dto->email,
+            'password'      => $dto->password,
+            'date_of_birth' => $dto->dateOfBirth,
+            'is_admin'      => $dto->isAdmin,
+        ]);
+    }
+
+    public function restore(int $id): User
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        $user->restore();
+
+        return $user->fresh();
+    }
+
+    public function toggleAdmin(User $user): User
+    {
+        // Prevent the only admin from revoking their own admin role — system would become unmanageable.
+        if ($user->is_admin && User::where('is_admin', true)->count() === 1) {
+            throw new DomainException('user.last_admin_cannot_be_demoted');
+        }
+
+        $user->update(['is_admin' => ! $user->is_admin]);
 
         return $user->fresh();
     }

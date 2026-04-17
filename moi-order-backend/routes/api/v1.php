@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AirportFastTrackController;
+use App\Http\Controllers\Api\V1\DynamicSubmissionController;
 use App\Http\Controllers\Api\V1\TestServiceController;
 use App\Http\Controllers\Api\V1\EmbassyBankController;
 use App\Http\Controllers\Api\V1\EmbassyVisaRecommendationController;
@@ -32,6 +33,7 @@ Route::put('/profile/password', [ProfileController::class, 'changePassword']);
 // Submissions
 Route::get('/submissions',              [SubmissionController::class, 'index']);
 Route::get('/submissions/{id}',         [SubmissionController::class, 'show']);
+Route::post('/submissions/dynamic',     [DynamicSubmissionController::class, 'store']);
 Route::post('/submissions/90-day-report',         [SubmissionController::class,         'store']);
 Route::post('/submissions/company-registration',  [CompanyRegistrationController::class, 'store']);
 Route::post('/submissions/airport-fast-track',    [AirportFastTrackController::class,    'store']);
