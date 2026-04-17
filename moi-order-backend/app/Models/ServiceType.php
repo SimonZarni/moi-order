@@ -27,13 +27,15 @@ class ServiceType extends Model
         'name_en',
         'price',
         'is_active',
+        'field_schema',
     ];
 
     protected function casts(): array
     {
         return [
-            'price'     => 'integer',
-            'is_active' => 'boolean',
+            'price'        => 'integer',
+            'is_active'    => 'boolean',
+            'field_schema' => 'array',
         ];
     }
 

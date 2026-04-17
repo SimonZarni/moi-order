@@ -23,20 +23,22 @@ class AdminServiceTypeService
     public function store(Service $service, AdminStoreServiceTypeDTO $dto): ServiceType
     {
         return $service->types()->create([
-            'name'      => $dto->name,
-            'name_en'   => $dto->nameEn,
-            'price'     => $dto->price,
-            'is_active' => $dto->isActive,
+            'name'         => $dto->name,
+            'name_en'      => $dto->nameEn,
+            'price'        => $dto->price,
+            'is_active'    => $dto->isActive,
+            'field_schema' => $dto->fieldSchema,
         ]);
     }
 
     public function update(ServiceType $type, AdminUpdateServiceTypeDTO $dto): ServiceType
     {
         $type->update(array_filter([
-            'name'      => $dto->name,
-            'name_en'   => $dto->nameEn,
-            'price'     => $dto->price,
-            'is_active' => $dto->isActive,
+            'name'         => $dto->name,
+            'name_en'      => $dto->nameEn,
+            'price'        => $dto->price,
+            'is_active'    => $dto->isActive,
+            'field_schema' => $dto->fieldSchema,
         ], fn ($v) => $v !== null));
 
         return $type->fresh();

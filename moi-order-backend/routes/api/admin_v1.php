@@ -50,10 +50,14 @@ Route::prefix('services')->name('admin.services.')->group(function (): void {
 
 // ── Users ─────────────────────────────────────────────────────────────────────
 Route::prefix('users')->name('admin.users.')->group(function (): void {
-    Route::get('/', [AdminUserController::class, 'index'])->name('index');
-    Route::get('/{user}', [AdminUserController::class, 'show'])->name('show');
-    Route::put('/{user}', [AdminUserController::class, 'update'])->name('update');
+    Route::get('/',    [AdminUserController::class, 'index'])->name('index');
+    Route::post('/',   [AdminUserController::class, 'store'])->name('store');
+    Route::get('/{user}',    [AdminUserController::class, 'show'])->name('show');
+    Route::put('/{user}',    [AdminUserController::class, 'update'])->name('update');
     Route::delete('/{user}', [AdminUserController::class, 'destroy'])->name('destroy');
+    // Restore requires withTrashed lookup — plain int $id, not route model binding
+    Route::patch('/{id}/restore',      [AdminUserController::class, 'restore'])->name('restore')->whereNumber('id');
+    Route::patch('/{user}/toggle-admin', [AdminUserController::class, 'toggleAdmin'])->name('toggle-admin');
 });
 
 // ── Payments ──────────────────────────────────────────────────────────────────

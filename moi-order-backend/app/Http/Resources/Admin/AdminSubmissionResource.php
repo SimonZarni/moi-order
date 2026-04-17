@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Admin;
 
+use App\Contracts\FileStorageInterface;
 use App\Http\Resources\PaymentResource;
 use App\Http\Resources\ServiceTypeResource;
 use App\Http\Resources\SubmissionDocumentResource;
@@ -63,6 +64,25 @@ class AdminSubmissionResource extends JsonResource
             ),
 
             'payment' => new PaymentResource($this->whenLoaded('payment')),
+
+            // Dynamic schema submissions — resolves file paths to signed URLs.
+            'submission_data' => $this->when(
+                $this->submission_data !== null,
+                function () {
+                    /** @var FileStorageInterface $storage */
+                    $storage = app(FileStorageInterface::class);
+                    $data    = $this->submission_data;
+                    $files   = $data['_files'] ?? [];
+
+                    unset($data['_files']); // raw paths never exposed
+
+                    foreach ($files as $key => $path) {
+                        $data[$key] = $storage->url($path);
+                    }
+
+                    return $data;
+                }
+            ),
         ];
     }
 

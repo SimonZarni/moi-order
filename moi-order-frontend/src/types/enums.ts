@@ -37,6 +37,21 @@ export const TICKET_ORDER_STATUS = {
 
 export type TicketOrderStatus = (typeof TICKET_ORDER_STATUS)[keyof typeof TICKET_ORDER_STATUS];
 
+// Mirrors App\Enums\FieldType
+export const FIELD_TYPE = {
+  Text:     'text',
+  Textarea: 'textarea',
+  Number:   'number',
+  Email:    'email',
+  Phone:    'phone',
+  Date:     'date',
+  Boolean:  'boolean',
+  Select:   'select',
+  File:     'file',
+} as const;
+
+export type FieldType = (typeof FIELD_TYPE)[keyof typeof FIELD_TYPE];
+
 // Mirrors App\Enums\DocumentType
 export const DOCUMENT_TYPE = {
   PassportBioPage:   'passport_bio_page',

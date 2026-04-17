@@ -17,11 +17,12 @@ class ServiceTypeResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'      => $this->id,
-            'name'    => $this->name,
-            'name_en' => $this->name_en,
-            'price'   => $this->price, // satangs
-            'service' => $this->when(
+            'id'           => $this->id,
+            'name'         => $this->name,
+            'name_en'      => $this->name_en,
+            'price'        => $this->price, // satangs
+            'field_schema' => $this->field_schema ?? [],
+            'service'      => $this->when(
                 $this->relationLoaded('service'),
                 fn () => [
                     'id'      => $this->service->id,

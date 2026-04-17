@@ -56,11 +56,23 @@ export interface User {
 
 // ── Services ───────────────────────────────────────────────────────────────
 
+export interface FieldSchemaItem {
+  key: string;
+  label: string;
+  label_en: string;
+  type: import('./enums').FieldType;
+  required: boolean;
+  sort_order: number;
+  options?: string[];   // present when type === 'select'
+  accepts?: string[];   // present when type === 'file' — e.g. ['image', 'pdf']
+}
+
 export interface ServiceType {
   id: number;
   name: string;
   name_en: string;
   price: number; // satangs
+  field_schema: FieldSchemaItem[];
   // Present only when the parent service relation is loaded (detail endpoint)
   service?: {
     id: number;
@@ -122,6 +134,8 @@ export interface ServiceSubmission {
   detail?: SubmissionDetail;
   documents?: SubmissionDocument[];
   payment?: Payment;
+  /** Present for dynamic-schema submissions. File fields contain signed URLs. */
+  submission_data?: Record<string, string | number | boolean>;
 }
 
 // ── Tickets ────────────────────────────────────────────────────────────────

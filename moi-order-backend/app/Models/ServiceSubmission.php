@@ -35,14 +35,16 @@ class ServiceSubmission extends Model implements PayableInterface
         'status',
         'idempotency_key',
         'completed_at',
+        'submission_data',
     ];
 
     protected function casts(): array
     {
         return [
-            'price_snapshot' => 'integer',
-            'status'         => SubmissionStatus::class,
-            'completed_at'   => 'datetime',
+            'price_snapshot'  => 'integer',
+            'status'          => SubmissionStatus::class,
+            'completed_at'    => 'datetime',
+            'submission_data' => 'array',
         ];
     }
 
