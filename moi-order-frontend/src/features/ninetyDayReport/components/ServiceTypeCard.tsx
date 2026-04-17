@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
 import { formatCurrency } from '@/shared/utils/formatCurrency';
+import { useLocale } from '@/shared/hooks/useLocale';
+import { localeName } from '@/shared/utils/localeName';
 import { ServiceType } from '@/types/models';
 import { styles } from './ServiceTypeCard.styles';
 
@@ -13,6 +15,9 @@ interface Props {
 }
 
 export function ServiceTypeCard({ type, onPress }: Props): React.JSX.Element {
+  const { locale } = useLocale();
+  const displayName = localeName(type, locale);
+
   const handlePress = (): void => {
     onPress(type);
   };
@@ -21,11 +26,11 @@ export function ServiceTypeCard({ type, onPress }: Props): React.JSX.Element {
     <Pressable
       style={({ pressed }) => [styles.card, { opacity: pressed ? 0.85 : 1 }]}
       onPress={handlePress}
-      accessibilityLabel={`Select ${type.name_en} — ${formatCurrency(type.price)}`}
+      accessibilityLabel={`Select ${displayName} — ${formatCurrency(type.price)}`}
       accessibilityRole="button"
     >
       <View style={styles.content}>
-        <Text style={styles.nameEn}>{type.name_en}</Text>
+        <Text style={styles.nameEn}>{displayName}</Text>
         <View style={styles.priceRow}>
           <Text style={styles.priceCurrency}>฿</Text>
           <Text style={styles.priceAmount}>

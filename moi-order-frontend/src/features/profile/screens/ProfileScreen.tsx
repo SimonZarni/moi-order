@@ -27,6 +27,7 @@ export function ProfileScreen(): React.JSX.Element {
     name, dateOfBirth, profileErrors, isDirty, isSavingProfile, showDatePicker, isEditingProfile,
     currentPassword, newPassword, confirmPassword, passwordErrors,
     isPasswordSectionOpen, isChangingPassword,
+    locale, handleSetLocale,
     handleToggleEditProfile,
     handleNameChange, handleDateFieldPress, handleDatePickerChange, handleSaveProfile, handleRefresh,
     handleTogglePasswordSection,
@@ -180,6 +181,36 @@ export function ProfileScreen(): React.JSX.Element {
                 </View>
               </>
             )}
+          </View>
+
+          {/* § Language */}
+          <View style={styles.sectionRow}>
+            <Text style={styles.sectionLabel}>Language</Text>
+            <View style={styles.sectionLine} />
+          </View>
+          <View style={styles.card}>
+            <View style={styles.langRow}>
+              <Pressable
+                style={[styles.langBtn, locale === 'en' && styles.langBtnActive]}
+                onPress={() => handleSetLocale('en')}
+                accessibilityLabel="Switch to English"
+                accessibilityRole="button"
+              >
+                <Text style={[styles.langBtnText, locale === 'en' && styles.langBtnTextActive]}>
+                  English
+                </Text>
+              </Pressable>
+              <Pressable
+                style={[styles.langBtn, locale === 'mm' && styles.langBtnActive]}
+                onPress={() => handleSetLocale('mm')}
+                accessibilityLabel="Switch to Burmese"
+                accessibilityRole="button"
+              >
+                <Text style={[styles.langBtnText, locale === 'mm' && styles.langBtnTextActive]}>
+                  မြန်မာ
+                </Text>
+              </Pressable>
+            </View>
           </View>
 
           {/* § Activity */}

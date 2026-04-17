@@ -342,6 +342,35 @@ export const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
 
+  // ── Language switcher ─────────────────────────────────────────────────────
+  langRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  langBtn: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.xl,
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: colours.infoBg,
+    backgroundColor: 'transparent',
+  },
+  langBtnActive: {
+    borderColor: colours.primary,
+    backgroundColor: `${colours.primary}14`,
+  },
+  langBtnText: {
+    fontSize: typography.sm,
+    fontWeight: '600',
+    color: colours.textMuted,
+  },
+  langBtnTextActive: {
+    color: colours.primary,
+  },
+
   // ── Sign out ───────────────────────────────────────────────────────────────
   signOutBtn: {
     marginTop: spacing.sm,

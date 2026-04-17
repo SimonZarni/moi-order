@@ -8,6 +8,8 @@ import { useProfileData } from '@/features/profile/hooks/useProfileData';
 import { useProfileForm } from '@/features/profile/hooks/useProfileForm';
 import { useChangePasswordForm } from '@/features/profile/hooks/useChangePasswordForm';
 import { useAuthStore } from '@/shared/store/authStore';
+import { useLocale } from '@/shared/hooks/useLocale';
+import { Locale } from '@/shared/store/localeStore';
 import { RootStackParamList } from '@/types/navigation';
 import { User } from '@/types/models';
 
@@ -44,6 +46,9 @@ export interface UseProfileScreenResult {
   handleNewPasswordChange: (text: string) => void;
   handleConfirmPasswordChange: (text: string) => void;
   handleChangePassword: () => void;
+  // Language
+  locale: Locale;
+  handleSetLocale: (locale: Locale) => void;
   // Handlers — nav
   handleGoToOrders: () => void;
   handleGoToPrivacyPolicy: () => void;
@@ -56,6 +61,7 @@ export function useProfileScreen(): UseProfileScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const clearAuth  = useAuthStore((s) => s.clearAuth);
+  const { locale, setLocale } = useLocale();
 
   const { user, isLoading, isRefreshing, refetch, updateMutation, changePasswordMutation } = useProfileData();
   const profileForm       = useProfileForm(user);
@@ -170,6 +176,10 @@ export function useProfileScreen(): UseProfileScreenResult {
     navigation.navigate('PdpaNotice');
   }, [navigation]);
 
+  const handleSetLocale = useCallback((l: Locale): void => {
+    setLocale(l);
+  }, [setLocale]);
+
   const handleLogout = useCallback((): void => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
       { text: 'Cancel', style: 'cancel' },
@@ -211,6 +221,8 @@ export function useProfileScreen(): UseProfileScreenResult {
     handleNewPasswordChange:     changePasswordForm.handleNewPasswordChange,
     handleConfirmPasswordChange: changePasswordForm.handleConfirmPasswordChange,
     handleChangePassword,
+    locale,
+    handleSetLocale,
     handleGoToOrders,
     handleGoToPrivacyPolicy,
     handleGoToTerms,
