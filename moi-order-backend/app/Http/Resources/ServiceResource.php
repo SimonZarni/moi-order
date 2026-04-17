@@ -20,6 +20,7 @@ class ServiceResource extends JsonResource
             'id'      => $this->id,
             'name'    => $this->name,
             'name_en' => $this->name_en,
+            'name_mm' => $this->name_mm,
             'slug'    => $this->slug,
             'types'   => ServiceTypeResource::collection($this->whenLoaded('types')),
         ];

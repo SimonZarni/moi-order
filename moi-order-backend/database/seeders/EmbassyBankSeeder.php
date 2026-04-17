@@ -14,6 +14,7 @@ class EmbassyBankSeeder extends Seeder
         $serviceId = DB::table('services')->insertGetId([
             'name'       => 'บริการธนาคารสถานทูต',
             'name_en'    => 'Embassy Bank Service',
+            'name_mm'    => 'ဘဏ်ဖွင့်ရန်ထောက်ခံစာ',
             'slug'       => 'embassy-bank-service',
             'is_active'  => true,
             'created_at' => now(),
@@ -24,6 +25,7 @@ class EmbassyBankSeeder extends Seeder
             'service_id' => $serviceId,
             'name'       => 'มาตรฐาน',
             'name_en'    => 'Standard',
+            'name_mm'    => 'အခြေခံ၀န်ဆောင်မှု',
             'price'      => 350,
             'is_active'  => true,
             'created_at' => now(),

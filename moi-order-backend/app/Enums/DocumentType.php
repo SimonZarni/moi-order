@@ -32,4 +32,20 @@ enum DocumentType: string
             self::TestPhoto         => 'Test Photo',
         };
     }
+
+    public function labelMm(): string
+    {
+        return match($this) {
+            self::PassportBioPage   => 'ပတ်စပို့ (ရှေ့မျက်နှာ)',
+            self::VisaPage          => 'ဗီဇာ မျက်နှာ',
+            self::OldSlip           => 'ရက် ၉၀ စလစ်အဟောင်း',
+            self::IdentityCardFront => 'မှတ်ပုံတင် (အရှေ့)',
+            self::IdentityCardBack  => 'မှတ်ပုံတင် (အနောက်)',
+            self::Tm30              => 'TM30',
+            self::UpperBodyPhoto    => 'ကိုယ်တစ်ပိုင်းပုံ (လာမည့်နေ့ ဝတ်ဆင်လာမည့် ပုံစံ)',
+            self::AirplaneTicket    => 'လေယာဉ်လက်မှတ်',
+            self::PassportSizePhoto => 'ပတ်စပို့ ဓါတ်ပုံ (1.5" x 1.5")',
+            self::TestPhoto         => 'Test Photo',
+        };
+    }
 }

@@ -20,6 +20,7 @@ class ServiceTypeResource extends JsonResource
             'id'           => $this->id,
             'name'         => $this->name,
             'name_en'      => $this->name_en,
+            'name_mm'      => $this->name_mm,
             'price'        => $this->price, // satangs
             'field_schema' => $this->field_schema ?? [],
             'service'      => $this->when(
@@ -28,6 +29,7 @@ class ServiceTypeResource extends JsonResource
                     'id'      => $this->service->id,
                     'name'    => $this->service->name,
                     'name_en' => $this->service->name_en,
+                    'name_mm' => $this->service->name_mm,
                 ],
             ),
         ];

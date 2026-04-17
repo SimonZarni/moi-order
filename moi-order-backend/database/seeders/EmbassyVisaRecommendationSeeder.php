@@ -14,6 +14,7 @@ class EmbassyVisaRecommendationSeeder extends Seeder
         $serviceId = DB::table('services')->insertGetId([
             'name'       => 'หนังสือแนะนำวีซ่าสถานทูต',
             'name_en'    => 'Embassy Visa Recommendation Letter',
+            'name_mm'    => 'ဗီဇာ သက်တမ်းတိုးရန်ထောက်ခံစာ',
             'slug'       => 'embassy-visa-recommendation',
             'is_active'  => true,
             'created_at' => now(),
@@ -24,6 +25,7 @@ class EmbassyVisaRecommendationSeeder extends Seeder
             'service_id' => $serviceId,
             'name'       => 'มาตรฐาน',
             'name_en'    => 'Standard',
+            'name_mm'    => 'အခြေခံ၀န်ဆောင်မှု',
             'price'      => 350,
             'is_active'  => true,
             'created_at' => now(),

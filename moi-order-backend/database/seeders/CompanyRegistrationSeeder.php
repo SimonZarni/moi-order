@@ -14,6 +14,7 @@ class CompanyRegistrationSeeder extends Seeder
         $serviceId = DB::table('services')->insertGetId([
             'name'       => 'จดทะเบียนบริษัท',
             'name_en'    => 'Company Registration',
+            'name_mm'    => 'ကုမ္ပဏီလိုင်စင် လျှောက်ထားရန်',
             'slug'       => 'company-registration',
             'is_active'  => true,
             'created_at' => now(),
@@ -24,6 +25,7 @@ class CompanyRegistrationSeeder extends Seeder
             'service_id' => $serviceId,
             'name'       => 'มาตรฐาน',
             'name_en'    => 'Standard',
+            'name_mm'    => 'အခြေခံ၀န်ဆောင်မှု',
             'price'      => 45000,
             'is_active'  => true,
             'created_at' => now(),

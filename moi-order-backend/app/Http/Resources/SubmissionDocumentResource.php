@@ -25,6 +25,7 @@ class SubmissionDocumentResource extends JsonResource
             'id'            => $this->id,
             'document_type' => $this->document_type->value,
             'label'         => $this->document_type->label(),
+            'label_mm'      => $this->document_type->labelMm(),
             'signed_url'    => $storage->url($this->file_path),
         ];
     }
