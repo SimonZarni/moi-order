@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -22,6 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Principle: Encapsulation — status transitions via domain method only.
  * Principle: Tell-Don't-Ask — complete() sets status + timestamp in one call.
  * Security: price_snapshot is immutable after insert; never recomputed from live prices.
+ * Option B: all submission fields stored in submission_data JSON; no detail tables.
  */
 class ServiceSubmission extends Model implements PayableInterface
 {
@@ -131,54 +131,6 @@ class ServiceSubmission extends Model implements PayableInterface
     public function payment(): MorphOne
     {
         return $this->morphOne(Payment::class, 'payable')->latestOfMany();
-    }
-
-    /** One-to-one: only set when the submission is for a 90-day report. */
-    public function ninetyDayReportDetail(): HasOne
-    {
-        return $this->hasOne(NinetyDayReportDetail::class, 'submission_id');
-    }
-
-    /** One-to-one: only set when the submission is for a company registration. */
-    public function companyRegistrationDetail(): HasOne
-    {
-        return $this->hasOne(CompanyRegistrationDetail::class, 'submission_id');
-    }
-
-    /** One-to-one: only set when the submission is for an airport fast track. */
-    public function airportFastTrackDetail(): HasOne
-    {
-        return $this->hasOne(AirportFastTrackDetail::class, 'submission_id');
-    }
-
-    /** One-to-one: only set when the submission is for an embassy residential. */
-    public function embassyResidentialDetail(): HasOne
-    {
-        return $this->hasOne(EmbassyResidentialDetail::class, 'submission_id');
-    }
-
-    /** One-to-one: only set when the submission is for an embassy car license. */
-    public function embassyCarLicenseDetail(): HasOne
-    {
-        return $this->hasOne(EmbassyCarLicenseDetail::class, 'submission_id');
-    }
-
-    /** One-to-one: only set when the submission is for an embassy bank. */
-    public function embassyBankDetail(): HasOne
-    {
-        return $this->hasOne(EmbassyBankDetail::class, 'submission_id');
-    }
-
-    /** One-to-one: only set when the submission is for an embassy visa recommendation. */
-    public function embassyVisaRecommendationDetail(): HasOne
-    {
-        return $this->hasOne(EmbassyVisaRecommendationDetail::class, 'submission_id');
-    }
-
-    /** One-to-one: only set when the submission is for the test service. */
-    public function testServiceDetail(): HasOne
-    {
-        return $this->hasOne(TestServiceDetail::class, 'submission_id');
     }
 
     public function documents(): HasMany

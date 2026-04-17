@@ -26,37 +26,6 @@ class ServiceSubmissionResource extends JsonResource
             'completed_at'   => $this->completed_at?->toISOString(),
             'created_at'     => $this->created_at->toISOString(),
             'service_type'   => new ServiceTypeResource($this->whenLoaded('serviceType')),
-            'detail' => $this->when(
-                $this->relationLoaded('ninetyDayReportDetail')
-                    || $this->relationLoaded('companyRegistrationDetail')
-                    || $this->relationLoaded('airportFastTrackDetail')
-                    || $this->relationLoaded('embassyResidentialDetail')
-                    || $this->relationLoaded('embassyCarLicenseDetail')
-                    || $this->relationLoaded('embassyBankDetail')
-                    || $this->relationLoaded('embassyVisaRecommendationDetail')
-                    || $this->relationLoaded('testServiceDetail'),
-                function () {
-                    $detail = $this->ninetyDayReportDetail
-                        ?? $this->companyRegistrationDetail
-                        ?? $this->airportFastTrackDetail
-                        ?? $this->embassyResidentialDetail
-                        ?? $this->embassyCarLicenseDetail
-                        ?? $this->embassyBankDetail
-                        ?? $this->embassyVisaRecommendationDetail
-                        ?? $this->testServiceDetail;
-
-                    // Guard: a submission may have relations eager-loaded but no
-                    // detail row yet (e.g. service type added after submission created).
-                    if ($detail === null) {
-                        return null;
-                    }
-
-                    return [
-                        'full_name' => $detail->full_name,
-                        'phone'     => $detail->phone,
-                    ];
-                }
-            ),
             'documents' => SubmissionDocumentResource::collection(
                 $this->whenLoaded('documents')
             ),

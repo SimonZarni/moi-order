@@ -51,48 +51,6 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(
-            \App\Services\NinetyDayReportService::class,
-            fn ($app) => new \App\Services\NinetyDayReportService(
-                $app->make(FileStorageInterface::class)
-            )
-        );
-
-        $this->app->bind(
-            \App\Services\CompanyRegistrationService::class,
-            fn ($app) => new \App\Services\CompanyRegistrationService(
-                $app->make(FileStorageInterface::class)
-            )
-        );
-
-        $this->app->bind(
-            \App\Services\AirportFastTrackService::class,
-            fn ($app) => new \App\Services\AirportFastTrackService(
-                $app->make(FileStorageInterface::class)
-            )
-        );
-
-        $this->app->bind(
-            \App\Services\EmbassyResidentialService::class,
-            fn ($app) => new \App\Services\EmbassyResidentialService(
-                $app->make(FileStorageInterface::class)
-            )
-        );
-
-        $this->app->bind(
-            \App\Services\EmbassyCarLicenseService::class,
-            fn ($app) => new \App\Services\EmbassyCarLicenseService(
-                $app->make(FileStorageInterface::class)
-            )
-        );
-
-        $this->app->bind(
-            \App\Services\EmbassyBankService::class,
-            fn ($app) => new \App\Services\EmbassyBankService(
-                $app->make(FileStorageInterface::class)
-            )
-        );
-
-        $this->app->bind(
             TicketOrderService::class,
             fn ($app) => new TicketOrderService(
                 $app->make(FileStorageInterface::class)

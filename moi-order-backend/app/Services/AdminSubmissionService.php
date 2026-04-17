@@ -70,24 +70,11 @@ class AdminSubmissionService
     }
 
     /**
-     * Full submission detail — loads every detail relation for the admin view.
+     * Full submission detail — loads all relations for the admin view.
      */
     public function show(ServiceSubmission $submission): ServiceSubmission
     {
-        return $submission->load([
-            'user',
-            'serviceType.service',
-            'payment',
-            'documents',
-            'ninetyDayReportDetail',
-            'companyRegistrationDetail',
-            'airportFastTrackDetail',
-            'embassyResidentialDetail',
-            'embassyCarLicenseDetail',
-            'embassyBankDetail',
-            'embassyVisaRecommendationDetail',
-            'testServiceDetail',
-        ]);
+        return $submission->load(['user', 'serviceType.service', 'payment', 'documents']);
     }
 
     /**
