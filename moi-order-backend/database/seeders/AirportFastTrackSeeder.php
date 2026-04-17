@@ -14,6 +14,7 @@ class AirportFastTrackSeeder extends Seeder
         $serviceId = DB::table('services')->insertGetId([
             'name'       => 'ฟาสแทร็กสนามบิน',
             'name_en'    => 'Airport Fast Track',
+            'name_mm'    => 'လေဆိပ် Fast Track',
             'slug'       => 'airport-fast-track',
             'is_active'  => true,
             'created_at' => now(),
@@ -24,6 +25,7 @@ class AirportFastTrackSeeder extends Seeder
             'service_id' => $serviceId,
             'name'       => 'มาตรฐาน',
             'name_en'    => 'Standard',
+            'name_mm'    => 'အခြေခံ၀န်ဆောင်မှု',
             'price'      => 3000,
             'is_active'  => true,
             'created_at' => now(),

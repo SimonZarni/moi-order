@@ -71,6 +71,7 @@ export interface ServiceType {
   id: number;
   name: string;
   name_en: string;
+  name_mm: string | null;
   price: number; // satangs
   field_schema: FieldSchemaItem[];
   // Present only when the parent service relation is loaded (detail endpoint)
@@ -78,6 +79,7 @@ export interface ServiceType {
     id: number;
     name: string;
     name_en: string;
+    name_mm: string | null;
   };
 }
 
@@ -85,6 +87,7 @@ export interface Service {
   id: number;
   name: string;
   name_en: string;
+  name_mm: string | null;
   slug: string;
   types: ServiceType[];
 }
@@ -95,6 +98,7 @@ export interface SubmissionDocument {
   id: number;
   document_type: string;
   label: string;
+  label_mm: string;
   signed_url: string;
 }
 

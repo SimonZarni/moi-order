@@ -94,7 +94,7 @@ export function HomeScreen(): React.JSX.Element {
               accessibilityLabel="Places — immigration offices" accessibilityRole="button">
               <Text style={[styles.cardTag, styles.tagGold]}>Explore</Text>
               <Text style={styles.cardTitle}>Places</Text>
-              <Text style={styles.cardSubtitle}>Immigration offices</Text>
+              <Text style={styles.cardSubtitle}>Attractions & Landmarks</Text>
               <Ionicons name="location" size={28} color={colours.secondary} style={styles.cardIcon} />
             </Pressable>
 

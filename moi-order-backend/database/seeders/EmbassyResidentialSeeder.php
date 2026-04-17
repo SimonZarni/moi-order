@@ -14,6 +14,7 @@ class EmbassyResidentialSeeder extends Seeder
         $serviceId = DB::table('services')->insertGetId([
             'name'       => 'บริการที่พักสถานทูต',
             'name_en'    => 'Embassy Residential Service',
+            'name_mm'    => 'နေထိုင်ကြောင်း ထောက်ခံစာ',
             'slug'       => 'embassy-residential-service',
             'is_active'  => true,
             'created_at' => now(),
@@ -24,6 +25,7 @@ class EmbassyResidentialSeeder extends Seeder
             'service_id' => $serviceId,
             'name'       => 'มาตรฐาน',
             'name_en'    => 'Standard',
+            'name_mm'    => 'အခြေခံ၀န်ဆောင်မှု',
             'price'      => 350,
             'is_active'  => true,
             'created_at' => now(),

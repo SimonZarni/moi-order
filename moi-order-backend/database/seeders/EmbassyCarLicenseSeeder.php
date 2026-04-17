@@ -14,6 +14,7 @@ class EmbassyCarLicenseSeeder extends Seeder
         $serviceId = DB::table('services')->insertGetId([
             'name'       => 'บริการใบขับขี่สถานทูต',
             'name_en'    => 'Embassy Car License',
+            'name_mm'    => 'ကားလိုင်စင်ထောက်ခံစာ',
             'slug'       => 'embassy-car-license',
             'is_active'  => true,
             'created_at' => now(),
@@ -24,6 +25,7 @@ class EmbassyCarLicenseSeeder extends Seeder
             'service_id' => $serviceId,
             'name'       => 'มาตรฐาน',
             'name_en'    => 'Standard',
+            'name_mm'    => 'အခြေခံ၀န်ဆောင်မှု',
             'price'      => 350,
             'is_active'  => true,
             'created_at' => now(),
