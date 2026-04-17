@@ -1,4 +1,6 @@
 import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { colours } from '@/shared/theme/colours';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -38,7 +40,7 @@ export function EmbassyResidentialFormScreen(): React.JSX.Element {
           accessibilityLabel="Go back"
           accessibilityRole="button"
         >
-          <Text style={styles.backArrow}>‹</Text>
+          <Ionicons name="chevron-back" size={20} color={colours.tertiary} />
           <Text style={styles.backLabel}>Other Services</Text>
         </Pressable>
         <Text style={styles.headerTitle}>Embassy Residential</Text>
@@ -91,11 +93,11 @@ export function EmbassyResidentialFormScreen(): React.JSX.Element {
               <Text style={styles.sectionTitle}>Required Documents</Text>
 
               {([
-                { key: 'passportBioPage',   label: 'Passport Bio Page',     icon: '📄', onPick: handlePickPassportBioPage },
-                { key: 'visaPage',          label: 'Visa Page',             icon: '🪪', onPick: handlePickVisaPage },
-                { key: 'identityCardFront', label: 'Identity Card (Front)', icon: '🪪', onPick: handlePickIdentityCardFront },
-                { key: 'identityCardBack',  label: 'Identity Card (Back)',  icon: '🪪', onPick: handlePickIdentityCardBack },
-                { key: 'tm30',              label: 'TM30',                  icon: '📋', onPick: handlePickTm30,
+                { key: 'passportBioPage',   label: 'Passport Bio Page',     icon: 'document-text' as const, onPick: handlePickPassportBioPage },
+                { key: 'visaPage',          label: 'Visa Page',             icon: 'id-card' as const, onPick: handlePickVisaPage },
+                { key: 'identityCardFront', label: 'Identity Card (Front)', icon: 'id-card' as const, onPick: handlePickIdentityCardFront },
+                { key: 'identityCardBack',  label: 'Identity Card (Back)',  icon: 'id-card' as const, onPick: handlePickIdentityCardBack },
+                { key: 'tm30',              label: 'TM30',                  icon: 'clipboard' as const, onPick: handlePickTm30,
                   hint: 'Tap to select image or PDF', uploadedHint: 'File selected — tap to change' },
               ] as const).map(({ key, label, icon, onPick, ...rest }) => (
                 <DocumentPickerField

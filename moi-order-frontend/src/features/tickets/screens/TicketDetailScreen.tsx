@@ -1,5 +1,8 @@
 import React from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+import { colours } from '@/shared/theme/colours';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { formatPrice } from '@/shared/utils/formatCurrency';
@@ -29,7 +32,7 @@ export function TicketDetailScreen(): React.JSX.Element {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
         <View style={styles.stateBox}>
-          <Text style={styles.stateIcon}>⚠</Text>
+          <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
           <Text style={styles.stateTitle}>Could not load ticket</Text>
           <Text style={styles.stateSubtitle}>Go back and try again</Text>
         </View>
@@ -43,7 +46,7 @@ export function TicketDetailScreen(): React.JSX.Element {
         <View>
           <Image source={{ uri: ticket.cover_image_url }} style={styles.cover} resizeMode="cover" />
           <Pressable style={styles.backBtn} onPress={handleBack} accessibilityLabel="Go back" accessibilityRole="button">
-            <Text style={styles.backArrow}>‹</Text>
+            <Ionicons name="chevron-back" size={20} color={colours.white} />
             <Text style={styles.backLabel}>Back</Text>
           </Pressable>
         </View>
@@ -53,7 +56,8 @@ export function TicketDetailScreen(): React.JSX.Element {
           <Text style={styles.highlight}>{ticket.highlight_description}</Text>
           <Text style={styles.description}>{ticket.description}</Text>
           <View style={styles.addressRow}>
-            <Text style={styles.addressText}>📍 {ticket.address}, {ticket.city}</Text>
+            <Ionicons name="location-outline" size={14} color={colours.textMuted} />
+            <Text style={styles.addressText}>{ticket.address}, {ticket.city}</Text>
           </View>
         </View>
 

@@ -1,6 +1,8 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
+import { colours } from '@/shared/theme/colours';
 import { styles } from './SuccessState.styles';
 
 interface SuccessStateProps {
@@ -19,7 +21,7 @@ export function SuccessState({
   return (
     <View style={styles.container}>
       <View style={styles.iconCircle}>
-        <Text style={styles.icon}>✓</Text>
+        <Ionicons name="checkmark" size={42} color={colours.success} />
       </View>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>

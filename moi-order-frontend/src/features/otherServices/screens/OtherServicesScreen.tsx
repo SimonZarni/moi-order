@@ -1,5 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
@@ -68,7 +69,7 @@ export function OtherServicesScreen(): React.JSX.Element {
                 )}
               </View>
               <View style={styles.serviceCardArrow}>
-                <Text style={styles.serviceCardArrowText}>›</Text>
+                <Ionicons name="chevron-forward" size={18} color={styles.serviceCardArrowText.color} />
               </View>
             </Pressable>
           ))}

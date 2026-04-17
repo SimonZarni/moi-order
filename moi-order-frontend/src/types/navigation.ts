@@ -65,4 +65,9 @@ export type RootStackParamList = {
 
   // ── Profile ──────────────────────────────────────────────────────────────
   Profile: undefined;
+
+  // ── Legal ─────────────────────────────────────────────────────────────────
+  PrivacyPolicy: undefined;
+  TermsAndConditions: undefined;
+  PdpaNotice: undefined;
 };

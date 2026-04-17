@@ -1,4 +1,6 @@
 import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { colours } from '@/shared/theme/colours';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -38,7 +40,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
           accessibilityLabel="Go back"
           accessibilityRole="button"
         >
-          <Text style={styles.backArrow}>‹</Text>
+          <Ionicons name="chevron-back" size={20} color={colours.tertiary} />
           <Text style={styles.backLabel}>Select Type</Text>
         </Pressable>
         <Text style={styles.headerTypeName}>{serviceTypeName} · {serviceTypeNameEn}</Text>
@@ -93,7 +95,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
 
               <DocumentPickerField
                 label="Passport Bio Page"
-                icon="📄"
+                icon="document-text"
                 onPress={handlePickPassportBioPage}
                 isUploaded={form.passportBioPage !== null}
                 error={form.errors['passportBioPage']}
@@ -102,7 +104,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
 
               <DocumentPickerField
                 label="Visa Page"
-                icon="🪪"
+                icon="id-card"
                 onPress={handlePickVisaPage}
                 isUploaded={form.visaPage !== null}
                 error={form.errors['visaPage']}
@@ -111,7 +113,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
 
               <DocumentPickerField
                 label="Previous 90-Day Slip"
-                icon="📋"
+                icon="newspaper"
                 onPress={handlePickOldSlip}
                 isUploaded={form.oldSlip !== null}
                 error={form.errors['oldSlip']}

@@ -1,6 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
+import { colours } from '@/shared/theme/colours';
 import { Category } from '@/types/models';
 import { styles } from './PlacesSearchBar.styles';
 
@@ -41,7 +43,7 @@ export function PlacesSearchBar({
       {/* Search input + filter pill row */}
       <View style={styles.row}>
         <View style={styles.inputWrap}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Ionicons name="search" size={16} color={colours.textMuted} style={styles.searchIcon} />
           <TextInput
             style={styles.input}
             value={query}
@@ -60,7 +62,7 @@ export function PlacesSearchBar({
               accessibilityLabel="Clear search"
               accessibilityRole="button"
             >
-              <Text style={styles.clearIcon}>✕</Text>
+              <Ionicons name="close" size={16} color={colours.textMuted} />
             </Pressable>
           )}
         </View>
@@ -77,9 +79,11 @@ export function PlacesSearchBar({
           >
             {selectedLabel}
           </Text>
-          <Text style={[styles.filterChevron, isFiltered && styles.filterChevronActive]}>
-            ▾
-          </Text>
+          <Ionicons
+            name="chevron-down"
+            size={12}
+            color={isFiltered ? colours.primary : colours.textMuted}
+          />
         </Pressable>
       </View>
 
@@ -121,7 +125,7 @@ export function PlacesSearchBar({
                   All
                 </Text>
                 {selectedCategory === null && (
-                  <Text style={styles.checkmark}>✓</Text>
+                  <Ionicons name="checkmark" size={16} color={colours.primary} />
                 )}
               </Pressable>
 
@@ -144,7 +148,7 @@ export function PlacesSearchBar({
                     >
                       {cat.name_en}
                     </Text>
-                    {isActive && <Text style={styles.checkmark}>✓</Text>}
+                    {isActive && <Ionicons name="checkmark" size={16} color={colours.primary} />}
                   </Pressable>
                 );
               })}

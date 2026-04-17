@@ -1,5 +1,8 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { formatDate } from '@/shared/utils/formatDate';
@@ -20,7 +23,7 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
       <View style={styles.orbLarge} />
       <View style={styles.orbSmall} />
       <Pressable style={styles.backBtn} onPress={handleBack} accessibilityLabel="Go back" accessibilityRole="button">
-        <Text style={styles.backArrow}>‹</Text>
+        <Ionicons name="chevron-back" size={20} color={colours.tertiary} />
         <Text style={styles.backLabel}>My Tickets</Text>
       </Pressable>
       {order !== undefined && (
@@ -49,7 +52,7 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
       <SafeAreaView style={styles.root} edges={['top']}>
         {hero}
         <View style={styles.stateBox}>
-          <Text style={styles.stateIcon}>⚠</Text>
+          <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
           <Text style={styles.stateTitle}>Could not load order</Text>
           <Text style={styles.stateSubtitle}>Pull down to retry</Text>
         </View>

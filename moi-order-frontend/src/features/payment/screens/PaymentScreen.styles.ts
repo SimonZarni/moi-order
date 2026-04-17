@@ -145,4 +145,22 @@ export const styles = StyleSheet.create({
     fontSize: typography.md,
     fontWeight: '600',
   },
+
+  // ── Pay Later (ghost) ─────────────────────────────────────────────────────
+  payLaterBtn: {
+    borderWidth: 1,
+    borderColor: colours.textMuted,
+    borderRadius: radius.xl,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    minHeight: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.lg,
+  },
+  payLaterBtnText: {
+    color: colours.textMuted,
+    fontSize: typography.md,
+    fontWeight: '600',
+  },
 });

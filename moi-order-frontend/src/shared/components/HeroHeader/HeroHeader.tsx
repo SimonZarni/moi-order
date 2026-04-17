@@ -1,6 +1,8 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
+import { colours } from '@/shared/theme/colours';
 import { styles } from './HeroHeader.styles';
 
 interface HeroHeaderProps {
@@ -35,7 +37,7 @@ export function HeroHeader({
         accessibilityLabel="Go back"
         accessibilityRole="button"
       >
-        <Text style={styles.backArrow}>‹</Text>
+        <Ionicons name="chevron-back" size={20} color={colours.tertiary} />
         <Text style={styles.backLabel}>{backLabel}</Text>
       </Pressable>
 

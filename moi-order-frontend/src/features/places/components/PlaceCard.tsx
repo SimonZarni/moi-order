@@ -2,6 +2,9 @@ import React from 'react';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+import { colours } from '@/shared/theme/colours';
 
 import { Place } from '@/types/models';
 import { styles } from './PlaceCard.styles';
@@ -32,7 +35,7 @@ export function PlaceCard({ place, onPress, distance }: PlaceCardProps): React.J
           />
         ) : (
           <View style={styles.imageFallback}>
-            <Text style={styles.imageFallbackIcon}>📍</Text>
+            <Ionicons name="location" size={36} color={colours.textMuted} />
           </View>
         )}
 

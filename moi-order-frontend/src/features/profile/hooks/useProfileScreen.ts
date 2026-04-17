@@ -23,6 +23,7 @@ export interface UseProfileScreenResult {
   isDirty: boolean;
   isSavingProfile: boolean;
   showDatePicker: boolean;
+  isEditingProfile: boolean;
   // Change password form
   currentPassword: string;
   newPassword: string;
@@ -31,6 +32,7 @@ export interface UseProfileScreenResult {
   isPasswordSectionOpen: boolean;
   isChangingPassword: boolean;
   // Handlers — profile
+  handleToggleEditProfile: () => void;
   handleNameChange: (text: string) => void;
   handleDateFieldPress: () => void;
   handleDatePickerChange: (event: DateTimePickerEvent, date?: Date) => void;
@@ -44,6 +46,9 @@ export interface UseProfileScreenResult {
   handleChangePassword: () => void;
   // Handlers — nav
   handleGoToOrders: () => void;
+  handleGoToPrivacyPolicy: () => void;
+  handleGoToTerms: () => void;
+  handleGoToPdpa: () => void;
   handleLogout: () => void;
 }
 
@@ -58,6 +63,7 @@ export function useProfileScreen(): UseProfileScreenResult {
 
   const [showDatePicker, setShowDatePicker]         = useState(false);
   const [isPasswordSectionOpen, setPasswordSection] = useState(false);
+  const [isEditingProfile, setIsEditingProfile]     = useState(false);
 
   // Guard: navigate to Home when unauthenticated.
   // Guests cannot reach this screen via the tab bar (FloatingTabBar redirects them
@@ -71,6 +77,17 @@ export function useProfileScreen(): UseProfileScreenResult {
   const handleRefresh = useCallback(() => { refetch(); }, [refetch]);
 
   // ── Profile form handlers ───────────────────────────────────────────────
+
+  const handleToggleEditProfile = useCallback((): void => {
+    setIsEditingProfile((prev) => {
+      if (prev && user) {
+        // Cancelling — reset form back to server values
+        profileForm.resetToUser(user);
+        setShowDatePicker(false);
+      }
+      return !prev;
+    });
+  }, [profileForm, user]);
 
   const handleDateFieldPress = useCallback((): void => {
     setShowDatePicker(true);
@@ -100,7 +117,8 @@ export function useProfileScreen(): UseProfileScreenResult {
     updateMutation.mutate(
       { name: profileForm.name.trim(), dateOfBirth: dobStr },
       {
-        onError: (err) => profileForm.applyApiError(err),
+        onSuccess: () => setIsEditingProfile(false),
+        onError:   (err) => profileForm.applyApiError(err),
       },
     );
   }, [profileForm, updateMutation]);
@@ -140,6 +158,18 @@ export function useProfileScreen(): UseProfileScreenResult {
     navigation.navigate('Orders');
   }, [navigation]);
 
+  const handleGoToPrivacyPolicy = useCallback((): void => {
+    navigation.navigate('PrivacyPolicy');
+  }, [navigation]);
+
+  const handleGoToTerms = useCallback((): void => {
+    navigation.navigate('TermsAndConditions');
+  }, [navigation]);
+
+  const handleGoToPdpa = useCallback((): void => {
+    navigation.navigate('PdpaNotice');
+  }, [navigation]);
+
   const handleLogout = useCallback((): void => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
       { text: 'Cancel', style: 'cancel' },
@@ -160,15 +190,17 @@ export function useProfileScreen(): UseProfileScreenResult {
     name:            profileForm.name,
     dateOfBirth:     profileForm.dateOfBirth,
     profileErrors:   profileForm.errors,
-    isDirty:         profileForm.isDirty,
-    isSavingProfile: updateMutation.isPending,
+    isDirty:          profileForm.isDirty,
+    isSavingProfile:  updateMutation.isPending,
     showDatePicker,
+    isEditingProfile,
     currentPassword:        changePasswordForm.currentPassword,
     newPassword:            changePasswordForm.newPassword,
     confirmPassword:        changePasswordForm.confirmPassword,
     passwordErrors:         changePasswordForm.errors,
     isPasswordSectionOpen,
     isChangingPassword:     changePasswordMutation.isPending,
+    handleToggleEditProfile,
     handleNameChange:    profileForm.handleNameChange,
     handleDateFieldPress,
     handleDatePickerChange,
@@ -180,6 +212,9 @@ export function useProfileScreen(): UseProfileScreenResult {
     handleConfirmPasswordChange: changePasswordForm.handleConfirmPasswordChange,
     handleChangePassword,
     handleGoToOrders,
+    handleGoToPrivacyPolicy,
+    handleGoToTerms,
+    handleGoToPdpa,
     handleLogout,
   };
 }

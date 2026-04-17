@@ -1,6 +1,8 @@
 import React from 'react';
 import { Image } from 'expo-image';
 import { FlatList, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -64,7 +66,7 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
           )}
           <Pressable style={styles.heroBackBtn} onPress={handleBack}
             accessibilityLabel="Go back to places" accessibilityRole="button">
-            <Text style={styles.heroBackArrow}>‹</Text>
+            <Ionicons name="chevron-back" size={20} color={colours.white} />
             <Text style={styles.heroBackLabel}>Places</Text>
           </Pressable>
 
@@ -76,9 +78,11 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
               accessibilityLabel={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
               accessibilityRole="button"
             >
-              <Text style={[styles.heroFavIcon, isFavorited && styles.heroFavIconActive]}>
-                {isFavorited ? '♥' : '♡'}
-              </Text>
+              <Ionicons
+                name={isFavorited ? 'heart' : 'heart-outline'}
+                size={20}
+                color={isFavorited ? colours.danger : colours.white}
+              />
             </Pressable>
           )}
         </View>
@@ -101,29 +105,29 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
           <Text style={styles.sectionLabel}>Details</Text>
           {place.opening_hours !== null && (
             <View style={styles.infoRow}>
-              <Text style={styles.infoIcon}>🕐</Text>
+              <Ionicons name="time-outline" size={16} color={colours.textMuted} style={styles.infoIcon} />
               <Text style={styles.infoText}>{place.opening_hours}</Text>
             </View>
           )}
           <View style={styles.infoRow}>
-            <Text style={styles.infoIcon}>📍</Text>
+            <Ionicons name="location-outline" size={16} color={colours.textMuted} style={styles.infoIcon} />
             <Text style={styles.infoText}>{place.address}</Text>
           </View>
           {place.contact_phone !== null && (
             <Pressable style={styles.infoRow} onPress={handleCallPhone} accessibilityLabel="Call phone number" accessibilityRole="button">
-              <Text style={styles.infoIcon}>📞</Text>
+              <Ionicons name="call-outline" size={16} color={colours.primary} style={styles.infoIcon} />
               <Text style={[styles.infoText, styles.infoLink]}>{place.contact_phone}</Text>
             </Pressable>
           )}
           {place.website !== null && (
             <Pressable style={styles.infoRow} onPress={handleOpenWebsite} accessibilityLabel="Open website" accessibilityRole="button">
-              <Text style={styles.infoIcon}>🌐</Text>
+              <Ionicons name="globe-outline" size={16} color={colours.primary} style={styles.infoIcon} />
               <Text style={[styles.infoText, styles.infoLink]} numberOfLines={1}>{place.website}</Text>
             </Pressable>
           )}
           {place.latitude !== null && (
             <Pressable style={styles.infoRow} onPress={handleOpenMaps} accessibilityLabel="Open in maps" accessibilityRole="button">
-              <Text style={styles.infoIcon}>🗺</Text>
+              <Ionicons name="map-outline" size={16} color={colours.primary} style={styles.infoIcon} />
               <Text style={[styles.infoText, styles.infoLink]}>View on Map</Text>
             </Pressable>
           )}

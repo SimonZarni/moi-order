@@ -11,7 +11,7 @@ import { RootStackParamList } from '@/types/navigation';
 const SLUG_TO_SCREEN: Partial<Record<string, keyof RootStackParamList>> = {
   'company-registration': 'CompanyRegistrationForm',
   'airport-fast-track':   'AirportFastTrackForm',
-  'embassy-residential':  'EmbassyResidentialForm',
+  'embassy-residential-service': 'EmbassyResidentialForm',
   'embassy-car-license':  'EmbassyCarLicenseForm',
   'embassy-bank-service':         'EmbassyBankForm',
   'embassy-visa-recommendation':  'EmbassyVisaRecommendationForm',

@@ -3,30 +3,29 @@ import { Pressable, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
+import { colours } from '@/shared/theme/colours';
 import { useAuthStore } from '@/shared/store/authStore';
 import { RootStackParamList } from '@/types/navigation';
 import { styles, TAB_BAR_BOTTOM_OFFSET } from './FloatingTabBar.styles';
 
-/**
- * Routes that conceptually belong to the Home tab.
- * Explicitly typing this ensures we only include valid keys from our ParamList.
- */
 const HOME_CHILD_ROUTES: (keyof RootStackParamList)[] = ['NinetyDayReport', 'OtherServices'];
+
+type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
 interface TabItem {
   route: keyof RootStackParamList;
-  icon: string;
+  icon: IoniconsName;
   label: string;
   disabled?: boolean;
 }
 
 const TABS: TabItem[] = [
-  { route: 'Home',   icon: '🏠', label: 'Home'    },
-  { route: 'Places', icon: '📍', label: 'Places'  },
-  { route: 'Orders', icon: '📋', label: 'Orders'  },
-  // Ensure 'Profile' exists in your RootStackParamList or add it here
-  { route: 'Profile', icon: '👤', label: 'Profile' },
+  { route: 'Home',    icon: 'home',   label: 'Home'    },
+  { route: 'Places',  icon: 'location', label: 'Places'  },
+  { route: 'Orders',  icon: 'list',   label: 'Orders'  },
+  { route: 'Profile', icon: 'person', label: 'Profile' },
 ];
 
 export function FloatingTabBar(): React.JSX.Element {
@@ -82,9 +81,12 @@ export function FloatingTabBar(): React.JSX.Element {
             accessibilityRole="button"
             accessibilityState={{ selected: isActive }}
           >
-            <Text style={[styles.tabIcon, isActive && styles.tabIconActive]}>
-              {tab.icon}
-            </Text>
+            <Ionicons
+              name={tab.icon}
+              size={20}
+              color={isActive ? colours.primary : colours.textMuted}
+              style={{ opacity: isActive ? 1 : 0.45 }}
+            />
             <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>
               {tab.label}
             </Text>
