@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useOrderDetailScreen } from '@/features/orders/hooks/useOrderDetailScreen';
 import { formatDate } from '@/shared/utils/formatDate';
 import { formatPrice } from '@/shared/utils/formatCurrency';
-import { SubmissionDocument } from '@/types/models';
+import { FieldSchemaItem, SubmissionDocument } from '@/types/models';
 import { styles, STATUS_COLOURS } from './OrderDetailScreen.styles';
 
 const DOC_ICONS: Record<string, string> = {
@@ -117,22 +117,27 @@ export function OrderDetailScreen(): React.JSX.Element {
             </Pressable>
           )}
 
-          {/* ── Personal info ── */}
-          {submission.detail !== undefined && (
+          {/* ── Personal info (from dynamic submission_data + field_schema) ── */}
+          {submission.submission_data !== undefined &&
+           submission.service_type.field_schema !== undefined &&
+           submission.service_type.field_schema.some((f: FieldSchemaItem) => f.type !== 'file') && (
             <>
               <View style={styles.sectionLabelRow}>
                 <Text style={styles.sectionLabel}>Personal Info</Text>
                 <View style={styles.sectionLine} />
               </View>
               <View style={styles.infoCard}>
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Full Name</Text>
-                  <Text style={styles.infoValue}>{submission.detail.full_name}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Phone</Text>
-                  <Text style={styles.infoValue}>{submission.detail.phone}</Text>
-                </View>
+                {submission.service_type.field_schema
+                  .filter((f: FieldSchemaItem) => f.type !== 'file')
+                  .map((f: FieldSchemaItem) => (
+                    <View key={f.key} style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>{f.label_en}</Text>
+                      <Text style={styles.infoValue}>
+                        {String(submission.submission_data![f.key] ?? '—')}
+                      </Text>
+                    </View>
+                  ))
+                }
                 {submission.completed_at !== null && (
                   <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Completed</Text>

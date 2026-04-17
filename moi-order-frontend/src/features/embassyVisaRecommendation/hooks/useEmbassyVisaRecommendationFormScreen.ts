@@ -9,7 +9,7 @@ import {
   useEmbassyVisaRecommendationForm,
   UseEmbassyVisaRecommendationFormResult,
 } from './useEmbassyVisaRecommendationForm';
-import { submitEmbassyVisaRecommendation } from '@/shared/api/submissions';
+import { submitDynamic } from '@/shared/api/submissions';
 import { useAuthStore } from '@/shared/store/authStore';
 import { MESSAGES } from '@/shared/constants/messages';
 import { ApiError } from '@/types/models';
@@ -85,17 +85,17 @@ export function useEmbassyVisaRecommendationFormScreen(): UseEmbassyVisaRecommen
   // ── Submit ────────────────────────────────────────────────────────────────
 
   const { mutate, isPending: isSubmitting } = useMutation({
-    mutationFn: () =>
-      submitEmbassyVisaRecommendation({
-        idempotencyKey:    Crypto.randomUUID(),
-        serviceTypeId,
-        fullName:          form.fullName.trim(),
-        phone:             form.phone.trim(),
-        passportBioPage:   form.passportBioPage!,
-        visaPage:          form.visaPage!,
-        identityCardFront: form.identityCardFront!,
-        identityCardBack:  form.identityCardBack!,
-      }),
+    mutationFn: () => submitDynamic({
+      idempotencyKey: Crypto.randomUUID(),
+      serviceTypeId,
+      fields: { full_name: form.fullName.trim(), phone: form.phone.trim() },
+      files:  {
+        passport_bio_page:   form.passportBioPage!,
+        visa_page:           form.visaPage!,
+        identity_card_front: form.identityCardFront!,
+        identity_card_back:  form.identityCardBack!,
+      },
+    }),
     onSuccess: (submission) => navigation.navigate('Payment', { kind: 'submission', submissionId: submission.id }),
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {

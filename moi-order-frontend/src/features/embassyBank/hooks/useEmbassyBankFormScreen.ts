@@ -9,7 +9,7 @@ import {
   useEmbassyBankForm,
   UseEmbassyBankFormResult,
 } from './useEmbassyBankForm';
-import { submitEmbassyBank } from '@/shared/api/submissions';
+import { submitDynamic } from '@/shared/api/submissions';
 import { useAuthStore } from '@/shared/store/authStore';
 import { MESSAGES } from '@/shared/constants/messages';
 import { ApiError } from '@/types/models';
@@ -105,26 +105,35 @@ export function useEmbassyBankFormScreen(): UseEmbassyBankFormScreenResult {
   // ── Submit ────────────────────────────────────────────────────────────────
 
   const { mutate, isPending: isSubmitting } = useMutation({
-    mutationFn: () =>
-      submitEmbassyBank({
-        idempotencyKey:    Crypto.randomUUID(),
+    mutationFn: () => {
+      const fields: Record<string, string> = {
+        full_name:        form.fullName.trim(),
+        passport_no:      form.passportNo.trim(),
+        identity_card_no: form.identityCardNo.trim(),
+        myanmar_address:  form.myanmarAddress.trim(),
+        thai_address:     form.thaiAddress.trim(),
+        phone:            form.phone.trim(),
+        bank_name:        form.bankName.trim(),
+      };
+      const job     = form.currentJob.trim();
+      const company = form.company.trim();
+      if (job)     fields.current_job = job;
+      if (company) fields.company     = company;
+
+      return submitDynamic({
+        idempotencyKey: Crypto.randomUUID(),
         serviceTypeId,
-        fullName:          form.fullName.trim(),
-        passportNo:        form.passportNo.trim(),
-        identityCardNo:    form.identityCardNo.trim(),
-        currentJob:        form.currentJob.trim() || null,
-        company:           form.company.trim()    || null,
-        myanmarAddress:    form.myanmarAddress.trim(),
-        thaiAddress:       form.thaiAddress.trim(),
-        phone:             form.phone.trim(),
-        bankName:          form.bankName.trim(),
-        passportSizePhoto: form.passportSizePhoto!,
-        passportBioPage:   form.passportBioPage!,
-        visaPage:          form.visaPage!,
-        identityCardFront: form.identityCardFront!,
-        identityCardBack:  form.identityCardBack!,
-        tm30:              form.tm30!,
-      }),
+        fields,
+        files: {
+          passport_size_photo:  form.passportSizePhoto!,
+          passport_bio_page:    form.passportBioPage!,
+          visa_page:            form.visaPage!,
+          identity_card_front:  form.identityCardFront!,
+          identity_card_back:   form.identityCardBack!,
+          tm30:                 form.tm30!,
+        },
+      });
+    },
     onSuccess: (submission) => navigation.navigate('Payment', { kind: 'submission', submissionId: submission.id }),
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {

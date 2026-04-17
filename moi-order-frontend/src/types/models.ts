@@ -91,26 +91,11 @@ export interface Service {
 
 // ── Submissions ────────────────────────────────────────────────────────────
 
-export interface SubmissionDetail {
-  full_name: string;
-  phone: string;
-}
-
 export interface SubmissionDocument {
   id: number;
   document_type: string;
   label: string;
   signed_url: string;
-}
-
-export interface EmbassyBankDetail extends SubmissionDetail {
-  passport_no: string;
-  identity_card_no: string;
-  current_job: string | null;
-  company: string | null;
-  myanmar_address: string;
-  thai_address: string;
-  bank_name: string;
 }
 
 export interface Payment {
@@ -131,10 +116,9 @@ export interface ServiceSubmission {
   completed_at: string | null;
   created_at: string;
   service_type: ServiceType;
-  detail?: SubmissionDetail;
   documents?: SubmissionDocument[];
   payment?: Payment;
-  /** Present for dynamic-schema submissions. File fields contain signed URLs. */
+  /** All submission fields. Text values are strings; file fields are signed URLs. */
   submission_data?: Record<string, string | number | boolean>;
 }
 
