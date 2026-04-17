@@ -13,9 +13,14 @@ import { ApiError } from '@/types/models';
 // In-memory token ref — populated by authStore on login, cleared on logout.
 // Avoids async SecureStore reads inside the synchronous request interceptor.
 let _accessToken: string | null = null;
+let _locale: string = 'en';
 
 export function setMemoryToken(token: string | null): void {
   _accessToken = token;
+}
+
+export function setMemoryLocale(locale: string): void {
+  _locale = locale;
 }
 
 const apiClient = axios.create({
@@ -32,6 +37,7 @@ apiClient.interceptors.request.use((config) => {
   if (_accessToken !== null) {
     config.headers['Authorization'] = `Bearer ${_accessToken}`;
   }
+  config.headers['Accept-Language'] = _locale;
   return config;
 });
 

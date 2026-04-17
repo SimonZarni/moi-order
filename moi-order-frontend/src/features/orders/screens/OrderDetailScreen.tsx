@@ -8,6 +8,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useOrderDetailScreen } from '@/features/orders/hooks/useOrderDetailScreen';
 import { formatDate } from '@/shared/utils/formatDate';
 import { formatPrice } from '@/shared/utils/formatCurrency';
+import { useLocale } from '@/shared/hooks/useLocale';
+import { localeName, localeLabel } from '@/shared/utils/localeName';
 import { FieldSchemaItem, SubmissionDocument } from '@/types/models';
 import { styles, STATUS_COLOURS } from './OrderDetailScreen.styles';
 
@@ -27,6 +29,7 @@ const DOC_ICONS: Record<string, IoniconsName> = {
 
 export function OrderDetailScreen(): React.JSX.Element {
   const { submission, isLoading, isRefreshing, isError, canPay, handleRefresh, handleBack, handlePayNow } = useOrderDetailScreen();
+  const { locale } = useLocale();
 
   const hero = (
     <View style={styles.hero}>
@@ -41,7 +44,7 @@ export function OrderDetailScreen(): React.JSX.Element {
         <View style={styles.heroTextBlock}>
           <Text style={styles.heroEyebrow}>Order #{submission.id}</Text>
           <Text style={styles.heroTitle}>
-            {submission.service_type.service?.name_en ?? submission.service_type.name_en}
+            {localeName(submission.service_type.service ?? submission.service_type, locale)}
           </Text>
           <Text style={styles.heroDate}>Submitted {formatDate(submission.created_at)}</Text>
         </View>
@@ -97,7 +100,7 @@ export function OrderDetailScreen(): React.JSX.Element {
             <View style={styles.statusCardLeft}>
               <Text style={styles.statusCardLabel}>Service</Text>
               <Text style={styles.statusCardServiceName}>
-                {submission.service_type.service?.name_en ?? submission.service_type.name_en}
+                {localeName(submission.service_type.service ?? submission.service_type, locale)}
               </Text>
               <View style={styles.statusCardDivider} />
               <Text style={styles.statusCardLabel}>Status</Text>
@@ -169,7 +172,7 @@ export function OrderDetailScreen(): React.JSX.Element {
                         size={16}
                         color={colours.textMuted}
                       />
-                      <Text style={styles.docLabel}>{doc.label}</Text>
+                      <Text style={styles.docLabel}>{localeLabel(doc, locale)}</Text>
                       <Ionicons name="checkmark" size={14} color={colours.success} />
                     </View>
                   </React.Fragment>

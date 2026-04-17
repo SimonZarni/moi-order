@@ -7,11 +7,14 @@ import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBa
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { useOtherServicesScreen } from '@/features/otherServices/hooks/useOtherServicesScreen';
+import { useLocale } from '@/shared/hooks/useLocale';
+import { localeName } from '@/shared/utils/localeName';
 import { styles } from './OtherServicesScreen.styles';
 
 export function OtherServicesScreen(): React.JSX.Element {
   const { services, isLoading, isRefreshing, isError, handleRefresh, handleSelectService, handleBack } =
     useOtherServicesScreen();
+  const { locale } = useLocale();
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -56,11 +59,11 @@ export function OtherServicesScreen(): React.JSX.Element {
               key={service.id}
               style={({ pressed }) => [styles.serviceCard, { opacity: pressed ? 0.88 : 1 }]}
               onPress={() => handleSelectService(service)}
-              accessibilityLabel={`${service.name_en} service`}
+              accessibilityLabel={`${localeName(service, locale)} service`}
               accessibilityRole="button"
             >
               <View style={styles.serviceCardContent}>
-                <Text style={styles.serviceCardTitle}>{service.name_en}</Text>
+                <Text style={styles.serviceCardTitle}>{localeName(service, locale)}</Text>
                 <Text style={styles.serviceCardSubtitle}>{service.name}</Text>
                 {service.types.length > 0 && (
                   <Text style={styles.serviceCardPrice}>

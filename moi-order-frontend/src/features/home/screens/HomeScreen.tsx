@@ -73,7 +73,6 @@ export function HomeScreen(): React.JSX.Element {
               accessibilityLabel="90-Day Report service" accessibilityRole="button">
               <Text style={[styles.cardTag, styles.tagSage]}>Immigration</Text>
               <Text style={styles.cardTitle}>90-Day{'\n'}Report</Text>
-              <Text style={styles.cardSubtitle}>รายงานตัว 90 วัน</Text>
               <Ionicons name="calendar" size={28} color={colours.primary} style={styles.cardIcon} />
             </Pressable>
 

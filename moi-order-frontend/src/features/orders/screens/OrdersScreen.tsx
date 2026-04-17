@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useLocale } from '@/shared/hooks/useLocale';
+import { localeName } from '@/shared/utils/localeName';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
@@ -21,20 +23,22 @@ interface OrderCardProps {
 }
 
 function OrderCard({ item, onPress }: OrderCardProps): React.JSX.Element {
+  const { locale } = useLocale();
   const accentColour = STATUS_COLOURS[item.status] ?? STATUS_COLOURS['pending']!;
+  const svcName = localeName(item.service_type.service ?? item.service_type, locale);
   return (
     <View style={styles.cardWrap}>
       <Pressable
         style={({ pressed }) => [styles.card, { opacity: pressed ? 0.85 : 1 }]}
         onPress={() => onPress(item.id)}
-        accessibilityLabel={`Order ${item.id} — ${item.service_type.name_en}`}
+        accessibilityLabel={`Order ${item.id} — ${svcName}`}
         accessibilityRole="button"
       >
         <View style={[styles.cardAccentBar, { backgroundColor: accentColour }]} />
         <View style={styles.cardBody}>
           <View style={styles.cardTopRow}>
             <Text style={styles.cardServiceName} numberOfLines={1}>
-              {item.service_type.service?.name_en ?? item.service_type.name_en}
+              {svcName}
             </Text>
             <View style={[styles.statusPill, { borderColor: `${accentColour}40` }]}>
               <Text style={[styles.statusText, { color: accentColour }]}>{item.status_label}</Text>

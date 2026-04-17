@@ -18,10 +18,11 @@ import { enableScreens } from 'react-native-screens';
 
 enableScreens(true);
 
-import { setMemoryToken } from '@/shared/api/client';
+import { setMemoryToken, setMemoryLocale } from '@/shared/api/client';
 import { fetchMe } from '@/shared/api/auth';
-import { TOKEN_KEY, CACHE_TTL } from '@/shared/constants/config';
+import { TOKEN_KEY, LOCALE_KEY, CACHE_TTL } from '@/shared/constants/config';
 import { useAuthStore } from '@/shared/store/authStore';
+import { useLocaleStore, Locale } from '@/shared/store/localeStore';
 import { colours } from '@/shared/theme/colours';
 
 import { LoginScreen } from '@/features/auth/screens/LoginScreen';
@@ -72,7 +73,16 @@ export default function App(): React.JSX.Element {
   useEffect(() => {
     async function restoreSession(): Promise<void> {
       try {
-        const token = await SecureStore.getItemAsync(TOKEN_KEY);
+        const [token, localeVal] = await Promise.all([
+          SecureStore.getItemAsync(TOKEN_KEY),
+          SecureStore.getItemAsync(LOCALE_KEY),
+        ]);
+
+        if (localeVal === 'en' || localeVal === 'mm') {
+          setMemoryLocale(localeVal);
+          useLocaleStore.getState().setLocale(localeVal as Locale);
+        }
+
         if (token !== null) {
           setMemoryToken(token);
           const user = await fetchMe();
