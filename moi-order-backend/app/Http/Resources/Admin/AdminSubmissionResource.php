@@ -10,13 +10,10 @@ use App\Http\Resources\ServiceTypeResource;
 use App\Http\Resources\SubmissionDocumentResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Arr;
-
 /**
  * Principle: SRP — shapes the admin-facing submission response only.
  * Principle: Security — idempotency_key never exposed. file_path never exposed
  *   (SubmissionDocumentResource generates signed URLs instead).
- *   Admin sees full detail fields (e.g. passport_no) unlike user-facing resource.
  */
 class AdminSubmissionResource extends JsonResource
 {
@@ -41,23 +38,6 @@ class AdminSubmissionResource extends JsonResource
             ),
 
             'service_type' => new ServiceTypeResource($this->whenLoaded('serviceType')),
-
-            // Full applicant detail — all fields from whichever detail model is populated.
-            // Internal fields (id, submission_id, timestamps) are stripped.
-            'detail' => $this->when(
-                $this->hasAnyDetailLoaded(),
-                function () {
-                    $detail = $this->resolveDetail();
-
-                    if ($detail === null) {
-                        return null;
-                    }
-
-                    return Arr::except($detail->toArray(), [
-                        'id', 'submission_id', 'created_at', 'updated_at',
-                    ]);
-                }
-            ),
 
             'documents' => SubmissionDocumentResource::collection(
                 $this->whenLoaded('documents')
@@ -84,31 +64,5 @@ class AdminSubmissionResource extends JsonResource
                 }
             ),
         ];
-    }
-
-    // ─── Private ─────────────────────────────────────────────────────────────
-
-    private function hasAnyDetailLoaded(): bool
-    {
-        return $this->relationLoaded('ninetyDayReportDetail')
-            || $this->relationLoaded('companyRegistrationDetail')
-            || $this->relationLoaded('airportFastTrackDetail')
-            || $this->relationLoaded('embassyResidentialDetail')
-            || $this->relationLoaded('embassyCarLicenseDetail')
-            || $this->relationLoaded('embassyBankDetail')
-            || $this->relationLoaded('embassyVisaRecommendationDetail')
-            || $this->relationLoaded('testServiceDetail');
-    }
-
-    private function resolveDetail(): mixed
-    {
-        return $this->ninetyDayReportDetail
-            ?? $this->companyRegistrationDetail
-            ?? $this->airportFastTrackDetail
-            ?? $this->embassyResidentialDetail
-            ?? $this->embassyCarLicenseDetail
-            ?? $this->embassyBankDetail
-            ?? $this->embassyVisaRecommendationDetail
-            ?? $this->testServiceDetail;
     }
 }
