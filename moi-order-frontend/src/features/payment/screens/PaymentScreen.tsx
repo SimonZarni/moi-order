@@ -1,5 +1,8 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { QrCodeDisplay } from '@/features/payment/components/QrCodeDisplay';
 import { usePaymentScreen } from '@/features/payment/hooks/usePaymentScreen';
@@ -29,7 +32,7 @@ export function PaymentScreen(): React.JSX.Element {
           accessibilityLabel="Go back"
           accessibilityRole="button"
         >
-          <Text style={styles.backArrow}>‹</Text>
+          <Ionicons name="chevron-back" size={20} color={colours.tertiary} />
           <Text style={styles.backLabel}>Back</Text>
         </Pressable>
         <Text style={styles.headerTitle}>Pay with PromptPay</Text>
@@ -41,7 +44,7 @@ export function PaymentScreen(): React.JSX.Element {
       <View style={styles.body}>
         {isPaid ? (
           <View style={styles.successContainer}>
-            <Text style={styles.successIcon}>✓</Text>
+            <Ionicons name="checkmark-circle" size={64} color={colours.success} />
             <Text style={styles.successTitle}>Payment Successful</Text>
             <Text style={styles.successSubtitle}>
               Your payment has been confirmed.{'\n'}We'll start processing your order shortly.
@@ -57,7 +60,7 @@ export function PaymentScreen(): React.JSX.Element {
           </View>
         ) : isPaymentFailed ? (
           <View style={styles.failureContainer}>
-            <Text style={styles.failureIcon}>✕</Text>
+            <Ionicons name="close-circle" size={64} color={colours.danger} />
             <Text style={styles.failureTitle}>Payment Failed</Text>
             <Text style={styles.failureSubtitle}>
               Your payment could not be processed.{'\n'}Please contact support.
@@ -75,7 +78,7 @@ export function PaymentScreen(): React.JSX.Element {
           // Error check BEFORE the payment===undefined guard — failed mutation leaves
           // payment as undefined, so the order here matters.
           <View style={styles.failureContainer}>
-            <Text style={styles.failureIcon}>⚠</Text>
+            <Ionicons name="warning" size={64} color={colours.secondary} />
             <Text style={styles.failureTitle}>Could not load payment</Text>
             <Text style={styles.failureSubtitle}>{createError.message}</Text>
           </View>
@@ -94,6 +97,14 @@ export function PaymentScreen(): React.JSX.Element {
               <View style={styles.waitingDot} />
               <Text style={styles.waitingText}>Waiting for payment…</Text>
             </View>
+            <Pressable
+              style={styles.payLaterBtn}
+              onPress={handleGoToOrders}
+              accessibilityLabel="Pay later from order history"
+              accessibilityRole="button"
+            >
+              <Text style={styles.payLaterBtnText}>Pay Later</Text>
+            </Pressable>
           </>
         )}
       </View>

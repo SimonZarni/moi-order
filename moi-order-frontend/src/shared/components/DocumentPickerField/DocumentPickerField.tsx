@@ -1,11 +1,15 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
+import { colours } from '@/shared/theme/colours';
 import { styles } from './DocumentPickerField.styles';
+
+type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
 interface DocumentPickerFieldProps {
   label: string;
-  icon: string;            // emoji shown before upload
+  icon: IoniconsName;      // Ionicons name shown before upload
   onPress: () => void;
   isUploaded: boolean;
   error?: string | undefined;
@@ -40,7 +44,11 @@ export function DocumentPickerField({
         accessibilityRole="button"
       >
         <View style={[styles.iconBox, isUploaded && styles.iconBoxUploaded]}>
-          <Text style={styles.iconText}>{isUploaded ? '✓' : icon}</Text>
+          <Ionicons
+            name={isUploaded ? 'checkmark' : icon}
+            size={20}
+            color={colours.white}
+          />
         </View>
         <View style={styles.textCol}>
           <Text style={styles.title}>{label}</Text>

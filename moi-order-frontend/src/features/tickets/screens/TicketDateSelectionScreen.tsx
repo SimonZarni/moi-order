@@ -1,4 +1,6 @@
 import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { colours } from '@/shared/theme/colours';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -16,7 +18,7 @@ export function TicketDateSelectionScreen(): React.JSX.Element {
       <View style={styles.hero}>
         <View style={styles.orbLarge} />
         <Pressable style={styles.backBtn} onPress={handleBack} accessibilityLabel="Go back" accessibilityRole="button">
-          <Text style={styles.backArrow}>‹</Text>
+          <Ionicons name="chevron-back" size={20} color={colours.tertiary} />
           <Text style={styles.backLabel}>Back</Text>
         </Pressable>
         <Text style={styles.heroEyebrow}>Select Date</Text>

@@ -1,8 +1,9 @@
 import React from 'react';
 import {
-  Alert, Pressable, RefreshControl,
+  Pressable, RefreshControl,
   ScrollView, Text, TextInput, View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -23,14 +24,15 @@ function getInitials(name: string): string {
 export function ProfileScreen(): React.JSX.Element {
   const {
     user, isLoading, isRefreshing,
-    name, dateOfBirth, profileErrors, isDirty, isSavingProfile, showDatePicker,
+    name, dateOfBirth, profileErrors, isDirty, isSavingProfile, showDatePicker, isEditingProfile,
     currentPassword, newPassword, confirmPassword, passwordErrors,
     isPasswordSectionOpen, isChangingPassword,
+    handleToggleEditProfile,
     handleNameChange, handleDateFieldPress, handleDatePickerChange, handleSaveProfile, handleRefresh,
     handleTogglePasswordSection,
     handleCurrentPasswordChange, handleNewPasswordChange, handleConfirmPasswordChange,
     handleChangePassword,
-    handleGoToOrders, handleLogout,
+    handleGoToOrders, handleGoToPrivacyPolicy, handleGoToTerms, handleGoToPdpa, handleLogout,
   } = useProfileScreen();
 
   if (isLoading) {
@@ -80,71 +82,103 @@ export function ProfileScreen(): React.JSX.Element {
             <View style={styles.sectionLine} />
           </View>
           <View style={styles.card}>
-            {/* Name */}
-            <View style={styles.inputRow}>
-              <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
-                <Text style={styles.iconEmoji}>👤</Text>
-              </View>
-              <TextInput
-                style={[styles.inputField, profileErrors.name !== null && styles.inputError]}
-                value={name}
-                onChangeText={handleNameChange}
-                placeholder="Full name"
-                placeholderTextColor={colours.textMuted}
-                autoCapitalize="words"
-                returnKeyType="done"
-                accessibilityLabel="Full name"
-              />
-            </View>
-            {profileErrors.name !== null && (
-              <Text style={styles.errorText}>{profileErrors.name}</Text>
-            )}
+            {/* Icon button — absolutely positioned so it adds zero vertical space */}
+            <Pressable
+              style={styles.editIconBtn}
+              onPress={handleToggleEditProfile}
+              accessibilityLabel={isEditingProfile ? 'Cancel editing profile' : 'Edit profile'}
+              accessibilityRole="button"
+            >
+              <Ionicons name={isEditingProfile ? 'close' : 'pencil'} size={14} color={colours.primary} />
+            </Pressable>
 
-            {/* Date of birth */}
-            <View style={[styles.inputRow, { marginTop: 4 }]}>
-              <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
-                <Text style={styles.iconEmoji}>🎂</Text>
-              </View>
-              <Pressable
-                style={{ flex: 1 }}
-                onPress={handleDateFieldPress}
-                accessibilityLabel="Select date of birth"
-                accessibilityRole="button"
-              >
-                <Text style={[styles.dobValue, dateOfBirth === null && styles.dobPlaceholder]}>
-                  {dateOfBirth !== null ? formatDate(dateOfBirth.toISOString()) : 'Date of birth'}
-                </Text>
-              </Pressable>
-            </View>
-            {profileErrors.dateOfBirth !== null && (
-              <Text style={styles.errorText}>{profileErrors.dateOfBirth}</Text>
-            )}
+            {isEditingProfile ? (
+              <>
+                {/* Name input */}
+                <View style={styles.inputRow}>
+                  <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
+                    <Ionicons name="person" size={16} color={colours.primary} />
+                  </View>
+                  <TextInput
+                    style={[styles.inputField, profileErrors.name !== null && styles.inputError]}
+                    value={name}
+                    onChangeText={handleNameChange}
+                    placeholder="Full name"
+                    placeholderTextColor={colours.textMuted}
+                    autoCapitalize="words"
+                    returnKeyType="done"
+                    accessibilityLabel="Full name"
+                  />
+                </View>
+                {profileErrors.name !== null && (
+                  <Text style={styles.errorText}>{profileErrors.name}</Text>
+                )}
 
-            {/* Native date picker */}
-            {showDatePicker && (
-              <DateTimePicker
-                value={dateOfBirth ?? new Date(2000, 0, 1)}
-                mode="date"
-                display="default"
-                onChange={handleDatePickerChange}
-                maximumDate={new Date()}
-                minimumDate={new Date(1900, 0, 1)}
-              />
-            )}
+                {/* Date of birth input */}
+                <View style={[styles.inputRow, { marginTop: 4 }]}>
+                  <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
+                    <Ionicons name="gift-outline" size={16} color={colours.primary} />
+                  </View>
+                  <Pressable
+                    style={{ flex: 1 }}
+                    onPress={handleDateFieldPress}
+                    accessibilityLabel="Select date of birth"
+                    accessibilityRole="button"
+                  >
+                    <Text style={[styles.dobValue, dateOfBirth === null && styles.dobPlaceholder]}>
+                      {dateOfBirth !== null ? formatDate(dateOfBirth.toISOString()) : 'Date of birth'}
+                    </Text>
+                  </Pressable>
+                </View>
+                {profileErrors.dateOfBirth !== null && (
+                  <Text style={styles.errorText}>{profileErrors.dateOfBirth}</Text>
+                )}
 
-            {/* Save button — shown only when form is dirty */}
-            {isDirty && (
-              <Pressable
-                style={styles.saveBtn}
-                onPress={handleSaveProfile}
-                disabled={isSavingProfile}
-                accessibilityLabel="Save profile changes"
-                accessibilityRole="button"
-              >
-                <Text style={styles.saveBtnText}>
-                  {isSavingProfile ? 'Saving…' : 'Save Changes'}
-                </Text>
-              </Pressable>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={dateOfBirth ?? new Date(2000, 0, 1)}
+                    mode="date"
+                    display="default"
+                    onChange={handleDatePickerChange}
+                    maximumDate={new Date()}
+                    minimumDate={new Date(1900, 0, 1)}
+                  />
+                )}
+
+                {isDirty && (
+                  <Pressable
+                    style={styles.saveBtn}
+                    onPress={handleSaveProfile}
+                    disabled={isSavingProfile}
+                    accessibilityLabel="Save profile changes"
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.saveBtnText}>
+                      {isSavingProfile ? 'Saving…' : 'Save Changes'}
+                    </Text>
+                  </Pressable>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Read-only name row */}
+                <View style={styles.infoRow}>
+                  <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
+                    <Ionicons name="person" size={16} color={colours.primary} />
+                  </View>
+                  <Text style={styles.infoValue}>{name || '—'}</Text>
+                </View>
+
+                {/* Read-only date of birth row */}
+                <View style={styles.infoRow}>
+                  <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
+                    <Ionicons name="gift-outline" size={16} color={colours.primary} />
+                  </View>
+                  <Text style={[styles.infoValue, dateOfBirth === null && styles.infoPlaceholder]}>
+                    {dateOfBirth !== null ? formatDate(dateOfBirth.toISOString()) : 'Not set'}
+                  </Text>
+                </View>
+              </>
             )}
           </View>
 
@@ -161,10 +195,10 @@ export function ProfileScreen(): React.JSX.Element {
               accessibilityRole="button"
             >
               <View style={[styles.iconBadge, styles.iconBadgeAmber]}>
-                <Text style={styles.iconEmoji}>📋</Text>
+                <Ionicons name="list" size={16} color={colours.secondary} />
               </View>
               <Text style={styles.rowLabel}>My Orders</Text>
-              <Text style={styles.rowChevron}>›</Text>
+              <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </Pressable>
           </View>
 
@@ -181,10 +215,10 @@ export function ProfileScreen(): React.JSX.Element {
               accessibilityRole="button"
             >
               <View style={[styles.iconBadge, styles.iconBadgeSlate]}>
-                <Text style={styles.iconEmoji}>🔐</Text>
+                <Ionicons name="lock-closed-outline" size={16} color={colours.medium} />
               </View>
               <Text style={styles.rowLabel}>Change Password</Text>
-              <Text style={styles.rowChevron}>{isPasswordSectionOpen ? '↑' : '›'}</Text>
+              <Ionicons name={isPasswordSectionOpen ? 'chevron-up' : 'chevron-forward'} size={18} color={colours.textMuted} />
             </Pressable>
 
             {isPasswordSectionOpen && (
@@ -251,41 +285,41 @@ export function ProfileScreen(): React.JSX.Element {
           <View style={styles.card}>
             <Pressable
               style={styles.row}
-              onPress={() => Alert.alert('Coming Soon', 'Privacy Policy will be available in a future update.')}
+              onPress={handleGoToPrivacyPolicy}
               accessibilityLabel="Privacy Policy"
               accessibilityRole="button"
             >
               <View style={[styles.iconBadge, styles.iconBadgeTeal]}>
-                <Text style={styles.iconEmoji}>📄</Text>
+                <Ionicons name="document-text-outline" size={16} color={colours.tertiary} />
               </View>
               <Text style={styles.rowLabel}>Privacy Policy</Text>
-              <Text style={styles.rowChevron}>›</Text>
+              <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </Pressable>
             <View style={styles.rowSeparator} />
             <Pressable
               style={styles.row}
-              onPress={() => Alert.alert('Coming Soon', 'Terms & Conditions will be available in a future update.')}
+              onPress={handleGoToTerms}
               accessibilityLabel="Terms and Conditions"
               accessibilityRole="button"
             >
               <View style={[styles.iconBadge, styles.iconBadgeTeal]}>
-                <Text style={styles.iconEmoji}>📜</Text>
+                <Ionicons name="reader-outline" size={16} color={colours.tertiary} />
               </View>
               <Text style={styles.rowLabel}>Terms & Conditions</Text>
-              <Text style={styles.rowChevron}>›</Text>
+              <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </Pressable>
             <View style={styles.rowSeparator} />
             <Pressable
               style={styles.row}
-              onPress={() => Alert.alert('Coming Soon', 'Personal Data Protection Act information will be available in a future update.')}
+              onPress={handleGoToPdpa}
               accessibilityLabel="Personal Data Protection Act"
               accessibilityRole="button"
             >
               <View style={[styles.iconBadge, styles.iconBadgeTeal]}>
-                <Text style={styles.iconEmoji}>🛡️</Text>
+                <Ionicons name="shield-checkmark-outline" size={16} color={colours.tertiary} />
               </View>
               <Text style={styles.rowLabel}>Personal Data Protection Act</Text>
-              <Text style={styles.rowChevron}>›</Text>
+              <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </Pressable>
           </View>
 

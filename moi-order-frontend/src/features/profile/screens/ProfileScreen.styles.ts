@@ -205,6 +205,42 @@ export const styles = StyleSheet.create({
     marginLeft: spacing.xs,
   },
 
+  // ── Edit icon button (absolute — adds no vertical space) ──────────────────
+  editIconBtn: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    zIndex: 1,
+    width: 30,
+    height: 30,
+    borderRadius: radius.full,
+    backgroundColor: `${colours.primary}14`,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editIconText: {
+    fontSize: 15,
+    color: colours.primary,
+    lineHeight: 18,
+  },
+
+  // ── Read-only info rows ────────────────────────────────────────────────────
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  infoValue: {
+    flex: 1,
+    fontSize: typography.md,
+    color: colours.textOnLight,
+    fontWeight: '500',
+  },
+  infoPlaceholder: {
+    color: colours.textMuted,
+  },
+
   // ── Profile form inputs ────────────────────────────────────────────────────
   inputRow: {
     flexDirection: 'row',

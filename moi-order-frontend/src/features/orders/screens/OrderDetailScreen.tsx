@@ -1,5 +1,8 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useOrderDetailScreen } from '@/features/orders/hooks/useOrderDetailScreen';
@@ -8,16 +11,18 @@ import { formatPrice } from '@/shared/utils/formatCurrency';
 import { FieldSchemaItem, SubmissionDocument } from '@/types/models';
 import { styles, STATUS_COLOURS } from './OrderDetailScreen.styles';
 
-const DOC_ICONS: Record<string, string> = {
-  passport_bio_page:   '📄',
-  visa_page:           '🪪',
-  old_slip:            '📋',
-  identity_card_front:  '🪪',
-  identity_card_back:   '🪪',
-  tm30:                 '📋',
-  upper_body_photo:     '🖼',
-  airplane_ticket:      '✈',
-  passport_size_photo:  '🖼',
+type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
+
+const DOC_ICONS: Record<string, IoniconsName> = {
+  passport_bio_page:    'document-text-outline',
+  visa_page:            'card-outline',
+  old_slip:             'clipboard-outline',
+  identity_card_front:  'card-outline',
+  identity_card_back:   'card-outline',
+  tm30:                 'clipboard-outline',
+  upper_body_photo:     'image-outline',
+  airplane_ticket:      'airplane-outline',
+  passport_size_photo:  'image-outline',
 };
 
 export function OrderDetailScreen(): React.JSX.Element {
@@ -29,7 +34,7 @@ export function OrderDetailScreen(): React.JSX.Element {
       <View style={styles.orbSmall} />
       <Pressable style={styles.backBtn} onPress={handleBack}
         accessibilityLabel="Go back to orders" accessibilityRole="button">
-        <Text style={styles.backArrow}>‹</Text>
+        <Ionicons name="chevron-back" size={20} color={colours.tertiary} />
         <Text style={styles.backLabel}>Orders</Text>
       </Pressable>
       {submission !== null && (
@@ -60,7 +65,7 @@ export function OrderDetailScreen(): React.JSX.Element {
       <SafeAreaView style={styles.root} edges={['top']}>
         {hero}
         <View style={styles.stateBox}>
-          <Text style={styles.stateIcon}>⚠</Text>
+          <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
           <Text style={styles.stateTitle}>Could not load order</Text>
           <Text style={styles.stateSubtitle}>Pull down to retry</Text>
         </View>
@@ -159,11 +164,13 @@ export function OrderDetailScreen(): React.JSX.Element {
                 {submission.documents.map((doc: SubmissionDocument) => (
                   <React.Fragment key={doc.id}>
                     <View style={styles.docRow}>
-                      <Text style={styles.docIcon}>
-                        {DOC_ICONS[doc.document_type] ?? '📄'}
-                      </Text>
+                      <Ionicons
+                        name={DOC_ICONS[doc.document_type] ?? 'document-text-outline'}
+                        size={16}
+                        color={colours.textMuted}
+                      />
                       <Text style={styles.docLabel}>{doc.label}</Text>
-                      <Text style={styles.docCheck}>✓</Text>
+                      <Ionicons name="checkmark" size={14} color={colours.success} />
                     </View>
                   </React.Fragment>
                 ))}

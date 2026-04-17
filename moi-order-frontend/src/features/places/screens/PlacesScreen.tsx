@@ -1,5 +1,8 @@
 import React from 'react';
 import { ActivityIndicator, FlatList, ScrollView, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
@@ -76,7 +79,7 @@ export function PlacesScreen(): React.JSX.Element {
       <SafeAreaView style={styles.root} edges={['top']}>
         {header}
         <View style={styles.stateBox}>
-          <Text style={styles.stateIcon}>⚠</Text>
+          <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
           <Text style={styles.stateTitle}>Could not load places</Text>
           <Text style={styles.stateSubtitle}>Pull down to retry</Text>
         </View>
@@ -96,7 +99,7 @@ export function PlacesScreen(): React.JSX.Element {
         ListHeaderComponent={header}
         ListEmptyComponent={
           <View style={styles.stateBox}>
-            <Text style={styles.stateIcon}>🔍</Text>
+            <Ionicons name="search" size={36} color={colours.textMuted} style={styles.stateIcon} />
             <Text style={styles.stateTitle}>No places found</Text>
             <Text style={styles.stateSubtitle}>Try a different search or category</Text>
           </View>

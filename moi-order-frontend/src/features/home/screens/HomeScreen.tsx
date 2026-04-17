@@ -1,5 +1,8 @@
 import React from 'react';
 import { Pressable, Text, View, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
@@ -71,7 +74,7 @@ export function HomeScreen(): React.JSX.Element {
               <Text style={[styles.cardTag, styles.tagSage]}>Immigration</Text>
               <Text style={styles.cardTitle}>90-Day{'\n'}Report</Text>
               <Text style={styles.cardSubtitle}>รายงานตัว 90 วัน</Text>
-              <Text style={styles.cardIcon}>📅</Text>
+              <Ionicons name="calendar" size={28} color={colours.primary} style={styles.cardIcon} />
             </Pressable>
 
             <Pressable style={[styles.card, styles.cardAccentSlate]}
@@ -80,7 +83,7 @@ export function HomeScreen(): React.JSX.Element {
               <Text style={[styles.cardTag, styles.tagSlate]}>Attractions</Text>
               <Text style={styles.cardTitle}>Tickets</Text>
               <Text style={styles.cardSubtitle}>Theme parks & more</Text>
-              <Text style={styles.cardIcon}>🎫</Text>
+              <Ionicons name="pricetag" size={28} color={colours.medium} style={styles.cardIcon} />
             </Pressable>
           </View>
 
@@ -92,7 +95,7 @@ export function HomeScreen(): React.JSX.Element {
               <Text style={[styles.cardTag, styles.tagGold]}>Explore</Text>
               <Text style={styles.cardTitle}>Places</Text>
               <Text style={styles.cardSubtitle}>Immigration offices</Text>
-              <Text style={styles.cardIcon}>📍</Text>
+              <Ionicons name="location" size={28} color={colours.secondary} style={styles.cardIcon} />
             </Pressable>
 
             <Pressable style={[styles.card, styles.cardAccentTeal]}
@@ -101,7 +104,7 @@ export function HomeScreen(): React.JSX.Element {
               <Text style={[styles.cardTag, styles.tagTeal]}>Registration</Text>
               <Text style={styles.cardTitle}>Other{'\n'}Services</Text>
               <Text style={styles.cardSubtitle}>Company & more</Text>
-              <Text style={styles.cardIcon}>⚡</Text>
+              <Ionicons name="flash" size={28} color={colours.tertiary} style={styles.cardIcon} />
             </Pressable>
           </View>
         </View>

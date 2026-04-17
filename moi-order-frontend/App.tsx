@@ -43,6 +43,9 @@ import { PaymentScreen } from '@/features/payment/screens/PaymentScreen';
 import { PlaceDetailScreen } from '@/features/places/screens/PlaceDetailScreen';
 import { PlacesScreen } from '@/features/places/screens/PlacesScreen';
 import { ProfileScreen } from '@/features/profile/screens/ProfileScreen';
+import { PrivacyPolicyScreen } from '@/features/legal/screens/PrivacyPolicyScreen';
+import { TermsAndConditionsScreen } from '@/features/legal/screens/TermsAndConditionsScreen';
+import { PdpaNoticeScreen } from '@/features/legal/screens/PdpaNoticeScreen';
 import { TicketsScreen } from '@/features/tickets/screens/TicketsScreen';
 import { TicketDetailScreen } from '@/features/tickets/screens/TicketDetailScreen';
 import { TicketDateSelectionScreen } from '@/features/tickets/screens/TicketDateSelectionScreen';
@@ -125,6 +128,9 @@ export default function App(): React.JSX.Element {
             <Stack.Screen name="TicketDetail"              component={TicketDetailScreen} />
             <Stack.Screen name="TicketDateSelection"       component={TicketDateSelectionScreen} />
             <Stack.Screen name="TicketOrderDetail"         component={TicketOrderDetailScreen} />
+            <Stack.Screen name="PrivacyPolicy"             component={PrivacyPolicyScreen} />
+            <Stack.Screen name="TermsAndConditions"        component={TermsAndConditionsScreen} />
+            <Stack.Screen name="PdpaNotice"                component={PdpaNoticeScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </QueryClientProvider>

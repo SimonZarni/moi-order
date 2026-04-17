@@ -1,5 +1,8 @@
 import React from 'react';
 import { ActivityIndicator, FlatList, Image, Pressable, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
@@ -75,7 +78,7 @@ export function TicketsScreen(): React.JSX.Element {
       <SafeAreaView style={styles.root} edges={['top']}>
         {header}
         <View style={styles.stateBox}>
-          <Text style={styles.stateIcon}>⚠</Text>
+          <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
           <Text style={styles.stateTitle}>Could not load tickets</Text>
           <Text style={styles.stateSubtitle}>Pull down to retry</Text>
         </View>

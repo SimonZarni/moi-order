@@ -1,5 +1,8 @@
 import React from 'react';
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
@@ -143,7 +146,7 @@ export function OrdersScreen(): React.JSX.Element {
       <SafeAreaView style={styles.root} edges={['top']}>
         {header}
         <View style={styles.guestWrap}>
-          <Text style={styles.guestIcon}>📋</Text>
+          <Ionicons name="list" size={48} color={colours.textMuted} style={styles.guestIcon} />
           <Text style={styles.guestTitle}>Sign in to view orders</Text>
           <Text style={styles.guestSubtitle}>
             Track your service submissions and{'\n'}ticket bookings in one place.
@@ -174,7 +177,7 @@ export function OrdersScreen(): React.JSX.Element {
       <SafeAreaView style={styles.root} edges={['top']}>
         {header}
         <View style={styles.stateBox}>
-          <Text style={styles.stateIcon}>⚠</Text>
+          <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
           <Text style={styles.stateTitle}>Could not load orders</Text>
           <Text style={styles.stateSubtitle}>Pull down to retry</Text>
         </View>
@@ -193,7 +196,7 @@ export function OrdersScreen(): React.JSX.Element {
           ListHeaderComponent={header}
           ListEmptyComponent={
             <View style={styles.emptyWrap}>
-              <Text style={styles.emptyIcon}>📭</Text>
+              <Ionicons name="mail-open-outline" size={48} color={colours.textMuted} style={styles.emptyIcon} />
               <Text style={styles.emptyTitle}>No service orders yet</Text>
               <Text style={styles.emptySubtitle}>
                 Your service submissions will{'\n'}appear here once you place an order.
@@ -231,7 +234,7 @@ export function OrdersScreen(): React.JSX.Element {
         ListHeaderComponent={header}
         ListEmptyComponent={
           <View style={styles.emptyWrap}>
-            <Text style={styles.emptyIcon}>🎟</Text>
+            <Ionicons name="pricetag-outline" size={48} color={colours.textMuted} style={styles.emptyIcon} />
             <Text style={styles.emptyTitle}>No ticket orders yet</Text>
             <Text style={styles.emptySubtitle}>
               Book attractions and tickets{'\n'}to see them here.

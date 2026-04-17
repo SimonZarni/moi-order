@@ -1,6 +1,8 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
+import { colours } from '@/shared/theme/colours';
 import { formatCurrency } from '@/shared/utils/formatCurrency';
 import { ServiceType } from '@/types/models';
 import { styles } from './ServiceTypeCard.styles';
@@ -32,7 +34,7 @@ export function ServiceTypeCard({ type, onPress }: Props): React.JSX.Element {
         </View>
       </View>
       <View style={styles.chevron}>
-        <Text style={styles.chevronText}>›</Text>
+        <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
       </View>
     </Pressable>
   );

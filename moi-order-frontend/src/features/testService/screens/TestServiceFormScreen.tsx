@@ -1,4 +1,6 @@
 import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { colours } from '@/shared/theme/colours';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -30,7 +32,7 @@ export function TestServiceFormScreen(): React.JSX.Element {
           accessibilityLabel="Go back"
           accessibilityRole="button"
         >
-          <Text style={styles.backArrow}>‹</Text>
+          <Ionicons name="chevron-back" size={20} color={colours.tertiary} />
           <Text style={styles.backLabel}>Other Services</Text>
         </Pressable>
         <Text style={styles.headerTitle}>Test Service</Text>
