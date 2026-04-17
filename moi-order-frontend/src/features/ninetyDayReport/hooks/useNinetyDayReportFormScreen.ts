@@ -6,7 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Crypto from 'expo-crypto';
 
 import { useNinetyDayReportForm, UseNinetyDayReportFormResult } from './useNinetyDayReportForm';
-import { submitNinetyDayReport } from '@/shared/api/submissions';
+import { submitDynamic } from '@/shared/api/submissions';
 import { useAuthStore } from '@/shared/store/authStore';
 import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
@@ -92,17 +92,16 @@ export function useNinetyDayReportFormScreen(): UseNinetyDayReportFormScreenResu
   // ── Submit ────────────────────────────────────────────────────────────────
 
   const { mutate, isPending: isSubmitting } = useMutation({
-    mutationFn: () => {
-      return submitNinetyDayReport({
-        idempotencyKey:  Crypto.randomUUID(),
-        serviceTypeId,
-        fullName:        form.fullName.trim(),
-        phone:           form.phone.trim(),
-        passportBioPage: form.passportBioPage!,
-        visaPage:        form.visaPage!,
-        oldSlip:         form.oldSlip!,
-      });
-    },
+    mutationFn: () => submitDynamic({
+      idempotencyKey: Crypto.randomUUID(),
+      serviceTypeId,
+      fields: { full_name: form.fullName.trim(), phone: form.phone.trim() },
+      files:  {
+        passport_bio_page: form.passportBioPage!,
+        visa_page:         form.visaPage!,
+        old_slip:          form.oldSlip!,
+      },
+    }),
     onSuccess: (submission) => {
       navigation.navigate('Payment', { kind: 'submission', submissionId: submission.id });
     },

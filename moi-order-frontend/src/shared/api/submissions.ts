@@ -9,335 +9,38 @@ function requireMimeType(asset: ImagePickerAsset): string {
   return asset.mimeType;
 }
 
-export interface CompanyRegistrationPayload {
-  idempotencyKey:    string;
-  serviceTypeId:     number;
-  fullName:          string;
-  phone:             string;
-  passportBioPage:   ImagePickerAsset;
-  visaPage:          ImagePickerAsset;
-  identityCardFront: ImagePickerAsset;
-  identityCardBack:  ImagePickerAsset;
-  tm30:              ImagePickerAsset;
-}
-
-export async function submitCompanyRegistration(
-  payload: CompanyRegistrationPayload,
-): Promise<ServiceSubmission> {
-  const form = new FormData();
-  form.append('idempotency_key',  payload.idempotencyKey);
-  form.append('service_type_id',  String(payload.serviceTypeId));
-  form.append('full_name',        payload.fullName);
-  form.append('phone',            payload.phone);
-
-  const appendImage = (key: string, asset: ImagePickerAsset): void => {
-    form.append(key, {
-      uri:  asset.uri,
-      type: requireMimeType(asset),
-      name: `${key}.jpg`,
-    } as unknown as Blob);
-  };
-
-  appendImage('passport_bio_page',   payload.passportBioPage);
-  appendImage('visa_page',           payload.visaPage);
-  appendImage('identity_card_front', payload.identityCardFront);
-  appendImage('identity_card_back',  payload.identityCardBack);
-  appendImage('tm30',                payload.tm30);
-
-  const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
-    '/api/v1/submissions/company-registration',
-    form,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
-  );
-  return response.data.data;
-}
-
-export interface NinetyDayReportPayload {
+export interface DynamicSubmissionPayload {
   idempotencyKey: string;
-  serviceTypeId: number;
-  fullName: string;
-  phone: string;
-  passportBioPage: ImagePickerAsset;
-  visaPage: ImagePickerAsset;
-  oldSlip: ImagePickerAsset;
+  serviceTypeId:  number;
+  fields:         Record<string, string>;
+  files?:         Record<string, ImagePickerAsset>;
 }
 
-export async function submitNinetyDayReport(
-  payload: NinetyDayReportPayload,
+export async function submitDynamic(
+  payload: DynamicSubmissionPayload,
 ): Promise<ServiceSubmission> {
   const form = new FormData();
   form.append('idempotency_key', payload.idempotencyKey);
   form.append('service_type_id', String(payload.serviceTypeId));
-  form.append('full_name', payload.fullName);
-  form.append('phone', payload.phone);
 
-  form.append('passport_bio_page', {
-    uri:  payload.passportBioPage.uri,
-    type: requireMimeType(payload.passportBioPage),
-    name: 'passport_bio_page.jpg',
-  } as unknown as Blob);
+  for (const [key, value] of Object.entries(payload.fields)) {
+    form.append(key, value);
+  }
 
-  form.append('visa_page', {
-    uri:  payload.visaPage.uri,
-    type: requireMimeType(payload.visaPage),
-    name: 'visa_page.jpg',
-  } as unknown as Blob);
-
-  form.append('old_slip', {
-    uri:  payload.oldSlip.uri,
-    type: requireMimeType(payload.oldSlip),
-    name: 'old_slip.jpg',
-  } as unknown as Blob);
+  if (payload.files !== undefined) {
+    for (const [key, asset] of Object.entries(payload.files)) {
+      form.append(key, {
+        uri:  asset.uri,
+        type: requireMimeType(asset),
+        name: `${key}.jpg`,
+      } as unknown as Blob);
+    }
+  }
 
   const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
-    '/api/v1/submissions/90-day-report',
+    '/api/v1/submissions/dynamic',
     form,
     { headers: { 'Content-Type': 'multipart/form-data' } },
-  );
-  return response.data.data;
-}
-
-export interface AirportFastTrackPayload {
-  idempotencyKey: string;
-  serviceTypeId:  number;
-  fullName:       string;
-  phone:          string;
-  upperBodyPhoto: ImagePickerAsset;
-  airplaneTicket: ImagePickerAsset;
-}
-
-export async function submitAirportFastTrack(
-  payload: AirportFastTrackPayload,
-): Promise<ServiceSubmission> {
-  const form = new FormData();
-  form.append('idempotency_key',  payload.idempotencyKey);
-  form.append('service_type_id',  String(payload.serviceTypeId));
-  form.append('full_name',        payload.fullName);
-  form.append('phone',            payload.phone);
-
-  const appendImage = (key: string, asset: ImagePickerAsset): void => {
-    form.append(key, {
-      uri:  asset.uri,
-      type: requireMimeType(asset),
-      name: `${key}.jpg`,
-    } as unknown as Blob);
-  };
-
-  appendImage('upper_body_photo', payload.upperBodyPhoto);
-  appendImage('airplane_ticket',  payload.airplaneTicket);
-
-  const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
-    '/api/v1/submissions/airport-fast-track',
-    form,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
-  );
-  return response.data.data;
-}
-
-export interface EmbassyResidentialPayload {
-  idempotencyKey:    string;
-  serviceTypeId:     number;
-  fullName:          string;
-  phone:             string;
-  passportBioPage:   ImagePickerAsset;
-  visaPage:          ImagePickerAsset;
-  identityCardFront: ImagePickerAsset;
-  identityCardBack:  ImagePickerAsset;
-  tm30:              ImagePickerAsset;
-}
-
-export async function submitEmbassyResidential(
-  payload: EmbassyResidentialPayload,
-): Promise<ServiceSubmission> {
-  const form = new FormData();
-  form.append('idempotency_key',  payload.idempotencyKey);
-  form.append('service_type_id',  String(payload.serviceTypeId));
-  form.append('full_name',        payload.fullName);
-  form.append('phone',            payload.phone);
-
-  const appendImage = (key: string, asset: ImagePickerAsset): void => {
-    form.append(key, {
-      uri:  asset.uri,
-      type: requireMimeType(asset),
-      name: `${key}.jpg`,
-    } as unknown as Blob);
-  };
-
-  appendImage('passport_bio_page',   payload.passportBioPage);
-  appendImage('visa_page',           payload.visaPage);
-  appendImage('identity_card_front', payload.identityCardFront);
-  appendImage('identity_card_back',  payload.identityCardBack);
-  appendImage('tm30',                payload.tm30);
-
-  const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
-    '/api/v1/submissions/embassy-residential',
-    form,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
-  );
-  return response.data.data;
-}
-
-export interface EmbassyCarLicensePayload {
-  idempotencyKey:    string;
-  serviceTypeId:     number;
-  fullName:          string;
-  phone:             string;
-  passportBioPage:   ImagePickerAsset;
-  visaPage:          ImagePickerAsset;
-  identityCardFront: ImagePickerAsset;
-  identityCardBack:  ImagePickerAsset;
-  tm30:              ImagePickerAsset;
-}
-
-export async function submitEmbassyCarLicense(
-  payload: EmbassyCarLicensePayload,
-): Promise<ServiceSubmission> {
-  const form = new FormData();
-  form.append('idempotency_key',  payload.idempotencyKey);
-  form.append('service_type_id',  String(payload.serviceTypeId));
-  form.append('full_name',        payload.fullName);
-  form.append('phone',            payload.phone);
-
-  const appendImage = (key: string, asset: ImagePickerAsset): void => {
-    form.append(key, {
-      uri:  asset.uri,
-      type: requireMimeType(asset),
-      name: `${key}.jpg`,
-    } as unknown as Blob);
-  };
-
-  appendImage('passport_bio_page',   payload.passportBioPage);
-  appendImage('visa_page',           payload.visaPage);
-  appendImage('identity_card_front', payload.identityCardFront);
-  appendImage('identity_card_back',  payload.identityCardBack);
-  appendImage('tm30',                payload.tm30);
-
-  const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
-    '/api/v1/submissions/embassy-car-license',
-    form,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
-  );
-  return response.data.data;
-}
-
-export interface EmbassyBankPayload {
-  idempotencyKey:    string;
-  serviceTypeId:     number;
-  fullName:          string;
-  passportNo:        string;
-  identityCardNo:    string;
-  currentJob:        string | null;
-  company:           string | null;
-  myanmarAddress:    string;
-  thaiAddress:       string;
-  phone:             string;
-  bankName:          string;
-  passportSizePhoto: ImagePickerAsset;
-  passportBioPage:   ImagePickerAsset;
-  visaPage:          ImagePickerAsset;
-  identityCardFront: ImagePickerAsset;
-  identityCardBack:  ImagePickerAsset;
-  tm30:              ImagePickerAsset;
-}
-
-export async function submitEmbassyBank(
-  payload: EmbassyBankPayload,
-): Promise<ServiceSubmission> {
-  const form = new FormData();
-  form.append('idempotency_key',  payload.idempotencyKey);
-  form.append('service_type_id',  String(payload.serviceTypeId));
-  form.append('full_name',        payload.fullName);
-  form.append('passport_no',      payload.passportNo);
-  form.append('identity_card_no', payload.identityCardNo);
-  if (payload.currentJob !== null) form.append('current_job', payload.currentJob);
-  if (payload.company    !== null) form.append('company',     payload.company);
-  form.append('myanmar_address',  payload.myanmarAddress);
-  form.append('thai_address',     payload.thaiAddress);
-  form.append('phone',            payload.phone);
-  form.append('bank_name',        payload.bankName);
-
-  const appendImage = (key: string, asset: ImagePickerAsset): void => {
-    form.append(key, {
-      uri:  asset.uri,
-      type: requireMimeType(asset),
-      name: `${key}.jpg`,
-    } as unknown as Blob);
-  };
-
-  appendImage('passport_size_photo',  payload.passportSizePhoto);
-  appendImage('passport_bio_page',    payload.passportBioPage);
-  appendImage('visa_page',            payload.visaPage);
-  appendImage('identity_card_front',  payload.identityCardFront);
-  appendImage('identity_card_back',   payload.identityCardBack);
-  appendImage('tm30',                 payload.tm30);
-
-  const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
-    '/api/v1/submissions/embassy-bank',
-    form,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
-  );
-  return response.data.data;
-}
-
-export interface EmbassyVisaRecommendationPayload {
-  idempotencyKey:    string;
-  serviceTypeId:     number;
-  fullName:          string;
-  phone:             string;
-  passportBioPage:   ImagePickerAsset;
-  visaPage:          ImagePickerAsset;
-  identityCardFront: ImagePickerAsset;
-  identityCardBack:  ImagePickerAsset;
-}
-
-export async function submitEmbassyVisaRecommendation(
-  payload: EmbassyVisaRecommendationPayload,
-): Promise<ServiceSubmission> {
-  const form = new FormData();
-  form.append('idempotency_key',  payload.idempotencyKey);
-  form.append('service_type_id',  String(payload.serviceTypeId));
-  form.append('full_name',        payload.fullName);
-  form.append('phone',            payload.phone);
-
-  const appendImage = (key: string, asset: ImagePickerAsset): void => {
-    form.append(key, {
-      uri:  asset.uri,
-      type: requireMimeType(asset),
-      name: `${key}.jpg`,
-    } as unknown as Blob);
-  };
-
-  appendImage('passport_bio_page',   payload.passportBioPage);
-  appendImage('visa_page',           payload.visaPage);
-  appendImage('identity_card_front', payload.identityCardFront);
-  appendImage('identity_card_back',  payload.identityCardBack);
-
-  const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
-    '/api/v1/submissions/embassy-visa-recommendation',
-    form,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
-  );
-  return response.data.data;
-}
-
-export interface TestServicePayload {
-  idempotencyKey: string;
-  serviceTypeId:  number;
-  fullName:       string;
-  phone:          string;
-}
-
-export async function submitTestService(
-  payload: TestServicePayload,
-): Promise<ServiceSubmission> {
-  const response = await apiClient.post<ApiResponse<ServiceSubmission>>(
-    '/api/v1/submissions/test-service',
-    {
-      idempotency_key:  payload.idempotencyKey,
-      service_type_id:  payload.serviceTypeId,
-      full_name:        payload.fullName,
-      phone:            payload.phone,
-    },
   );
   return response.data.data;
 }
