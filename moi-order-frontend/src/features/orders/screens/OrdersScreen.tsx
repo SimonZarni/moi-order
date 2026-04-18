@@ -99,6 +99,10 @@ interface TabBarProps {
 }
 
 function TabBar({ activeTab, onTabChange }: TabBarProps): React.JSX.Element {
+  const { locale } = useLocale();
+  const servicesLabel = locale === 'mm' ? '၀န်ဆောင်မှုများ' : 'Services';
+  const ticketsLabel  = locale === 'mm' ? 'လက်မှတ်များ'    : 'Tickets';
+
   return (
     <View style={styles.tabRow}>
       <Pressable
@@ -107,7 +111,7 @@ function TabBar({ activeTab, onTabChange }: TabBarProps): React.JSX.Element {
         accessibilityLabel="Services tab"
         accessibilityRole="tab"
       >
-        <Text style={[styles.tabText, activeTab === 'services' && styles.tabTextActive]}>Services</Text>
+        <Text style={[styles.tabText, activeTab === 'services' && styles.tabTextActive]}>{servicesLabel}</Text>
       </Pressable>
       <Pressable
         style={[styles.tab, activeTab === 'tickets' && styles.tabActive]}
@@ -115,7 +119,7 @@ function TabBar({ activeTab, onTabChange }: TabBarProps): React.JSX.Element {
         accessibilityLabel="Tickets tab"
         accessibilityRole="tab"
       >
-        <Text style={[styles.tabText, activeTab === 'tickets' && styles.tabTextActive]}>Tickets</Text>
+        <Text style={[styles.tabText, activeTab === 'tickets' && styles.tabTextActive]}>{ticketsLabel}</Text>
       </Pressable>
     </View>
   );

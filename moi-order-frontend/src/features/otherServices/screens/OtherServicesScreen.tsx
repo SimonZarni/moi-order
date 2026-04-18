@@ -64,7 +64,6 @@ export function OtherServicesScreen(): React.JSX.Element {
             >
               <View style={styles.serviceCardContent}>
                 <Text style={styles.serviceCardTitle}>{localeName(service, locale)}</Text>
-                <Text style={styles.serviceCardSubtitle}>{service.name}</Text>
                 {service.types.length > 0 && (
                   <Text style={styles.serviceCardPrice}>
                     ฿{service.types[0]!.price.toLocaleString('th-TH')}

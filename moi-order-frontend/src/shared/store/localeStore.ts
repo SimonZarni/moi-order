@@ -12,7 +12,7 @@ interface LocaleState {
 }
 
 export const useLocaleStore = create<LocaleState>((set) => ({
-  locale: 'en',
+  locale: 'mm',
 
   setLocale: (locale: Locale): void => {
     setMemoryLocale(locale);

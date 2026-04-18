@@ -9,6 +9,9 @@ import { ErrorBanner } from '@/shared/components/ErrorBanner/ErrorBanner';
 import { FormField } from '@/shared/components/FormField/FormField';
 import { SuccessState } from '@/shared/components/SuccessState/SuccessState';
 import { useNinetyDayReportFormScreen } from '@/features/ninetyDayReport/hooks/useNinetyDayReportFormScreen';
+import { useLocale } from '@/shared/hooks/useLocale';
+import { localeDocumentLabel } from '@/shared/utils/localeName';
+import { DOCUMENT_TYPE } from '@/types/enums';
 import { styles } from './NinetyDayReportFormScreen.styles';
 
 export function NinetyDayReportFormScreen(): React.JSX.Element {
@@ -29,6 +32,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
     handleBack,
   } = useNinetyDayReportFormScreen();
 
+  const { locale } = useLocale();
   const priceFormatted = `฿${price.toLocaleString('th-TH')}`;
 
   return (
@@ -94,7 +98,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
               <Text style={styles.sectionTitle}>Required Documents</Text>
 
               <DocumentPickerField
-                label="Passport Bio Page"
+                label={localeDocumentLabel(DOCUMENT_TYPE.PassportBioPage, locale)}
                 icon="document-text"
                 onPress={handlePickPassportBioPage}
                 isUploaded={form.passportBioPage !== null}
@@ -103,7 +107,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
               />
 
               <DocumentPickerField
-                label="Visa Page"
+                label={localeDocumentLabel(DOCUMENT_TYPE.VisaPage, locale)}
                 icon="id-card"
                 onPress={handlePickVisaPage}
                 isUploaded={form.visaPage !== null}
@@ -112,7 +116,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
               />
 
               <DocumentPickerField
-                label="Previous 90-Day Slip"
+                label={localeDocumentLabel(DOCUMENT_TYPE.OldSlip, locale)}
                 icon="newspaper"
                 onPress={handlePickOldSlip}
                 isUploaded={form.oldSlip !== null}

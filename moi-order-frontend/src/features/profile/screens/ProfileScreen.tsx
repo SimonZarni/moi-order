@@ -11,6 +11,7 @@ import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBa
 import { ProfileSkeleton } from '@/features/profile/components/ProfileSkeleton';
 import { useProfileScreen } from '@/features/profile/hooks/useProfileScreen';
 import { formatDate } from '@/shared/utils/formatDate';
+import { getProfileStrings } from '@/shared/constants/profileStrings';
 import { colours } from '@/shared/theme/colours';
 import { styles } from './ProfileScreen.styles';
 
@@ -35,6 +36,8 @@ export function ProfileScreen(): React.JSX.Element {
     handleChangePassword,
     handleGoToOrders, handleGoToPrivacyPolicy, handleGoToTerms, handleGoToPdpa, handleLogout,
   } = useProfileScreen();
+
+  const t = getProfileStrings(locale);
 
   if (isLoading) {
     return (
@@ -79,7 +82,7 @@ export function ProfileScreen(): React.JSX.Element {
 
           {/* § Personal Info */}
           <View style={styles.sectionRow}>
-            <Text style={styles.sectionLabel}>Personal Info</Text>
+            <Text style={styles.sectionLabel}>{t.personalInfo}</Text>
             <View style={styles.sectionLine} />
           </View>
           <View style={styles.card}>
@@ -104,7 +107,7 @@ export function ProfileScreen(): React.JSX.Element {
                     style={[styles.inputField, profileErrors.name !== null && styles.inputError]}
                     value={name}
                     onChangeText={handleNameChange}
-                    placeholder="Full name"
+                    placeholder={t.fullNamePlaceholder}
                     placeholderTextColor={colours.textMuted}
                     autoCapitalize="words"
                     returnKeyType="done"
@@ -127,7 +130,7 @@ export function ProfileScreen(): React.JSX.Element {
                     accessibilityRole="button"
                   >
                     <Text style={[styles.dobValue, dateOfBirth === null && styles.dobPlaceholder]}>
-                      {dateOfBirth !== null ? formatDate(dateOfBirth.toISOString()) : 'Date of birth'}
+                      {dateOfBirth !== null ? formatDate(dateOfBirth.toISOString()) : t.dobPlaceholder}
                     </Text>
                   </Pressable>
                 </View>
@@ -155,7 +158,7 @@ export function ProfileScreen(): React.JSX.Element {
                     accessibilityRole="button"
                   >
                     <Text style={styles.saveBtnText}>
-                      {isSavingProfile ? 'Saving…' : 'Save Changes'}
+                      {isSavingProfile ? 'Saving…' : t.saveChanges}
                     </Text>
                   </Pressable>
                 )}
@@ -185,7 +188,7 @@ export function ProfileScreen(): React.JSX.Element {
 
           {/* § Language */}
           <View style={styles.sectionRow}>
-            <Text style={styles.sectionLabel}>Language</Text>
+            <Text style={styles.sectionLabel}>{t.language}</Text>
             <View style={styles.sectionLine} />
           </View>
           <View style={styles.card}>
@@ -215,7 +218,7 @@ export function ProfileScreen(): React.JSX.Element {
 
           {/* § Activity */}
           <View style={styles.sectionRow}>
-            <Text style={styles.sectionLabel}>Activity</Text>
+            <Text style={styles.sectionLabel}>{t.activity}</Text>
             <View style={styles.sectionLine} />
           </View>
           <View style={styles.card}>
@@ -228,14 +231,14 @@ export function ProfileScreen(): React.JSX.Element {
               <View style={[styles.iconBadge, styles.iconBadgeAmber]}>
                 <Ionicons name="list" size={16} color={colours.secondary} />
               </View>
-              <Text style={styles.rowLabel}>My Orders</Text>
+              <Text style={styles.rowLabel}>{t.myOrders}</Text>
               <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </Pressable>
           </View>
 
           {/* § Security */}
           <View style={styles.sectionRow}>
-            <Text style={styles.sectionLabel}>Security</Text>
+            <Text style={styles.sectionLabel}>{t.security}</Text>
             <View style={styles.sectionLine} />
           </View>
           <View style={styles.card}>
@@ -248,7 +251,7 @@ export function ProfileScreen(): React.JSX.Element {
               <View style={[styles.iconBadge, styles.iconBadgeSlate]}>
                 <Ionicons name="lock-closed-outline" size={16} color={colours.medium} />
               </View>
-              <Text style={styles.rowLabel}>Change Password</Text>
+              <Text style={styles.rowLabel}>{t.changePassword}</Text>
               <Ionicons name={isPasswordSectionOpen ? 'chevron-up' : 'chevron-forward'} size={18} color={colours.textMuted} />
             </Pressable>
 
@@ -258,7 +261,7 @@ export function ProfileScreen(): React.JSX.Element {
                   style={[styles.passwordInput, passwordErrors.currentPassword !== null && styles.passwordInputError]}
                   value={currentPassword}
                   onChangeText={handleCurrentPasswordChange}
-                  placeholder="Current password"
+                  placeholder={t.currentPassword}
                   placeholderTextColor={colours.textMuted}
                   secureTextEntry
                   accessibilityLabel="Current password"
@@ -271,7 +274,7 @@ export function ProfileScreen(): React.JSX.Element {
                   style={[styles.passwordInput, passwordErrors.newPassword !== null && styles.passwordInputError]}
                   value={newPassword}
                   onChangeText={handleNewPasswordChange}
-                  placeholder="New password"
+                  placeholder={t.newPassword}
                   placeholderTextColor={colours.textMuted}
                   secureTextEntry
                   accessibilityLabel="New password"
@@ -284,7 +287,7 @@ export function ProfileScreen(): React.JSX.Element {
                   style={[styles.passwordInput, passwordErrors.confirmPassword !== null && styles.passwordInputError]}
                   value={confirmPassword}
                   onChangeText={handleConfirmPasswordChange}
-                  placeholder="Confirm new password"
+                  placeholder={t.confirmNewPassword}
                   placeholderTextColor={colours.textMuted}
                   secureTextEntry
                   accessibilityLabel="Confirm new password"
@@ -301,7 +304,7 @@ export function ProfileScreen(): React.JSX.Element {
                   accessibilityRole="button"
                 >
                   <Text style={styles.updatePasswordBtnText}>
-                    {isChangingPassword ? 'Updating…' : 'Update Password'}
+                    {isChangingPassword ? 'Updating…' : t.updatePassword}
                   </Text>
                 </Pressable>
               </View>
@@ -310,7 +313,7 @@ export function ProfileScreen(): React.JSX.Element {
 
           {/* § Legal */}
           <View style={styles.sectionRow}>
-            <Text style={styles.sectionLabel}>Legal</Text>
+            <Text style={styles.sectionLabel}>{t.legal}</Text>
             <View style={styles.sectionLine} />
           </View>
           <View style={styles.card}>
@@ -323,7 +326,7 @@ export function ProfileScreen(): React.JSX.Element {
               <View style={[styles.iconBadge, styles.iconBadgeTeal]}>
                 <Ionicons name="document-text-outline" size={16} color={colours.tertiary} />
               </View>
-              <Text style={styles.rowLabel}>Privacy Policy</Text>
+              <Text style={styles.rowLabel}>{t.privacyPolicy}</Text>
               <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </Pressable>
             <View style={styles.rowSeparator} />
@@ -336,7 +339,7 @@ export function ProfileScreen(): React.JSX.Element {
               <View style={[styles.iconBadge, styles.iconBadgeTeal]}>
                 <Ionicons name="reader-outline" size={16} color={colours.tertiary} />
               </View>
-              <Text style={styles.rowLabel}>Terms & Conditions</Text>
+              <Text style={styles.rowLabel}>{t.termsConditions}</Text>
               <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </Pressable>
             <View style={styles.rowSeparator} />
@@ -349,7 +352,7 @@ export function ProfileScreen(): React.JSX.Element {
               <View style={[styles.iconBadge, styles.iconBadgeTeal]}>
                 <Ionicons name="shield-checkmark-outline" size={16} color={colours.tertiary} />
               </View>
-              <Text style={styles.rowLabel}>Personal Data Protection Act</Text>
+              <Text style={styles.rowLabel}>{t.pdpa}</Text>
               <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </Pressable>
           </View>
