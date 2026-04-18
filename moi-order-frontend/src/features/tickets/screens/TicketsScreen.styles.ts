@@ -9,7 +9,8 @@ import { typography } from '@/shared/theme/typography';
 import { TAB_BAR_CLEARANCE } from '@/shared/components/FloatingTabBar/FloatingTabBar.styles';
 
 export const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colours.backgroundLight },
+  root: { flex: 1, backgroundColor: colours.backgroundDark },
+  flatList: { backgroundColor: colours.backgroundLight },
 
   bodyGap: {
     height: spacing.xl,

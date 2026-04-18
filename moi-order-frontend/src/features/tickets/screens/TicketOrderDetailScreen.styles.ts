@@ -15,8 +15,8 @@ export const TICKET_STATUS_COLOURS: Record<string, string> = {
 };
 
 export const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colours.backgroundLight },
-  scroll: { flex: 1 },
+  root: { flex: 1, backgroundColor: colours.backgroundDark },
+  scroll: { flex: 1, backgroundColor: colours.backgroundLight },
   scrollContent: { paddingBottom: spacing.xxl + spacing.lg },
 
   // ── Hero ──────────────────────────────────────────────────────────────────

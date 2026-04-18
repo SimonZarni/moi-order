@@ -13,10 +13,11 @@ export { STATUS_COLOURS };
 export const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colours.backgroundLight,
+    backgroundColor: colours.backgroundDark,
   },
   scroll: {
     flex: 1,
+    backgroundColor: colours.backgroundLight,
   },
   scrollContent: {
     paddingBottom: spacing.xxl + spacing.lg,
@@ -159,6 +160,7 @@ export const styles = StyleSheet.create({
     color: colours.textOnLight,
     letterSpacing: -0.2,
     marginBottom: 2,
+    lineHeight: 24,
   },
   statusCardDivider: {
     height: 1,
@@ -253,6 +255,7 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: colours.textOnLight,
     flex: 1,
+    lineHeight: 22,
   },
   docCheck: {
     fontSize: 12,

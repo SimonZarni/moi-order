@@ -26,7 +26,7 @@ export function TicketDateSelectionScreen(): React.JSX.Element {
         <Text style={styles.heroSubtitle}>Available for the next 7 days</Text>
       </View>
 
-      <ScrollView contentContainerStyle={[styles.body, { paddingBottom: 120 }]} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scroll} contentContainerStyle={[styles.body, { paddingBottom: 120 }]} showsVerticalScrollIndicator={false}>
         <View style={styles.sectionLabelRow}>
           <Text style={styles.sectionLabel}>Choose a day</Text>
           <View style={styles.sectionLine} />

@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
+import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { useOtherServicesScreen } from '@/features/otherServices/hooks/useOtherServicesScreen';
@@ -18,7 +19,9 @@ export function OtherServicesScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
+      <StickyBackButton onPress={handleBack} label="Home" />
       <ScrollView
+        style={styles.scroll}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={editorialPalette.teal} />
@@ -31,6 +34,7 @@ export function OtherServicesScreen(): React.JSX.Element {
           subtitle="Additional immigration and registration services."
           onBack={handleBack}
           backLabel="Home"
+          hideBack
         />
 
         <View style={styles.body}>

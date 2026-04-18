@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
@@ -7,6 +7,8 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { formatPrice } from '@/shared/utils/formatCurrency';
 import { useTicketDetailScreen } from '@/features/tickets/hooks/useTicketDetailScreen';
+import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
+import { TicketDetailSkeleton } from '@/features/tickets/components/TicketDetailSkeleton';
 import { TicketVariant } from '@/types/models';
 import { styles } from './TicketDetailScreen.styles';
 
@@ -19,18 +21,13 @@ export function TicketDetailScreen(): React.JSX.Element {
   } = useTicketDetailScreen();
 
   if (isLoading || ticket === undefined) {
-    return (
-      <SafeAreaView style={styles.root} edges={['top']}>
-        <View style={styles.stateBox}>
-          <ActivityIndicator size="large" color={styles.spinner.color} />
-        </View>
-      </SafeAreaView>
-    );
+    return <TicketDetailSkeleton />;
   }
 
   if (isError) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
+        <StickyBackButton onPress={handleBack} label="Back" />
         <View style={styles.stateBox}>
           <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
           <Text style={styles.stateTitle}>Could not load ticket</Text>
@@ -42,13 +39,10 @@ export function TicketDetailScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
+      <StickyBackButton onPress={handleBack} label="Back" />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View>
           <Image source={{ uri: ticket.cover_image_url }} style={styles.cover} resizeMode="cover" />
-          <Pressable style={styles.backBtn} onPress={handleBack} accessibilityLabel="Go back" accessibilityRole="button">
-            <Ionicons name="chevron-back" size={20} color={colours.white} />
-            <Text style={styles.backLabel}>Back</Text>
-          </Pressable>
         </View>
 
         <View style={styles.infoBlock}>

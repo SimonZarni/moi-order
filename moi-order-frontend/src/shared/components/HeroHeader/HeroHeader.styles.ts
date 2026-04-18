@@ -36,6 +36,12 @@ export const styles = StyleSheet.create({
     left: -20,
   },
 
+  // Spacer used when hideBack=true — preserves text position
+  backPlaceholder: {
+    height: 36,
+    marginBottom: spacing.sm,
+  },
+
   // Pill back button
   backBtn: {
     flexDirection: 'row',

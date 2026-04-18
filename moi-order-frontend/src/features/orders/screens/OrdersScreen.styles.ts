@@ -20,8 +20,10 @@ export const STATUS_COLOURS: Record<string, string> = {
 export const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colours.backgroundLight,
+    backgroundColor: colours.backgroundDark,
   },
+
+  flatList: { flex: 1, backgroundColor: colours.backgroundLight },
 
   // Light spacer between HeroHeader and the first card
   bodyGap: {
@@ -56,6 +58,7 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.textMuted,
     letterSpacing: 0.5,
+    lineHeight: 20,
   },
   tabTextActive: {
     color: colours.textOnLight,
@@ -108,6 +111,7 @@ export const styles = StyleSheet.create({
     color: colours.textOnLight,
     letterSpacing: -0.2,
     marginRight: spacing.sm,
+    lineHeight: 24,
   },
   statusPill: {
     borderRadius: radius.full,

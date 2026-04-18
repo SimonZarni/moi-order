@@ -113,7 +113,12 @@ export default function App(): React.JSX.Element {
           {/* All screens always available — form screens guard auth at submit time. */}
           <Stack.Navigator
             initialRouteName="Home"
-            screenOptions={{ headerShown: false, animation: 'fade' }}
+            screenOptions={{
+              headerShown: false,
+              animation: 'fade',
+              statusBarStyle: 'light',
+              statusBarTranslucent: true,
+            }}
           >
             <Stack.Screen name="Home"                      component={HomeScreen} />
             <Stack.Screen name="Orders"                    component={OrdersScreen} />

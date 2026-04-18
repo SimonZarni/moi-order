@@ -16,6 +16,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 1,
     textTransform: 'uppercase',
     marginBottom: spacing.xs,
+    lineHeight: 20,
   },
   inputWrapper: {
     flexDirection: 'row',

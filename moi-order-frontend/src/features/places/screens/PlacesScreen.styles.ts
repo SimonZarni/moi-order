@@ -10,7 +10,7 @@ import { TAB_BAR_CLEARANCE } from '@/shared/components/FloatingTabBar/FloatingTa
 export const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colours.backgroundLight,
+    backgroundColor: colours.backgroundDark,
   },
 
   // ── Inline hero title ("Explore Places" on one line, same font) ──────────

@@ -1,11 +1,10 @@
 import React from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ScrollView, Text, View } from 'react-native';
 
-import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
+import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
 import type { LegalSection } from '@/features/legal/types';
 import { styles } from './LegalDocumentLayout.styles';
 
@@ -30,22 +29,13 @@ export function LegalDocumentLayout({
 }: LegalDocumentLayoutProps): React.JSX.Element {
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
+      <StickyBackButton onPress={onBack} label="Back" />
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {/* ── Hero ── */}
         <View style={styles.hero}>
           <View style={styles.orbLarge} />
           <View style={styles.orbSmall} />
-
-          <Pressable
-            style={styles.backBtn}
-            onPress={onBack}
-            accessibilityLabel="Go back"
-            accessibilityRole="button"
-          >
-            <Ionicons name="chevron-back" size={20} color={colours.tertiary} />
-            <Text style={styles.backLabel}>Back</Text>
-          </Pressable>
 
           <View style={styles.heroContent}>
             <Text style={[styles.eyebrow, { color: accentColor }]}>{eyebrow}</Text>

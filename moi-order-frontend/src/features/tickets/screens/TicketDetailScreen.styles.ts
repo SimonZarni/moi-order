@@ -8,8 +8,8 @@ import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 
 export const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colours.backgroundLight },
-  scroll: { flex: 1 },
+  root: { flex: 1, backgroundColor: colours.backgroundDark },
+  scroll: { flex: 1, backgroundColor: colours.backgroundLight },
   scrollContent: { paddingBottom: 180 },
 
   // ── Cover image ───────────────────────────────────────────────────────────

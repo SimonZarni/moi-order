@@ -61,6 +61,7 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: colours.textMuted,
     letterSpacing: 0.4,
+    lineHeight: 16,
   },
   tabLabelActive: {
     color: colours.primary,

@@ -26,11 +26,13 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.textOnLight,
     letterSpacing: -0.2,
+    lineHeight: 34,
   },
   nameEn: {
     fontSize: typography.sm,
     color: colours.textMuted,
     marginTop: 2,
+    lineHeight: 22,
   },
   priceRow: {
     flexDirection: 'row',

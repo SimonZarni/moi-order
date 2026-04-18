@@ -10,7 +10,7 @@ import { TAB_BAR_CLEARANCE } from '@/shared/components/FloatingTabBar/FloatingTa
 export const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colours.backgroundLight,
+    backgroundColor: colours.backgroundDark,
   },
 
   // ── Body (overlaps HeroHeader bottom via negative marginTop) ───────────────
@@ -24,6 +24,10 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     paddingBottom: TAB_BAR_CLEARANCE,
   },
+  scroll: {
+    backgroundColor: colours.backgroundLight,
+  },
+
   sectionLabel: {
     fontSize: typography.xs,
     fontWeight: '700',
@@ -31,6 +35,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 2,
     textTransform: 'uppercase',
     marginBottom: spacing.md,
+    lineHeight: 20,
   },
 
   // ── Service card ──────────────────────────────────────────────────────────
@@ -53,6 +58,7 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.textOnLight,
     letterSpacing: -0.3,
+    lineHeight: 28,
   },
   serviceCardSubtitle: {
     fontSize: typography.sm,

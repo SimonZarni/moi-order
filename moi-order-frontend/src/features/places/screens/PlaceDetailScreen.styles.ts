@@ -14,6 +14,9 @@ export const styles = StyleSheet.create({
   // ── Scaffold ──────────────────────────────────────────────────────────────
   container: {
     flex: 1,
+    backgroundColor: colours.backgroundDark,
+  },
+  scroll: {
     backgroundColor: colours.backgroundLight,
   },
   scrollContent: {
