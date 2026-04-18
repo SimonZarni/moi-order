@@ -1,11 +1,13 @@
 import React from 'react';
-import { ActivityIndicator, FlatList, Image, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
+import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
+import { TicketCardSkeleton } from '@/features/tickets/components/TicketCardSkeleton';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { formatPrice } from '@/shared/utils/formatCurrency';
@@ -56,6 +58,7 @@ export function TicketsScreen(): React.JSX.Element {
         subtitle="Book attractions & experiences"
         onBack={handleBack}
         backLabel="Back"
+        hideBack
       />
       <View style={styles.bodyGap} />
     </>
@@ -64,10 +67,15 @@ export function TicketsScreen(): React.JSX.Element {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        {header}
-        <View style={styles.stateBox}>
-          <ActivityIndicator size="large" color={styles.spinner.color} />
-        </View>
+        <StickyBackButton onPress={handleBack} label="Back" />
+        <ScrollView style={styles.flatList} showsVerticalScrollIndicator={false} scrollEnabled={false} contentContainerStyle={styles.list}>
+          {header}
+          <View style={styles.cardsContainer}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <TicketCardSkeleton key={i} />
+            ))}
+          </View>
+        </ScrollView>
         <FloatingTabBar />
       </SafeAreaView>
     );
@@ -76,6 +84,7 @@ export function TicketsScreen(): React.JSX.Element {
   if (isError) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
+        <StickyBackButton onPress={handleBack} label="Back" />
         {header}
         <View style={styles.stateBox}>
           <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
@@ -89,7 +98,9 @@ export function TicketsScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
+      <StickyBackButton onPress={handleBack} label="Back" />
       <FlatList
+        style={styles.flatList}
         data={tickets}
         keyExtractor={(item: Ticket) => String(item.id)}
         renderItem={({ item }) => (

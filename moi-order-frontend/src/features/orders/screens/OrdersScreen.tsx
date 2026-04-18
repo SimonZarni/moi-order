@@ -8,6 +8,7 @@ import { useLocale } from '@/shared/hooks/useLocale';
 import { localeName } from '@/shared/utils/localeName';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
+import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { OrderCardSkeleton } from '@/features/orders/components/OrderCardSkeleton';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
@@ -143,6 +144,7 @@ export function OrdersScreen(): React.JSX.Element {
         subtitle="Your service submissions & tickets"
         onBack={handleBack}
         backLabel="Back"
+        hideBack
       />
       <View style={styles.bodyGap} />
       <TabBar activeTab={activeTab} onTabChange={handleTabChange} />
@@ -152,17 +154,20 @@ export function OrdersScreen(): React.JSX.Element {
   if (!isLoggedIn) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        {header}
-        <View style={styles.guestWrap}>
-          <Ionicons name="list" size={48} color={colours.textMuted} style={styles.guestIcon} />
-          <Text style={styles.guestTitle}>Sign in to view orders</Text>
-          <Text style={styles.guestSubtitle}>
-            Track your service submissions and{'\n'}ticket bookings in one place.
-          </Text>
-          <Pressable style={styles.guestBtn} onPress={handleNavigateToLogin}
-            accessibilityLabel="Sign in to view orders" accessibilityRole="button">
-            <Text style={styles.guestBtnText}>Sign In</Text>
-          </Pressable>
+        <StickyBackButton onPress={handleBack} label="Back" />
+        <View style={styles.flatList}>
+          {header}
+          <View style={styles.guestWrap}>
+            <Ionicons name="list" size={48} color={colours.textMuted} style={styles.guestIcon} />
+            <Text style={styles.guestTitle}>Sign in to view orders</Text>
+            <Text style={styles.guestSubtitle}>
+              Track your service submissions and{'\n'}ticket bookings in one place.
+            </Text>
+            <Pressable style={styles.guestBtn} onPress={handleNavigateToLogin}
+              accessibilityLabel="Sign in to view orders" accessibilityRole="button">
+              <Text style={styles.guestBtnText}>Sign In</Text>
+            </Pressable>
+          </View>
         </View>
         <FloatingTabBar />
       </SafeAreaView>
@@ -172,9 +177,12 @@ export function OrdersScreen(): React.JSX.Element {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        {header}
-        <OrderCardSkeleton /><OrderCardSkeleton /><OrderCardSkeleton />
-        <OrderCardSkeleton /><OrderCardSkeleton /><OrderCardSkeleton />
+        <StickyBackButton onPress={handleBack} label="Back" />
+        <View style={styles.flatList}>
+          {header}
+          <OrderCardSkeleton /><OrderCardSkeleton /><OrderCardSkeleton />
+          <OrderCardSkeleton /><OrderCardSkeleton /><OrderCardSkeleton />
+        </View>
         <FloatingTabBar />
       </SafeAreaView>
     );
@@ -183,11 +191,14 @@ export function OrdersScreen(): React.JSX.Element {
   if (isError) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        {header}
-        <View style={styles.stateBox}>
-          <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
-          <Text style={styles.stateTitle}>Could not load orders</Text>
-          <Text style={styles.stateSubtitle}>Pull down to retry</Text>
+        <StickyBackButton onPress={handleBack} label="Back" />
+        <View style={styles.flatList}>
+          {header}
+          <View style={styles.stateBox}>
+            <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
+            <Text style={styles.stateTitle}>Could not load orders</Text>
+            <Text style={styles.stateSubtitle}>Pull down to retry</Text>
+          </View>
         </View>
         <FloatingTabBar />
       </SafeAreaView>
@@ -197,7 +208,9 @@ export function OrdersScreen(): React.JSX.Element {
   if (activeTab === 'services') {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
+        <StickyBackButton onPress={handleBack} label="Back" />
         <FlatList
+          style={styles.flatList}
           data={submissions}
           keyExtractor={(item: ServiceSubmission) => String(item.id)}
           renderItem={({ item }) => <OrderCard item={item} onPress={handleOrderPress} />}
@@ -235,7 +248,9 @@ export function OrdersScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
+      <StickyBackButton onPress={handleBack} label="Back" />
       <FlatList
+        style={styles.flatList}
         data={ticketOrders}
         keyExtractor={(item: TicketOrder) => String(item.id)}
         renderItem={({ item }) => <TicketOrderCard item={item} onPress={handleTicketOrderPress} />}

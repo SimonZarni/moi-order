@@ -11,6 +11,10 @@ import { TAB_BAR_CLEARANCE } from '@/shared/components/FloatingTabBar/FloatingTa
 export const styles = StyleSheet.create({
   root: {
     flex: 1,
+    backgroundColor: colours.backgroundDark,
+  },
+
+  scroll: {
     backgroundColor: colours.backgroundLight,
   },
 
@@ -135,6 +139,7 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
     letterSpacing: 2,
     textTransform: 'uppercase',
+    lineHeight: 18,
   },
   sectionLine: {
     flex: 1,

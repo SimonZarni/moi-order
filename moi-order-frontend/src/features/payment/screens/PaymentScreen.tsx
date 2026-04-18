@@ -12,7 +12,6 @@ import { styles } from './PaymentScreen.styles';
 export function PaymentScreen(): React.JSX.Element {
   const {
     payment,
-    payableName,
     isCreating,
     isPaymentFailed,
     isPaid,
@@ -36,9 +35,6 @@ export function PaymentScreen(): React.JSX.Element {
           <Text style={styles.backLabel}>Back</Text>
         </Pressable>
         <Text style={styles.headerTitle}>Pay with PromptPay</Text>
-        {payableName !== '' && (
-          <Text style={styles.headerSubtitle}>{payableName}</Text>
-        )}
       </View>
 
       <View style={styles.body}>

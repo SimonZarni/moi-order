@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { usePlaceDetailScreen } from '@/features/places/hooks/usePlaceDetailScreen';
+import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
 import { colours } from '@/shared/theme/colours';
 import { PlaceDetailSkeleton } from '@/features/places/components/PlaceDetailSkeleton';
 import { PlaceImageViewer } from '@/features/places/components/PlaceImageViewer';
@@ -43,7 +44,9 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <StickyBackButton onPress={handleBack} label="Places" />
       <ScrollView
+        style={styles.scroll}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
@@ -64,12 +67,6 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
               />
             </Pressable>
           )}
-          <Pressable style={styles.heroBackBtn} onPress={handleBack}
-            accessibilityLabel="Go back to places" accessibilityRole="button">
-            <Ionicons name="chevron-back" size={20} color={colours.white} />
-            <Text style={styles.heroBackLabel}>Places</Text>
-          </Pressable>
-
           {isLoggedIn && (
             <Pressable
               style={styles.heroFavBtn}

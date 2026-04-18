@@ -6,6 +6,7 @@ import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
+import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { PlaceCard } from '@/features/places/components/PlaceCard';
@@ -41,6 +42,7 @@ export function PlacesScreen(): React.JSX.Element {
         accentColor={editorialPalette.gold}
         onBack={handleBack}
         backLabel="Back"
+        hideBack
         titleNode={
           <Text style={styles.heroInlineTitle}>
             <Text style={styles.heroInlineTitleAccent}>Explore </Text>
@@ -63,6 +65,7 @@ export function PlacesScreen(): React.JSX.Element {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
+        <StickyBackButton onPress={handleBack} label="Back" />
         <ScrollView showsVerticalScrollIndicator={false} scrollEnabled={false} contentContainerStyle={styles.list}>
           {header}
           {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
@@ -77,6 +80,7 @@ export function PlacesScreen(): React.JSX.Element {
   if (isError) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
+        <StickyBackButton onPress={handleBack} label="Back" />
         {header}
         <View style={styles.stateBox}>
           <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
@@ -90,6 +94,7 @@ export function PlacesScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
+      <StickyBackButton onPress={handleBack} label="Back" />
       <FlatList
         data={filteredPlaces}
         keyExtractor={(item: Place) => String(item.id)}

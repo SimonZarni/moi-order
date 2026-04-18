@@ -133,6 +133,7 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
     letterSpacing: 2,
     textTransform: 'uppercase',
+    lineHeight: 18,
   },
   sectionLine: {
     flex: 1,
@@ -188,6 +189,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.md,
     color: colours.textOnLight,
     fontWeight: '500',
+    lineHeight: 24,
   },
   rowValue: {
     fontSize: typography.sm,
@@ -236,6 +238,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.md,
     color: colours.textOnLight,
     fontWeight: '500',
+    lineHeight: 24,
   },
   infoPlaceholder: {
     color: colours.textMuted,
@@ -302,6 +305,7 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.white,
     letterSpacing: 0.5,
+    lineHeight: 22,
   },
 
   // ── Expanded change-password form ──────────────────────────────────────────
@@ -340,6 +344,7 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.white,
     letterSpacing: 0.4,
+    lineHeight: 22,
   },
 
   // ── Language switcher ─────────────────────────────────────────────────────
@@ -366,6 +371,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     fontWeight: '600',
     color: colours.textMuted,
+    lineHeight: 22,
   },
   langBtnTextActive: {
     color: colours.primary,

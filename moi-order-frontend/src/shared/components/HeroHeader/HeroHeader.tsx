@@ -10,6 +10,7 @@ interface HeroHeaderProps {
   onBack: () => void;
   backLabel: string;
   subtitle?: string;
+  hideBack?: boolean;    // true when a StickyBackButton is used instead
   // Standard stacked layout
   eyebrow?: string;
   title?: string;
@@ -25,21 +26,26 @@ export function HeroHeader({
   titleNode,
   onBack,
   backLabel,
+  hideBack = false,
 }: HeroHeaderProps): React.JSX.Element {
   return (
     <View style={styles.container}>
       <View style={[styles.orbLarge, { backgroundColor: accentColor }]} />
       <View style={styles.orbSmall} />
 
-      <Pressable
-        style={styles.backBtn}
-        onPress={onBack}
-        accessibilityLabel="Go back"
-        accessibilityRole="button"
-      >
-        <Ionicons name="chevron-back" size={20} color={colours.tertiary} />
-        <Text style={styles.backLabel}>{backLabel}</Text>
-      </Pressable>
+      {hideBack ? (
+        <View style={styles.backPlaceholder} />
+      ) : (
+        <Pressable
+          style={styles.backBtn}
+          onPress={onBack}
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
+        >
+          <Ionicons name="chevron-back" size={20} color={colours.tertiary} />
+          <Text style={styles.backLabel}>{backLabel}</Text>
+        </Pressable>
+      )}
 
       <View style={styles.textBlock}>
         {titleNode != null ? (

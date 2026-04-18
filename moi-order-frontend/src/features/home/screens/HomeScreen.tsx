@@ -28,7 +28,7 @@ export function HomeScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {/* ── Hero ── */}
         <View style={styles.hero}>

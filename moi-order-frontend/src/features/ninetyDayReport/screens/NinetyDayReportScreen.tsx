@@ -3,6 +3,7 @@ import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from 'react
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
+import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { ServiceTypeCard } from '@/features/ninetyDayReport/components/ServiceTypeCard';
@@ -15,7 +16,9 @@ export function NinetyDayReportScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
+      <StickyBackButton onPress={handleBack} label="Home" />
       <ScrollView
+        style={styles.scroll}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={editorialPalette.sage} />
@@ -28,6 +31,7 @@ export function NinetyDayReportScreen(): React.JSX.Element {
           subtitle="Select the report type that matches your visa category."
           onBack={handleBack}
           backLabel="Home"
+          hideBack
         />
 
         <View style={styles.body}>

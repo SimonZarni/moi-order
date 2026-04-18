@@ -9,6 +9,10 @@ import { TAB_BAR_CLEARANCE } from '@/shared/components/FloatingTabBar/FloatingTa
 export const styles = StyleSheet.create({
   root: {
     flex: 1,
+    backgroundColor: colours.backgroundDark,
+  },
+
+  scroll: {
     backgroundColor: colours.backgroundLight,
   },
 
@@ -30,6 +34,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 2,
     textTransform: 'uppercase',
     marginBottom: spacing.md,
+    lineHeight: 20,
   },
 
   // ── States ────────────────────────────────────────────────────────────────
