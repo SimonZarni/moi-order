@@ -188,13 +188,13 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.textOnLight,
     letterSpacing: -0.2,
-    lineHeight: 22,
+    lineHeight: 28,
     marginBottom: 3,
   },
   cardSubtitle: {
     fontSize: typography.xs,
     color: colours.medium,
-    lineHeight: 15,
+    lineHeight: 20,
   },
 
   // Ghost icon — large emoji watermark, bottom-right

@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
 import { useAuthStore } from '@/shared/store/authStore';
+import { useLocale } from '@/shared/hooks/useLocale';
 import { RootStackParamList } from '@/types/navigation';
 import { styles, TAB_BAR_BOTTOM_OFFSET } from './FloatingTabBar.styles';
 
@@ -21,11 +22,18 @@ interface TabItem {
   disabled?: boolean;
 }
 
+const TAB_LABELS: Record<string, { en: string; mm: string }> = {
+  Home:    { en: 'Home',    mm: 'ပင်မ'      },
+  Places:  { en: 'Places',  mm: 'နေရာများ'  },
+  Orders:  { en: 'Orders',  mm: 'အော်ဒါများ' },
+  Profile: { en: 'Profile', mm: 'ပရိုဖိုင်'  },
+};
+
 const TABS: TabItem[] = [
-  { route: 'Home',    icon: 'home',   label: 'Home'    },
+  { route: 'Home',    icon: 'home',     label: 'Home'    },
   { route: 'Places',  icon: 'location', label: 'Places'  },
-  { route: 'Orders',  icon: 'list',   label: 'Orders'  },
-  { route: 'Profile', icon: 'person', label: 'Profile' },
+  { route: 'Orders',  icon: 'list',     label: 'Orders'  },
+  { route: 'Profile', icon: 'person',   label: 'Profile' },
 ];
 
 export function FloatingTabBar(): React.JSX.Element {
@@ -34,6 +42,7 @@ export function FloatingTabBar(): React.JSX.Element {
   const insets = useSafeAreaInsets();
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
 
+  const { locale } = useLocale();
   const currentRoute = route.name as keyof RootStackParamList;
   // Tracks the last intended destination synchronously — useRoute() lags during
   // animation so the old screen's tab bar would block rapid re-taps without this.
@@ -88,7 +97,7 @@ export function FloatingTabBar(): React.JSX.Element {
               style={{ opacity: isActive ? 1 : 0.45 }}
             />
             <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>
-              {tab.label}
+              {TAB_LABELS[tab.route]?.[locale] ?? tab.label}
             </Text>
           </Pressable>
         );

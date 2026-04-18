@@ -13,7 +13,7 @@ import { ApiError } from '@/types/models';
 // In-memory token ref — populated by authStore on login, cleared on logout.
 // Avoids async SecureStore reads inside the synchronous request interceptor.
 let _accessToken: string | null = null;
-let _locale: string = 'en';
+let _locale: string = 'mm';
 
 export function setMemoryToken(token: string | null): void {
   _accessToken = token;

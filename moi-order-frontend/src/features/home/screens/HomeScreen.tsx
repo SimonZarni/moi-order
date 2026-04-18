@@ -7,6 +7,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { useHomeScreen } from '@/features/home/hooks/useHomeScreen';
+import { useLocale } from '@/shared/hooks/useLocale';
+import { getHomeStrings } from '@/shared/constants/homeStrings';
 import { styles } from './HomeScreen.styles';
 
 export function HomeScreen(): React.JSX.Element {
@@ -20,6 +22,9 @@ export function HomeScreen(): React.JSX.Element {
     handleNavigateToLogin,
     handleLogout,
   } = useHomeScreen();
+
+  const { locale } = useLocale();
+  const t = getHomeStrings(locale);
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -62,7 +67,7 @@ export function HomeScreen(): React.JSX.Element {
         {/* ── Body ── */}
         <View style={styles.body}>
           <View style={styles.sectionLabelRow}>
-            <Text style={styles.sectionLabel}>Our Services</Text>
+            <Text style={styles.sectionLabel}>{t.ourServices}</Text>
             <View style={styles.sectionLine} />
           </View>
 
@@ -72,7 +77,7 @@ export function HomeScreen(): React.JSX.Element {
               onPress={handleNavigateToNinetyDayReport}
               accessibilityLabel="90-Day Report service" accessibilityRole="button">
               <Text style={[styles.cardTag, styles.tagSage]}>Immigration</Text>
-              <Text style={styles.cardTitle}>90-Day{'\n'}Report</Text>
+              <Text style={styles.cardTitle}>{t.ninetyDayReport}</Text>
               <Ionicons name="calendar" size={28} color={colours.primary} style={styles.cardIcon} />
             </Pressable>
 
@@ -80,8 +85,8 @@ export function HomeScreen(): React.JSX.Element {
               onPress={handleNavigateToTickets}
               accessibilityLabel="Tickets" accessibilityRole="button">
               <Text style={[styles.cardTag, styles.tagSlate]}>Attractions</Text>
-              <Text style={styles.cardTitle}>Tickets</Text>
-              <Text style={styles.cardSubtitle}>Theme parks & more</Text>
+              <Text style={styles.cardTitle}>{t.tickets}</Text>
+              <Text style={styles.cardSubtitle}>{t.themeParks}</Text>
               <Ionicons name="pricetag" size={28} color={colours.medium} style={styles.cardIcon} />
             </Pressable>
           </View>
@@ -92,8 +97,8 @@ export function HomeScreen(): React.JSX.Element {
               onPress={handleNavigateToPlaces}
               accessibilityLabel="Places — immigration offices" accessibilityRole="button">
               <Text style={[styles.cardTag, styles.tagGold]}>Explore</Text>
-              <Text style={styles.cardTitle}>Places</Text>
-              <Text style={styles.cardSubtitle}>Attractions & Landmarks</Text>
+              <Text style={styles.cardTitle}>{t.places}</Text>
+              <Text style={styles.cardSubtitle}>{t.attractionsLandmarks}</Text>
               <Ionicons name="location" size={28} color={colours.secondary} style={styles.cardIcon} />
             </Pressable>
 
@@ -101,8 +106,8 @@ export function HomeScreen(): React.JSX.Element {
               onPress={handleNavigateToOtherServices}
               accessibilityLabel="Other services" accessibilityRole="button">
               <Text style={[styles.cardTag, styles.tagTeal]}>Registration</Text>
-              <Text style={styles.cardTitle}>Other{'\n'}Services</Text>
-              <Text style={styles.cardSubtitle}>Company & more</Text>
+              <Text style={styles.cardTitle}>{t.otherServices}</Text>
+              <Text style={styles.cardSubtitle}>{t.companyMore}</Text>
               <Ionicons name="flash" size={28} color={colours.tertiary} style={styles.cardIcon} />
             </Pressable>
           </View>

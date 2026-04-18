@@ -9,6 +9,11 @@ import { ErrorBanner } from '@/shared/components/ErrorBanner/ErrorBanner';
 import { FormField } from '@/shared/components/FormField/FormField';
 import { SuccessState } from '@/shared/components/SuccessState/SuccessState';
 import { useEmbassyResidentialFormScreen } from '@/features/embassyResidential/hooks/useEmbassyResidentialFormScreen';
+import { useLocale } from '@/shared/hooks/useLocale';
+import { localeDocumentLabel } from '@/shared/utils/localeName';
+import { DOCUMENT_TYPE, DocumentType } from '@/types/enums';
+
+type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 import { styles } from './EmbassyResidentialFormScreen.styles';
 
 export function EmbassyResidentialFormScreen(): React.JSX.Element {
@@ -29,6 +34,7 @@ export function EmbassyResidentialFormScreen(): React.JSX.Element {
     handleBack,
   } = useEmbassyResidentialFormScreen();
 
+  const { locale } = useLocale();
   const priceFormatted = `฿${price.toLocaleString('th-TH')}`;
 
   return (
@@ -93,21 +99,22 @@ export function EmbassyResidentialFormScreen(): React.JSX.Element {
               <Text style={styles.sectionTitle}>Required Documents</Text>
 
               {([
-                { key: 'passportBioPage',   label: 'Passport Bio Page',     icon: 'document-text' as const, onPick: handlePickPassportBioPage },
-                { key: 'visaPage',          label: 'Visa Page',             icon: 'id-card' as const, onPick: handlePickVisaPage },
-                { key: 'identityCardFront', label: 'Identity Card (Front)', icon: 'id-card' as const, onPick: handlePickIdentityCardFront },
-                { key: 'identityCardBack',  label: 'Identity Card (Back)',  icon: 'id-card' as const, onPick: handlePickIdentityCardBack },
-                { key: 'tm30',              label: 'TM30',                  icon: 'clipboard' as const, onPick: handlePickTm30,
+                { key: 'passportBioPage'   as const, docType: DOCUMENT_TYPE.PassportBioPage,   icon: 'document-text' as const, onPick: handlePickPassportBioPage },
+                { key: 'visaPage'          as const, docType: DOCUMENT_TYPE.VisaPage,          icon: 'id-card' as const,       onPick: handlePickVisaPage },
+                { key: 'identityCardFront' as const, docType: DOCUMENT_TYPE.IdentityCardFront, icon: 'id-card' as const,       onPick: handlePickIdentityCardFront },
+                { key: 'identityCardBack'  as const, docType: DOCUMENT_TYPE.IdentityCardBack,  icon: 'id-card' as const,       onPick: handlePickIdentityCardBack },
+                { key: 'tm30'              as const, docType: DOCUMENT_TYPE.Tm30,              icon: 'clipboard' as const,     onPick: handlePickTm30,
                   hint: 'Tap to select image or PDF', uploadedHint: 'File selected — tap to change' },
-              ] as const).map(({ key, label, icon, onPick, ...rest }) => (
+              ] as { key: 'passportBioPage' | 'visaPage' | 'identityCardFront' | 'identityCardBack' | 'tm30'; docType: DocumentType; icon: IoniconsName; onPick: () => void; hint?: string; uploadedHint?: string }[])
+              .map(({ key, docType, icon, onPick, ...rest }) => (
                 <DocumentPickerField
                   key={key}
-                  label={label}
+                  label={localeDocumentLabel(docType, locale)}
                   icon={icon}
                   onPress={onPick}
                   isUploaded={form[key] !== null}
                   error={form.errors[key]}
-                  accessibilityLabel={`Upload ${label}`}
+                  accessibilityLabel={`Upload ${localeDocumentLabel(docType, locale)}`}
                   {...rest}
                 />
               ))}
