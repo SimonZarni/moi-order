@@ -7,9 +7,7 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
 import Table from '@mui/material/Table';
-import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import TableRow from '@mui/material/TableRow';
@@ -20,14 +18,13 @@ import InputLabel from '@mui/material/InputLabel';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import FormControl from '@mui/material/FormControl';
-import DialogTitle from '@mui/material/DialogTitle';
 import OutlinedInput from '@mui/material/OutlinedInput';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
 import InputAdornment from '@mui/material/InputAdornment';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 import CircularProgress from '@mui/material/CircularProgress';
+
+import { useRouter } from 'src/routes/hooks';
 
 import { fDate } from 'src/utils/format-time';
 import { fCurrency } from 'src/utils/format-number';
@@ -51,6 +48,7 @@ const STATUS_LABEL_COLORS: Record<string, 'success' | 'warning' | 'default' | 'e
 // ----------------------------------------------------------------------
 
 export function BookingsView() {
+  const router = useRouter();
   const [searchParams] = useSearchParams();
   const [bookings, setBookings] = useState<BookingData[]>([]);
   const [total, setTotal] = useState(0);
@@ -58,7 +56,6 @@ export function BookingsView() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [filterStatus, setFilterStatus] = useState(searchParams.get('status') ?? 'all');
-  const [viewBooking, setViewBooking] = useState<BookingData | null>(null);
 
   const fetchBookings = useCallback(() => {
     setLoading(true);
@@ -173,7 +170,7 @@ export function BookingsView() {
                           <Label color={statusColor(row.status)}>{row.status_label}</Label>
                         </TableCell>
                         <TableCell align="right">
-                          <IconButton size="small" onClick={() => setViewBooking(row)}>
+                          <IconButton size="small" onClick={() => router.push(`/bookings/${row.id}`)}>
                             <Iconify icon="solar:eye-bold" width={16} />
                           </IconButton>
                         </TableCell>
@@ -204,34 +201,6 @@ export function BookingsView() {
         />
       </Card>
 
-      <Dialog open={!!viewBooking} onClose={() => setViewBooking(null)} maxWidth="xs" fullWidth>
-        <DialogTitle>Order #{viewBooking?.id}</DialogTitle>
-        <DialogContent>
-          {viewBooking && (
-            <Stack spacing={1.5} sx={{ mt: 1 }}>
-              {[
-                ['Ticket', viewBooking.ticket?.name ?? '—'],
-                ['Visit Date', fDate(viewBooking.visit_date)],
-                ['Total', viewBooking.total !== null ? fCurrency(viewBooking.total / 100) : '—'],
-                ['E-Ticket', viewBooking.has_eticket ? 'Yes' : 'No'],
-                ['Ordered', fDate(viewBooking.created_at)],
-              ].map(([label, value]) => (
-                <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="body2" color="text.secondary">{label}</Typography>
-                  <Typography variant="body2" fontWeight={500}>{value}</Typography>
-                </Box>
-              ))}
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body2" color="text.secondary">Status</Typography>
-                <Label color={statusColor(viewBooking.status)}>{viewBooking.status_label}</Label>
-              </Box>
-            </Stack>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setViewBooking(null)}>Close</Button>
-        </DialogActions>
-      </Dialog>
     </DashboardContent>
   );
 }
