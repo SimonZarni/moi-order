@@ -18,9 +18,10 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
  *   provide a second guard layer (defence in depth).
  *
  * Status transition rules:
- *   pending_payment → processing  (admin overrides a missed webhook)
- *   processing      → completed   (primary admin workflow)
- *   Any other       → 409 DomainException
+ *   pending_payment → cancelled   (admin cancels before payment clears)
+ *   processing      → completed   (admin marks work done)
+ *   processing      → cancelled   (admin cancels in-progress submission)
+ *   completed/cancelled → 409 DomainException (terminal states)
  */
 class AdminSubmissionService
 {
@@ -30,8 +31,11 @@ class AdminSubmissionService
      */
     public function index(AdminSubmissionIndexRequest $request): LengthAwarePaginator
     {
-        $query = ServiceSubmission::with(['user', 'serviceType.service', 'payment'])
-            ->latest();
+        $query = ServiceSubmission::with([
+            'user',
+            'serviceType' => fn ($q) => $q->withTrashed()->with(['service' => fn ($q) => $q->withTrashed()]),
+            'payment',
+        ])->latest();
 
         if ($request->filled('status')) {
             $query->where('status', $request->string('status')->toString());
@@ -74,7 +78,12 @@ class AdminSubmissionService
      */
     public function show(ServiceSubmission $submission): ServiceSubmission
     {
-        return $submission->load(['user', 'serviceType.service', 'payment', 'documents']);
+        return $submission->load([
+            'user',
+            'serviceType' => fn ($q) => $q->withTrashed()->with(['service' => fn ($q) => $q->withTrashed()]),
+            'payment',
+            'documents',
+        ]);
     }
 
     /**
@@ -87,8 +96,8 @@ class AdminSubmissionService
         AdminUpdateSubmissionStatusDTO $dto,
     ): ServiceSubmission {
         match ($dto->status) {
-            SubmissionStatus::Processing => $this->transitionToProcessing($submission),
             SubmissionStatus::Completed  => $this->transitionToCompleted($submission),
+            SubmissionStatus::Cancelled  => $this->transitionToCancelled($submission),
             default                      => throw new DomainException('submission.invalid_status'),
         };
 
@@ -97,15 +106,6 @@ class AdminSubmissionService
 
     // ─── Private ─────────────────────────────────────────────────────────────
 
-    private function transitionToProcessing(ServiceSubmission $submission): void
-    {
-        if ($submission->status !== SubmissionStatus::PendingPayment) {
-            throw new DomainException('submission.not_pending_payment');
-        }
-
-        $submission->markProcessing();
-    }
-
     private function transitionToCompleted(ServiceSubmission $submission): void
     {
         if ($submission->status !== SubmissionStatus::Processing) {
@@ -113,5 +113,17 @@ class AdminSubmissionService
         }
 
         $submission->complete();
+    }
+
+    private function transitionToCancelled(ServiceSubmission $submission): void
+    {
+        if (! in_array($submission->status, [
+            SubmissionStatus::PendingPayment,
+            SubmissionStatus::Processing,
+        ], true)) {
+            throw new DomainException('submission.not_cancellable');
+        }
+
+        $submission->cancel();
     }
 }

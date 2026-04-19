@@ -115,6 +115,15 @@ class ServiceSubmission extends Model implements PayableInterface
         ]);
     }
 
+    /** Cancel the submission. Admin-triggered; irreversible. */
+    public function cancel(): void
+    {
+        if ($this->status->isTerminal()) {
+            return;
+        }
+        $this->update(['status' => SubmissionStatus::Cancelled]);
+    }
+
     // ─── Relationships ────────────────────────────────────────────────────────
 
     public function user(): BelongsTo

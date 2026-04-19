@@ -10,6 +10,7 @@ enum SubmissionStatus: string
     case Processing     = 'processing';
     case Completed      = 'completed';
     case PaymentFailed  = 'payment_failed';
+    case Cancelled      = 'cancelled';
 
     public function label(): string
     {
@@ -18,6 +19,7 @@ enum SubmissionStatus: string
             self::Processing     => 'Processing',
             self::Completed      => 'Completed',
             self::PaymentFailed  => 'Payment Failed',
+            self::Cancelled      => 'Cancelled',
         };
     }
 
@@ -27,7 +29,8 @@ enum SubmissionStatus: string
             self::PendingPayment => false,
             self::Processing     => false,
             self::Completed      => true,
-            self::PaymentFailed  => false, // User can retry payment.
+            self::PaymentFailed  => false,
+            self::Cancelled      => true,
         };
     }
 }

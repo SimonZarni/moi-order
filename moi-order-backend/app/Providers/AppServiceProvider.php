@@ -105,9 +105,11 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($request->ip());
         });
 
-        // 20 requests/minute per authenticated user or IP — admin endpoints
+        // 1000 requests/minute per authenticated user — admin endpoints are already
+        // protected by auth:sanctum + abilities:admin + admin.auth; a per-user
+        // rate limit mainly guards against runaway scripts, not interactive use.
         RateLimiter::for('admin', function (Request $request): Limit {
-            return Limit::perMinute(20)->by(
+            return Limit::perMinute(1000)->by(
                 $request->user()?->id ?? $request->ip()
             );
         });
