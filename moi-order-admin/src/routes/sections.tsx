@@ -23,13 +23,16 @@ export const ReviewsPage = lazy(() => import('src/pages/reviews'));
 export const PlacesPage = lazy(() => import('src/pages/places'));
 export const ProfilePage = lazy(() => import('src/pages/profile'));
 export const BookingsPage = lazy(() => import('src/pages/bookings'));
+export const BookingDetailPage = lazy(() => import('src/pages/booking-detail'));
 export const PaymentsPage = lazy(() => import('src/pages/payments'));
 export const ServicesPage = lazy(() => import('src/pages/services'));
 export const SettingsPage = lazy(() => import('src/pages/settings'));
 export const PlaceEditPage = lazy(() => import('src/pages/place-edit'));
+export const PlaceCreatePage = lazy(() => import('src/pages/place-create'));
 export const DashboardPage = lazy(() => import('src/pages/dashboard'));
 export const AttractionsPage = lazy(() => import('src/pages/attractions'));
 export const AttractionDetailPage = lazy(() => import('src/pages/attraction-detail'));
+export const AttractionCreatePage = lazy(() => import('src/pages/attraction-create'));
 export const SubmissionsPage = lazy(() => import('src/pages/submissions'));
 export const PaymentDetailPage = lazy(() => import('src/pages/payment-detail'));
 export const ContentPage = lazy(() => import('src/pages/content'));
@@ -63,10 +66,13 @@ export const routesSection: RouteObject[] = [
     children: [
       { index: true, element: <DashboardPage /> },
       { path: 'places', element: <PlacesPage /> },
+      { path: 'places/new', element: <PlaceCreatePage /> },
       { path: 'places/:id/edit', element: <PlaceEditPage /> },
       { path: 'attractions', element: <AttractionsPage /> },
+      { path: 'attractions/new', element: <AttractionCreatePage /> },
       { path: 'attractions/:id', element: <AttractionDetailPage /> },
       { path: 'bookings', element: <BookingsPage /> },
+      { path: 'bookings/:id', element: <BookingDetailPage /> },
       { path: 'bookings/report', element: <ReportPage /> },
       { path: 'users', element: <UsersPage /> },
       { path: 'payments', element: <PaymentsPage /> },

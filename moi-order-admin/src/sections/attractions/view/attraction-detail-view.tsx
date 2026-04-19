@@ -146,7 +146,7 @@ export function AttractionDetailView() {
               <Typography variant="body2" color="text.secondary">
                 {attraction.highlight_description || attraction.description}
               </Typography>
-              {attraction.starting_from_price !== null && (
+              {attraction.starting_from_price != null && (
                 <Typography variant="body2" color="primary.main" fontWeight={600} sx={{ mt: 1 }}>
                   From {attraction.starting_from_price.toFixed(0)} THB
                 </Typography>

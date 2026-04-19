@@ -56,19 +56,26 @@ export function AttractionsView() {
 
   return (
     <DashboardContent>
-      <Box sx={{ mb: 5, display: 'flex', alignItems: 'center' }}>
-        <Box>
+      <Box sx={{ mb: 5, display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+        <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h4">Attractions</Typography>
           <Typography variant="body2" color="text.secondary">Manage ticket listings</Typography>
         </Box>
-        <Box sx={{ flexGrow: 1 }} />
         <OutlinedInput
           value={filterName}
           onChange={(e) => setFilterName(e.target.value)}
           placeholder="Search attractions..."
           startAdornment={<InputAdornment position="start"><Iconify icon="eva:search-fill" /></InputAdornment>}
-          sx={{ mr: 2, width: 240, height: 40 }}
+          sx={{ width: 240, height: 40 }}
         />
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<Iconify icon="mingcute:add-line" />}
+          onClick={() => router.push('/attractions/new')}
+        >
+          Add Attraction
+        </Button>
       </Box>
 
       {loading ? (

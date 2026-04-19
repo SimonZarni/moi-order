@@ -32,6 +32,12 @@ export const attractionsApi = {
     apiClient.get<{ data: AttractionData[]; meta: Meta }>('/tickets', { params }).then((r) => r.data),
   get: (id: number | string) =>
     apiClient.get<{ data: AttractionData }>(`/tickets/${id}`).then((r) => r.data.data),
+  create: (formData: FormData) =>
+    apiClient
+      .post<{ data: AttractionData }>('/tickets', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((r) => r.data.data),
   update: (id: number | string, payload: Record<string, unknown>) =>
     apiClient.put<{ data: AttractionData }>(`/tickets/${id}`, payload).then((r) => r.data.data),
   remove: (id: number | string) => apiClient.delete(`/tickets/${id}`),

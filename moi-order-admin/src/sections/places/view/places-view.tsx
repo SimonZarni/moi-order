@@ -8,7 +8,6 @@ import Chip from '@mui/material/Chip';
 import Table from '@mui/material/Table';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Avatar from '@mui/material/Avatar';
 import Dialog from '@mui/material/Dialog';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -34,7 +33,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useRouter } from 'src/routes/hooks';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { placesApi, type PlaceData, type PlaceLocale, type PlaceStatus } from 'src/api/places';
+import { placesApi, type PlaceData, type PlaceLocale } from 'src/api/places';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
@@ -145,13 +144,6 @@ export function PlacesView() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [selected, setSelected] = useState<number[]>([]);
 
-  const [addOpen, setAddOpen] = useState(false);
-  const [addName, setAddName] = useState('');
-  const [addCategory, setAddCategory] = useState('');
-  const [addCity, setAddCity] = useState('');
-  const [addAddress, setAddAddress] = useState('');
-  const [addStatus, setAddStatus] = useState<PlaceStatus>('active');
-
   const [editConfirm, setEditConfirm] = useState<PlaceData | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
@@ -213,21 +205,6 @@ export function PlacesView() {
     router.push(`/places/${place.id}/edit`);
   };
 
-  const handleAddPlace = () => {
-    placesApi
-      .create({ name_my: addName, category: addCategory, city: addCity, address: addAddress, status: addStatus })
-      .then(() => {
-        setAddOpen(false);
-        setAddName('');
-        setAddCategory('');
-        setAddCity('');
-        setAddAddress('');
-        setAddStatus('active');
-        fetchPlaces();
-      })
-      .catch(() => {});
-  };
-
   return (
     <DashboardContent>
       <Box sx={{ mb: 5, display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
@@ -254,7 +231,7 @@ export function PlacesView() {
           variant="contained"
           color="primary"
           startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={() => setAddOpen(true)}
+          onClick={() => router.push('/places/new')}
         >
           Add Place
         </Button>
@@ -355,30 +332,20 @@ export function PlacesView() {
                           />
                         </TableCell>
                         <TableCell>
-                          <Stack direction="row" alignItems="center" spacing={1.5}>
-                            <Avatar
-                              src={row.cover_image ?? undefined}
-                              variant="rounded"
-                              sx={{ width: 40, height: 40, cursor: 'pointer', flexShrink: 0 }}
-                              onClick={() => setEditConfirm(row)}
-                            />
-                            <Box>
-                              <Typography
-                                variant="body2"
-                                fontWeight={600}
-                                sx={{
-                                  cursor: 'pointer',
-                                  '&:hover': { color: 'primary.main', textDecoration: 'underline' },
-                                }}
-                                onClick={() => setEditConfirm(row)}
-                              >
-                                {row.name_my}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {row.address}
-                              </Typography>
-                            </Box>
-                          </Stack>
+                          <Typography
+                            variant="body2"
+                            fontWeight={600}
+                            sx={{
+                              cursor: 'pointer',
+                              '&:hover': { color: 'primary.main', textDecoration: 'underline' },
+                            }}
+                            onClick={() => setEditConfirm(row)}
+                          >
+                            {row.name_my}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {row.address}
+                          </Typography>
                         </TableCell>
                         <TableCell>{localeName(row.category)}</TableCell>
                         <TableCell>{row.city ?? '—'}</TableCell>
@@ -448,62 +415,6 @@ export function PlacesView() {
           }}
         />
       </Card>
-
-      {/* Add Place Dialog */}
-      <Dialog open={addOpen} onClose={() => setAddOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add New Place</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2.5} sx={{ mt: 1 }}>
-            <TextField
-              fullWidth
-              label="Place Name"
-              value={addName}
-              onChange={(e) => setAddName(e.target.value)}
-            />
-            <TextField
-              fullWidth
-              label="Category"
-              value={addCategory}
-              onChange={(e) => setAddCategory(e.target.value)}
-            />
-            <TextField
-              fullWidth
-              label="City"
-              value={addCity}
-              onChange={(e) => setAddCity(e.target.value)}
-            />
-            <TextField
-              fullWidth
-              label="Address"
-              value={addAddress}
-              onChange={(e) => setAddAddress(e.target.value)}
-            />
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select
-                label="Status"
-                value={addStatus}
-                onChange={(e) => setAddStatus(e.target.value as PlaceStatus)}
-              >
-                <MenuItem value="active">Active</MenuItem>
-                <MenuItem value="pending">Pending</MenuItem>
-                <MenuItem value="inactive">Inactive</MenuItem>
-              </Select>
-            </FormControl>
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setAddOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleAddPlace}
-            disabled={!addName.trim()}
-          >
-            Add Place
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       <PasswordConfirmDialog
         open={!!editConfirm}
