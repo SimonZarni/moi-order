@@ -31,6 +31,7 @@ class AdminUpdateSubmissionStatusRequest extends FormRequest
                 Rule::in([
                     SubmissionStatus::Processing->value,
                     SubmissionStatus::Completed->value,
+                    SubmissionStatus::Cancelled->value,
                 ]),
             ],
         ];
@@ -39,7 +40,7 @@ class AdminUpdateSubmissionStatusRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'status.in' => 'Status must be one of: processing, completed.',
+            'status.in' => 'Status must be one of: processing, completed, cancelled.',
         ];
     }
 
