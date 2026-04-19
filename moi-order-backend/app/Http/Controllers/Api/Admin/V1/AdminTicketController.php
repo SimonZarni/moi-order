@@ -63,7 +63,7 @@ class AdminTicketController extends Controller
 
     public function show(Ticket $ticket): JsonResponse
     {
-        $ticket->load('variants');
+        $ticket->load('activeVariants');
         return response()->json(['data' => new TicketResource($ticket)]);
     }
 
