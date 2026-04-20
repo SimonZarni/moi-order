@@ -25,6 +25,12 @@ class AdminPaymentController extends Controller
         return AdminPaymentResource::collection($this->service->index($request));
     }
 
+    /** GET /api/admin/v1/payments/stats */
+    public function stats(): JsonResponse
+    {
+        return response()->json(['data' => $this->service->stats()]);
+    }
+
     /** GET /api/admin/v1/payments/{payment} */
     public function show(Payment $payment): JsonResponse
     {

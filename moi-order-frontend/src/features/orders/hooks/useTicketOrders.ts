@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 import { fetchTicketOrders } from '@/shared/api/ticketOrders';
+import { useAuthStore } from '@/shared/store/authStore';
 import { CACHE_TTL } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { PaginatedResponse, TicketOrder } from '@/types/models';
@@ -17,9 +18,12 @@ export interface UseTicketOrdersResult {
 }
 
 export function useTicketOrders(): UseTicketOrdersResult {
+  const { isLoggedIn } = useAuthStore();
+
   const query = useInfiniteQuery({
     queryKey: QUERY_KEYS.TICKET_ORDERS.LIST,
     queryFn: ({ pageParam }) => fetchTicketOrders(pageParam as number),
+    enabled: isLoggedIn,
     getNextPageParam: (last: PaginatedResponse<TicketOrder>) =>
       last.meta.current_page < last.meta.last_page
         ? last.meta.current_page + 1

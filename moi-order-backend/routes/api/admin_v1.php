@@ -64,6 +64,7 @@ Route::prefix('users')->name('admin.users.')->group(function (): void {
 // ── Payments ──────────────────────────────────────────────────────────────────
 Route::prefix('payments')->name('admin.payments.')->group(function (): void {
     Route::get('/', [AdminPaymentController::class, 'index'])->name('index');
+    Route::get('/stats', [AdminPaymentController::class, 'stats'])->name('stats');
     Route::get('/{payment}', [AdminPaymentController::class, 'show'])->name('show');
 });
 

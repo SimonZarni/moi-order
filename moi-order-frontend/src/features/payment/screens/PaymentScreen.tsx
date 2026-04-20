@@ -20,7 +20,7 @@ export function PaymentScreen(): React.JSX.Element {
     handleGoToOrders,
   } = usePaymentScreen();
 
-  const amountFormatted = formatCurrency(payment?.amount ?? 0);
+  const amountFormatted = formatCurrency((payment?.amount ?? 0) / 100);
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>

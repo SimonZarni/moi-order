@@ -26,7 +26,7 @@ interface OrderCardProps {
 function OrderCard({ item, onPress }: OrderCardProps): React.JSX.Element {
   const { locale } = useLocale();
   const accentColour = STATUS_COLOURS[item.status] ?? STATUS_COLOURS['pending']!;
-  const svcName = localeName(item.service_type.service ?? item.service_type, locale);
+  const svcName = localeName(item.service_type?.service ?? item.service_type, locale);
   return (
     <View style={styles.cardWrap}>
       <Pressable

@@ -7,6 +7,7 @@ import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
+import Switch from '@mui/material/Switch';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
@@ -15,6 +16,7 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { useRouter } from 'src/routes/hooks';
@@ -28,8 +30,19 @@ import { Iconify } from 'src/components/iconify';
 
 const genTempId = () => Math.random().toString(36).slice(2, 10);
 
-type LocalVariant  = { tempId: string; id?: number; name: string; price: number; description: string };
-type PendingImage  = { tempId: string; file: File; preview: string };
+type LocalVariant = { tempId: string; id?: number; name: string; price: number; description: string };
+type PendingImage = { tempId: string; file: File; preview: string };
+
+type InfoForm = {
+  name: string;
+  highlight_description: string;
+  description: string;
+  google_maps_link: string;
+  address: string;
+  city: string;
+  province: string;
+  is_active: boolean;
+};
 
 // ----------------------------------------------------------------------
 
@@ -41,6 +54,7 @@ export function AttractionDetailView() {
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const [attraction, setAttraction]       = useState<AttractionData | null>(null);
+  const [infoForm, setInfoForm]           = useState<InfoForm | null>(null);
   const [loading, setLoading]             = useState(true);
   const [variants, setVariants]           = useState<LocalVariant[]>([]);
   const [saving, setSaving]               = useState(false);
@@ -58,17 +72,34 @@ export function AttractionDetailView() {
         setAttraction(data);
         setImages(data.images ?? []);
         setVariants(variantList.map((v) => ({ ...v, tempId: String(v.id) })));
+        setInfoForm({
+          name: data.name,
+          highlight_description: data.highlight_description,
+          description: data.description,
+          google_maps_link: data.google_maps_link ?? '',
+          address: data.address,
+          city: data.city,
+          province: data.province,
+          is_active: data.is_active,
+        });
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [id]);
 
   // Revoke all pending object URLs on unmount
-  useEffect(() => () => {
-    pendingImages.forEach((p) => URL.revokeObjectURL(p.preview));
-    if (coverPreview) URL.revokeObjectURL(coverPreview);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useEffect(
+    () => () => {
+      pendingImages.forEach((p) => URL.revokeObjectURL(p.preview));
+      if (coverPreview) URL.revokeObjectURL(coverPreview);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    []
+  );
+
+  const updateInfo = (field: keyof InfoForm, value: string | boolean) => {
+    setInfoForm((prev) => prev && { ...prev, [field]: value });
+  };
 
   // ── Cover image ──────────────────────────────────────────────────────────
 
@@ -130,23 +161,36 @@ export function AttractionDetailView() {
   // ── Save ──────────────────────────────────────────────────────────────────
 
   const handleSave = async () => {
-    if (!id || !attraction) return;
+    if (!id || !attraction || !infoForm) return;
     setSaving(true);
     setSaveError('');
     try {
-      // 1. Replace cover image if a new one was chosen
+      // 1. Update basic info
+      const updated = await attractionsApi.update(id, {
+        name: infoForm.name,
+        highlight_description: infoForm.highlight_description,
+        description: infoForm.description,
+        google_maps_link: infoForm.google_maps_link,
+        address: infoForm.address,
+        city: infoForm.city,
+        province: infoForm.province,
+        is_active: infoForm.is_active,
+      });
+      setAttraction(updated);
+
+      // 2. Replace cover image if a new one was chosen
       if (coverFile) {
         const fd = new FormData();
         fd.append('_method', 'PUT');
         fd.append('cover_image', coverFile);
-        const updated = await attractionsApi.updateCover(Number(id), fd);
-        setAttraction(updated);
+        const withCover = await attractionsApi.updateCover(Number(id), fd);
+        setAttraction(withCover);
         if (coverPreview) URL.revokeObjectURL(coverPreview);
         setCoverFile(null);
         setCoverPreview(null);
       }
 
-      // 2. Upload any pending gallery images
+      // 3. Upload any pending gallery images
       if (pendingImages.length > 0) {
         const files = pendingImages.map((p) => p.file);
         const uploaded = await attractionsApi.uploadImages(Number(id), files);
@@ -155,7 +199,7 @@ export function AttractionDetailView() {
         setImages((prev) => [...prev, ...uploaded]);
       }
 
-      // 3. Sync variants
+      // 4. Sync variants
       const current = attraction.variants ?? [];
       const removedIds = current
         .filter((v) => !variants.find((lv) => lv.id === v.id))
@@ -195,7 +239,7 @@ export function AttractionDetailView() {
     );
   }
 
-  if (!attraction) {
+  if (!attraction || !infoForm) {
     return (
       <DashboardContent>
         <Alert severity="error">Attraction not found.</Alert>
@@ -233,7 +277,7 @@ export function AttractionDetailView() {
 
       {hasPendingChanges && !saving && (
         <Alert severity="info" sx={{ mb: 3 }}>
-          You have unsaved changes — click <strong>Save Changes</strong> to upload them.
+          You have unsaved photo changes — click <strong>Save Changes</strong> to upload them.
         </Alert>
       )}
 
@@ -292,7 +336,7 @@ export function AttractionDetailView() {
             <Card>
               <CardHeader
                 title={`Gallery (${totalPhotoCount} photos)`}
-                subheader="First photo is shown as cover in gallery"
+                subheader="First photo shown as gallery cover"
                 action={
                   <Button
                     size="small" variant="outlined"
@@ -313,7 +357,6 @@ export function AttractionDetailView() {
                   onChange={handleGallerySelect}
                 />
                 <Grid container spacing={1}>
-                  {/* Uploaded images */}
                   {images.map((img, idx) => (
                     <Grid key={img.id} size={{ xs: 6 }}>
                       <Box
@@ -349,7 +392,6 @@ export function AttractionDetailView() {
                     </Grid>
                   ))}
 
-                  {/* Pending (not yet uploaded) images */}
                   {pendingImages.map((p) => (
                     <Grid key={p.tempId} size={{ xs: 6 }}>
                       <Box
@@ -381,7 +423,6 @@ export function AttractionDetailView() {
                     </Grid>
                   ))}
 
-                  {/* Add tile */}
                   <Grid size={{ xs: 6 }}>
                     <Box
                       sx={{
@@ -401,74 +442,151 @@ export function AttractionDetailView() {
           </Stack>
         </Grid>
 
-        {/* ── Right: variants ── */}
+        {/* ── Right: info + variants ── */}
         <Grid size={{ xs: 12, md: 8 }}>
-          <Card>
-            <CardHeader
-              title={`Pricing Variants (${variants.length})`}
-              action={
-                <Button
-                  size="small" variant="outlined"
-                  startIcon={<Iconify icon="mingcute:add-line" width={14} />}
-                  onClick={addVariant}
-                >
-                  Add Variant
-                </Button>
-              }
-            />
-            <Divider />
-            <CardContent>
-              <Stack spacing={2}>
-                {variants.map((v) => (
-                  <Box key={v.tempId} sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1.5 }}>
-                    <Grid container spacing={2} alignItems="center">
-                      <Grid size={{ xs: 12, sm: 5 }}>
-                        <TextField
-                          fullWidth size="small" label="Variant Name"
-                          value={v.name}
-                          onChange={(e) => updateVariant(v.tempId, 'name', e.target.value)}
+          <Stack spacing={3}>
+            {/* Basic Info */}
+            <Card>
+              <CardHeader title="Basic Information" />
+              <CardContent>
+                <Grid container spacing={2.5}>
+                  <Grid size={{ xs: 12 }}>
+                    <TextField
+                      fullWidth required label="Name"
+                      value={infoForm.name}
+                      onChange={(e) => updateInfo('name', e.target.value)}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12 }}>
+                    <TextField
+                      fullWidth label="Highlight Description"
+                      multiline rows={2}
+                      inputProps={{ maxLength: 500 }}
+                      value={infoForm.highlight_description}
+                      onChange={(e) => updateInfo('highlight_description', e.target.value)}
+                      helperText={`${infoForm.highlight_description.length}/500`}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12 }}>
+                    <TextField
+                      fullWidth label="Description"
+                      multiline rows={4}
+                      value={infoForm.description}
+                      onChange={(e) => updateInfo('description', e.target.value)}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      fullWidth label="City"
+                      value={infoForm.city}
+                      onChange={(e) => updateInfo('city', e.target.value)}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      fullWidth label="Province"
+                      value={infoForm.province}
+                      onChange={(e) => updateInfo('province', e.target.value)}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12 }}>
+                    <TextField
+                      fullWidth label="Address"
+                      value={infoForm.address}
+                      onChange={(e) => updateInfo('address', e.target.value)}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12 }}>
+                    <TextField
+                      fullWidth label="Google Maps Link"
+                      placeholder="https://maps.google.com/..."
+                      value={infoForm.google_maps_link}
+                      onChange={(e) => updateInfo('google_maps_link', e.target.value)}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12 }}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={infoForm.is_active}
+                          onChange={(e) => updateInfo('is_active', e.target.checked)}
                         />
-                      </Grid>
-                      <Grid size={{ xs: 6, sm: 3 }}>
-                        <TextField
-                          fullWidth size="small" label="Price (THB)" type="number"
-                          slotProps={{ htmlInput: { min: 1 } }}
-                          value={v.price}
-                          error={v.price < 1}
-                          helperText={v.price < 1 ? 'Min 1 THB' : ''}
-                          onChange={(e) => updateVariant(v.tempId, 'price', Number(e.target.value))}
-                        />
-                      </Grid>
-                      <Grid size={{ xs: 4, sm: 3 }}>
-                        <TextField
-                          fullWidth size="small" label="Description"
-                          value={v.description}
-                          onChange={(e) => updateVariant(v.tempId, 'description', e.target.value)}
-                        />
-                      </Grid>
-                      <Grid size={{ xs: 2, sm: 1 }}>
-                        <IconButton size="small" color="error" onClick={() => removeVariant(v.tempId)}>
-                          <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                        </IconButton>
-                      </Grid>
-                    </Grid>
-                  </Box>
-                ))}
-                {variants.length === 0 && (
-                  <Box
-                    sx={{
-                      py: 4, textAlign: 'center', color: 'text.disabled',
-                      border: '1px dashed', borderColor: 'divider', borderRadius: 1,
-                    }}
+                      }
+                      label="Active (visible to users)"
+                    />
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+
+            {/* Variants */}
+            <Card>
+              <CardHeader
+                title={`Pricing Variants (${variants.length})`}
+                action={
+                  <Button
+                    size="small" variant="outlined"
+                    startIcon={<Iconify icon="mingcute:add-line" width={14} />}
+                    onClick={addVariant}
                   >
-                    <Typography variant="body2">
-                      No variants yet. Click &quot;Add Variant&quot; to add pricing options.
-                    </Typography>
-                  </Box>
-                )}
-              </Stack>
-            </CardContent>
-          </Card>
+                    Add Variant
+                  </Button>
+                }
+              />
+              <Divider />
+              <CardContent>
+                <Stack spacing={2}>
+                  {variants.map((v) => (
+                    <Box key={v.tempId} sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1.5 }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid size={{ xs: 12, sm: 5 }}>
+                          <TextField
+                            fullWidth size="small" label="Variant Name"
+                            value={v.name}
+                            onChange={(e) => updateVariant(v.tempId, 'name', e.target.value)}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 6, sm: 3 }}>
+                          <TextField
+                            fullWidth size="small" label="Price (THB)" type="number"
+                            slotProps={{ htmlInput: { min: 1 } }}
+                            value={v.price}
+                            error={v.price < 1}
+                            helperText={v.price < 1 ? 'Min 1 THB' : ''}
+                            onChange={(e) => updateVariant(v.tempId, 'price', Number(e.target.value))}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 4, sm: 3 }}>
+                          <TextField
+                            fullWidth size="small" label="Description"
+                            value={v.description}
+                            onChange={(e) => updateVariant(v.tempId, 'description', e.target.value)}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 2, sm: 1 }}>
+                          <IconButton size="small" color="error" onClick={() => removeVariant(v.tempId)}>
+                            <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                          </IconButton>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  ))}
+                  {variants.length === 0 && (
+                    <Box
+                      sx={{
+                        py: 4, textAlign: 'center', color: 'text.disabled',
+                        border: '1px dashed', borderColor: 'divider', borderRadius: 1,
+                      }}
+                    >
+                      <Typography variant="body2">
+                        No variants yet. Click &quot;Add Variant&quot; to add pricing options.
+                      </Typography>
+                    </Box>
+                  )}
+                </Stack>
+              </CardContent>
+            </Card>
+          </Stack>
         </Grid>
       </Grid>
     </DashboardContent>
