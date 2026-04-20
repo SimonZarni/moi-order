@@ -13,7 +13,6 @@ import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
 import Divider from '@mui/material/Divider';
 import Checkbox from '@mui/material/Checkbox';
-import Collapse from '@mui/material/Collapse';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -110,7 +109,7 @@ function toLocalType(t: ServiceTypeData): LocalType {
       id:            f.key,
       label:         f.label,
       label_en:      f.label_en ?? '',
-      label_mm:      '',
+      label_mm:      f.label_mm ?? '',
       type:          (f.type === 'file' ? 'photo' : f.type) as FieldType,
       required:      f.required,
       options:       f.options,
@@ -218,10 +217,10 @@ function FieldEditor({ field, index, isFirst, isLast, onUpdate, onDelete, onMove
             label={<Typography variant="body2">Required</Typography>}
           />
         </Grid>
-        <Collapse in={field.type === 'photo'} sx={{ width: '100%', px: 1 }}>
-          <Box sx={{ mt: 1 }}>
-            <FormControl fullWidth size="small" error={field.type === 'photo' && !field.document_type}>
-              <InputLabel>Document Type *</InputLabel>
+        {field.type === 'photo' && (
+          <Grid size={{ xs: 12 }} sx={{ px: 1 }}>
+            <FormControl fullWidth size="small" error={!field.document_type}>
+              <InputLabel shrink={field.document_type ? true : undefined}>Document Type *</InputLabel>
               <Select
                 value={field.document_type ?? ''}
                 label="Document Type *"
@@ -231,17 +230,17 @@ function FieldEditor({ field, index, isFirst, isLast, onUpdate, onDelete, onMove
                   <MenuItem key={dt} value={dt}>{DOCUMENT_TYPE_LABELS[dt]}</MenuItem>
                 ))}
               </Select>
-              {field.type === 'photo' && !field.document_type && (
+              {!field.document_type && (
                 <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>
                   Required for file upload fields
                 </Typography>
               )}
             </FormControl>
-          </Box>
-        </Collapse>
+          </Grid>
+        )}
 
-        <Collapse in={field.type === 'select'} sx={{ width: '100%', px: 1 }}>
-          <Box sx={{ mt: 1 }}>
+        {field.type === 'select' && (
+          <Grid size={{ xs: 12 }} sx={{ px: 1 }}>
             <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>Dropdown options</Typography>
             <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
               <TextField
@@ -259,8 +258,8 @@ function FieldEditor({ field, index, isFirst, isLast, onUpdate, onDelete, onMove
                 <Chip key={opt} label={opt} size="small" onDelete={() => onUpdate(field.id, { options: (field.options ?? []).filter((o) => o !== opt) })} />
               ))}
             </Stack>
-          </Box>
-        </Collapse>
+          </Grid>
+        )}
       </Grid>
     </Box>
   );

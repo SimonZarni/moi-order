@@ -6,8 +6,10 @@ namespace App\Http\Controllers\Api\Admin\V1;
 
 use App\Contracts\FileStorageInterface;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\TicketImageResource;
 use App\Http\Resources\TicketResource;
 use App\Models\Ticket;
+use App\Models\TicketImage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -63,8 +65,34 @@ class AdminTicketController extends Controller
 
     public function show(Ticket $ticket): JsonResponse
     {
-        $ticket->load('activeVariants');
+        $ticket->load(['activeVariants', 'images']);
         return response()->json(['data' => new TicketResource($ticket)]);
+    }
+
+    public function uploadImages(Request $request, Ticket $ticket): JsonResponse
+    {
+        $request->validate([
+            'images'   => ['required', 'array', 'min:1', 'max:10'],
+            'images.*' => ['required', 'file', 'mimes:jpeg,png,webp', 'max:5120'],
+        ]);
+
+        $nextOrder = $ticket->images()->max('sort_order') ?? -1;
+
+        $created = collect($request->file('images'))->map(function ($file) use ($ticket, &$nextOrder) {
+            $nextOrder++;
+            $path = $this->fileStorage->store($file, "tickets/{$ticket->id}");
+            return $ticket->images()->create(['path' => $path, 'sort_order' => $nextOrder]);
+        });
+
+        return response()->json(['data' => TicketImageResource::collection($created)], 201);
+    }
+
+    public function deleteImage(Ticket $ticket, TicketImage $image): JsonResponse
+    {
+        abort_if($image->ticket_id !== $ticket->id, 404);
+        $this->fileStorage->delete($image->path);
+        $image->delete();
+        return response()->json(null, 204);
     }
 
     public function update(Request $request, Ticket $ticket): JsonResponse
