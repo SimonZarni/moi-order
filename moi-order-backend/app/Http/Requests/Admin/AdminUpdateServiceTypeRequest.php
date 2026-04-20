@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\DocumentType;
 use App\Enums\FieldType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -18,6 +19,7 @@ class AdminUpdateServiceTypeRequest extends FormRequest
         return [
             'name'      => ['sometimes', 'string', 'max:255'],
             'name_en'   => ['sometimes', 'string', 'max:255'],
+            'name_mm'   => ['sometimes', 'nullable', 'string', 'max:255'],
             'price'     => ['sometimes', 'integer', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],
 
@@ -25,13 +27,15 @@ class AdminUpdateServiceTypeRequest extends FormRequest
             'field_schema.*.key'        => ['required', 'string', 'max:100', 'regex:/^[a-z][a-z0-9_]*$/'],
             'field_schema.*.label'      => ['required', 'string', 'max:255'],
             'field_schema.*.label_en'   => ['required', 'string', 'max:255'],
+            'field_schema.*.label_mm'   => ['nullable', 'string', 'max:255'],
             'field_schema.*.type'       => ['required', Rule::enum(FieldType::class)],
             'field_schema.*.required'   => ['required', 'boolean'],
             'field_schema.*.sort_order' => ['required', 'integer', 'min:1'],
             'field_schema.*.options'    => ['nullable', 'array', 'min:1'],
             'field_schema.*.options.*'  => ['string', 'max:100'],
-            'field_schema.*.accepts'    => ['nullable', 'array', 'min:1'],
-            'field_schema.*.accepts.*'  => ['string', Rule::in(['image', 'pdf', 'doc'])],
+            'field_schema.*.accepts'         => ['nullable', 'array', 'min:1'],
+            'field_schema.*.accepts.*'       => ['string', Rule::in(['image', 'pdf', 'doc'])],
+            'field_schema.*.document_type'   => ['nullable', Rule::enum(DocumentType::class)],
         ];
     }
 
@@ -62,6 +66,7 @@ class AdminUpdateServiceTypeRequest extends FormRequest
     {
         return [
             'name_en'      => 'English name',
+            'name_mm'      => 'Myanmar name',
             'price'        => 'price (satangs)',
             'is_active'    => 'active status',
             'field_schema' => 'field schema',
@@ -99,6 +104,13 @@ class AdminUpdateServiceTypeRequest extends FormRequest
                 $v->errors()->add(
                     "field_schema.{$index}.accepts",
                     'File fields must specify at least one accepted file type (image, pdf, doc).'
+                );
+            }
+
+            if ($type === FieldType::File && empty($field['document_type'])) {
+                $v->errors()->add(
+                    "field_schema.{$index}.document_type",
+                    'File fields must specify a document type.'
                 );
             }
         }

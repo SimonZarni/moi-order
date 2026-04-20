@@ -23,6 +23,7 @@ class Service extends Model
     protected $fillable = [
         'name',
         'name_en',
+        'name_mm',
         'slug',
         'is_active',
     ];

@@ -27,6 +27,7 @@ class AdminServiceService
         return Service::create([
             'name'      => $dto->name,
             'name_en'   => $dto->nameEn,
+            'name_mm'   => $dto->nameMm,
             'slug'      => $dto->slug,
             'is_active' => $dto->isActive,
         ]);
@@ -37,6 +38,7 @@ class AdminServiceService
         $service->update(array_filter([
             'name'      => $dto->name,
             'name_en'   => $dto->nameEn,
+            'name_mm'   => $dto->nameMm,
             'slug'      => $dto->slug,
             'is_active' => $dto->isActive,
         ], fn ($v) => $v !== null));

@@ -135,7 +135,7 @@ class PaymentService
                 'payable_type'     => $payable->getMorphClass(),
                 'payable_id'       => $payable->getKey(),
                 'stripe_intent_id' => $dto->stripeIntentId,
-                'amount'           => $payable->getPayableAmountThb(),
+                'amount'           => $payable->getPayableAmountSatangs(),
                 'currency'         => 'thb',
                 'status'           => PaymentStatus::Pending,
                 'qr_image_url'     => $dto->qrImageUrl,

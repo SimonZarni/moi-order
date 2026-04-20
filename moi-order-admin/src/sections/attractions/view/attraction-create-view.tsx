@@ -137,7 +137,8 @@ export function AttractionCreateView() {
     !!form.address.trim() &&
     !!form.city.trim() &&
     !!form.province.trim() &&
-    !!coverFile;
+    !!coverFile &&
+    variants.every((v) => !!v.name.trim() && v.price >= 1);
 
   return (
     <DashboardContent>
@@ -362,7 +363,10 @@ export function AttractionCreateView() {
                             size="small"
                             label="Price (THB)"
                             type="number"
+                            slotProps={{ htmlInput: { min: 1 } }}
                             value={v.price}
+                            error={v.price < 1}
+                            helperText={v.price < 1 ? 'Min 1 THB' : ''}
                             onChange={(e) =>
                               updateVariant(v.tempId, 'price', Number(e.target.value))
                             }

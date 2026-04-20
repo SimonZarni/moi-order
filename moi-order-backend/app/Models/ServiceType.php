@@ -25,6 +25,7 @@ class ServiceType extends Model
         'service_id',
         'name',
         'name_en',
+        'name_mm',
         'price',
         'is_active',
         'field_schema',

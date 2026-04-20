@@ -5,6 +5,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useOtherServices, UseOtherServicesResult } from './useOtherServices';
 import { Service } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
+import { localeName } from '@/shared/utils/localeName';
+import { useLocale } from '@/shared/hooks/useLocale';
 
 // Maps service slugs to their destination screen.
 // OCP: new service = new entry here + new screen. No changes to OtherServicesScreen.
@@ -30,17 +32,27 @@ export interface UseOtherServicesScreenResult {
 
 export function useOtherServicesScreen(): UseOtherServicesScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { locale } = useLocale();
   const { services, isLoading, isRefreshing, isError, refetch } = useOtherServices();
 
   const handleRefresh = useCallback((): void => { refetch(); }, [refetch]);
 
   const handleSelectService = useCallback((service: Service): void => {
-    const screen = SLUG_TO_SCREEN[service.slug];
-    if (screen === undefined) return;
-
-    // All current "other services" have exactly one service type.
     const firstType = service.types[0];
     if (firstType === undefined) return;
+
+    const screen = SLUG_TO_SCREEN[service.slug];
+
+    // For services not in the hardcoded map, use the generic dynamic form.
+    if (screen === undefined) {
+      navigation.navigate('GenericServiceForm', {
+        serviceTypeId: firstType.id,
+        serviceId:     service.id,
+        serviceName:   localeName(service, locale),
+        price:         firstType.price,
+      });
+      return;
+    }
 
     if (screen === 'CompanyRegistrationForm') {
       navigation.navigate('CompanyRegistrationForm', {
@@ -78,7 +90,7 @@ export function useOtherServicesScreen(): UseOtherServicesScreenResult {
         price:         firstType.price,
       });
     }
-  }, [navigation]);
+  }, [navigation, locale]);
 
   const handleBack = useCallback((): void => {
     navigation.goBack();
