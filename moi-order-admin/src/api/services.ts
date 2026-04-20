@@ -4,6 +4,7 @@ export type ServiceFieldData = {
   key: string;
   label: string;
   label_en: string | null;
+  label_mm: string | null;
   type: string;
   required: boolean;
   sort_order: number;

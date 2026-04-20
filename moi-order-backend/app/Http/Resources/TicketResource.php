@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\TicketImageResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -37,6 +38,10 @@ class TicketResource extends JsonResource
             'variants'              => $this->when(
                 $this->relationLoaded('activeVariants'),
                 fn () => TicketVariantResource::collection($this->activeVariants),
+            ),
+            'images'                => $this->when(
+                $this->relationLoaded('images'),
+                fn () => TicketImageResource::collection($this->images),
             ),
         ];
     }

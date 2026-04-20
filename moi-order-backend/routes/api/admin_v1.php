@@ -106,6 +106,10 @@ Route::prefix('tickets')->name('admin.tickets.')->group(function (): void {
     Route::post('/{ticket}/variants',                 [AdminTicketVariantController::class, 'store'])->name('variants.store');
     Route::put('/{ticket}/variants/{variant}',        [AdminTicketVariantController::class, 'update'])->name('variants.update');
     Route::delete('/{ticket}/variants/{variant}',     [AdminTicketVariantController::class, 'destroy'])->name('variants.destroy');
+
+    // Image gallery sub-resource
+    Route::post('/{ticket}/images',                   [AdminTicketController::class, 'uploadImages'])->name('images.store');
+    Route::delete('/{ticket}/images/{image}',         [AdminTicketController::class, 'deleteImage'])->name('images.destroy');
 });
 
 Route::prefix('ticket-orders')->name('admin.ticket-orders.')->group(function (): void {

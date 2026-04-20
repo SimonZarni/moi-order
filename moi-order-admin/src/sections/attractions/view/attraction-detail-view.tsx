@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useRef, useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
@@ -19,7 +20,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useRouter } from 'src/routes/hooks';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { attractionsApi, type AttractionData } from 'src/api/attractions';
+import { attractionsApi, type AttractionData, type TicketImageData } from 'src/api/attractions';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -27,7 +28,8 @@ import { Iconify } from 'src/components/iconify';
 
 const genTempId = () => Math.random().toString(36).slice(2, 10);
 
-type LocalVariant = { tempId: string; id?: number; name: string; price: number; description: string };
+type LocalVariant  = { tempId: string; id?: number; name: string; price: number; description: string };
+type PendingImage  = { tempId: string; file: File; preview: string };
 
 // ----------------------------------------------------------------------
 
@@ -35,21 +37,81 @@ export function AttractionDetailView() {
   const { id } = useParams();
   const router = useRouter();
 
-  const [attraction, setAttraction] = useState<AttractionData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [variants, setVariants] = useState<LocalVariant[]>([]);
-  const [saving, setSaving] = useState(false);
+  const coverInputRef   = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  const [attraction, setAttraction]       = useState<AttractionData | null>(null);
+  const [loading, setLoading]             = useState(true);
+  const [variants, setVariants]           = useState<LocalVariant[]>([]);
+  const [saving, setSaving]               = useState(false);
+  const [saveError, setSaveError]         = useState('');
+  const [images, setImages]               = useState<TicketImageData[]>([]);
+  const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
+  const [deletingId, setDeletingId]       = useState<number | null>(null);
+  const [coverFile, setCoverFile]         = useState<File | null>(null);
+  const [coverPreview, setCoverPreview]   = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
     Promise.all([attractionsApi.get(id), attractionsApi.listVariants(id)])
       .then(([data, variantList]) => {
         setAttraction(data);
+        setImages(data.images ?? []);
         setVariants(variantList.map((v) => ({ ...v, tempId: String(v.id) })));
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [id]);
+
+  // Revoke all pending object URLs on unmount
+  useEffect(() => () => {
+    pendingImages.forEach((p) => URL.revokeObjectURL(p.preview));
+    if (coverPreview) URL.revokeObjectURL(coverPreview);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Cover image ──────────────────────────────────────────────────────────
+
+  const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    if (coverPreview) URL.revokeObjectURL(coverPreview);
+    setCoverFile(file);
+    setCoverPreview(URL.createObjectURL(file));
+  };
+
+  // ── Gallery images — local preview, uploaded on Save ─────────────────────
+
+  const handleGallerySelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    e.target.value = '';
+    setPendingImages((prev) => [
+      ...prev,
+      ...files.map((file) => ({ tempId: genTempId(), file, preview: URL.createObjectURL(file) })),
+    ]);
+  };
+
+  const removePendingImage = (tempId: string) => {
+    setPendingImages((prev) => {
+      const target = prev.find((p) => p.tempId === tempId);
+      if (target) URL.revokeObjectURL(target.preview);
+      return prev.filter((p) => p.tempId !== tempId);
+    });
+  };
+
+  const handleDeleteImage = (imageId: number) => {
+    if (!id) return;
+    setDeletingId(imageId);
+    attractionsApi
+      .deleteImage(id, imageId)
+      .then(() => setImages((prev) => prev.filter((img) => img.id !== imageId)))
+      .catch(() => {})
+      .finally(() => setDeletingId(null));
+  };
+
+  // ── Variants ──────────────────────────────────────────────────────────────
 
   const addVariant = () => {
     setVariants((prev) => [...prev, { tempId: genTempId(), name: '', price: 0, description: '' }]);
@@ -65,29 +127,63 @@ export function AttractionDetailView() {
     setVariants((prev) => prev.filter((v) => v.tempId !== tempId));
   };
 
-  const handleSave = () => {
+  // ── Save ──────────────────────────────────────────────────────────────────
+
+  const handleSave = async () => {
     if (!id || !attraction) return;
     setSaving(true);
-    const current = attraction.variants ?? [];
-    const removedIds = current.filter((v) => !variants.find((lv) => lv.id === v.id)).map((v) => v.id);
-    const ops = [
-      ...removedIds.map((vid) => attractionsApi.deleteVariant(Number(id), vid)),
-      ...variants.map((lv, i) => {
-        const payload = { name: lv.name, price: lv.price, description: lv.description, sort_order: i + 1 };
-        return lv.id
-          ? attractionsApi.updateVariant(Number(id), lv.id, payload)
-          : attractionsApi.createVariant(Number(id), payload);
-      }),
-    ];
-    Promise.all(ops)
-      .then(() => Promise.all([attractionsApi.get(Number(id)), attractionsApi.listVariants(Number(id))]))
-      .then(([data, variantList]) => {
-        setAttraction(data);
-        setVariants(variantList.map((v) => ({ ...v, tempId: String(v.id) })));
-      })
-      .catch(() => {})
-      .finally(() => setSaving(false));
+    setSaveError('');
+    try {
+      // 1. Replace cover image if a new one was chosen
+      if (coverFile) {
+        const fd = new FormData();
+        fd.append('_method', 'PUT');
+        fd.append('cover_image', coverFile);
+        const updated = await attractionsApi.updateCover(Number(id), fd);
+        setAttraction(updated);
+        if (coverPreview) URL.revokeObjectURL(coverPreview);
+        setCoverFile(null);
+        setCoverPreview(null);
+      }
+
+      // 2. Upload any pending gallery images
+      if (pendingImages.length > 0) {
+        const files = pendingImages.map((p) => p.file);
+        const uploaded = await attractionsApi.uploadImages(Number(id), files);
+        pendingImages.forEach((p) => URL.revokeObjectURL(p.preview));
+        setPendingImages([]);
+        setImages((prev) => [...prev, ...uploaded]);
+      }
+
+      // 3. Sync variants
+      const current = attraction.variants ?? [];
+      const removedIds = current
+        .filter((v) => !variants.find((lv) => lv.id === v.id))
+        .map((v) => v.id);
+      const ops = [
+        ...removedIds.map((vid) => attractionsApi.deleteVariant(Number(id), vid)),
+        ...variants.map((lv, i) => {
+          const payload = { name: lv.name, price: lv.price, description: lv.description, sort_order: i + 1 };
+          return lv.id
+            ? attractionsApi.updateVariant(Number(id), lv.id, payload)
+            : attractionsApi.createVariant(Number(id), payload);
+        }),
+      ];
+      await Promise.all(ops);
+      const [data, variantList] = await Promise.all([
+        attractionsApi.get(Number(id)),
+        attractionsApi.listVariants(Number(id)),
+      ]);
+      setAttraction(data);
+      setVariants(variantList.map((v) => ({ ...v, tempId: String(v.id) })));
+    } catch {
+      setSaveError('Failed to save changes. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
+
+  // ── Render ────────────────────────────────────────────────────────────────
 
   if (loading) {
     return (
@@ -107,6 +203,9 @@ export function AttractionDetailView() {
     );
   }
 
+  const totalPhotoCount = images.length + pendingImages.length;
+  const hasPendingChanges = !!coverFile || pendingImages.length > 0;
+
   return (
     <DashboardContent>
       <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -116,8 +215,7 @@ export function AttractionDetailView() {
         <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h4">{attraction.name}</Typography>
           <Typography variant="body2" color="text.secondary">
-            {attraction.city}
-            {attraction.province ? ` · ${attraction.province}` : ''}
+            {attraction.city}{attraction.province ? ` · ${attraction.province}` : ''}
           </Typography>
         </Box>
         <Button
@@ -127,42 +225,190 @@ export function AttractionDetailView() {
           disabled={saving || variants.some((v) => !v.name.trim() || v.price < 1)}
           startIcon={saving ? <CircularProgress size={14} /> : <Iconify icon="eva:checkmark-fill" width={14} />}
         >
-          Save Variants
+          {saving ? 'Saving…' : 'Save Changes'}
         </Button>
       </Box>
 
+      {saveError && <Alert severity="error" sx={{ mb: 3 }}>{saveError}</Alert>}
+
+      {hasPendingChanges && !saving && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          You have unsaved changes — click <strong>Save Changes</strong> to upload them.
+        </Alert>
+      )}
+
       <Grid container spacing={3}>
+        {/* ── Left: photos ── */}
         <Grid size={{ xs: 12, md: 4 }}>
-          <Card>
-            <Avatar
-              src={attraction.cover_image_url ?? undefined}
-              variant="square"
-              sx={{ width: '100%', height: 200, borderRadius: '12px 12px 0 0' }}
-            />
-            <CardContent>
-              <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-                {attraction.name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {attraction.highlight_description || attraction.description}
-              </Typography>
-              {attraction.starting_from_price != null && (
-                <Typography variant="body2" color="primary.main" fontWeight={600} sx={{ mt: 1 }}>
-                  From {attraction.starting_from_price.toFixed(0)} THB
-                </Typography>
-              )}
-            </CardContent>
-          </Card>
+          <Stack spacing={3}>
+            {/* Cover image */}
+            <Card>
+              <CardHeader title="Cover Photo" subheader="Shown in listings and cards" />
+              <CardContent>
+                <Box
+                  sx={{
+                    width: '100%', height: 180, borderRadius: 1.5, overflow: 'hidden',
+                    mb: 2, border: '1px dashed', borderColor: 'divider',
+                    position: 'relative', cursor: 'pointer',
+                    '&:hover .cover-overlay': { opacity: 1 },
+                  }}
+                  onClick={() => coverInputRef.current?.click()}
+                >
+                  <Avatar
+                    src={coverPreview ?? attraction.cover_image_url ?? undefined}
+                    variant="square"
+                    sx={{ width: '100%', height: '100%', borderRadius: 1.5 }}
+                  />
+                  <Stack
+                    className="cover-overlay"
+                    alignItems="center" justifyContent="center" spacing={0.5}
+                    sx={{
+                      position: 'absolute', inset: 0, bgcolor: 'rgba(0,0,0,0.45)',
+                      opacity: 0, transition: 'opacity 0.2s', borderRadius: 1.5,
+                    }}
+                  >
+                    <Iconify icon="solar:pen-bold" width={22} sx={{ color: 'common.white' }} />
+                    <Typography variant="caption" sx={{ color: 'common.white' }}>Change cover</Typography>
+                  </Stack>
+                </Box>
+                <input
+                  ref={coverInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  hidden
+                  onChange={handleCoverSelect}
+                />
+                <Button
+                  fullWidth variant="outlined"
+                  startIcon={<Iconify icon="mingcute:add-line" width={14} />}
+                  onClick={() => coverInputRef.current?.click()}
+                >
+                  {coverFile ? 'Change Cover' : 'Replace Cover'}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Gallery */}
+            <Card>
+              <CardHeader
+                title={`Gallery (${totalPhotoCount} photos)`}
+                subheader="First photo is shown as cover in gallery"
+                action={
+                  <Button
+                    size="small" variant="outlined"
+                    startIcon={<Iconify icon="mingcute:add-line" width={14} />}
+                    onClick={() => galleryInputRef.current?.click()}
+                  >
+                    Add Photos
+                  </Button>
+                }
+              />
+              <CardContent>
+                <input
+                  ref={galleryInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  hidden
+                  onChange={handleGallerySelect}
+                />
+                <Grid container spacing={1}>
+                  {/* Uploaded images */}
+                  {images.map((img, idx) => (
+                    <Grid key={img.id} size={{ xs: 6 }}>
+                      <Box
+                        sx={{
+                          position: 'relative', borderRadius: 1, overflow: 'hidden',
+                          '&:hover .del-btn': { opacity: 1 },
+                        }}
+                      >
+                        <Avatar src={img.url} variant="rounded" sx={{ width: '100%', height: 80 }} />
+                        {idx === 0 && (
+                          <Chip
+                            label="Cover" size="small" color="primary"
+                            sx={{ position: 'absolute', top: 4, left: 4, height: 18, fontSize: 10 }}
+                          />
+                        )}
+                        <IconButton
+                          className="del-btn"
+                          size="small" color="error"
+                          disabled={deletingId === img.id}
+                          sx={{
+                            position: 'absolute', top: 4, right: 4,
+                            bgcolor: 'rgba(255,255,255,0.9)', opacity: 0,
+                            transition: 'opacity 0.2s',
+                            '&:hover': { bgcolor: 'white' },
+                          }}
+                          onClick={() => handleDeleteImage(img.id)}
+                        >
+                          {deletingId === img.id
+                            ? <CircularProgress size={12} />
+                            : <Iconify icon="mingcute:close-line" width={14} />}
+                        </IconButton>
+                      </Box>
+                    </Grid>
+                  ))}
+
+                  {/* Pending (not yet uploaded) images */}
+                  {pendingImages.map((p) => (
+                    <Grid key={p.tempId} size={{ xs: 6 }}>
+                      <Box
+                        sx={{
+                          position: 'relative', borderRadius: 1, overflow: 'hidden',
+                          outline: '2px solid', outlineColor: 'warning.main',
+                          '&:hover .del-btn': { opacity: 1 },
+                        }}
+                      >
+                        <Avatar src={p.preview} variant="rounded" sx={{ width: '100%', height: 80 }} />
+                        <Chip
+                          label="Pending" size="small" color="warning"
+                          sx={{ position: 'absolute', top: 4, left: 4, height: 18, fontSize: 10 }}
+                        />
+                        <IconButton
+                          className="del-btn"
+                          size="small" color="error"
+                          sx={{
+                            position: 'absolute', top: 4, right: 4,
+                            bgcolor: 'rgba(255,255,255,0.9)', opacity: 0,
+                            transition: 'opacity 0.2s',
+                            '&:hover': { bgcolor: 'white' },
+                          }}
+                          onClick={() => removePendingImage(p.tempId)}
+                        >
+                          <Iconify icon="mingcute:close-line" width={14} />
+                        </IconButton>
+                      </Box>
+                    </Grid>
+                  ))}
+
+                  {/* Add tile */}
+                  <Grid size={{ xs: 6 }}>
+                    <Box
+                      sx={{
+                        height: 80, border: '1px dashed', borderColor: 'divider',
+                        borderRadius: 1, display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', cursor: 'pointer',
+                        '&:hover': { bgcolor: 'action.hover' },
+                      }}
+                      onClick={() => galleryInputRef.current?.click()}
+                    >
+                      <Iconify icon="mingcute:add-line" width={24} sx={{ color: 'text.disabled' }} />
+                    </Box>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+          </Stack>
         </Grid>
 
+        {/* ── Right: variants ── */}
         <Grid size={{ xs: 12, md: 8 }}>
           <Card>
             <CardHeader
               title={`Pricing Variants (${variants.length})`}
               action={
                 <Button
-                  size="small"
-                  variant="outlined"
+                  size="small" variant="outlined"
                   startIcon={<Iconify icon="mingcute:add-line" width={14} />}
                   onClick={addVariant}
                 >
@@ -174,26 +420,18 @@ export function AttractionDetailView() {
             <CardContent>
               <Stack spacing={2}>
                 {variants.map((v) => (
-                  <Box
-                    key={v.tempId}
-                    sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1.5 }}
-                  >
+                  <Box key={v.tempId} sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1.5 }}>
                     <Grid container spacing={2} alignItems="center">
                       <Grid size={{ xs: 12, sm: 5 }}>
                         <TextField
-                          fullWidth
-                          size="small"
-                          label="Variant Name"
+                          fullWidth size="small" label="Variant Name"
                           value={v.name}
                           onChange={(e) => updateVariant(v.tempId, 'name', e.target.value)}
                         />
                       </Grid>
                       <Grid size={{ xs: 6, sm: 3 }}>
                         <TextField
-                          fullWidth
-                          size="small"
-                          label="Price (THB)"
-                          type="number"
+                          fullWidth size="small" label="Price (THB)" type="number"
                           slotProps={{ htmlInput: { min: 1 } }}
                           value={v.price}
                           error={v.price < 1}
@@ -203,9 +441,7 @@ export function AttractionDetailView() {
                       </Grid>
                       <Grid size={{ xs: 4, sm: 3 }}>
                         <TextField
-                          fullWidth
-                          size="small"
-                          label="Description"
+                          fullWidth size="small" label="Description"
                           value={v.description}
                           onChange={(e) => updateVariant(v.tempId, 'description', e.target.value)}
                         />
@@ -221,12 +457,8 @@ export function AttractionDetailView() {
                 {variants.length === 0 && (
                   <Box
                     sx={{
-                      py: 4,
-                      textAlign: 'center',
-                      color: 'text.disabled',
-                      border: '1px dashed',
-                      borderColor: 'divider',
-                      borderRadius: 1,
+                      py: 4, textAlign: 'center', color: 'text.disabled',
+                      border: '1px dashed', borderColor: 'divider', borderRadius: 1,
                     }}
                   >
                     <Typography variant="body2">

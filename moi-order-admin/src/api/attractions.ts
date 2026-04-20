@@ -8,6 +8,12 @@ export type TicketVariantData = {
   sort_order: number;
 };
 
+export type TicketImageData = {
+  id: number;
+  url: string;
+  sort_order: number;
+};
+
 export type AttractionData = {
   id: number;
   name: string;
@@ -19,6 +25,7 @@ export type AttractionData = {
   cover_image_url: string | null;
   starting_from_price: number | null;
   variants?: TicketVariantData[];
+  images?: TicketImageData[];
 };
 
 export type AttractionStatus = 'active' | 'inactive';
@@ -59,4 +66,21 @@ export const attractionsApi = {
       .then((r) => r.data.data),
   deleteVariant: (ticketId: number | string, variantId: number | string) =>
     apiClient.delete(`/tickets/${ticketId}/variants/${variantId}`),
+  updateCover: (id: number | string, formData: FormData) =>
+    apiClient
+      .post<{ data: AttractionData }>(`/tickets/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((r) => r.data.data),
+  uploadImages: (id: number | string, files: File[]) => {
+    const fd = new FormData();
+    files.forEach((f) => fd.append('images[]', f));
+    return apiClient
+      .post<{ data: TicketImageData[] }>(`/tickets/${id}/images`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((r) => r.data.data);
+  },
+  deleteImage: (id: number | string, imageId: number) =>
+    apiClient.delete(`/tickets/${id}/images/${imageId}`),
 };

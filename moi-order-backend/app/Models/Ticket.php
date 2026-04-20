@@ -59,6 +59,11 @@ class Ticket extends Model
         return $this->variants()->where('is_active', true);
     }
 
+    public function images(): HasMany
+    {
+        return $this->hasMany(TicketImage::class)->orderBy('sort_order');
+    }
+
     // ─── Scopes ───────────────────────────────────────────────────────────────
 
     public function scopeActive(Builder $query): void
