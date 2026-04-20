@@ -15,6 +15,11 @@ class AdminPaymentResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $userName = null;
+        if ($this->relationLoaded('payable') && $this->payable !== null) {
+            $userName = $this->payable->user?->name;
+        }
+
         return [
             'id'               => $this->id,
             'status'           => $this->status->value,
@@ -25,9 +30,10 @@ class AdminPaymentResource extends JsonResource
             'qr_image_url'     => $this->qr_image_url,
             'expires_at'       => $this->expires_at?->toISOString(),
             'created_at'       => $this->created_at->toISOString(),
-            'payable_type' => $this->payable_type,
-            'payable_id'   => $this->payable_id,
-            'payable'      => $this->when(
+            'user_name'        => $userName,
+            'payable_type'     => $this->payable_type,
+            'payable_id'       => $this->payable_id,
+            'payable'          => $this->when(
                 $this->relationLoaded('payable') && $this->payable !== null,
                 fn () => [
                     'id'   => $this->payable->getKey(),

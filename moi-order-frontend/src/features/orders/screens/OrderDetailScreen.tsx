@@ -40,7 +40,7 @@ export function OrderDetailScreen(): React.JSX.Element {
         <View style={styles.heroTextBlock}>
           <Text style={styles.heroEyebrow}>Order #{submission.id}</Text>
           <Text style={styles.heroTitle}>
-            {localeName(submission.service_type.service ?? submission.service_type, locale)}
+            {localeName(submission.service_type?.service ?? submission.service_type, locale)}
           </Text>
           <Text style={styles.heroDate}>Submitted {formatDate(submission.created_at)}</Text>
         </View>
@@ -99,7 +99,7 @@ export function OrderDetailScreen(): React.JSX.Element {
             <View style={styles.statusCardLeft}>
               <Text style={styles.statusCardLabel}>Service</Text>
               <Text style={styles.statusCardServiceName}>
-                {localeName(submission.service_type.service ?? submission.service_type, locale)}
+                {localeName(submission.service_type?.service ?? submission.service_type, locale)}
               </Text>
               <View style={styles.statusCardDivider} />
               <Text style={styles.statusCardLabel}>Status</Text>

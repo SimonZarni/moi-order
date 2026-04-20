@@ -10,6 +10,7 @@ export type PaymentData = {
   qr_image_url: string | null;
   expires_at: string | null;
   created_at: string;
+  user_name: string | null;
   payable_type: string | null;
   payable_id: number | null;
   payable: { id: number; type: string } | null;
@@ -20,9 +21,17 @@ type Meta = { current_page: number; last_page: number; per_page: number; total: 
 type ListParams = {
   page?: number;
   per_page?: number;
+  search?: string;
   status?: string;
   date_from?: string;
   date_to?: string;
+};
+
+export type PaymentStats = {
+  total_revenue: number;
+  succeeded_count: number;
+  pending_count: number;
+  failed_count: number;
 };
 
 export const paymentsApi = {
@@ -32,4 +41,6 @@ export const paymentsApi = {
       .then((r) => r.data),
   get: (id: number | string) =>
     apiClient.get<{ data: PaymentData }>(`/payments/${id}`).then((r) => r.data.data),
+  stats: () =>
+    apiClient.get<{ data: PaymentStats }>('/payments/stats').then((r) => r.data.data),
 };

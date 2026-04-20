@@ -103,8 +103,9 @@ export function PaymentDetailView() {
               <Stack spacing={1.5}>
                 {[
                   ['Payment ID', `#${payment.id}`],
+                  ['User', payment.user_name ?? '—'],
                   ['Stripe Intent', payment.stripe_intent_id ?? '—'],
-                  ['Amount', fCurrency(payment.amount)],
+                  ['Amount', fCurrency(payment.amount / 100)],
                   ['Currency', payment.currency.toUpperCase()],
                   ['Status', payment.status_label],
                   ['Created', fDate(payment.created_at)],

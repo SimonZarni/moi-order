@@ -11,6 +11,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
+import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -112,13 +113,12 @@ export default function App(): React.JSX.Element {
       <QueryClientProvider client={queryClient}>
         <NavigationContainer>
           {/* All screens always available — form screens guard auth at submit time. */}
+          <StatusBar style="light" translucent />
           <Stack.Navigator
             initialRouteName="Home"
             screenOptions={{
               headerShown: false,
               animation: 'fade',
-              statusBarStyle: 'light',
-              statusBarTranslucent: true,
             }}
           >
             <Stack.Screen name="Home"                      component={HomeScreen} />

@@ -46,11 +46,6 @@ const localeName = (v: PlaceLocale | null): string => {
   return v.name_my ?? v.name_en ?? '—';
 };
 
-const STATUS_COLORS: Record<string, 'success' | 'warning' | 'error'> = {
-  active: 'success',
-  pending: 'warning',
-  inactive: 'error',
-};
 
 // ----------------------------------------------------------------------
 
@@ -366,9 +361,9 @@ export function PlacesView() {
                         </TableCell>
                         <TableCell align="center">{row.review_count ?? '—'}</TableCell>
                         <TableCell>
-                          {row.status ? (
-                            <Label color={STATUS_COLORS[row.status] ?? 'default'}>{row.status}</Label>
-                          ) : '—'}
+                          <Label color={row.deleted_at ? 'error' : 'success'}>
+                            {row.deleted_at ? 'deleted' : 'active'}
+                          </Label>
                         </TableCell>
                         <TableCell align="right">
                           <IconButton size="small" onClick={() => setEditConfirm(row)}>

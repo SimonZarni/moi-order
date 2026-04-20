@@ -15,6 +15,7 @@ class AdminPaymentIndexRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'search'    => ['sometimes', 'string', 'max:100'],
             'status'    => ['sometimes', 'string', Rule::enum(PaymentStatus::class)],
             'date_from' => ['sometimes', 'date'],
             'date_to'   => ['sometimes', 'date', 'after_or_equal:date_from'],

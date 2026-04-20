@@ -10,6 +10,7 @@ import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import TableRow from '@mui/material/TableRow';
+import TextField from '@mui/material/TextField';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
@@ -18,6 +19,7 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import FormControl from '@mui/material/FormControl';
 import CardContent from '@mui/material/CardContent';
+import InputAdornment from '@mui/material/InputAdornment';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -28,7 +30,7 @@ import { fDate } from 'src/utils/format-time';
 import { fCurrency } from 'src/utils/format-number';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { paymentsApi, type PaymentData } from 'src/api/payments';
+import { paymentsApi, type PaymentData, type PaymentStats } from 'src/api/payments';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
@@ -42,8 +44,6 @@ const STATUS_COLORS: Record<string, 'success' | 'warning' | 'error' | 'default'>
   failed: 'error',
 };
 
-// ----------------------------------------------------------------------
-
 const formatPayableType = (type: string | null): string => {
   if (!type) return '—';
   return type.split('\\').pop()?.replace(/([A-Z])/g, ' $1').trim() ?? '—';
@@ -54,11 +54,17 @@ const formatPayableType = (type: string | null): string => {
 export function PaymentsView() {
   const router = useRouter();
   const [payments, setPayments] = useState<PaymentData[]>([]);
+  const [stats, setStats] = useState<PaymentStats | null>(null);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [filterStatus, setFilterStatus] = useState('all');
+  const [filterSearch, setFilterSearch] = useState('');
+
+  useEffect(() => {
+    paymentsApi.stats().then(setStats).catch(() => {});
+  }, []);
 
   const fetchPayments = useCallback(() => {
     setLoading(true);
@@ -67,6 +73,7 @@ export function PaymentsView() {
         page: page + 1,
         per_page: rowsPerPage,
         status: filterStatus !== 'all' ? filterStatus : undefined,
+        search: filterSearch.trim() || undefined,
       })
       .then(({ data, meta }) => {
         setPayments(data);
@@ -74,22 +81,17 @@ export function PaymentsView() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [page, rowsPerPage, filterStatus]);
+  }, [page, rowsPerPage, filterStatus, filterSearch]);
 
   useEffect(() => {
     fetchPayments();
   }, [fetchPayments]);
 
-  const paidRevenue = payments.filter((p) => p.status === 'succeeded').reduce((s, p) => s + p.amount, 0);
-  const paidCount = payments.filter((p) => p.status === 'succeeded').length;
-  const pendingCount = payments.filter((p) => p.status === 'pending').length;
-  const failedCount = payments.filter((p) => p.status === 'failed').length;
-
   const summary = [
-    { label: 'Total Revenue', value: fCurrency(paidRevenue), color: 'primary' as const },
-    { label: 'Succeeded', value: String(paidCount), color: 'success' as const },
-    { label: 'Pending', value: String(pendingCount), color: 'warning' as const },
-    { label: 'Failed', value: String(failedCount), color: 'error' as const },
+    { label: 'Total Revenue', value: fCurrency((stats?.total_revenue ?? 0) / 100), color: 'primary' as const },
+    { label: 'Succeeded', value: String(stats?.succeeded_count ?? 0), color: 'success' as const },
+    { label: 'Pending', value: String(stats?.pending_count ?? 0), color: 'warning' as const },
+    { label: 'Failed', value: String(stats?.failed_count ?? 0), color: 'error' as const },
   ];
 
   return (
@@ -122,15 +124,27 @@ export function PaymentsView() {
 
       <Card>
         <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+          <TextField
+            size="small"
+            placeholder="Search user, email or Stripe ID…"
+            value={filterSearch}
+            onChange={(e) => { setFilterSearch(e.target.value); setPage(0); }}
+            sx={{ minWidth: 260 }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Iconify icon="eva:search-fill" width={16} sx={{ color: 'text.disabled' }} />
+                </InputAdornment>
+              ),
+            }}
+          />
+
           <FormControl size="small" sx={{ minWidth: 130 }}>
             <InputLabel>Status</InputLabel>
             <Select
               value={filterStatus}
               label="Status"
-              onChange={(e: SelectChangeEvent) => {
-                setFilterStatus(e.target.value);
-                setPage(0);
-              }}
+              onChange={(e: SelectChangeEvent) => { setFilterStatus(e.target.value); setPage(0); }}
             >
               <MenuItem value="all">All</MenuItem>
               <MenuItem value="succeeded">Succeeded</MenuItem>
@@ -138,6 +152,7 @@ export function PaymentsView() {
               <MenuItem value="failed">Failed</MenuItem>
             </Select>
           </FormControl>
+
           <Typography variant="body2" sx={{ ml: 'auto', color: 'text.secondary' }}>
             {total} results
           </Typography>
@@ -145,28 +160,29 @@ export function PaymentsView() {
 
         <Scrollbar>
           <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 700 }}>
+            <Table sx={{ minWidth: 800 }}>
               <TableHead>
                 <TableRow>
-                  <TableCell>#</TableCell>
+                  <TableCell width={80}>No. / ID</TableCell>
+                  <TableCell>User</TableCell>
                   <TableCell>Stripe Intent</TableCell>
                   <TableCell>Type</TableCell>
                   <TableCell align="right">Amount</TableCell>
                   <TableCell>Date</TableCell>
                   <TableCell>Status</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell align="right" width={60} />
                 </TableRow>
               </TableHead>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
+                    <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
                       <CircularProgress size={28} />
                     </TableCell>
                   </TableRow>
                 ) : (
                   <>
-                    {payments.map((row) => (
+                    {payments.map((row, index) => (
                       <TableRow
                         key={row.id}
                         hover
@@ -174,8 +190,16 @@ export function PaymentsView() {
                         onClick={() => router.push(`/payments/${row.id}`)}
                       >
                         <TableCell>
+                          <Typography variant="caption" color="text.disabled" display="block">
+                            {page * rowsPerPage + index + 1}.
+                          </Typography>
                           <Typography variant="body2" fontWeight={600} color="primary.main">
                             #{row.id}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" fontWeight={500}>
+                            {row.user_name ?? '—'}
                           </Typography>
                         </TableCell>
                         <TableCell>
@@ -188,7 +212,7 @@ export function PaymentsView() {
                         </TableCell>
                         <TableCell align="right">
                           <Typography variant="body2" fontWeight={600}>
-                            {fCurrency(row.amount)}
+                            {fCurrency(row.amount / 100)}
                           </Typography>
                         </TableCell>
                         <TableCell>{fDate(row.created_at)}</TableCell>
@@ -198,10 +222,7 @@ export function PaymentsView() {
                         <TableCell align="right">
                           <IconButton
                             size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              router.push(`/payments/${row.id}`);
-                            }}
+                            onClick={(e) => { e.stopPropagation(); router.push(`/payments/${row.id}`); }}
                           >
                             <Iconify icon="solar:eye-bold" width={16} />
                           </IconButton>
@@ -210,7 +231,7 @@ export function PaymentsView() {
                     ))}
                     {payments.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={7} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                        <TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.secondary' }}>
                           No payments found
                         </TableCell>
                       </TableRow>
@@ -229,10 +250,7 @@ export function PaymentsView() {
           rowsPerPage={rowsPerPage}
           rowsPerPageOptions={[5, 10, 25]}
           onPageChange={(_, newPage) => setPage(newPage)}
-          onRowsPerPageChange={(e) => {
-            setRowsPerPage(parseInt(e.target.value, 10));
-            setPage(0);
-          }}
+          onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
         />
       </Card>
     </DashboardContent>

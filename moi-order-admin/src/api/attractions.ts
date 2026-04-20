@@ -19,11 +19,14 @@ export type AttractionData = {
   name: string;
   highlight_description: string;
   description: string;
+  google_maps_link: string;
   city: string;
   province: string;
   address: string;
   cover_image_url: string | null;
   starting_from_price: number | null;
+  is_active: boolean;
+  sort_order: number;
   variants?: TicketVariantData[];
   images?: TicketImageData[];
 };
