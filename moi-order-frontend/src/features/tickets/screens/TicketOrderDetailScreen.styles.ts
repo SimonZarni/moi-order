@@ -136,7 +136,23 @@ export const styles = StyleSheet.create({
   },
   previewImage: {
     width: '90%',
-    height: '80%',
+    height: '72%',
+  },
+  previewSaveBtn: {
+    marginTop: spacing.lg,
+    backgroundColor: colours.primary,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xxl,
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  previewSaveBtnText: {
+    fontSize: typography.sm,
+    fontWeight: '700',
+    color: colours.white,
+    letterSpacing: 0.4,
   },
 
   // ── States ────────────────────────────────────────────────────────────────

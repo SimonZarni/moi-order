@@ -34,6 +34,12 @@ export const styles = StyleSheet.create({
     marginTop: -spacing.xl,
   },
 
+  // ── Sticky tab container (rendered outside FlatList so it never scrolls) ──
+  stickyTabBar: {
+    backgroundColor: colours.backgroundLight,
+    paddingBottom: spacing.md,
+  },
+
   // ── Tabs ──────────────────────────────────────────────────────────────────
   tabRow: {
     flexDirection: 'row',

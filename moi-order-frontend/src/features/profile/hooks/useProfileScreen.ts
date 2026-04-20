@@ -55,6 +55,8 @@ export interface UseProfileScreenResult {
   handleGoToTerms: () => void;
   handleGoToPdpa: () => void;
   handleLogout: () => void;
+  handleDeleteAccount: () => void;
+  isDeletingAccount: boolean;
 }
 
 export function useProfileScreen(): UseProfileScreenResult {
@@ -63,7 +65,7 @@ export function useProfileScreen(): UseProfileScreenResult {
   const clearAuth  = useAuthStore((s) => s.clearAuth);
   const { locale, setLocale } = useLocale();
 
-  const { user, isLoading, isRefreshing, refetch, updateMutation, changePasswordMutation } = useProfileData();
+  const { user, isLoading, isRefreshing, refetch, updateMutation, changePasswordMutation, deleteAccountMutation } = useProfileData();
   const profileForm       = useProfileForm(user);
   const changePasswordForm = useChangePasswordForm();
 
@@ -193,6 +195,25 @@ export function useProfileScreen(): UseProfileScreenResult {
     ]);
   }, [clearAuth, navigation]);
 
+  const handleDeleteAccount = useCallback((): void => {
+    Alert.alert(
+      'Delete Account',
+      'This will permanently delete your account and all personal data. Your order history will be anonymised. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete My Account',
+          style: 'destructive',
+          onPress: () => {
+            deleteAccountMutation.mutate(undefined, {
+              onSuccess: () => clearAuth(),
+            });
+          },
+        },
+      ],
+    );
+  }, [clearAuth, deleteAccountMutation]);
+
   return {
     user,
     isLoading,
@@ -228,5 +249,7 @@ export function useProfileScreen(): UseProfileScreenResult {
     handleGoToTerms,
     handleGoToPdpa,
     handleLogout,
+    handleDeleteAccount,
+    isDeletingAccount: deleteAccountMutation.isPending,
   };
 }

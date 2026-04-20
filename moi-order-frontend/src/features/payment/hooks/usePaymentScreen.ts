@@ -1,7 +1,11 @@
 import { useCallback, useMemo } from 'react';
+import { Alert } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as MediaLibrary from 'expo-media-library';
+import * as Sharing from 'expo-sharing';
 
 import { usePayment } from './usePayment';
 import { useTicketOrderPayment } from './useTicketOrderPayment';
@@ -23,6 +27,7 @@ export interface UsePaymentScreenResult {
   handleBack: () => void;
   handleGoToOrders: () => void;
   handleRefreshQr: () => void;
+  handleDownloadQr: () => Promise<void>;
 }
 
 export function usePaymentScreen(): UsePaymentScreenResult {
@@ -93,10 +98,42 @@ export function usePaymentScreen(): UsePaymentScreenResult {
     }
   }, [params.kind, refreshSubmissionPayment, refreshTicketPayment]);
 
+  const handleDownloadQr = useCallback(async (): Promise<void> => {
+    const url = payment?.qr_image_url;
+    if (!url) return;
+
+    try {
+      const cacheDir = FileSystem.cacheDirectory;
+      if (!cacheDir) throw new Error('Cache directory unavailable');
+
+      const fileUri = `${cacheDir}qr_${Date.now()}.png`;
+      const result = await FileSystem.downloadAsync(url, fileUri);
+      if (result.status !== 200) throw new Error(`Download failed: ${result.status}`);
+
+      // writeOnly=true requests only image/video permission — avoids the audio permission
+      // that MediaLibrary would otherwise require on Android 13+
+      const permission = await MediaLibrary.requestPermissionsAsync(true);
+      if (permission.granted) {
+        await MediaLibrary.saveToLibraryAsync(result.uri);
+        await FileSystem.deleteAsync(result.uri, { idempotent: true });
+        Alert.alert('Saved', 'QR code saved to your gallery.');
+        return;
+      }
+
+      // Expo Go or user denied — fall back to share sheet
+      const canShare = await Sharing.isAvailableAsync();
+      if (!canShare) throw new Error('Sharing not available on this device');
+      await Sharing.shareAsync(result.uri, { mimeType: 'image/png', dialogTitle: 'Save QR code' });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Unknown error';
+      Alert.alert('Error', `Could not save QR code.\n${message}`);
+    }
+  }, [payment?.qr_image_url]);
+
   return {
     payment, payableName, isCreating,
     createError: createError ?? null,
     isPaid, isPaymentFailed, isQrExpired,
-    handleBack, handleGoToOrders, handleRefreshQr,
+    handleBack, handleGoToOrders, handleRefreshQr, handleDownloadQr,
   };
 }

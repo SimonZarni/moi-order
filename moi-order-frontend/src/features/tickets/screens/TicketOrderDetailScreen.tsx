@@ -15,9 +15,9 @@ import { styles, TICKET_STATUS_COLOURS } from './TicketOrderDetailScreen.styles'
 export function TicketOrderDetailScreen(): React.JSX.Element {
   const {
     order, isLoading, isRefreshing, isError,
-    canPayNow, canDownload, isDownloading, downloadError,
+    canPayNow, canDownload, isDownloading, isSavingEticket, downloadError,
     previewImageUrl,
-    handleRefresh, handleBack, handlePayNow, handleDownloadEticket, handleClosePreview,
+    handleRefresh, handleBack, handlePayNow, handleDownloadEticket, handleSaveEticket, handleClosePreview,
   } = useTicketOrderDetailScreen();
 
   const hero = (
@@ -90,6 +90,18 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
               accessibilityLabel="E-ticket preview"
             />
           )}
+          <Pressable
+            style={styles.previewSaveBtn}
+            onPress={handleSaveEticket}
+            disabled={isSavingEticket}
+            accessibilityLabel="Save e-ticket to gallery"
+            accessibilityRole="button"
+          >
+            {isSavingEticket
+              ? <ActivityIndicator color="white" />
+              : <Text style={styles.previewSaveBtnText}>Save to Gallery</Text>
+            }
+          </Pressable>
         </View>
       </Modal>
 
@@ -156,7 +168,7 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
                 }
               </Pressable>
               {downloadError !== null && (
-                <Text style={styles.downloadError}>{downloadError.message}</Text>
+                <Text style={styles.downloadError}>{downloadError}</Text>
               )}
             </>
           )}

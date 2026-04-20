@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, Linking, Pressable, Text, View } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
@@ -8,14 +8,10 @@ import { styles } from './QrCodeDisplay.styles';
 interface QrCodeDisplayProps {
   qrImageUrl: string;
   amountFormatted: string;
+  onDownloadQr: () => Promise<void>;
 }
 
-export function QrCodeDisplay({ qrImageUrl, amountFormatted }: QrCodeDisplayProps): React.JSX.Element {
-  const handleDownloadQr = (): void => {
-    if (qrImageUrl !== '') {
-      Linking.openURL(qrImageUrl).catch(() => {});
-    }
-  };
+export function QrCodeDisplay({ qrImageUrl, amountFormatted, onDownloadQr }: QrCodeDisplayProps): React.JSX.Element {
 
   return (
     <View style={styles.container}>
@@ -44,7 +40,7 @@ export function QrCodeDisplay({ qrImageUrl, amountFormatted }: QrCodeDisplayProp
       {qrImageUrl !== '' && (
         <Pressable
           style={styles.downloadBtn}
-          onPress={handleDownloadQr}
+          onPress={onDownloadQr}
           accessibilityLabel="Download QR code"
           accessibilityRole="button"
         >

@@ -8,6 +8,7 @@ use App\DTOs\ChangePasswordDTO;
 use App\DTOs\UpdateProfileDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangePasswordRequest;
+use App\Http\Requests\DeleteAccountRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Services\ProfileService;
@@ -41,6 +42,14 @@ class ProfileController extends Controller
             $request->user(),
             ChangePasswordDTO::fromRequest($request),
         );
+
+        return response()->json(null, 204);
+    }
+
+    /** DELETE /api/v1/profile */
+    public function destroy(DeleteAccountRequest $request): JsonResponse
+    {
+        $this->profileService->deleteAccount($request->user());
 
         return response()->json(null, 204);
     }

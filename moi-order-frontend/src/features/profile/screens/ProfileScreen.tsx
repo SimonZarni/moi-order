@@ -35,6 +35,7 @@ export function ProfileScreen(): React.JSX.Element {
     handleCurrentPasswordChange, handleNewPasswordChange, handleConfirmPasswordChange,
     handleChangePassword,
     handleGoToOrders, handleGoToPrivacyPolicy, handleGoToTerms, handleGoToPdpa, handleLogout,
+    handleDeleteAccount, isDeletingAccount,
   } = useProfileScreen();
 
   const t = getProfileStrings(locale);
@@ -365,6 +366,19 @@ export function ProfileScreen(): React.JSX.Element {
             accessibilityRole="button"
           >
             <Text style={styles.signOutText}>Sign Out</Text>
+          </Pressable>
+
+          {/* § Delete Account */}
+          <Pressable
+            style={styles.deleteAccountBtn}
+            onPress={handleDeleteAccount}
+            disabled={isDeletingAccount}
+            accessibilityLabel="Delete account"
+            accessibilityRole="button"
+          >
+            <Text style={styles.deleteAccountText}>
+              {isDeletingAccount ? 'Deleting…' : 'Delete Account'}
+            </Text>
           </Pressable>
 
         </View>

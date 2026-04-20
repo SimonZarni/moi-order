@@ -99,7 +99,7 @@ export function BookingDetailView() {
     setUploadError('');
     bookingsApi
       .uploadEticket(id, selectedFile)
-      .then((updated) => { setBooking(updated); setSelectedFile(null); setUploadSuccess(true); setEticketUrl(null); })
+      .then((updated) => { setBooking(updated); setSelectedFile(null); setUploadSuccess(true); setEticketObjectUrl(null); })
       .catch(() => setUploadError('Upload failed. Ensure the file is a valid PDF or image under 20 MB.'))
       .finally(() => setUploading(false));
   };

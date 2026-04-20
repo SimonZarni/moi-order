@@ -135,7 +135,7 @@ export function OrdersScreen(): React.JSX.Element {
     handleNavigateToLogin, handleBack,
   } = useOrdersScreen();
 
-  const header = (
+  const hero = (
     <>
       <HeroHeader
         accentColor={editorialPalette.amber}
@@ -147,16 +147,17 @@ export function OrdersScreen(): React.JSX.Element {
         hideBack
       />
       <View style={styles.bodyGap} />
-      <TabBar activeTab={activeTab} onTabChange={handleTabChange} />
     </>
   );
+
+  const tabBar = <View style={styles.stickyTabBar}><TabBar activeTab={activeTab} onTabChange={handleTabChange} /></View>;
 
   if (!isLoggedIn) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
         <StickyBackButton onPress={handleBack} label="Back" />
         <View style={styles.flatList}>
-          {header}
+          {hero}{tabBar}
           <View style={styles.guestWrap}>
             <Ionicons name="list" size={48} color={colours.textMuted} style={styles.guestIcon} />
             <Text style={styles.guestTitle}>Sign in to view orders</Text>
@@ -179,7 +180,7 @@ export function OrdersScreen(): React.JSX.Element {
       <SafeAreaView style={styles.root} edges={['top']}>
         <StickyBackButton onPress={handleBack} label="Back" />
         <View style={styles.flatList}>
-          {header}
+          {hero}{tabBar}
           <OrderCardSkeleton /><OrderCardSkeleton /><OrderCardSkeleton />
           <OrderCardSkeleton /><OrderCardSkeleton /><OrderCardSkeleton />
         </View>
@@ -193,7 +194,7 @@ export function OrdersScreen(): React.JSX.Element {
       <SafeAreaView style={styles.root} edges={['top']}>
         <StickyBackButton onPress={handleBack} label="Back" />
         <View style={styles.flatList}>
-          {header}
+          {hero}{tabBar}
           <View style={styles.stateBox}>
             <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
             <Text style={styles.stateTitle}>Could not load orders</Text>
@@ -209,12 +210,13 @@ export function OrdersScreen(): React.JSX.Element {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
         <StickyBackButton onPress={handleBack} label="Back" />
+        {hero}
+        {tabBar}
         <FlatList
           style={styles.flatList}
           data={submissions}
           keyExtractor={(item: ServiceSubmission) => String(item.id)}
           renderItem={({ item }) => <OrderCard item={item} onPress={handleOrderPress} />}
-          ListHeaderComponent={header}
           ListEmptyComponent={
             <View style={styles.emptyWrap}>
               <Ionicons name="mail-open-outline" size={48} color={colours.textMuted} style={styles.emptyIcon} />
@@ -224,16 +226,16 @@ export function OrdersScreen(): React.JSX.Element {
               </Text>
             </View>
           }
-          onEndReached={handleEndReached}
-          onEndReachedThreshold={0.4}
-          onRefresh={handleRefresh}
-          refreshing={isRefreshing}
-          contentContainerStyle={styles.list}
           ListFooterComponent={
             isFetchingNextPage
               ? <ActivityIndicator style={styles.listFooter} color={styles.spinner.color} />
               : null
           }
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.4}
+          onRefresh={handleRefresh}
+          refreshing={isRefreshing}
+          contentContainerStyle={styles.list}
           initialNumToRender={8}
           maxToRenderPerBatch={8}
           windowSize={5}
@@ -249,12 +251,13 @@ export function OrdersScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <StickyBackButton onPress={handleBack} label="Back" />
+      {hero}
+      {tabBar}
       <FlatList
         style={styles.flatList}
         data={ticketOrders}
         keyExtractor={(item: TicketOrder) => String(item.id)}
         renderItem={({ item }) => <TicketOrderCard item={item} onPress={handleTicketOrderPress} />}
-        ListHeaderComponent={header}
         ListEmptyComponent={
           <View style={styles.emptyWrap}>
             <Ionicons name="pricetag-outline" size={48} color={colours.textMuted} style={styles.emptyIcon} />
@@ -264,16 +267,16 @@ export function OrdersScreen(): React.JSX.Element {
             </Text>
           </View>
         }
-        onEndReached={handleEndReached}
-        onEndReachedThreshold={0.4}
-        onRefresh={handleRefresh}
-        refreshing={isRefreshing}
-        contentContainerStyle={styles.list}
         ListFooterComponent={
           isFetchingNextPage
             ? <ActivityIndicator style={styles.listFooter} color={styles.spinner.color} />
             : null
         }
+        onEndReached={handleEndReached}
+        onEndReachedThreshold={0.4}
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
+        contentContainerStyle={styles.list}
         initialNumToRender={8}
         maxToRenderPerBatch={8}
         windowSize={5}
