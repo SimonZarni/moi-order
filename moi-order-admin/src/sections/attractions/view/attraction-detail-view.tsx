@@ -124,7 +124,7 @@ export function AttractionDetailView() {
           variant="contained"
           color="primary"
           onClick={handleSave}
-          disabled={saving}
+          disabled={saving || variants.some((v) => !v.name.trim() || v.price < 1)}
           startIcon={saving ? <CircularProgress size={14} /> : <Iconify icon="eva:checkmark-fill" width={14} />}
         >
           Save Variants
@@ -194,7 +194,10 @@ export function AttractionDetailView() {
                           size="small"
                           label="Price (THB)"
                           type="number"
+                          slotProps={{ htmlInput: { min: 1 } }}
                           value={v.price}
+                          error={v.price < 1}
+                          helperText={v.price < 1 ? 'Min 1 THB' : ''}
                           onChange={(e) => updateVariant(v.tempId, 'price', Number(e.target.value))}
                         />
                       </Grid>

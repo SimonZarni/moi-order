@@ -38,6 +38,12 @@ class AdminServiceController extends Controller
         return AdminServiceResource::collection($this->serviceService->index());
     }
 
+    /** GET /api/admin/v1/services/{service} */
+    public function show(Service $service): JsonResponse
+    {
+        return response()->json(['data' => new AdminServiceResource($service)]);
+    }
+
     /** POST /api/admin/v1/services */
     public function store(AdminStoreServiceRequest $request): JsonResponse
     {

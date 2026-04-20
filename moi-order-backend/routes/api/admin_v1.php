@@ -38,6 +38,7 @@ Route::prefix('submissions')->name('admin.submissions.')->group(function (): voi
 Route::prefix('services')->name('admin.services.')->group(function (): void {
     Route::get('/', [AdminServiceController::class, 'index'])->name('index');
     Route::post('/', [AdminServiceController::class, 'store'])->name('store');
+    Route::get('/{service}', [AdminServiceController::class, 'show'])->name('show');
     Route::put('/{service}', [AdminServiceController::class, 'update'])->name('update');
     Route::delete('/{service}', [AdminServiceController::class, 'destroy'])->name('destroy');
 

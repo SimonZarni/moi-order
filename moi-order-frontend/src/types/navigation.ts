@@ -43,6 +43,12 @@ export type RootStackParamList = {
     serviceTypeId: number;
     price: number;
   };
+  GenericServiceForm: {
+    serviceTypeId: number;
+    serviceId: number;
+    serviceName: string;
+    price: number;
+  };
 
   // ── Payment ──────────────────────────────────────────────────────────────
   Payment:

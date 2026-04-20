@@ -28,7 +28,7 @@ class AdminTicketVariantController extends Controller
         $data = $request->validate([
             'name'        => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'price'       => ['required', 'integer', 'min:0'],
+            'price'       => ['required', 'integer', 'min:1'],
             'is_active'   => ['boolean'],
             'sort_order'  => ['integer', 'min:0'],
         ]);
@@ -45,7 +45,7 @@ class AdminTicketVariantController extends Controller
         $data = $request->validate([
             'name'        => ['sometimes', 'string', 'max:255'],
             'description' => ['sometimes', 'nullable', 'string'],
-            'price'       => ['sometimes', 'integer', 'min:0'],
+            'price'       => ['sometimes', 'integer', 'min:1'],
             'is_active'   => ['sometimes', 'boolean'],
             'sort_order'  => ['sometimes', 'integer', 'min:0'],
         ]);

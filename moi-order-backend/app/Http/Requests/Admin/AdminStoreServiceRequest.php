@@ -16,6 +16,7 @@ class AdminStoreServiceRequest extends FormRequest
         return [
             'name'      => ['required', 'string', 'max:255'],
             'name_en'   => ['required', 'string', 'max:255'],
+            'name_mm'   => ['nullable', 'string', 'max:255'],
             'slug'      => ['required', 'string', 'max:100', Rule::unique('services', 'slug')],
             'is_active' => ['required', 'boolean'],
         ];
@@ -23,6 +24,6 @@ class AdminStoreServiceRequest extends FormRequest
 
     public function attributes(): array
     {
-        return ['name_en' => 'English name', 'is_active' => 'active status'];
+        return ['name_en' => 'English name', 'name_mm' => 'Myanmar name', 'is_active' => 'active status'];
     }
 }

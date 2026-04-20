@@ -58,13 +58,15 @@ export interface User {
 
 export interface FieldSchemaItem {
   key: string;
-  label: string;
-  label_en: string;
+  label: string;        // Thai
+  label_en: string;     // English
+  label_mm?: string;    // Myanmar (nullable)
   type: import('./enums').FieldType;
   required: boolean;
   sort_order: number;
-  options?: string[];   // present when type === 'select'
-  accepts?: string[];   // present when type === 'file' — e.g. ['image', 'pdf']
+  options?: string[];       // present when type === 'select'
+  accepts?: string[];       // present when type === 'file' — e.g. ['image', 'pdf']
+  document_type?: import('./enums').DocumentType; // required when type === 'file'
 }
 
 export interface ServiceType {
@@ -72,7 +74,7 @@ export interface ServiceType {
   name: string;
   name_en: string;
   name_mm: string | null;
-  price: number; // satangs
+  price: number; // whole THB
   field_schema: FieldSchemaItem[];
   // Present only when the parent service relation is loaded (detail endpoint)
   service?: {
@@ -106,7 +108,7 @@ export interface Payment {
   id: number;
   status: string;
   status_label: string;
-  amount: number;      // satangs
+  amount: number;      // satangs (divide by 100 for THB display)
   currency: string;
   qr_image_url: string | null;
   expires_at: string | null;
@@ -116,7 +118,7 @@ export interface ServiceSubmission {
   id: number;
   status: string;
   status_label: string;
-  price_snapshot: number; // satangs
+  price_snapshot: number; // whole THB
   completed_at: string | null;
   created_at: string;
   service_type: ServiceType;

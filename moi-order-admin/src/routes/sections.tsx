@@ -35,6 +35,7 @@ export const AttractionDetailPage = lazy(() => import('src/pages/attraction-deta
 export const AttractionCreatePage = lazy(() => import('src/pages/attraction-create'));
 export const SubmissionsPage = lazy(() => import('src/pages/submissions'));
 export const PaymentDetailPage = lazy(() => import('src/pages/payment-detail'));
+export const ServiceDetailPage = lazy(() => import('src/pages/service-detail'));
 export const ContentPage = lazy(() => import('src/pages/content'));
 export const SupportPage = lazy(() => import('src/pages/support'));
 export const SubmissionDetailPage = lazy(() => import('src/pages/submission-detail'));
@@ -80,6 +81,7 @@ export const routesSection: RouteObject[] = [
       { path: 'services', element: <ServicesPage /> },
       { path: 'services/submissions', element: <SubmissionsPage /> },
       { path: 'services/submissions/:id', element: <SubmissionDetailPage /> },
+      { path: 'services/:id', element: <ServiceDetailPage /> },
       { path: 'roles', element: <RolesPage /> },
       { path: 'reviews', element: <ReviewsPage /> },
       { path: 'content', element: <ContentPage /> },

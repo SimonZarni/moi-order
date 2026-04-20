@@ -18,6 +18,7 @@ class AdminUpdateServiceRequest extends FormRequest
         return [
             'name'      => ['sometimes', 'string', 'max:255'],
             'name_en'   => ['sometimes', 'string', 'max:255'],
+            'name_mm'   => ['sometimes', 'nullable', 'string', 'max:255'],
             'slug'      => ['sometimes', 'string', 'max:100', Rule::unique('services', 'slug')->ignore($serviceId)],
             'is_active' => ['sometimes', 'boolean'],
         ];
@@ -25,6 +26,6 @@ class AdminUpdateServiceRequest extends FormRequest
 
     public function attributes(): array
     {
-        return ['name_en' => 'English name', 'is_active' => 'active status'];
+        return ['name_en' => 'English name', 'name_mm' => 'Myanmar name', 'is_active' => 'active status'];
     }
 }

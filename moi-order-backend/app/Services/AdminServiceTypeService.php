@@ -25,6 +25,7 @@ class AdminServiceTypeService
         return $service->types()->create([
             'name'         => $dto->name,
             'name_en'      => $dto->nameEn,
+            'name_mm'      => $dto->nameMm,
             'price'        => $dto->price,
             'is_active'    => $dto->isActive,
             'field_schema' => $dto->fieldSchema,
@@ -36,6 +37,7 @@ class AdminServiceTypeService
         $type->update(array_filter([
             'name'         => $dto->name,
             'name_en'      => $dto->nameEn,
+            'name_mm'      => $dto->nameMm,
             'price'        => $dto->price,
             'is_active'    => $dto->isActive,
             'field_schema' => $dto->fieldSchema,
