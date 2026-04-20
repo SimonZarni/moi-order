@@ -25,6 +25,7 @@ import { useRouter } from 'src/routes/hooks';
 import { fDate } from 'src/utils/format-time';
 import { fCurrency } from 'src/utils/format-number';
 
+import { paymentsApi } from 'src/api/payments';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { bookingsApi, type BookingDetailData } from 'src/api/bookings';
 
@@ -51,9 +52,7 @@ const PAYMENT_COLORS: Record<string, 'success' | 'warning' | 'error' | 'default'
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.75 }}>
-      <Typography variant="body2" color="text.secondary">
-        {label}
-      </Typography>
+      <Typography variant="body2" color="text.secondary">{label}</Typography>
       <Typography variant="body2" fontWeight={500} sx={{ textAlign: 'right', maxWidth: '60%' }}>
         {value}
       </Typography>
@@ -74,15 +73,16 @@ export function BookingDetailView() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [eticketObjectUrl, setEticketObjectUrl] = useState<string | null>(null);
+  const [eticketLoading, setEticketLoading] = useState(false);
+  const [eticketError, setEticketError] = useState('');
+  const [confirming, setConfirming] = useState(false);
+  const [confirmError, setConfirmError] = useState('');
 
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    bookingsApi
-      .get(id)
-      .then(setBooking)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    bookingsApi.get(id).then(setBooking).catch(() => {}).finally(() => setLoading(false));
   }, [id]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,13 +99,56 @@ export function BookingDetailView() {
     setUploadError('');
     bookingsApi
       .uploadEticket(id, selectedFile)
-      .then((updated) => {
-        setBooking(updated);
-        setSelectedFile(null);
-        setUploadSuccess(true);
-      })
-      .catch(() => setUploadError('Upload failed. Ensure the file is a valid PDF under 20 MB.'))
+      .then((updated) => { setBooking(updated); setSelectedFile(null); setUploadSuccess(true); setEticketUrl(null); })
+      .catch(() => setUploadError('Upload failed. Ensure the file is a valid PDF or image under 20 MB.'))
       .finally(() => setUploading(false));
+  };
+
+  const fetchEticketBlob = (onSuccess: (objectUrl: string, contentType: string) => void) => {
+    if (!id) return;
+    setEticketLoading(true);
+    setEticketError('');
+    bookingsApi
+      .downloadEticket(id)
+      .then(({ blob, contentType }) => {
+        const objectUrl = URL.createObjectURL(blob);
+        onSuccess(objectUrl, contentType ?? '');
+      })
+      .catch(() => setEticketError('Could not load e-ticket. The file may no longer exist on the server.'))
+      .finally(() => setEticketLoading(false));
+  };
+
+  const handleViewEticket = () => {
+    if (eticketObjectUrl) { window.open(eticketObjectUrl, '_blank'); return; }
+    fetchEticketBlob((objectUrl) => {
+      setEticketObjectUrl(objectUrl);
+      window.open(objectUrl, '_blank');
+    });
+  };
+
+  const handleDownloadEticket = () => {
+    fetchEticketBlob((objectUrl, contentType) => {
+      const ext = contentType.includes('pdf') ? 'pdf' : 'jpg';
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = `eticket-${id}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+  };
+
+  const handleConfirmPayment = () => {
+    if (!booking?.payment?.id) return;
+    setConfirming(true);
+    setConfirmError('');
+    paymentsApi
+      .confirm(booking.payment.id)
+      .then(() => {
+        if (id) bookingsApi.get(id).then(setBooking).catch(() => {});
+      })
+      .catch(() => setConfirmError('Could not confirm payment. Try again.'))
+      .finally(() => setConfirming(false));
   };
 
   if (loading) {
@@ -128,6 +171,7 @@ export function BookingDetailView() {
 
   const canUpload = booking.status === 'processing' || booking.status === 'completed';
   const statusColor = STATUS_COLORS[booking.status] ?? 'default';
+  const paymentIsPending = booking.payment?.status === 'pending';
 
   return (
     <DashboardContent>
@@ -200,9 +244,7 @@ export function BookingDetailView() {
                       </TableCell>
                       <TableCell align="right">
                         <Typography variant="subtitle2" color="primary.main">
-                          {booking.total !== null
-                            ? `${booking.total.toLocaleString()} THB`
-                            : '—'}
+                          {booking.total !== null ? `${booking.total.toLocaleString()} THB` : '—'}
                         </Typography>
                       </TableCell>
                     </TableRow>
@@ -216,22 +258,53 @@ export function BookingDetailView() {
               <CardHeader title="Payment" />
               <CardContent>
                 {booking.payment ? (
-                  <Stack spacing={0.5} divider={<Divider />}>
-                    <InfoRow
-                      label="Status"
-                      value={
-                        <Label color={PAYMENT_COLORS[booking.payment.status] ?? 'default'}>
-                          {booking.payment.status_label}
-                        </Label>
-                      }
-                    />
-                    <InfoRow
-                      label="Amount"
-                      value={fCurrency(booking.payment.amount / 100)}
-                    />
-                    <InfoRow label="Currency" value={booking.payment.currency} />
-                    {booking.payment.expires_at && (
-                      <InfoRow label="Expires" value={fDate(booking.payment.expires_at)} />
+                  <Stack spacing={1.5}>
+                    <Stack spacing={0.5} divider={<Divider />}>
+                      <InfoRow
+                        label="Status"
+                        value={
+                          <Label color={PAYMENT_COLORS[booking.payment.status] ?? 'default'}>
+                            {booking.payment.status_label}
+                          </Label>
+                        }
+                      />
+                      <InfoRow label="Amount" value={fCurrency(booking.payment.amount / 100)} />
+                      <InfoRow label="Currency" value={booking.payment.currency.toUpperCase()} />
+                      {booking.payment.expires_at && (
+                        <InfoRow label="Expires" value={fDate(booking.payment.expires_at)} />
+                      )}
+                    </Stack>
+
+                    {/* QR code for pending payments */}
+                    {paymentIsPending && booking.payment.qr_image_url && (
+                      <Box sx={{ textAlign: 'center', pt: 1 }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                          PromptPay QR Code
+                        </Typography>
+                        <Box
+                          component="img"
+                          src={booking.payment.qr_image_url}
+                          alt="Payment QR"
+                          sx={{ width: 200, height: 200, objectFit: 'contain', border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
+                        />
+                      </Box>
+                    )}
+
+                    {/* Mark as Paid */}
+                    {paymentIsPending && (
+                      <Stack spacing={1}>
+                        {confirmError && <Alert severity="error" sx={{ py: 0.5 }}>{confirmError}</Alert>}
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          color="success"
+                          disabled={confirming}
+                          onClick={handleConfirmPayment}
+                          startIcon={confirming ? <CircularProgress size={14} color="inherit" /> : <Iconify icon="solar:check-circle-bold" width={16} />}
+                        >
+                          {confirming ? 'Confirming…' : 'Mark as Paid'}
+                        </Button>
+                      </Stack>
                     )}
                   </Stack>
                 ) : (
@@ -286,39 +359,57 @@ export function BookingDetailView() {
                 }
               />
               <CardContent>
-                {booking.has_eticket ? (
-                  <Stack spacing={2}>
+                {booking.has_eticket && (
+                  <Stack spacing={1.5} sx={{ mb: 2 }}>
                     <Stack direction="row" alignItems="center" spacing={1}>
                       <Iconify icon="solar:check-circle-bold" width={20} sx={{ color: 'success.main' }} />
                       <Typography variant="body2" color="text.secondary">
-                        E-ticket is available to the customer in the app.
+                        E-ticket is available to the customer.
                       </Typography>
                     </Stack>
-                    {booking.completed_at && (
-                      <Typography variant="caption" color="text.disabled">
-                        Uploaded on {fDate(booking.completed_at)}
-                      </Typography>
-                    )}
+                    {eticketError && <Alert severity="error" sx={{ py: 0.5 }}>{eticketError}</Alert>}
+                    <Stack direction="row" spacing={1}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        disabled={eticketLoading}
+                        onClick={handleViewEticket}
+                        startIcon={eticketLoading ? <CircularProgress size={12} /> : <Iconify icon="solar:eye-bold" width={14} />}
+                      >
+                        Preview
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        disabled={eticketLoading}
+                        onClick={handleDownloadEticket}
+                        startIcon={eticketLoading ? <CircularProgress size={12} /> : <Iconify icon="eva:arrow-ios-downward-fill" width={14} />}
+                      >
+                        Download
+                      </Button>
+                    </Stack>
                     <Divider />
-                    <Typography variant="caption" color="text.secondary">
-                      Replace e-ticket:
-                    </Typography>
+                    <Typography variant="caption" color="text.secondary">Replace e-ticket:</Typography>
                   </Stack>
-                ) : !canUpload ? (
+                )}
+
+                {!booking.has_eticket && !canUpload && (
                   <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
                     <Iconify icon="solar:clock-circle-outline" width={18} sx={{ color: 'text.disabled' }} />
                     <Typography variant="body2" color="text.secondary">
                       E-ticket can be uploaded once payment is confirmed.
                     </Typography>
                   </Stack>
-                ) : null}
+                )}
 
                 {canUpload && (
-                  <Stack spacing={1.5} sx={{ mt: booking.has_eticket ? 1 : 0 }}>
+                  <Stack spacing={1.5}>
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="application/pdf"
+                      accept="application/pdf,image/jpeg,image/jpg,image/png"
                       hidden
                       onChange={handleFileSelect}
                     />
@@ -328,36 +419,17 @@ export function BookingDetailView() {
                       startIcon={<Iconify icon="eva:trending-up-fill" width={14} />}
                       onClick={() => fileInputRef.current?.click()}
                     >
-                      {selectedFile ? 'Change PDF' : 'Select PDF'}
+                      {selectedFile ? selectedFile.name : 'Select PDF or Image'}
                     </Button>
-                    {selectedFile && (
-                      <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
-                        {selectedFile.name}
-                      </Typography>
-                    )}
-                    {uploadError && (
-                      <Alert severity="error" sx={{ py: 0.5 }}>
-                        {uploadError}
-                      </Alert>
-                    )}
-                    {uploadSuccess && (
-                      <Alert severity="success" sx={{ py: 0.5 }}>
-                        E-ticket uploaded successfully.
-                      </Alert>
-                    )}
+                    {uploadError && <Alert severity="error" sx={{ py: 0.5 }}>{uploadError}</Alert>}
+                    {uploadSuccess && <Alert severity="success" sx={{ py: 0.5 }}>E-ticket uploaded successfully.</Alert>}
                     <Button
                       fullWidth
                       variant="contained"
                       color="primary"
                       disabled={!selectedFile || uploading}
                       onClick={handleUpload}
-                      startIcon={
-                        uploading ? (
-                          <CircularProgress size={14} color="inherit" />
-                        ) : (
-                          <Iconify icon="eva:checkmark-fill" width={14} />
-                        )
-                      }
+                      startIcon={uploading ? <CircularProgress size={14} color="inherit" /> : <Iconify icon="eva:checkmark-fill" width={14} />}
                     >
                       {uploading ? 'Uploading…' : 'Upload E-Ticket'}
                     </Button>

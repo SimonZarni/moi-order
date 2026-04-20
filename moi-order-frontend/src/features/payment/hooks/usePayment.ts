@@ -15,6 +15,10 @@ export interface UsePaymentResult {
   createError: ApiError | null;
 }
 
+export interface UsePaymentRefreshable extends UsePaymentResult {
+  refreshPayment: () => void;
+}
+
 /**
  * Principle: SRP — creates the payment intent, polls submission status, and syncs
  *   with Stripe directly when the app returns to the foreground.
@@ -84,5 +88,6 @@ export function usePayment(submissionId: number): UsePaymentResult {
     isCreating,
     isLoadingSubmission,
     createError,
+    refreshPayment: create,
   };
 }

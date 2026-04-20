@@ -22,8 +22,9 @@ if [ -n "$AIVEN_CA_CERT" ]; then
     export MYSQL_ATTR_SSL_CA=/tmp/aiven-ca.crt
 fi
 
-# Laravel private storage directory for submissions
+# Laravel private storage directories
 mkdir -p /var/www/html/storage/app/private/submissions/documents
+mkdir -p /var/www/html/storage/app/private/etickets
 chown -R www-data:www-data /var/www/html/storage/app/private
 chmod -R 775 /var/www/html/storage/app/private
 

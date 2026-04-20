@@ -20,10 +20,12 @@ export interface UseTicketOrderDetailScreenResult {
   canDownload: boolean;
   isDownloading: boolean;
   downloadError: ApiError | null;
+  previewImageUrl: string | null;
   handleRefresh: () => void;
   handleBack: () => void;
   handlePayNow: () => void;
   handleDownloadEticket: () => void;
+  handleClosePreview: () => void;
 }
 
 export function useTicketOrderDetailScreen(): UseTicketOrderDetailScreenResult {
@@ -32,6 +34,7 @@ export function useTicketOrderDetailScreen(): UseTicketOrderDetailScreenResult {
   const { ticketOrderId } = route.params;
 
   const { order, isLoading, isRefreshing, isError, refetch } = useTicketOrderDetail(ticketOrderId);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   const canPayNow = useMemo(
     () => order?.status === TICKET_ORDER_STATUS.PendingPayment
@@ -45,20 +48,22 @@ export function useTicketOrderDetailScreen(): UseTicketOrderDetailScreenResult {
   );
 
   const { mutate: downloadEticket, isPending: isDownloading, error: downloadError } = useMutation<
-    string,
+    { url: string; mime_type: string },
     ApiError
   >({
     mutationFn: () => fetchTicketOrderEticketUrl(ticketOrderId),
-    onSuccess: (url) => {
-      // Open the signed PDF URL in the device's browser/PDF viewer.
-      // Linking.openURL is imported from react-native at the component level
-      // to avoid importing it in the hook; we expose the URL via a callback instead.
-      import('react-native').then(({ Linking }) => Linking.openURL(url));
+    onSuccess: ({ url, mime_type }) => {
+      if (mime_type.startsWith('image/')) {
+        setPreviewImageUrl(url);
+      } else {
+        import('react-native').then(({ Linking }) => Linking.openURL(url));
+      }
     },
   });
 
-  const handleRefresh = useCallback((): void => { refetch(); }, [refetch]);
-  const handleBack    = useCallback((): void => { navigation.goBack(); }, [navigation]);
+  const handleRefresh  = useCallback((): void => { refetch(); }, [refetch]);
+  const handleBack     = useCallback((): void => { navigation.goBack(); }, [navigation]);
+  const handleClosePreview = useCallback((): void => { setPreviewImageUrl(null); }, []);
 
   const handlePayNow = useCallback((): void => {
     navigation.navigate('Payment', { kind: 'ticket_order', ticketOrderId });
@@ -70,6 +75,7 @@ export function useTicketOrderDetailScreen(): UseTicketOrderDetailScreenResult {
     order, isLoading, isRefreshing, isError,
     canPayNow, canDownload, isDownloading,
     downloadError: downloadError ?? null,
-    handleRefresh, handleBack, handlePayNow, handleDownloadEticket,
+    previewImageUrl,
+    handleRefresh, handleBack, handlePayNow, handleDownloadEticket, handleClosePreview,
   };
 }

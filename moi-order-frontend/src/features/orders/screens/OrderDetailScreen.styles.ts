@@ -160,7 +160,7 @@ export const styles = StyleSheet.create({
     color: colours.textOnLight,
     letterSpacing: -0.2,
     marginBottom: 2,
-    lineHeight: 24,
+    lineHeight: 28,
   },
   statusCardDivider: {
     height: 1,

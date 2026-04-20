@@ -36,4 +36,10 @@ class AdminPaymentController extends Controller
     {
         return response()->json(['data' => new AdminPaymentResource($this->service->show($payment))]);
     }
+
+    /** POST /api/admin/v1/payments/{payment}/confirm */
+    public function confirm(Payment $payment): JsonResponse
+    {
+        return response()->json(['data' => new AdminPaymentResource($this->service->confirm($payment))]);
+    }
 }

@@ -15,9 +15,11 @@ export function PaymentScreen(): React.JSX.Element {
     isCreating,
     isPaymentFailed,
     isPaid,
+    isQrExpired,
     createError,
     handleBack,
     handleGoToOrders,
+    handleRefreshQr,
   } = usePaymentScreen();
 
   const amountFormatted = formatCurrency((payment?.amount ?? 0) / 100);
@@ -83,6 +85,22 @@ export function PaymentScreen(): React.JSX.Element {
             <ActivityIndicator color={styles.waitingText.color} size="large" />
             <Text style={styles.loadingText}>Generating QR code…</Text>
           </>
+        ) : isQrExpired ? (
+          <View style={styles.expiredContainer}>
+            <Ionicons name="time-outline" size={64} color={colours.secondary} />
+            <Text style={styles.expiredTitle}>QR Code Expired</Text>
+            <Text style={styles.expiredSubtitle}>
+              This QR code has expired.{'\n'}Tap below to generate a new one.
+            </Text>
+            <Pressable
+              style={styles.refreshBtn}
+              onPress={handleRefreshQr}
+              accessibilityLabel="Refresh QR code"
+              accessibilityRole="button"
+            >
+              <Text style={styles.refreshBtnText}>Refresh QR</Text>
+            </Pressable>
+          </View>
         ) : (
           <>
             <QrCodeDisplay

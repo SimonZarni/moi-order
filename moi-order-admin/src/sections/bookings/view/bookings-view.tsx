@@ -56,6 +56,7 @@ export function BookingsView() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [filterStatus, setFilterStatus] = useState(searchParams.get('status') ?? 'all');
+  const [filterSearch, setFilterSearch] = useState('');
 
   const fetchBookings = useCallback(() => {
     setLoading(true);
@@ -64,6 +65,7 @@ export function BookingsView() {
         page: page + 1,
         per_page: rowsPerPage,
         status: filterStatus !== 'all' ? filterStatus : undefined,
+        search: filterSearch.trim() || undefined,
       })
       .then(({ data, meta }) => {
         setBookings(data);
@@ -71,7 +73,7 @@ export function BookingsView() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [page, rowsPerPage, filterStatus]);
+  }, [page, rowsPerPage, filterStatus, filterSearch]);
 
   useEffect(() => {
     fetchBookings();
@@ -93,10 +95,11 @@ export function BookingsView() {
       <Card>
         <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
           <OutlinedInput
-            placeholder="Search bookings..."
+            placeholder="Search user, ticket…"
+            value={filterSearch}
+            onChange={(e) => { setFilterSearch(e.target.value); setPage(0); }}
             startAdornment={<InputAdornment position="start"><Iconify icon="eva:search-fill" /></InputAdornment>}
             sx={{ flexGrow: 1, maxWidth: 340, height: 40 }}
-            disabled
           />
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Status</InputLabel>

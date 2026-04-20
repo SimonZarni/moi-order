@@ -8,8 +8,10 @@ use App\Contracts\FileStorageInterface;
 use App\Enums\TicketOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\TicketOrder;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Principle: SRP — generates e-ticket download URL only.
@@ -33,8 +35,15 @@ class TicketOrderEticketController extends Controller
             'E-ticket is not yet available for this order.',
         );
 
-        $url = $this->fileStorage->url($order->eticket_path, 30);
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk(config('filesystems.default', 'local'));
 
-        return response()->json(['data' => ['url' => $url]]);
+        abort_if(! $disk->exists($order->eticket_path), 404, 'E-ticket file not found. Please contact support.');
+
+        $url      = $this->fileStorage->url($order->eticket_path, 30);
+        $isPdf    = str_ends_with(strtolower($order->eticket_path), '.pdf');
+        $mimeType = $isPdf ? 'application/pdf' : 'image/jpeg';
+
+        return response()->json(['data' => ['url' => $url, 'mime_type' => $mimeType]]);
     }
 }

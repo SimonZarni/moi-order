@@ -43,4 +43,6 @@ export const paymentsApi = {
     apiClient.get<{ data: PaymentData }>(`/payments/${id}`).then((r) => r.data.data),
   stats: () =>
     apiClient.get<{ data: PaymentStats }>('/payments/stats').then((r) => r.data.data),
+  confirm: (id: number | string) =>
+    apiClient.post<{ data: PaymentData }>(`/payments/${id}/confirm`).then((r) => r.data.data),
 };

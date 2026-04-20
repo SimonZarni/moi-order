@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Modal, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
@@ -15,8 +15,9 @@ import { styles, TICKET_STATUS_COLOURS } from './TicketOrderDetailScreen.styles'
 export function TicketOrderDetailScreen(): React.JSX.Element {
   const {
     order, isLoading, isRefreshing, isError,
-    canPayNow, canDownload, isDownloading,
-    handleRefresh, handleBack, handlePayNow, handleDownloadEticket,
+    canPayNow, canDownload, isDownloading, downloadError,
+    previewImageUrl,
+    handleRefresh, handleBack, handlePayNow, handleDownloadEticket, handleClosePreview,
   } = useTicketOrderDetailScreen();
 
   const hero = (
@@ -64,6 +65,34 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <StickyBackButton onPress={handleBack} label="My Tickets" />
+
+      {/* ── Image preview modal ── */}
+      <Modal
+        visible={previewImageUrl !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={handleClosePreview}
+      >
+        <View style={styles.previewOverlay}>
+          <Pressable
+            style={styles.previewClose}
+            onPress={handleClosePreview}
+            accessibilityLabel="Close preview"
+            accessibilityRole="button"
+          >
+            <Ionicons name="close" size={28} color={colours.textOnDark} />
+          </Pressable>
+          {previewImageUrl !== null && (
+            <Image
+              source={{ uri: previewImageUrl }}
+              style={styles.previewImage}
+              resizeMode="contain"
+              accessibilityLabel="E-ticket preview"
+            />
+          )}
+        </View>
+      </Modal>
+
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
@@ -111,20 +140,25 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
             </Pressable>
           )}
 
-          {/* ── Download E-Ticket (completed) ── */}
+          {/* ── Download / Preview E-Ticket (completed) ── */}
           {canDownload && (
-            <Pressable
-              style={styles.downloadBtn}
-              onPress={handleDownloadEticket}
-              disabled={isDownloading}
-              accessibilityLabel="Download e-ticket"
-              accessibilityRole="button"
-            >
-              {isDownloading
-                ? <ActivityIndicator color="white" />
-                : <Text style={styles.downloadBtnText}>Download E-Ticket</Text>
-              }
-            </Pressable>
+            <>
+              <Pressable
+                style={styles.downloadBtn}
+                onPress={handleDownloadEticket}
+                disabled={isDownloading}
+                accessibilityLabel="View e-ticket"
+                accessibilityRole="button"
+              >
+                {isDownloading
+                  ? <ActivityIndicator color="white" />
+                  : <Text style={styles.downloadBtnText}>View / Download E-Ticket</Text>
+                }
+              </Pressable>
+              {downloadError !== null && (
+                <Text style={styles.downloadError}>{downloadError.message}</Text>
+              )}
+            </>
           )}
 
           {/* ── Items ── */}

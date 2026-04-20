@@ -22,7 +22,9 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useRouter } from 'src/routes/hooks';
 
 import { fDate } from 'src/utils/format-time';
+import { fCurrency } from 'src/utils/format-number';
 
+import { paymentsApi } from 'src/api/payments';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { submissionsApi, type SubmissionStatus, type SubmissionDetailData } from 'src/api/submissions';
 
@@ -57,6 +59,8 @@ export function SubmissionDetailView() {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<SubmissionStatus>('processing');
   const [saving, setSaving] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [confirmError, setConfirmError] = useState('');
 
   useEffect(() => {
     if (!id) return;
@@ -78,6 +82,23 @@ export function SubmissionDetailView() {
     submissionsApi.updateStatus(id, status).then(() => {
       if (submission) setSubmission({ ...submission, status });
     }).catch(() => {}).finally(() => setSaving(false));
+  };
+
+  const handleConfirmPayment = () => {
+    if (!submission?.payment?.id) return;
+    setConfirming(true);
+    setConfirmError('');
+    paymentsApi
+      .confirm(submission.payment.id)
+      .then(() => {
+        if (id) submissionsApi.get(id).then((data) => {
+          setSubmission(data);
+          const opts = WRITABLE_STATUSES[data.status as SubmissionStatus];
+          setStatus(opts?.[0]?.value ?? (data.status as SubmissionStatus));
+        }).catch(() => {});
+      })
+      .catch(() => setConfirmError('Could not confirm payment. Try again.'))
+      .finally(() => setConfirming(false));
   };
 
   if (loading) {
@@ -216,6 +237,65 @@ export function SubmissionDetailView() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Payment */}
+            {submission.payment && (
+              <Card>
+                <CardHeader title="Payment" />
+                <CardContent>
+                  <Stack spacing={1}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" color="text.secondary">Status</Typography>
+                      <Label color={submission.payment.status === 'succeeded' ? 'success' : submission.payment.status === 'pending' ? 'warning' : 'error'}>
+                        {submission.payment.status_label}
+                      </Label>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" color="text.secondary">Amount</Typography>
+                      <Typography variant="body2" fontWeight={500}>
+                        {fCurrency(submission.payment.amount / 100)}
+                      </Typography>
+                    </Box>
+                    {submission.payment.expires_at && (
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Typography variant="body2" color="text.secondary">Expires</Typography>
+                        <Typography variant="body2" fontWeight={500}>{fDate(submission.payment.expires_at)}</Typography>
+                      </Box>
+                    )}
+                  </Stack>
+
+                  {submission.payment.status === 'pending' && submission.payment.qr_image_url && (
+                    <Box sx={{ textAlign: 'center', mt: 2 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                        PromptPay QR Code
+                      </Typography>
+                      <Box
+                        component="img"
+                        src={submission.payment.qr_image_url}
+                        alt="Payment QR"
+                        sx={{ width: 180, height: 180, objectFit: 'contain', border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
+                      />
+                    </Box>
+                  )}
+
+                  {submission.payment.status === 'pending' && (
+                    <Stack spacing={1} sx={{ mt: 2 }}>
+                      {confirmError && <Alert severity="error" sx={{ py: 0.5 }}>{confirmError}</Alert>}
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        color="success"
+                        disabled={confirming}
+                        onClick={handleConfirmPayment}
+                        startIcon={confirming ? <CircularProgress size={14} color="inherit" /> : <Iconify icon="solar:check-circle-bold" width={16} />}
+                      >
+                        {confirming ? 'Confirming…' : 'Mark as Paid'}
+                      </Button>
+                    </Stack>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </Stack>
         </Grid>
 
