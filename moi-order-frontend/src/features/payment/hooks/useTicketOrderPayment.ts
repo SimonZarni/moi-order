@@ -19,6 +19,10 @@ export interface UseTicketOrderPaymentResult {
   createError: ApiError | null;
 }
 
+export interface UseTicketOrderPaymentRefreshable extends UseTicketOrderPaymentResult {
+  refreshPayment: () => void;
+}
+
 /**
  * Mirrors usePayment but for TicketOrder — same polling + AppState sync pattern.
  * Principle: OCP — new payable type adds a new hook instead of modifying usePayment.
@@ -69,5 +73,5 @@ export function useTicketOrderPayment(ticketOrderId: number): UseTicketOrderPaym
     return () => subscription.remove();
   }, [handleAppStateChange]);
 
-  return { payment, ticketOrder, isCreating, isLoadingOrder, createError };
+  return { payment, ticketOrder, isCreating, isLoadingOrder, createError, refreshPayment: create };
 }

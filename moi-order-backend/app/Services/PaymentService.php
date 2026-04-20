@@ -141,7 +141,8 @@ class PaymentService
                 'qr_image_url'     => $dto->qrImageUrl,
                 'stripe_payload'   => $dto->stripePayload,
                 'idempotency_key'  => $idempotencyKey,
-                'expires_at'       => $dto->expiresAt,
+                // Always store an expiry — fall back to 60 min if Stripe omits it.
+                'expires_at'       => $dto->expiresAt ?? now()->addMinutes(60),
             ]);
         });
     }
@@ -151,7 +152,16 @@ class PaymentService
         $query = Payment::where('payable_type', $payable->getMorphClass())
             ->where('payable_id', $payable->getKey())
             ->where('status', PaymentStatus::Pending)
-            ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()));
+            ->where(function ($q): void {
+                // Non-null expires_at: must be in the future.
+                // Null expires_at (legacy rows before fallback was added): treat as
+                // expired after 1 hour from creation to prevent stale QR reuse.
+                $q->where('expires_at', '>', now())
+                  ->orWhere(function ($q2): void {
+                      $q2->whereNull('expires_at')
+                         ->where('created_at', '>', now()->subHour());
+                  });
+            });
 
         if ($lockForUpdate) {
             $query->lockForUpdate();

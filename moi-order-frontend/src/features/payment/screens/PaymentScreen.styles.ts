@@ -146,6 +146,39 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
+  // ── Expired QR ───────────────────────────────────────────────────────────
+  expiredContainer: {
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  expiredTitle: {
+    color: colours.textOnLight,
+    fontSize: typography.xl,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  expiredSubtitle: {
+    color: colours.textMuted,
+    fontSize: typography.md,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  refreshBtn: {
+    backgroundColor: colours.primary,
+    borderRadius: radius.xl,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    minHeight: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.sm,
+  },
+  refreshBtnText: {
+    color: colours.textOnDark,
+    fontSize: typography.md,
+    fontWeight: '600',
+  },
+
   // ── Pay Later (ghost) ─────────────────────────────────────────────────────
   payLaterBtn: {
     borderWidth: 1,

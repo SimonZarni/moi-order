@@ -21,7 +21,7 @@ class UploadEticketRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'eticket' => ['required', 'file', 'mimes:pdf', 'max:20480'],
+            'eticket' => ['required', 'file', 'mimes:pdf,jpeg,jpg,png', 'max:20480'],
         ];
     }
 

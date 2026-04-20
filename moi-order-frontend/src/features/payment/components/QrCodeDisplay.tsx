@@ -1,5 +1,8 @@
 import React from 'react';
-import { Image, Text, View } from 'react-native';
+import { Image, Linking, Pressable, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+import { colours } from '@/shared/theme/colours';
 import { styles } from './QrCodeDisplay.styles';
 
 interface QrCodeDisplayProps {
@@ -8,6 +11,12 @@ interface QrCodeDisplayProps {
 }
 
 export function QrCodeDisplay({ qrImageUrl, amountFormatted }: QrCodeDisplayProps): React.JSX.Element {
+  const handleDownloadQr = (): void => {
+    if (qrImageUrl !== '') {
+      Linking.openURL(qrImageUrl).catch(() => {});
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.amountRow}>
@@ -31,6 +40,18 @@ export function QrCodeDisplay({ qrImageUrl, amountFormatted }: QrCodeDisplayProp
       <Text style={styles.hint}>
         Open your banking app and scan{'\n'}this QR code to pay via PromptPay
       </Text>
+
+      {qrImageUrl !== '' && (
+        <Pressable
+          style={styles.downloadBtn}
+          onPress={handleDownloadQr}
+          accessibilityLabel="Download QR code"
+          accessibilityRole="button"
+        >
+          <Ionicons name="download-outline" size={14} color={colours.textMuted} />
+          <Text style={styles.downloadBtnText}>Download QR</Text>
+        </Pressable>
+      )}
     </View>
   );
 }

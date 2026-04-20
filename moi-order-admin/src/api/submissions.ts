@@ -22,8 +22,19 @@ export type SubmissionListItem = {
   documents: SubmissionDocumentData[];
 };
 
+export type SubmissionPaymentData = {
+  id: number;
+  status: string;
+  status_label: string;
+  amount: number;
+  currency: string;
+  qr_image_url: string | null;
+  expires_at: string | null;
+};
+
 export type SubmissionDetailData = SubmissionListItem & {
   submission_data: Record<string, string> | null;
+  payment: SubmissionPaymentData | null;
 };
 
 type Meta = { current_page: number; last_page: number; per_page: number; total: number };

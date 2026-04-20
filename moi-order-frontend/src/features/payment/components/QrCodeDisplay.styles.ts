@@ -50,4 +50,20 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
   },
+  downloadBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.xs + 2,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colours.medium,
+  },
+  downloadBtnText: {
+    color: colours.textMuted,
+    fontSize: typography.xs,
+    fontWeight: '600',
+    letterSpacing: 0.4,
+  },
 });

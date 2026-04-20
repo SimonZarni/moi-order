@@ -94,7 +94,7 @@ class TicketOrderService
      */
     public function uploadEticket(TicketOrder $order, UploadedFile $file): TicketOrder
     {
-        $path = $this->fileStorage->store($file, 'etickets', ['application/pdf']);
+        $path = $this->fileStorage->store($file, 'etickets', ['application/pdf', 'image/jpeg', 'image/png']);
 
         DB::transaction(function () use ($order, $path): void {
             $order->markCompleted($path);

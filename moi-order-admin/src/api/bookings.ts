@@ -46,7 +46,7 @@ export type BookingDetailData = BookingData & {
 
 type Meta = { current_page: number; last_page: number; per_page: number; total: number };
 
-type ListParams = { page?: number; per_page?: number; status?: string };
+type ListParams = { page?: number; per_page?: number; status?: string; search?: string };
 
 export const bookingsApi = {
   list: (params: ListParams) =>
@@ -66,4 +66,8 @@ export const bookingsApi = {
       })
       .then((r) => r.data.data);
   },
+  downloadEticket: (id: number | string) =>
+    apiClient
+      .get(`/ticket-orders/${id}/eticket`, { responseType: 'blob' })
+      .then((r) => ({ blob: r.data as Blob, contentType: r.headers['content-type'] as string })),
 };

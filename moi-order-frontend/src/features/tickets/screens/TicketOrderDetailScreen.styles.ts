@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
   hero: {
     backgroundColor: colours.backgroundDark,
     paddingHorizontal: spacing.xl + spacing.sm,
-    paddingTop: spacing.sm,
+    paddingTop: spacing.xxl + spacing.md,
     paddingBottom: spacing.xl,
     overflow: 'hidden',
   },
@@ -105,6 +105,13 @@ export const styles = StyleSheet.create({
   },
   payNowBtnText: { fontSize: typography.md, fontWeight: '800', color: colours.white, letterSpacing: 0.4 },
 
+  downloadError: {
+    fontSize: typography.xs,
+    color: colours.danger,
+    textAlign: 'center',
+    marginTop: spacing.sm,
+  },
+
   // ── Download button ───────────────────────────────────────────────────────
   downloadBtn: {
     backgroundColor: colours.primary,
@@ -112,6 +119,25 @@ export const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', marginTop: spacing.lg,
   },
   downloadBtnText: { fontSize: typography.md, fontWeight: '800', color: colours.white, letterSpacing: 0.4 },
+
+  // ── E-ticket image preview modal ──────────────────────────────────────────
+  previewOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.92)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  previewClose: {
+    position: 'absolute',
+    top: spacing.xxl,
+    right: spacing.lg,
+    padding: spacing.sm,
+    zIndex: 10,
+  },
+  previewImage: {
+    width: '90%',
+    height: '80%',
+  },
 
   // ── States ────────────────────────────────────────────────────────────────
   stateBox: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: spacing.xxl, backgroundColor: colours.backgroundLight },

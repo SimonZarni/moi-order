@@ -66,6 +66,7 @@ Route::prefix('payments')->name('admin.payments.')->group(function (): void {
     Route::get('/', [AdminPaymentController::class, 'index'])->name('index');
     Route::get('/stats', [AdminPaymentController::class, 'stats'])->name('stats');
     Route::get('/{payment}', [AdminPaymentController::class, 'show'])->name('show');
+    Route::post('/{payment}/confirm', [AdminPaymentController::class, 'confirm'])->name('confirm');
 });
 
 // ── Places + Images ───────────────────────────────────────────────────────────
@@ -117,6 +118,7 @@ Route::prefix('ticket-orders')->name('admin.ticket-orders.')->group(function ():
     Route::get('/',                              [AdminTicketOrderController::class, 'index'])->name('index');
     Route::get('/{ticketOrder}',                 [AdminTicketOrderController::class, 'show'])->name('show');
     Route::post('/{ticketOrder}/eticket',        [AdminTicketOrderController::class, 'uploadEticket'])->name('eticket.store');
+    Route::get('/{ticketOrder}/eticket',         [AdminTicketOrderController::class, 'downloadEticket'])->name('eticket.download');
 });
 
 // ── Tags ──────────────────────────────────────────────────────────────────────

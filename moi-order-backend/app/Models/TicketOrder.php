@@ -100,14 +100,14 @@ class TicketOrder extends Model implements PayableInterface
 
     public function markCompleted(string $eticketPath): void
     {
-        if ($this->status->isTerminal()) {
-            return;
+        $updates = ['eticket_path' => $eticketPath];
+
+        if (! $this->status->isTerminal()) {
+            $updates['status']       = TicketOrderStatus::Completed;
+            $updates['completed_at'] = now();
         }
-        $this->update([
-            'status'       => TicketOrderStatus::Completed,
-            'eticket_path' => $eticketPath,
-            'completed_at' => now(),
-        ]);
+
+        $this->update($updates);
     }
 
     // ─── Relationships ────────────────────────────────────────────────────────

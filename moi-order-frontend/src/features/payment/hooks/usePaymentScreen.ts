@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
@@ -7,7 +7,7 @@ import { usePayment } from './usePayment';
 import { useTicketOrderPayment } from './useTicketOrderPayment';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { SUBMISSION_STATUS, TICKET_ORDER_STATUS } from '@/types/enums';
-import { ApiError, Payment, ServiceSubmission, TicketOrder } from '@/types/models';
+import { ApiError, Payment } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 
 type RouteParams = RouteProp<RootStackParamList, 'Payment'>;
@@ -19,8 +19,10 @@ export interface UsePaymentScreenResult {
   createError: ApiError | null;
   isPaid: boolean;
   isPaymentFailed: boolean;
+  isQrExpired: boolean;
   handleBack: () => void;
   handleGoToOrders: () => void;
+  handleRefreshQr: () => void;
 }
 
 export function usePaymentScreen(): UsePaymentScreenResult {
@@ -36,6 +38,7 @@ export function usePaymentScreen(): UsePaymentScreenResult {
     submission,
     isCreating: isCreatingSubmission,
     createError: submissionCreateError,
+    refreshPayment: refreshSubmissionPayment,
   } = usePayment(submissionId);
 
   // ── Ticket order path ─────────────────────────────────────────────────────
@@ -45,6 +48,7 @@ export function usePaymentScreen(): UsePaymentScreenResult {
     ticketOrder,
     isCreating: isCreatingTicket,
     createError: ticketCreateError,
+    refreshPayment: refreshTicketPayment,
   } = useTicketOrderPayment(ticketOrderId);
 
   // ── Derive unified values ─────────────────────────────────────────────────
@@ -65,6 +69,11 @@ export function usePaymentScreen(): UsePaymentScreenResult {
   const isCreating = params.kind === 'submission' ? isCreatingSubmission : isCreatingTicket;
   const createError = params.kind === 'submission' ? submissionCreateError : ticketCreateError;
 
+  const isQrExpired = useMemo((): boolean => {
+    if (!payment?.expires_at) return false;
+    return new Date(payment.expires_at) < new Date();
+  }, [payment?.expires_at]);
+
   const handleBack = useCallback((): void => { navigation.goBack(); }, [navigation]);
 
   const handleGoToOrders = useCallback((): void => {
@@ -76,10 +85,18 @@ export function usePaymentScreen(): UsePaymentScreenResult {
     navigation.navigate('Orders');
   }, [navigation, queryClient, params.kind]);
 
+  const handleRefreshQr = useCallback((): void => {
+    if (params.kind === 'submission') {
+      refreshSubmissionPayment();
+    } else {
+      refreshTicketPayment();
+    }
+  }, [params.kind, refreshSubmissionPayment, refreshTicketPayment]);
+
   return {
     payment, payableName, isCreating,
     createError: createError ?? null,
-    isPaid, isPaymentFailed,
-    handleBack, handleGoToOrders,
+    isPaid, isPaymentFailed, isQrExpired,
+    handleBack, handleGoToOrders, handleRefreshQr,
   };
 }
