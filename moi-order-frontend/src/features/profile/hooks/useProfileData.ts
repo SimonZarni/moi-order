@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { fetchMe } from '@/shared/api/auth';
-import { updateProfile, changePassword } from '@/shared/api/profile';
+import { updateProfile, changePassword, deleteAccount } from '@/shared/api/profile';
 import { CACHE_TTL } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { useAuthStore } from '@/shared/store/authStore';
@@ -15,6 +15,7 @@ export interface UseProfileDataResult {
   refetch: () => void;
   updateMutation: ReturnType<typeof useMutation<User, ApiError, { name: string; dateOfBirth: string | null }>>;
   changePasswordMutation: ReturnType<typeof useMutation<void, ApiError, { currentPassword: string; newPassword: string; confirmPassword: string }>>;
+  deleteAccountMutation: ReturnType<typeof useMutation<void, ApiError, void>>;
 }
 
 export function useProfileData(): UseProfileDataResult {
@@ -40,6 +41,10 @@ export function useProfileData(): UseProfileDataResult {
       changePassword(currentPassword, newPassword, confirmPassword),
   });
 
+  const deleteAccountMutation = useMutation<void, ApiError, void>({
+    mutationFn: () => deleteAccount(),
+  });
+
   return {
     user:         query.data ?? null,
     isLoading:    query.isPending,
@@ -48,5 +53,6 @@ export function useProfileData(): UseProfileDataResult {
     refetch:      query.refetch,
     updateMutation,
     changePasswordMutation,
+    deleteAccountMutation,
   };
 }

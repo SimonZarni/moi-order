@@ -48,7 +48,15 @@
           "locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to show distances to nearby places."
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to save QR codes to your gallery.",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save QR codes to your gallery.",
+          "isAccessMediaLocationEnabled": false
+        }
+      ]
     ],
     "extra": {
       "eas": {

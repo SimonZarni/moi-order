@@ -394,4 +394,20 @@ export const styles = StyleSheet.create({
     letterSpacing: 0.6,
     textTransform: 'uppercase',
   },
+
+  // ── Delete account ─────────────────────────────────────────────────────────
+  deleteAccountBtn: {
+    marginTop: spacing.sm,
+    borderRadius: radius.xl,
+    paddingVertical: spacing.sm + 4,
+    alignItems: 'center',
+  },
+  deleteAccountText: {
+    fontSize: typography.xs,
+    fontWeight: '600',
+    color: colours.textMuted,
+    letterSpacing: 0.4,
+    lineHeight: 20,
+    textDecorationLine: 'underline',
+  },
 });

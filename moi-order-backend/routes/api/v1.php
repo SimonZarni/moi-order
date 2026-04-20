@@ -22,6 +22,7 @@ Route::get('/auth/me',      [AuthController::class, 'me']);
 // Profile
 Route::put('/profile',          [ProfileController::class, 'update']);
 Route::put('/profile/password', [ProfileController::class, 'changePassword']);
+Route::delete('/profile',       [ProfileController::class, 'destroy']);
 
 // Submissions
 Route::get('/submissions',          [SubmissionController::class,        'index']);

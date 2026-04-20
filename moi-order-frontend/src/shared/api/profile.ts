@@ -23,3 +23,7 @@ export async function changePassword(
     password_confirmation: passwordConfirmation,
   });
 }
+
+export async function deleteAccount(): Promise<void> {
+  await apiClient.delete('/api/v1/profile');
+}

@@ -20,6 +20,7 @@ export function PaymentScreen(): React.JSX.Element {
     handleBack,
     handleGoToOrders,
     handleRefreshQr,
+    handleDownloadQr,
   } = usePaymentScreen();
 
   const amountFormatted = formatCurrency((payment?.amount ?? 0) / 100);
@@ -106,6 +107,7 @@ export function PaymentScreen(): React.JSX.Element {
             <QrCodeDisplay
               qrImageUrl={payment.qr_image_url ?? ''}
               amountFormatted={amountFormatted}
+              onDownloadQr={handleDownloadQr}
             />
             <View style={styles.waitingRow}>
               <View style={styles.waitingDot} />
