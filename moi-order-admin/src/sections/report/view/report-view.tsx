@@ -36,11 +36,21 @@ type FieldType = 'text' | 'number' | 'textarea' | 'photo' | 'select' | 'date';
 type ServiceField = {
   id: string;
   label: string;
+  label_en: string;
+  label_mm: string;
   placeholder: string;
   type: FieldType;
   required: boolean;
   options?: string[];
   document_type?: string;
+};
+
+const BURMESE_DEFAULTS: Record<string, string> = {
+  full_name:         'အမည်အပြည့်အစုံ',
+  phone:             'ဖုန်းနံပါတ်',
+  passport_bio_page: 'ပတ်စပို့ (ရှေ့မျက်နှာ)',
+  visa_page:         'ဗီဇာ စာမျက်နှာ',
+  old_slip:          'ယခင် ၉၀ ရက် သတင်းပေးစာ',
 };
 
 type LocalType = {
@@ -99,6 +109,8 @@ function toLocalType(t: ServiceTypeData): LocalType {
     fields: t.field_schema.map((f) => ({
       id:            f.key,
       label:         f.label,
+      label_en:      f.label_en ?? '',
+      label_mm:      f.label_mm ?? BURMESE_DEFAULTS[f.key] ?? '',
       placeholder:   '',
       type:          (f.type === 'file' ? 'photo' : f.type) as FieldType ?? 'text',
       required:      f.required,
@@ -116,13 +128,14 @@ function typeToPayload(t: LocalType, index: number) {
     is_active: t.is_active,
     sort_order: index + 1,
     field_schema: t.fields.map((f, i) => ({
-      key: f.id,
-      label: f.label,
-      label_en: f.label,
-      type: f.type === 'photo' ? 'file' : f.type,
+      key:      f.id,
+      label:    f.label,
+      label_en: f.label_en || f.label,
+      label_mm: f.label_mm || null,
+      type:     f.type === 'photo' ? 'file' : f.type,
       required: f.required,
       sort_order: i + 1,
-      options: f.options,
+      options:  f.options,
       ...(f.type === 'photo' ? { accepts: ['image'], document_type: f.document_type ?? null } : {}),
     })),
   };
@@ -137,12 +150,13 @@ type FieldEditorProps = {
   isLast: boolean;
   documentTypes: DocumentTypeData[];
   onUpdate: (id: string, updated: Partial<ServiceField>) => void;
+  onDocumentTypeChange: (id: string, slug: string) => void;
   onDelete: (id: string) => void;
   onMoveUp: (index: number) => void;
   onMoveDown: (index: number) => void;
 };
 
-function FieldEditor({ field, index, isFirst, isLast, documentTypes, onUpdate, onDelete, onMoveUp, onMoveDown }: FieldEditorProps) {
+function FieldEditor({ field, index, isFirst, isLast, documentTypes, onUpdate, onDocumentTypeChange, onDelete, onMoveUp, onMoveDown }: FieldEditorProps) {
   const [optionInput, setOptionInput] = useState('');
 
   const addOption = () => {
@@ -169,9 +183,19 @@ function FieldEditor({ field, index, isFirst, isLast, documentTypes, onUpdate, o
       </Stack>
 
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12, sm: 6 }}>
-          <TextField fullWidth size="small" label="Label" value={field.label} onChange={(e) => onUpdate(field.id, { label: e.target.value })} />
-        </Grid>
+        {field.type !== 'photo' && (
+          <>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <TextField fullWidth size="small" label="Label (TH)" value={field.label} onChange={(e) => onUpdate(field.id, { label: e.target.value })} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <TextField fullWidth size="small" label="Label (EN)" value={field.label_en} onChange={(e) => onUpdate(field.id, { label_en: e.target.value })} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <TextField fullWidth size="small" label="Label (MM)" value={field.label_mm} onChange={(e) => onUpdate(field.id, { label_mm: e.target.value })} />
+            </Grid>
+          </>
+        )}
         <Grid size={{ xs: 12, sm: 6 }}>
           <FormControl fullWidth size="small">
             <InputLabel>Field Type</InputLabel>
@@ -188,18 +212,18 @@ function FieldEditor({ field, index, isFirst, isLast, documentTypes, onUpdate, o
           </FormControl>
         </Grid>
         {field.type !== 'photo' && (
-          <Grid size={{ xs: 12 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <TextField fullWidth size="small" label="Placeholder" value={field.placeholder} onChange={(e) => onUpdate(field.id, { placeholder: e.target.value })} />
           </Grid>
         )}
         {field.type === 'photo' && (
-          <Grid size={{ xs: 12 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth size="small" error={!field.document_type}>
               <InputLabel shrink={!!field.document_type}>Document Type *</InputLabel>
               <Select
                 value={field.document_type ?? ''}
                 label="Document Type *"
-                onChange={(e) => onUpdate(field.id, { document_type: e.target.value })}
+                onChange={(e) => onDocumentTypeChange(field.id, String(e.target.value))}
               >
                 {documentTypes.map((dt) => (
                   <MenuItem key={dt.slug} value={dt.slug}>{dt.name_en}</MenuItem>
@@ -258,6 +282,20 @@ function ServiceTypeForm({ initial, documentTypes, onSave, onCancel, apiError }:
     setFields((prev) => prev.map((f) => (f.id === fid ? { ...f, ...updated } : f)));
   }, []);
 
+  const handleDocumentTypeChange = useCallback((fid: string, slug: string) => {
+    const dt = documentTypes.find((d) => d.slug === slug);
+    setFields((prev) => prev.map((f) => {
+      if (f.id !== fid) return f;
+      return {
+        ...f,
+        document_type: slug,
+        label:    dt ? dt.name_en : f.label,
+        label_en: dt ? dt.name_en : f.label_en,
+        label_mm: dt ? (dt.name_mm ?? f.label_mm) : f.label_mm,
+      };
+    }));
+  }, [documentTypes]);
+
   const handleDeleteField = useCallback((fid: string) => {
     setFields((prev) => prev.filter((f) => f.id !== fid));
   }, []);
@@ -296,13 +334,13 @@ function ServiceTypeForm({ initial, documentTypes, onSave, onCancel, apiError }:
       <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>Form Fields ({fields.length})</Typography>
       <Stack spacing={1.5} sx={{ mb: 1.5 }}>
         {fields.map((field, i) => (
-          <FieldEditor key={field.id} field={field} index={i} isFirst={i === 0} isLast={i === fields.length - 1} documentTypes={documentTypes} onUpdate={handleUpdateField} onDelete={handleDeleteField} onMoveUp={handleMoveUp} onMoveDown={handleMoveDown} />
+          <FieldEditor key={field.id} field={field} index={i} isFirst={i === 0} isLast={i === fields.length - 1} documentTypes={documentTypes} onUpdate={handleUpdateField} onDocumentTypeChange={handleDocumentTypeChange} onDelete={handleDeleteField} onMoveUp={handleMoveUp} onMoveDown={handleMoveDown} />
         ))}
       </Stack>
       <Stack direction="row" flexWrap="wrap" gap={0.75} sx={{ mb: 2 }}>
         {(Object.keys(FIELD_TYPE_LABELS) as FieldType[]).map((type) => (
           <Button key={type} size="small" variant="outlined" color="inherit" startIcon={<Iconify icon={FIELD_TYPE_ICONS[type]} width={12} />}
-            onClick={() => setFields((prev) => [...prev, { id: genId(), label: '', placeholder: '', type, required: false, options: type === 'select' ? [] : undefined }])}>
+            onClick={() => setFields((prev) => [...prev, { id: genId(), label: '', label_en: '', label_mm: '', placeholder: '', type, required: false, options: type === 'select' ? [] : undefined }])}>
             {FIELD_TYPE_LABELS[type]}
           </Button>
         ))}
