@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
@@ -31,6 +32,24 @@ import { Iconify } from 'src/components/iconify';
 
 type FieldType = 'text' | 'number' | 'textarea' | 'photo' | 'select' | 'date';
 
+type DocumentType =
+  | 'passport_bio_page' | 'visa_page' | 'old_slip'
+  | 'identity_card_front' | 'identity_card_back' | 'tm30'
+  | 'upper_body_photo' | 'airplane_ticket' | 'passport_size_photo' | 'test_photo';
+
+const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
+  passport_bio_page:   'Passport Bio Page',
+  visa_page:           'Visa Page',
+  old_slip:            'Previous 90-Day Slip',
+  identity_card_front: 'Identity Card (Front)',
+  identity_card_back:  'Identity Card (Back)',
+  tm30:                'TM30',
+  upper_body_photo:    'Upper Body Photo',
+  airplane_ticket:     'Airplane Ticket',
+  passport_size_photo: 'Passport Size Photo',
+  test_photo:          'Test Photo',
+};
+
 type ServiceField = {
   id: string;
   label: string;
@@ -38,6 +57,7 @@ type ServiceField = {
   type: FieldType;
   required: boolean;
   options?: string[];
+  document_type?: DocumentType;
 };
 
 type LocalType = {
@@ -51,6 +71,19 @@ type LocalType = {
 };
 
 const genId = () => 'f' + Math.random().toString(36).slice(2, 10);
+
+function buildNewTypeInitial(existingTypes: LocalType[]): LocalType | null {
+  const template = existingTypes.find((t) => t.fields.length > 0);
+  if (!template) return null;
+  return {
+    tempId:    genId(),
+    name:      '',
+    name_mm:   null,
+    price:     0,
+    is_active: true,
+    fields:    template.fields.map((f) => ({ ...f })),
+  };
+}
 
 const REPORT_ICON: IconifyName = 'solar:shield-keyhole-bold-duotone';
 
@@ -78,15 +111,16 @@ function toLocalType(t: ServiceTypeData): LocalType {
     id: t.id,
     name: t.name,
     name_mm: t.name_mm,
-    price: t.price / 100,
+    price: t.price,
     is_active: t.is_active,
     fields: t.field_schema.map((f) => ({
-      id: f.key,
-      label: f.label,
-      placeholder: '',
-      type: (f.type === 'file' ? 'photo' : f.type) as FieldType ?? 'text',
-      required: f.required,
-      options: f.options,
+      id:            f.key,
+      label:         f.label,
+      placeholder:   '',
+      type:          (f.type === 'file' ? 'photo' : f.type) as FieldType ?? 'text',
+      required:      f.required,
+      options:       f.options,
+      document_type: f.document_type as DocumentType | undefined,
     })),
   };
 }
@@ -95,7 +129,7 @@ function typeToPayload(t: LocalType, index: number) {
   return {
     name: t.name,
     name_en: t.name,
-    price: Math.round(t.price * 100),
+    price: Math.round(t.price),
     is_active: t.is_active,
     sort_order: index + 1,
     field_schema: t.fields.map((f, i) => ({
@@ -106,7 +140,7 @@ function typeToPayload(t: LocalType, index: number) {
       required: f.required,
       sort_order: i + 1,
       options: f.options,
-      ...(f.type === 'photo' ? { accepts: ['image'] } : {}),
+      ...(f.type === 'photo' ? { accepts: ['image'], document_type: f.document_type ?? null } : {}),
     })),
   };
 }
@@ -174,6 +208,27 @@ function FieldEditor({ field, index, isFirst, isLast, onUpdate, onDelete, onMove
             <TextField fullWidth size="small" label="Placeholder" value={field.placeholder} onChange={(e) => onUpdate(field.id, { placeholder: e.target.value })} />
           </Grid>
         )}
+        {field.type === 'photo' && (
+          <Grid size={{ xs: 12 }}>
+            <FormControl fullWidth size="small" error={!field.document_type}>
+              <InputLabel shrink={!!field.document_type}>Document Type *</InputLabel>
+              <Select
+                value={field.document_type ?? ''}
+                label="Document Type *"
+                onChange={(e) => onUpdate(field.id, { document_type: e.target.value as DocumentType })}
+              >
+                {(Object.keys(DOCUMENT_TYPE_LABELS) as DocumentType[]).map((dt) => (
+                  <MenuItem key={dt} value={dt}>{DOCUMENT_TYPE_LABELS[dt]}</MenuItem>
+                ))}
+              </Select>
+              {!field.document_type && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>
+                  Required for file upload fields
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
+        )}
         <Collapse in={field.type === 'select'} sx={{ width: '100%', px: 1 }}>
           <Box sx={{ mt: 1 }}>
             <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>Dropdown options</Typography>
@@ -205,9 +260,10 @@ type ServiceTypeFormProps = {
   initial: LocalType | null;
   onSave: (t: LocalType) => void;
   onCancel: () => void;
+  apiError?: string;
 };
 
-function ServiceTypeForm({ initial, onSave, onCancel }: ServiceTypeFormProps) {
+function ServiceTypeForm({ initial, onSave, onCancel, apiError }: ServiceTypeFormProps) {
   const [name, setName] = useState(initial?.name ?? '');
   const [price, setPrice] = useState(initial?.price ?? 0);
   const [isActive, setIsActive] = useState(initial?.is_active ?? true);
@@ -237,6 +293,9 @@ function ServiceTypeForm({ initial, onSave, onCancel }: ServiceTypeFormProps) {
   return (
     <Box sx={{ p: 2, border: '1px solid', borderColor: 'primary.main', borderRadius: 2, bgcolor: 'background.paper' }}>
       <Typography variant="subtitle2" sx={{ mb: 2 }}>{initial?.id ? 'Edit Type' : 'New Type'}</Typography>
+
+      {apiError && <Alert severity="error" sx={{ mb: 2 }}>{apiError}</Alert>}
+
       <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid size={{ xs: 12, sm: 5 }}>
           <TextField fullWidth size="small" label="Type Name" value={name} onChange={(e) => setName(e.target.value)} />
@@ -266,7 +325,7 @@ function ServiceTypeForm({ initial, onSave, onCancel }: ServiceTypeFormProps) {
 
       <Stack direction="row" justifyContent="flex-end" spacing={1}>
         <Button size="small" onClick={onCancel}>Cancel</Button>
-        <Button size="small" variant="contained" color="primary" onClick={handleSave} disabled={!name.trim()}>Save Type</Button>
+        <Button size="small" variant="contained" color="primary" onClick={handleSave} disabled={!name.trim() || fields.some((f) => f.type === 'photo' && !f.document_type)}>Save Type</Button>
       </Stack>
     </Box>
   );
@@ -280,6 +339,7 @@ export function ReportView() {
   const [types, setTypes] = useState<LocalType[]>([]);
   const [loading, setLoading] = useState(true);
   const [formTarget, setFormTarget] = useState<LocalType | null | 'new'>(null);
+  const [typeFormError, setTypeFormError] = useState('');
 
   useEffect(() => {
     servicesApi
@@ -312,6 +372,7 @@ export function ReportView() {
       const call = t.id
         ? servicesApi.updateType(reportService.id, t.id, payload)
         : servicesApi.createType(reportService.id, payload);
+      setTypeFormError('');
       call
         .then((saved) => {
           setTypes((prev) => {
@@ -322,7 +383,10 @@ export function ReportView() {
           });
           setFormTarget(null);
         })
-        .catch(() => {});
+        .catch((err) => {
+          const msg = err?.response?.data?.message ?? 'Failed to save. Please try again.';
+          setTypeFormError(msg);
+        });
     },
     [reportService, types]
   );
@@ -388,7 +452,7 @@ export function ReportView() {
         {types.map((t) => (
           <Box key={t.tempId}>
             {formTarget !== null && typeof formTarget === 'object' && formTarget.tempId === t.tempId ? (
-              <ServiceTypeForm initial={t} onSave={handleSaveType} onCancel={() => setFormTarget(null)} />
+              <ServiceTypeForm initial={t} onSave={handleSaveType} onCancel={() => { setFormTarget(null); setTypeFormError(''); }} apiError={typeFormError} />
             ) : (
               <Card>
                 <CardContent>
@@ -419,7 +483,7 @@ export function ReportView() {
         ))}
 
         {formTarget === 'new' && (
-          <ServiceTypeForm initial={null} onSave={handleSaveType} onCancel={() => setFormTarget(null)} />
+          <ServiceTypeForm initial={buildNewTypeInitial(types)} onSave={handleSaveType} onCancel={() => { setFormTarget(null); setTypeFormError(''); }} apiError={typeFormError} />
         )}
 
         {types.length === 0 && formTarget === null && (

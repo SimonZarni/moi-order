@@ -20,6 +20,7 @@ type RouteParams = RouteProp<RootStackParamList, 'GenericServiceForm'>;
 export interface UseGenericServiceFormScreenResult {
   form:            UseGenericServiceFormResult['form'];
   schema:          FieldSchemaItem[];
+  hasSchema:       boolean;
   serviceName:     string;
   price:           number;
   isLoadingSchema: boolean;
@@ -73,7 +74,22 @@ export function useGenericServiceFormScreen(): UseGenericServiceFormScreenResult
       navigation.navigate('Payment', { kind: 'submission', submissionId: submission.id }),
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {
-        applyApiError(error.errors);
+        const schemaKeys = new Set(schema.map((f) => f.key));
+        const schemaErrors: Record<string, string[]>  = {};
+        const orphanMessages: string[] = [];
+
+        Object.entries(error.errors).forEach(([rawKey, messages]) => {
+          const fieldKey = rawKey.startsWith('fields.') ? rawKey.slice(7) : rawKey;
+          if (schemaKeys.has(fieldKey)) {
+            schemaErrors[rawKey] = messages;
+          } else {
+            const msg = messages[0];
+            if (msg) orphanMessages.push(msg);
+          }
+        });
+
+        if (Object.keys(schemaErrors).length > 0) applyApiError(schemaErrors);
+        if (orphanMessages.length > 0) setBannerError(orphanMessages[0] ?? MESSAGES.genericError);
       } else {
         setBannerError(error.message ?? MESSAGES.genericError);
       }
@@ -110,6 +126,7 @@ export function useGenericServiceFormScreen(): UseGenericServiceFormScreenResult
   return {
     form,
     schema,
+    hasSchema: schema.length > 0,
     serviceName,
     price,
     isLoadingSchema,

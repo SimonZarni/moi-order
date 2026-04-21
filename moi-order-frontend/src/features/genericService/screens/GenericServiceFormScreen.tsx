@@ -159,6 +159,7 @@ export function GenericServiceFormScreen(): React.JSX.Element {
   const {
     form,
     schema,
+    hasSchema,
     serviceName,
     price,
     isLoadingSchema,
@@ -207,6 +208,12 @@ export function GenericServiceFormScreen(): React.JSX.Element {
 
           <Text style={styles.sectionTitle}>Your Information</Text>
 
+          {!isLoadingSchema && !hasSchema ? (
+            <Text style={styles.emptySchemaText}>
+              This service type is not yet configured. Please contact support.
+            </Text>
+          ) : null}
+
           {schema.map((field) => (
             <DynamicField
               key={field.key}
@@ -223,9 +230,9 @@ export function GenericServiceFormScreen(): React.JSX.Element {
 
         <View style={styles.submitBar}>
           <Pressable
-            style={[styles.submitBtn, isSubmitting && styles.submitBtnDisabled]}
+            style={[styles.submitBtn, (isSubmitting || !hasSchema) && styles.submitBtnDisabled]}
             onPress={handleSubmit}
-            disabled={isSubmitting}
+            disabled={isSubmitting || !hasSchema}
             accessibilityLabel={`Submit ${serviceName} — ${priceFormatted}`}
             accessibilityRole="button"
           >
