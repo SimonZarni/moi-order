@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\Admin\V1\AdminAuthController;
 use App\Http\Controllers\Api\Admin\V1\AdminCategoryController;
+use App\Http\Controllers\Api\Admin\V1\AdminDocumentTypeController;
 use App\Http\Controllers\Api\Admin\V1\AdminPaymentController;
 use App\Http\Controllers\Api\Admin\V1\AdminPlaceController;
 use App\Http\Controllers\Api\Admin\V1\AdminServiceController;
@@ -130,5 +131,15 @@ Route::prefix('tags')->name('admin.tags.')->group(function (): void {
     Route::delete('/{tag}', [AdminTagController::class, 'destroy'])->name('destroy');
     // Restore requires withTrashed lookup — uses plain int $id, not route model binding
     Route::patch('/{id}/restore', [AdminTagController::class, 'restore'])->name('restore')
+        ->whereNumber('id');
+});
+
+// ── Document Types ────────────────────────────────────────────────────────────
+Route::prefix('document-types')->name('admin.document-types.')->group(function (): void {
+    Route::get('/', [AdminDocumentTypeController::class, 'index'])->name('index');
+    Route::post('/', [AdminDocumentTypeController::class, 'store'])->name('store');
+    Route::put('/{documentType}', [AdminDocumentTypeController::class, 'update'])->name('update');
+    Route::delete('/{documentType}', [AdminDocumentTypeController::class, 'destroy'])->name('destroy');
+    Route::patch('/{id}/restore', [AdminDocumentTypeController::class, 'restore'])->name('restore')
         ->whereNumber('id');
 });

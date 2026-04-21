@@ -52,18 +52,3 @@ export const FIELD_TYPE = {
 
 export type FieldType = (typeof FIELD_TYPE)[keyof typeof FIELD_TYPE];
 
-// Mirrors App\Enums\DocumentType
-export const DOCUMENT_TYPE = {
-  PassportBioPage:   'passport_bio_page',
-  VisaPage:          'visa_page',
-  OldSlip:           'old_slip',
-  IdentityCardFront: 'identity_card_front',
-  IdentityCardBack:  'identity_card_back',
-  Tm30:              'tm30',
-  UpperBodyPhoto:    'upper_body_photo',
-  AirplaneTicket:    'airplane_ticket',
-  PassportSizePhoto: 'passport_size_photo',
-  TestPhoto:         'test_photo',
-} as const;
-
-export type DocumentType = (typeof DOCUMENT_TYPE)[keyof typeof DOCUMENT_TYPE];

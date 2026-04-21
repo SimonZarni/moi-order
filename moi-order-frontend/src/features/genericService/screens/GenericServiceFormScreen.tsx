@@ -7,8 +7,6 @@ import { DocumentPickerField } from '@/shared/components/DocumentPickerField/Doc
 import { ErrorBanner } from '@/shared/components/ErrorBanner/ErrorBanner';
 import { useGenericServiceFormScreen } from '@/features/genericService/hooks/useGenericServiceFormScreen';
 import { useLocale } from '@/shared/hooks/useLocale';
-import { localeDocumentLabel } from '@/shared/utils/localeName';
-import { DOCUMENT_TYPE, DocumentType } from '@/types/enums';
 import { FieldSchemaItem } from '@/types/models';
 import { colours } from '@/shared/theme/colours';
 import { Locale } from '@/shared/store/localeStore';
@@ -18,17 +16,17 @@ import { styles } from './GenericServiceFormScreen.styles';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
-const DOC_TYPE_ICON: Record<DocumentType, IoniconsName> = {
-  [DOCUMENT_TYPE.PassportBioPage]:   'document-text',
-  [DOCUMENT_TYPE.VisaPage]:          'id-card',
-  [DOCUMENT_TYPE.OldSlip]:           'receipt',
-  [DOCUMENT_TYPE.IdentityCardFront]: 'id-card',
-  [DOCUMENT_TYPE.IdentityCardBack]:  'id-card',
-  [DOCUMENT_TYPE.Tm30]:              'clipboard',
-  [DOCUMENT_TYPE.UpperBodyPhoto]:    'person',
-  [DOCUMENT_TYPE.AirplaneTicket]:    'airplane',
-  [DOCUMENT_TYPE.PassportSizePhoto]: 'camera',
-  [DOCUMENT_TYPE.TestPhoto]:         'image',
+const DOC_TYPE_ICON: Record<string, IoniconsName> = {
+  passport_bio_page:   'document-text',
+  visa_page:           'id-card',
+  old_slip:            'receipt',
+  identity_card_front: 'id-card',
+  identity_card_back:  'id-card',
+  tm30:                'clipboard',
+  upper_body_photo:    'person',
+  airplane_ticket:     'airplane',
+  passport_size_photo: 'camera',
+  test_photo:          'image',
 };
 
 // ── Field renderer ────────────────────────────────────────────────────────────
@@ -97,11 +95,9 @@ function DynamicField({ field, value, fileSelected, error, onChange, onPickFile,
     }
 
     if (field.type === 'file') {
-      const docType = field.document_type as DocumentType | undefined;
-      const docLabel = docType != null
-        ? localeDocumentLabel(docType, locale)
-        : label;
-      const icon: IoniconsName = docType != null ? DOC_TYPE_ICON[docType] : 'cloud-upload-outline';
+      const docType = field.document_type;
+      const docLabel = locale === 'mm' ? (field.label_mm ?? label) : label;
+      const icon: IoniconsName = docType != null ? (DOC_TYPE_ICON[docType] ?? 'cloud-upload-outline') : 'cloud-upload-outline';
       return (
         <DocumentPickerField
           label={docLabel}

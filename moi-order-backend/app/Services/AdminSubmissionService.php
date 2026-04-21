@@ -82,7 +82,7 @@ class AdminSubmissionService
             'user',
             'serviceType' => fn ($q) => $q->withTrashed()->with(['service' => fn ($q) => $q->withTrashed()]),
             'payment',
-            'documents',
+            'documents.documentType',
         ]);
     }
 

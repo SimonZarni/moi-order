@@ -66,7 +66,7 @@ export interface FieldSchemaItem {
   sort_order: number;
   options?: string[];       // present when type === 'select'
   accepts?: string[];       // present when type === 'file' — e.g. ['image', 'pdf']
-  document_type?: import('./enums').DocumentType; // required when type === 'file'
+  document_type?: string; // slug — required when type === 'file'
 }
 
 export interface ServiceType {

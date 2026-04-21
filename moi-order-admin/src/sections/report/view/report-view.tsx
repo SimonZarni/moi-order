@@ -23,6 +23,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
 import { DashboardContent } from 'src/layouts/dashboard';
+import { documentTypesApi, type DocumentTypeData } from 'src/api/documentTypes';
 import { servicesApi, type ServiceData, type ServiceTypeData } from 'src/api/services';
 
 import { Label } from 'src/components/label';
@@ -32,24 +33,6 @@ import { Iconify } from 'src/components/iconify';
 
 type FieldType = 'text' | 'number' | 'textarea' | 'photo' | 'select' | 'date';
 
-type DocumentType =
-  | 'passport_bio_page' | 'visa_page' | 'old_slip'
-  | 'identity_card_front' | 'identity_card_back' | 'tm30'
-  | 'upper_body_photo' | 'airplane_ticket' | 'passport_size_photo' | 'test_photo';
-
-const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
-  passport_bio_page:   'Passport Bio Page',
-  visa_page:           'Visa Page',
-  old_slip:            'Previous 90-Day Slip',
-  identity_card_front: 'Identity Card (Front)',
-  identity_card_back:  'Identity Card (Back)',
-  tm30:                'TM30',
-  upper_body_photo:    'Upper Body Photo',
-  airplane_ticket:     'Airplane Ticket',
-  passport_size_photo: 'Passport Size Photo',
-  test_photo:          'Test Photo',
-};
-
 type ServiceField = {
   id: string;
   label: string;
@@ -57,7 +40,7 @@ type ServiceField = {
   type: FieldType;
   required: boolean;
   options?: string[];
-  document_type?: DocumentType;
+  document_type?: string;
 };
 
 type LocalType = {
@@ -120,7 +103,7 @@ function toLocalType(t: ServiceTypeData): LocalType {
       type:          (f.type === 'file' ? 'photo' : f.type) as FieldType ?? 'text',
       required:      f.required,
       options:       f.options,
-      document_type: f.document_type as DocumentType | undefined,
+      document_type: f.document_type ?? undefined,
     })),
   };
 }
@@ -152,13 +135,14 @@ type FieldEditorProps = {
   index: number;
   isFirst: boolean;
   isLast: boolean;
+  documentTypes: DocumentTypeData[];
   onUpdate: (id: string, updated: Partial<ServiceField>) => void;
   onDelete: (id: string) => void;
   onMoveUp: (index: number) => void;
   onMoveDown: (index: number) => void;
 };
 
-function FieldEditor({ field, index, isFirst, isLast, onUpdate, onDelete, onMoveUp, onMoveDown }: FieldEditorProps) {
+function FieldEditor({ field, index, isFirst, isLast, documentTypes, onUpdate, onDelete, onMoveUp, onMoveDown }: FieldEditorProps) {
   const [optionInput, setOptionInput] = useState('');
 
   const addOption = () => {
@@ -215,10 +199,10 @@ function FieldEditor({ field, index, isFirst, isLast, onUpdate, onDelete, onMove
               <Select
                 value={field.document_type ?? ''}
                 label="Document Type *"
-                onChange={(e) => onUpdate(field.id, { document_type: e.target.value as DocumentType })}
+                onChange={(e) => onUpdate(field.id, { document_type: e.target.value })}
               >
-                {(Object.keys(DOCUMENT_TYPE_LABELS) as DocumentType[]).map((dt) => (
-                  <MenuItem key={dt} value={dt}>{DOCUMENT_TYPE_LABELS[dt]}</MenuItem>
+                {documentTypes.map((dt) => (
+                  <MenuItem key={dt.slug} value={dt.slug}>{dt.name_en}</MenuItem>
                 ))}
               </Select>
               {!field.document_type && (
@@ -258,12 +242,13 @@ function FieldEditor({ field, index, isFirst, isLast, onUpdate, onDelete, onMove
 
 type ServiceTypeFormProps = {
   initial: LocalType | null;
+  documentTypes: DocumentTypeData[];
   onSave: (t: LocalType) => void;
   onCancel: () => void;
   apiError?: string;
 };
 
-function ServiceTypeForm({ initial, onSave, onCancel, apiError }: ServiceTypeFormProps) {
+function ServiceTypeForm({ initial, documentTypes, onSave, onCancel, apiError }: ServiceTypeFormProps) {
   const [name, setName] = useState(initial?.name ?? '');
   const [price, setPrice] = useState(initial?.price ?? 0);
   const [isActive, setIsActive] = useState(initial?.is_active ?? true);
@@ -311,7 +296,7 @@ function ServiceTypeForm({ initial, onSave, onCancel, apiError }: ServiceTypeFor
       <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>Form Fields ({fields.length})</Typography>
       <Stack spacing={1.5} sx={{ mb: 1.5 }}>
         {fields.map((field, i) => (
-          <FieldEditor key={field.id} field={field} index={i} isFirst={i === 0} isLast={i === fields.length - 1} onUpdate={handleUpdateField} onDelete={handleDeleteField} onMoveUp={handleMoveUp} onMoveDown={handleMoveDown} />
+          <FieldEditor key={field.id} field={field} index={i} isFirst={i === 0} isLast={i === fields.length - 1} documentTypes={documentTypes} onUpdate={handleUpdateField} onDelete={handleDeleteField} onMoveUp={handleMoveUp} onMoveDown={handleMoveDown} />
         ))}
       </Stack>
       <Stack direction="row" flexWrap="wrap" gap={0.75} sx={{ mb: 2 }}>
@@ -340,6 +325,11 @@ export function ReportView() {
   const [loading, setLoading] = useState(true);
   const [formTarget, setFormTarget] = useState<LocalType | null | 'new'>(null);
   const [typeFormError, setTypeFormError] = useState('');
+  const [documentTypes, setDocumentTypes] = useState<DocumentTypeData[]>([]);
+
+  useEffect(() => {
+    documentTypesApi.all().then(setDocumentTypes).catch(() => {});
+  }, []);
 
   useEffect(() => {
     servicesApi
@@ -452,7 +442,7 @@ export function ReportView() {
         {types.map((t) => (
           <Box key={t.tempId}>
             {formTarget !== null && typeof formTarget === 'object' && formTarget.tempId === t.tempId ? (
-              <ServiceTypeForm initial={t} onSave={handleSaveType} onCancel={() => { setFormTarget(null); setTypeFormError(''); }} apiError={typeFormError} />
+              <ServiceTypeForm initial={t} documentTypes={documentTypes} onSave={handleSaveType} onCancel={() => { setFormTarget(null); setTypeFormError(''); }} apiError={typeFormError} />
             ) : (
               <Card>
                 <CardContent>
@@ -483,7 +473,7 @@ export function ReportView() {
         ))}
 
         {formTarget === 'new' && (
-          <ServiceTypeForm initial={buildNewTypeInitial(types)} onSave={handleSaveType} onCancel={() => { setFormTarget(null); setTypeFormError(''); }} apiError={typeFormError} />
+          <ServiceTypeForm initial={buildNewTypeInitial(types)} documentTypes={documentTypes} onSave={handleSaveType} onCancel={() => { setFormTarget(null); setTypeFormError(''); }} apiError={typeFormError} />
         )}
 
         {types.length === 0 && formTarget === null && (

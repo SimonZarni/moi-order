@@ -38,7 +38,7 @@ class SubmissionController extends Controller
      */
     public function show(int $id, Request $request): JsonResponse
     {
-        $submission = ServiceSubmission::with(['serviceType.service', 'documents', 'payment'])
+        $submission = ServiceSubmission::with(['serviceType.service', 'documents.documentType', 'payment'])
             ->forUser($request->user()->id)
             ->findOrFail($id);
 

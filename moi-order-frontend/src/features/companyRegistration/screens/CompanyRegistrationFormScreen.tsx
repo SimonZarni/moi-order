@@ -10,8 +10,6 @@ import { FormField } from '@/shared/components/FormField/FormField';
 import { SuccessState } from '@/shared/components/SuccessState/SuccessState';
 import { useCompanyRegistrationFormScreen } from '@/features/companyRegistration/hooks/useCompanyRegistrationFormScreen';
 import { useLocale } from '@/shared/hooks/useLocale';
-import { localeDocumentLabel } from '@/shared/utils/localeName';
-import { DOCUMENT_TYPE, DocumentType } from '@/types/enums';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 import { styles } from './CompanyRegistrationFormScreen.styles';
@@ -99,21 +97,21 @@ export function CompanyRegistrationFormScreen(): React.JSX.Element {
               <Text style={styles.sectionTitle}>Required Documents</Text>
 
               {([
-                { key: 'passportBioPage'   as const, docType: DOCUMENT_TYPE.PassportBioPage,    icon: 'document-text' as const, onPick: handlePickPassportBioPage },
-                { key: 'visaPage'          as const, docType: DOCUMENT_TYPE.VisaPage,           icon: 'card' as const, onPick: handlePickVisaPage },
-                { key: 'identityCardFront' as const, docType: DOCUMENT_TYPE.IdentityCardFront,  icon: 'card-outline' as const, onPick: handlePickIdentityCardFront },
-                { key: 'identityCardBack'  as const, docType: DOCUMENT_TYPE.IdentityCardBack,   icon: 'card-outline' as const, onPick: handlePickIdentityCardBack },
-                { key: 'tm30'              as const, docType: DOCUMENT_TYPE.Tm30,               icon: 'document' as const, onPick: handlePickTm30 },
-              ] as { key: 'passportBioPage' | 'visaPage' | 'identityCardFront' | 'identityCardBack' | 'tm30'; docType: DocumentType; icon: IoniconsName; onPick: () => void }[])
-              .map(({ key, docType, icon, onPick }) => (
+                { key: 'passportBioPage'   as const, label: locale === 'mm' ? 'ပတ်စပို့ (ရှေ့မျက်နှာ)'  : 'Passport Bio Page',     icon: 'document-text' as const, onPick: handlePickPassportBioPage },
+                { key: 'visaPage'          as const, label: locale === 'mm' ? 'ဗီဇာ မျက်နှာ'            : 'Visa Page',             icon: 'card' as const,          onPick: handlePickVisaPage },
+                { key: 'identityCardFront' as const, label: locale === 'mm' ? 'မှတ်ပုံတင် (အရှေ့)'       : 'Identity Card (Front)', icon: 'card-outline' as const,  onPick: handlePickIdentityCardFront },
+                { key: 'identityCardBack'  as const, label: locale === 'mm' ? 'မှတ်ပုံတင် (အနောက်)'      : 'Identity Card (Back)',  icon: 'card-outline' as const,  onPick: handlePickIdentityCardBack },
+                { key: 'tm30'              as const, label: 'TM30',                                         icon: 'document' as const,      onPick: handlePickTm30 },
+              ] as { key: 'passportBioPage' | 'visaPage' | 'identityCardFront' | 'identityCardBack' | 'tm30'; label: string; icon: IoniconsName; onPick: () => void }[])
+              .map(({ key, label, icon, onPick }) => (
                 <DocumentPickerField
                   key={key}
-                  label={localeDocumentLabel(docType, locale)}
+                  label={label}
                   icon={icon}
                   onPress={onPick}
                   isUploaded={form[key] !== null}
                   error={form.errors[key]}
-                  accessibilityLabel={`Upload ${localeDocumentLabel(docType, locale)}`}
+                  accessibilityLabel={`Upload ${label}`}
                 />
               ))}
             </ScrollView>

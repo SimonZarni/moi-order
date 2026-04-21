@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
-use App\Enums\DocumentType;
 use App\Enums\FieldType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -35,7 +34,7 @@ class AdminStoreServiceTypeRequest extends FormRequest
             'field_schema.*.options.*'  => ['string', 'max:100'],
             'field_schema.*.accepts'         => ['nullable', 'array', 'min:1'],
             'field_schema.*.accepts.*'       => ['string', Rule::in(['image', 'pdf', 'doc'])],
-            'field_schema.*.document_type'   => ['nullable', Rule::enum(DocumentType::class)],
+            'field_schema.*.document_type'   => ['nullable', 'string', Rule::exists('document_types', 'slug')->whereNull('deleted_at')],
         ];
     }
 
