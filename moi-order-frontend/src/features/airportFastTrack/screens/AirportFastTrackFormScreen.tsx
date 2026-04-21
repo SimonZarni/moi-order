@@ -10,8 +10,6 @@ import { FormField } from '@/shared/components/FormField/FormField';
 import { SuccessState } from '@/shared/components/SuccessState/SuccessState';
 import { useAirportFastTrackFormScreen } from '@/features/airportFastTrack/hooks/useAirportFastTrackFormScreen';
 import { useLocale } from '@/shared/hooks/useLocale';
-import { localeDocumentLabel } from '@/shared/utils/localeName';
-import { DOCUMENT_TYPE } from '@/types/enums';
 import { styles } from './AirportFastTrackFormScreen.styles';
 
 export function AirportFastTrackFormScreen(): React.JSX.Element {
@@ -94,7 +92,7 @@ export function AirportFastTrackFormScreen(): React.JSX.Element {
               <Text style={styles.sectionTitle}>Required Documents</Text>
 
               <DocumentPickerField
-                label={localeDocumentLabel(DOCUMENT_TYPE.UpperBodyPhoto, locale)}
+                label={locale === 'mm' ? 'ကိုယ်တစ်ပိုင်းပုံ (လာမည့်နေ့ ဝတ်ဆင်လာမည့် ပုံစံ)' : 'Upper Half Body Photo'}
                 icon="camera"
                 onPress={handlePickUpperBodyPhoto}
                 isUploaded={form.upperBodyPhoto !== null}
@@ -105,7 +103,7 @@ export function AirportFastTrackFormScreen(): React.JSX.Element {
               />
 
               <DocumentPickerField
-                label={localeDocumentLabel(DOCUMENT_TYPE.AirplaneTicket, locale)}
+                label={locale === 'mm' ? 'လေယာဉ်လက်မှတ်' : 'Airplane Ticket'}
                 icon="airplane-outline"
                 onPress={handlePickAirplaneTicket}
                 isUploaded={form.airplaneTicket !== null}

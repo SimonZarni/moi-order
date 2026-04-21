@@ -4,42 +4,31 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\DocumentType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-/**
- * Principle: SRP — owns the reference to a single uploaded document file.
- * Security: file_path is opaque (UUID-named, stored outside public/).
- *   Signed URLs are generated at read time via FileStorageInterface.
- *   The raw path is never exposed in API responses.
- */
 class SubmissionDocument extends Model
 {
     use SoftDeletes;
 
     protected $fillable = [
         'submission_id',
-        'document_type',
+        'document_type_id',
         'file_path',
     ];
 
     protected $hidden = [
-        'file_path', // raw path never serialised; signed URL generated in Resource
+        'file_path',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'document_type' => DocumentType::class,
-        ];
-    }
-
-    // ─── Relationships ────────────────────────────────────────────────────────
 
     public function submission(): BelongsTo
     {
         return $this->belongsTo(ServiceSubmission::class, 'submission_id');
+    }
+
+    public function documentType(): BelongsTo
+    {
+        return $this->belongsTo(DocumentType::class, 'document_type_id');
     }
 }

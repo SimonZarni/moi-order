@@ -10,8 +10,6 @@ import { FormField } from '@/shared/components/FormField/FormField';
 import { SuccessState } from '@/shared/components/SuccessState/SuccessState';
 import { useEmbassyBankFormScreen } from '@/features/embassyBank/hooks/useEmbassyBankFormScreen';
 import { useLocale } from '@/shared/hooks/useLocale';
-import { localeDocumentLabel } from '@/shared/utils/localeName';
-import { DOCUMENT_TYPE, DocumentType } from '@/types/enums';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 import { styles } from './EmbassyBankFormScreen.styles';
@@ -170,23 +168,23 @@ export function EmbassyBankFormScreen(): React.JSX.Element {
               <Text style={styles.sectionTitle}>Required Documents</Text>
 
               {([
-                { key: 'passportSizePhoto' as const, docType: DOCUMENT_TYPE.PassportSizePhoto,  icon: 'images' as const,        onPick: handlePickPassportSizePhoto },
-                { key: 'passportBioPage'   as const, docType: DOCUMENT_TYPE.PassportBioPage,    icon: 'document-text' as const, onPick: handlePickPassportBioPage },
-                { key: 'visaPage'          as const, docType: DOCUMENT_TYPE.VisaPage,           icon: 'card' as const,          onPick: handlePickVisaPage },
-                { key: 'identityCardFront' as const, docType: DOCUMENT_TYPE.IdentityCardFront,  icon: 'card-outline' as const,  onPick: handlePickIdentityCardFront },
-                { key: 'identityCardBack'  as const, docType: DOCUMENT_TYPE.IdentityCardBack,   icon: 'card-outline' as const,  onPick: handlePickIdentityCardBack },
-                { key: 'tm30'              as const, docType: DOCUMENT_TYPE.Tm30,               icon: 'clipboard' as const,     onPick: handlePickTm30,
+                { key: 'passportSizePhoto' as const, label: locale === 'mm' ? 'ပတ်စပို့ ဓါတ်ပုံ (1.5" x 1.5")' : 'Passport Size Photo',    icon: 'images' as const,        onPick: handlePickPassportSizePhoto },
+                { key: 'passportBioPage'   as const, label: locale === 'mm' ? 'ပတ်စပို့ (ရှေ့မျက်နှာ)'          : 'Passport Bio Page',       icon: 'document-text' as const, onPick: handlePickPassportBioPage },
+                { key: 'visaPage'          as const, label: locale === 'mm' ? 'ဗီဇာ မျက်နှာ'                    : 'Visa Page',               icon: 'card' as const,          onPick: handlePickVisaPage },
+                { key: 'identityCardFront' as const, label: locale === 'mm' ? 'မှတ်ပုံတင် (အရှေ့)'               : 'Identity Card (Front)',    icon: 'card-outline' as const,  onPick: handlePickIdentityCardFront },
+                { key: 'identityCardBack'  as const, label: locale === 'mm' ? 'မှတ်ပုံတင် (အနောက်)'              : 'Identity Card (Back)',     icon: 'card-outline' as const,  onPick: handlePickIdentityCardBack },
+                { key: 'tm30'              as const, label: 'TM30',                                                                              icon: 'clipboard' as const,     onPick: handlePickTm30,
                   hint: 'Tap to select image or PDF', uploadedHint: 'File selected — tap to change' },
-              ] as { key: 'passportSizePhoto' | 'passportBioPage' | 'visaPage' | 'identityCardFront' | 'identityCardBack' | 'tm30'; docType: DocumentType; icon: IoniconsName; onPick: () => void; hint?: string; uploadedHint?: string }[])
-              .map(({ key, docType, icon, onPick, ...rest }) => (
+              ] as { key: 'passportSizePhoto' | 'passportBioPage' | 'visaPage' | 'identityCardFront' | 'identityCardBack' | 'tm30'; label: string; icon: IoniconsName; onPick: () => void; hint?: string; uploadedHint?: string }[])
+              .map(({ key, label, icon, onPick, ...rest }) => (
                 <DocumentPickerField
                   key={key}
-                  label={localeDocumentLabel(docType, locale)}
+                  label={label}
                   icon={icon}
                   onPress={onPick}
                   isUploaded={form[key] !== null}
                   error={form.errors[key]}
-                  accessibilityLabel={`Upload ${localeDocumentLabel(docType, locale)}`}
+                  accessibilityLabel={`Upload ${label}`}
                   {...rest}
                 />
               ))}

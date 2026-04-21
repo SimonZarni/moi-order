@@ -11,9 +11,7 @@ import { formatDate } from '@/shared/utils/formatDate';
 import { formatPrice } from '@/shared/utils/formatCurrency';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { localeName, localeLabel } from '@/shared/utils/localeName';
-import { DOCUMENT_LABELS } from '@/shared/constants/documentLabels';
 import { FieldSchemaItem, SubmissionDocument } from '@/types/models';
-import { DocumentType } from '@/types/enums';
 import { styles, STATUS_COLOURS } from './OrderDetailScreen.styles';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
@@ -197,9 +195,7 @@ export function OrderDetailScreen(): React.JSX.Element {
                         color={colours.textMuted}
                       />
                       <Text style={styles.docLabel}>
-                        {f.document_type && DOCUMENT_LABELS[f.document_type as DocumentType]
-                          ? DOCUMENT_LABELS[f.document_type as DocumentType].mm
-                          : (f.label_mm ?? f.label_en)}
+                        {f.label_mm ?? f.label_en}
                       </Text>
                       <Ionicons name="checkmark" size={14} color={colours.success} />
                     </View>
