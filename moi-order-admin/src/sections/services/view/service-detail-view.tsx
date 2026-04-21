@@ -146,12 +146,13 @@ type FieldEditorProps = {
   isLast: boolean;
   documentTypes: DocumentTypeData[];
   onUpdate: (id: string, updated: Partial<ServiceField>) => void;
+  onDocumentTypeChange: (id: string, slug: string) => void;
   onDelete: (id: string) => void;
   onMoveUp: (index: number) => void;
   onMoveDown: (index: number) => void;
 };
 
-function FieldEditor({ field, index, isFirst, isLast, documentTypes, onUpdate, onDelete, onMoveUp, onMoveDown }: FieldEditorProps) {
+function FieldEditor({ field, index, isFirst, isLast, documentTypes, onUpdate, onDocumentTypeChange, onDelete, onMoveUp, onMoveDown }: FieldEditorProps) {
   const [optionInput, setOptionInput] = useState('');
 
   const addOption = () => {
@@ -178,15 +179,19 @@ function FieldEditor({ field, index, isFirst, isLast, documentTypes, onUpdate, o
       </Stack>
 
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <TextField fullWidth size="small" label="Label (TH)" value={field.label} onChange={(e) => onUpdate(field.id, { label: e.target.value })} />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <TextField fullWidth size="small" label="Label (EN)" value={field.label_en} onChange={(e) => onUpdate(field.id, { label_en: e.target.value })} />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <TextField fullWidth size="small" label="Label (MM)" value={field.label_mm} onChange={(e) => onUpdate(field.id, { label_mm: e.target.value })} />
-        </Grid>
+        {field.type !== 'photo' && (
+          <>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <TextField fullWidth size="small" label="Label (TH)" value={field.label} onChange={(e) => onUpdate(field.id, { label: e.target.value })} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <TextField fullWidth size="small" label="Label (EN)" value={field.label_en} onChange={(e) => onUpdate(field.id, { label_en: e.target.value })} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <TextField fullWidth size="small" label="Label (MM)" value={field.label_mm} onChange={(e) => onUpdate(field.id, { label_mm: e.target.value })} />
+            </Grid>
+          </>
+        )}
         <Grid size={{ xs: 12, sm: 6 }}>
           <FormControl fullWidth size="small">
             <InputLabel>Field Type</InputLabel>
@@ -222,7 +227,7 @@ function FieldEditor({ field, index, isFirst, isLast, documentTypes, onUpdate, o
               <Select
                 value={field.document_type ?? ''}
                 label="Document Type *"
-                onChange={(e) => onUpdate(field.id, { document_type: e.target.value })}
+                onChange={(e) => onDocumentTypeChange(field.id, String(e.target.value))}
               >
                 {documentTypes.map((dt) => (
                   <MenuItem key={dt.slug} value={dt.slug}>{dt.name_en}</MenuItem>
@@ -286,6 +291,20 @@ function ServiceTypeForm({ initial, documentTypes, onSave, onCancel, saving, api
     setFields((prev) => prev.map((f) => (f.id === fid ? { ...f, ...updated } : f)));
   }, []);
 
+  const handleDocumentTypeChange = useCallback((fid: string, slug: string) => {
+    const dt = documentTypes.find((d) => d.slug === slug);
+    setFields((prev) => prev.map((f) => {
+      if (f.id !== fid) return f;
+      return {
+        ...f,
+        document_type: slug,
+        label:    dt ? dt.name_en : f.label,
+        label_en: dt ? dt.name_en : f.label_en,
+        label_mm: dt ? (dt.name_mm ?? f.label_mm) : f.label_mm,
+      };
+    }));
+  }, [documentTypes]);
+
   const handleDeleteField = useCallback((fid: string) => {
     setFields((prev) => prev.filter((f) => f.id !== fid));
   }, []);
@@ -345,8 +364,8 @@ function ServiceTypeForm({ initial, documentTypes, onSave, onCancel, saving, api
             key={field.id} field={field} index={i}
             isFirst={i === 0} isLast={i === fields.length - 1}
             documentTypes={documentTypes}
-            onUpdate={handleUpdateField} onDelete={handleDeleteField}
-            onMoveUp={handleMoveUp} onMoveDown={handleMoveDown}
+            onUpdate={handleUpdateField} onDocumentTypeChange={handleDocumentTypeChange}
+            onDelete={handleDeleteField} onMoveUp={handleMoveUp} onMoveDown={handleMoveDown}
           />
         ))}
       </Stack>
