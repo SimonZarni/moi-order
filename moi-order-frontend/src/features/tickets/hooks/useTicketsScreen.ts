@@ -47,7 +47,11 @@ export function useTicketsScreen(): UseTicketsScreenResult {
   }, [navigation, queryClient]);
 
   const handleBack = useCallback((): void => {
-    navigation.navigate('Home');
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.navigate('MainTabs', { screen: 'Home' });
+    }
   }, [navigation]);
 
   return {

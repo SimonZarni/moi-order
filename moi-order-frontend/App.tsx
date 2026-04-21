@@ -2,12 +2,17 @@
  * Principle: SRP — entry point wires providers + auth-aware navigation only; zero business logic.
  * Auth restore: on mount, reads token from SecureStore → calls /me → populates authStore.
  *   Shows a blank teal splash while initialising to avoid flash of wrong screen.
+ * Navigation structure:
+ *   RootStack (native-stack) → MainTabs (bottom-tabs) → Home / Places / Orders / Profile
+ *   Non-tab screens (Login, OrderDetail, etc.) are pushed onto the root stack.
+ *   FloatingTabBar is the tabBar prop of MainTabs — renders once, never remounts.
  * Guest access: all screens are always mounted. Auth guard lives in form-submission
  *   coordinator hooks (redirect to Login on submit when unauthenticated).
  * Provider order (outermost → innermost):
- *   SafeAreaProvider → QueryClientProvider → NavigationContainer → Stack
+ *   SafeAreaProvider → QueryClientProvider → NavigationContainer → RootStack
  */
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
@@ -25,6 +30,7 @@ import { TOKEN_KEY, LOCALE_KEY, CACHE_TTL } from '@/shared/constants/config';
 import { useAuthStore } from '@/shared/store/authStore';
 import { useLocaleStore, Locale } from '@/shared/store/localeStore';
 import { colours } from '@/shared/theme/colours';
+import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 
 import { LoginScreen } from '@/features/auth/screens/LoginScreen';
 import { RegisterScreen } from '@/features/auth/screens/RegisterScreen';
@@ -54,9 +60,10 @@ import { TicketDetailScreen } from '@/features/tickets/screens/TicketDetailScree
 import { TicketDateSelectionScreen } from '@/features/tickets/screens/TicketDateSelectionScreen';
 import { TicketOrderDetailScreen } from '@/features/tickets/screens/TicketOrderDetailScreen';
 
-import { RootStackParamList } from '@/types/navigation';
+import { RootStackParamList, TabParamList } from '@/types/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<TabParamList>();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,6 +74,23 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// Persistent tab container — all 4 tab screens are pre-rendered (lazy={false})
+// so switching between them is always instant with no mount cost.
+function MainTabs(): React.JSX.Element {
+  return (
+    <Tab.Navigator
+      tabBar={(props) => <FloatingTabBar {...props} />}
+      screenOptions={{ headerShown: false }}
+      initialRouteName="Home"
+    >
+      <Tab.Screen name="Home"    component={HomeScreen} />
+      <Tab.Screen name="Places"  component={PlacesScreen} />
+      <Tab.Screen name="Orders"  component={OrdersScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
+    </Tab.Navigator>
+  );
+}
 
 export default function App(): React.JSX.Element {
   const [isInitializing, setIsInitializing] = useState(true);
@@ -112,42 +136,41 @@ export default function App(): React.JSX.Element {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <NavigationContainer>
-          {/* All screens always available — form screens guard auth at submit time. */}
           <StatusBar style="light" translucent />
           <Stack.Navigator
-            initialRouteName="Home"
+            initialRouteName="MainTabs"
             screenOptions={{
               headerShown: false,
               animation: 'fade',
             }}
           >
-            <Stack.Screen name="Home"                      component={HomeScreen} />
-            <Stack.Screen name="Orders"                    component={OrdersScreen} />
-            <Stack.Screen name="OrderDetail"               component={OrderDetailScreen} />
-            <Stack.Screen name="Payment"                   component={PaymentScreen} />
-            <Stack.Screen name="Login"                     component={LoginScreen} />
-            <Stack.Screen name="Register"                  component={RegisterScreen} />
-            <Stack.Screen name="NinetyDayReport"           component={NinetyDayReportScreen} />
-            <Stack.Screen name="NinetyDayReportForm"       component={NinetyDayReportFormScreen} />
-            <Stack.Screen name="OtherServices"             component={OtherServicesScreen} />
-            <Stack.Screen name="CompanyRegistrationForm"   component={CompanyRegistrationFormScreen} />
-            <Stack.Screen name="AirportFastTrackForm"      component={AirportFastTrackFormScreen} />
-            <Stack.Screen name="EmbassyResidentialForm"    component={EmbassyResidentialFormScreen} />
-            <Stack.Screen name="EmbassyCarLicenseForm"     component={EmbassyCarLicenseFormScreen} />
-            <Stack.Screen name="EmbassyBankForm"                  component={EmbassyBankFormScreen} />
-            <Stack.Screen name="EmbassyVisaRecommendationForm"    component={EmbassyVisaRecommendationFormScreen} />
-            <Stack.Screen name="TestServiceForm"                  component={TestServiceFormScreen} />
-            <Stack.Screen name="GenericServiceForm"               component={GenericServiceFormScreen} />
-            <Stack.Screen name="Places"                    component={PlacesScreen} />
-            <Stack.Screen name="PlaceDetail"               component={PlaceDetailScreen} />
-            <Stack.Screen name="Profile"                   component={ProfileScreen} />
-            <Stack.Screen name="Tickets"                   component={TicketsScreen} />
-            <Stack.Screen name="TicketDetail"              component={TicketDetailScreen} />
-            <Stack.Screen name="TicketDateSelection"       component={TicketDateSelectionScreen} />
-            <Stack.Screen name="TicketOrderDetail"         component={TicketOrderDetailScreen} />
-            <Stack.Screen name="PrivacyPolicy"             component={PrivacyPolicyScreen} />
-            <Stack.Screen name="TermsAndConditions"        component={TermsAndConditionsScreen} />
-            <Stack.Screen name="PdpaNotice"                component={PdpaNoticeScreen} />
+            {/* Tab container — no animation on the container itself since tabs switch internally */}
+            <Stack.Screen name="MainTabs" component={MainTabs} options={{ animation: 'none' }} />
+
+            {/* Non-tab screens pushed onto the root stack with fade animation */}
+            <Stack.Screen name="Login"                         component={LoginScreen} />
+            <Stack.Screen name="Register"                      component={RegisterScreen} />
+            <Stack.Screen name="OrderDetail"                   component={OrderDetailScreen} />
+            <Stack.Screen name="Payment"                       component={PaymentScreen} />
+            <Stack.Screen name="NinetyDayReport"               component={NinetyDayReportScreen} />
+            <Stack.Screen name="NinetyDayReportForm"           component={NinetyDayReportFormScreen} />
+            <Stack.Screen name="OtherServices"                 component={OtherServicesScreen} />
+            <Stack.Screen name="CompanyRegistrationForm"       component={CompanyRegistrationFormScreen} />
+            <Stack.Screen name="AirportFastTrackForm"          component={AirportFastTrackFormScreen} />
+            <Stack.Screen name="EmbassyResidentialForm"        component={EmbassyResidentialFormScreen} />
+            <Stack.Screen name="EmbassyCarLicenseForm"         component={EmbassyCarLicenseFormScreen} />
+            <Stack.Screen name="EmbassyBankForm"               component={EmbassyBankFormScreen} />
+            <Stack.Screen name="EmbassyVisaRecommendationForm" component={EmbassyVisaRecommendationFormScreen} />
+            <Stack.Screen name="TestServiceForm"               component={TestServiceFormScreen} />
+            <Stack.Screen name="GenericServiceForm"            component={GenericServiceFormScreen} />
+            <Stack.Screen name="PlaceDetail"                   component={PlaceDetailScreen} />
+            <Stack.Screen name="Tickets"                       component={TicketsScreen} />
+            <Stack.Screen name="TicketDetail"                  component={TicketDetailScreen} />
+            <Stack.Screen name="TicketDateSelection"           component={TicketDateSelectionScreen} />
+            <Stack.Screen name="TicketOrderDetail"             component={TicketOrderDetailScreen} />
+            <Stack.Screen name="PrivacyPolicy"                 component={PrivacyPolicyScreen} />
+            <Stack.Screen name="TermsAndConditions"            component={TermsAndConditionsScreen} />
+            <Stack.Screen name="PdpaNotice"                    component={PdpaNoticeScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </QueryClientProvider>

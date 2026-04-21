@@ -2,7 +2,7 @@ import React from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
+import { StandaloneFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
@@ -60,7 +60,7 @@ export function NinetyDayReportScreen(): React.JSX.Element {
           ))}
         </View>
       </ScrollView>
-      <FloatingTabBar />
+      <StandaloneFloatingTabBar />
     </SafeAreaView>
   );
 }

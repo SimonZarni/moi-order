@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
+import { StandaloneFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
 import { TicketCardSkeleton } from '@/features/tickets/components/TicketCardSkeleton';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
@@ -76,7 +76,7 @@ export function TicketsScreen(): React.JSX.Element {
             ))}
           </View>
         </ScrollView>
-        <FloatingTabBar />
+        <StandaloneFloatingTabBar />
       </SafeAreaView>
     );
   }
@@ -91,7 +91,7 @@ export function TicketsScreen(): React.JSX.Element {
           <Text style={styles.stateTitle}>Could not load tickets</Text>
           <Text style={styles.stateSubtitle}>Pull down to retry</Text>
         </View>
-        <FloatingTabBar />
+        <StandaloneFloatingTabBar />
       </SafeAreaView>
     );
   }
@@ -126,7 +126,7 @@ export function TicketsScreen(): React.JSX.Element {
         accessibilityRole="list"
         showsVerticalScrollIndicator={false}
       />
-      <FloatingTabBar />
+      <StandaloneFloatingTabBar />
     </SafeAreaView>
   );
 }

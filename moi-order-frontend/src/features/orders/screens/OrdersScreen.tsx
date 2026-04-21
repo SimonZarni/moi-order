@@ -7,7 +7,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { localeName } from '@/shared/utils/localeName';
 
-import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { OrderCardSkeleton } from '@/features/orders/components/OrderCardSkeleton';
@@ -170,7 +169,6 @@ export function OrdersScreen(): React.JSX.Element {
             </Pressable>
           </View>
         </View>
-        <FloatingTabBar />
       </SafeAreaView>
     );
   }
@@ -184,7 +182,6 @@ export function OrdersScreen(): React.JSX.Element {
           <OrderCardSkeleton /><OrderCardSkeleton /><OrderCardSkeleton />
           <OrderCardSkeleton /><OrderCardSkeleton /><OrderCardSkeleton />
         </View>
-        <FloatingTabBar />
       </SafeAreaView>
     );
   }
@@ -201,7 +198,6 @@ export function OrdersScreen(): React.JSX.Element {
             <Text style={styles.stateSubtitle}>Pull down to retry</Text>
           </View>
         </View>
-        <FloatingTabBar />
       </SafeAreaView>
     );
   }
@@ -243,7 +239,6 @@ export function OrdersScreen(): React.JSX.Element {
           accessibilityRole="list"
           showsVerticalScrollIndicator={false}
         />
-        <FloatingTabBar />
       </SafeAreaView>
     );
   }
@@ -284,7 +279,6 @@ export function OrdersScreen(): React.JSX.Element {
         accessibilityRole="list"
         showsVerticalScrollIndicator={false}
       />
-      <FloatingTabBar />
     </SafeAreaView>
   );
 }
