@@ -23,10 +23,13 @@ return new class extends Migration
         }
 
         // Step 2 — backfill only rows still missing the FK value.
+        // COLLATE forces both sides to the same collation — needed when the old table
+        // (utf8mb4_unicode_ci) and new table (utf8mb4_0900_ai_ci) differ.
         if (Schema::hasColumn('submission_documents', 'document_type')) {
             DB::statement('
                 UPDATE submission_documents sd
-                JOIN document_types dt ON dt.slug = sd.document_type
+                JOIN document_types dt
+                  ON dt.slug COLLATE utf8mb4_unicode_ci = sd.document_type COLLATE utf8mb4_unicode_ci
                 SET sd.document_type_id = dt.id
                 WHERE sd.document_type_id IS NULL
             ');
