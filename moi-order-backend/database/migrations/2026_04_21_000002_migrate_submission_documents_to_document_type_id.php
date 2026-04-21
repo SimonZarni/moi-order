@@ -11,33 +11,44 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Step 1 — add nullable FK column alongside old column.
-        Schema::table('submission_documents', function (Blueprint $table): void {
-            $table->foreignId('document_type_id')
-                ->nullable()
-                ->after('submission_id')
-                ->constrained('document_types')
-                ->restrictOnDelete();
-        });
+        // Step 1 — add nullable FK column if it doesn't already exist (idempotent).
+        if (! Schema::hasColumn('submission_documents', 'document_type_id')) {
+            Schema::table('submission_documents', function (Blueprint $table): void {
+                $table->foreignId('document_type_id')
+                    ->nullable()
+                    ->after('submission_id')
+                    ->constrained('document_types')
+                    ->restrictOnDelete();
+            });
+        }
 
-        // Step 2 — backfill: match slug in document_types to existing VARCHAR value.
-        DB::statement('
-            UPDATE submission_documents sd
-            JOIN document_types dt ON dt.slug = sd.document_type
-            SET sd.document_type_id = dt.id
-        ');
+        // Step 2 — backfill only rows still missing the FK value.
+        if (Schema::hasColumn('submission_documents', 'document_type')) {
+            DB::statement('
+                UPDATE submission_documents sd
+                JOIN document_types dt ON dt.slug = sd.document_type
+                SET sd.document_type_id = dt.id
+                WHERE sd.document_type_id IS NULL
+            ');
+        }
 
         // Step 3 — enforce NOT NULL now that all rows are filled.
         Schema::table('submission_documents', function (Blueprint $table): void {
             $table->unsignedBigInteger('document_type_id')->nullable(false)->change();
         });
 
-        // Step 4 — drop the old CHECK constraint and VARCHAR column.
-        DB::statement('ALTER TABLE submission_documents DROP CONSTRAINT chk_document_type');
+        // Step 4 — drop the old CHECK constraint and VARCHAR column if still present.
+        if (Schema::hasColumn('submission_documents', 'document_type')) {
+            try {
+                DB::statement('ALTER TABLE submission_documents DROP CONSTRAINT chk_document_type');
+            } catch (\Throwable) {
+                // constraint may have already been dropped
+            }
 
-        Schema::table('submission_documents', function (Blueprint $table): void {
-            $table->dropColumn('document_type');
-        });
+            Schema::table('submission_documents', function (Blueprint $table): void {
+                $table->dropColumn('document_type');
+            });
+        }
     }
 
     public function down(): void
