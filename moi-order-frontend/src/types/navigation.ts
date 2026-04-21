@@ -1,9 +1,23 @@
+import { NavigatorScreenParams } from '@react-navigation/native';
+
+// Tab navigator screens — persistent, pre-rendered, instant switching.
+export type TabParamList = {
+  Home: undefined;
+  Places: undefined;
+  Orders: undefined;
+  Profile: undefined;
+};
+
 export type RootStackParamList = {
+  // ── Tab container (always the initial screen) ───────────────────────────
+  MainTabs: NavigatorScreenParams<TabParamList> | undefined;
+
   // ── Auth flow (unauthenticated) ─────────────────────────────────────────
   Login: undefined;
   Register: undefined;
 
-  // ── Main app (authenticated) ────────────────────────────────────────────
+  // ── Tab routes kept here for TypeScript compat with coordinator hooks ───
+  // At runtime these are handled by the tab navigator, not the root stack.
   Home: undefined;
   Orders: undefined;
   OrderDetail: { submissionId: number };

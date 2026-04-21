@@ -5,7 +5,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
@@ -72,7 +71,6 @@ export function PlacesScreen(): React.JSX.Element {
             <PlaceCardSkeleton key={i} />
           ))}
         </ScrollView>
-        <FloatingTabBar />
       </SafeAreaView>
     );
   }
@@ -87,7 +85,6 @@ export function PlacesScreen(): React.JSX.Element {
           <Text style={styles.stateTitle}>Could not load places</Text>
           <Text style={styles.stateSubtitle}>Pull down to retry</Text>
         </View>
-        <FloatingTabBar />
       </SafeAreaView>
     );
   }
@@ -126,7 +123,6 @@ export function PlacesScreen(): React.JSX.Element {
         accessibilityRole="list"
         showsVerticalScrollIndicator={false}
       />
-      <FloatingTabBar />
     </SafeAreaView>
   );
 }

@@ -3,7 +3,7 @@ import { ScrollView, Text, View } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
+import { StandaloneFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
 import type { LegalSection } from '@/features/legal/types';
 import { styles } from './LegalDocumentLayout.styles';
@@ -67,7 +67,7 @@ export function LegalDocumentLayout({
         </View>
 
       </ScrollView>
-      <FloatingTabBar />
+      <StandaloneFloatingTabBar />
     </SafeAreaView>
   );
 }

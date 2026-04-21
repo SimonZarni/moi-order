@@ -7,7 +7,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { ProfileSkeleton } from '@/features/profile/components/ProfileSkeleton';
 import { useProfileScreen } from '@/features/profile/hooks/useProfileScreen';
 import { formatDate } from '@/shared/utils/formatDate';
@@ -41,12 +40,7 @@ export function ProfileScreen(): React.JSX.Element {
   const t = getProfileStrings(locale);
 
   if (isLoading) {
-    return (
-      <>
-        <ProfileSkeleton />
-        <FloatingTabBar />
-      </>
-    );
+    return <ProfileSkeleton />;
   }
 
   const initials   = getInitials(user?.name ?? name);
@@ -383,7 +377,6 @@ export function ProfileScreen(): React.JSX.Element {
 
         </View>
       </ScrollView>
-      <FloatingTabBar />
     </SafeAreaView>
   );
 }

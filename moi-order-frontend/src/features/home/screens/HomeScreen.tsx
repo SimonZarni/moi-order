@@ -5,7 +5,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { useHomeScreen } from '@/features/home/hooks/useHomeScreen';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { getHomeStrings } from '@/shared/constants/homeStrings';
@@ -114,7 +113,6 @@ export function HomeScreen(): React.JSX.Element {
         </View>
 
       </ScrollView>
-      <FloatingTabBar />
     </SafeAreaView>
   );
 }
