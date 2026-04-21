@@ -95,7 +95,7 @@ export const styles = StyleSheet.create({
     fontWeight: '900',
     color: colours.textOnDark,
     letterSpacing: -0.8,
-    lineHeight: 32,
+    lineHeight: 42,
   },
   heroDate: {
     fontSize: typography.xs,

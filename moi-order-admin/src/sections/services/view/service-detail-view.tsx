@@ -78,6 +78,20 @@ type LocalType = {
 
 const genId = () => 'f' + Math.random().toString(36).slice(2, 10);
 
+function buildNewTypeInitial(existingTypes: LocalType[]): LocalType | null {
+  const template = existingTypes.find((t) => t.fields.length > 0);
+  if (!template) return null;
+  return {
+    tempId:    genId(),
+    name:      '',
+    name_en:   '',
+    name_mm:   '',
+    price:     0,
+    is_active: true,
+    fields:    template.fields.map((f) => ({ ...f })),
+  };
+}
+
 const FIELD_TYPE_LABELS: Record<FieldType, string> = {
   text: 'Short Text',
   number: 'Number',
@@ -272,9 +286,10 @@ type ServiceTypeFormProps = {
   onSave: (t: LocalType) => void;
   onCancel: () => void;
   saving: boolean;
+  apiError?: string;
 };
 
-function ServiceTypeForm({ initial, onSave, onCancel, saving }: ServiceTypeFormProps) {
+function ServiceTypeForm({ initial, onSave, onCancel, saving, apiError }: ServiceTypeFormProps) {
   const [name, setName]       = useState(initial?.name ?? '');
   const [nameEn, setNameEn]   = useState(initial?.name_en ?? '');
   const [nameMm, setNameMm]   = useState(initial?.name_mm ?? '');
@@ -309,6 +324,8 @@ function ServiceTypeForm({ initial, onSave, onCancel, saving }: ServiceTypeFormP
   return (
     <Box sx={{ p: 2.5, border: '1px solid', borderColor: 'primary.main', borderRadius: 2, bgcolor: 'background.paper' }}>
       <Typography variant="subtitle2" sx={{ mb: 2 }}>{initial?.id ? 'Edit Type' : 'New Type'}</Typography>
+
+      {apiError && <Alert severity="error" sx={{ mb: 2 }}>{apiError}</Alert>}
 
       <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid size={{ xs: 12, sm: 4 }}>
@@ -397,6 +414,7 @@ export function ServiceDetailView() {
   const [types, setTypes]         = useState<LocalType[]>([]);
   const [formTarget, setFormTarget] = useState<LocalType | null | 'new'>(null);
   const [savingType, setSavingType] = useState(false);
+  const [typeFormError, setTypeFormError] = useState('');
 
   useEffect(() => {
     if (!id) return;
@@ -432,6 +450,7 @@ export function ServiceDetailView() {
     const idx     = t.id ? types.findIndex((x) => x.id === t.id) : types.length;
     const payload = typeToPayload(t, idx);
     setSavingType(true);
+    setTypeFormError('');
     const call = t.id
       ? servicesApi.updateType(id, t.id, payload)
       : servicesApi.createType(id, payload);
@@ -445,7 +464,10 @@ export function ServiceDetailView() {
         });
         setFormTarget(null);
       })
-      .catch(() => {})
+      .catch((err) => {
+        const msg = err?.response?.data?.message ?? 'Failed to save. Please try again.';
+        setTypeFormError(msg);
+      })
       .finally(() => setSavingType(false));
   };
 
@@ -544,7 +566,7 @@ export function ServiceDetailView() {
                 {types.map((t) => (
                   <Box key={t.tempId}>
                     {formTarget !== null && typeof formTarget === 'object' && formTarget.tempId === t.tempId ? (
-                      <ServiceTypeForm initial={t} saving={savingType} onSave={handleSaveType} onCancel={() => setFormTarget(null)} />
+                      <ServiceTypeForm initial={t} saving={savingType} onSave={handleSaveType} onCancel={() => { setFormTarget(null); setTypeFormError(''); }} apiError={typeFormError} />
                     ) : (
                       <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1.5 }}>
                         <Stack direction="row" alignItems="center" spacing={1.5}>
@@ -572,7 +594,7 @@ export function ServiceDetailView() {
                 ))}
 
                 {formTarget === 'new' && (
-                  <ServiceTypeForm initial={null} saving={savingType} onSave={handleSaveType} onCancel={() => setFormTarget(null)} />
+                  <ServiceTypeForm initial={buildNewTypeInitial(types)} saving={savingType} onSave={handleSaveType} onCancel={() => { setFormTarget(null); setTypeFormError(''); }} apiError={typeFormError} />
                 )}
 
                 {types.length === 0 && formTarget === null && (

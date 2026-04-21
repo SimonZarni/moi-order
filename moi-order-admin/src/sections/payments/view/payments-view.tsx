@@ -27,7 +27,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useRouter } from 'src/routes/hooks';
 
 import { fDate } from 'src/utils/format-time';
-import { fCurrency } from 'src/utils/format-number';
+import { fNumber, fCurrency } from 'src/utils/format-number';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { paymentsApi, type PaymentData, type PaymentStats } from 'src/api/payments';
@@ -212,7 +212,7 @@ export function PaymentsView() {
                         </TableCell>
                         <TableCell align="right">
                           <Typography variant="body2" fontWeight={600}>
-                            {fCurrency(row.amount / 100)}
+                            {fNumber(row.amount / 100)}
                           </Typography>
                         </TableCell>
                         <TableCell>{fDate(row.created_at)}</TableCell>

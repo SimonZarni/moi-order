@@ -77,6 +77,13 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.md,
     marginTop: spacing.md,
   },
+  emptySchemaText: {
+    fontSize: typography.sm,
+    color: colours.textMuted,
+    textAlign: 'center',
+    marginTop: spacing.xl,
+    lineHeight: 22,
+  },
 
   // ── Field ─────────────────────────────────────────────────────────────────
   fieldGroup: {

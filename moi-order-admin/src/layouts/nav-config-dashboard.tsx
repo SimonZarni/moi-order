@@ -53,11 +53,6 @@ export const navData: NavItem[] = [
     title: 'Other Services',
     path: '/services',
     icon: icon('ic-lock'),
-    info: (
-      <Label color="primary" variant="inverted">
-        New
-      </Label>
-    ),
     children: [
       {
         title: 'Manage Services',

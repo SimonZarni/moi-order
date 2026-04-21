@@ -11,7 +11,9 @@ import { formatDate } from '@/shared/utils/formatDate';
 import { formatPrice } from '@/shared/utils/formatCurrency';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { localeName, localeLabel } from '@/shared/utils/localeName';
+import { DOCUMENT_LABELS } from '@/shared/constants/documentLabels';
 import { FieldSchemaItem, SubmissionDocument } from '@/types/models';
+import { DocumentType } from '@/types/enums';
 import { styles, STATUS_COLOURS } from './OrderDetailScreen.styles';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
@@ -126,7 +128,7 @@ export function OrderDetailScreen(): React.JSX.Element {
 
           {/* ── Personal info (from dynamic submission_data + field_schema) ── */}
           {submission.submission_data !== undefined &&
-           submission.service_type.field_schema !== undefined &&
+           submission.service_type?.field_schema !== undefined &&
            submission.service_type.field_schema.some((f: FieldSchemaItem) => f.type !== 'file') && (
             <>
               <View style={styles.sectionLabelRow}>
@@ -138,16 +140,20 @@ export function OrderDetailScreen(): React.JSX.Element {
                   .filter((f: FieldSchemaItem) => f.type !== 'file')
                   .map((f: FieldSchemaItem) => (
                     <View key={f.key} style={styles.infoRow}>
-                      <Text style={styles.infoLabel}>{f.label_en}</Text>
+                      <Text style={styles.infoLabel}>{f.label_mm ?? f.label_en}</Text>
                       <Text style={styles.infoValue}>
                         {String(submission.submission_data![f.key] ?? '—')}
                       </Text>
                     </View>
                   ))
                 }
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>တင်သွင်းသောနေ့</Text>
+                  <Text style={styles.infoValue}>{formatDate(submission.created_at)}</Text>
+                </View>
                 {submission.completed_at !== null && (
                   <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Completed</Text>
+                    <Text style={styles.infoLabel}>ပြီးစီးသောနေ့</Text>
                     <Text style={styles.infoValue}>{formatDate(submission.completed_at)}</Text>
                   </View>
                 )}
@@ -156,29 +162,52 @@ export function OrderDetailScreen(): React.JSX.Element {
           )}
 
           {/* ── Documents ── */}
-          {submission.documents !== undefined && submission.documents.length > 0 && (
-            <>
-              <View style={styles.sectionLabelRow}>
-                <Text style={styles.sectionLabel}>Documents</Text>
-                <View style={styles.sectionLine} />
-              </View>
-              <View style={styles.docCard}>
-                {submission.documents.map((doc: SubmissionDocument) => (
-                  <React.Fragment key={doc.id}>
-                    <View style={styles.docRow}>
+          {/* Old submissions: documents relation. New submissions: file fields in submission_data. */}
+          {(() => {
+            const oldDocs = submission.documents ?? [];
+            const fileFields = (submission.service_type?.field_schema ?? []).filter(
+              (f: FieldSchemaItem) => f.type === 'file' && submission.submission_data?.[f.key] != null,
+            );
+            const hasOldDocs = oldDocs.length > 0;
+            const hasNewFiles = fileFields.length > 0;
+            if (!hasOldDocs && !hasNewFiles) return null;
+            return (
+              <>
+                <View style={styles.sectionLabelRow}>
+                  <Text style={styles.sectionLabel}>Documents</Text>
+                  <View style={styles.sectionLine} />
+                </View>
+                <View style={styles.docCard}>
+                  {hasOldDocs && oldDocs.map((doc: SubmissionDocument) => (
+                    <View key={doc.id} style={styles.docRow}>
                       <Ionicons
                         name={DOC_ICONS[doc.document_type] ?? 'document-text-outline'}
                         size={16}
                         color={colours.textMuted}
                       />
-                      <Text style={styles.docLabel}>{localeLabel(doc, locale)}</Text>
+                      <Text style={styles.docLabel}>{doc.label_mm || doc.label}</Text>
                       <Ionicons name="checkmark" size={14} color={colours.success} />
                     </View>
-                  </React.Fragment>
-                ))}
-              </View>
-            </>
-          )}
+                  ))}
+                  {hasNewFiles && fileFields.map((f: FieldSchemaItem) => (
+                    <View key={f.key} style={styles.docRow}>
+                      <Ionicons
+                        name={DOC_ICONS[f.key] ?? 'document-text-outline'}
+                        size={16}
+                        color={colours.textMuted}
+                      />
+                      <Text style={styles.docLabel}>
+                        {f.document_type && DOCUMENT_LABELS[f.document_type as DocumentType]
+                          ? DOCUMENT_LABELS[f.document_type as DocumentType].mm
+                          : (f.label_mm ?? f.label_en)}
+                      </Text>
+                      <Ionicons name="checkmark" size={14} color={colours.success} />
+                    </View>
+                  ))}
+                </View>
+              </>
+            );
+          })()}
         </View>
       </ScrollView>
     </SafeAreaView>
