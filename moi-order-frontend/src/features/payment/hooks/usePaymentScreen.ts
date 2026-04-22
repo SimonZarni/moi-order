@@ -87,7 +87,7 @@ export function usePaymentScreen(): UsePaymentScreenResult {
     } else {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TICKET_ORDERS.LIST });
     }
-    navigation.navigate('Orders');
+    navigation.reset({ index: 0, routes: [{ name: 'MainTabs', params: { screen: 'Orders' } }] });
   }, [navigation, queryClient, params.kind]);
 
   const handleRefreshQr = useCallback((): void => {
