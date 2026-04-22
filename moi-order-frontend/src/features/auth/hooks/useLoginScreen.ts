@@ -32,7 +32,7 @@ export function useLoginScreen(): UseLoginScreenResult {
     mutationFn: () => login(form.email.trim(), form.password),
     onSuccess: ({ user, token }) => {
       setUser(user, token);
-      navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+      navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
     },
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {
