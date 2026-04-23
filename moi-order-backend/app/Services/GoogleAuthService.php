@@ -44,8 +44,11 @@ class GoogleAuthService
         $user = $this->findOrCreateUser($googleId, $email, $name);
 
         if ($user->isRestricted()) {
-            $code = $user->status->value === 'banned' ? 'account.banned' : 'account.suspended';
-            throw new DomainException($code, 403);
+            $code    = $user->status->value === 'banned' ? 'account.banned' : 'account.suspended';
+            $context = $user->suspended_until !== null
+                ? ['suspended_until' => $user->suspended_until->toISOString()]
+                : [];
+            throw new DomainException($code, 403, $context);
         }
 
         $token = $user->createToken('user-auth', ['user'], now()->addDays(30))->plainTextToken;
