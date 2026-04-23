@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useQueryClient } from '@tanstack/react-query';
 import type { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
 import { useProfileData } from '@/features/profile/hooks/useProfileData';
@@ -61,8 +62,9 @@ export interface UseProfileScreenResult {
 
 export function useProfileScreen(): UseProfileScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
-  const clearAuth  = useAuthStore((s) => s.clearAuth);
+  const queryClient = useQueryClient();
+  const isLoggedIn  = useAuthStore((s) => s.isLoggedIn);
+  const clearAuth   = useAuthStore((s) => s.clearAuth);
   const { locale, setLocale } = useLocale();
 
   const { user, isLoading, isRefreshing, refetch, updateMutation, changePasswordMutation, deleteAccountMutation } = useProfileData();
@@ -189,6 +191,7 @@ export function useProfileScreen(): UseProfileScreenResult {
         text: 'Sign Out',
         style: 'destructive',
         onPress: () => {
+          queryClient.clear();
           clearAuth(); // isLoggedIn → false → effect navigates to Home
         },
       },

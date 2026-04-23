@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useLoginForm, UseLoginFormResult } from '@/features/auth/hooks/useLoginForm';
 import { useGoogleAuth } from '@/features/auth/hooks/useGoogleAuth';
@@ -25,7 +25,8 @@ export interface UseLoginScreenResult {
 }
 
 export function useLoginScreen(): UseLoginScreenResult {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation  = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const queryClient = useQueryClient();
   const { setUser } = useAuthStore();
   const { form, handleEmailChange, handlePasswordChange, validate, applyApiError } = useLoginForm();
   const { handleGoogleSignIn, isGoogleSigningIn, googleBannerError } = useGoogleAuth();
@@ -35,6 +36,7 @@ export function useLoginScreen(): UseLoginScreenResult {
   const { mutate, isPending: isSubmitting } = useMutation({
     mutationFn: () => login(form.email.trim(), form.password),
     onSuccess: ({ user, token }) => {
+      queryClient.clear();
       setUser(user, token);
       navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
     },
