@@ -81,7 +81,9 @@ class AdminPlaceImportService
     private function validateRow(PlaceImportRowDTO $dto, int $row): void
     {
         $required = [
-            'category'          => $dto->category,
+            'category_name_my'  => $dto->categoryNameMy,
+            'category_name_en'  => $dto->categoryNameEn,
+            'category_name_th'  => $dto->categoryNameTh,
             'name_my'           => $dto->nameMy,
             'name_en'           => $dto->nameEn,
             'name_th'           => $dto->nameTh,
@@ -117,7 +119,7 @@ class AdminPlaceImportService
     private function processRow(PlaceImportRowDTO $dto): void
     {
         DB::transaction(function () use ($dto): void {
-            $category = $this->resolveCategory($dto->category);
+            $category = $this->resolveCategory($dto);
             $tagIds   = array_map(fn (string $name) => $this->resolveTag($name)->id, $dto->tags);
 
             $place = Place::create([
@@ -143,14 +145,14 @@ class AdminPlaceImportService
         });
     }
 
-    private function resolveCategory(string $name): Category
+    private function resolveCategory(PlaceImportRowDTO $dto): Category
     {
         return Category::firstOrCreate(
-            ['name_en' => $name],
+            ['name_en' => $dto->categoryNameEn],
             [
-                'name_my' => $name,
-                'name_th' => $name,
-                'slug'    => $this->uniqueSlug($name, 'categories'),
+                'name_my' => $dto->categoryNameMy,
+                'name_th' => $dto->categoryNameTh,
+                'slug'    => $this->uniqueSlug($dto->categoryNameEn, 'categories'),
             ]
         );
     }

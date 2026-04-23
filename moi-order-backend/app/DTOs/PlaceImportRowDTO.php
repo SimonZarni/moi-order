@@ -11,7 +11,9 @@ namespace App\DTOs;
 readonly class PlaceImportRowDTO
 {
     public function __construct(
-        public string  $category,
+        public string  $categoryNameMy,
+        public string  $categoryNameEn,
+        public string  $categoryNameTh,
         public string  $nameMy,
         public string  $nameEn,
         public string  $nameTh,
@@ -31,9 +33,10 @@ readonly class PlaceImportRowDTO
 
     /**
      * Build from a heading-row-normalised array (keys are lowercased snake_case).
-     * Expected headers: category, name_my, name_en, name_th, short_description,
-     * long_description, address, city, latitude, longitude, opening_hours,
-     * contact_phone, website, google_map_url, tags
+     * Expected headers: category_name_my, category_name_en, category_name_th,
+     * name_my, name_en, name_th, short_description, long_description, address,
+     * city, latitude, longitude, opening_hours, contact_phone, website,
+     * google_map_url, tags
      */
     public static function fromRow(array $row): self
     {
@@ -49,7 +52,9 @@ readonly class PlaceImportRowDTO
         $lng = $opt($row['longitude'] ?? null);
 
         return new self(
-            category:         $str($row['category'] ?? ''),
+            categoryNameMy:   $str($row['category_name_my'] ?? ''),
+            categoryNameEn:   $str($row['category_name_en'] ?? ''),
+            categoryNameTh:   $str($row['category_name_th'] ?? ''),
             nameMy:           $str($row['name_my'] ?? ''),
             nameEn:           $str($row['name_en'] ?? ''),
             nameTh:           $str($row['name_th'] ?? ''),

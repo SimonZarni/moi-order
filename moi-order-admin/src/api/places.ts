@@ -2,6 +2,17 @@ import apiClient from './client';
 
 export type PlaceStatus = 'active' | 'inactive' | 'pending';
 
+export type ImportBatchData = {
+  id: number;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  total: number;
+  imported: number;
+  failed: number;
+  errors: Array<{ row: number; message: string }>;
+  created_at: string;
+  updated_at: string;
+};
+
 export type PlaceLocale = {
   id: number;
   name_my: string;
@@ -61,4 +72,17 @@ export const placesApi = {
   },
   deleteImage: (id: number | string, imageId: number) =>
     apiClient.delete(`/places/${id}/images/${imageId}`),
+  importExcel: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiClient
+      .post<{ data: ImportBatchData }>('/places/import', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((r) => r.data.data);
+  },
+  getImportStatus: (batchId: number) =>
+    apiClient
+      .get<{ data: ImportBatchData }>(`/places/import/${batchId}`)
+      .then((r) => r.data.data),
 };

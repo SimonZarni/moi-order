@@ -1,10 +1,12 @@
+import type { ChangeEvent } from 'react';
 import type { SelectChangeEvent } from '@mui/material/Select';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
+import Alert from '@mui/material/Alert';
 import Table from '@mui/material/Table';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -33,7 +35,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useRouter } from 'src/routes/hooks';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { placesApi, type PlaceData, type PlaceLocale } from 'src/api/places';
+import { placesApi, type PlaceData, type PlaceLocale, type ImportBatchData } from 'src/api/places';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
@@ -45,7 +47,6 @@ const localeName = (v: PlaceLocale | null): string => {
   if (!v) return '—';
   return v.name_my ?? v.name_en ?? '—';
 };
-
 
 // ----------------------------------------------------------------------
 
@@ -128,6 +129,84 @@ function PasswordConfirmDialog({
 
 // ----------------------------------------------------------------------
 
+type ImportDialogProps = {
+  open: boolean;
+  uploading: boolean;
+  batch: ImportBatchData | null;
+  error: string | null;
+  onClose: () => void;
+};
+
+function ImportDialog({ open, uploading, batch, error, onClose }: ImportDialogProps) {
+  const isInProgress =
+    uploading || batch?.status === 'pending' || batch?.status === 'processing';
+  const isTerminal = batch?.status === 'completed' || batch?.status === 'failed';
+
+  return (
+    <Dialog open={open} onClose={isInProgress ? undefined : onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>Import Places</DialogTitle>
+      <DialogContent>
+        {isInProgress && (
+          <Stack alignItems="center" spacing={2} sx={{ py: 3 }}>
+            <CircularProgress />
+            <Typography variant="body2" color="text.secondary">
+              {uploading ? 'Uploading file…' : 'Processing rows…'}
+            </Typography>
+          </Stack>
+        )}
+
+        {error && (
+          <Alert severity="error" sx={{ mt: 1 }}>
+            {error}
+          </Alert>
+        )}
+
+        {batch?.status === 'completed' && (
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <Alert severity={batch.failed === 0 ? 'success' : 'warning'}>
+              {batch.imported} of {batch.total} place{batch.total !== 1 ? 's' : ''} imported
+              successfully.
+              {batch.failed > 0 &&
+                ` ${batch.failed} row${batch.failed !== 1 ? 's' : ''} failed.`}
+            </Alert>
+
+            {batch.errors.length > 0 && (
+              <Box
+                sx={{
+                  maxHeight: 200,
+                  overflowY: 'auto',
+                  p: 1.5,
+                  bgcolor: 'background.neutral',
+                  borderRadius: 1,
+                }}
+              >
+                {batch.errors.map((e, i) => (
+                  <Typography key={i} variant="caption" display="block" color="error.main">
+                    Row {e.row}: {e.message}
+                  </Typography>
+                ))}
+              </Box>
+            )}
+          </Stack>
+        )}
+
+        {batch?.status === 'failed' && (
+          <Alert severity="error" sx={{ mt: 1 }}>
+            {batch.errors[0]?.message ?? 'Import job failed unexpectedly.'}
+          </Alert>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} disabled={!!isInProgress}>
+          {isTerminal ? 'Done' : 'Cancel'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+// ----------------------------------------------------------------------
+
 export function PlacesView() {
   const router = useRouter();
   const [places, setPlaces] = useState<PlaceData[]>([]);
@@ -142,6 +221,13 @@ export function PlacesView() {
   const [editConfirm, setEditConfirm] = useState<PlaceData | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+
+  // ── Import state ────────────────────────────────────────────────────────────
+  const importInputRef = useRef<HTMLInputElement>(null);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importUploading, setImportUploading] = useState(false);
+  const [importBatch, setImportBatch] = useState<ImportBatchData | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
 
   const fetchPlaces = useCallback(() => {
     setLoading(true);
@@ -163,6 +249,26 @@ export function PlacesView() {
   useEffect(() => {
     fetchPlaces();
   }, [fetchPlaces]);
+
+  // Poll for import status until terminal
+  useEffect(() => {
+    if (!importBatch || importBatch.status === 'completed' || importBatch.status === 'failed') {
+      return undefined;
+    }
+    const interval = setInterval(() => {
+      placesApi
+        .getImportStatus(importBatch.id)
+        .then((updated) => {
+          setImportBatch(updated);
+          if (updated.status === 'completed' || updated.status === 'failed') {
+            clearInterval(interval);
+            if (updated.status === 'completed') fetchPlaces();
+          }
+        })
+        .catch(() => clearInterval(interval));
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [importBatch, fetchPlaces]);
 
   const handleSelectAll = useCallback(
     (checked: boolean) => {
@@ -200,6 +306,48 @@ export function PlacesView() {
     router.push(`/places/${place.id}/edit`);
   };
 
+  // ── Import handlers ─────────────────────────────────────────────────────────
+  const handleImportClick = () => {
+    importInputRef.current?.click();
+  };
+
+  const handleImportFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+
+    setImportDialogOpen(true);
+    setImportUploading(true);
+    setImportBatch(null);
+    setImportError(null);
+
+    placesApi
+      .importExcel(file)
+      .then((batch) => {
+        setImportBatch(batch);
+        setImportUploading(false);
+        if (batch.status === 'completed') fetchPlaces();
+      })
+      .catch((err: unknown) => {
+        const message =
+          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+          'Upload failed. Please try again.';
+        setImportUploading(false);
+        setImportError(message);
+      });
+  };
+
+  const handleImportClose = () => {
+    const isInProgress =
+      importUploading ||
+      importBatch?.status === 'pending' ||
+      importBatch?.status === 'processing';
+    if (isInProgress) return;
+    setImportDialogOpen(false);
+    setImportBatch(null);
+    setImportError(null);
+  };
+
   return (
     <DashboardContent>
       <Box sx={{ mb: 5, display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
@@ -219,6 +367,7 @@ export function PlacesView() {
           color="inherit"
           size="small"
           startIcon={<Iconify icon="eva:trending-up-fill" width={16} />}
+          onClick={handleImportClick}
         >
           Import Excel
         </Button>
@@ -231,6 +380,15 @@ export function PlacesView() {
           Add Place
         </Button>
       </Box>
+
+      {/* Hidden file input for Excel import */}
+      <input
+        ref={importInputRef}
+        type="file"
+        accept=".xlsx,.xls,.csv"
+        style={{ display: 'none' }}
+        onChange={handleImportFileChange}
+      />
 
       <Card>
         <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
@@ -439,6 +597,14 @@ export function PlacesView() {
         confirmColor="error"
         onClose={() => setBulkDeleteConfirm(false)}
         onConfirm={handleBulkDelete}
+      />
+
+      <ImportDialog
+        open={importDialogOpen}
+        uploading={importUploading}
+        batch={importBatch}
+        error={importError}
+        onClose={handleImportClose}
       />
     </DashboardContent>
   );
