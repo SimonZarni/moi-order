@@ -54,7 +54,12 @@ class AdminPlaceImportService
         $import = new PlacesImport();
         Excel::import($import, $batch->file_path, 'local');
 
-        $rows     = $import->getRows();
+        $rows = $import->getRows()->filter(
+            fn ($row) => collect($row->toArray())
+                ->filter(fn ($v) => trim((string) ($v ?? '')) !== '')
+                ->isNotEmpty()
+        );
+
         $imported = 0;
         $errors   = [];
 
@@ -72,7 +77,7 @@ class AdminPlaceImportService
             }
         }
 
-        $batch->markCompleted(count($rows), $imported, count($errors), $errors);
+        $batch->markCompleted($rows->count(), $imported, count($errors), $errors);
 
         // Clean up temp file after processing is complete.
         Storage::disk('local')->delete($batch->file_path);
