@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\DTOs\GoogleAuthDTO;
 use App\DTOs\LoginDTO;
 use App\DTOs\RegisterDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\GoogleAuthRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Services\AuthService;
+use App\Services\GoogleAuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -21,7 +24,8 @@ use Illuminate\Http\Request;
 class AuthController extends Controller
 {
     public function __construct(
-        private readonly AuthService $authService,
+        private readonly AuthService       $authService,
+        private readonly GoogleAuthService $googleAuthService,
     ) {}
 
     /** POST /api/v1/auth/login — intentionally public */
@@ -48,6 +52,19 @@ class AuthController extends Controller
                 'token' => $result['token'],
             ],
         ], 201);
+    }
+
+    /** POST /api/v1/auth/google — intentionally public */
+    public function googleAuth(GoogleAuthRequest $request): JsonResponse
+    {
+        $result = $this->googleAuthService->authenticate(GoogleAuthDTO::fromRequest($request));
+
+        return response()->json([
+            'data' => [
+                'user'  => new UserResource($result['user']),
+                'token' => $result['token'],
+            ],
+        ]);
     }
 
     /** POST /api/v1/auth/logout — requires auth:sanctum */

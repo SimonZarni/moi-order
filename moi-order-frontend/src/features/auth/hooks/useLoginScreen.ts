@@ -4,6 +4,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMutation } from '@tanstack/react-query';
 
 import { useLoginForm, UseLoginFormResult } from '@/features/auth/hooks/useLoginForm';
+import { useGoogleAuth } from '@/features/auth/hooks/useGoogleAuth';
 import { login } from '@/shared/api/auth';
 import { useAuthStore } from '@/shared/store/authStore';
 import { ApiError } from '@/types/models';
@@ -12,12 +13,14 @@ import { RootStackParamList } from '@/types/navigation';
 export interface UseLoginScreenResult {
   form: UseLoginFormResult['form'];
   isSubmitting: boolean;
+  isGoogleSigningIn: boolean;
   bannerError: string;
   showPassword: boolean;
   handleEmailChange: (value: string) => void;
   handlePasswordChange: (value: string) => void;
   handleTogglePassword: () => void;
   handleSubmit: () => void;
+  handleGoogleSignIn: () => Promise<void>;
   handleGoToRegister: () => void;
 }
 
@@ -25,6 +28,7 @@ export function useLoginScreen(): UseLoginScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { setUser } = useAuthStore();
   const { form, handleEmailChange, handlePasswordChange, validate, applyApiError } = useLoginForm();
+  const { handleGoogleSignIn, isGoogleSigningIn, googleBannerError } = useGoogleAuth();
   const [bannerError, setBannerError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -61,12 +65,14 @@ export function useLoginScreen(): UseLoginScreenResult {
   return {
     form,
     isSubmitting,
-    bannerError,
+    isGoogleSigningIn,
+    bannerError: bannerError || googleBannerError,
     showPassword,
     handleEmailChange,
     handlePasswordChange,
     handleTogglePassword,
     handleSubmit,
+    handleGoogleSignIn,
     handleGoToRegister,
   };
 }

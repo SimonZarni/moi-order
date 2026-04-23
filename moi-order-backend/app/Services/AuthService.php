@@ -27,7 +27,7 @@ class AuthService
     {
         $user = User::where('email', $dto->email)->first();
 
-        if ($user === null || ! Hash::check($dto->password, $user->password)) {
+        if ($user === null || $user->password === null || ! Hash::check($dto->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);

@@ -4,6 +4,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMutation } from '@tanstack/react-query';
 
 import { useRegisterForm, UseRegisterFormResult } from '@/features/auth/hooks/useRegisterForm';
+import { useGoogleAuth } from '@/features/auth/hooks/useGoogleAuth';
 import { register } from '@/shared/api/auth';
 import { useAuthStore } from '@/shared/store/authStore';
 import { ApiError } from '@/types/models';
@@ -12,6 +13,7 @@ import { RootStackParamList } from '@/types/navigation';
 export interface UseRegisterScreenResult {
   form: UseRegisterFormResult['form'];
   isSubmitting: boolean;
+  isGoogleSigningIn: boolean;
   bannerError: string;
   showPassword: boolean;
   handleNameChange: (value: string) => void;
@@ -20,6 +22,7 @@ export interface UseRegisterScreenResult {
   handlePasswordConfirmationChange: (value: string) => void;
   handleTogglePassword: () => void;
   handleSubmit: () => void;
+  handleGoogleSignIn: () => Promise<void>;
   handleGoToLogin: () => void;
 }
 
@@ -35,6 +38,7 @@ export function useRegisterScreen(): UseRegisterScreenResult {
     validate,
     applyApiError,
   } = useRegisterForm();
+  const { handleGoogleSignIn, isGoogleSigningIn, googleBannerError } = useGoogleAuth();
   const [bannerError, setBannerError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -70,7 +74,8 @@ export function useRegisterScreen(): UseRegisterScreenResult {
   return {
     form,
     isSubmitting,
-    bannerError,
+    isGoogleSigningIn,
+    bannerError: bannerError || googleBannerError,
     showPassword,
     handleNameChange,
     handleEmailChange,
@@ -78,6 +83,7 @@ export function useRegisterScreen(): UseRegisterScreenResult {
     handlePasswordConfirmationChange,
     handleTogglePassword,
     handleSubmit,
+    handleGoogleSignIn,
     handleGoToLogin,
   };
 }

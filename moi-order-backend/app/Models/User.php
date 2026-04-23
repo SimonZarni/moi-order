@@ -34,6 +34,7 @@ class User extends Authenticatable
         'password',
         'date_of_birth',
         'is_admin',
+        'google_id',
     ];
 
     /**

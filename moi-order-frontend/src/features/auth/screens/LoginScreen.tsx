@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ErrorBanner } from '@/shared/components/ErrorBanner/ErrorBanner';
 import { FormField } from '@/shared/components/FormField/FormField';
+import { GoogleSignInButton } from '@/shared/components/GoogleSignInButton/GoogleSignInButton';
 import { useLoginScreen } from '@/features/auth/hooks/useLoginScreen';
 import { styles } from './LoginScreen.styles';
 
@@ -18,12 +19,14 @@ export function LoginScreen(): React.JSX.Element {
   const {
     form,
     isSubmitting,
+    isGoogleSigningIn,
     bannerError,
     showPassword,
     handleEmailChange,
     handlePasswordChange,
     handleTogglePassword,
     handleSubmit,
+    handleGoogleSignIn,
     handleGoToRegister,
   } = useLoginScreen();
 
@@ -96,6 +99,18 @@ export function LoginScreen(): React.JSX.Element {
             >
               <Text style={styles.submitText}>{isSubmitting ? 'Signing in…' : 'Sign In'}</Text>
             </Pressable>
+
+            <View style={styles.dividerRow}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <GoogleSignInButton
+              onPress={handleGoogleSignIn}
+              isLoading={isGoogleSigningIn}
+              disabled={isSubmitting}
+            />
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>Don't have an account?</Text>
