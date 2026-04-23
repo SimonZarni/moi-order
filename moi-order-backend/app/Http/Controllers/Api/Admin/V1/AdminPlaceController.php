@@ -7,15 +7,19 @@ namespace App\Http\Controllers\Api\Admin\V1;
 use App\DTOs\AdminStorePlaceDTO;
 use App\DTOs\AdminUpdatePlaceDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\AdminImportPlacesRequest;
 use App\Http\Requests\Admin\AdminPlaceIndexRequest;
 use App\Http\Requests\Admin\AdminReorderPlaceImagesRequest;
 use App\Http\Requests\Admin\AdminStorePlaceRequest;
 use App\Http\Requests\Admin\AdminUpdatePlaceRequest;
 use App\Http\Requests\Admin\AdminUploadPlaceImagesRequest;
+use App\Http\Resources\Admin\AdminPlaceImportBatchResource;
 use App\Http\Resources\Admin\AdminPlaceResource;
 use App\Http\Resources\PlaceImageResource;
 use App\Models\Place;
 use App\Models\PlaceImage;
+use App\Models\PlaceImportBatch;
+use App\Services\AdminPlaceImportService;
 use App\Services\AdminPlaceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -25,7 +29,24 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
  */
 class AdminPlaceController extends Controller
 {
-    public function __construct(private readonly AdminPlaceService $service) {}
+    public function __construct(
+        private readonly AdminPlaceService $service,
+        private readonly AdminPlaceImportService $importService,
+    ) {}
+
+    /** POST /api/admin/v1/places/import */
+    public function import(AdminImportPlacesRequest $request): JsonResponse
+    {
+        $batch = $this->importService->queue($request->file('file'));
+
+        return response()->json(['data' => new AdminPlaceImportBatchResource($batch)], 202);
+    }
+
+    /** GET /api/admin/v1/places/import/{batch} */
+    public function importStatus(PlaceImportBatch $batch): JsonResponse
+    {
+        return response()->json(['data' => new AdminPlaceImportBatchResource($batch)]);
+    }
 
     /** GET /api/admin/v1/places */
     public function index(AdminPlaceIndexRequest $request): AnonymousResourceCollection
