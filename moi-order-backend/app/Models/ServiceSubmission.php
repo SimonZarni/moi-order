@@ -129,6 +129,15 @@ class ServiceSubmission extends Model implements PayableInterface
         ]);
     }
 
+    /** Replace an existing result file. Only callable on an already-Completed submission. */
+    public function replaceResultFile(string $resultPath): void
+    {
+        if ($this->status !== SubmissionStatus::Completed) {
+            return;
+        }
+        $this->update(['result_path' => $resultPath]);
+    }
+
     /** Cancel the submission. Admin-triggered; irreversible. */
     public function cancel(): void
     {

@@ -120,14 +120,18 @@ class AdminSubmissionService
      */
     public function uploadResultFile(ServiceSubmission $submission, UploadedFile $file): ServiceSubmission
     {
-        if ($submission->status !== SubmissionStatus::Processing) {
+        if (! in_array($submission->status, [SubmissionStatus::Processing, SubmissionStatus::Completed], true)) {
             throw new DomainException('submission.not_processing');
         }
 
         $path = $this->fileStorage->store($file, 'results', ['application/pdf', 'image/jpeg', 'image/png']);
 
         DB::transaction(function () use ($submission, $path): void {
-            $submission->markCompleted($path);
+            if ($submission->status === SubmissionStatus::Processing) {
+                $submission->markCompleted($path);
+            } else {
+                $submission->replaceResultFile($path);
+            }
         });
 
         Log::info('submission.result_uploaded', ['submission_id' => $submission->id]);
