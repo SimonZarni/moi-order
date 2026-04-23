@@ -7,6 +7,8 @@ import { useLoginForm, UseLoginFormResult } from '@/features/auth/hooks/useLogin
 import { useGoogleAuth } from '@/features/auth/hooks/useGoogleAuth';
 import { login } from '@/shared/api/auth';
 import { useAuthStore } from '@/shared/store/authStore';
+import { DOMAIN_ERROR_MESSAGES } from '@/shared/constants/errorCodes';
+import { MESSAGES } from '@/shared/constants/messages';
 import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 
@@ -44,7 +46,7 @@ export function useLoginScreen(): UseLoginScreenResult {
       if (error.status === 422 && error.errors !== undefined) {
         applyApiError(error.errors);
       } else {
-        setBannerError(error.message ?? 'Something went wrong. Please try again.');
+        setBannerError(DOMAIN_ERROR_MESSAGES[error.code] ?? MESSAGES.genericError);
       }
     },
   });

@@ -7,23 +7,31 @@ import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
 import Stack from '@mui/material/Stack';
 import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
 import Select from '@mui/material/Select';
+import Switch from '@mui/material/Switch';
 import MenuItem from '@mui/material/MenuItem';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
+import TextField from '@mui/material/TextField';
 import InputLabel from '@mui/material/InputLabel';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import DialogTitle from '@mui/material/DialogTitle';
 import FormControl from '@mui/material/FormControl';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { fDate } from 'src/utils/format-time';
+import { fDate, fDateTime } from 'src/utils/format-time';
 
 import { type UserData, usersApi } from 'src/api/users';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -37,13 +45,68 @@ import { Scrollbar } from 'src/components/scrollbar';
 type StatusLabelColor = 'success' | 'warning' | 'error' | 'default';
 
 function getAccountStatus(row: UserData): { label: string; color: StatusLabelColor } {
-  if (row.deleted_at) return { label: 'Deleted',   color: 'error' };
-  if (row.status === 'banned')    return { label: 'Banned',    color: 'error' };
-  if (row.status === 'suspended') return { label: 'Suspended', color: 'warning' };
+  if (row.deleted_at)          return { label: 'Deleted',   color: 'error' };
+  if (row.status === 'banned') return { label: 'Banned',    color: 'error' };
+  if (row.status === 'suspended') {
+    const label = row.suspended_until
+      ? `Suspended until ${fDate(row.suspended_until)}`
+      : 'Suspended';
+    return { label, color: 'warning' };
+  }
   return { label: 'Active', color: 'success' };
 }
 
-// ----------------------------------------------------------------------
+// ── Suspend dialog ───────────────────────────────────────────────────────────
+
+interface SuspendDialogProps {
+  name: string;
+  open: boolean;
+  onClose: () => void;
+  onConfirm: (suspendedUntil: string | null) => void;
+}
+
+function SuspendDialog({ name, open, onClose, onConfirm }: SuspendDialogProps) {
+  const [indefinite, setIndefinite] = useState(true);
+  const [until, setUntil] = useState('');
+
+  const handleConfirm = () => {
+    onConfirm(indefinite ? null : until || null);
+  };
+
+  const confirmDisabled = !indefinite && !until;
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogTitle>Suspend {name}</DialogTitle>
+      <DialogContent>
+        <FormControlLabel
+          control={<Switch checked={indefinite} onChange={(e) => setIndefinite(e.target.checked)} />}
+          label="Suspend indefinitely"
+          sx={{ mb: 2, mt: 0.5 }}
+        />
+        {!indefinite && (
+          <TextField
+            label="Suspend until"
+            type="datetime-local"
+            fullWidth
+            value={until}
+            onChange={(e) => setUntil(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            inputProps={{ min: new Date().toISOString().slice(0, 16) }}
+          />
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={handleConfirm} color="warning" variant="contained" disabled={confirmDisabled}>
+          Suspend
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+// ── Main view ────────────────────────────────────────────────────────────────
 
 export function UsersView() {
   const [users, setUsers] = useState<UserData[]>([]);
@@ -54,6 +117,8 @@ export function UsersView() {
   const [filterName, setFilterName] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+
+  const [suspendDialog, setSuspendDialog] = useState<{ open: boolean; userId: number; userName: string } | null>(null);
 
   const fetchUsers = useCallback(() => {
     setLoading(true);
@@ -91,12 +156,17 @@ export function UsersView() {
     usersApi.destroy(id).then(() => removeRow(id)).catch(() => {});
   }, [removeRow]);
 
-  const handleSuspend = useCallback((id: number) => {
-    usersApi.suspend(id).then((u) => updateRow(id, u)).catch(() => {});
-  }, [updateRow]);
+  const handleSuspendConfirm = useCallback((suspendedUntil: string | null) => {
+    if (!suspendDialog) return;
+    const { userId } = suspendDialog;
+    setSuspendDialog(null);
+    // Convert datetime-local string to ISO if provided
+    const isoUntil = suspendedUntil ? new Date(suspendedUntil).toISOString() : null;
+    usersApi.suspend(userId, isoUntil).then((u) => updateRow(userId, u)).catch(() => {});
+  }, [suspendDialog, updateRow]);
 
   const handleBan = useCallback((id: number) => {
-    if (!window.confirm('Ban this user? They will be blocked from logging in.')) return;
+    if (!window.confirm('Ban this user? They will be permanently blocked from logging in.')) return;
     usersApi.ban(id).then((u) => updateRow(id, u)).catch(() => {});
   }, [updateRow]);
 
@@ -107,7 +177,7 @@ export function UsersView() {
   const filtered = users.filter((u) => {
     if (filterRole === 'admin' && !u.is_admin) return false;
     if (filterRole === 'user'  &&  u.is_admin) return false;
-    if (filterStatus === 'deleted'   && !u.deleted_at)              return false;
+    if (filterStatus === 'deleted'   && !u.deleted_at)                          return false;
     if (filterStatus === 'active'    && (u.deleted_at || u.status !== 'active'))    return false;
     if (filterStatus === 'suspended' && (u.deleted_at || u.status !== 'suspended')) return false;
     if (filterStatus === 'banned'    && (u.deleted_at || u.status !== 'banned'))    return false;
@@ -177,7 +247,7 @@ export function UsersView() {
                   <>
                     {filtered.map((row) => {
                       const accountStatus = getAccountStatus(row);
-                      const isDeleted = Boolean(row.deleted_at);
+                      const isDeleted    = Boolean(row.deleted_at);
                       const isRestricted = row.status !== 'active';
 
                       return (
@@ -203,7 +273,14 @@ export function UsersView() {
                           </TableCell>
                           <TableCell>{fDate(row.created_at)}</TableCell>
                           <TableCell>
-                            <Label color={accountStatus.color}>{accountStatus.label}</Label>
+                            <Stack spacing={0.25}>
+                              <Label color={accountStatus.color}>{accountStatus.label}</Label>
+                              {row.status === 'suspended' && row.suspended_until && (
+                                <Typography variant="caption" color="text.disabled">
+                                  until {fDateTime(row.suspended_until)}
+                                </Typography>
+                              )}
+                            </Stack>
                           </TableCell>
                           <TableCell align="right">
                             <Stack direction="row" justifyContent="flex-end" spacing={0.5}>
@@ -215,16 +292,16 @@ export function UsersView() {
                                 <>
                                   {isRestricted ? (
                                     <IconButton size="small" color="success" onClick={() => handleActivate(row.id)} title="Activate account">
-                                      <Iconify icon="eva:checkmark-circle-2-fill" width={16} />
+                                      <Iconify icon="eva:checkmark-fill" width={16} />
                                     </IconButton>
                                   ) : (
-                                    <IconButton size="small" color="warning" onClick={() => handleSuspend(row.id)} title="Suspend account">
-                                      <Iconify icon="eva:pause-circle-fill" width={16} />
+                                    <IconButton size="small" color="warning" onClick={() => setSuspendDialog({ open: true, userId: row.id, userName: row.name })} title="Suspend account">
+                                      <Iconify icon="solar:pause-bold" width={16} />
                                     </IconButton>
                                   )}
                                   {row.status !== 'banned' && (
                                     <IconButton size="small" color="error" onClick={() => handleBan(row.id)} title="Ban account">
-                                      <Iconify icon="solar:forbidden-bold" width={16} />
+                                      <Iconify icon="solar:stop-bold" width={16} />
                                     </IconButton>
                                   )}
                                   <IconButton size="small" onClick={() => handleToggleAdmin(row.id)} title={row.is_admin ? 'Remove admin' : 'Make admin'}>
@@ -264,6 +341,15 @@ export function UsersView() {
           onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
         />
       </Card>
+
+      {suspendDialog && (
+        <SuspendDialog
+          name={suspendDialog.userName}
+          open={suspendDialog.open}
+          onClose={() => setSuspendDialog(null)}
+          onConfirm={handleSuspendConfirm}
+        />
+      )}
     </DashboardContent>
   );
 }

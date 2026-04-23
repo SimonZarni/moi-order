@@ -6,6 +6,9 @@ import { GoogleSignin, statusCodes } from '@/shared/utils/googleSignin';
 
 import { googleAuth } from '@/shared/api/auth';
 import { useAuthStore } from '@/shared/store/authStore';
+import { DOMAIN_ERROR_MESSAGES } from '@/shared/constants/errorCodes';
+import { MESSAGES } from '@/shared/constants/messages';
+import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 
 export interface UseGoogleAuthResult {
@@ -36,11 +39,19 @@ export function useGoogleAuth(): UseGoogleAuthResult {
       setUser(user, token);
       navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
     } catch (error: unknown) {
-      const code = (error as { code?: string }).code;
-      if (code === statusCodes.SIGN_IN_CANCELLED) {
+      // Google SDK errors carry a string `code` but no numeric `status`.
+      // ApiErrors (from our backend) carry both `code` and `status`.
+      const asGoogle = error as { code?: string };
+      if (asGoogle.code === statusCodes.SIGN_IN_CANCELLED) {
         return;
       }
-      setGoogleBannerError('Google sign-in failed. Please try again.');
+
+      const asApiError = error as ApiError;
+      if (typeof asApiError.status === 'number') {
+        setGoogleBannerError(DOMAIN_ERROR_MESSAGES[asApiError.code] ?? MESSAGES.genericError);
+      } else {
+        setGoogleBannerError('Google sign-in failed. Please try again.');
+      }
     } finally {
       setIsGoogleSigningIn(false);
     }
