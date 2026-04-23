@@ -40,6 +40,13 @@ readonly class PlaceImportRowDTO
      */
     public static function fromRow(array $row): self
     {
+        // Normalise keys: the WithHeadingRow formatter may produce hyphens or underscores
+        // depending on the excel config. Always convert to underscores for consistent lookup.
+        $row = array_combine(
+            array_map(static fn ($k) => str_replace('-', '_', strtolower((string) $k)), array_keys($row)),
+            array_values($row)
+        );
+
         $str = static fn (mixed $v): string => trim((string) ($v ?? ''));
         $opt = static fn (mixed $v): ?string => ($s = trim((string) ($v ?? ''))) !== '' ? $s : null;
 
