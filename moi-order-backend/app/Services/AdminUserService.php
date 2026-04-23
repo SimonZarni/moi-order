@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\DTOs\AdminCreateUserDTO;
 use App\DTOs\AdminUpdateUserDTO;
+use App\Enums\UserStatusEnum;
 use App\Exceptions\DomainException;
 use App\Http\Requests\Admin\AdminUserIndexRequest;
 use App\Models\User;
@@ -89,10 +90,75 @@ class AdminUserService
         return $user->fresh();
     }
 
-    public function destroy(User $user): void
+    public function destroy(User $user, User $actor): void
     {
+        if ($actor->id === $user->id) {
+            throw new DomainException('user.cannot_delete_self');
+        }
+
+        if ($user->is_admin && $this->isLastActiveAdmin($user)) {
+            throw new DomainException('user.last_admin_cannot_be_deleted');
+        }
+
         // Revoke all tokens before soft-deleting — defence in depth.
         $user->tokens()->delete();
         $user->delete();
+    }
+
+    public function suspend(User $user, User $actor): User
+    {
+        if ($actor->id === $user->id) {
+            throw new DomainException('user.cannot_restrict_self');
+        }
+
+        if ($user->deleted_at !== null) {
+            throw new DomainException('user.cannot_restrict_deleted_user');
+        }
+
+        if ($user->is_admin && $this->isLastActiveAdmin($user)) {
+            throw new DomainException('user.last_admin_cannot_be_restricted');
+        }
+
+        $user->tokens()->delete();
+        $user->suspend();
+
+        return $user->fresh();
+    }
+
+    public function ban(User $user, User $actor): User
+    {
+        if ($actor->id === $user->id) {
+            throw new DomainException('user.cannot_restrict_self');
+        }
+
+        if ($user->deleted_at !== null) {
+            throw new DomainException('user.cannot_restrict_deleted_user');
+        }
+
+        if ($user->is_admin && $this->isLastActiveAdmin($user)) {
+            throw new DomainException('user.last_admin_cannot_be_restricted');
+        }
+
+        $user->tokens()->delete();
+        $user->ban();
+
+        return $user->fresh();
+    }
+
+    public function activate(User $user): User
+    {
+        $user->activate();
+
+        return $user->fresh();
+    }
+
+    /** True when this admin is the only one who is active and not soft-deleted. */
+    private function isLastActiveAdmin(User $user): bool
+    {
+        return $user->is_admin
+            && User::where('is_admin', true)
+                ->where('status', UserStatusEnum::Active->value)
+                ->whereNull('deleted_at')
+                ->count() === 1;
     }
 }

@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { GoogleSignin, statusCodes } from '@/shared/utils/googleSignin';
 
 import { googleAuth } from '@/shared/api/auth';
 import { useAuthStore } from '@/shared/store/authStore';

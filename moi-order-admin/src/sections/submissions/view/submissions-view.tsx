@@ -82,7 +82,7 @@ export function SubmissionsView() {
   const [serviceOptions, setServiceOptions] = useState<ServiceOption[]>([]);
 
   useEffect(() => {
-    servicesApi.list().then((data) => setServiceOptions(data.map((s) => ({ id: s.id, name: s.name })))).catch(() => {});
+    servicesApi.list().then((data) => setServiceOptions(data.map((s) => ({ id: s.id, name: s.name_mm ?? s.name })))).catch(() => {});
   }, []);
 
   const fetchSubmissions = useCallback(() => {

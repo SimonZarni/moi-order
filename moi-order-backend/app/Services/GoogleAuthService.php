@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\DTOs\GoogleAuthDTO;
+use App\Exceptions\DomainException;
 use App\Models\User;
 use Google\Client as GoogleClient;
 use Illuminate\Validation\ValidationException;
@@ -41,6 +42,11 @@ class GoogleAuthService
         $name     = (string) ($payload['name'] ?? $email);
 
         $user = $this->findOrCreateUser($googleId, $email, $name);
+
+        if ($user->isRestricted()) {
+            $code = $user->status->value === 'banned' ? 'account.banned' : 'account.suspended';
+            throw new DomainException($code, 403);
+        }
 
         $token = $user->createToken('user-auth', ['user'], now()->addDays(30))->plainTextToken;
 

@@ -34,6 +34,17 @@ import { Scrollbar } from 'src/components/scrollbar';
 
 // ----------------------------------------------------------------------
 
+type StatusLabelColor = 'success' | 'warning' | 'error' | 'default';
+
+function getAccountStatus(row: UserData): { label: string; color: StatusLabelColor } {
+  if (row.deleted_at) return { label: 'Deleted',   color: 'error' };
+  if (row.status === 'banned')    return { label: 'Banned',    color: 'error' };
+  if (row.status === 'suspended') return { label: 'Suspended', color: 'warning' };
+  return { label: 'Active', color: 'success' };
+}
+
+// ----------------------------------------------------------------------
+
 export function UsersView() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [total, setTotal] = useState(0);
@@ -41,7 +52,8 @@ export function UsersView() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [filterName, setFilterName] = useState('');
-  const [filterAdmin, setFilterAdmin] = useState('all');
+  const [filterRole, setFilterRole] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
 
   const fetchUsers = useCallback(() => {
     setLoading(true);
@@ -55,27 +67,52 @@ export function UsersView() {
       .finally(() => setLoading(false));
   }, [page, rowsPerPage, filterName]);
 
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+
+  const updateRow = useCallback((id: number, updated: UserData) => {
+    setUsers((prev) => prev.map((u) => (u.id === id ? updated : u)));
+  }, []);
+
+  const removeRow = useCallback((id: number) => {
+    setUsers((prev) => prev.filter((u) => u.id !== id));
+    setTotal((t) => t - 1);
+  }, []);
 
   const handleToggleAdmin = useCallback((id: number) => {
-    usersApi.toggleAdmin(id)
-      .then((updated) => setUsers((prev) => prev.map((u) => (u.id === id ? updated : u))))
-      .catch(() => {});
-  }, []);
+    usersApi.toggleAdmin(id).then((u) => updateRow(id, u)).catch(() => {});
+  }, [updateRow]);
 
   const handleRestore = useCallback((id: number) => {
-    usersApi.restore(id)
-      .then((updated) => setUsers((prev) => prev.map((u) => (u.id === id ? updated : u))))
-      .catch(() => {});
-  }, []);
+    usersApi.restore(id).then((u) => updateRow(id, u)).catch(() => {});
+  }, [updateRow]);
 
-  const filtered = filterAdmin === 'all'
-    ? users
-    : filterAdmin === 'admin'
-      ? users.filter((u) => u.is_admin)
-      : users.filter((u) => !u.is_admin);
+  const handleDelete = useCallback((id: number, name: string) => {
+    if (!window.confirm(`Delete ${name}? This can be undone with Restore.`)) return;
+    usersApi.destroy(id).then(() => removeRow(id)).catch(() => {});
+  }, [removeRow]);
+
+  const handleSuspend = useCallback((id: number) => {
+    usersApi.suspend(id).then((u) => updateRow(id, u)).catch(() => {});
+  }, [updateRow]);
+
+  const handleBan = useCallback((id: number) => {
+    if (!window.confirm('Ban this user? They will be blocked from logging in.')) return;
+    usersApi.ban(id).then((u) => updateRow(id, u)).catch(() => {});
+  }, [updateRow]);
+
+  const handleActivate = useCallback((id: number) => {
+    usersApi.activate(id).then((u) => updateRow(id, u)).catch(() => {});
+  }, [updateRow]);
+
+  const filtered = users.filter((u) => {
+    if (filterRole === 'admin' && !u.is_admin) return false;
+    if (filterRole === 'user'  &&  u.is_admin) return false;
+    if (filterStatus === 'deleted'   && !u.deleted_at)              return false;
+    if (filterStatus === 'active'    && (u.deleted_at || u.status !== 'active'))    return false;
+    if (filterStatus === 'suspended' && (u.deleted_at || u.status !== 'suspended')) return false;
+    if (filterStatus === 'banned'    && (u.deleted_at || u.status !== 'banned'))    return false;
+    return true;
+  });
 
   return (
     <DashboardContent>
@@ -91,14 +128,24 @@ export function UsersView() {
             onChange={(e) => { setFilterName(e.target.value); setPage(0); }}
             placeholder="Search by name or email..."
             startAdornment={<InputAdornment position="start"><Iconify icon="eva:search-fill" /></InputAdornment>}
-            sx={{ flexGrow: 1, maxWidth: 320, height: 40 }}
+            sx={{ flexGrow: 1, maxWidth: 280, height: 40 }}
           />
-          <FormControl size="small" sx={{ minWidth: 140 }}>
+          <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Role</InputLabel>
-            <Select value={filterAdmin} label="Role" onChange={(e: SelectChangeEvent) => setFilterAdmin(e.target.value)}>
+            <Select value={filterRole} label="Role" onChange={(e: SelectChangeEvent) => setFilterRole(e.target.value)}>
               <MenuItem value="all">All</MenuItem>
               <MenuItem value="admin">Admin</MenuItem>
               <MenuItem value="user">User</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={{ minWidth: 130 }}>
+            <InputLabel>Status</InputLabel>
+            <Select value={filterStatus} label="Status" onChange={(e: SelectChangeEvent) => setFilterStatus(e.target.value)}>
+              <MenuItem value="all">All</MenuItem>
+              <MenuItem value="active">Active</MenuItem>
+              <MenuItem value="suspended">Suspended</MenuItem>
+              <MenuItem value="banned">Banned</MenuItem>
+              <MenuItem value="deleted">Deleted</MenuItem>
             </Select>
           </FormControl>
           <Typography variant="body2" sx={{ ml: 'auto', color: 'text.secondary' }}>
@@ -108,7 +155,7 @@ export function UsersView() {
 
         <Scrollbar>
           <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 700 }}>
+            <Table sx={{ minWidth: 750 }}>
               <TableHead>
                 <TableRow>
                   <TableCell>User</TableCell>
@@ -128,46 +175,71 @@ export function UsersView() {
                   </TableRow>
                 ) : (
                   <>
-                    {filtered.map((row) => (
-                      <TableRow key={row.id} hover sx={{ opacity: row.deleted_at ? 0.55 : 1 }}>
-                        <TableCell>
-                          <Stack direction="row" alignItems="center" spacing={1.5}>
-                            <Avatar alt={row.name}>{row.name.charAt(0).toUpperCase()}</Avatar>
-                            <Box>
-                              <Typography variant="body2" fontWeight={600}>{row.name}</Typography>
-                              <Typography variant="caption" color="text.secondary">{row.email}</Typography>
-                            </Box>
-                          </Stack>
-                        </TableCell>
-                        <TableCell>
-                          <Label color={row.is_admin ? 'primary' : 'default'}>
-                            {row.is_admin ? 'Admin' : 'User'}
-                          </Label>
-                        </TableCell>
-                        <TableCell>
-                          {row.email_verified_at
-                            ? <Label color="success">Verified</Label>
-                            : <Label color="warning">Unverified</Label>}
-                        </TableCell>
-                        <TableCell>{fDate(row.created_at)}</TableCell>
-                        <TableCell>
-                          <Label color={row.deleted_at ? 'error' : 'success'}>
-                            {row.deleted_at ? 'Deleted' : 'Active'}
-                          </Label>
-                        </TableCell>
-                        <TableCell align="right">
-                          {row.deleted_at ? (
-                            <IconButton size="small" color="primary" onClick={() => handleRestore(row.id)} title="Restore">
-                              <Iconify icon="eva:checkmark-fill" width={16} />
-                            </IconButton>
-                          ) : (
-                            <IconButton size="small" onClick={() => handleToggleAdmin(row.id)} title={row.is_admin ? 'Remove admin' : 'Make admin'}>
-                              <Iconify icon={row.is_admin ? 'solar:eye-closed-bold' : 'solar:check-circle-bold'} width={16} />
-                            </IconButton>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {filtered.map((row) => {
+                      const accountStatus = getAccountStatus(row);
+                      const isDeleted = Boolean(row.deleted_at);
+                      const isRestricted = row.status !== 'active';
+
+                      return (
+                        <TableRow key={row.id} hover sx={{ opacity: isDeleted ? 0.55 : 1 }}>
+                          <TableCell>
+                            <Stack direction="row" alignItems="center" spacing={1.5}>
+                              <Avatar alt={row.name}>{row.name.charAt(0).toUpperCase()}</Avatar>
+                              <Box>
+                                <Typography variant="body2" fontWeight={600}>{row.name}</Typography>
+                                <Typography variant="caption" color="text.secondary">{row.email}</Typography>
+                              </Box>
+                            </Stack>
+                          </TableCell>
+                          <TableCell>
+                            <Label color={row.is_admin ? 'primary' : 'default'}>
+                              {row.is_admin ? 'Admin' : 'User'}
+                            </Label>
+                          </TableCell>
+                          <TableCell>
+                            {row.email_verified_at
+                              ? <Label color="success">Verified</Label>
+                              : <Label color="warning">Unverified</Label>}
+                          </TableCell>
+                          <TableCell>{fDate(row.created_at)}</TableCell>
+                          <TableCell>
+                            <Label color={accountStatus.color}>{accountStatus.label}</Label>
+                          </TableCell>
+                          <TableCell align="right">
+                            <Stack direction="row" justifyContent="flex-end" spacing={0.5}>
+                              {isDeleted ? (
+                                <IconButton size="small" color="primary" onClick={() => handleRestore(row.id)} title="Restore account">
+                                  <Iconify icon="eva:checkmark-fill" width={16} />
+                                </IconButton>
+                              ) : (
+                                <>
+                                  {isRestricted ? (
+                                    <IconButton size="small" color="success" onClick={() => handleActivate(row.id)} title="Activate account">
+                                      <Iconify icon="eva:checkmark-circle-2-fill" width={16} />
+                                    </IconButton>
+                                  ) : (
+                                    <IconButton size="small" color="warning" onClick={() => handleSuspend(row.id)} title="Suspend account">
+                                      <Iconify icon="eva:pause-circle-fill" width={16} />
+                                    </IconButton>
+                                  )}
+                                  {row.status !== 'banned' && (
+                                    <IconButton size="small" color="error" onClick={() => handleBan(row.id)} title="Ban account">
+                                      <Iconify icon="solar:forbidden-bold" width={16} />
+                                    </IconButton>
+                                  )}
+                                  <IconButton size="small" onClick={() => handleToggleAdmin(row.id)} title={row.is_admin ? 'Remove admin' : 'Make admin'}>
+                                    <Iconify icon={row.is_admin ? 'solar:eye-closed-bold' : 'solar:check-circle-bold'} width={16} />
+                                  </IconButton>
+                                  <IconButton size="small" color="error" onClick={() => handleDelete(row.id, row.name)} title="Delete account">
+                                    <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                                  </IconButton>
+                                </>
+                              )}
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                     {filtered.length === 0 && (
                       <TableRow>
                         <TableCell colSpan={6} align="center" sx={{ py: 6, color: 'text.secondary' }}>

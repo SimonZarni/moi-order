@@ -62,6 +62,9 @@ Route::prefix('users')->name('admin.users.')->group(function (): void {
     // Restore requires withTrashed lookup — plain int $id, not route model binding
     Route::patch('/{id}/restore',      [AdminUserController::class, 'restore'])->name('restore')->whereNumber('id');
     Route::patch('/{user}/toggle-admin', [AdminUserController::class, 'toggleAdmin'])->name('toggle-admin');
+    Route::patch('/{user}/suspend',    [AdminUserController::class, 'suspend'])->name('suspend');
+    Route::patch('/{user}/ban',        [AdminUserController::class, 'ban'])->name('ban');
+    Route::patch('/{user}/activate',   [AdminUserController::class, 'activate'])->name('activate');
 });
 
 // ── Payments ──────────────────────────────────────────────────────────────────

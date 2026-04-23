@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\UserStatusEnum;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -34,6 +35,7 @@ class User extends Authenticatable
         'password',
         'date_of_birth',
         'is_admin',
+        'status',
         'google_id',
     ];
 
@@ -60,18 +62,37 @@ class User extends Authenticatable
             'password'          => 'hashed',
             'date_of_birth'     => 'date:Y-m-d',
             'is_admin'          => 'boolean',
+            'status'            => UserStatusEnum::class,
         ];
     }
 
     // ─── Domain methods ───────────────────────────────────────────────────────
 
-    /**
-     * Principle: Tell-Don't-Ask — consumers ask the model, not the raw flag.
-     * Principle: Encapsulation — is_admin detail stays inside the model.
-     */
+    /** Principle: Tell-Don't-Ask — consumers ask the model, not the raw flag. */
     public function isAdmin(): bool
     {
         return $this->is_admin === true;
+    }
+
+    /** Returns true for suspended or banned — any state that blocks access. */
+    public function isRestricted(): bool
+    {
+        return $this->status->isRestricted();
+    }
+
+    public function suspend(): void
+    {
+        $this->update(['status' => UserStatusEnum::Suspended]);
+    }
+
+    public function ban(): void
+    {
+        $this->update(['status' => UserStatusEnum::Banned]);
+    }
+
+    public function activate(): void
+    {
+        $this->update(['status' => UserStatusEnum::Active]);
     }
 
     // ─── Relationships ────────────────────────────────────────────────────────

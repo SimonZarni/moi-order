@@ -14,6 +14,7 @@ use App\Http\Resources\Admin\AdminUserResource;
 use App\Models\User;
 use App\Services\AdminUserService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
@@ -52,9 +53,11 @@ class AdminUserController extends Controller
     }
 
     /** DELETE /api/admin/v1/users/{user} */
-    public function destroy(User $user): JsonResponse
+    public function destroy(User $user, Request $request): JsonResponse
     {
-        $this->service->destroy($user);
+        /** @var User $actor */
+        $actor = $request->user();
+        $this->service->destroy($user, $actor);
 
         return response()->json(null, 204);
     }
@@ -73,5 +76,33 @@ class AdminUserController extends Controller
         $user = $this->service->toggleAdmin($user);
 
         return response()->json(['data' => new AdminUserResource($user)]);
+    }
+
+    /** PATCH /api/admin/v1/users/{user}/suspend */
+    public function suspend(User $user, Request $request): JsonResponse
+    {
+        /** @var User $actor */
+        $actor = $request->user();
+        $updated = $this->service->suspend($user, $actor);
+
+        return response()->json(['data' => new AdminUserResource($updated)]);
+    }
+
+    /** PATCH /api/admin/v1/users/{user}/ban */
+    public function ban(User $user, Request $request): JsonResponse
+    {
+        /** @var User $actor */
+        $actor = $request->user();
+        $updated = $this->service->ban($user, $actor);
+
+        return response()->json(['data' => new AdminUserResource($updated)]);
+    }
+
+    /** PATCH /api/admin/v1/users/{user}/activate */
+    public function activate(User $user): JsonResponse
+    {
+        $updated = $this->service->activate($user);
+
+        return response()->json(['data' => new AdminUserResource($updated)]);
     }
 }

@@ -24,7 +24,7 @@ import { enableScreens } from 'react-native-screens';
 
 enableScreens(true);
 
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { GoogleSignin } from '@/shared/utils/googleSignin';
 
 import { setMemoryToken, setMemoryLocale } from '@/shared/api/client';
 import { fetchMe } from '@/shared/api/auth';
