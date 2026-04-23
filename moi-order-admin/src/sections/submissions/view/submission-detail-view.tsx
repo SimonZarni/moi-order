@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
@@ -61,6 +61,10 @@ export function SubmissionDetailView() {
   const [saving, setSaving] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [confirmError, setConfirmError] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -82,6 +86,41 @@ export function SubmissionDetailView() {
     submissionsApi.updateStatus(id, status).then(() => {
       if (submission) setSubmission({ ...submission, status });
     }).catch(() => {}).finally(() => setSaving(false));
+  };
+
+  const handleUploadResult = () => {
+    if (!id || !selectedFile) return;
+    setUploading(true);
+    setUploadError('');
+    submissionsApi
+      .uploadResultFile(id, selectedFile)
+      .then((data) => {
+        setSubmission(data);
+        setSelectedFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      })
+      .catch(() => setUploadError('Upload failed. Please try again.'))
+      .finally(() => setUploading(false));
+  };
+
+  const handleDownloadResult = () => {
+    if (!id) return;
+    submissionsApi.downloadResultFile(id).then(({ blob, contentType }) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `result-${id}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }).catch(() => {});
+  };
+
+  const handleViewResult = () => {
+    if (!id) return;
+    submissionsApi.downloadResultFile(id).then(({ blob, contentType }) => {
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    }).catch(() => {});
   };
 
   const handleConfirmPayment = () => {
@@ -237,6 +276,78 @@ export function SubmissionDetailView() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Result File */}
+            {(submission.status === 'processing' || submission.status === 'completed') && (
+              <Card>
+                <CardHeader
+                  title="Result File"
+                  action={submission.has_result && (
+                    <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 700, px: 1 }}>
+                      Uploaded
+                    </Typography>
+                  )}
+                />
+                <CardContent>
+                  {submission.status === 'processing' && (
+                    <>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="application/pdf,image/jpeg,image/jpg,image/png"
+                        style={{ display: 'none' }}
+                        onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
+                      />
+                      <Button
+                        fullWidth
+                        variant="outlined"
+                        startIcon={<Iconify icon="mingcute:add-line" width={16} />}
+                        onClick={() => fileInputRef.current?.click()}
+                        sx={{ mb: 1 }}
+                      >
+                        {selectedFile ? selectedFile.name : 'Select PDF or Image'}
+                      </Button>
+                      {uploadError && <Alert severity="error" sx={{ mb: 1, py: 0.5 }}>{uploadError}</Alert>}
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        disabled={!selectedFile || uploading}
+                        onClick={handleUploadResult}
+                        startIcon={uploading ? <CircularProgress size={14} color="inherit" /> : <Iconify icon="eva:arrow-ios-upward-fill" width={16} />}
+                      >
+                        {uploading ? 'Uploading…' : 'Upload Result'}
+                      </Button>
+                    </>
+                  )}
+                  {submission.has_result && (
+                    <Stack direction="row" spacing={1} sx={{ mt: submission.status === 'processing' ? 2 : 0 }}>
+                      <Button
+                        fullWidth
+                        variant="outlined"
+                        startIcon={<Iconify icon="solar:eye-bold" width={16} />}
+                        onClick={handleViewResult}
+                      >
+                        View
+                      </Button>
+                      <Button
+                        fullWidth
+                        variant="outlined"
+                        startIcon={<Iconify icon="eva:arrow-ios-downward-fill" width={16} />}
+                        onClick={handleDownloadResult}
+                      >
+                        Download
+                      </Button>
+                    </Stack>
+                  )}
+                  {!submission.has_result && submission.status === 'completed' && (
+                    <Typography variant="body2" color="text.disabled" sx={{ textAlign: 'center', py: 1 }}>
+                      No result file was uploaded.
+                    </Typography>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Payment */}
             {submission.payment && (

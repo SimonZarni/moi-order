@@ -17,6 +17,7 @@ export type SubmissionListItem = {
   price_snapshot: number | null;
   completed_at: string | null;
   created_at: string;
+  has_result: boolean;
   user: { id: number; name: string; email: string } | null;
   service_type: { id: number; name: string; name_mm: string | null; service: { id: number; name: string; name_mm: string | null; slug: string } | null } | null;
   documents: SubmissionDocumentData[];
@@ -58,4 +59,17 @@ export const submissionsApi = {
       .then((r) => r.data.data),
   updateStatus: (id: number | string, status: SubmissionStatus) =>
     apiClient.patch(`/submissions/${id}/status`, { status }),
+  uploadResultFile: (id: number | string, file: File) => {
+    const formData = new FormData();
+    formData.append('eticket', file);
+    return apiClient
+      .post<{ data: SubmissionDetailData }>(`/submissions/${id}/result`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((r) => r.data.data);
+  },
+  downloadResultFile: (id: number | string) =>
+    apiClient
+      .get(`/submissions/${id}/result`, { responseType: 'blob' })
+      .then((r) => ({ blob: r.data as Blob, contentType: r.headers['content-type'] as string })),
 };

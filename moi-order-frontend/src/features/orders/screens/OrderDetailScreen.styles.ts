@@ -196,6 +196,63 @@ export const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
 
+  // ── Download button ────────────────────────────────────────────────────────
+  downloadBtn: {
+    backgroundColor: colours.primary,
+    borderRadius: radius.lg,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.lg,
+  },
+  downloadBtnText: {
+    fontSize: typography.md,
+    fontWeight: '800',
+    color: colours.white,
+    letterSpacing: 0.4,
+  },
+  downloadError: {
+    fontSize: typography.xs,
+    color: colours.danger,
+    textAlign: 'center',
+    marginTop: spacing.sm,
+  },
+
+  // ── Result file image preview modal ────────────────────────────────────────
+  previewOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.92)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  previewClose: {
+    position: 'absolute',
+    top: spacing.xxl,
+    right: spacing.lg,
+    padding: spacing.sm,
+    zIndex: 10,
+  },
+  previewImage: {
+    width: '90%',
+    height: '72%',
+  },
+  previewSaveBtn: {
+    marginTop: spacing.lg,
+    backgroundColor: colours.primary,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xxl,
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  previewSaveBtnText: {
+    fontSize: typography.sm,
+    fontWeight: '700',
+    color: colours.white,
+    letterSpacing: 0.4,
+  },
+
   // ── Info card ──────────────────────────────────────────────────────────────
   infoCard: {
     backgroundColor: colours.card,
