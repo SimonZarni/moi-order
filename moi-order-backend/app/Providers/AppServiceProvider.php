@@ -64,6 +64,8 @@ class AppServiceProvider extends ServiceProvider
             )
         );
 
+        $this->app->bind(\App\Services\AdminPlaceImportService::class);
+
         $this->app->bind(
             \App\Services\DynamicSubmissionService::class,
             fn ($app) => new \App\Services\DynamicSubmissionService(

@@ -37,6 +37,16 @@ export const TICKET_ORDER_STATUS = {
 
 export type TicketOrderStatus = (typeof TICKET_ORDER_STATUS)[keyof typeof TICKET_ORDER_STATUS];
 
+// Mirrors App\Enums\PlaceImportBatchStatus
+export const PLACE_IMPORT_BATCH_STATUS = {
+  Pending:    'pending',
+  Processing: 'processing',
+  Completed:  'completed',
+  Failed:     'failed',
+} as const;
+
+export type PlaceImportBatchStatus = (typeof PLACE_IMPORT_BATCH_STATUS)[keyof typeof PLACE_IMPORT_BATCH_STATUS];
+
 // Mirrors App\Enums\FieldType
 export const FIELD_TYPE = {
   Text:     'text',

@@ -72,6 +72,8 @@ Route::prefix('payments')->name('admin.payments.')->group(function (): void {
 
 // ── Places + Images ───────────────────────────────────────────────────────────
 Route::prefix('places')->name('admin.places.')->group(function (): void {
+    Route::post('/import', [AdminPlaceController::class, 'import'])->name('import');
+    Route::get('/import/{batch}', [AdminPlaceController::class, 'importStatus'])->name('import.status');
     Route::get('/', [AdminPlaceController::class, 'index'])->name('index');
     Route::post('/', [AdminPlaceController::class, 'store'])->name('store');
     Route::get('/{place}', [AdminPlaceController::class, 'show'])->name('show');
