@@ -6,8 +6,7 @@ import { GoogleSignin, statusCodes } from '@/shared/utils/googleSignin';
 
 import { googleAuth } from '@/shared/api/auth';
 import { useAuthStore } from '@/shared/store/authStore';
-import { DOMAIN_ERROR_MESSAGES } from '@/shared/constants/errorCodes';
-import { MESSAGES } from '@/shared/constants/messages';
+import { getAccountErrorMessage } from '@/shared/constants/errorCodes';
 import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 
@@ -48,7 +47,7 @@ export function useGoogleAuth(): UseGoogleAuthResult {
 
       const asApiError = error as ApiError;
       if (typeof asApiError.status === 'number') {
-        setGoogleBannerError(DOMAIN_ERROR_MESSAGES[asApiError.code] ?? MESSAGES.genericError);
+        setGoogleBannerError(getAccountErrorMessage(asApiError.code, asApiError.context));
       } else {
         setGoogleBannerError('Google sign-in failed. Please try again.');
       }

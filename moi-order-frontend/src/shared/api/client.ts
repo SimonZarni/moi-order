@@ -9,7 +9,7 @@ import * as SecureStore from 'expo-secure-store';
 import { Alert } from 'react-native';
 
 import { TOKEN_KEY } from '@/shared/constants/config';
-import { DOMAIN_ERROR_MESSAGES, ERROR_CODES } from '@/shared/constants/errorCodes';
+import { ERROR_CODES, getAccountErrorMessage } from '@/shared/constants/errorCodes';
 import { ApiError } from '@/types/models';
 
 // In-memory token ref — populated by authStore on login, cleared on logout.
@@ -46,14 +46,15 @@ apiClient.interceptors.request.use((config) => {
 // ── Response interceptor ─────────────────────────────────────────────────────
 apiClient.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError<{ message?: string; code?: string; errors?: Record<string, string[]> }>) => {
+  async (error: AxiosError<{ message?: string; code?: string; errors?: Record<string, string[]>; context?: Record<string, string> }>) => {
     const status = error.response?.status ?? 0;
     const data = error.response?.data;
 
     const apiError: ApiError = {
       message: data?.message ?? 'Something went wrong.',
       code: data?.code ?? 'internal',
-      ...(data?.errors !== undefined && { errors: data.errors }),
+      ...(data?.errors   !== undefined && { errors:  data.errors }),
+      ...(data?.context  !== undefined && { context: data.context }),
       status,
     };
 
@@ -79,7 +80,7 @@ apiClient.interceptors.response.use(
       await SecureStore.deleteItemAsync(TOKEN_KEY);
       const { useAuthStore } = await import('@/shared/store/authStore');
       useAuthStore.getState().clearAuth();
-      Alert.alert('Account Restricted', DOMAIN_ERROR_MESSAGES[accountCode!]);
+      Alert.alert('Account Restricted', getAccountErrorMessage(accountCode!, data?.context));
     }
 
     return Promise.reject(apiError);

@@ -31,10 +31,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (DomainException $e): JsonResponse {
             Log::error('Domain exception', ['code' => $e->getMessage(), 'status' => $e->getStatus()]);
 
-            return response()->json([
-                'message' => $e->getMessage(),
-                'code'    => $e->getMessage(),
-            ], $e->getStatus());
+            $body = ['message' => $e->getMessage(), 'code' => $e->getMessage()];
+
+            if ($e->getContext() !== []) {
+                $body['context'] = $e->getContext();
+            }
+
+            return response()->json($body, $e->getStatus());
         });
 
         $exceptions->render(function (ValidationException $e): JsonResponse {

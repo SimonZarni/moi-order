@@ -13,3 +13,22 @@ export const DOMAIN_ERROR_MESSAGES: Record<string, string> = {
   [ERROR_CODES.ACCOUNT_SUSPENDED]: 'Your account has been suspended. Please contact support.',
   [ERROR_CODES.ACCOUNT_BANNED]: 'Your account has been banned. Please contact support.',
 };
+
+/**
+ * Returns the user-facing message for an error code.
+ * For timed suspensions, appends the expiry date from context.
+ */
+export function getAccountErrorMessage(code: string, context?: Record<string, string>): string {
+  if (code === ERROR_CODES.ACCOUNT_SUSPENDED && context?.suspended_until != null) {
+    const d = new Date(context.suspended_until);
+    const formatted = d.toLocaleString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    return `Your account is suspended until ${formatted}. Please contact support.`;
+  }
+  return DOMAIN_ERROR_MESSAGES[code] ?? 'Something went wrong. Please try again.';
+}
