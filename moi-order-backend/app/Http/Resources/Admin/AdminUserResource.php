@@ -22,6 +22,7 @@ class AdminUserResource extends JsonResource
             'email'             => $this->email,
             'is_admin'          => $this->is_admin,
             'status'            => $this->status->value,
+            'suspended_until'   => $this->suspended_until?->toISOString(),
             'date_of_birth'     => $this->date_of_birth?->format('Y-m-d'),
             'email_verified_at' => $this->email_verified_at?->toISOString(),
             'created_at'        => $this->created_at->toISOString(),

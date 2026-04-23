@@ -29,11 +29,17 @@ export function usePlaces(): UsePlacesResult {
     },
     // Places change infrequently — avoid refetching on every screen visit.
     staleTime: CACHE_TTL.USER_DATA,
-    // Memoised flat array — only recomputed when pages actually change.
-    select: (data) => ({
-      ...data,
-      places: data.pages.flatMap((page) => page.data),
-    }),
+    // Deduplicate by id — offset pagination can shift a record across page
+    // boundaries between fetches, causing the same id to appear on two pages.
+    select: (data) => {
+      const seen = new Set<number>();
+      const places = data.pages.flatMap((page) => page.data).filter((place) => {
+        if (seen.has(place.id)) return false;
+        seen.add(place.id);
+        return true;
+      });
+      return { ...data, places };
+    },
   });
 
   return {

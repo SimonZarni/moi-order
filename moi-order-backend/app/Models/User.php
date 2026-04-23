@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\UserStatusEnum;
+use Carbon\Carbon;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -36,6 +37,7 @@ class User extends Authenticatable
         'date_of_birth',
         'is_admin',
         'status',
+        'suspended_until',
         'google_id',
     ];
 
@@ -63,6 +65,7 @@ class User extends Authenticatable
             'date_of_birth'     => 'date:Y-m-d',
             'is_admin'          => 'boolean',
             'status'            => UserStatusEnum::class,
+            'suspended_until'   => 'datetime',
         ];
     }
 
@@ -74,25 +77,42 @@ class User extends Authenticatable
         return $this->is_admin === true;
     }
 
-    /** Returns true for suspended or banned — any state that blocks access. */
+    /**
+     * Banned  → always restricted.
+     * Suspended → restricted only while suspended_until is null (indefinite) or in the future.
+     *             A past suspended_until means the suspension has naturally expired.
+     */
     public function isRestricted(): bool
     {
-        return $this->status->isRestricted();
+        return match ($this->status) {
+            UserStatusEnum::Banned    => true,
+            UserStatusEnum::Suspended => $this->suspended_until === null || $this->suspended_until->isFuture(),
+            UserStatusEnum::Active    => false,
+        };
     }
 
-    public function suspend(): void
+    public function suspend(?Carbon $until = null): void
     {
-        $this->update(['status' => UserStatusEnum::Suspended]);
+        $this->update([
+            'status'          => UserStatusEnum::Suspended,
+            'suspended_until' => $until,
+        ]);
     }
 
     public function ban(): void
     {
-        $this->update(['status' => UserStatusEnum::Banned]);
+        $this->update([
+            'status'          => UserStatusEnum::Banned,
+            'suspended_until' => null,
+        ]);
     }
 
     public function activate(): void
     {
-        $this->update(['status' => UserStatusEnum::Active]);
+        $this->update([
+            'status'          => UserStatusEnum::Active,
+            'suspended_until' => null,
+        ]);
     }
 
     // ─── Relationships ────────────────────────────────────────────────────────

@@ -6,8 +6,10 @@
  */
 import axios, { AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import { Alert } from 'react-native';
 
 import { TOKEN_KEY } from '@/shared/constants/config';
+import { DOMAIN_ERROR_MESSAGES, ERROR_CODES } from '@/shared/constants/errorCodes';
 import { ApiError } from '@/types/models';
 
 // In-memory token ref — populated by authStore on login, cleared on logout.
@@ -62,6 +64,22 @@ apiClient.interceptors.response.use(
       // authStore listener imported lazily to avoid circular deps
       const { useAuthStore } = await import('@/shared/store/authStore');
       useAuthStore.getState().clearAuth();
+    }
+
+    // 403 account.suspended / account.banned mid-session — the admin acted after the
+    // token was issued. Tokens are revoked on suspend/ban so this is a race-condition
+    // defence: log out immediately and inform the user.
+    const accountCode = data?.code;
+    const isAccountRestriction =
+      accountCode === ERROR_CODES.ACCOUNT_SUSPENDED ||
+      accountCode === ERROR_CODES.ACCOUNT_BANNED;
+
+    if (status === 403 && isAccountRestriction && _accessToken !== null) {
+      _accessToken = null;
+      await SecureStore.deleteItemAsync(TOKEN_KEY);
+      const { useAuthStore } = await import('@/shared/store/authStore');
+      useAuthStore.getState().clearAuth();
+      Alert.alert('Account Restricted', DOMAIN_ERROR_MESSAGES[accountCode!]);
     }
 
     return Promise.reject(apiError);

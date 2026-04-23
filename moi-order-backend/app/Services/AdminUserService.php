@@ -10,6 +10,7 @@ use App\Enums\UserStatusEnum;
 use App\Exceptions\DomainException;
 use App\Http\Requests\Admin\AdminUserIndexRequest;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 /**
@@ -105,7 +106,7 @@ class AdminUserService
         $user->delete();
     }
 
-    public function suspend(User $user, User $actor): User
+    public function suspend(User $user, User $actor, ?Carbon $until): User
     {
         if ($actor->id === $user->id) {
             throw new DomainException('user.cannot_restrict_self');
@@ -120,7 +121,7 @@ class AdminUserService
         }
 
         $user->tokens()->delete();
-        $user->suspend();
+        $user->suspend($until);
 
         return $user->fresh();
     }

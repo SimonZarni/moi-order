@@ -8,8 +8,10 @@ use App\DTOs\AdminCreateUserDTO;
 use App\DTOs\AdminUpdateUserDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AdminStoreUserRequest;
+use App\Http\Requests\Admin\AdminSuspendUserRequest;
 use App\Http\Requests\Admin\AdminUpdateUserRequest;
 use App\Http\Requests\Admin\AdminUserIndexRequest;
+use Carbon\Carbon;
 use App\Http\Resources\Admin\AdminUserResource;
 use App\Models\User;
 use App\Services\AdminUserService;
@@ -79,11 +81,14 @@ class AdminUserController extends Controller
     }
 
     /** PATCH /api/admin/v1/users/{user}/suspend */
-    public function suspend(User $user, Request $request): JsonResponse
+    public function suspend(AdminSuspendUserRequest $request, User $user): JsonResponse
     {
         /** @var User $actor */
         $actor = $request->user();
-        $updated = $this->service->suspend($user, $actor);
+        $until = $request->filled('suspended_until')
+            ? Carbon::parse($request->string('suspended_until')->toString())
+            : null;
+        $updated = $this->service->suspend($user, $actor, $until);
 
         return response()->json(['data' => new AdminUserResource($updated)]);
     }
