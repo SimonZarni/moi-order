@@ -51,10 +51,14 @@ readonly class PlaceImportRowDTO
         $lat = $opt($row['latitude'] ?? null);
         $lng = $opt($row['longitude'] ?? null);
 
+        $catEn = $str($row['category_name_en'] ?? '');
+        $catMy = $str($row['category_name_my'] ?? '') ?: $catEn;
+        $catTh = $str($row['category_name_th'] ?? '') ?: $catEn;
+
         return new self(
-            categoryNameMy:   $str($row['category_name_my'] ?? ''),
-            categoryNameEn:   $str($row['category_name_en'] ?? ''),
-            categoryNameTh:   $str($row['category_name_th'] ?? ''),
+            categoryNameMy:   $catMy,
+            categoryNameEn:   $catEn,
+            categoryNameTh:   $catTh,
             nameMy:           $str($row['name_my'] ?? ''),
             nameEn:           $str($row['name_en'] ?? ''),
             nameTh:           $str($row['name_th'] ?? ''),
