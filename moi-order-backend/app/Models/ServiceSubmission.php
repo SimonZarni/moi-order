@@ -36,6 +36,7 @@ class ServiceSubmission extends Model implements PayableInterface
         'idempotency_key',
         'completed_at',
         'submission_data',
+        'result_path',
     ];
 
     protected function casts(): array
@@ -112,6 +113,19 @@ class ServiceSubmission extends Model implements PayableInterface
         $this->update([
             'status'       => SubmissionStatus::Completed,
             'completed_at' => now(),
+        ]);
+    }
+
+    /** Upload result file and mark complete atomically. Only callable from Processing state. */
+    public function markCompleted(string $resultPath): void
+    {
+        if ($this->status !== SubmissionStatus::Processing) {
+            return;
+        }
+        $this->update([
+            'status'       => SubmissionStatus::Completed,
+            'completed_at' => now(),
+            'result_path'  => $resultPath,
         ]);
     }
 

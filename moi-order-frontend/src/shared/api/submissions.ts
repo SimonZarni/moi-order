@@ -56,3 +56,10 @@ export async function fetchSubmission(id: number): Promise<ServiceSubmission> {
   const response = await apiClient.get<ApiResponse<ServiceSubmission>>(`/api/v1/submissions/${id}`);
   return response.data.data;
 }
+
+export async function fetchSubmissionResultUrl(submissionId: number): Promise<{ url: string; mime_type: string }> {
+  const { data } = await apiClient.get<ApiResponse<{ url: string; mime_type: string }>>(
+    `/api/v1/submissions/${submissionId}/result`,
+  );
+  return data.data;
+}

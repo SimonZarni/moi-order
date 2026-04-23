@@ -33,6 +33,8 @@ Route::prefix('submissions')->name('admin.submissions.')->group(function (): voi
     Route::get('/', [AdminSubmissionController::class, 'index'])->name('index');
     Route::get('/{submission}', [AdminSubmissionController::class, 'show'])->name('show');
     Route::patch('/{submission}/status', [AdminSubmissionController::class, 'updateStatus'])->name('updateStatus');
+    Route::post('/{submission}/result', [AdminSubmissionController::class, 'uploadResultFile'])->name('result.store');
+    Route::get('/{submission}/result',  [AdminSubmissionController::class, 'downloadResultFile'])->name('result.download');
 });
 
 // ── Services + Service Types ──────────────────────────────────────────────────

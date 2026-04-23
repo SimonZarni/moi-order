@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Modal, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
@@ -29,7 +29,13 @@ const DOC_ICONS: Record<string, IoniconsName> = {
 };
 
 export function OrderDetailScreen(): React.JSX.Element {
-  const { submission, isLoading, isRefreshing, isError, canPay, handleRefresh, handleBack, handlePayNow } = useOrderDetailScreen();
+  const {
+    submission, isLoading, isRefreshing, isError,
+    canPay, canDownload, isDownloading, isSavingResult, downloadError,
+    previewImageUrl,
+    handleRefresh, handleBack, handlePayNow,
+    handleDownloadResult, handleSaveResult, handleClosePreview,
+  } = useOrderDetailScreen();
   const { locale } = useLocale();
 
   const hero = (
@@ -79,6 +85,46 @@ export function OrderDetailScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <StickyBackButton onPress={handleBack} label="Orders" />
+
+      {/* ── Image preview modal ── */}
+      <Modal
+        visible={previewImageUrl !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={handleClosePreview}
+      >
+        <View style={styles.previewOverlay}>
+          <Pressable
+            style={styles.previewClose}
+            onPress={handleClosePreview}
+            accessibilityLabel="Close preview"
+            accessibilityRole="button"
+          >
+            <Ionicons name="close" size={28} color="#fff" />
+          </Pressable>
+          {previewImageUrl !== null && (
+            <Image
+              source={{ uri: previewImageUrl }}
+              style={styles.previewImage}
+              resizeMode="contain"
+              accessibilityLabel="Result file preview"
+            />
+          )}
+          <Pressable
+            style={styles.previewSaveBtn}
+            onPress={handleSaveResult}
+            disabled={isSavingResult}
+            accessibilityLabel="Save result file to gallery"
+            accessibilityRole="button"
+          >
+            {isSavingResult
+              ? <ActivityIndicator color="white" />
+              : <Text style={styles.previewSaveBtnText}>Save to Gallery</Text>
+            }
+          </Pressable>
+        </View>
+      </Modal>
+
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
@@ -122,6 +168,27 @@ export function OrderDetailScreen(): React.JSX.Element {
             >
               <Text style={styles.payNowBtnText}>Pay Now</Text>
             </Pressable>
+          )}
+
+          {/* ── Download / View Result File (completed) ── */}
+          {canDownload && (
+            <>
+              <Pressable
+                style={styles.downloadBtn}
+                onPress={handleDownloadResult}
+                disabled={isDownloading}
+                accessibilityLabel="View result file"
+                accessibilityRole="button"
+              >
+                {isDownloading
+                  ? <ActivityIndicator color="white" />
+                  : <Text style={styles.downloadBtnText}>View / Download Result</Text>
+                }
+              </Pressable>
+              {downloadError !== null && (
+                <Text style={styles.downloadError}>{downloadError}</Text>
+              )}
+            </>
           )}
 
           {/* ── Personal info (from dynamic submission_data + field_schema) ── */}

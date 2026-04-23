@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\FavoritePlaceController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\SubmissionController;
+use App\Http\Controllers\Api\V1\SubmissionResultController;
 use App\Http\Controllers\Api\V1\TicketOrderController;
 use App\Http\Controllers\Api\V1\TicketOrderEticketController;
 use App\Http\Controllers\Api\V1\TicketOrderPaymentController;
@@ -25,9 +26,10 @@ Route::put('/profile/password', [ProfileController::class, 'changePassword']);
 Route::delete('/profile',       [ProfileController::class, 'destroy']);
 
 // Submissions
-Route::get('/submissions',          [SubmissionController::class,        'index']);
-Route::get('/submissions/{id}',     [SubmissionController::class,        'show']);
-Route::post('/submissions/dynamic', [DynamicSubmissionController::class, 'store']);
+Route::get('/submissions',                 [SubmissionController::class,       'index']);
+Route::get('/submissions/{id}',            [SubmissionController::class,       'show']);
+Route::post('/submissions/dynamic',        [DynamicSubmissionController::class,'store']);
+Route::get('/submissions/{id}/result',     [SubmissionResultController::class, 'show']);
 
 // Payments
 Route::post('/submissions/{id}/payment',       [PaymentController::class, 'store']);

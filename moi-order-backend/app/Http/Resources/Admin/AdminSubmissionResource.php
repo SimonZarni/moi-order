@@ -26,6 +26,7 @@ class AdminSubmissionResource extends JsonResource
             'price_snapshot' => $this->price_snapshot,
             'completed_at'   => $this->completed_at?->toISOString(),
             'created_at'     => $this->created_at->toISOString(),
+            'has_result'     => $this->result_path !== null,
 
             // Admin always sees the user who submitted
             'user' => $this->when(

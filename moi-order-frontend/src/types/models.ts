@@ -121,6 +121,7 @@ export interface ServiceSubmission {
   price_snapshot: number; // whole THB
   completed_at: string | null;
   created_at: string;
+  has_result: boolean;
   service_type: ServiceType | null;
   documents?: SubmissionDocument[];
   payment?: Payment;

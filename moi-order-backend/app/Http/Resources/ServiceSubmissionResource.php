@@ -25,6 +25,7 @@ class ServiceSubmissionResource extends JsonResource
             'price_snapshot' => $this->price_snapshot,
             'completed_at'   => $this->completed_at?->toISOString(),
             'created_at'     => $this->created_at->toISOString(),
+            'has_result'     => $this->result_path !== null,
             'service_type'   => new ServiceTypeResource($this->whenLoaded('serviceType')),
             'documents' => SubmissionDocumentResource::collection(
                 $this->whenLoaded('documents')

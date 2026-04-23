@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\FileStorageInterface;
 use App\DTOs\AdminUpdateSubmissionStatusDTO;
 use App\Enums\SubmissionStatus;
 use App\Exceptions\DomainException;
 use App\Http\Requests\Admin\AdminSubmissionIndexRequest;
 use App\Models\ServiceSubmission;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Principle: SRP — owns admin-side submission business logic only.
@@ -25,6 +29,10 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
  */
 class AdminSubmissionService
 {
+    public function __construct(
+        private readonly FileStorageInterface $fileStorage,
+    ) {}
+
     /**
      * Paginated list with optional filters.
      * Index deliberately excludes heavy detail relations — those are for show() only.
@@ -100,6 +108,29 @@ class AdminSubmissionService
             SubmissionStatus::Cancelled  => $this->transitionToCancelled($submission),
             default                      => throw new DomainException('submission.invalid_status'),
         };
+
+        return $submission->fresh();
+    }
+
+    /**
+     * Upload a result file and mark the submission completed.
+     * Security: MIME whitelist re-checked in FileStorageService (defence in depth).
+     *
+     * @throws DomainException when submission is not in Processing state.
+     */
+    public function uploadResultFile(ServiceSubmission $submission, UploadedFile $file): ServiceSubmission
+    {
+        if ($submission->status !== SubmissionStatus::Processing) {
+            throw new DomainException('submission.not_processing');
+        }
+
+        $path = $this->fileStorage->store($file, 'results', ['application/pdf', 'image/jpeg', 'image/png']);
+
+        DB::transaction(function () use ($submission, $path): void {
+            $submission->markCompleted($path);
+        });
+
+        Log::info('submission.result_uploaded', ['submission_id' => $submission->id]);
 
         return $submission->fresh();
     }
