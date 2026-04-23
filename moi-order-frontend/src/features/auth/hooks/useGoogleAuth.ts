@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useQueryClient } from '@tanstack/react-query';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
 import { googleAuth } from '@/shared/api/auth';
@@ -14,7 +15,8 @@ export interface UseGoogleAuthResult {
 }
 
 export function useGoogleAuth(): UseGoogleAuthResult {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation  = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const queryClient = useQueryClient();
   const { setUser } = useAuthStore();
   const [isGoogleSigningIn, setIsGoogleSigningIn] = useState(false);
   const [googleBannerError, setGoogleBannerError] = useState('');
@@ -25,10 +27,12 @@ export function useGoogleAuth(): UseGoogleAuthResult {
       setIsGoogleSigningIn(true);
 
       await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signOut();
       await GoogleSignin.signIn();
       const { idToken } = await GoogleSignin.getTokens();
 
       const { user, token } = await googleAuth(idToken);
+      queryClient.clear();
       setUser(user, token);
       navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
     } catch (error: unknown) {

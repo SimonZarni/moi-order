@@ -22,12 +22,6 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  gLogo: {
-    fontSize: typography.lg,
-    fontWeight: '700',
-    color: '#4285F4',
-    lineHeight: 22,
-  },
   label: {
     fontSize: typography.md,
     fontWeight: '600',
