@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\DTOs\LoginDTO;
 use App\DTOs\RegisterDTO;
+use App\Exceptions\DomainException;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -31,6 +32,11 @@ class AuthService
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
+        }
+
+        if ($user->isRestricted()) {
+            $code = $user->status->value === 'banned' ? 'account.banned' : 'account.suspended';
+            throw new DomainException($code, 403);
         }
 
         $token = $user->createToken('user-auth', ['user'], now()->addDays(30))->plainTextToken;
