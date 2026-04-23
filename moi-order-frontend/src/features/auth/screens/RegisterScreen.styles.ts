@@ -98,6 +98,26 @@ export const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
 
+  // ── Divider ───────────────────────────────────────────────────────────────
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colours.divider,
+  },
+  dividerText: {
+    fontSize: typography.xs,
+    color: colours.textMuted,
+    marginHorizontal: spacing.md,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+
   // ── Footer ────────────────────────────────────────────────────────────────
   footer: {
     flexDirection: 'row',

@@ -29,3 +29,8 @@ export async function fetchMe(): Promise<User> {
   const response = await apiClient.get<ApiResponse<User>>('/api/v1/auth/me');
   return response.data.data;
 }
+
+export async function googleAuth(idToken: string): Promise<AuthResponse['data']> {
+  const response = await apiClient.post<AuthResponse>('/api/v1/auth/google', { id_token: idToken });
+  return response.data.data;
+}

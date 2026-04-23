@@ -24,9 +24,13 @@ import { enableScreens } from 'react-native-screens';
 
 enableScreens(true);
 
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+
 import { setMemoryToken, setMemoryLocale } from '@/shared/api/client';
 import { fetchMe } from '@/shared/api/auth';
-import { TOKEN_KEY, LOCALE_KEY, CACHE_TTL } from '@/shared/constants/config';
+import { TOKEN_KEY, LOCALE_KEY, CACHE_TTL, GOOGLE_WEB_CLIENT_ID } from '@/shared/constants/config';
+
+GoogleSignin.configure({ webClientId: GOOGLE_WEB_CLIENT_ID });
 import { useAuthStore } from '@/shared/store/authStore';
 import { useLocaleStore, Locale } from '@/shared/store/localeStore';
 import { colours } from '@/shared/theme/colours';

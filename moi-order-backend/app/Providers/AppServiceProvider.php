@@ -66,6 +66,12 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(\App\Services\AdminPlaceImportService::class);
 
+        $this->app->bind(\Google\Client::class, function (): \Google\Client {
+            $client = new \Google\Client();
+            $client->setClientId(config('services.google.client_id'));
+            return $client;
+        });
+
         $this->app->bind(
             \App\Services\DynamicSubmissionService::class,
             fn ($app) => new \App\Services\DynamicSubmissionService(
