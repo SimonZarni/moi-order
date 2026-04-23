@@ -52,8 +52,10 @@ readonly class PlaceImportRowDTO
             array_values($row)
         );
 
-        $str = static fn (mixed $v): string => trim((string) ($v ?? ''));
-        $opt = static fn (mixed $v): ?string => ($s = trim((string) ($v ?? ''))) !== '' ? $s : null;
+        $str    = static fn (mixed $v): string => trim((string) ($v ?? ''));
+        $opt    = static fn (mixed $v): ?string => ($s = trim((string) ($v ?? ''))) !== '' ? $s : null;
+        // Strip wrapping <p>...</p> tags that editors sometimes inject around plain text.
+        $stripP = static fn (mixed $v): string => trim((string) preg_replace('/<\/?p[^>]*>/i', '', trim((string) ($v ?? ''))));
 
         $rawTags = $str($row['tags'] ?? '');
         $tags    = $rawTags !== ''
@@ -76,8 +78,8 @@ readonly class PlaceImportRowDTO
             nameMy:           $str($row['name_my'] ?? ''),
             nameEn:           $str($row['name_en'] ?? ''),
             nameTh:           $str($row['name_th'] ?? ''),
-            shortDescription: $str($row['short_description'] ?? ''),
-            longDescription:  $str($row['long_description'] ?? ''),
+            shortDescription: $stripP($row['short_description'] ?? ''),
+            longDescription:  $stripP($row['long_description'] ?? ''),
             address:          $str($row['address'] ?? ''),
             city:             $str($row['city'] ?? ''),
             latitude:         $lat !== null && is_numeric($lat) ? (float) $lat : null,
