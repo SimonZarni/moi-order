@@ -150,14 +150,20 @@ class AdminPlaceImportService
 
     private function resolveCategory(PlaceImportRowDTO $dto): Category
     {
-        return Category::firstOrCreate(
-            ['name_my' => $dto->categoryNameMy],
-            [
-                'name_en' => $dto->categoryNameEn ?? $dto->categoryNameMy,
-                'name_th' => $dto->categoryNameTh ?? $dto->categoryNameMy,
-                'slug'    => $dto->categorySlug ?? $this->uniqueSlug($dto->categoryNameMy, 'categories'),
-            ]
-        );
+        // Primary lookup by name_my (required). Fall back to name_en to match
+        // categories created by earlier imports that used name_en as the key.
+        $category = Category::where('name_my', $dto->categoryNameMy)->first();
+
+        if ($category === null && $dto->categoryNameEn !== null) {
+            $category = Category::where('name_en', $dto->categoryNameEn)->first();
+        }
+
+        return $category ?? Category::create([
+            'name_my' => $dto->categoryNameMy,
+            'name_en' => $dto->categoryNameEn ?? $dto->categoryNameMy,
+            'name_th' => $dto->categoryNameTh ?? $dto->categoryNameMy,
+            'slug'    => $dto->categorySlug ?? $this->uniqueSlug($dto->categoryNameMy, 'categories'),
+        ]);
     }
 
     private function resolveTag(string $name): Tag
