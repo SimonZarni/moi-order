@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -15,12 +16,13 @@ return new class extends Migration
                 ->default('active')
                 ->after('is_admin');
 
-            // CHECK constraint replaces MySQL ENUM — keeps type enforcement at DB level
-            // while avoiding the migration cost of ALTER TABLE on ENUM changes.
-            DB::statement("ALTER TABLE users ADD CONSTRAINT chk_users_status CHECK (status IN ('active','suspended','banned'))");
-
             $table->index('status');
         });
+
+        // Must run after Schema::table() — Blueprint defers its ALTER TABLE until
+        // the callback returns, so DB::statement() inside the callback fires first
+        // and MySQL cannot find the column yet.
+        DB::statement("ALTER TABLE users ADD CONSTRAINT chk_users_status CHECK (status IN ('active','suspended','banned'))");
     }
 
     public function down(): void
