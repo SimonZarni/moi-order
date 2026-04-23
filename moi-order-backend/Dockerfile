@@ -15,6 +15,7 @@ RUN apk add --no-cache \
         unzip \
     && docker-php-ext-install \
         bcmath \
+        gd \
         mbstring \
         opcache \
         pcntl \
@@ -61,6 +62,7 @@ RUN apk add --no-cache \
         oniguruma-dev \
     && docker-php-ext-install \
         bcmath \
+        gd \
         mbstring \
         opcache \
         pcntl \
