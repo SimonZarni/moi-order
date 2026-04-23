@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedInteger('total')->default(0);
             $table->unsignedInteger('imported')->default(0);
             $table->unsignedInteger('failed')->default(0);
-            $table->json('errors')->default('[]');
+            $table->json('errors')->nullable();
             $table->timestamps();
 
             $table->index('status');
