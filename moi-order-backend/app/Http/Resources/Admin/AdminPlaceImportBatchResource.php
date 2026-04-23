@@ -17,7 +17,7 @@ class AdminPlaceImportBatchResource extends JsonResource
             'total'      => $this->total,
             'imported'   => $this->imported,
             'failed'     => $this->failed,
-            'errors'     => $this->errors,
+            'errors'     => $this->errors ?? [],
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];
