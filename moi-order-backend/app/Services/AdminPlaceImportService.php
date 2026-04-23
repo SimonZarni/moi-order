@@ -86,7 +86,7 @@ class AdminPlaceImportService
     private function validateRow(PlaceImportRowDTO $dto, int $row): void
     {
         $required = [
-            'category_name_en'  => $dto->categoryNameEn,
+            'category_name_my'  => $dto->categoryNameMy,
             'name_my'           => $dto->nameMy,
             'name_en'           => $dto->nameEn,
             'name_th'           => $dto->nameTh,
@@ -151,11 +151,11 @@ class AdminPlaceImportService
     private function resolveCategory(PlaceImportRowDTO $dto): Category
     {
         return Category::firstOrCreate(
-            ['name_en' => $dto->categoryNameEn],
+            ['name_my' => $dto->categoryNameMy],
             [
-                'name_my' => $dto->categoryNameMy,
-                'name_th' => $dto->categoryNameTh,
-                'slug'    => $this->uniqueSlug($dto->categoryNameEn, 'categories'),
+                'name_en' => $dto->categoryNameEn ?? $dto->categoryNameMy,
+                'name_th' => $dto->categoryNameTh ?? $dto->categoryNameMy,
+                'slug'    => $dto->categorySlug ?? $this->uniqueSlug($dto->categoryNameMy, 'categories'),
             ]
         );
     }
