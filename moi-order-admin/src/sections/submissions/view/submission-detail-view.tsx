@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -289,7 +289,7 @@ export function SubmissionDetailView() {
                   )}
                 />
                 <CardContent>
-                  {submission.status === 'processing' && (
+                  {(submission.status === 'processing' || submission.status === 'completed') && (
                     <>
                       <input
                         ref={fileInputRef}
@@ -321,7 +321,7 @@ export function SubmissionDetailView() {
                     </>
                   )}
                   {submission.has_result && (
-                    <Stack direction="row" spacing={1} sx={{ mt: submission.status === 'processing' ? 2 : 0 }}>
+                    <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
                       <Button
                         fullWidth
                         variant="outlined"
@@ -339,11 +339,6 @@ export function SubmissionDetailView() {
                         Download
                       </Button>
                     </Stack>
-                  )}
-                  {!submission.has_result && submission.status === 'completed' && (
-                    <Typography variant="body2" color="text.disabled" sx={{ textAlign: 'center', py: 1 }}>
-                      No result file was uploaded.
-                    </Typography>
                   )}
                 </CardContent>
               </Card>
@@ -411,12 +406,12 @@ export function SubmissionDetailView() {
         </Grid>
 
         <Grid size={{ xs: 12, md: 8 }}>
-          {submission.documents.length > 0 && (
+          {(submission.documents ?? []).length > 0 && (
             <Card>
-              <CardHeader title={`Documents (${submission.documents.length})`} />
+              <CardHeader title={`Documents (${(submission.documents ?? []).length})`} />
               <CardContent>
                 <Grid container spacing={2}>
-                  {submission.documents.map((doc) => (
+                  {(submission.documents ?? []).map((doc) => (
                     <Grid key={doc.id} size={{ xs: 6, sm: 4 }}>
                       <Box
                         sx={{
@@ -471,7 +466,7 @@ export function SubmissionDetailView() {
             </Card>
           )}
 
-          {submission.documents.length === 0 && (
+          {(submission.documents ?? []).length === 0 && (
             <Card>
               <CardContent>
                 <Box sx={{ py: 4, textAlign: 'center', color: 'text.disabled' }}>
