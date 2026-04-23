@@ -12,8 +12,9 @@ readonly class PlaceImportRowDTO
 {
     public function __construct(
         public string  $categoryNameMy,
-        public string  $categoryNameEn,
-        public string  $categoryNameTh,
+        public ?string $categoryNameEn,
+        public ?string $categoryNameTh,
+        public ?string $categorySlug,
         public string  $nameMy,
         public string  $nameEn,
         public string  $nameTh,
@@ -33,9 +34,10 @@ readonly class PlaceImportRowDTO
 
     /**
      * Build from a heading-row-normalised array (keys are lowercased snake_case).
-     * Expected headers: category_name_my, category_name_en, category_name_th,
-     * name_my, name_en, name_th, short_description, long_description, address,
-     * city, latitude, longitude, opening_hours, contact_phone, website,
+     * Expected headers: category_name_my (required), category_name_en (optional),
+     * category_name_th (optional), slug (optional — auto-generated from category_name_my
+     * when absent), name_my, name_en, name_th, short_description, long_description,
+     * address, city, latitude, longitude, opening_hours, contact_phone, website,
      * google_map_url, tags
      */
     public static function fromRow(array $row): self
@@ -61,14 +63,16 @@ readonly class PlaceImportRowDTO
         $lat = $opt($row['latitude'] ?? null);
         $lng = $opt($row['longitude'] ?? null);
 
-        $catEn = $str($row['category_name_en'] ?? '');
-        $catMy = $str($row['category_name_my'] ?? '') ?: $catEn;
-        $catTh = $str($row['category_name_th'] ?? '') ?: $catEn;
+        $catMy   = $str($row['category_name_my'] ?? '');  // required — validated in Service
+        $catEn   = $opt($row['category_name_en'] ?? null);
+        $catTh   = $opt($row['category_name_th'] ?? null);
+        $catSlug = $opt($row['slug'] ?? null);
 
         return new self(
             categoryNameMy:   $catMy,
             categoryNameEn:   $catEn,
             categoryNameTh:   $catTh,
+            categorySlug:     $catSlug,
             nameMy:           $str($row['name_my'] ?? ''),
             nameEn:           $str($row['name_en'] ?? ''),
             nameTh:           $str($row['name_th'] ?? ''),
