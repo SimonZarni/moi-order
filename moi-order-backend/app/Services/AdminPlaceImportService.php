@@ -81,9 +81,7 @@ class AdminPlaceImportService
     private function validateRow(PlaceImportRowDTO $dto, int $row): void
     {
         $required = [
-            'category_name_my'  => $dto->categoryNameMy,
             'category_name_en'  => $dto->categoryNameEn,
-            'category_name_th'  => $dto->categoryNameTh,
             'name_my'           => $dto->nameMy,
             'name_en'           => $dto->nameEn,
             'name_th'           => $dto->nameTh,
@@ -95,24 +93,24 @@ class AdminPlaceImportService
 
         foreach ($required as $field => $value) {
             if ($value === '') {
-                throw new \RuntimeException("Row {$row}: '{$field}' is required.");
+                throw new \RuntimeException("'{$field}' is required.");
             }
         }
 
         if (mb_strlen($dto->shortDescription) > 500) {
-            throw new \RuntimeException("Row {$row}: 'short_description' must not exceed 500 characters.");
+            throw new \RuntimeException("'short_description' must not exceed 500 characters.");
         }
 
         if (mb_strlen($dto->city) > 100) {
-            throw new \RuntimeException("Row {$row}: 'city' must not exceed 100 characters.");
+            throw new \RuntimeException("'city' must not exceed 100 characters.");
         }
 
         if ($dto->latitude !== null && ($dto->latitude < -90 || $dto->latitude > 90)) {
-            throw new \RuntimeException("Row {$row}: 'latitude' must be between -90 and 90.");
+            throw new \RuntimeException("'latitude' must be between -90 and 90.");
         }
 
         if ($dto->longitude !== null && ($dto->longitude < -180 || $dto->longitude > 180)) {
-            throw new \RuntimeException("Row {$row}: 'longitude' must be between -180 and 180.");
+            throw new \RuntimeException("'longitude' must be between -180 and 180.");
         }
     }
 
