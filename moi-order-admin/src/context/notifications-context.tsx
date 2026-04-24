@@ -1,7 +1,7 @@
 import type { AdminNotification } from 'src/types';
 
 import Pusher from 'pusher-js';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { useState, useEffect, useContext, useCallback, createContext } from 'react';
 
 import { TOKEN_KEY } from 'src/api/client';
 import { notificationsApi } from 'src/api/notifications';
