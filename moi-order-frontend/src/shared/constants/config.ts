@@ -11,4 +11,5 @@ export const CACHE_TTL = {
   USER_DATA: 5 * 60 * 1000,
   STATIC_DATA: Infinity,
   LIVE_DATA: 0,
+  NOTIFICATION_POLL: 30 * 1000,
 } as const;

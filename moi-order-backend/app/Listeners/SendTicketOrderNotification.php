@@ -6,6 +6,7 @@ namespace App\Listeners;
 
 use App\Enums\TicketOrderStatus;
 use App\Events\TicketOrderStatusChanged;
+use App\Events\UserNotificationReceived;
 use App\Notifications\TicketOrderStatusNotification;
 use Illuminate\Support\Facades\DB;
 
@@ -30,6 +31,7 @@ class SendTicketOrderNotification
 
         DB::afterCommit(function () use ($order): void {
             $order->user->notify(new TicketOrderStatusNotification($order));
+            event(new UserNotificationReceived($order->user));
         });
     }
 }
