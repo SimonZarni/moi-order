@@ -56,4 +56,14 @@ class AdminNotificationService
             ->where('created_at', '>=', now()->subDays(self::TTL_DAYS))
             ->update(['read_at' => now()]);
     }
+
+    public function deleteOne(User $admin, string $id): void
+    {
+        $admin->notifications()->where('id', $id)->firstOrFail()->delete();
+    }
+
+    public function deleteAll(User $admin): void
+    {
+        $admin->notifications()->delete();
+    }
 }

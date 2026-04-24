@@ -7,17 +7,9 @@ namespace App\Providers;
 use App\Contracts\FileStorageInterface;
 use App\Contracts\PaymentGatewayInterface;
 use App\Events\PaymentConfirmed;
-use App\Events\ServiceSubmissionCreated;
-use App\Events\SubmissionPaymentProcessed;
-use App\Events\TicketOrderCreated;
 use App\Events\TicketOrderPaymentConfirmed;
-use App\Events\TicketOrderPaymentProcessed;
 use App\Listeners\MarkSubmissionProcessing;
 use App\Listeners\MarkTicketOrderProcessing;
-use App\Listeners\NotifyAdminsOfNewSubmission;
-use App\Listeners\NotifyAdminsOfNewTicketOrder;
-use App\Listeners\NotifyAdminsOfServicePayment;
-use App\Listeners\NotifyAdminsOfTicketPayment;
 use App\Services\TicketOrderService;
 use App\Services\FileStorageService;
 use App\Services\StripePaymentService;
@@ -114,14 +106,14 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(PaymentConfirmed::class, MarkSubmissionProcessing::class);
         Event::listen(TicketOrderPaymentConfirmed::class, MarkTicketOrderProcessing::class);
 
-        // Admin real-time notifications — one listener per trigger event.
-        // Payment listeners use the deduplicated *PaymentProcessed events (fired from inside
-        // the lockForUpdate block in markProcessing) instead of the raw *PaymentConfirmed events,
-        // preventing duplicate admin notifications when both client and webhook confirm payment.
-        Event::listen(ServiceSubmissionCreated::class, NotifyAdminsOfNewSubmission::class);
-        Event::listen(TicketOrderCreated::class, NotifyAdminsOfNewTicketOrder::class);
-        Event::listen(SubmissionPaymentProcessed::class, NotifyAdminsOfServicePayment::class);
-        Event::listen(TicketOrderPaymentProcessed::class, NotifyAdminsOfTicketPayment::class);
+        // Admin real-time notifications for "created" events are registered via Laravel
+        // listener auto-discovery (NotifyAdminsOfNewSubmission / NotifyAdminsOfNewTicketOrder).
+        // Do not also register those with Event::listen(), or each event is handled twice and
+        // creates duplicate database notification rows.
+        //
+        // Admin payment notifications (NotifyAdminsOfServicePayment / NotifyAdminsOfTicketPayment)
+        // are also registered via auto-discovery for the same reason: avoid duplicate rows caused
+        // by combining discovery with explicit Event::listen() registration.
     }
 
     private function configureRateLimiting(): void

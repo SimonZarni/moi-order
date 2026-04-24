@@ -47,4 +47,20 @@ class AdminNotificationController extends Controller
 
         return response()->noContent();
     }
+
+    /** DELETE /api/admin/v1/notifications/{id} — delete a single notification */
+    public function destroy(Request $request, string $id): Response
+    {
+        $this->notifications->deleteOne($request->user(), $id);
+
+        return response()->noContent();
+    }
+
+    /** DELETE /api/admin/v1/notifications — delete all notifications for the admin */
+    public function destroyAll(Request $request): Response
+    {
+        $this->notifications->deleteAll($request->user());
+
+        return response()->noContent();
+    }
 }
