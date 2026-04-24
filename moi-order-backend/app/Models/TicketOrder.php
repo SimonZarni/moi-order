@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Contracts\PayableInterface;
 use App\Enums\TicketOrderStatus;
 use App\Events\TicketOrderPaymentConfirmed;
+use App\Events\TicketOrderStatusChanged;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -88,6 +89,7 @@ class TicketOrder extends Model implements PayableInterface
             return;
         }
         $this->update(['status' => TicketOrderStatus::Processing]);
+        event(new TicketOrderStatusChanged($this->fresh()));
     }
 
     public function markPaymentFailed(): void
@@ -100,14 +102,20 @@ class TicketOrder extends Model implements PayableInterface
 
     public function markCompleted(string $eticketPath): void
     {
+        $wasTerminal = $this->status->isTerminal();
+
         $updates = ['eticket_path' => $eticketPath];
 
-        if (! $this->status->isTerminal()) {
+        if (! $wasTerminal) {
             $updates['status']       = TicketOrderStatus::Completed;
             $updates['completed_at'] = now();
         }
 
         $this->update($updates);
+
+        if (! $wasTerminal) {
+            event(new TicketOrderStatusChanged($this->fresh()));
+        }
     }
 
     // ─── Relationships ────────────────────────────────────────────────────────

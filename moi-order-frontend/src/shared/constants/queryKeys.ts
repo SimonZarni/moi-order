@@ -31,4 +31,7 @@ export const QUERY_KEYS = {
     LIST:   ['ticket-orders', 'list'] as const,
     DETAIL: (id: number) => ['ticket-orders', 'detail', id] as const,
   },
+  NOTIFICATIONS: {
+    LIST: ['notifications', 'list'] as const,
+  },
 } as const;

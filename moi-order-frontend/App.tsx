@@ -63,6 +63,8 @@ import { TicketsScreen } from '@/features/tickets/screens/TicketsScreen';
 import { TicketDetailScreen } from '@/features/tickets/screens/TicketDetailScreen';
 import { TicketDateSelectionScreen } from '@/features/tickets/screens/TicketDateSelectionScreen';
 import { TicketOrderDetailScreen } from '@/features/tickets/screens/TicketOrderDetailScreen';
+import { NotificationsScreen } from '@/features/notifications/screens/NotificationsScreen';
+import { usePusherNotifications } from '@/features/notifications/hooks/usePusherNotifications';
 
 import { RootStackParamList, TabParamList } from '@/types/navigation';
 
@@ -78,6 +80,47 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// Mounted inside QueryClientProvider — manages the Pusher connection for the entire session.
+// Subscribes when the user logs in (userId becomes non-null), disconnects on logout.
+function AppShell(): React.JSX.Element {
+  usePusherNotifications();
+  return (
+    <Stack.Navigator
+      initialRouteName="MainTabs"
+      screenOptions={{
+        headerShown: false,
+        animation: 'fade',
+      }}
+    >
+      <Stack.Screen name="MainTabs" component={MainTabs} options={{ animation: 'none' }} />
+      <Stack.Screen name="Login"                         component={LoginScreen} />
+      <Stack.Screen name="Register"                      component={RegisterScreen} />
+      <Stack.Screen name="OrderDetail"                   component={OrderDetailScreen} />
+      <Stack.Screen name="Payment"                       component={PaymentScreen} />
+      <Stack.Screen name="NinetyDayReport"               component={NinetyDayReportScreen} />
+      <Stack.Screen name="NinetyDayReportForm"           component={NinetyDayReportFormScreen} />
+      <Stack.Screen name="OtherServices"                 component={OtherServicesScreen} />
+      <Stack.Screen name="CompanyRegistrationForm"       component={CompanyRegistrationFormScreen} />
+      <Stack.Screen name="AirportFastTrackForm"          component={AirportFastTrackFormScreen} />
+      <Stack.Screen name="EmbassyResidentialForm"        component={EmbassyResidentialFormScreen} />
+      <Stack.Screen name="EmbassyCarLicenseForm"         component={EmbassyCarLicenseFormScreen} />
+      <Stack.Screen name="EmbassyBankForm"               component={EmbassyBankFormScreen} />
+      <Stack.Screen name="EmbassyVisaRecommendationForm" component={EmbassyVisaRecommendationFormScreen} />
+      <Stack.Screen name="TestServiceForm"               component={TestServiceFormScreen} />
+      <Stack.Screen name="GenericServiceForm"            component={GenericServiceFormScreen} />
+      <Stack.Screen name="PlaceDetail"                   component={PlaceDetailScreen} />
+      <Stack.Screen name="Tickets"                       component={TicketsScreen} />
+      <Stack.Screen name="TicketDetail"                  component={TicketDetailScreen} />
+      <Stack.Screen name="TicketDateSelection"           component={TicketDateSelectionScreen} />
+      <Stack.Screen name="TicketOrderDetail"             component={TicketOrderDetailScreen} />
+      <Stack.Screen name="Notifications"                 component={NotificationsScreen} />
+      <Stack.Screen name="PrivacyPolicy"                 component={PrivacyPolicyScreen} />
+      <Stack.Screen name="TermsAndConditions"            component={TermsAndConditionsScreen} />
+      <Stack.Screen name="PdpaNotice"                    component={PdpaNoticeScreen} />
+    </Stack.Navigator>
+  );
+}
 
 // Persistent tab container — all 4 tab screens are pre-rendered (lazy={false})
 // so switching between them is always instant with no mount cost.
@@ -141,41 +184,7 @@ export default function App(): React.JSX.Element {
       <QueryClientProvider client={queryClient}>
         <NavigationContainer>
           <StatusBar style="light" translucent />
-          <Stack.Navigator
-            initialRouteName="MainTabs"
-            screenOptions={{
-              headerShown: false,
-              animation: 'fade',
-            }}
-          >
-            {/* Tab container — no animation on the container itself since tabs switch internally */}
-            <Stack.Screen name="MainTabs" component={MainTabs} options={{ animation: 'none' }} />
-
-            {/* Non-tab screens pushed onto the root stack with fade animation */}
-            <Stack.Screen name="Login"                         component={LoginScreen} />
-            <Stack.Screen name="Register"                      component={RegisterScreen} />
-            <Stack.Screen name="OrderDetail"                   component={OrderDetailScreen} />
-            <Stack.Screen name="Payment"                       component={PaymentScreen} />
-            <Stack.Screen name="NinetyDayReport"               component={NinetyDayReportScreen} />
-            <Stack.Screen name="NinetyDayReportForm"           component={NinetyDayReportFormScreen} />
-            <Stack.Screen name="OtherServices"                 component={OtherServicesScreen} />
-            <Stack.Screen name="CompanyRegistrationForm"       component={CompanyRegistrationFormScreen} />
-            <Stack.Screen name="AirportFastTrackForm"          component={AirportFastTrackFormScreen} />
-            <Stack.Screen name="EmbassyResidentialForm"        component={EmbassyResidentialFormScreen} />
-            <Stack.Screen name="EmbassyCarLicenseForm"         component={EmbassyCarLicenseFormScreen} />
-            <Stack.Screen name="EmbassyBankForm"               component={EmbassyBankFormScreen} />
-            <Stack.Screen name="EmbassyVisaRecommendationForm" component={EmbassyVisaRecommendationFormScreen} />
-            <Stack.Screen name="TestServiceForm"               component={TestServiceFormScreen} />
-            <Stack.Screen name="GenericServiceForm"            component={GenericServiceFormScreen} />
-            <Stack.Screen name="PlaceDetail"                   component={PlaceDetailScreen} />
-            <Stack.Screen name="Tickets"                       component={TicketsScreen} />
-            <Stack.Screen name="TicketDetail"                  component={TicketDetailScreen} />
-            <Stack.Screen name="TicketDateSelection"           component={TicketDateSelectionScreen} />
-            <Stack.Screen name="TicketOrderDetail"             component={TicketOrderDetailScreen} />
-            <Stack.Screen name="PrivacyPolicy"                 component={PrivacyPolicyScreen} />
-            <Stack.Screen name="TermsAndConditions"            component={TermsAndConditionsScreen} />
-            <Stack.Screen name="PdpaNotice"                    component={PdpaNoticeScreen} />
-          </Stack.Navigator>
+          <AppShell />
         </NavigationContainer>
       </QueryClientProvider>
     </SafeAreaProvider>

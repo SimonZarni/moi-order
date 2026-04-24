@@ -7,14 +7,19 @@ namespace App\Providers;
 use App\Contracts\FileStorageInterface;
 use App\Contracts\PaymentGatewayInterface;
 use App\Events\PaymentConfirmed;
+use App\Events\SubmissionStatusChanged;
 use App\Events\TicketOrderPaymentConfirmed;
+use App\Events\TicketOrderStatusChanged;
 use App\Listeners\MarkSubmissionProcessing;
 use App\Listeners\MarkTicketOrderProcessing;
+use App\Listeners\SendSubmissionNotification;
+use App\Listeners\SendTicketOrderNotification;
 use App\Services\TicketOrderService;
 use App\Services\FileStorageService;
 use App\Services\StripePaymentService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
@@ -95,8 +100,17 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureRateLimiting();
 
+        // Broadcast auth — must use auth:sanctum so mobile Bearer tokens are accepted.
+        Broadcast::routes(['middleware' => ['auth:sanctum']]);
+        require base_path('routes/channels.php');
+
+        // Existing: mark as processing after payment confirmation (synchronous, inside transaction).
         Event::listen(PaymentConfirmed::class, MarkSubmissionProcessing::class);
         Event::listen(TicketOrderPaymentConfirmed::class, MarkTicketOrderProcessing::class);
+
+        // Notifications: queued + afterCommit — dispatched only after transaction commits.
+        Event::listen(SubmissionStatusChanged::class, SendSubmissionNotification::class);
+        Event::listen(TicketOrderStatusChanged::class, SendTicketOrderNotification::class);
     }
 
     private function configureRateLimiting(): void

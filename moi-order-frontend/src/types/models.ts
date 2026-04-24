@@ -183,6 +183,26 @@ export interface TicketOrder {
   payment?: Payment;
 }
 
+// ── Notifications ──────────────────────────────────────────────────────────
+
+export interface AppNotification {
+  id: string;
+  type: 'submission_status' | 'ticket_order_status' | string;
+  title: string;
+  body: string;
+  data: {
+    submission_id?: number;
+    ticket_order_id?: number;
+  };
+  read_at: string | null;
+  created_at: string;
+}
+
+export interface NotificationsResponse {
+  data: AppNotification[];
+  meta: { unread_count: number };
+}
+
 // ── API wrappers ───────────────────────────────────────────────────────────
 
 export interface ApiResponse<T> {
