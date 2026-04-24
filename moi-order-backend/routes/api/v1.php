@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\DynamicSubmissionController;
 use App\Http\Controllers\Api\V1\FavoritePlaceController;
+use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\SubmissionController;
@@ -48,3 +49,9 @@ Route::get('/ticket-orders/{id}/eticket',                  [TicketOrderEticketCo
 // Favorites
 Route::get('/places/{placeId}/favorite',  [FavoritePlaceController::class, 'show']);
 Route::post('/places/{placeId}/favorite', [FavoritePlaceController::class, 'toggle']);
+
+// Notifications
+Route::get('/notifications',              [NotificationController::class, 'index']);
+Route::put('/notifications/read-all',     [NotificationController::class, 'markAllRead']);
+Route::delete('/notifications/{id}',      [NotificationController::class, 'destroy']);
+Route::delete('/notifications',           [NotificationController::class, 'destroyAll']);

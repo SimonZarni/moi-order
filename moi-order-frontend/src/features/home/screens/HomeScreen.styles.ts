@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.backgroundDark,
     paddingHorizontal: spacing.xl + spacing.sm, // 40
     paddingTop: spacing.sm,
-    paddingBottom: spacing.xl,
+    paddingBottom: spacing.md,
     overflow: 'hidden',
     minHeight: 180,
   },
@@ -74,7 +74,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: 12,
   },
   authBtn: {
     paddingVertical: 4,
@@ -96,12 +96,12 @@ export const styles = StyleSheet.create({
   },
 
   heroTextBlock: {
-    marginTop: spacing.xs,
+    marginTop: 0,
   },
   heroGreeting: {
     fontSize: typography.xs,
     color: colours.medium,
-    marginBottom: 2,
+    marginBottom: 5,
   },
   heroTitle: {
     fontSize: 26,
@@ -202,12 +202,10 @@ export const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
-  // Ghost icon — large emoji watermark, bottom-right
   cardIcon: {
     position: 'absolute',
     bottom: 6,
     right: 8,
-    fontSize: 46,
     opacity: 0.8,
   },
 

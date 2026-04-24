@@ -1,25 +1,22 @@
 import React from 'react';
 import { Pressable, Text, View, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-
-import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useHomeScreen } from '@/features/home/hooks/useHomeScreen';
+import { NotificationBell } from '@/features/notifications/components/NotificationBell';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { getHomeStrings } from '@/shared/constants/homeStrings';
+import { CalendarIcon, FlashIcon, LocationIcon, TicketIcon } from '../components/HomeCardIcons';
 import { styles } from './HomeScreen.styles';
 
 export function HomeScreen(): React.JSX.Element {
   const {
     user,
-    isLoggedIn,
     handleNavigateToNinetyDayReport,
     handleNavigateToTickets,
     handleNavigateToPlaces,
     handleNavigateToOtherServices,
-    handleNavigateToLogin,
-    handleLogout,
+    handleNavigateToNotifications,
   } = useHomeScreen();
 
   const { locale } = useLocale();
@@ -40,17 +37,7 @@ export function HomeScreen(): React.JSX.Element {
               <View style={styles.brandDot} />
               <Text style={styles.brandLabel}>MOI Order</Text>
             </View>
-            {isLoggedIn ? (
-              <Pressable style={styles.authBtn} onPress={handleLogout}
-                accessibilityLabel="Sign out" accessibilityRole="button">
-                <Text style={styles.authBtnText}>Sign Out</Text>
-              </Pressable>
-            ) : (
-              <Pressable style={styles.authBtn} onPress={handleNavigateToLogin}
-                accessibilityLabel="Sign in" accessibilityRole="button">
-                <Text style={styles.authBtnText}>Sign In</Text>
-              </Pressable>
-            )}
+            <NotificationBell onPress={handleNavigateToNotifications} />
           </View>
 
           <View style={styles.heroTextBlock}>
@@ -77,7 +64,7 @@ export function HomeScreen(): React.JSX.Element {
               accessibilityLabel="90-Day Report service" accessibilityRole="button">
               <Text style={[styles.cardTag, styles.tagSage]}>Immigration</Text>
               <Text style={styles.cardTitle}>{t.ninetyDayReport}</Text>
-              <Ionicons name="calendar" size={28} color={colours.primary} style={styles.cardIcon} />
+              <View style={styles.cardIcon}><CalendarIcon /></View>
             </Pressable>
 
             <Pressable style={[styles.card, styles.cardAccentSlate]}
@@ -86,7 +73,7 @@ export function HomeScreen(): React.JSX.Element {
               <Text style={[styles.cardTag, styles.tagSlate]}>Attractions</Text>
               <Text style={styles.cardTitle}>{t.tickets}</Text>
               <Text style={styles.cardSubtitle}>{t.themeParks}</Text>
-              <Ionicons name="pricetag" size={28} color={colours.medium} style={styles.cardIcon} />
+              <View style={styles.cardIcon}><TicketIcon /></View>
             </Pressable>
           </View>
 
@@ -98,7 +85,7 @@ export function HomeScreen(): React.JSX.Element {
               <Text style={[styles.cardTag, styles.tagGold]}>Explore</Text>
               <Text style={styles.cardTitle}>{t.places}</Text>
               <Text style={styles.cardSubtitle}>{t.attractionsLandmarks}</Text>
-              <Ionicons name="location" size={28} color={colours.secondary} style={styles.cardIcon} />
+              <View style={styles.cardIcon}><LocationIcon /></View>
             </Pressable>
 
             <Pressable style={[styles.card, styles.cardAccentTeal]}
@@ -107,7 +94,7 @@ export function HomeScreen(): React.JSX.Element {
               <Text style={[styles.cardTag, styles.tagTeal]}>Registration</Text>
               <Text style={styles.cardTitle}>{t.otherServices}</Text>
               <Text style={styles.cardSubtitle}>{t.companyMore}</Text>
-              <Ionicons name="flash" size={28} color={colours.tertiary} style={styles.cardIcon} />
+              <View style={styles.cardIcon}><FlashIcon /></View>
             </Pressable>
           </View>
         </View>

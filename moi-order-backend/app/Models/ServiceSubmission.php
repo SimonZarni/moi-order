@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Contracts\PayableInterface;
 use App\Enums\SubmissionStatus;
 use App\Events\PaymentConfirmed;
+use App\Events\SubmissionStatusChanged;
 use Database\Factories\ServiceSubmissionFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -93,6 +94,7 @@ class ServiceSubmission extends Model implements PayableInterface
             return;
         }
         $this->update(['status' => SubmissionStatus::Processing]);
+        event(new SubmissionStatusChanged($this->fresh()));
     }
 
     /** Payment failed or expired — user can retry payment. */
@@ -114,6 +116,7 @@ class ServiceSubmission extends Model implements PayableInterface
             'status'       => SubmissionStatus::Completed,
             'completed_at' => now(),
         ]);
+        event(new SubmissionStatusChanged($this->fresh()));
     }
 
     /** Upload result file and mark complete atomically. Only callable from Processing state. */
@@ -127,6 +130,7 @@ class ServiceSubmission extends Model implements PayableInterface
             'completed_at' => now(),
             'result_path'  => $resultPath,
         ]);
+        event(new SubmissionStatusChanged($this->fresh()));
     }
 
     /** Replace an existing result file. Only callable on an already-Completed submission. */

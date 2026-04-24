@@ -14,6 +14,7 @@ export interface UseHomeScreenResult {
   handleNavigateToTickets: () => void;
   handleNavigateToPlaces: () => void;
   handleNavigateToOtherServices: () => void;
+  handleNavigateToNotifications: () => void;
   handleNavigateToLogin: () => void;
   handleLogout: () => void;
 }
@@ -38,6 +39,10 @@ export function useHomeScreen(): UseHomeScreenResult {
     navigation.navigate('OtherServices');
   }, [navigation]);
 
+  const handleNavigateToNotifications = useCallback((): void => {
+    navigation.navigate('Notifications');
+  }, [navigation]);
+
   const handleNavigateToLogin = useCallback((): void => {
     navigation.navigate('Login');
   }, [navigation]);
@@ -55,6 +60,7 @@ export function useHomeScreen(): UseHomeScreenResult {
     handleNavigateToTickets,
     handleNavigateToPlaces,
     handleNavigateToOtherServices,
+    handleNavigateToNotifications,
     handleNavigateToLogin,
     handleLogout,
   };
