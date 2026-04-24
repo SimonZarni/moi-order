@@ -16,6 +16,8 @@ type NotificationsContextValue = {
   isLoading: boolean;
   markOneRead: (id: string) => Promise<void>;
   markAllRead: () => Promise<void>;
+  deleteOne: (id: string) => Promise<void>;
+  deleteAll: () => Promise<void>;
 };
 
 const NotificationsContext = createContext<NotificationsContextValue | null>(null);
@@ -149,9 +151,43 @@ export function NotificationsProvider({ children }: Props) {
     }
   }, [fetchNotifications]);
 
+  const deleteOne = useCallback(async (id: string) => {
+    const removed = notifications.find((n) => n.id === id);
+
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    if (removed && !removed.is_read) {
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    }
+
+    try {
+      await notificationsApi.deleteOne(id);
+    } catch {
+      fetchNotifications();
+    }
+  }, [fetchNotifications, notifications]);
+
+  const deleteAll = useCallback(async () => {
+    setNotifications([]);
+    setUnreadCount(0);
+
+    try {
+      await notificationsApi.deleteAll();
+    } catch {
+      fetchNotifications();
+    }
+  }, [fetchNotifications]);
+
   return (
     <NotificationsContext.Provider
-      value={{ notifications, unreadCount, isLoading, markOneRead, markAllRead }}
+      value={{
+        notifications,
+        unreadCount,
+        isLoading,
+        markOneRead,
+        markAllRead,
+        deleteOne,
+        deleteAll,
+      }}
     >
       {children}
     </NotificationsContext.Provider>
