@@ -8,8 +8,10 @@ use App\Contracts\FileStorageInterface;
 use App\Contracts\PaymentGatewayInterface;
 use App\Events\PaymentConfirmed;
 use App\Events\ServiceSubmissionCreated;
+use App\Events\SubmissionPaymentProcessed;
 use App\Events\TicketOrderCreated;
 use App\Events\TicketOrderPaymentConfirmed;
+use App\Events\TicketOrderPaymentProcessed;
 use App\Listeners\MarkSubmissionProcessing;
 use App\Listeners\MarkTicketOrderProcessing;
 use App\Listeners\NotifyAdminsOfNewSubmission;
@@ -113,10 +115,13 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(TicketOrderPaymentConfirmed::class, MarkTicketOrderProcessing::class);
 
         // Admin real-time notifications — one listener per trigger event.
+        // Payment listeners use the deduplicated *PaymentProcessed events (fired from inside
+        // the lockForUpdate block in markProcessing) instead of the raw *PaymentConfirmed events,
+        // preventing duplicate admin notifications when both client and webhook confirm payment.
         Event::listen(ServiceSubmissionCreated::class, NotifyAdminsOfNewSubmission::class);
         Event::listen(TicketOrderCreated::class, NotifyAdminsOfNewTicketOrder::class);
-        Event::listen(PaymentConfirmed::class, NotifyAdminsOfServicePayment::class);
-        Event::listen(TicketOrderPaymentConfirmed::class, NotifyAdminsOfTicketPayment::class);
+        Event::listen(SubmissionPaymentProcessed::class, NotifyAdminsOfServicePayment::class);
+        Event::listen(TicketOrderPaymentProcessed::class, NotifyAdminsOfTicketPayment::class);
     }
 
     private function configureRateLimiting(): void

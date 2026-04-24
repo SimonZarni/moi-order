@@ -4,21 +4,28 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
-use App\Events\PaymentConfirmed;
+use App\Events\SubmissionPaymentProcessed;
 use App\Events\UserNotificationReceived;
 use App\Models\User;
 use App\Notifications\Admin\NewPaymentNotification;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Principle: SRP — one reaction: notify all admins when a service submission payment is confirmed.
- * Timing: PaymentConfirmed fires inside DB::transaction in StripeWebhookController.
- *   DB::afterCommit() ensures the transaction commits before notifications are written
- *   and Pusher fires — same guard pattern as SendSubmissionNotification.
+ * Principle: SRP — one reaction: notify all admins when a service submission payment
+ *   is confirmed AND the submission has transitioned to Processing.
+ *
+ * Listens to SubmissionPaymentProcessed (not PaymentConfirmed) because
+ * SubmissionPaymentProcessed is fired from inside the lockForUpdate block in
+ * ServiceSubmission::markProcessing(). That lock guarantees this event fires at
+ * most once per submission, preventing duplicate admin notifications when both
+ * the client-side callback and the Stripe webhook call PaymentConfirmed concurrently.
+ *
+ * DB::afterCommit() defers the notify() calls until the outer transaction commits,
+ * ensuring notification rows are written to committed data.
  */
 class NotifyAdminsOfServicePayment
 {
-    public function handle(PaymentConfirmed $event): void
+    public function handle(SubmissionPaymentProcessed $event): void
     {
         $submission = $event->submission->loadMissing(['user', 'serviceType.service']);
 

@@ -4,21 +4,23 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
-use App\Events\TicketOrderPaymentConfirmed;
+use App\Events\TicketOrderPaymentProcessed;
 use App\Events\UserNotificationReceived;
 use App\Models\User;
 use App\Notifications\Admin\NewPaymentNotification;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Principle: SRP — one reaction: notify all admins when a ticket order payment is confirmed.
- * Timing: TicketOrderPaymentConfirmed fires inside DB::transaction.
- *   DB::afterCommit() defers notifications until after the commit — same guard
- *   pattern as NotifyAdminsOfServicePayment.
+ * Principle: SRP — one reaction: notify all admins when a ticket order payment
+ *   is confirmed AND the order has transitioned to Processing.
+ *
+ * Listens to TicketOrderPaymentProcessed (not TicketOrderPaymentConfirmed) to share
+ * the same lockForUpdate deduplication in TicketOrder::markProcessing() — same
+ * pattern as NotifyAdminsOfServicePayment.
  */
 class NotifyAdminsOfTicketPayment
 {
-    public function handle(TicketOrderPaymentConfirmed $event): void
+    public function handle(TicketOrderPaymentProcessed $event): void
     {
         $order = $event->ticketOrder->loadMissing(['user', 'ticket']);
 
