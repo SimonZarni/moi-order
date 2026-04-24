@@ -53,5 +53,6 @@ Route::post('/places/{placeId}/favorite', [FavoritePlaceController::class, 'togg
 // Notifications
 Route::get('/notifications',              [NotificationController::class, 'index']);
 Route::put('/notifications/read-all',     [NotificationController::class, 'markAllRead']);
+Route::patch('/notifications/{id}/read',  [NotificationController::class, 'markOneRead']);
 Route::delete('/notifications/{id}',      [NotificationController::class, 'destroy']);
 Route::delete('/notifications',           [NotificationController::class, 'destroyAll']);

@@ -32,6 +32,14 @@ class NotificationController extends Controller
         ]);
     }
 
+    /** PATCH /api/v1/notifications/{id}/read — mark a single notification as read */
+    public function markOneRead(Request $request, string $id): Response
+    {
+        $this->notifications->markOneRead($request->user(), $id);
+
+        return response()->noContent();
+    }
+
     /** PUT /api/v1/notifications/read-all — mark every unread notification as read */
     public function markAllRead(Request $request): Response
     {
