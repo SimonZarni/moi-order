@@ -242,6 +242,30 @@ export type ServiceSubmission = {
 };
 
 // ----------------------------------------------------------------------
+// Admin Notifications
+
+export type AdminNotificationType = 'new_submission' | 'new_ticket_order' | 'new_payment';
+
+export type AdminNotificationData = {
+  notification_type: AdminNotificationType;
+  title: string;
+  body: string;
+  submission_id?: string;
+  ticket_order_id?: string;
+};
+
+export type AdminNotification = {
+  id: string;
+  type: AdminNotificationType;
+  title: string;
+  body: string;
+  data: AdminNotificationData;
+  is_read: boolean;
+  created_at: string;
+  time_ago: string;
+};
+
+// ----------------------------------------------------------------------
 // Content (Ads & Notifications) — no backend API yet; kept for UI
 
 export type ContentType = 'advertisement' | 'notification' | 'banner' | 'announcement';

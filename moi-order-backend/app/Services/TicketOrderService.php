@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Contracts\FileStorageInterface;
 use App\DTOs\CreateTicketOrderDTO;
 use App\Enums\TicketOrderStatus;
+use App\Events\TicketOrderCreated;
 use App\Models\Ticket;
 use App\Models\TicketOrder;
 use App\Models\TicketVariant;
@@ -40,7 +41,7 @@ class TicketOrderService
         }
 
         try {
-            return DB::transaction(function () use ($dto, $user): TicketOrder {
+            $order = DB::transaction(function () use ($dto, $user): TicketOrder {
                 $variantIds = array_column($dto->items, 'variantId');
 
                 // Lock variants to snapshot prices and validate they belong to the ticket.
@@ -78,6 +79,11 @@ class TicketOrderService
 
                 return $order->load('items.variant', 'ticket');
             });
+
+            // Fired after the transaction commits — not dispatched on duplicate idempotency hits.
+            event(new TicketOrderCreated($order));
+
+            return $order;
         } catch (UniqueConstraintViolationException) {
             // A concurrent request with the same idempotency key beat us to the insert.
             // Return the order they created — this request is a safe duplicate.

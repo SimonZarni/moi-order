@@ -7,9 +7,15 @@ namespace App\Providers;
 use App\Contracts\FileStorageInterface;
 use App\Contracts\PaymentGatewayInterface;
 use App\Events\PaymentConfirmed;
+use App\Events\ServiceSubmissionCreated;
+use App\Events\TicketOrderCreated;
 use App\Events\TicketOrderPaymentConfirmed;
 use App\Listeners\MarkSubmissionProcessing;
 use App\Listeners\MarkTicketOrderProcessing;
+use App\Listeners\NotifyAdminsOfNewSubmission;
+use App\Listeners\NotifyAdminsOfNewTicketOrder;
+use App\Listeners\NotifyAdminsOfServicePayment;
+use App\Listeners\NotifyAdminsOfTicketPayment;
 use App\Services\TicketOrderService;
 use App\Services\FileStorageService;
 use App\Services\StripePaymentService;
@@ -105,6 +111,12 @@ class AppServiceProvider extends ServiceProvider
         // registered automatically via Laravel's event auto-discovery — no manual listen() needed.
         Event::listen(PaymentConfirmed::class, MarkSubmissionProcessing::class);
         Event::listen(TicketOrderPaymentConfirmed::class, MarkTicketOrderProcessing::class);
+
+        // Admin real-time notifications — one listener per trigger event.
+        Event::listen(ServiceSubmissionCreated::class, NotifyAdminsOfNewSubmission::class);
+        Event::listen(TicketOrderCreated::class, NotifyAdminsOfNewTicketOrder::class);
+        Event::listen(PaymentConfirmed::class, NotifyAdminsOfServicePayment::class);
+        Event::listen(TicketOrderPaymentConfirmed::class, NotifyAdminsOfTicketPayment::class);
     }
 
     private function configureRateLimiting(): void

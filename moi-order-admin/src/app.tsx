@@ -6,6 +6,7 @@ import { usePathname } from 'src/routes/hooks';
 
 import { AuthProvider } from 'src/context/auth-context';
 import { ThemeProvider } from 'src/theme/theme-provider';
+import { NotificationsProvider } from 'src/context/notifications-context';
 
 // ----------------------------------------------------------------------
 
@@ -18,7 +19,9 @@ export default function App({ children }: AppProps) {
 
   return (
     <AuthProvider>
-      <ThemeProvider>{children}</ThemeProvider>
+      <NotificationsProvider>
+        <ThemeProvider>{children}</ThemeProvider>
+      </NotificationsProvider>
     </AuthProvider>
   );
 }

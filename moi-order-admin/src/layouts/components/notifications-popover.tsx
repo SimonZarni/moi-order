@@ -1,6 +1,8 @@
 import type { IconButtonProps } from '@mui/material/IconButton';
+import type { AdminNotification, AdminNotificationData } from 'src/types';
 
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -17,31 +19,35 @@ import ListSubheader from '@mui/material/ListSubheader';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemButton from '@mui/material/ListItemButton';
 
-import { fToNow } from 'src/utils/format-time';
+import { useNotifications } from 'src/context/notifications-context';
 
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 
 // ----------------------------------------------------------------------
 
-type NotificationItemProps = {
-  id: string;
-  type: string;
-  title: string;
-  isUnRead: boolean;
-  description: string;
-  avatarUrl: string | null;
-  postedAt: string | number | null;
-};
+function getNavigationPath(data: AdminNotificationData): string | null {
+  switch (data.notification_type) {
+    case 'new_submission':
+      return data.submission_id ? `/services/submissions/${data.submission_id}` : null;
+    case 'new_ticket_order':
+      return data.ticket_order_id ? `/bookings/${data.ticket_order_id}` : null;
+    case 'new_payment':
+      if (data.submission_id) return `/services/submissions/${data.submission_id}`;
+      if (data.ticket_order_id) return `/bookings/${data.ticket_order_id}`;
+      return null;
+    default:
+      return null;
+  }
+}
 
-export type NotificationsPopoverProps = IconButtonProps & {
-  data?: NotificationItemProps[];
-};
+// ----------------------------------------------------------------------
 
-export function NotificationsPopover({ data = [], sx, ...other }: NotificationsPopoverProps) {
-  const [notifications, setNotifications] = useState(data);
+export type NotificationsPopoverProps = IconButtonProps;
 
-  const totalUnRead = notifications.filter((item) => item.isUnRead === true).length;
+export function NotificationsPopover({ sx, ...other }: NotificationsPopoverProps) {
+  const { notifications, unreadCount, markOneRead, markAllRead } = useNotifications();
+  const navigate = useNavigate();
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
@@ -53,14 +59,24 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
     setOpenPopover(null);
   }, []);
 
-  const handleMarkAllAsRead = useCallback(() => {
-    const updatedNotifications = notifications.map((notification) => ({
-      ...notification,
-      isUnRead: false,
-    }));
+  const handleMarkAllAsRead = useCallback(async () => {
+    await markAllRead();
+  }, [markAllRead]);
 
-    setNotifications(updatedNotifications);
-  }, [notifications]);
+  const handleNotificationClick = useCallback(
+    async (notification: AdminNotification) => {
+      if (!notification.is_read) {
+        await markOneRead(notification.id);
+      }
+      handleClosePopover();
+      const path = getNavigationPath(notification.data);
+      if (path) navigate(path);
+    },
+    [markOneRead, handleClosePopover, navigate]
+  );
+
+  const unread = notifications.filter((n) => !n.is_read);
+  const read = notifications.filter((n) => n.is_read);
 
   return (
     <>
@@ -70,7 +86,7 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
         sx={sx}
         {...other}
       >
-        <Badge badgeContent={totalUnRead} color="error">
+        <Badge badgeContent={unreadCount} color="error">
           <Iconify width={24} icon="solar:bell-bing-bold-duotone" />
         </Badge>
       </IconButton>
@@ -83,33 +99,22 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         slotProps={{
           paper: {
-            sx: {
-              width: 360,
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-            },
+            sx: { width: 380, overflow: 'hidden', display: 'flex', flexDirection: 'column' },
           },
         }}
       >
-        <Box
-          sx={{
-            py: 2,
-            pl: 2.5,
-            pr: 1.5,
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
+        <Box sx={{ py: 2, pl: 2.5, pr: 1.5, display: 'flex', alignItems: 'center' }}>
           <Box sx={{ flexGrow: 1 }}>
             <Typography variant="subtitle1">Notifications</Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              You have {totalUnRead} unread messages
+              {unreadCount > 0
+                ? `You have ${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`
+                : 'All caught up'}
             </Typography>
           </Box>
 
-          {totalUnRead > 0 && (
-            <Tooltip title=" Mark all as read">
+          {unreadCount > 0 && (
+            <Tooltip title="Mark all as read">
               <IconButton color="primary" onClick={handleMarkAllAsRead}>
                 <Iconify icon="eva:done-all-fill" />
               </IconButton>
@@ -120,38 +125,57 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <Scrollbar fillContent sx={{ minHeight: 240, maxHeight: { xs: 360, sm: 'none' } }}>
-          <List
-            disablePadding
-            subheader={
-              <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
-                New
-              </ListSubheader>
-            }
-          >
-            {notifications.slice(0, 2).map((notification) => (
-              <NotificationItem key={notification.id} notification={notification} />
-            ))}
-          </List>
+          {unread.length > 0 && (
+            <List
+              disablePadding
+              subheader={
+                <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
+                  New
+                </ListSubheader>
+              }
+            >
+              {unread.map((n) => (
+                <NotificationItem
+                  key={n.id}
+                  notification={n}
+                  onClick={handleNotificationClick}
+                />
+              ))}
+            </List>
+          )}
 
-          <List
-            disablePadding
-            subheader={
-              <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
-                Before that
-              </ListSubheader>
-            }
-          >
-            {notifications.slice(2, 5).map((notification) => (
-              <NotificationItem key={notification.id} notification={notification} />
-            ))}
-          </List>
+          {read.length > 0 && (
+            <List
+              disablePadding
+              subheader={
+                <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
+                  {unread.length > 0 ? 'Earlier' : 'Read'}
+                </ListSubheader>
+              }
+            >
+              {read.map((n) => (
+                <NotificationItem
+                  key={n.id}
+                  notification={n}
+                  onClick={handleNotificationClick}
+                />
+              ))}
+            </List>
+          )}
+
+          {notifications.length === 0 && (
+            <Box sx={{ py: 6, textAlign: 'center', color: 'text.disabled' }}>
+              <Iconify icon="solar:bell-bing-bold-duotone" width={40} sx={{ mb: 1, opacity: 0.4 }} />
+              <Typography variant="body2">No notifications</Typography>
+            </Box>
+          )}
         </Scrollbar>
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <Box sx={{ p: 1 }}>
-          <Button fullWidth disableRipple color="inherit">
-            View all
+          <Button fullWidth disableRipple color="inherit" onClick={handleClosePopover}>
+            Close
           </Button>
         </Box>
       </Popover>
@@ -161,38 +185,43 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
 
 // ----------------------------------------------------------------------
 
-function NotificationItem({ notification }: { notification: NotificationItemProps }) {
-  const { avatarUrl, title } = renderContent(notification);
+type NotificationItemProps = {
+  notification: AdminNotification;
+  onClick: (notification: AdminNotification) => void;
+};
 
+function NotificationItem({ notification, onClick }: NotificationItemProps) {
   return (
     <ListItemButton
+      onClick={() => onClick(notification)}
       sx={{
         py: 1.5,
         px: 2.5,
         mt: '1px',
-        ...(notification.isUnRead && {
-          bgcolor: 'action.selected',
-        }),
+        ...(!notification.is_read && { bgcolor: 'action.selected' }),
       }}
     >
       <ListItemAvatar>
-        <Avatar sx={{ bgcolor: 'background.neutral' }}>{avatarUrl}</Avatar>
+        <Avatar sx={{ bgcolor: 'background.neutral' }}>
+          <NotificationIcon type={notification.type} />
+        </Avatar>
       </ListItemAvatar>
       <ListItemText
-        primary={title}
+        primary={
+          <Typography variant="subtitle2">
+            {notification.title}
+            <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }}>
+              &nbsp;{notification.body}
+            </Typography>
+          </Typography>
+        }
         secondary={
           <Typography
             variant="caption"
-            sx={{
-              mt: 0.5,
-              gap: 0.5,
-              display: 'flex',
-              alignItems: 'center',
-              color: 'text.disabled',
-            }}
+            sx={{ mt: 0.5, gap: 0.5, display: 'flex', alignItems: 'center', color: 'text.disabled' }}
           >
             <Iconify width={14} icon="solar:clock-circle-outline" />
-            {fToNow(notification.postedAt)}
+            {notification.time_ago}
           </Typography>
         }
       />
@@ -202,58 +231,12 @@ function NotificationItem({ notification }: { notification: NotificationItemProp
 
 // ----------------------------------------------------------------------
 
-function renderContent(notification: NotificationItemProps) {
-  const title = (
-    <Typography variant="subtitle2">
-      {notification.title}
-      <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }}>
-        &nbsp; {notification.description}
-      </Typography>
-    </Typography>
-  );
-
-  if (notification.type === 'order-placed') {
-    return {
-      avatarUrl: (
-        <img
-          alt={notification.title}
-          src="/assets/icons/notification/ic-notification-package.svg"
-        />
-      ),
-      title,
-    };
+function NotificationIcon({ type }: { type: AdminNotification['type'] }) {
+  if (type === 'new_submission') {
+    return <Iconify icon="solar:check-circle-bold" width={20} sx={{ color: 'success.main' }} />;
   }
-  if (notification.type === 'order-shipped') {
-    return {
-      avatarUrl: (
-        <img
-          alt={notification.title}
-          src="/assets/icons/notification/ic-notification-shipping.svg"
-        />
-      ),
-      title,
-    };
+  if (type === 'new_ticket_order') {
+    return <Iconify icon="solar:cart-3-bold" width={20} sx={{ color: 'info.main' }} />;
   }
-  if (notification.type === 'mail') {
-    return {
-      avatarUrl: (
-        <img alt={notification.title} src="/assets/icons/notification/ic-notification-mail.svg" />
-      ),
-      title,
-    };
-  }
-  if (notification.type === 'chat-message') {
-    return {
-      avatarUrl: (
-        <img alt={notification.title} src="/assets/icons/notification/ic-notification-chat.svg" />
-      ),
-      title,
-    };
-  }
-  return {
-    avatarUrl: notification.avatarUrl ? (
-      <img alt={notification.title} src={notification.avatarUrl} />
-    ) : null,
-    title,
-  };
+  return <Iconify icon="eva:trending-up-fill" width={20} sx={{ color: 'warning.main' }} />;
 }
