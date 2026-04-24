@@ -6,14 +6,14 @@ namespace App\Notifications;
 
 use App\Enums\TicketOrderStatus;
 use App\Models\TicketOrder;
-use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
 /**
  * Principle: OCP — new status copy = update payload() only; no structural changes.
  * Principle: SRP — owns the ticket order notification payload exclusively.
  *
- * Channels: database (persisted) + broadcast (Pusher live update).
+ * Channel: database only — Pusher broadcast is handled by UserNotificationReceived
+ *   (ShouldBroadcastNow), which fires synchronously from the listener after commit.
  */
 class TicketOrderStatusNotification extends Notification
 {
@@ -23,22 +23,12 @@ class TicketOrderStatusNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database', 'broadcast'];
+        return ['database'];
     }
 
     public function toArray(object $notifiable): array
     {
         return $this->payload();
-    }
-
-    public function toBroadcast(object $notifiable): BroadcastMessage
-    {
-        return new BroadcastMessage($this->payload());
-    }
-
-    public function broadcastType(): string
-    {
-        return 'notification.created';
     }
 
     private function payload(): array

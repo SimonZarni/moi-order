@@ -6,6 +6,7 @@ namespace App\Listeners;
 
 use App\Enums\SubmissionStatus;
 use App\Events\SubmissionStatusChanged;
+use App\Events\UserNotificationReceived;
 use App\Notifications\SubmissionStatusNotification;
 use Illuminate\Support\Facades\DB;
 
@@ -33,6 +34,7 @@ class SendSubmissionNotification
 
         DB::afterCommit(function () use ($submission): void {
             $submission->user->notify(new SubmissionStatusNotification($submission));
+            event(new UserNotificationReceived($submission->user));
         });
     }
 }
