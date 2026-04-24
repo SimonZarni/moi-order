@@ -8,8 +8,10 @@
  */
 import { useEffect } from 'react';
 import { AppState } from 'react-native';
-import Pusher from 'pusher-js';
 import { useQueryClient } from '@tanstack/react-query';
+// pusher-js React Native bundle exports { Pusher: class } — not a default export.
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any
+const Pusher: typeof import('pusher-js').default = (require('pusher-js') as any).Pusher;
 
 import apiClient from '@/shared/api/client';
 import { PUSHER_APP_KEY, PUSHER_APP_CLUSTER } from '@/shared/constants/config';
