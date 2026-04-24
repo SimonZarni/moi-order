@@ -16,4 +16,10 @@ export const notificationsApi = {
 
   markAllRead: (): Promise<void> =>
     apiClient.put('/notifications/read-all').then(() => undefined),
+
+  deleteOne: (id: string): Promise<void> =>
+    apiClient.delete(`/notifications/${id}`).then(() => undefined),
+
+  deleteAll: (): Promise<void> =>
+    apiClient.delete('/notifications').then(() => undefined),
 };

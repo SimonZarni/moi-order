@@ -1,12 +1,13 @@
 import type { IconButtonProps } from '@mui/material/IconButton';
 import type { AdminNotification, AdminNotificationData } from 'src/types';
 
-import { useCallback, useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import Badge from '@mui/material/Badge';
+import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
@@ -46,7 +47,7 @@ function getNavigationPath(data: AdminNotificationData): string | null {
 export type NotificationsPopoverProps = IconButtonProps;
 
 export function NotificationsPopover({ sx, ...other }: NotificationsPopoverProps) {
-  const { notifications, unreadCount, markOneRead, markAllRead } = useNotifications();
+  const { notifications, unreadCount, markOneRead, markAllRead, deleteOne, deleteAll } = useNotifications();
   const navigate = useNavigate();
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
@@ -62,6 +63,10 @@ export function NotificationsPopover({ sx, ...other }: NotificationsPopoverProps
   const handleMarkAllAsRead = useCallback(async () => {
     await markAllRead();
   }, [markAllRead]);
+
+  const handleClearAll = useCallback(async () => {
+    await deleteAll();
+  }, [deleteAll]);
 
   const handleNotificationClick = useCallback(
     async (notification: AdminNotification) => {
@@ -113,16 +118,30 @@ export function NotificationsPopover({ sx, ...other }: NotificationsPopoverProps
             </Typography>
           </Box>
 
-          {unreadCount > 0 && (
-            <Tooltip title="Mark all as read">
-              <IconButton color="primary" onClick={handleMarkAllAsRead}>
-                <Iconify icon="eva:done-all-fill" />
-              </IconButton>
-            </Tooltip>
-          )}
         </Box>
 
         <Divider sx={{ borderStyle: 'dashed' }} />
+
+        {notifications.length > 0 && (
+          <>
+            <Box sx={{ px: 2, py: 1 }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Button
+                  size="small"
+                  color="inherit"
+                  onClick={handleMarkAllAsRead}
+                  disabled={unreadCount === 0}
+                >
+                  Mark all read
+                </Button>
+                <Button size="small" color="error" onClick={handleClearAll}>
+                  Clear all
+                </Button>
+              </Stack>
+            </Box>
+            <Divider sx={{ borderStyle: 'dashed' }} />
+          </>
+        )}
 
         <Scrollbar fillContent sx={{ minHeight: 240, maxHeight: { xs: 360, sm: 'none' } }}>
           {unread.length > 0 && (
@@ -139,6 +158,7 @@ export function NotificationsPopover({ sx, ...other }: NotificationsPopoverProps
                   key={n.id}
                   notification={n}
                   onClick={handleNotificationClick}
+                  onDelete={deleteOne}
                 />
               ))}
             </List>
@@ -158,6 +178,7 @@ export function NotificationsPopover({ sx, ...other }: NotificationsPopoverProps
                   key={n.id}
                   notification={n}
                   onClick={handleNotificationClick}
+                  onDelete={deleteOne}
                 />
               ))}
             </List>
@@ -188,9 +209,10 @@ export function NotificationsPopover({ sx, ...other }: NotificationsPopoverProps
 type NotificationItemProps = {
   notification: AdminNotification;
   onClick: (notification: AdminNotification) => void;
+  onDelete: (id: string) => void;
 };
 
-function NotificationItem({ notification, onClick }: NotificationItemProps) {
+function NotificationItem({ notification, onClick, onDelete }: NotificationItemProps) {
   return (
     <ListItemButton
       onClick={() => onClick(notification)}
@@ -225,6 +247,19 @@ function NotificationItem({ notification, onClick }: NotificationItemProps) {
           </Typography>
         }
       />
+      <Tooltip title="Delete notification">
+        <IconButton
+          edge="end"
+          size="small"
+          color="error"
+          onClick={(event) => {
+            event.stopPropagation();
+            void onDelete(notification.id);
+          }}
+        >
+          <Iconify icon="solar:trash-bin-trash-bold" width={18} />
+        </IconButton>
+      </Tooltip>
     </ListItemButton>
   );
 }
