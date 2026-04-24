@@ -40,6 +40,14 @@ class NotificationService
         ];
     }
 
+    public function markOneRead(User $user, string $id): void
+    {
+        $user->notifications()
+            ->where('id', $id)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+    }
+
     public function markAllRead(User $user): void
     {
         $user->unreadNotifications()->update(['read_at' => now()]);

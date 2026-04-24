@@ -28,6 +28,7 @@ export function useNotificationsScreen(): UseNotificationsScreenResult {
     isLoading,
     isError,
     isMarkingRead,
+    markOneRead,
     markAllRead,
     deleteOne,
     deleteAll,
@@ -46,12 +47,16 @@ export function useNotificationsScreen(): UseNotificationsScreenResult {
   }, [deleteAll]);
 
   const handleNotificationPress = useCallback((notification: AppNotification): void => {
+    if (notification.read_at === null) {
+      markOneRead(notification.id);
+    }
+
     if (notification.data.submission_id !== undefined) {
       navigation.navigate('OrderDetail', { submissionId: notification.data.submission_id });
     } else if (notification.data.ticket_order_id !== undefined) {
       navigation.navigate('TicketOrderDetail', { ticketOrderId: notification.data.ticket_order_id });
     }
-  }, [navigation]);
+  }, [navigation, markOneRead]);
 
   const handleBack = useCallback((): void => {
     navigation.goBack();

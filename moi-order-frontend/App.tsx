@@ -64,6 +64,7 @@ import { TicketDetailScreen } from '@/features/tickets/screens/TicketDetailScree
 import { TicketDateSelectionScreen } from '@/features/tickets/screens/TicketDateSelectionScreen';
 import { TicketOrderDetailScreen } from '@/features/tickets/screens/TicketOrderDetailScreen';
 import { NotificationsScreen } from '@/features/notifications/screens/NotificationsScreen';
+import { useNotificationsData } from '@/features/notifications/hooks/useNotificationsData';
 import { usePusherNotifications } from '@/features/notifications/hooks/usePusherNotifications';
 
 import { RootStackParamList, TabParamList } from '@/types/navigation';
@@ -81,10 +82,12 @@ const queryClient = new QueryClient({
   },
 });
 
-// Mounted inside QueryClientProvider — manages the Pusher connection for the entire session.
-// Subscribes when the user logs in (userId becomes non-null), disconnects on logout.
+// Mounted inside QueryClientProvider — manages the Pusher connection and seeds the
+// unread notification count for the entire session. Both hooks are no-ops until
+// the user logs in (userId becomes non-null).
 function AppShell(): React.JSX.Element {
   usePusherNotifications();
+  useNotificationsData();
   return (
     <Stack.Navigator
       initialRouteName="MainTabs"

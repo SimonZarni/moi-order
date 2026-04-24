@@ -6,6 +6,10 @@ export async function fetchNotifications(): Promise<NotificationsResponse> {
   return res.data;
 }
 
+export async function markNotificationRead(id: string): Promise<void> {
+  await apiClient.patch(`/api/v1/notifications/${id}/read`);
+}
+
 export async function markAllNotificationsRead(): Promise<void> {
   await apiClient.put('/api/v1/notifications/read-all');
 }
