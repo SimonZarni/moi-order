@@ -1,7 +1,7 @@
 import type { IconButtonProps } from '@mui/material/IconButton';
 import type { AdminNotification, AdminNotificationData } from 'src/types';
 
-import { useCallback, useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
