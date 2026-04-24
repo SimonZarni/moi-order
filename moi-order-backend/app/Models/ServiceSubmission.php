@@ -87,14 +87,29 @@ class ServiceSubmission extends Model implements PayableInterface
 
     // ─── Domain methods ───────────────────────────────────────────────────────
 
-    /** Payment confirmed — move to Processing for admin to work on. */
+    /**
+     * Payment confirmed — move to Processing for admin to work on.
+     *
+     * Security: re-reads the row with lockForUpdate() inside the caller's open transaction
+     * to close the race window between the client-side PaymentService confirmation and the
+     * Stripe webhook both calling onPaymentConfirmed() concurrently. Without the lock, both
+     * threads can pass the status guard before either commits, producing two SubmissionStatusChanged
+     * events and therefore two notification rows for the same transition.
+     *
+     * Must be called inside DB::transaction — lockForUpdate() is a no-op outside one.
+     */
     public function markProcessing(): void
     {
-        if ($this->status !== SubmissionStatus::PendingPayment) {
+        $locked = static::where('id', $this->id)
+            ->lockForUpdate()
+            ->first();
+
+        if ($locked === null || $locked->status !== SubmissionStatus::PendingPayment) {
             return;
         }
-        $this->update(['status' => SubmissionStatus::Processing]);
-        event(new SubmissionStatusChanged($this->fresh()));
+
+        $locked->update(['status' => SubmissionStatus::Processing]);
+        event(new SubmissionStatusChanged($locked->fresh()));
     }
 
     /** Payment failed or expired — user can retry payment. */
