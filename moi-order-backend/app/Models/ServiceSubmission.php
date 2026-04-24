@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Contracts\PayableInterface;
 use App\Enums\SubmissionStatus;
 use App\Events\PaymentConfirmed;
+use App\Events\SubmissionPaymentProcessed;
 use App\Events\SubmissionStatusChanged;
 use Database\Factories\ServiceSubmissionFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -109,7 +110,9 @@ class ServiceSubmission extends Model implements PayableInterface
         }
 
         $locked->update(['status' => SubmissionStatus::Processing]);
-        event(new SubmissionStatusChanged($locked->fresh()));
+        $fresh = $locked->fresh();
+        event(new SubmissionStatusChanged($fresh));
+        event(new SubmissionPaymentProcessed($fresh));
     }
 
     /** Payment failed or expired — user can retry payment. */

@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Contracts\PayableInterface;
 use App\Enums\TicketOrderStatus;
 use App\Events\TicketOrderPaymentConfirmed;
+use App\Events\TicketOrderPaymentProcessed;
 use App\Events\TicketOrderStatusChanged;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -105,7 +106,9 @@ class TicketOrder extends Model implements PayableInterface
         }
 
         $locked->update(['status' => TicketOrderStatus::Processing]);
-        event(new TicketOrderStatusChanged($locked->fresh()));
+        $fresh = $locked->fresh();
+        event(new TicketOrderStatusChanged($fresh));
+        event(new TicketOrderPaymentProcessed($fresh));
     }
 
     public function markPaymentFailed(): void
