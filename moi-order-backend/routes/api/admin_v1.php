@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\Admin\V1\AdminAuthController;
+use App\Http\Controllers\Api\Admin\V1\AdminNotificationController;
 use App\Http\Controllers\Api\Admin\V1\AdminCategoryController;
 use App\Http\Controllers\Api\Admin\V1\AdminDocumentTypeController;
 use App\Http\Controllers\Api\Admin\V1\AdminPaymentController;
@@ -21,6 +22,13 @@ use Illuminate\Support\Facades\Route;
 | Admin Authenticated Routes — requires auth:sanctum + admin.auth
 |--------------------------------------------------------------------------
 */
+
+// ── Notifications ─────────────────────────────────────────────────────────────
+Route::prefix('notifications')->name('admin.notifications.')->group(function (): void {
+    Route::get('/', [AdminNotificationController::class, 'index'])->name('index');
+    Route::put('/read-all', [AdminNotificationController::class, 'markAllRead'])->name('read-all');
+    Route::patch('/{id}/read', [AdminNotificationController::class, 'markOneRead'])->name('read');
+});
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 Route::prefix('auth')->name('admin.auth.')->group(function (): void {

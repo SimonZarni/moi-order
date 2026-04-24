@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Contracts\FileStorageInterface;
 use App\DTOs\CreateDynamicSubmissionDTO;
 use App\Enums\SubmissionStatus;
+use App\Events\ServiceSubmissionCreated;
 use App\Models\ServiceSubmission;
 use App\Models\ServiceType;
 use Illuminate\Support\Facades\DB;
@@ -52,7 +53,7 @@ class DynamicSubmissionService
 
         $serviceType = ServiceType::findOrFail($dto->serviceTypeId);
 
-        return DB::transaction(function () use ($dto, $serviceType): ServiceSubmission {
+        $submission = DB::transaction(function () use ($dto, $serviceType): ServiceSubmission {
             // Build submission_data: text values first, file paths nested under _files.
             $submissionData         = $dto->fields;
             $submissionData['_files'] = [];
@@ -80,6 +81,12 @@ class DynamicSubmissionService
 
             return $submission->load(['serviceType.service']);
         });
+
+        // Fired after the transaction commits so admin notification rows land on committed data.
+        // Not fired on idempotency hits — those return early before this point.
+        event(new ServiceSubmissionCreated($submission));
+
+        return $submission;
     }
 
     // ─── Private ─────────────────────────────────────────────────────────────
