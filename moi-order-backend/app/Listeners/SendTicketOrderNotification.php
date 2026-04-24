@@ -7,11 +7,12 @@ namespace App\Listeners;
 use App\Enums\TicketOrderStatus;
 use App\Events\TicketOrderStatusChanged;
 use App\Notifications\TicketOrderStatusNotification;
+use Illuminate\Support\Facades\DB;
+
 /**
  * Principle: SRP — one reaction: notify the user when their ticket order status changes.
- * Synchronous: QUEUE_CONNECTION=sync makes ShouldQueue + afterCommit fire twice (once
- *   via immediate sync dispatch, once via DB::afterCommit callback). Running synchronously
- *   fires exactly once. Acceptable because notification sending is fast.
+ * Timing: same DB::afterCommit() rationale as SendSubmissionNotification — Pusher must
+ *   fire only after the notification row is committed so client refetches see the new row.
  * Guard: only notifies for statuses the user cares about (Processing, Completed).
  */
 class SendTicketOrderNotification
@@ -27,6 +28,8 @@ class SendTicketOrderNotification
             return;
         }
 
-        $order->user->notify(new TicketOrderStatusNotification($order));
+        DB::afterCommit(function () use ($order): void {
+            $order->user->notify(new TicketOrderStatusNotification($order));
+        });
     }
 }

@@ -4,6 +4,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { logout } from '@/shared/api/auth';
 import { useAuthStore } from '@/shared/store/authStore';
+import { useNotificationStore } from '@/shared/store/notificationStore';
 import { User } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 
@@ -22,6 +23,7 @@ export interface UseHomeScreenResult {
 export function useHomeScreen(): UseHomeScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user, isLoggedIn, clearAuth } = useAuthStore();
+  const resetUnread = useNotificationStore((state) => state.resetUnread);
 
   const handleNavigateToNinetyDayReport = useCallback((): void => {
     navigation.navigate('NinetyDayReport');
@@ -48,10 +50,10 @@ export function useHomeScreen(): UseHomeScreenResult {
   }, [navigation]);
 
   const handleLogout = useCallback((): void => {
-    // Fire-and-forget: revoke token server-side, then clear local state.
     logout().catch(() => {});
     clearAuth();
-  }, [clearAuth]);
+    resetUnread();
+  }, [clearAuth, resetUnread]);
 
   return {
     user,
