@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, Image, Modal, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
@@ -106,7 +107,8 @@ export function OrderDetailScreen(): React.JSX.Element {
             <Image
               source={{ uri: previewImageUrl }}
               style={styles.previewImage}
-              resizeMode="contain"
+              contentFit="contain"
+              cachePolicy="memory"
               accessibilityLabel="Result file preview"
             />
           )}

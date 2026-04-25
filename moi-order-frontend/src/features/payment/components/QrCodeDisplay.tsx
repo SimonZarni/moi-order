@@ -1,5 +1,6 @@
 import React from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
@@ -25,7 +26,8 @@ export function QrCodeDisplay({ qrImageUrl, amountFormatted, onDownloadQr }: QrC
           <Image
             source={{ uri: qrImageUrl }}
             style={styles.qrImage}
-            resizeMode="contain"
+            contentFit="contain"
+            cachePolicy="memory"
             accessibilityLabel="PromptPay QR code"
           />
         ) : (

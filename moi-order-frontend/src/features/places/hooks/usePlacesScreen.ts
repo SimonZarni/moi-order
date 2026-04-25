@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { Image } from 'expo-image';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
@@ -68,6 +69,12 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     categories,
     handleCategorySelect,
   } = usePlacesSearch(places);
+
+  useEffect(() => {
+    filteredPlaces.forEach(p => {
+      if (p.cover_image !== null) Image.prefetch(p.cover_image);
+    });
+  }, [filteredPlaces]);
 
   const handleQueryChange = useCallback((text: string): void => {
     setQuery(text);

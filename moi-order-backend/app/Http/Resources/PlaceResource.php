@@ -47,11 +47,11 @@ class PlaceResource extends JsonResource
             'cover_image'       => $this->whenLoaded('coverImage', function () use ($storage) {
                 if (! $this->coverImage) return null;
                 $path = $this->coverImage->path;
-                return str_starts_with($path, 'http') ? $path : $storage->url($path);
+                return str_starts_with($path, 'http') ? $path : $storage->publicUrl($path);
             }, $this->whenLoaded('images', function () use ($storage) {
                 $first = $this->images->first();
                 if (! $first) return null;
-                return str_starts_with($first->path, 'http') ? $first->path : $storage->url($first->path);
+                return str_starts_with($first->path, 'http') ? $first->path : $storage->publicUrl($first->path);
             })),
         ];
     }

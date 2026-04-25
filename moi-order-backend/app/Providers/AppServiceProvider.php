@@ -50,7 +50,10 @@ class AppServiceProvider extends ServiceProvider
         //   causing temporaryUrl() to throw InvalidArgumentException → 500.
         $this->app->bind(FileStorageInterface::class, function () {
             $diskName = config('filesystems.default', 'local');
-            return new FileStorageService(Storage::disk($diskName));
+            return new FileStorageService(
+                Storage::disk($diskName),
+                config('filesystems.r2_public_url', ''),
+            );
         });
 
         $this->app->bind(

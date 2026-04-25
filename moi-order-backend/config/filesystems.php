@@ -15,6 +15,8 @@ return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
+    'r2_public_url' => env('R2_PUBLIC_URL', ''),
+
     /*
     |--------------------------------------------------------------------------
     | Filesystem Disks
