@@ -1,9 +1,9 @@
 import apiClient from '@/shared/api/client';
 import { PaginatedResponse, ApiResponse, Place } from '@/types/models';
 
-export async function fetchPlaces(page: number): Promise<PaginatedResponse<Place>> {
+export async function fetchPlaces(page: number, search?: string): Promise<PaginatedResponse<Place>> {
   const response = await apiClient.get<PaginatedResponse<Place>>('/api/v1/places', {
-    params: { page },
+    params: { page, ...(search ? { search } : {}) },
   });
   return response.data;
 }

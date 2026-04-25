@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
@@ -6,10 +6,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import { usePlaces } from '@/features/places/hooks/usePlaces';
 import { usePlacesSearch } from '@/features/places/hooks/usePlacesSearch';
 import { fetchPlaceDetail } from '@/shared/api/places';
+import { useDebounce } from '@/shared/hooks/useDebounce';
 import { CACHE_TTL } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { Category, Place, ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 export interface UsePlacesScreenResult {
   // Data
@@ -35,6 +38,10 @@ export interface UsePlacesScreenResult {
 export function usePlacesScreen(): UsePlacesScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const queryClient = useQueryClient();
+
+  const [query, setQuery] = useState('');
+  const debouncedQuery = useDebounce(query, SEARCH_DEBOUNCE_MS);
+
   const {
     places,
     isLoading,
@@ -45,16 +52,18 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     isFetchingNextPage,
     fetchNextPage,
     refetch,
-  } = usePlaces();
+  } = usePlaces(debouncedQuery);
 
   const {
-    query,
     selectedCategory,
     filteredPlaces,
     categories,
-    handleQueryChange,
     handleCategorySelect,
   } = usePlacesSearch(places);
+
+  const handleQueryChange = useCallback((text: string): void => {
+    setQuery(text);
+  }, []);
 
   const handleEndReached = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
