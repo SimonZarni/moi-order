@@ -19,6 +19,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { registerDeviceToken } from '@/shared/api/deviceTokens';
+import { EXPO_PROJECT_ID } from '@/shared/constants/config';
 import { useAuthStore } from '@/shared/store/authStore';
 import { useNotificationStore } from '@/shared/store/notificationStore';
 import { RootStackParamList } from '@/types/navigation';
@@ -106,11 +107,8 @@ export function usePushNotifications(): void {
     if (finalStatus !== 'granted') return;
 
     try {
-      // getDevicePushTokenAsync returns a native FCM token tied to com.moiorder.app —
-      // not an ExponentPushToken. This guarantees tapping the notification opens this
-      // app, never Expo Go, even if both are installed on the same device.
-      const tokenData = await Notifications.getDevicePushTokenAsync();
-      const token     = tokenData.data as string;
+      const tokenData = await Notifications.getExpoPushTokenAsync({ projectId: EXPO_PROJECT_ID });
+      const token     = tokenData.data;
       const platform  = Platform.OS === 'ios' ? 'ios' : 'android';
 
       setPushToken(token);
