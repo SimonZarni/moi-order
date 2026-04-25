@@ -8,7 +8,9 @@ import type { DateTimePickerEvent } from '@react-native-community/datetimepicker
 import { useProfileData } from '@/features/profile/hooks/useProfileData';
 import { useProfileForm } from '@/features/profile/hooks/useProfileForm';
 import { useChangePasswordForm } from '@/features/profile/hooks/useChangePasswordForm';
+import { unregisterDeviceToken } from '@/shared/api/deviceTokens';
 import { useAuthStore } from '@/shared/store/authStore';
+import { useNotificationStore } from '@/shared/store/notificationStore';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { Locale } from '@/shared/store/localeStore';
 import { RootStackParamList } from '@/types/navigation';
@@ -65,6 +67,7 @@ export function useProfileScreen(): UseProfileScreenResult {
   const queryClient = useQueryClient();
   const isLoggedIn  = useAuthStore((s) => s.isLoggedIn);
   const clearAuth   = useAuthStore((s) => s.clearAuth);
+  const pushToken   = useNotificationStore((s) => s.pushToken);
   const { locale, setLocale } = useLocale();
 
   const { user, isLoading, isRefreshing, refetch, updateMutation, changePasswordMutation, deleteAccountMutation } = useProfileData();
@@ -191,12 +194,16 @@ export function useProfileScreen(): UseProfileScreenResult {
         text: 'Sign Out',
         style: 'destructive',
         onPress: () => {
+          // Unregister push token before clearing auth so the API call still has a valid token.
+          if (pushToken !== null) {
+            unregisterDeviceToken(pushToken).catch(() => {});
+          }
           queryClient.clear();
           clearAuth(); // isLoggedIn → false → effect navigates to Home
         },
       },
     ]);
-  }, [clearAuth, navigation]);
+  }, [clearAuth, pushToken, queryClient]);
 
   const handleDeleteAccount = useCallback((): void => {
     Alert.alert(
