@@ -158,7 +158,11 @@ export function SubmissionDetailView() {
     );
   }
 
-  const serviceName = submission.service_type?.service?.name ?? submission.service_type?.name ?? '—';
+  const serviceName =
+    submission.service_type?.service?.name_mm ||
+    submission.service_type?.service?.name_en ||
+    submission.service_type?.service?.name ||
+    '—';
   const userName = submission.user?.name ?? '—';
   const userEmail = submission.user?.email ?? '';
 
@@ -193,7 +197,7 @@ export function SubmissionDetailView() {
                 <Stack spacing={1}>
                   {[
                     ['Service', serviceName],
-                    ['Service Type', submission.service_type?.name ?? '—'],
+                    ['Service Type', submission.service_type?.name_mm || submission.service_type?.name_en || submission.service_type?.name || '—'],
                     ['Submitted', fDate(submission.created_at)],
                     ['Completed', submission.completed_at ? fDate(submission.completed_at) : '—'],
                     ['Price', submission.price_snapshot !== null ? `${(submission.price_snapshot / 100).toFixed(2)}` : '—'],

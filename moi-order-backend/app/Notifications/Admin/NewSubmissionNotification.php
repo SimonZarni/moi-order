@@ -25,9 +25,11 @@ class NewSubmissionNotification extends Notification
 
     public function toArray(object $notifiable): array
     {
-        $serviceName = $this->submission->serviceType->service->name
-            ?? $this->submission->serviceType->name
-            ?? 'a service';
+        $serviceName = $this->submission->serviceType->service->name_mm
+            ?: $this->submission->serviceType->name_mm
+            ?: $this->submission->serviceType->service->name_en
+            ?: $this->submission->serviceType->name_en
+            ?: 'a service';
 
         $userName = $this->submission->user->name ?? 'A user';
 
