@@ -8,6 +8,8 @@ use App\Contracts\FileStorageInterface;
 use App\Contracts\PaymentGatewayInterface;
 use App\Contracts\PushNotificationInterface;
 use App\Services\ExpoPushNotificationService;
+use App\Services\FcmPushNotificationService;
+use App\Services\PushNotificationDispatcher;
 use App\Events\PaymentConfirmed;
 use App\Events\TicketOrderPaymentConfirmed;
 use App\Listeners\MarkSubmissionProcessing;
@@ -82,8 +84,17 @@ class AppServiceProvider extends ServiceProvider
             )
         );
 
-        // DIP: bind Expo push adapter. To switch to FCM direct, swap ExpoPushNotificationService.
-        $this->app->bind(PushNotificationInterface::class, ExpoPushNotificationService::class);
+        // DIP: dispatcher routes Android → FCM v1 API, iOS → Expo/APNs.
+        // To add a new platform, add a new service and one case in PushNotificationDispatcher.
+        $this->app->bind(PushNotificationInterface::class, function (): PushNotificationDispatcher {
+            return new PushNotificationDispatcher(
+                new FcmPushNotificationService(
+                    projectId:       config('services.firebase.project_id'),
+                    credentialsPath: config('services.firebase.credentials_path'),
+                ),
+                new ExpoPushNotificationService(),
+            );
+        });
 
         // DIP: bind Stripe adapter to the payment gateway contract.
         // To switch provider: swap StripePaymentService for an OmisePaymentService here.

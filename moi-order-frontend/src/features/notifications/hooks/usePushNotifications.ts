@@ -10,6 +10,7 @@
  *   2. The unique DB constraint on device_tokens.token is the hard guard.
  *   3. setNotificationHandler is set once at module load, not per-mount.
  */
+import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { useEffect, useRef } from 'react';
@@ -18,22 +19,39 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { registerDeviceToken } from '@/shared/api/deviceTokens';
-import { EXPO_PROJECT_ID } from '@/shared/constants/config';
 import { useAuthStore } from '@/shared/store/authStore';
 import { useNotificationStore } from '@/shared/store/notificationStore';
 import { RootStackParamList } from '@/types/navigation';
 
-// Set at module load so the handler is ready before the first notification arrives.
-// shouldSetBadge: false — badge count is managed by Zustand + Pusher, not OS badge API.
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+// Expo Go (SDK 53+) removed remote push support. Skip registration entirely when
+// running inside Expo Go — in-app notifications via Pusher still work normally.
+const IS_EXPO_GO = Constants.appOwnership === 'expo';
+
+if (Constants.appOwnership !== 'expo') {
+  // Android 8+ requires a notification channel to be created before any notification
+  // is displayed. The channel importance must be HIGH for heads-up (pop-over) banners
+  // to appear — importance alone is not enough; the backend must also send priority:'high'.
+  if (Platform.OS === 'android') {
+    Notifications.setNotificationChannelAsync('default', {
+      name: 'Default',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      sound: 'default',
+    });
+  }
+
+  // Set at module load so the handler is ready before the first notification arrives.
+  // shouldSetBadge: false — badge count is managed by Zustand + Pusher, not OS badge API.
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+}
 
 interface PushNotificationData {
   notification_type?: string;
@@ -74,8 +92,8 @@ export function usePushNotifications(): void {
   }, [userId]);
 
   async function registerForPush(): Promise<void> {
-    // Push tokens only work on physical devices — skip on Expo Go simulator.
-    if (!Device.isDevice) return;
+    // Skip on Expo Go (SDK 53+ removed remote push) and on simulators.
+    if (IS_EXPO_GO || !Device.isDevice) return;
 
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
@@ -88,12 +106,14 @@ export function usePushNotifications(): void {
     if (finalStatus !== 'granted') return;
 
     try {
-      const tokenData = await Notifications.getExpoPushTokenAsync({ projectId: EXPO_PROJECT_ID });
-      const token     = tokenData.data;
+      // getDevicePushTokenAsync returns a native FCM token tied to com.moiorder.app —
+      // not an ExponentPushToken. This guarantees tapping the notification opens this
+      // app, never Expo Go, even if both are installed on the same device.
+      const tokenData = await Notifications.getDevicePushTokenAsync();
+      const token     = tokenData.data as string;
       const platform  = Platform.OS === 'ios' ? 'ios' : 'android';
 
       setPushToken(token);
-      // Fire-and-forget — push registration failure is non-critical.
       registerDeviceToken(token, platform).catch(() => {});
     } catch {
       // Silently ignore — in-app notifications via Pusher still work.
