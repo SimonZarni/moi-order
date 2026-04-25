@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Contracts;
 
 use App\DTOs\ExpoPushMessage;
-use App\DTOs\PushToken;
 
 /**
  * Principle: ISP — push-only contract, separate from other notification concerns.
@@ -14,9 +13,7 @@ use App\DTOs\PushToken;
 interface PushNotificationInterface
 {
     /**
-     * Send a push notification to one or more device tokens.
-     *
-     * @param PushToken[] $tokens
+     * @param string[] $tokens  Expo push token strings
      */
     public function send(array $tokens, ExpoPushMessage $message): void;
 }
