@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -41,6 +41,14 @@ export function usePlacesScreen(): UsePlacesScreenResult {
 
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, SEARCH_DEBOUNCE_MS);
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setQuery('');
+      };
+    }, [])
+  );
 
   const {
     places,
