@@ -1,4 +1,5 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
+import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
@@ -30,6 +31,12 @@ export function useTicketsScreen(): UseTicketsScreenResult {
     tickets, isLoading, isError, isRefreshing,
     hasNextPage, isFetchingNextPage, fetchNextPage, refetch,
   } = useTickets();
+
+  useEffect(() => {
+    tickets.forEach(t => {
+      if (t.cover_image_url !== null) Image.prefetch(t.cover_image_url);
+    });
+  }, [tickets]);
 
   const handleEndReached = useCallback((): void => {
     if (hasNextPage && !isFetchingNextPage) fetchNextPage();

@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
@@ -28,7 +29,7 @@ function TicketCard({ item, onPress }: TicketCardProps): React.JSX.Element {
       accessibilityLabel={item.name}
       accessibilityRole="button"
     >
-      <Image source={{ uri: item.cover_image_url }} style={styles.cardImage} resizeMode="cover" />
+      <Image source={{ uri: item.cover_image_url ?? undefined }} style={styles.cardImage} contentFit="cover" cachePolicy="disk" transition={150} />
       <View style={styles.cardBody}>
         <Text style={styles.cardName}>{item.name}</Text>
         <Text style={styles.cardHighlight} numberOfLines={2}>{item.highlight_description}</Text>

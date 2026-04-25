@@ -1,5 +1,6 @@
 import React from 'react';
-import { Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
@@ -42,7 +43,7 @@ export function TicketDetailScreen(): React.JSX.Element {
       <StickyBackButton onPress={handleBack} label="Back" />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View>
-          <Image source={{ uri: ticket.cover_image_url }} style={styles.cover} resizeMode="cover" />
+          <Image source={{ uri: ticket.cover_image_url ?? undefined }} style={styles.cover} contentFit="cover" cachePolicy="disk" priority="high" transition={200} />
         </View>
 
         <View style={styles.infoBlock}>

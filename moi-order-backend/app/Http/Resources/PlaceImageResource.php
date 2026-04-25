@@ -22,7 +22,7 @@ class PlaceImageResource extends JsonResource
             'id'         => $this->id,
             'url'        => str_starts_with($this->path, 'http')
                 ? $this->path
-                : $storage->url($this->path),
+                : $storage->publicUrl($this->path),
             'sort_order' => $this->sort_order,
         ];
     }

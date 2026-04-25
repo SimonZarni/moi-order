@@ -29,7 +29,7 @@ class TicketResource extends JsonResource
             'cover_image_url'       => $this->cover_image_path !== null
                 ? (str_starts_with($this->cover_image_path, 'http')
                     ? $this->cover_image_path
-                    : app(\App\Contracts\FileStorageInterface::class)->url($this->cover_image_path))
+                    : app(\App\Contracts\FileStorageInterface::class)->publicUrl($this->cover_image_path))
                 : null,
             'starting_from_price'   => $this->when(
                 ! $this->relationLoaded('activeVariants'),

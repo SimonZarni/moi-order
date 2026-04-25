@@ -31,7 +31,10 @@ class FileStorageService implements FileStorageInterface
         'image/gif',
     ];
 
-    public function __construct(private readonly FilesystemAdapter $disk) {}
+    public function __construct(
+        private readonly FilesystemAdapter $disk,
+        private readonly string $publicBaseUrl = '',
+    ) {}
 
     /**
      * {@inheritdoc}
@@ -66,6 +69,18 @@ class FileStorageService implements FileStorageInterface
             // missing after route:cache — see FilesystemServiceProvider::serveFiles().
             return $this->disk->url($path);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function publicUrl(string $path): string
+    {
+        if ($this->publicBaseUrl === '') {
+            return $this->url($path);
+        }
+
+        return rtrim($this->publicBaseUrl, '/').'/'.ltrim($path, '/');
     }
 
     /**

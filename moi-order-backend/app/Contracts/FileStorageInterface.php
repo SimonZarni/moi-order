@@ -31,6 +31,13 @@ interface FileStorageInterface
     public function url(string $path, int $minutesTtl = 30): string;
 
     /**
+     * Return a permanent public CDN URL for the given stored path.
+     * Use for non-sensitive assets (place images, ticket covers).
+     * Falls back to a signed URL when R2_PUBLIC_URL is not configured.
+     */
+    public function publicUrl(string $path): string;
+
+    /**
      * Delete the file at the given stored path.
      */
     public function delete(string $path): void;

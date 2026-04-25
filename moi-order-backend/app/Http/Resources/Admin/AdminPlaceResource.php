@@ -39,10 +39,10 @@ class AdminPlaceResource extends JsonResource
             'tags'              => TagResource::collection($this->whenLoaded('tags')),
             'images'            => PlaceImageResource::collection($this->whenLoaded('images')),
             'cover_image'       => $this->whenLoaded('coverImage', function () use ($storage) {
-                return $this->coverImage ? $storage->url($this->coverImage->path) : null;
+                return $this->coverImage ? $storage->publicUrl($this->coverImage->path) : null;
             }, $this->whenLoaded('images', function () use ($storage) {
                 $first = $this->images->first();
-                return $first ? $storage->url($first->path) : null;
+                return $first ? $storage->publicUrl($first->path) : null;
             })),
         ];
     }
