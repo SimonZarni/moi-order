@@ -35,6 +35,20 @@ class PlaceController extends Controller
                         ->orWhere('name_th', 'like', "%{$search}%")
                         ->orWhere('city', 'like', "%{$search}%");
                 });
+                // Tier 1: name_en starts with term (strongest signal).
+                // Tier 2: name_en contains term mid-string.
+                // Tier 3: name_th or name_my starts with term.
+                // Tier 4: any other field matches (city, mid-string other langs).
+                // created_at DESC breaks ties within each tier.
+                $q->orderByRaw(
+                    'CASE
+                        WHEN name_en LIKE ? THEN 1
+                        WHEN name_en LIKE ? THEN 2
+                        WHEN name_th LIKE ? OR name_my LIKE ? THEN 3
+                        ELSE 4
+                    END',
+                    ["{$search}%", "%{$search}%", "{$search}%", "{$search}%"],
+                );
             })
             ->latest()
             ->paginate(perPage: 20);
