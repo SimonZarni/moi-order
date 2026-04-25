@@ -136,6 +136,7 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.textOnLight,
     letterSpacing: -0.3,
+    lineHeight: 34,
   },
   nameSub: {
     fontSize: typography.md,
@@ -223,6 +224,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.xs,
     color: colours.tertiary,
     fontWeight: '600',
+    lineHeight: 18,
   },
 
   // ── Section 4 — About (left accent bar) ──────────────────────────────────

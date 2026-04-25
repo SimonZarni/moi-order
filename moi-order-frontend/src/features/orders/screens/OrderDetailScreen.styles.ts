@@ -276,6 +276,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.xs,
     color: colours.textMuted,
     fontWeight: '500',
+    lineHeight: 18,
   },
   infoValue: {
     fontSize: typography.sm,
@@ -283,6 +284,7 @@ export const styles = StyleSheet.create({
     color: colours.textOnLight,
     maxWidth: '60%',
     textAlign: 'right',
+    lineHeight: 22,
   },
 
   // ── Document row ────────────────────────────────────────────────────────────
