@@ -18,10 +18,10 @@ export interface UsePlacesResult {
   refetch: () => void;
 }
 
-export function usePlaces(): UsePlacesResult {
+export function usePlaces(search: string = ''): UsePlacesResult {
   const query = useInfiniteQuery({
-    queryKey: QUERY_KEYS.PLACES.LIST,
-    queryFn: ({ pageParam }) => fetchPlaces(pageParam as number),
+    queryKey: [...QUERY_KEYS.PLACES.LIST, search],
+    queryFn: ({ pageParam }) => fetchPlaces(pageParam as number, search || undefined),
     initialPageParam: 1,
     getNextPageParam: (lastPage: PaginatedResponse<Place>) => {
       const { current_page, last_page } = lastPage.meta;
