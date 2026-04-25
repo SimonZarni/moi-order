@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, keepPreviousData } from '@tanstack/react-query';
 
 import { fetchPlaces } from '@/shared/api/places';
 import { CACHE_TTL } from '@/shared/constants/config';
@@ -29,6 +29,9 @@ export function usePlaces(search: string = ''): UsePlacesResult {
     },
     // Places change infrequently — avoid refetching on every screen visit.
     staleTime: CACHE_TTL.USER_DATA,
+    // Keep previous search results visible while a new search is fetching so the
+    // TextInput stays mounted and the keyboard never dismisses mid-typing.
+    placeholderData: keepPreviousData,
     // Deduplicate by id — offset pagination can shift a record across page
     // boundaries between fetches, causing the same id to appear on two pages.
     select: (data) => {
