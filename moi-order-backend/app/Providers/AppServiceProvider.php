@@ -6,6 +6,8 @@ namespace App\Providers;
 
 use App\Contracts\FileStorageInterface;
 use App\Contracts\PaymentGatewayInterface;
+use App\Contracts\PushNotificationInterface;
+use App\Services\ExpoPushNotificationService;
 use App\Events\PaymentConfirmed;
 use App\Events\TicketOrderPaymentConfirmed;
 use App\Listeners\MarkSubmissionProcessing;
@@ -79,6 +81,9 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(FileStorageInterface::class)
             )
         );
+
+        // DIP: bind Expo push adapter. To switch to FCM direct, swap ExpoPushNotificationService.
+        $this->app->bind(PushNotificationInterface::class, ExpoPushNotificationService::class);
 
         // DIP: bind Stripe adapter to the payment gateway contract.
         // To switch provider: swap StripePaymentService for an OmisePaymentService here.

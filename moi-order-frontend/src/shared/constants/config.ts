@@ -7,6 +7,9 @@ export const PUSHER_APP_CLUSTER = process.env['EXPO_PUBLIC_PUSHER_CLUSTER'] ?? '
 // Web Client ID (client_type: 3) — used by GoogleSignin.configure and backend token verification.
 export const GOOGLE_WEB_CLIENT_ID = '661538209777-nhtp07mb5guuhrd3128r80m83imtut6p.apps.googleusercontent.com' as const;
 
+// EAS project ID — required by getExpoPushTokenAsync to address the correct project.
+export const EXPO_PROJECT_ID = '299e73b6-58b0-43d0-9a56-c7a212af98e5' as const;
+
 export const CACHE_TTL = {
   USER_DATA: 5 * 60 * 1000,
   STATIC_DATA: Infinity,

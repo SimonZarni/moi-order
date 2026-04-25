@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\DeviceTokenController;
 use App\Http\Controllers\Api\V1\DynamicSubmissionController;
 use App\Http\Controllers\Api\V1\FavoritePlaceController;
 use App\Http\Controllers\Api\V1\NotificationController;
@@ -56,3 +57,7 @@ Route::put('/notifications/read-all',     [NotificationController::class, 'markA
 Route::patch('/notifications/{id}/read',  [NotificationController::class, 'markOneRead']);
 Route::delete('/notifications/{id}',      [NotificationController::class, 'destroy']);
 Route::delete('/notifications',           [NotificationController::class, 'destroyAll']);
+
+// Device tokens — push notification registration
+Route::post('/device-tokens',   [DeviceTokenController::class, 'store']);
+Route::delete('/device-tokens', [DeviceTokenController::class, 'destroy']);
