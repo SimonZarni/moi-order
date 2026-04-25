@@ -19,7 +19,7 @@ export type SubmissionListItem = {
   created_at: string;
   has_result: boolean;
   user: { id: number; name: string; email: string } | null;
-  service_type: { id: number; name: string; name_mm: string | null; service: { id: number; name: string; name_mm: string | null; slug: string } | null } | null;
+  service_type: { id: number; name: string; name_en: string | null; name_mm: string | null; service: { id: number; name: string; name_en: string | null; name_mm: string | null; slug: string } | null } | null;
   documents: SubmissionDocumentData[];
 };
 

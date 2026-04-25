@@ -29,7 +29,7 @@ Route::prefix('notifications')->name('admin.notifications.')->group(function ():
     Route::put('/read-all', [AdminNotificationController::class, 'markAllRead'])->name('read-all');
     Route::patch('/{id}/read', [AdminNotificationController::class, 'markOneRead'])->name('read');
     Route::delete('/{id}', [AdminNotificationController::class, 'destroy'])->name('destroy');
-    Route::delete('/', [AdminNotificationController::class, 'destroy-all'])->name('destroy-all');
+    Route::delete('/', [AdminNotificationController::class, 'destroyAll'])->name('destroy-all');
 });
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
