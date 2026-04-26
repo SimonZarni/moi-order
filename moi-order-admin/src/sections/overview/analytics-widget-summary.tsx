@@ -27,6 +27,7 @@ type Props = CardProps & {
     categories: string[];
     options?: ChartOptions;
   };
+  formatTotal?: (value: number) => string;
 };
 
 export function AnalyticsWidgetSummary({
@@ -37,6 +38,7 @@ export function AnalyticsWidgetSummary({
   chart,
   percent,
   color = 'primary',
+  formatTotal,
   ...other
 }: Props) {
   const theme = useTheme();
@@ -113,7 +115,7 @@ export function AnalyticsWidgetSummary({
         <Box sx={{ flexGrow: 1, minWidth: 112 }}>
           <Box sx={{ mb: 1, typography: 'subtitle2' }}>{title}</Box>
 
-          <Box sx={{ typography: 'h4' }}>{fShortenNumber(total)}</Box>
+          <Box sx={{ typography: 'h4' }}>{formatTotal ? formatTotal(total) : fShortenNumber(total)}</Box>
         </Box>
 
         <Chart
