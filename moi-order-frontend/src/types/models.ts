@@ -85,12 +85,22 @@ export interface ServiceType {
   };
 }
 
+export interface ServiceCategory {
+  id: number;
+  name: string;
+  name_en: string;
+  name_mm: string | null;
+  slug: string;
+  services: Service[];
+}
+
 export interface Service {
   id: number;
   name: string;
   name_en: string;
   name_mm: string | null;
   slug: string;
+  service_category_slug: string | null;
   types: ServiceType[];
 }
 

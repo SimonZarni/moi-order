@@ -4,22 +4,17 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Database\Factories\ServiceFactory;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * Principle: SRP — owns service catalog entity + its own scopes.
- * Principle: Encapsulation — active state queried via scope, not inline checks.
+ * Principle: SRP — owns the service category entity and its own scopes.
  */
-class Service extends Model
+class ServiceCategory extends Model
 {
-    /** @use HasFactory<ServiceFactory> */
-    use HasFactory, SoftDeletes;
+    use SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -27,7 +22,6 @@ class Service extends Model
         'name_mm',
         'slug',
         'is_active',
-        'service_category_id',
     ];
 
     protected function casts(): array
@@ -39,14 +33,9 @@ class Service extends Model
 
     // ─── Relationships ────────────────────────────────────────────────────────
 
-    public function serviceCategory(): BelongsTo
+    public function services(): HasMany
     {
-        return $this->belongsTo(ServiceCategory::class);
-    }
-
-    public function types(): HasMany
-    {
-        return $this->hasMany(ServiceType::class);
+        return $this->hasMany(Service::class);
     }
 
     // ─── Scopes ───────────────────────────────────────────────────────────────

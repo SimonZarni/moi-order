@@ -21,7 +21,10 @@ class ServiceController extends Controller
      */
     public function index(): AnonymousResourceCollection
     {
-        $services = Service::with(['types' => fn ($q) => $q->active()->orderBy('id')])
+        $services = Service::with([
+                'serviceCategory',
+                'types' => fn ($q) => $q->active()->orderBy('id'),
+            ])
             ->active()
             ->orderBy('id')
             ->get();

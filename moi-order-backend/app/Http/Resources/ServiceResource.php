@@ -17,12 +17,13 @@ class ServiceResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'      => $this->id,
-            'name'    => $this->name,
-            'name_en' => $this->name_en,
-            'name_mm' => $this->name_mm,
-            'slug'    => $this->slug,
-            'types'   => ServiceTypeResource::collection($this->whenLoaded('types')),
+            'id'                     => $this->id,
+            'name'                   => $this->name,
+            'name_en'                => $this->name_en,
+            'name_mm'                => $this->name_mm,
+            'slug'                   => $this->slug,
+            'service_category_slug'  => $this->serviceCategory?->slug,
+            'types'                  => ServiceTypeResource::collection($this->whenLoaded('types')),
         ];
     }
 }

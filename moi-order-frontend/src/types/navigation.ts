@@ -29,6 +29,7 @@ export type RootStackParamList = {
     price: number;
   };
   OtherServices: undefined;
+  EmbassyServices: undefined;
   CompanyRegistrationForm: {
     serviceTypeId: number;
     price: number;

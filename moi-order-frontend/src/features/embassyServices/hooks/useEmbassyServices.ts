@@ -1,14 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { fetchServices } from '@/shared/api/services';
+import { fetchServiceCategory } from '@/shared/api/serviceCategories';
 import { CACHE_TTL } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
+import { EMBASSY_CATEGORY_SLUG } from '@/shared/constants/serviceCategories';
 import { Service } from '@/types/models';
 
-// Services with a category have their own dedicated screen; exclude them here.
-const FEATURED_SLUG = '90-day-report';
-
-export interface UseOtherServicesResult {
+export interface UseEmbassyServicesResult {
   services: Service[];
   isLoading: boolean;
   isRefreshing: boolean;
@@ -16,19 +14,15 @@ export interface UseOtherServicesResult {
   refetch: () => void;
 }
 
-export function useOtherServices(): UseOtherServicesResult {
+export function useEmbassyServices(): UseEmbassyServicesResult {
   const query = useQuery({
-    queryKey: QUERY_KEYS.SERVICES.LIST,
-    queryFn:  fetchServices,
+    queryKey: QUERY_KEYS.SERVICE_CATEGORIES.BY_SLUG(EMBASSY_CATEGORY_SLUG),
+    queryFn:  () => fetchServiceCategory(EMBASSY_CATEGORY_SLUG),
     staleTime: CACHE_TTL.STATIC_DATA,
   });
 
-  const services = (query.data ?? []).filter(
-    (s) => s.slug !== FEATURED_SLUG && s.service_category_slug == null,
-  );
-
   return {
-    services,
+    services:     query.data?.services ?? [],
     isLoading:    query.isPending,
     isRefreshing: query.isFetching && !query.isPending,
     isError:      query.isError,
