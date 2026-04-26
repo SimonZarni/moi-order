@@ -5,8 +5,8 @@ import { CACHE_TTL } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { Service } from '@/types/models';
 
-// Services with a category have their own dedicated screen; exclude them here.
-const FEATURED_SLUG = '90-day-report';
+// Slugs with dedicated Home cards are excluded from this general list.
+const EXCLUDED_SLUGS = new Set(['90-day-report', 'airport-fast-track']);
 
 export interface UseOtherServicesResult {
   services: Service[];
@@ -24,7 +24,7 @@ export function useOtherServices(): UseOtherServicesResult {
   });
 
   const services = (query.data ?? []).filter(
-    (s) => s.slug !== FEATURED_SLUG && s.service_category_slug == null,
+    (s) => !EXCLUDED_SLUGS.has(s.slug) && s.service_category_slug == null,
   );
 
   return {

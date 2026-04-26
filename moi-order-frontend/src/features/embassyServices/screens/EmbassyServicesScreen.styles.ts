@@ -7,10 +7,21 @@ import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 import { TAB_BAR_CLEARANCE } from '@/shared/components/FloatingTabBar/FloatingTabBar.styles';
 
+// Burmese ascenders and subscripts clip at lineHeight:36 (the HeroHeader default).
+// 52 gives enough room above and below for the full Myanmar glyph stack.
+
 export const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colours.backgroundDark,
+  },
+
+  heroTitle: {
+    fontSize: typography.hero,
+    fontWeight: '900',
+    color: colours.textOnDark,
+    letterSpacing: -0.8,
+    lineHeight: 52,
   },
 
   body: {

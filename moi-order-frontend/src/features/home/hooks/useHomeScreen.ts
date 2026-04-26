@@ -13,6 +13,8 @@ import { RootStackParamList } from '@/types/navigation';
 export interface UseHomeScreenResult {
   user: User | null;
   isLoggedIn: boolean;
+  isRefreshing: boolean;
+  handleRefresh: () => void;
   handleNavigateToNinetyDayReport: () => void;
   handleNavigateToTickets: () => void;
   handleNavigateToPlaces: () => void;
@@ -27,8 +29,15 @@ export interface UseHomeScreenResult {
 export function useHomeScreen(): UseHomeScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user, isLoggedIn, clearAuth } = useAuthStore();
-  const { serviceTypeId: airportServiceTypeId, price: airportPrice, isReady: airportReady } =
-    useAirportFastTrackCard();
+  const {
+    serviceTypeId: airportServiceTypeId,
+    price:         airportPrice,
+    isReady:       airportReady,
+    isRefreshing,
+    refetch,
+  } = useAirportFastTrackCard();
+
+  const handleRefresh = useCallback((): void => { refetch(); }, [refetch]);
   const resetUnread  = useNotificationStore((state) => state.resetUnread);
   const pushToken    = useNotificationStore((state) => state.pushToken);
 
@@ -81,6 +90,8 @@ export function useHomeScreen(): UseHomeScreenResult {
   return {
     user,
     isLoggedIn,
+    isRefreshing,
+    handleRefresh,
     handleNavigateToNinetyDayReport,
     handleNavigateToTickets,
     handleNavigateToPlaces,

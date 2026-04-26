@@ -16,5 +16,7 @@ export const editorialPalette = {
   teal:  '#6b9e94',
   amber: '#c4813b',
   rose:  '#8b4353',
-  sky:   '#4a7fa5',
+  sky:    '#4a7fa5',
+  indigo: '#5c5a8a',
+  coral:  '#b85c45',
 } as const;

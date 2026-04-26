@@ -67,6 +67,44 @@ export function LocationIcon(): React.JSX.Element {
   );
 }
 
+// ── Passport / CI — indigo booklet ───────────────────────────────────────────
+export function PassportIcon(): React.JSX.Element {
+  return (
+    <Svg width={40} height={40} viewBox="0 0 40 40">
+      {/* Booklet cover */}
+      <Rect x="6" y="4" width="28" height="34" rx="3" fill="#5c5a8a" />
+      {/* Spine */}
+      <Rect x="6" y="4" width="6" height="34" rx="3" fill="#47456e" />
+      <Rect x="9" y="4" width="3" height="34" fill="#47456e" />
+      {/* Emblem circle */}
+      <Circle cx="22" cy="17" r="7" fill="rgba(255,255,255,0.15)" />
+      <Circle cx="22" cy="17" r="4.5" fill="rgba(255,255,255,0.25)" />
+      <Circle cx="22" cy="17" r="2" fill="rgba(255,255,255,0.7)" />
+      {/* Text lines */}
+      <Rect x="13" y="27" width="18" height="2"   rx="1" fill="rgba(255,255,255,0.55)" />
+      <Rect x="15" y="31" width="14" height="1.5" rx="0.75" fill="rgba(255,255,255,0.30)" />
+    </Svg>
+  );
+}
+
+// ── Food ordering — coral bowl ────────────────────────────────────────────────
+export function FoodIcon(): React.JSX.Element {
+  return (
+    <Svg width={40} height={40} viewBox="0 0 40 40">
+      {/* Bowl body */}
+      <Path d="M6 18 Q6 34 20 34 Q34 34 34 18 Z" fill="#b85c45" />
+      {/* Bowl rim */}
+      <Rect x="5" y="15" width="30" height="4" rx="2" fill="#d4785e" />
+      {/* Steam lines */}
+      <Path d="M14 11 Q15 8 14 5" stroke="#b85c45" strokeWidth="2" strokeLinecap="round" fill="none" />
+      <Path d="M20 10 Q21 7 20 4" stroke="#b85c45" strokeWidth="2" strokeLinecap="round" fill="none" />
+      <Path d="M26 11 Q27 8 26 5" stroke="#b85c45" strokeWidth="2" strokeLinecap="round" fill="none" />
+      {/* Shine */}
+      <Path d="M10 22 Q13 20 16 22" stroke="rgba(255,255,255,0.35)" strokeWidth="2" strokeLinecap="round" fill="none" />
+    </Svg>
+  );
+}
+
 // ── Airport Fast Track — sky blue plane ───────────────────────────────────────
 export function AirportIcon(): React.JSX.Element {
   return (

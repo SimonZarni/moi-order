@@ -68,6 +68,7 @@ import { NotificationsScreen } from '@/features/notifications/screens/Notificati
 import { useNotificationsData } from '@/features/notifications/hooks/useNotificationsData';
 import { usePusherNotifications } from '@/features/notifications/hooks/usePusherNotifications';
 import { usePushNotifications } from '@/features/notifications/hooks/usePushNotifications';
+import { useAppUpdate } from '@/shared/hooks/useAppUpdate';
 
 import { RootStackParamList, TabParamList } from '@/types/navigation';
 
@@ -88,6 +89,7 @@ const queryClient = new QueryClient({
 // unread notification count for the entire session. Both hooks are no-ops until
 // the user logs in (userId becomes non-null).
 function AppShell(): React.JSX.Element {
+  useAppUpdate();
   usePusherNotifications();
   usePushNotifications();
   useNotificationsData();

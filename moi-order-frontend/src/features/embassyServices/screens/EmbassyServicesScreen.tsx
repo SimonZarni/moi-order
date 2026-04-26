@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StandaloneFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
+import { colours } from '@/shared/theme/colours';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { useEmbassyServicesScreen } from '@/features/embassyServices/hooks/useEmbassyServicesScreen';
 import { useLocale } from '@/shared/hooks/useLocale';
@@ -29,8 +30,7 @@ export function EmbassyServicesScreen(): React.JSX.Element {
       >
         <HeroHeader
           accentColor={editorialPalette.rose}
-          eyebrow="Embassy"
-          title="သံရုံးထောက်ခံစာများ"
+          titleNode={<Text style={styles.heroTitle}>သံရုံးထောက်ခံစာများ</Text>}
           subtitle="Embassy support letters and documentation services."
           onBack={handleBack}
           backLabel="Home"
@@ -42,7 +42,7 @@ export function EmbassyServicesScreen(): React.JSX.Element {
 
           {isLoading && (
             <View style={styles.centered}>
-              <ActivityIndicator color={editorialPalette.rose} size="large" />
+              <ActivityIndicator color={colours.primary} size="large" />
             </View>
           )}
 

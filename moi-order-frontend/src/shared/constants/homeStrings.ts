@@ -14,6 +14,10 @@ const HOME_STRINGS = {
     embassyMore:          'Support letters & more',
     airportFastTrack:     'Airport Fast Track',
     airportSubtitle:      'Priority airport service',
+    passport:             'Passport / CI',
+    passportSubtitle:     'Document services',
+    foodOrder:            'အစားအသောက်မှာယူရန်',
+    foodOrderSubtitle:    'Food delivery',
   },
   mm: {
     ourServices:          '၀န်ဆောင်မှုများ',
@@ -28,6 +32,10 @@ const HOME_STRINGS = {
     embassyMore:          'ထောက်ခံစာများနှင့် အခြားကဏ္ဍများ',
     airportFastTrack:     'Airport Fast Track',
     airportSubtitle:      'လေဆိပ် အထူး၀န်ဆောင်မှု',
+    passport:             'Passport / CI',
+    passportSubtitle:     'Document services',
+    foodOrder:            'အစားအသောက်မှာယူရန်',
+    foodOrderSubtitle:    'အစားအသောက် ပို့ဆောင်ရေး',
   },
 } as const;
 
