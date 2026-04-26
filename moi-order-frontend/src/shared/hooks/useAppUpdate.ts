@@ -1,12 +1,16 @@
 import { useEffect } from 'react';
 import { Alert, Linking, Platform } from 'react-native';
 import * as Application from 'expo-application';
-import InAppUpdates, { IAUUpdateKind } from 'sp-react-native-in-app-updates';
 
 import { fetchAppStoreVersion } from '@/shared/api/appUpdate';
 import { IOS_BUNDLE_ID, IOS_APP_STORE_ID } from '@/shared/constants/config';
 
-const inAppUpdates = new InAppUpdates(false);
+type InAppUpdatesInstance = {
+  checkNeedsUpdate: (opts: object) => Promise<{ shouldUpdate: boolean }>;
+  startUpdate: (opts: { updateType: number }) => Promise<void>;
+};
+type InAppUpdatesCtor = new (debug: boolean) => InAppUpdatesInstance;
+type InAppUpdatesModule = { default: InAppUpdatesCtor; IAUUpdateKind: { IMMEDIATE: number } };
 
 function isNewerVersion(storeVersion: string, currentVersion: string): boolean {
   const parse = (v: string): number[] => v.split('.').map(Number);
@@ -19,12 +23,16 @@ function isNewerVersion(storeVersion: string, currentVersion: string): boolean {
 
 async function checkAndroidUpdate(): Promise<void> {
   try {
-    const result = await inAppUpdates.checkNeedsUpdate({});
+    // require() instead of import so Metro doesn't touch the native module at parse time
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { default: InAppUpdates, IAUUpdateKind } = require('sp-react-native-in-app-updates') as InAppUpdatesModule;
+    const updater = new InAppUpdates(false);
+    const result = await updater.checkNeedsUpdate({});
     if (result.shouldUpdate) {
-      await inAppUpdates.startUpdate({ updateType: IAUUpdateKind.IMMEDIATE });
+      await updater.startUpdate({ updateType: IAUUpdateKind.IMMEDIATE });
     }
   } catch {
-    // Play Store unavailable in dev/sideloaded builds — skip silently.
+    // Native module unavailable in Expo Go / sideloaded builds — skip silently.
   }
 }
 
