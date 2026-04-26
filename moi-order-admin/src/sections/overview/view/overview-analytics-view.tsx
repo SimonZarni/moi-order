@@ -1,7 +1,9 @@
+import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 
-import { _tasks, _timeline } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { AnalyticsNews } from '../analytics-news';
@@ -12,26 +14,70 @@ import { AnalyticsWebsiteVisits } from '../analytics-website-visits';
 import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
 import { AnalyticsCurrentSubject } from '../analytics-current-subject';
 import { AnalyticsConversionRates } from '../analytics-conversion-rates';
+import { useDashboardStats, getLastEightMonthLabels } from '../hooks/useDashboardStats';
 
 // ----------------------------------------------------------------------
 
-const _recentActivity = [
-  { id: '1', title: 'Booking #B-1042 — Vientiane City Tour', description: 'Confirmed · 2 guests', postedAt: new Date(Date.now() - 1000 * 60 * 20) },
-  { id: '2', title: 'Booking #B-1041 — Luang Prabang Day Trip', description: 'Pending payment · 3 guests', postedAt: new Date(Date.now() - 1000 * 60 * 55) },
-  { id: '3', title: 'New place listed — Phosy Night Market', description: 'Awaiting review', postedAt: new Date(Date.now() - 1000 * 60 * 90) },
-  { id: '4', title: 'Booking #B-1040 — Mekong Sunset Cruise', description: 'Completed · 4 guests', postedAt: new Date(Date.now() - 1000 * 60 * 180) },
-  { id: '5', title: 'New partner joined — Lao Green Travel', description: 'Partner verified', postedAt: new Date(Date.now() - 1000 * 60 * 300) },
-];
+const EMPTY_EIGHT = [0, 0, 0, 0, 0, 0, 0, 0];
+const MONTH_LABELS = getLastEightMonthLabels();
 
-const _adminTasks = [
-  { id: '1', name: 'Review pending place submissions (8)' },
+const STATIC_TASKS = [
   { id: '2', name: 'Respond to partner onboarding requests' },
-  { id: '3', name: 'Update Vang Vieng category listings' },
-  { id: '4', name: 'Verify new user KYC documents' },
-  { id: '5', name: "Publish this week's featured destinations" },
+  { id: '3', name: 'Check recent payment confirmations' },
+  { id: '4', name: 'Review new user registrations' },
+  { id: '5', name: "Update this week's service listings" },
 ];
 
 export function OverviewAnalyticsView() {
+  const { stats, isLoading, error } = useDashboardStats();
+
+  if (isLoading) {
+    return (
+      <DashboardContent maxWidth="xl">
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+          <CircularProgress />
+        </Box>
+      </DashboardContent>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardContent maxWidth="xl">
+        <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>
+      </DashboardContent>
+    );
+  }
+
+  const summary = stats!.summary;
+  const ordersChange = summary.total_orders_change;
+  const changeSign = ordersChange > 0 ? '+' : '';
+
+  const recentActivity = stats!.recent_activity.map((item) => ({
+    id: item.id,
+    title: item.title,
+    coverUrl: item.cover_url,
+    description: item.description,
+    postedAt: item.posted_at,
+  }));
+
+  const topServices = stats!.top_services_comparison;
+  const topServicesChart = {
+    categories: topServices.categories,
+    series: [
+      { name: 'This Month', data: topServices.this_month },
+      { name: 'Last Month', data: topServices.last_month },
+    ],
+  };
+
+  const statusBreakdown = stats!.submission_status_breakdown;
+
+  const pendingCount = stats!.pending_submissions_count;
+  const adminTasks = [
+    { id: '1', name: `Review pending submissions (${pendingCount})` },
+    ...STATIC_TASKS,
+  ];
+
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
@@ -41,71 +87,63 @@ export function OverviewAnalyticsView() {
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <AnalyticsWidgetSummary
-            title="Total Bookings"
-            percent={8.2}
-            total={3842}
-            icon={<img alt="Total Bookings" src="/assets/icons/glass/ic-glass-bag.svg" />}
-            chart={{ categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'], series: [120, 185, 210, 260, 310, 390, 420, 480] }}
+            title="Total Orders"
+            percent={summary.total_orders_change}
+            total={summary.total_orders}
+            icon={<img alt="Total Orders" src="/assets/icons/glass/ic-glass-bag.svg" />}
+            chart={{ categories: MONTH_LABELS, series: summary.total_orders_monthly.length ? summary.total_orders_monthly : EMPTY_EIGHT }}
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <AnalyticsWidgetSummary
             title="Active Users"
-            percent={5.4}
-            total={12560}
+            percent={summary.active_users_change}
+            total={summary.active_users}
             color="secondary"
             icon={<img alt="Active Users" src="/assets/icons/glass/ic-glass-users.svg" />}
-            chart={{ categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'], series: [800, 1200, 1500, 1900, 2400, 2800, 3100, 3600] }}
+            chart={{ categories: MONTH_LABELS, series: summary.active_users_monthly.length ? summary.active_users_monthly : EMPTY_EIGHT }}
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <AnalyticsWidgetSummary
             title="Listed Places"
-            percent={12.1}
-            total={648}
+            percent={summary.listed_places_change}
+            total={summary.listed_places}
             color="warning"
             icon={<img alt="Listed Places" src="/assets/icons/glass/ic-glass-buy.svg" />}
-            chart={{ categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'], series: [40, 80, 120, 200, 310, 420, 530, 648] }}
+            chart={{ categories: MONTH_LABELS, series: summary.listed_places_monthly.length ? summary.listed_places_monthly : EMPTY_EIGHT }}
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <AnalyticsWidgetSummary
-            title="Revenue (USD)"
-            percent={3.6}
-            total={52480}
+            title="Revenue (THB)"
+            percent={summary.revenue_change}
+            total={summary.total_revenue}
             color="error"
             icon={<img alt="Revenue" src="/assets/icons/glass/ic-glass-message.svg" />}
-            chart={{ categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'], series: [3200, 4100, 5200, 6300, 7100, 8400, 9200, 9900] }}
+            chart={{ categories: MONTH_LABELS, series: summary.revenue_monthly.length ? summary.revenue_monthly : EMPTY_EIGHT }}
           />
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <AnalyticsCurrentVisits
-            title="Bookings by Category"
-            chart={{
-              series: [
-                { label: 'Tours & Sightseeing', value: 1540 },
-                { label: 'Accommodation', value: 980 },
-                { label: 'Food & Dining', value: 720 },
-                { label: 'Transport', value: 380 },
-                { label: 'Activities', value: 222 },
-              ],
-            }}
+            title="Orders by Service"
+            chart={{ series: stats!.orders_by_service }}
           />
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 8 }}>
           <AnalyticsWebsiteVisits
-            title="Monthly Bookings"
-            subheader="(+8.2%) compared to last year"
+            title="Monthly Orders"
+            subheader={`(${changeSign}${ordersChange}%) compared to last year`}
             chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+              categories: stats!.monthly_orders.labels,
               series: [
-                { name: 'This Year', data: [120, 185, 210, 260, 310, 390, 420, 480, 540] },
-                { name: 'Last Year', data: [95, 140, 170, 200, 240, 290, 330, 380, 430] },
+                { name: 'This Year', data: stats!.monthly_orders.this_year },
+                { name: 'Last Year', data: stats!.monthly_orders.last_year },
               ],
             }}
           />
@@ -113,41 +151,30 @@ export function OverviewAnalyticsView() {
 
         <Grid size={{ xs: 12, md: 6, lg: 8 }}>
           <AnalyticsConversionRates
-            title="Top Destinations"
-            subheader="Bookings by city this month"
-            chart={{
-              categories: ['Vientiane', 'Luang Prabang', 'Vang Vieng', 'Pakse', 'Savannakhet'],
-              series: [
-                { name: 'This Month', data: [320, 280, 210, 145, 98] },
-                { name: 'Last Month', data: [290, 250, 195, 130, 85] },
-              ],
-            }}
+            title="Top Services"
+            subheader="Orders by service — this month vs last month"
+            chart={topServicesChart}
           />
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <AnalyticsCurrentSubject
-            title="Feature Usage"
-            chart={{
-              categories: ['Search', 'Booking', 'Reviews', 'Wishlist', 'Chat', 'Map'],
-              series: [
-                { name: 'Mobile App', data: [90, 75, 60, 55, 45, 80] },
-                { name: 'Web', data: [70, 65, 50, 40, 30, 60] },
-              ],
-            }}
+            title="Submission Status"
+            subheader="This year vs last year"
+            chart={statusBreakdown}
           />
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 8 }}>
-          <AnalyticsNews title="Recent Activity" list={_recentActivity as any} />
+          <AnalyticsNews title="Recent Activity" list={recentActivity} />
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <AnalyticsOrderTimeline title="Booking Timeline" list={_timeline} />
+          <AnalyticsOrderTimeline title="Payment Timeline" list={stats!.payment_timeline} />
         </Grid>
 
         <Grid size={{ xs: 12 }}>
-          <AnalyticsTasks title="Admin Tasks" list={_adminTasks} />
+          <AnalyticsTasks title="Admin Tasks" list={adminTasks} />
         </Grid>
       </Grid>
     </DashboardContent>

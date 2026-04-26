@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\Admin\V1\AdminAuthController;
+use App\Http\Controllers\Api\Admin\V1\AdminDashboardController;
 use App\Http\Controllers\Api\Admin\V1\AdminNotificationController;
 use App\Http\Controllers\Api\Admin\V1\AdminCategoryController;
 use App\Http\Controllers\Api\Admin\V1\AdminDocumentTypeController;
@@ -22,6 +23,9 @@ use Illuminate\Support\Facades\Route;
 | Admin Authenticated Routes — requires auth:sanctum + admin.auth
 |--------------------------------------------------------------------------
 */
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
 // ── Notifications ─────────────────────────────────────────────────────────────
 Route::prefix('notifications')->name('admin.notifications.')->group(function (): void {
