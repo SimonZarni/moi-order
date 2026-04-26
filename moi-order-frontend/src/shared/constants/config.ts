@@ -10,6 +10,13 @@ export const GOOGLE_WEB_CLIENT_ID = '661538209777-nhtp07mb5guuhrd3128r80m83imtut
 // EAS project ID — required by getExpoPushTokenAsync to address the correct project.
 export const EXPO_PROJECT_ID = '299e73b6-58b0-43d0-9a56-c7a212af98e5' as const;
 
+// iOS bundle ID — must match ios.bundleIdentifier in app.json once set.
+export const IOS_BUNDLE_ID = 'com.moiorder.app' as const;
+
+// Numeric App Store ID from App Store Connect (e.g. 123456789).
+// Leave empty until the app is published; the update check is skipped when blank.
+export const IOS_APP_STORE_ID = '' as const;
+
 export const CACHE_TTL = {
   USER_DATA: 5 * 60 * 1000,
   STATIC_DATA: Infinity,

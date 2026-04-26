@@ -10,6 +10,8 @@ export interface UseAirportFastTrackCardResult {
   serviceTypeId: number | null;
   price: number | null;
   isReady: boolean;
+  isRefreshing: boolean;
+  refetch: () => void;
 }
 
 export function useAirportFastTrackCard(): UseAirportFastTrackCardResult {
@@ -26,5 +28,7 @@ export function useAirportFastTrackCard(): UseAirportFastTrackCardResult {
     serviceTypeId: firstType?.id ?? null,
     price:         firstType?.price ?? null,
     isReady:       firstType !== null,
+    isRefreshing:  query.isFetching && !query.isPending,
+    refetch:       query.refetch,
   };
 }

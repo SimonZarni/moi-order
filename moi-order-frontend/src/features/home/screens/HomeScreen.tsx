@@ -1,17 +1,20 @@
 import React from 'react';
-import { Pressable, Text, View, ScrollView } from 'react-native';
+import { Pressable, RefreshControl, Text, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useHomeScreen } from '@/features/home/hooks/useHomeScreen';
 import { NotificationBell } from '@/features/notifications/components/NotificationBell';
+import { colours } from '@/shared/theme/colours';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { getHomeStrings } from '@/shared/constants/homeStrings';
-import { AirportIcon, CalendarIcon, EmbassyIcon, FlashIcon, LocationIcon, TicketIcon } from '../components/HomeCardIcons';
+import { AirportIcon, CalendarIcon, EmbassyIcon, FlashIcon, FoodIcon, LocationIcon, PassportIcon, TicketIcon } from '../components/HomeCardIcons';
 import { styles } from './HomeScreen.styles';
 
 export function HomeScreen(): React.JSX.Element {
   const {
     user,
+    isRefreshing,
+    handleRefresh,
     handleNavigateToNinetyDayReport,
     handleNavigateToTickets,
     handleNavigateToPlaces,
@@ -26,7 +29,13 @@ export function HomeScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+          style={styles.scroll}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={colours.tertiary} />
+          }
+        >
 
         {/* ── Hero ── */}
         <View style={styles.hero}>
@@ -118,6 +127,27 @@ export function HomeScreen(): React.JSX.Element {
               <Text style={styles.cardTitle}>{t.airportFastTrack}</Text>
               <Text style={styles.cardSubtitle}>{t.airportSubtitle}</Text>
               <View style={styles.cardIcon}><AirportIcon /></View>
+            </Pressable>
+          </View>
+
+          {/* Row 4 */}
+          <View style={styles.gridRow}>
+            <Pressable style={[styles.card, styles.cardAccentIndigo, styles.cardDimmed]}
+              accessibilityLabel="Passport and CI services — coming soon" accessibilityRole="button">
+              <Text style={[styles.cardTag, styles.tagIndigo]}>Documents</Text>
+              <Text style={styles.cardTitle}>{t.passport}</Text>
+              <Text style={styles.cardSubtitle}>{t.passportSubtitle}</Text>
+              <View style={styles.soonPill}><Text style={styles.soonText}>SOON</Text></View>
+              <View style={styles.cardIcon}><PassportIcon /></View>
+            </Pressable>
+
+            <Pressable style={[styles.card, styles.cardAccentCoral, styles.cardDimmed]}
+              accessibilityLabel="Food ordering — coming soon" accessibilityRole="button">
+              <Text style={[styles.cardTag, styles.tagCoral]}>Food</Text>
+              <Text style={styles.cardTitle}>{t.foodOrder}</Text>
+              <Text style={styles.cardSubtitle}>{t.foodOrderSubtitle}</Text>
+              <View style={styles.soonPill}><Text style={styles.soonText}>SOON</Text></View>
+              <View style={styles.cardIcon}><FoodIcon /></View>
             </Pressable>
           </View>
         </View>

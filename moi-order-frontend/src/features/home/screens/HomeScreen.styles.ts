@@ -177,6 +177,8 @@ export const styles = StyleSheet.create({
   cardAccentTeal:  { borderTopColor: editorialPalette.teal },
   cardAccentRose:  { borderTopColor: editorialPalette.rose },
   cardAccentSky:   { borderTopColor: editorialPalette.sky },
+  cardAccentIndigo: { borderTopColor: editorialPalette.indigo },
+  cardAccentCoral:  { borderTopColor: editorialPalette.coral },
 
   // Card text
   cardTag: {
@@ -191,7 +193,9 @@ export const styles = StyleSheet.create({
   tagGold:  { color: editorialPalette.gold },
   tagTeal:  { color: editorialPalette.teal },
   tagRose:  { color: editorialPalette.rose },
-  tagSky:   { color: editorialPalette.sky },
+  tagSky:    { color: editorialPalette.sky },
+  tagIndigo: { color: editorialPalette.indigo },
+  tagCoral:  { color: editorialPalette.coral },
 
   cardTitle: {
     fontSize: typography.lg,
