@@ -245,11 +245,11 @@ class AdminDashboardService
         $lastYear    = $currentYear - 1;
 
         $statuses = [
-            SubmissionStatus::Processing     => 'Processing',
-            SubmissionStatus::Completed      => 'Completed',
-            SubmissionStatus::PendingPayment => 'Pending Payment',
-            SubmissionStatus::PaymentFailed  => 'Payment Failed',
-            SubmissionStatus::Cancelled      => 'Cancelled',
+            SubmissionStatus::Processing->value     => 'Processing',
+            SubmissionStatus::Completed->value      => 'Completed',
+            SubmissionStatus::PendingPayment->value => 'Pending Payment',
+            SubmissionStatus::PaymentFailed->value  => 'Payment Failed',
+            SubmissionStatus::Cancelled->value      => 'Cancelled',
         ];
 
         $thisYearRows = ServiceSubmission::selectRaw('status, COUNT(*) as cnt')
@@ -264,10 +264,10 @@ class AdminDashboardService
         $thisYearSeries = [];
         $lastYearSeries = [];
 
-        foreach ($statuses as $enum => $label) {
+        foreach ($statuses as $status => $label) {
             $categories[]     = $label;
-            $thisYearSeries[] = (int) ($thisYearRows[$enum->value]?->cnt ?? 0);
-            $lastYearSeries[] = (int) ($lastYearRows[$enum->value]?->cnt ?? 0);
+            $thisYearSeries[] = (int) ($thisYearRows[$status]?->cnt ?? 0);
+            $lastYearSeries[] = (int) ($lastYearRows[$status]?->cnt ?? 0);
         }
 
         return [
@@ -318,8 +318,8 @@ class AdminDashboardService
     {
         $typeMap = [
             PaymentStatus::Succeeded->value => 'order1',
-            PaymentStatus::Pending->value   => 'order4',
-            PaymentStatus::Failed->value    => 'order5',
+            PaymentStatus::Pending->value => 'order4',
+            PaymentStatus::Failed->value => 'order5',
         ];
 
         return Payment::with(['payable' => fn (MorphTo $q) => $q->morphWith([
