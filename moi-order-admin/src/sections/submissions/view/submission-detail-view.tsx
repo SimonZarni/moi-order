@@ -200,7 +200,7 @@ export function SubmissionDetailView() {
                     ['Service Type', submission.service_type?.name_mm || submission.service_type?.name_en || submission.service_type?.name || '—'],
                     ['Submitted', fDate(submission.created_at)],
                     ['Completed', submission.completed_at ? fDate(submission.completed_at) : '—'],
-                    ['Price', submission.price_snapshot !== null ? `${(submission.price_snapshot / 100).toFixed(2)}` : '—'],
+                    ['Price', submission.price_snapshot !== null ? `${submission.price_snapshot.toLocaleString()} THB` : '—'],
                   ].map(([label, value]) => (
                     <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between' }}>
                       <Typography variant="body2" color="text.secondary">{label}</Typography>
