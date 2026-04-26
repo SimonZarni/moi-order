@@ -16,7 +16,6 @@ export interface UseHomeScreenResult {
   isRefreshing: boolean;
   handleRefresh: () => void;
   handleNavigateToNinetyDayReport: () => void;
-  handleNavigateToTickets: () => void;
   handleNavigateToPlaces: () => void;
   handleNavigateToOtherServices: () => void;
   handleNavigateToEmbassyServices: () => void;
@@ -43,10 +42,6 @@ export function useHomeScreen(): UseHomeScreenResult {
 
   const handleNavigateToNinetyDayReport = useCallback((): void => {
     navigation.navigate('NinetyDayReport');
-  }, [navigation]);
-
-  const handleNavigateToTickets = useCallback((): void => {
-    navigation.navigate('Tickets');
   }, [navigation]);
 
   const handleNavigateToPlaces = useCallback((): void => {
@@ -93,7 +88,6 @@ export function useHomeScreen(): UseHomeScreenResult {
     isRefreshing,
     handleRefresh,
     handleNavigateToNinetyDayReport,
-    handleNavigateToTickets,
     handleNavigateToPlaces,
     handleNavigateToOtherServices,
     handleNavigateToEmbassyServices,

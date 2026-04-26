@@ -179,6 +179,7 @@ export const styles = StyleSheet.create({
   cardAccentSky:   { borderTopColor: editorialPalette.sky },
   cardAccentIndigo: { borderTopColor: editorialPalette.indigo },
   cardAccentCoral:  { borderTopColor: editorialPalette.coral },
+  cardAccentNavy:   { borderTopColor: editorialPalette.navy },
 
   // Card text
   cardTag: {
@@ -196,6 +197,7 @@ export const styles = StyleSheet.create({
   tagSky:    { color: editorialPalette.sky },
   tagIndigo: { color: editorialPalette.indigo },
   tagCoral:  { color: editorialPalette.coral },
+  tagNavy:   { color: editorialPalette.navy },
 
   cardTitle: {
     fontSize: typography.lg,

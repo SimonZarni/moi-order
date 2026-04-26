@@ -1,6 +1,5 @@
 import React from 'react';
-import { Image } from 'expo-image';
-import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, ScrollView, View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
@@ -8,41 +7,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { StandaloneFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
+import { TicketCard } from '@/features/tickets/components/TicketCard';
 import { TicketCardSkeleton } from '@/features/tickets/components/TicketCardSkeleton';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
-import { formatPrice } from '@/shared/utils/formatCurrency';
 import { useTicketsScreen } from '@/features/tickets/hooks/useTicketsScreen';
 import { Ticket } from '@/types/models';
 import { styles } from './TicketsScreen.styles';
-
-interface TicketCardProps {
-  item: Ticket;
-  onPress: (id: number) => void;
-}
-
-function TicketCard({ item, onPress }: TicketCardProps): React.JSX.Element {
-  return (
-    <Pressable
-      style={({ pressed }) => [styles.cardWrap, { opacity: pressed ? 0.88 : 1 }]}
-      onPress={() => onPress(item.id)}
-      accessibilityLabel={item.name}
-      accessibilityRole="button"
-    >
-      <Image source={{ uri: item.cover_image_url ?? undefined }} style={styles.cardImage} contentFit="cover" cachePolicy="disk" transition={150} />
-      <View style={styles.cardBody}>
-        <Text style={styles.cardName}>{item.name}</Text>
-        <Text style={styles.cardHighlight} numberOfLines={2}>{item.highlight_description}</Text>
-        <View style={styles.cardFooter}>
-          <Text style={styles.cardLocation}>{item.city}</Text>
-          {item.starting_from_price !== undefined && (
-            <Text style={styles.cardPrice}>From {formatPrice(item.starting_from_price)}</Text>
-          )}
-        </View>
-      </View>
-    </Pressable>
-  );
-}
 
 export function TicketsScreen(): React.JSX.Element {
   const {

@@ -140,6 +140,35 @@ export function EmbassyIcon(): React.JSX.Element {
   );
 }
 
+// ── Bus Tickets — navy bus ────────────────────────────────────────────────────
+export function BusIcon(): React.JSX.Element {
+  return (
+    <Svg width={40} height={40} viewBox="0 0 40 40">
+      {/* Body */}
+      <Rect x="3" y="12" width="34" height="18" rx="3" fill="#1e3d6b" />
+      {/* Roof */}
+      <Rect x="5" y="9" width="30" height="6" rx="3" fill="#2a5190" />
+      {/* Windows */}
+      <Rect x="7"  y="16" width="7" height="6" rx="2" fill="rgba(255,255,255,0.65)" />
+      <Rect x="16" y="16" width="8" height="6" rx="2" fill="rgba(255,255,255,0.65)" />
+      <Rect x="26" y="16" width="7" height="6" rx="2" fill="rgba(255,255,255,0.65)" />
+      {/* Side stripe */}
+      <Rect x="3" y="24" width="34" height="3" rx="0" fill="#2a5190" opacity={0.55} />
+      {/* Door */}
+      <Rect x="18" y="25" width="5" height="5" rx="1" fill="#2a5190" />
+      <Rect x="18.5" y="25.5" width="1.8" height="4" rx="0.5" fill="rgba(255,255,255,0.3)" />
+      <Rect x="21" y="25.5" width="1.8" height="4" rx="0.5" fill="rgba(255,255,255,0.3)" />
+      {/* Undercarriage */}
+      <Rect x="6" y="30" width="28" height="3" rx="1" fill="#0f2035" />
+      {/* Wheels */}
+      <Circle cx="11" cy="34" r="4" fill="#0f2035" />
+      <Circle cx="11" cy="34" r="2" fill="#2a5190" />
+      <Circle cx="29" cy="34" r="4" fill="#0f2035" />
+      <Circle cx="29" cy="34" r="2" fill="#2a5190" />
+    </Svg>
+  );
+}
+
 // ── Other Services — teal lightning bolt ──────────────────────────────────────
 export function FlashIcon(): React.JSX.Element {
   return (

@@ -7,7 +7,7 @@ import { NotificationBell } from '@/features/notifications/components/Notificati
 import { colours } from '@/shared/theme/colours';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { getHomeStrings } from '@/shared/constants/homeStrings';
-import { AirportIcon, CalendarIcon, EmbassyIcon, FlashIcon, FoodIcon, LocationIcon, PassportIcon, TicketIcon } from '../components/HomeCardIcons';
+import { AirportIcon, BusIcon, CalendarIcon, EmbassyIcon, FlashIcon, FoodIcon, LocationIcon, PassportIcon } from '../components/HomeCardIcons';
 import { styles } from './HomeScreen.styles';
 
 export function HomeScreen(): React.JSX.Element {
@@ -16,7 +16,6 @@ export function HomeScreen(): React.JSX.Element {
     isRefreshing,
     handleRefresh,
     handleNavigateToNinetyDayReport,
-    handleNavigateToTickets,
     handleNavigateToPlaces,
     handleNavigateToOtherServices,
     handleNavigateToEmbassyServices,
@@ -39,7 +38,6 @@ export function HomeScreen(): React.JSX.Element {
 
         {/* ── Hero ── */}
         <View style={styles.hero}>
-          {/* Decorative orbs */}
           <View style={styles.orbLarge} />
           <View style={styles.orbSmall} />
 
@@ -78,27 +76,18 @@ export function HomeScreen(): React.JSX.Element {
               <View style={styles.cardIcon}><CalendarIcon /></View>
             </Pressable>
 
-            <Pressable style={[styles.card, styles.cardAccentSlate]}
-              onPress={handleNavigateToTickets}
-              accessibilityLabel="Tickets" accessibilityRole="button">
-              <Text style={[styles.cardTag, styles.tagSlate]}>Attractions</Text>
-              <Text style={styles.cardTitle}>{t.tickets}</Text>
-              <Text style={styles.cardSubtitle}>{t.themeParks}</Text>
-              <View style={styles.cardIcon}><TicketIcon /></View>
+            <Pressable style={[styles.card, styles.cardAccentGold]}
+              onPress={handleNavigateToPlaces}
+              accessibilityLabel="Places and Tickets" accessibilityRole="button">
+              <Text style={[styles.cardTag, styles.tagGold]}>Explore</Text>
+              <Text style={styles.cardTitle}>{t.placesAndTickets}</Text>
+              <Text style={styles.cardSubtitle}>{t.attractionsLandmarks}</Text>
+              <View style={styles.cardIcon}><LocationIcon /></View>
             </Pressable>
           </View>
 
           {/* Row 2 */}
           <View style={styles.gridRow}>
-            <Pressable style={[styles.card, styles.cardAccentGold]}
-              onPress={handleNavigateToPlaces}
-              accessibilityLabel="Places — immigration offices" accessibilityRole="button">
-              <Text style={[styles.cardTag, styles.tagGold]}>Explore</Text>
-              <Text style={styles.cardTitle}>{t.places}</Text>
-              <Text style={styles.cardSubtitle}>{t.attractionsLandmarks}</Text>
-              <View style={styles.cardIcon}><LocationIcon /></View>
-            </Pressable>
-
             <Pressable style={[styles.card, styles.cardAccentTeal]}
               onPress={handleNavigateToOtherServices}
               accessibilityLabel="Other services" accessibilityRole="button">
@@ -107,10 +96,7 @@ export function HomeScreen(): React.JSX.Element {
               <Text style={styles.cardSubtitle}>{t.companyMore}</Text>
               <View style={styles.cardIcon}><FlashIcon /></View>
             </Pressable>
-          </View>
 
-          {/* Row 3 */}
-          <View style={styles.gridRow}>
             <Pressable style={[styles.card, styles.cardAccentRose]}
               onPress={handleNavigateToEmbassyServices}
               accessibilityLabel="Embassy support letters" accessibilityRole="button">
@@ -119,7 +105,10 @@ export function HomeScreen(): React.JSX.Element {
               <Text style={styles.cardSubtitle}>{t.embassyMore}</Text>
               <View style={styles.cardIcon}><EmbassyIcon /></View>
             </Pressable>
+          </View>
 
+          {/* Row 3 */}
+          <View style={styles.gridRow}>
             <Pressable style={[styles.card, styles.cardAccentSky]}
               onPress={handleNavigateToAirportFastTrack}
               accessibilityLabel="Airport Fast Track service" accessibilityRole="button">
@@ -127,6 +116,15 @@ export function HomeScreen(): React.JSX.Element {
               <Text style={styles.cardTitle}>{t.airportFastTrack}</Text>
               <Text style={styles.cardSubtitle}>{t.airportSubtitle}</Text>
               <View style={styles.cardIcon}><AirportIcon /></View>
+            </Pressable>
+
+            <Pressable style={[styles.card, styles.cardAccentNavy, styles.cardDimmed]}
+              accessibilityLabel="Bus tickets — coming soon" accessibilityRole="button">
+              <Text style={[styles.cardTag, styles.tagNavy]}>Transport</Text>
+              <Text style={styles.cardTitle}>{t.busTickets}</Text>
+              <Text style={styles.cardSubtitle}>{t.busSubtitle}</Text>
+              <View style={styles.soonPill}><Text style={styles.soonText}>SOON</Text></View>
+              <View style={styles.cardIcon}><BusIcon /></View>
             </Pressable>
           </View>
 

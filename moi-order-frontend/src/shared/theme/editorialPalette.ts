@@ -19,4 +19,5 @@ export const editorialPalette = {
   sky:    '#4a7fa5',
   indigo: '#5c5a8a',
   coral:  '#b85c45',
+  navy:   '#1e3d6b',
 } as const;
