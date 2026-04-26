@@ -4,6 +4,8 @@ import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
+import { fNumber } from 'src/utils/format-number';
+
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { AnalyticsNews } from '../analytics-news';
@@ -122,6 +124,7 @@ export function OverviewAnalyticsView() {
             title="Revenue (THB)"
             percent={summary.revenue_change}
             total={summary.total_revenue}
+            formatTotal={(value) => fNumber(value / 100)}
             color="error"
             icon={<img alt="Revenue" src="/assets/icons/glass/ic-glass-message.svg" />}
             chart={{ categories: MONTH_LABELS, series: summary.revenue_monthly.length ? summary.revenue_monthly : EMPTY_EIGHT }}
