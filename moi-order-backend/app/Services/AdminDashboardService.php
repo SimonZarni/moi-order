@@ -6,12 +6,14 @@ namespace App\Services;
 
 use App\Enums\PaymentStatus;
 use App\Enums\SubmissionStatus;
+use App\Enums\TicketOrderStatus;
 use App\Models\Payment;
 use App\Models\Place;
 use App\Models\ServiceSubmission;
 use App\Models\TicketOrder;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 
@@ -56,8 +58,8 @@ class AdminDashboardService
             ->where('created_at', '>=', $eightMonthsAgo)
             ->groupByRaw('YEAR(created_at), MONTH(created_at)')
             ->get()->keyBy(fn ($r) => "{$r->yr}-{$r->mo}");
-        $revenueByMonth = Payment::selectRaw('YEAR(created_at) as yr, MONTH(created_at) as mo, SUM(amount) as total')
-            ->where('status', PaymentStatus::Succeeded)
+        $revenueByMonth = $this->confirmedRevenuePayments()
+            ->selectRaw('YEAR(created_at) as yr, MONTH(created_at) as mo, SUM(amount) as total')
             ->where('created_at', '>=', $eightMonthsAgo)
             ->groupByRaw('YEAR(created_at), MONTH(created_at)')
             ->get()->keyBy(fn ($r) => "{$r->yr}-{$r->mo}");
@@ -78,10 +80,12 @@ class AdminDashboardService
         $newPlacesThisYear = Place::whereYear('created_at', $currentYear)->count();
         $newPlacesLastYear = Place::whereYear('created_at', $lastYear)->count();
 
-        $revenueThisYear = (int) Payment::where('status', PaymentStatus::Succeeded)
-            ->whereYear('created_at', $currentYear)->sum('amount');
-        $revenueLastYear = (int) Payment::where('status', PaymentStatus::Succeeded)
-            ->whereYear('created_at', $lastYear)->sum('amount');
+        $revenueThisYear = (int) $this->confirmedRevenuePayments()
+            ->whereYear('created_at', $currentYear)
+            ->sum('amount');
+        $revenueLastYear = (int) $this->confirmedRevenuePayments()
+            ->whereYear('created_at', $lastYear)
+            ->sum('amount');
 
         // 8-month sparklines
         $months = collect(range(7, 0))->map(fn (int $i) => $now->copy()->subMonths($i));
@@ -245,11 +249,11 @@ class AdminDashboardService
         $lastYear    = $currentYear - 1;
 
         $statuses = [
-            SubmissionStatus::Processing     => 'Processing',
-            SubmissionStatus::Completed      => 'Completed',
-            SubmissionStatus::PendingPayment => 'Pending Payment',
-            SubmissionStatus::PaymentFailed  => 'Payment Failed',
-            SubmissionStatus::Cancelled      => 'Cancelled',
+            SubmissionStatus::Processing->value     => 'Processing',
+            SubmissionStatus::Completed->value      => 'Completed',
+            SubmissionStatus::PendingPayment->value => 'Pending Payment',
+            SubmissionStatus::PaymentFailed->value  => 'Payment Failed',
+            SubmissionStatus::Cancelled->value      => 'Cancelled',
         ];
 
         $thisYearRows = ServiceSubmission::selectRaw('status, COUNT(*) as cnt')
@@ -264,10 +268,10 @@ class AdminDashboardService
         $thisYearSeries = [];
         $lastYearSeries = [];
 
-        foreach ($statuses as $enum => $label) {
+        foreach ($statuses as $status => $label) {
             $categories[]     = $label;
-            $thisYearSeries[] = (int) ($thisYearRows[$enum->value]?->cnt ?? 0);
-            $lastYearSeries[] = (int) ($lastYearRows[$enum->value]?->cnt ?? 0);
+            $thisYearSeries[] = (int) ($thisYearRows[$status]?->cnt ?? 0);
+            $lastYearSeries[] = (int) ($lastYearRows[$status]?->cnt ?? 0);
         }
 
         return [
@@ -318,8 +322,8 @@ class AdminDashboardService
     {
         $typeMap = [
             PaymentStatus::Succeeded->value => 'order1',
-            PaymentStatus::Pending->value   => 'order4',
-            PaymentStatus::Failed->value    => 'order5',
+            PaymentStatus::Pending->value => 'order4',
+            PaymentStatus::Failed->value => 'order5',
         ];
 
         return Payment::with(['payable' => fn (MorphTo $q) => $q->morphWith([
@@ -360,5 +364,30 @@ class AdminDashboardService
         }
 
         return round(($curr - $prev) / $prev * 100, 1);
+    }
+
+    private function confirmedRevenuePayments(): Builder
+    {
+        return Payment::query()
+            ->where('status', PaymentStatus::Succeeded)
+            ->whereHasMorph(
+                'payable',
+                [ServiceSubmission::class, TicketOrder::class],
+                function (Builder $query, string $type): void {
+                    if ($type === ServiceSubmission::class) {
+                        $query->whereIn('status', [
+                            SubmissionStatus::Processing->value,
+                            SubmissionStatus::Completed->value,
+                        ]);
+
+                        return;
+                    }
+
+                    $query->whereIn('status', [
+                        TicketOrderStatus::Processing->value,
+                        TicketOrderStatus::Completed->value,
+                    ]);
+                }
+            );
     }
 }
