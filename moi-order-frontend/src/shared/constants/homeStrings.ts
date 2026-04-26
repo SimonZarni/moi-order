@@ -10,6 +10,10 @@ const HOME_STRINGS = {
     attractionsLandmarks: 'Attractions & Landmarks',
     otherServices:        'Other Services',
     companyMore:          'Company & more',
+    embassyServices:      'သံရုံးထောက်ခံစာများ',
+    embassyMore:          'Support letters & more',
+    airportFastTrack:     'Airport Fast Track',
+    airportSubtitle:      'Priority airport service',
   },
   mm: {
     ourServices:          '၀န်ဆောင်မှုများ',
@@ -20,6 +24,10 @@ const HOME_STRINGS = {
     attractionsLandmarks: 'လည်ပတ်စရာများနှင့် ထင်ရှားသောနေရာများ',
     otherServices:        'အခြား၀န်ဆောင်မှုများ',
     companyMore:          'ကုမ္ပဏီနှင့် အခြားအချက်အလက်များ',
+    embassyServices:      'သံရုံးထောက်ခံစာများ',
+    embassyMore:          'ထောက်ခံစာများနှင့် အခြားကဏ္ဍများ',
+    airportFastTrack:     'Airport Fast Track',
+    airportSubtitle:      'လေဆိပ် အထူး၀န်ဆောင်မှု',
   },
 } as const;
 

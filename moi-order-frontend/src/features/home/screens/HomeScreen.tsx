@@ -6,7 +6,7 @@ import { useHomeScreen } from '@/features/home/hooks/useHomeScreen';
 import { NotificationBell } from '@/features/notifications/components/NotificationBell';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { getHomeStrings } from '@/shared/constants/homeStrings';
-import { CalendarIcon, FlashIcon, LocationIcon, TicketIcon } from '../components/HomeCardIcons';
+import { AirportIcon, CalendarIcon, EmbassyIcon, FlashIcon, LocationIcon, TicketIcon } from '../components/HomeCardIcons';
 import { styles } from './HomeScreen.styles';
 
 export function HomeScreen(): React.JSX.Element {
@@ -16,6 +16,8 @@ export function HomeScreen(): React.JSX.Element {
     handleNavigateToTickets,
     handleNavigateToPlaces,
     handleNavigateToOtherServices,
+    handleNavigateToEmbassyServices,
+    handleNavigateToAirportFastTrack,
     handleNavigateToNotifications,
   } = useHomeScreen();
 
@@ -95,6 +97,27 @@ export function HomeScreen(): React.JSX.Element {
               <Text style={styles.cardTitle}>{t.otherServices}</Text>
               <Text style={styles.cardSubtitle}>{t.companyMore}</Text>
               <View style={styles.cardIcon}><FlashIcon /></View>
+            </Pressable>
+          </View>
+
+          {/* Row 3 */}
+          <View style={styles.gridRow}>
+            <Pressable style={[styles.card, styles.cardAccentRose]}
+              onPress={handleNavigateToEmbassyServices}
+              accessibilityLabel="Embassy support letters" accessibilityRole="button">
+              <Text style={[styles.cardTag, styles.tagRose]}>Embassy</Text>
+              <Text style={styles.cardTitle}>{t.embassyServices}</Text>
+              <Text style={styles.cardSubtitle}>{t.embassyMore}</Text>
+              <View style={styles.cardIcon}><EmbassyIcon /></View>
+            </Pressable>
+
+            <Pressable style={[styles.card, styles.cardAccentSky]}
+              onPress={handleNavigateToAirportFastTrack}
+              accessibilityLabel="Airport Fast Track service" accessibilityRole="button">
+              <Text style={[styles.cardTag, styles.tagSky]}>Travel</Text>
+              <Text style={styles.cardTitle}>{t.airportFastTrack}</Text>
+              <Text style={styles.cardSubtitle}>{t.airportSubtitle}</Text>
+              <View style={styles.cardIcon}><AirportIcon /></View>
             </Pressable>
           </View>
         </View>

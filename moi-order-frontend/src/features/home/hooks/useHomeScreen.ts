@@ -4,6 +4,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { logout } from '@/shared/api/auth';
 import { unregisterDeviceToken } from '@/shared/api/deviceTokens';
+import { useAirportFastTrackCard } from '@/features/airportFastTrack/hooks/useAirportFastTrackCard';
 import { useAuthStore } from '@/shared/store/authStore';
 import { useNotificationStore } from '@/shared/store/notificationStore';
 import { User } from '@/types/models';
@@ -16,6 +17,8 @@ export interface UseHomeScreenResult {
   handleNavigateToTickets: () => void;
   handleNavigateToPlaces: () => void;
   handleNavigateToOtherServices: () => void;
+  handleNavigateToEmbassyServices: () => void;
+  handleNavigateToAirportFastTrack: () => void;
   handleNavigateToNotifications: () => void;
   handleNavigateToLogin: () => void;
   handleLogout: () => void;
@@ -24,6 +27,8 @@ export interface UseHomeScreenResult {
 export function useHomeScreen(): UseHomeScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user, isLoggedIn, clearAuth } = useAuthStore();
+  const { serviceTypeId: airportServiceTypeId, price: airportPrice, isReady: airportReady } =
+    useAirportFastTrackCard();
   const resetUnread  = useNotificationStore((state) => state.resetUnread);
   const pushToken    = useNotificationStore((state) => state.pushToken);
 
@@ -42,6 +47,18 @@ export function useHomeScreen(): UseHomeScreenResult {
   const handleNavigateToOtherServices = useCallback((): void => {
     navigation.navigate('OtherServices');
   }, [navigation]);
+
+  const handleNavigateToEmbassyServices = useCallback((): void => {
+    navigation.navigate('EmbassyServices');
+  }, [navigation]);
+
+  const handleNavigateToAirportFastTrack = useCallback((): void => {
+    if (!airportReady || airportServiceTypeId === null || airportPrice === null) return;
+    navigation.navigate('AirportFastTrackForm', {
+      serviceTypeId: airportServiceTypeId,
+      price:         airportPrice,
+    });
+  }, [navigation, airportReady, airportServiceTypeId, airportPrice]);
 
   const handleNavigateToNotifications = useCallback((): void => {
     navigation.navigate('Notifications');
@@ -68,6 +85,8 @@ export function useHomeScreen(): UseHomeScreenResult {
     handleNavigateToTickets,
     handleNavigateToPlaces,
     handleNavigateToOtherServices,
+    handleNavigateToEmbassyServices,
+    handleNavigateToAirportFastTrack,
     handleNavigateToNotifications,
     handleNavigateToLogin,
     handleLogout,

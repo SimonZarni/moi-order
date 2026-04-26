@@ -15,4 +15,6 @@ export const editorialPalette = {
   gold:  '#b08d57',
   teal:  '#6b9e94',
   amber: '#c4813b',
+  rose:  '#8b4353',
+  sky:   '#4a7fa5',
 } as const;

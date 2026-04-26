@@ -154,6 +154,7 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
 
+
   // ── Card base ─────────────────────────────────────────────────────────────
   card: {
     flex: 1,
@@ -174,6 +175,8 @@ export const styles = StyleSheet.create({
   cardAccentSlate: { borderTopColor: editorialPalette.slate },
   cardAccentGold:  { borderTopColor: editorialPalette.gold },
   cardAccentTeal:  { borderTopColor: editorialPalette.teal },
+  cardAccentRose:  { borderTopColor: editorialPalette.rose },
+  cardAccentSky:   { borderTopColor: editorialPalette.sky },
 
   // Card text
   cardTag: {
@@ -187,6 +190,8 @@ export const styles = StyleSheet.create({
   tagSlate: { color: editorialPalette.slate },
   tagGold:  { color: editorialPalette.gold },
   tagTeal:  { color: editorialPalette.teal },
+  tagRose:  { color: editorialPalette.rose },
+  tagSky:   { color: editorialPalette.sky },
 
   cardTitle: {
     fontSize: typography.lg,

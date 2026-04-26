@@ -10,6 +10,9 @@ export const QUERY_KEYS = {
   SERVICES: {
     LIST: ['services', 'list'] as const,
   },
+  SERVICE_CATEGORIES: {
+    BY_SLUG: (slug: string) => ['service-categories', slug] as const,
+  },
   SUBMISSIONS: {
     LIST:   ['submissions', 'list'] as const,
     DETAIL: (id: number) => ['submissions', 'detail', id] as const,
