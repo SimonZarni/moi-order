@@ -1,22 +1,16 @@
 import { StyleSheet } from 'react-native';
 
 import { colours } from '@/shared/theme/colours';
-import { radius } from '@/shared/theme/radius';
 import { typography } from '@/shared/theme/typography';
 
-// Amount of bottom padding screens need to clear the floating bar
-export const TAB_BAR_CLEARANCE = 100;
-// Gap between floating bar and the bottom safe area edge
+export const TAB_BAR_CLEARANCE     = 100;
 export const TAB_BAR_BOTTOM_OFFSET = 14;
 
 export const styles = StyleSheet.create({
-  // Outer pill — light background, floating
   container: {
     position: 'absolute',
     left: 20,
     right: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: colours.white,
     borderRadius: 36,
     paddingVertical: 6,
@@ -30,7 +24,23 @@ export const styles = StyleSheet.create({
     elevation: 10,
   },
 
-  // Individual tab
+  // Inner row — layout measurement target + host for absolute pill + flex tabs.
+  tabsRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+  },
+
+  // Animated pill — liquid glass indicator that slides between tabs.
+  pill: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    borderRadius: 28,
+    backgroundColor: colours.infoBg,
+    borderWidth: 1,
+    borderColor: colours.infoBorder,
+  },
+
   tab: {
     flex: 1,
     alignItems: 'center',
@@ -40,35 +50,20 @@ export const styles = StyleSheet.create({
     borderRadius: 28,
     gap: 3,
   },
-  tabActive: {
-    backgroundColor: colours.infoBg,
-    borderWidth: 1,
-    borderColor: colours.infoBorder,
-  },
 
-  // Icon — muted at rest, full opacity when active (emoji intrinsic colour)
-  tabIcon: {
-    fontSize: 18,
-    opacity: 0.3,
-  },
-  tabIconActive: {
-    opacity: 1,
-  },
-
-  // Label — dark on light background
   tabLabel: {
-    fontSize: 9,
+    fontSize: typography.xxs,
     fontWeight: '600',
     color: colours.textMuted,
     letterSpacing: 0.4,
     lineHeight: 16,
   },
+
   tabLabelActive: {
     color: colours.primary,
     fontWeight: '800',
   },
 
-  // Profile — disabled until screen exists
   tabDisabled: {
     opacity: 0.35,
   },
