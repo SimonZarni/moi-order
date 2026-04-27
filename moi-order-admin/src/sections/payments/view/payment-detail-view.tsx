@@ -6,6 +6,7 @@ import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
@@ -49,6 +50,8 @@ export function PaymentDetailView() {
 
   const [payment, setPayment] = useState<PaymentData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [regenerating, setRegenerating] = useState(false);
+  const [regenerateError, setRegenerateError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -59,6 +62,27 @@ export function PaymentDetailView() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [id]);
+
+  const isQrExpired =
+    payment !== null &&
+    payment.status === 'pending' &&
+    payment.qr_image_url !== null &&
+    (payment.expires_at === null || new Date(payment.expires_at) < new Date());
+
+  const handleRegenerateQr = async () => {
+    if (!payment) return;
+    setRegenerating(true);
+    setRegenerateError(null);
+    try {
+      const newPayment = await paymentsApi.regenerate(payment.id);
+      setPayment(newPayment);
+      router.replace(`/payments/${newPayment.id}`);
+    } catch {
+      setRegenerateError('Failed to regenerate QR code. Please try again.');
+    } finally {
+      setRegenerating(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -146,15 +170,74 @@ export function PaymentDetailView() {
 
             {payment.qr_image_url && (
               <Card>
-                <CardHeader title="QR Code" />
+                <CardHeader
+                  title="QR Code"
+                  action={
+                    isQrExpired ? (
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="warning"
+                        disabled={regenerating}
+                        onClick={handleRegenerateQr}
+                        startIcon={
+                          regenerating ? (
+                            <CircularProgress size={14} color="inherit" />
+                          ) : (
+                            <Iconify icon="solar:restart-bold" width={16} />
+                          )
+                        }
+                      >
+                        {regenerating ? 'Generating…' : 'Regenerate QR'}
+                      </Button>
+                    ) : null
+                  }
+                />
                 <Divider />
-                <CardContent sx={{ display: 'flex', justifyContent: 'center', pt: 2 }}>
-                  <Box
-                    component="img"
-                    src={payment.qr_image_url}
-                    alt="Payment QR Code"
-                    sx={{ width: 200, height: 200, objectFit: 'contain', borderRadius: 1 }}
-                  />
+                <CardContent
+                  sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, pt: 2 }}
+                >
+                  <Box sx={{ position: 'relative' }}>
+                    <Box
+                      component="img"
+                      src={payment.qr_image_url}
+                      alt="Payment QR Code"
+                      sx={{
+                        width: 200,
+                        height: 200,
+                        objectFit: 'contain',
+                        borderRadius: 1,
+                        opacity: isQrExpired ? 0.25 : 1,
+                        filter: isQrExpired ? 'grayscale(1)' : 'none',
+                        transition: 'opacity 0.2s, filter 0.2s',
+                      }}
+                    />
+                    {isQrExpired && (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          inset: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Label color="error" sx={{ fontSize: 13, px: 1.5, py: 0.5 }}>
+                          Expired
+                        </Label>
+                      </Box>
+                    )}
+                  </Box>
+                  {isQrExpired && (
+                    <Typography variant="caption" color="text.secondary" textAlign="center">
+                      QR code expired. Click &quot;Regenerate QR&quot; to create a fresh code.
+                    </Typography>
+                  )}
+                  {regenerateError && (
+                    <Alert severity="error" sx={{ width: '100%' }}>
+                      {regenerateError}
+                    </Alert>
+                  )}
                 </CardContent>
               </Card>
             )}

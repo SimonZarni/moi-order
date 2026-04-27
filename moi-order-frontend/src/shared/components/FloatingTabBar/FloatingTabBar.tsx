@@ -49,7 +49,15 @@ interface TabBarViewProps {
 }
 
 function TabBarView({ activeRoute, activeIndex, onTabPress, bottom, locale }: TabBarViewProps): React.JSX.Element {
-  const { pillLeft, pillWidth, onContainerLayout } = useFloatingTabBarPill(activeIndex);
+  const onTabChange = useCallback(
+    (index: number) => onTabPress(TABS[index]),
+    [onTabPress],
+  );
+
+  const { pillLeft, pillWidth, onContainerLayout, panHandlers } = useFloatingTabBarPill(
+    activeIndex,
+    onTabChange,
+  );
 
   const handleLayout = useCallback(
     (e: LayoutChangeEvent) => onContainerLayout(e.nativeEvent.layout.width),
@@ -58,7 +66,7 @@ function TabBarView({ activeRoute, activeIndex, onTabPress, bottom, locale }: Ta
 
   return (
     <View style={[styles.container, { bottom }]}>
-      <View style={styles.tabsRow} onLayout={handleLayout}>
+      <View style={styles.tabsRow} onLayout={handleLayout} {...panHandlers}>
         {/* Animated pill slides between tabs with liquid stretch spring */}
         <Animated.View
           style={[styles.pill, { left: pillLeft, width: pillWidth }]}

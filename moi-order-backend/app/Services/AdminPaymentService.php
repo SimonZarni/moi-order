@@ -15,10 +15,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Principle: SRP — admin payment read logic only. Payments are never mutated by admin.
+ * Principle: SRP — admin payment read/regenerate logic only.
+ * Principle: DIP — depends on PaymentService interface for QR creation; never calls Stripe directly.
  */
 class AdminPaymentService
 {
+    public function __construct(
+        private readonly PaymentService $paymentService,
+    ) {}
+
     private function withPayable(): array
     {
         return [
@@ -96,6 +101,47 @@ class AdminPaymentService
         });
 
         return $payment->fresh($this->withPayable());
+    }
+
+    /**
+     * Create a fresh Stripe PromptPay intent for an expired pending QR.
+     * The old Payment row is left untouched; a new Payment is returned.
+     *
+     * Security: only callable on pending + expired payments — prevents double-charging
+     * a payable that has already succeeded or is still within its valid QR window.
+     */
+    public function regenerate(Payment $payment): Payment
+    {
+        if ($payment->status !== PaymentStatus::Pending) {
+            throw new \DomainException('payment.not_regeneratable', 409);
+        }
+
+        // Null expires_at (legacy rows): treat as expired after 1 hour — mirrors
+        // the same logic in PaymentService::findPendingPayment().
+        $isExpired = $payment->expires_at !== null
+            ? $payment->expires_at->isPast()
+            : $payment->created_at->lt(now()->subHour());
+
+        if (! $isExpired) {
+            throw new \DomainException('payment.qr_not_expired', 409);
+        }
+
+        $payment->loadMissing('payable');
+
+        if ($payment->payable === null) {
+            throw new \DomainException('payment.payable_not_found', 422);
+        }
+
+        // PaymentService::createForPayable() will find no valid pending payment
+        // (the existing one is expired) and create a fresh Stripe intent.
+        $newPayment = $this->paymentService->createForPayable($payment->payable);
+
+        Log::info('payment.admin_regenerated', [
+            'old_payment_id' => $payment->id,
+            'new_payment_id' => $newPayment->id,
+        ]);
+
+        return $newPayment->load($this->withPayable());
     }
 
     /** Aggregate totals across ALL payments — not scoped to current page. */

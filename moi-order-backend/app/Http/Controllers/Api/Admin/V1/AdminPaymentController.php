@@ -42,4 +42,10 @@ class AdminPaymentController extends Controller
     {
         return response()->json(['data' => new AdminPaymentResource($this->service->confirm($payment))]);
     }
+
+    /** POST /api/admin/v1/payments/{payment}/regenerate */
+    public function regenerate(Payment $payment): JsonResponse
+    {
+        return response()->json(['data' => new AdminPaymentResource($this->service->regenerate($payment))]);
+    }
 }

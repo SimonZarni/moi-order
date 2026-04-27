@@ -87,6 +87,7 @@ Route::prefix('payments')->name('admin.payments.')->group(function (): void {
     Route::get('/stats', [AdminPaymentController::class, 'stats'])->name('stats');
     Route::get('/{payment}', [AdminPaymentController::class, 'show'])->name('show');
     Route::post('/{payment}/confirm', [AdminPaymentController::class, 'confirm'])->name('confirm');
+    Route::post('/{payment}/regenerate', [AdminPaymentController::class, 'regenerate'])->name('regenerate');
 });
 
 // ── Places + Images ───────────────────────────────────────────────────────────
