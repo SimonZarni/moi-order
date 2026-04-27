@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
-import * as FileSystem from 'expo-file-system/legacy';
+import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import * as Sharing from 'expo-sharing';
 
@@ -103,10 +103,7 @@ export function usePaymentScreen(): UsePaymentScreenResult {
     if (!url) return;
 
     try {
-      const cacheDir = FileSystem.cacheDirectory;
-      if (!cacheDir) throw new Error('Cache directory unavailable');
-
-      const fileUri = `${cacheDir}qr_${Date.now()}.png`;
+      const fileUri = new FileSystem.File(FileSystem.Paths.cache, `qr_${Date.now()}.png`).uri;
       const result = await FileSystem.downloadAsync(url, fileUri);
       if (result.status !== 200) throw new Error(`Download failed: ${result.status}`);
 

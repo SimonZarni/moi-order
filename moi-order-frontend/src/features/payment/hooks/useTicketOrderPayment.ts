@@ -27,7 +27,7 @@ export interface UseTicketOrderPaymentRefreshable extends UseTicketOrderPaymentR
  * Mirrors usePayment but for TicketOrder — same polling + AppState sync pattern.
  * Principle: OCP — new payable type adds a new hook instead of modifying usePayment.
  */
-export function useTicketOrderPayment(ticketOrderId: number): UseTicketOrderPaymentResult {
+export function useTicketOrderPayment(ticketOrderId: number): UseTicketOrderPaymentRefreshable {
   const queryClient = useQueryClient();
 
   const {

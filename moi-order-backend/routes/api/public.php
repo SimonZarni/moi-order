@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\PlaceController;
 use App\Http\Controllers\Api\V1\ServiceCategoryController;
 use App\Http\Controllers\Api\V1\ServiceController;
+use App\Http\Controllers\Api\V1\TagController;
 use App\Http\Controllers\Api\V1\TicketController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,9 @@ Route::middleware('throttle:auth')->group(function (): void {
 // Places — public browsing, no auth required
 Route::get('/places', [PlaceController::class, 'index']);
 Route::get('/places/{place}', [PlaceController::class, 'show']);
+
+// Tags — public, used for map filter
+Route::get('/tags', [TagController::class, 'index']);
 
 // Services — public catalog (prices + types), no auth required
 Route::get('/services', [ServiceController::class, 'index']);

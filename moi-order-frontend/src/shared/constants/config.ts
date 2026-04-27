@@ -17,6 +17,10 @@ export const IOS_BUNDLE_ID = 'com.moiorder.app' as const;
 // Leave empty until the app is published; the update check is skipped when blank.
 export const IOS_APP_STORE_ID = '' as const;
 
+// iOS Client ID (client_type: 1) — from GoogleService-Info.plist CLIENT_ID.
+// Required so the native iOS sign-in sheet uses the correct OAuth client.
+export const GOOGLE_IOS_CLIENT_ID = '661538209777-o33avjo80379ui26kj2clbn4snla6j2g.apps.googleusercontent.com' as const;
+
 export const CACHE_TTL = {
   USER_DATA: 5 * 60 * 1000,
   STATIC_DATA: Infinity,

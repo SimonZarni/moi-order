@@ -30,7 +30,7 @@ export interface UsePaymentRefreshable extends UsePaymentResult {
  *   webhooks. After sync we invalidate the submission query so polling picks up the
  *   updated status immediately.
  */
-export function usePayment(submissionId: number): UsePaymentResult {
+export function usePayment(submissionId: number): UsePaymentRefreshable {
   const queryClient = useQueryClient();
 
   const {

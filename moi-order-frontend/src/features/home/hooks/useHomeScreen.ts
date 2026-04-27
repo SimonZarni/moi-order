@@ -23,6 +23,8 @@ export interface UseHomeScreenResult {
   handleNavigateToNotifications: () => void;
   handleNavigateToLogin: () => void;
   handleLogout: () => void;
+  handleNavigateToSearch: () => void;
+  handleNavigateToMap: () => void;
 }
 
 export function useHomeScreen(): UseHomeScreenResult {
@@ -82,6 +84,14 @@ export function useHomeScreen(): UseHomeScreenResult {
     resetUnread();
   }, [clearAuth, resetUnread, pushToken]);
 
+  const handleNavigateToSearch = useCallback((): void => {
+    navigation.navigate('Search');
+  }, [navigation]);
+
+  const handleNavigateToMap = useCallback((): void => {
+    navigation.navigate('PlacesMap');
+  }, [navigation]);
+
   return {
     user,
     isLoggedIn,
@@ -95,5 +105,7 @@ export function useHomeScreen(): UseHomeScreenResult {
     handleNavigateToNotifications,
     handleNavigateToLogin,
     handleLogout,
+    handleNavigateToSearch,
+    handleNavigateToMap,
   };
 }

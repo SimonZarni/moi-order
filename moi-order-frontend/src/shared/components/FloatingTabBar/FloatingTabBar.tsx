@@ -50,7 +50,10 @@ interface TabBarViewProps {
 
 function TabBarView({ activeRoute, activeIndex, onTabPress, bottom, locale }: TabBarViewProps): React.JSX.Element {
   const onTabChange = useCallback(
-    (index: number) => onTabPress(TABS[index]),
+    (index: number) => {
+      const tab = TABS[index];
+      if (tab) onTabPress(tab);
+    },
     [onTabPress],
   );
 

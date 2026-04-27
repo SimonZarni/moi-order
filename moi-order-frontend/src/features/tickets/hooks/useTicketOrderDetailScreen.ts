@@ -3,7 +3,7 @@ import { Alert, Platform } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMutation } from '@tanstack/react-query';
-import * as FileSystem from 'expo-file-system/legacy';
+import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import * as Sharing from 'expo-sharing';
 import * as IntentLauncher from 'expo-intent-launcher';
@@ -65,13 +65,11 @@ export function useTicketOrderDetailScreen(): UseTicketOrderDetailScreenResult {
         return;
       }
 
-      const cacheDir = FileSystem.cacheDirectory;
-      if (!cacheDir) throw new Error('Device storage is unavailable.');
-
       const ext = mime_type.includes('pdf') ? 'pdf' : (mime_type.split('/')[1] ?? 'bin');
+      const fileUri = new FileSystem.File(FileSystem.Paths.cache, `eticket_${ticketOrderId}.${ext}`).uri;
       const result = await FileSystem.downloadAsync(
         url,
-        `${cacheDir}eticket_${ticketOrderId}.${ext}`,
+        fileUri,
       );
       if (result.status !== 200) throw new Error(`Download failed (HTTP ${result.status}).`);
 
@@ -100,10 +98,10 @@ export function useTicketOrderDetailScreen(): UseTicketOrderDetailScreenResult {
     if (!previewImageUrl) return;
     setIsSavingEticket(true);
     try {
-      const cacheDir = FileSystem.cacheDirectory;
-      if (!cacheDir) throw new Error('Cache directory unavailable');
-
-      const fileUri = `${cacheDir}eticket_${ticketOrderId}_${Date.now()}.png`;
+      const fileUri = new FileSystem.File(
+        FileSystem.Paths.cache,
+        `eticket_${ticketOrderId}_${Date.now()}.png`,
+      ).uri;
       const result = await FileSystem.downloadAsync(previewImageUrl, fileUri);
       if (result.status !== 200) throw new Error(`Download failed (HTTP ${result.status})`);
 

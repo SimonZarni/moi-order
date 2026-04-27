@@ -84,6 +84,12 @@ export type RootStackParamList = {
   Places: undefined;
   PlaceDetail: { placeId: number };
 
+  // ── Map ──────────────────────────────────────────────────────────────────
+  PlacesMap: undefined;
+
+  // ── Global search ─────────────────────────────────────────────────────────
+  Search: undefined;
+
   // ── Profile ──────────────────────────────────────────────────────────────
   Profile: undefined;
 

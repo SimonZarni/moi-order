@@ -1,0 +1,395 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, Keyboard, Linking } from 'react-native';
+import * as Location from 'expo-location';
+import { usePlacesList, usePlaceDetailForMap, useTagsList } from './usePlacesMapData';
+import {
+  geocodeQueryApi,
+  getBothDirectionsApi,
+  type GeocodingResult,
+  type DirectionsResult,
+} from '@/shared/api/mapbox';
+import type { Place, Category, Tag } from '@/types/models';
+import type { Camera } from '@rnmapbox/maps';
+
+const NEARBY_KM  = 50;
+const TAB_NEARBY = 'nearby';
+const TAB_ALL    = 'all';
+
+function distanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R    = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) *
+    Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+export interface UserLocation {
+  coords: [number, number];
+  label:  string;
+  isGPS:  boolean;
+}
+
+export interface UsePlacesMapScreenResult {
+  displayedPlaces:  Place[];
+  selectedPlace:    Place | null;
+  selectedDetail:   Place | null;
+  isLoadingPlaces:  boolean;
+  isLoadingDetail:  boolean;
+  isError:          boolean;
+  cameraRef:        React.RefObject<Camera | null>;
+  userLocation:     UserLocation | null;
+  searchQuery:      string;
+  placeSuggestions: Place[];
+  geoSuggestions:   GeocodingResult[];
+  isGeoLoading:     boolean;
+  categories:       Category[];
+  allTags:          Tag[];
+  activeTab:        string | null;
+  activeCategory:   number | null;
+  activeTags:       number[];
+  isFABOpen:        boolean;
+  showTagFilter:    boolean;
+  drivingRoute:     DirectionsResult | null;
+  walkingRoute:     DirectionsResult | null;
+  isLoadingRoutes:  boolean;
+  longPressCoords:        [number, number] | null;
+  showLocationOptions:    boolean;
+  longPressMarker:        [number, number] | null;
+  handleTabPress:             (tabId: string) => void;
+  handleMarkerPress:          (place: Place) => void;
+  handleMapPress:             () => void;
+  handleMapLongPress:         (coords: [number, number]) => void;
+  handleMyLocation:           () => void;
+  handleSearchChange:         (q: string) => void;
+  handleClearSearch:          () => void;
+  handleSelectPlace:          (place: Place) => void;
+  handleSelectGeocoding:      (result: GeocodingResult) => void;
+  handleGetDirections:        () => void;
+  handleDismiss:              () => void;
+  handleNavigate:             () => void;
+  handleRefetch:              () => void;
+  handleUseCurrentGPS:        () => void;
+  handleUseMapLocation:       () => void;
+  handleDismissLocationOptions: () => void;
+  handleToggleFAB:            () => void;
+  handleSelectCategory:       (id: number | null) => void;
+  handleShowTagFilter:        () => void;
+  handleApplyTags:            (tagIds: number[]) => void;
+  handleDismissTagFilter:     () => void;
+}
+
+export function usePlacesMapScreen(): UsePlacesMapScreenResult {
+  const cameraRef = useRef<Camera>(null);
+
+  const [gpsCoords, setGpsCoords]           = useState<[number, number] | null>(null);
+  const [userLocation, setUserLocation]     = useState<UserLocation | null>(null);
+  const [selectedPlace, setSelectedPlace]   = useState<Place | null>(null);
+  const [searchQuery, setSearchQuery]       = useState('');
+  const [geoSuggestions, setGeoSuggestions] = useState<GeocodingResult[]>([]);
+  const [isGeoLoading, setIsGeoLoading]     = useState(false);
+  const [drivingRoute, setDrivingRoute]     = useState<DirectionsResult | null>(null);
+  const [walkingRoute, setWalkingRoute]     = useState<DirectionsResult | null>(null);
+  const [isLoadingRoutes, setIsLoadingRoutes] = useState(false);
+  const [activeTab, setActiveTab]           = useState<string | null>(TAB_NEARBY);
+  const [activeCategory, setActiveCategory] = useState<number | null>(null);
+  const [activeTags, setActiveTags]         = useState<number[]>([]);
+  const [isFABOpen, setIsFABOpen]           = useState(false);
+  const [showTagFilter, setShowTagFilter]   = useState(false);
+  const [longPressCoords, setLongPressCoords]     = useState<[number, number] | null>(null);
+  const [showLocationOptions, setShowLocationOptions] = useState(false);
+  const [longPressMarker, setLongPressMarker]     = useState<[number, number] | null>(null);
+
+  const { places, isLoading: isLoadingPlaces, isError, refetch } = usePlacesList();
+  const { place: selectedDetail, isLoading: isLoadingDetail } =
+    usePlaceDetailForMap(selectedPlace?.id ?? null);
+  const { tags: fetchedTags } = useTagsList();
+
+  // ── GPS ───────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') return;
+      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      const coords: [number, number] = [loc.coords.longitude, loc.coords.latitude];
+      setGpsCoords(coords);
+      setUserLocation({ coords, label: 'Current Location', isGPS: true });
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (!gpsCoords) return;
+    cameraRef.current?.setCamera({
+      centerCoordinate: gpsCoords, zoomLevel: 13,
+      animationMode: 'flyTo', animationDuration: 1200,
+    });
+  }, [gpsCoords]);
+
+  // ── Derived data ──────────────────────────────────────────────────────────
+  const categories = useMemo<Category[]>(() => {
+    const seen = new Set<number>();
+    return places.reduce<Category[]>((acc, p) => {
+      if (p.category && !seen.has(p.category.id)) {
+        seen.add(p.category.id);
+        acc.push(p.category);
+      }
+      return acc;
+    }, []).sort((a, b) => a.name_en.localeCompare(b.name_en));
+  }, [places]);
+
+  const allTags = useMemo<Tag[]>(() => {
+    if (fetchedTags.length > 0) {
+      return fetchedTags;
+    }
+
+    const byId = new Map<number, Tag>();
+    for (const place of places) {
+      for (const tag of place.tags ?? []) {
+        byId.set(tag.id, tag);
+      }
+    }
+
+    return [...byId.values()].sort((a, b) => a.name_en.localeCompare(b.name_en));
+  }, [fetchedTags, places]);
+
+  const nearbyPlaces = useMemo(() => {
+    const coords = userLocation?.coords ?? gpsCoords;
+    if (!coords) return places.slice(0, 30);
+    const [lng, lat] = coords;
+    return places
+      .filter(p => p.latitude !== null && p.longitude !== null)
+      .map(p => ({ place: p, dist: distanceKm(lat, lng, p.latitude!, p.longitude!) }))
+      .filter(({ dist }) => dist <= NEARBY_KM)
+      .sort((a, b) => a.dist - b.dist)
+      .map(({ place }) => place);
+  }, [places, userLocation, gpsCoords]);
+
+  const searchResults = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    return places.filter(p =>
+      p.name_en.toLowerCase().includes(q) ||
+      p.city?.toLowerCase().includes(q) ||
+      (p.category?.name_en ?? '').toLowerCase().includes(q)
+    );
+  }, [places, searchQuery]);
+
+  const displayedPlaces = useMemo(() => {
+    if (searchQuery.trim().length > 0) return searchResults;
+    if (!activeTab) return [];
+
+    let base: Place[] =
+      activeTab === TAB_NEARBY
+        ? nearbyPlaces
+        : places.filter(p => p.latitude !== null);
+
+    if (activeCategory !== null) {
+      base = base.filter(p => p.category?.id === activeCategory);
+    }
+    if (activeTags.length > 0) {
+      base = base.filter(p => (p.tags ?? []).some(t => activeTags.includes(t.id)));
+    }
+    return base;
+  }, [activeTab, searchQuery, searchResults, nearbyPlaces, places, activeCategory, activeTags]);
+
+  const placeSuggestions = useMemo(() =>
+    searchQuery.trim().length > 1 ? searchResults.slice(0, 3) : [],
+    [searchResults, searchQuery],
+  );
+
+  // ── Geocoding ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) { setGeoSuggestions([]); return; }
+    setIsGeoLoading(true);
+    const t = setTimeout(async () => {
+      try {
+        const r = await geocodeQueryApi(searchQuery, userLocation?.coords);
+        setGeoSuggestions(r);
+      } catch { setGeoSuggestions([]); }
+      finally  { setIsGeoLoading(false); }
+    }, 500);
+    return () => clearTimeout(t);
+  }, [searchQuery, userLocation]);
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
+  const handleTabPress = useCallback((tabId: string) => {
+    setActiveTab(prev => prev === tabId ? null : tabId);
+    setSelectedPlace(null);
+    setDrivingRoute(null);
+    setWalkingRoute(null);
+    setIsFABOpen(false);
+  }, []);
+
+  const handleToggleFAB = useCallback(() => setIsFABOpen(prev => !prev), []);
+
+  const handleSelectCategory = useCallback((id: number | null) => {
+    setActiveCategory(id);
+  }, []);
+
+  const handleShowTagFilter    = useCallback(() => setShowTagFilter(true), []);
+  const handleDismissTagFilter = useCallback(() => setShowTagFilter(false), []);
+  const handleApplyTags        = useCallback((tagIds: number[]) => {
+    setActiveTags(tagIds);
+    setShowTagFilter(false);
+  }, []);
+
+  const handleGetDirections = useCallback(async () => {
+    const from = userLocation?.coords;
+    if (!from || !selectedPlace?.latitude || !selectedPlace?.longitude) return;
+    setIsLoadingRoutes(true);
+    try {
+      const { driving, walking } = await getBothDirectionsApi(
+        from, [selectedPlace.longitude, selectedPlace.latitude],
+      );
+      setDrivingRoute(driving);
+      setWalkingRoute(walking);
+    } finally { setIsLoadingRoutes(false); }
+  }, [userLocation, selectedPlace]);
+
+  const handleNavigate = useCallback(() => {
+    if (!selectedPlace?.latitude || !selectedPlace?.longitude) return;
+    const { latitude: lat, longitude: lng, name_en } = selectedPlace;
+    Linking.openURL(
+      `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_name=${encodeURIComponent(name_en)}&travelmode=driving`
+    );
+  }, [selectedPlace]);
+
+  const handleDismiss = useCallback(() => {
+    setSelectedPlace(null);
+    setDrivingRoute(null);
+    setWalkingRoute(null);
+  }, []);
+
+  const handleMapPress = useCallback(() => {
+    Keyboard.dismiss();
+    setIsFABOpen(false);
+  }, []);
+
+  const handleMapLongPress = useCallback((coords: [number, number]) => {
+    Keyboard.dismiss();
+    setLongPressCoords(coords);
+    setLongPressMarker(coords);
+    setShowLocationOptions(true);
+    setIsFABOpen(false);
+  }, []);
+
+  const handleUseCurrentGPS = useCallback(() => {
+    if (!gpsCoords) return;
+    setUserLocation({ coords: gpsCoords, label: 'Current Location', isGPS: true });
+    setLongPressMarker(null);
+    setShowLocationOptions(false);
+    setLongPressCoords(null);
+    setActiveTab(TAB_NEARBY);
+    cameraRef.current?.setCamera({
+      centerCoordinate: gpsCoords, zoomLevel: 13,
+      animationMode: 'flyTo', animationDuration: 800,
+    });
+  }, [gpsCoords]);
+
+  const handleUseMapLocation = useCallback(() => {
+    if (!longPressCoords) return;
+    const [lng, lat] = longPressCoords;
+    setUserLocation({ coords: longPressCoords, label: `${lat.toFixed(4)}, ${lng.toFixed(4)}`, isGPS: false });
+    setShowLocationOptions(false);
+    setLongPressCoords(null);
+    setActiveTab(TAB_NEARBY);
+    cameraRef.current?.setCamera({
+      centerCoordinate: longPressCoords, zoomLevel: 13,
+      animationMode: 'flyTo', animationDuration: 800,
+    });
+  }, [longPressCoords]);
+
+  const handleDismissLocationOptions = useCallback(() => {
+    setShowLocationOptions(false);
+    setLongPressCoords(null);
+    setLongPressMarker(null);
+  }, []);
+
+  const flyToPlace = useCallback((place: Place) => {
+    if (!place.latitude || !place.longitude) return;
+    cameraRef.current?.setCamera({
+      centerCoordinate: [place.longitude, place.latitude - 0.003],
+      zoomLevel: 15, animationMode: 'flyTo', animationDuration: 700,
+    });
+  }, []);
+
+  const handleMarkerPress = useCallback((place: Place) => {
+    Keyboard.dismiss();
+    setSelectedPlace(place);
+    setDrivingRoute(null);
+    setWalkingRoute(null);
+    setSearchQuery('');
+    setIsFABOpen(false);
+    flyToPlace(place);
+  }, [flyToPlace]);
+
+  const handleSelectPlace = useCallback((place: Place) => {
+    setSearchQuery('');
+    setGeoSuggestions([]);
+    setSelectedPlace(place);
+    setDrivingRoute(null);
+    setWalkingRoute(null);
+    flyToPlace(place);
+  }, [flyToPlace]);
+
+  const handleSelectGeocoding = useCallback((result: GeocodingResult) => {
+    setSearchQuery('');
+    setGeoSuggestions([]);
+    setSelectedPlace(null);
+    setDrivingRoute(null);
+    setWalkingRoute(null);
+    cameraRef.current?.setCamera({
+      centerCoordinate: result.coordinates, zoomLevel: 14,
+      animationMode: 'flyTo', animationDuration: 800,
+    });
+  }, []);
+
+  const handleMyLocation = useCallback(async () => {
+    const coords = userLocation?.coords ?? gpsCoords;
+    if (coords) {
+      cameraRef.current?.setCamera({
+        centerCoordinate: coords, zoomLevel: 14,
+        animationMode: 'flyTo', animationDuration: 800,
+      });
+      return;
+    }
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Location unavailable', 'Enable location access in Settings to use this feature.');
+      return;
+    }
+    const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+    const newCoords: [number, number] = [loc.coords.longitude, loc.coords.latitude];
+    setGpsCoords(newCoords);
+    setUserLocation({ coords: newCoords, label: 'Current Location', isGPS: true });
+    cameraRef.current?.setCamera({
+      centerCoordinate: newCoords, zoomLevel: 14,
+      animationMode: 'flyTo', animationDuration: 800,
+    });
+  }, [userLocation, gpsCoords]);
+
+  const handleSearchChange = useCallback((q: string) => setSearchQuery(q), []);
+  const handleClearSearch  = useCallback(() => { setSearchQuery(''); setGeoSuggestions([]); }, []);
+  const handleRefetch      = useCallback(() => refetch(), [refetch]);
+
+  return {
+    displayedPlaces, selectedPlace, selectedDetail,
+    isLoadingPlaces, isLoadingDetail, isError,
+    cameraRef, userLocation,
+    searchQuery, placeSuggestions, geoSuggestions, isGeoLoading,
+    categories, allTags, activeTab, activeCategory, activeTags,
+    isFABOpen, showTagFilter,
+    drivingRoute, walkingRoute, isLoadingRoutes,
+    longPressCoords, showLocationOptions, longPressMarker,
+    handleTabPress, handleMarkerPress, handleMapPress, handleMapLongPress,
+    handleMyLocation, handleSearchChange, handleClearSearch,
+    handleSelectPlace, handleSelectGeocoding,
+    handleGetDirections, handleDismiss, handleNavigate, handleRefetch,
+    handleUseCurrentGPS, handleUseMapLocation, handleDismissLocationOptions,
+    handleToggleFAB, handleSelectCategory,
+    handleShowTagFilter, handleApplyTags, handleDismissTagFilter,
+  };
+}

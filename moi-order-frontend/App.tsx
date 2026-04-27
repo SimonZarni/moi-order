@@ -24,13 +24,16 @@ import { enableScreens } from 'react-native-screens';
 
 enableScreens(true);
 
+import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
+configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false });
+
 import { GoogleSignin } from '@/shared/utils/googleSignin';
 
 import { setMemoryToken, setMemoryLocale } from '@/shared/api/client';
 import { fetchMe } from '@/shared/api/auth';
-import { TOKEN_KEY, LOCALE_KEY, CACHE_TTL, GOOGLE_WEB_CLIENT_ID } from '@/shared/constants/config';
+import { TOKEN_KEY, LOCALE_KEY, CACHE_TTL, GOOGLE_WEB_CLIENT_ID, GOOGLE_IOS_CLIENT_ID } from '@/shared/constants/config';
 
-GoogleSignin.configure({ webClientId: GOOGLE_WEB_CLIENT_ID });
+GoogleSignin.configure({ webClientId: GOOGLE_WEB_CLIENT_ID, iosClientId: GOOGLE_IOS_CLIENT_ID });
 import { useAuthStore } from '@/shared/store/authStore';
 import { useLocaleStore, Locale } from '@/shared/store/localeStore';
 import { colours } from '@/shared/theme/colours';
@@ -69,6 +72,9 @@ import { useNotificationsData } from '@/features/notifications/hooks/useNotifica
 import { usePusherNotifications } from '@/features/notifications/hooks/usePusherNotifications';
 import { usePushNotifications } from '@/features/notifications/hooks/usePushNotifications';
 import { useAppUpdate } from '@/shared/hooks/useAppUpdate';
+import { PlacesMapScreen } from '@/features/map/screens/PlacesMapScreen';
+import { SearchScreen } from '@/features/search/screens/SearchScreen';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { RootStackParamList, TabParamList } from '@/types/navigation';
 
@@ -124,6 +130,8 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="TicketDateSelection"           component={TicketDateSelectionScreen} />
       <Stack.Screen name="TicketOrderDetail"             component={TicketOrderDetailScreen} />
       <Stack.Screen name="Notifications"                 component={NotificationsScreen} />
+      <Stack.Screen name="PlacesMap"                     component={PlacesMapScreen} options={{ animation: 'slide_from_bottom' }} />
+      <Stack.Screen name="Search"                        component={SearchScreen} options={{ animation: 'fade' }} />
       <Stack.Screen name="PrivacyPolicy"                 component={PrivacyPolicyScreen} />
       <Stack.Screen name="TermsAndConditions"            component={TermsAndConditionsScreen} />
       <Stack.Screen name="PdpaNotice"                    component={PdpaNoticeScreen} />
@@ -189,13 +197,15 @@ export default function App(): React.JSX.Element {
   }
 
   return (
-    <SafeAreaProvider>
-      <QueryClientProvider client={queryClient}>
-        <NavigationContainer>
-          <StatusBar style="light" translucent />
-          <AppShell />
-        </NavigationContainer>
-      </QueryClientProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <QueryClientProvider client={queryClient}>
+          <NavigationContainer>
+            <StatusBar style="light" translucent />
+            <AppShell />
+          </NavigationContainer>
+        </QueryClientProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

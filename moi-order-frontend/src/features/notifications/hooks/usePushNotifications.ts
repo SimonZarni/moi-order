@@ -74,12 +74,12 @@ export function usePushNotifications(): void {
 
     // Handle notification tap from all states: foreground, background, and killed.
     responseListenerRef.current = Notifications.addNotificationResponseReceivedListener(
-      (response) => handleNotificationTap(response),
+      (response: Notifications.NotificationResponse) => handleNotificationTap(response),
     );
 
     // Handle tap from killed state — getLastNotificationResponseAsync fires once on mount
     // for notifications tapped while the app was terminated.
-    Notifications.getLastNotificationResponseAsync().then((response) => {
+    Notifications.getLastNotificationResponseAsync().then((response: Notifications.NotificationResponse | null) => {
       if (response !== null) {
         handleNotificationTap(response);
       }

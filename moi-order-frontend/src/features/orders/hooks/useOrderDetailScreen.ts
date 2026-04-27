@@ -3,7 +3,7 @@ import { Alert, Platform } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMutation } from '@tanstack/react-query';
-import * as FileSystem from 'expo-file-system/legacy';
+import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import * as Sharing from 'expo-sharing';
 import * as IntentLauncher from 'expo-intent-launcher';
@@ -66,11 +66,9 @@ export function useOrderDetailScreen(): UseOrderDetailScreenResult {
         return;
       }
 
-      const cacheDir = FileSystem.cacheDirectory;
-      if (!cacheDir) throw new Error('Device storage is unavailable.');
-
       const ext    = mime_type.includes('pdf') ? 'pdf' : (mime_type.split('/')[1] ?? 'bin');
-      const result = await FileSystem.downloadAsync(url, `${cacheDir}result_${submissionId}.${ext}`);
+      const fileUri = new FileSystem.File(FileSystem.Paths.cache, `result_${submissionId}.${ext}`).uri;
+      const result = await FileSystem.downloadAsync(url, fileUri);
       if (result.status !== 200) throw new Error(`Download failed (HTTP ${result.status}).`);
 
       if (Platform.OS === 'android') {
@@ -96,10 +94,10 @@ export function useOrderDetailScreen(): UseOrderDetailScreenResult {
     if (!previewImageUrl) return;
     setIsSavingResult(true);
     try {
-      const cacheDir = FileSystem.cacheDirectory;
-      if (!cacheDir) throw new Error('Cache directory unavailable');
-
-      const fileUri = `${cacheDir}result_${submissionId}_${Date.now()}.png`;
+      const fileUri = new FileSystem.File(
+        FileSystem.Paths.cache,
+        `result_${submissionId}_${Date.now()}.png`,
+      ).uri;
       const result  = await FileSystem.downloadAsync(previewImageUrl, fileUri);
       if (result.status !== 200) throw new Error(`Download failed (HTTP ${result.status})`);
 

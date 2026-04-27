@@ -1,8 +1,10 @@
 // Query keys added here as features are built
 export const QUERY_KEYS = {
   PLACES: {
-    LIST:   ['places', 'list'] as const,
-    DETAIL: (id: number) => ['places', 'detail', id] as const,
+    LIST:     ['places', 'list'] as const,
+    ALL:      () => ['places', 'all'] as const,
+    DETAIL:   (id: number) => ['places', 'detail', id] as const,
+    FAVORITE: (id: number) => ['places', 'favorite', id] as const,
   },
   FAVORITES: {
     STATUS: (placeId: number) => ['favorites', 'status', placeId] as const,
@@ -36,5 +38,8 @@ export const QUERY_KEYS = {
   },
   NOTIFICATIONS: {
     LIST: ['notifications', 'list'] as const,
+  },
+  TAGS: {
+    LIST: () => ['tags', 'list'] as const,
   },
 } as const;

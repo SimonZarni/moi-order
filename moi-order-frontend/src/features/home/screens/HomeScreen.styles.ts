@@ -113,6 +113,35 @@ export const styles = StyleSheet.create({
     color: colours.tertiary,
   },
 
+  // ── Search row ────────────────────────────────────────────────────────────
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  searchBox: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    minHeight: 44,
+    gap: spacing.xs,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.18)',
+  },
+  searchIcon:        { fontSize: 14 },
+  searchPlaceholder: { fontSize: typography.xs, color: 'rgba(255,255,255,0.55)', flex: 1 },
+  mapBtn: {
+    width: 44, height: 44, borderRadius: radius.full,
+    backgroundColor: colours.tertiary,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  mapBtnIcon: { fontSize: 20 },
+
   // ── Body ──────────────────────────────────────────────────────────────────
   body: {
     flex: 1,

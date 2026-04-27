@@ -23,11 +23,12 @@ class PlaceController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
+        $perPage = min($request->integer('per_page', 20), 100);
         $search = $request->string('search')->trim()->value();
 
         // coverImage: loads 1 row per place (HasOne, lowest sort_order).
         // Previously `images` loaded every image for every place — ~5× the data.
-        $places = Place::with(['category', 'coverImage'])
+        $places = Place::with(['category', 'coverImage', 'tags'])
             ->when($search !== '', function ($q) use ($search): void {
                 $q->where(function ($q) use ($search): void {
                     $q->where('name_en', 'like', "%{$search}%")
@@ -51,7 +52,7 @@ class PlaceController extends Controller
                 );
             })
             ->latest()
-            ->paginate(perPage: 20);
+            ->paginate(perPage: $perPage);
 
         return PlaceResource::collection($places);
     }

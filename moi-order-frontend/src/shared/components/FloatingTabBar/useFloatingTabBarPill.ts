@@ -11,7 +11,7 @@ const SNAP = { tension: 280, friction: 18, useNativeDriver: false } as const;
 
 export interface PillAnimationResult {
   pillLeft: Animated.Value;
-  pillWidth: Animated.AnimatedSubtraction;
+  pillWidth: Animated.AnimatedSubtraction<number>;
   onContainerLayout: (width: number) => void;
   panHandlers: ReturnType<typeof PanResponder.create>['panHandlers'];
 }
