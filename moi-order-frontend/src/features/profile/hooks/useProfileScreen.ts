@@ -23,12 +23,14 @@ export interface UseProfileScreenResult {
   isRefreshing: boolean;
   // Profile form
   name: string;
+  email: string;
   dateOfBirth: Date | null;
   profileErrors: ReturnType<typeof useProfileForm>['errors'];
   isDirty: boolean;
   isSavingProfile: boolean;
   showDatePicker: boolean;
   isEditingProfile: boolean;
+  needsEmailCompletion: boolean;
   // Change password form
   currentPassword: string;
   newPassword: string;
@@ -39,6 +41,7 @@ export interface UseProfileScreenResult {
   // Handlers — profile
   handleToggleEditProfile: () => void;
   handleNameChange: (text: string) => void;
+  handleEmailChange: (text: string) => void;
   handleDateFieldPress: () => void;
   handleDatePickerChange: (event: DateTimePickerEvent, date?: Date) => void;
   handleSaveProfile: () => void;
@@ -77,6 +80,7 @@ export function useProfileScreen(): UseProfileScreenResult {
   const [showDatePicker, setShowDatePicker]         = useState(false);
   const [isPasswordSectionOpen, setPasswordSection] = useState(false);
   const [isEditingProfile, setIsEditingProfile]     = useState(false);
+  const needsEmailCompletion = user?.email.endsWith('@users.moiorder.local') ?? false;
 
   // Guard: navigate to Home when unauthenticated.
   // Guests cannot reach this screen via the tab bar (FloatingTabBar redirects them
@@ -128,7 +132,7 @@ export function useProfileScreen(): UseProfileScreenResult {
       : null;
 
     updateMutation.mutate(
-      { name: profileForm.name.trim(), dateOfBirth: dobStr },
+      { name: profileForm.name.trim(), email: profileForm.email.trim(), dateOfBirth: dobStr },
       {
         onSuccess: () => setIsEditingProfile(false),
         onError:   (err) => profileForm.applyApiError(err),
@@ -229,12 +233,14 @@ export function useProfileScreen(): UseProfileScreenResult {
     isLoading,
     isRefreshing,
     name:            profileForm.name,
+    email:           profileForm.email,
     dateOfBirth:     profileForm.dateOfBirth,
     profileErrors:   profileForm.errors,
     isDirty:          profileForm.isDirty,
     isSavingProfile:  updateMutation.isPending,
     showDatePicker,
     isEditingProfile,
+    needsEmailCompletion,
     currentPassword:        changePasswordForm.currentPassword,
     newPassword:            changePasswordForm.newPassword,
     confirmPassword:        changePasswordForm.confirmPassword,
@@ -243,6 +249,7 @@ export function useProfileScreen(): UseProfileScreenResult {
     isChangingPassword:     changePasswordMutation.isPending,
     handleToggleEditProfile,
     handleNameChange:    profileForm.handleNameChange,
+    handleEmailChange:   profileForm.handleEmailChange,
     handleDateFieldPress,
     handleDatePickerChange,
     handleSaveProfile,

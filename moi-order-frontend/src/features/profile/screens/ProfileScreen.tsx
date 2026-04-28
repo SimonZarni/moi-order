@@ -24,12 +24,12 @@ function getInitials(name: string): string {
 export function ProfileScreen(): React.JSX.Element {
   const {
     user, isLoading, isRefreshing,
-    name, dateOfBirth, profileErrors, isDirty, isSavingProfile, showDatePicker, isEditingProfile,
+    name, email, dateOfBirth, profileErrors, isDirty, isSavingProfile, showDatePicker, isEditingProfile, needsEmailCompletion,
     currentPassword, newPassword, confirmPassword, passwordErrors,
     isPasswordSectionOpen, isChangingPassword,
     locale, handleSetLocale,
     handleToggleEditProfile,
-    handleNameChange, handleDateFieldPress, handleDatePickerChange, handleSaveProfile, handleRefresh,
+    handleNameChange, handleEmailChange, handleDateFieldPress, handleDatePickerChange, handleSaveProfile, handleRefresh,
     handleTogglePasswordSection,
     handleCurrentPasswordChange, handleNewPasswordChange, handleConfirmPasswordChange,
     handleChangePassword,
@@ -74,6 +74,31 @@ export function ProfileScreen(): React.JSX.Element {
 
         {/* ── Body ── */}
         <View style={styles.body}>
+          {needsEmailCompletion && (
+            <View style={styles.emailPromptCard}>
+              <View style={styles.emailPromptHeader}>
+                <View style={[styles.iconBadge, styles.iconBadgeAmber]}>
+                  <Ionicons name="mail-open-outline" size={16} color={colours.secondary} />
+                </View>
+                <View style={styles.emailPromptCopy}>
+                  <Text style={styles.emailPromptTitle}>Add your real email</Text>
+                  <Text style={styles.emailPromptText}>
+                    Your LINE account signed in without sharing an email. Update it here so your account can receive future updates.
+                  </Text>
+                </View>
+              </View>
+              {!isEditingProfile && (
+                <Pressable
+                  style={styles.emailPromptButton}
+                  onPress={handleToggleEditProfile}
+                  accessibilityLabel="Add email address"
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.emailPromptButtonText}>Add Email</Text>
+                </Pressable>
+              )}
+            </View>
+          )}
 
           {/* § Personal Info */}
           <View style={styles.sectionRow}>
@@ -111,6 +136,27 @@ export function ProfileScreen(): React.JSX.Element {
                 </View>
                 {profileErrors.name !== null && (
                   <Text style={styles.errorText}>{profileErrors.name}</Text>
+                )}
+
+                <View style={styles.inputRow}>
+                  <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
+                    <Ionicons name="mail-outline" size={16} color={colours.primary} />
+                  </View>
+                  <TextInput
+                    style={[styles.inputField, profileErrors.email !== null && styles.inputError]}
+                    value={email}
+                    onChangeText={handleEmailChange}
+                    placeholder="you@example.com"
+                    placeholderTextColor={colours.textMuted}
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    keyboardType="email-address"
+                    returnKeyType="next"
+                    accessibilityLabel="Email address"
+                  />
+                </View>
+                {profileErrors.email !== null && (
+                  <Text style={styles.errorText}>{profileErrors.email}</Text>
                 )}
 
                 {/* Date of birth input */}
@@ -166,6 +212,15 @@ export function ProfileScreen(): React.JSX.Element {
                     <Ionicons name="person" size={16} color={colours.primary} />
                   </View>
                   <Text style={styles.infoValue}>{name || '—'}</Text>
+                </View>
+
+                <View style={styles.infoRow}>
+                  <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
+                    <Ionicons name="mail-outline" size={16} color={colours.primary} />
+                  </View>
+                  <Text style={[styles.infoValue, needsEmailCompletion && styles.infoPlaceholder]}>
+                    {needsEmailCompletion ? 'Add your real email address' : (email || '—')}
+                  </Text>
                 </View>
 
                 {/* Read-only date of birth row */}

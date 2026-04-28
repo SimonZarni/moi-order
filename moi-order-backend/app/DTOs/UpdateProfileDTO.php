@@ -10,6 +10,7 @@ readonly class UpdateProfileDTO
 {
     public function __construct(
         public string  $name,
+        public string  $email,
         public ?string $dateOfBirth,
     ) {}
 
@@ -17,6 +18,7 @@ readonly class UpdateProfileDTO
     {
         return new self(
             name:         $request->string('name')->toString(),
+            email:        $request->string('email')->toString(),
             dateOfBirth:  $request->input('date_of_birth'),
         );
     }

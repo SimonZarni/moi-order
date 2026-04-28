@@ -21,6 +21,7 @@ class ProfileService
     {
         $user->update([
             'name'          => $dto->name,
+            'email'         => $dto->email,
             'date_of_birth' => $dto->dateOfBirth,
         ]);
 

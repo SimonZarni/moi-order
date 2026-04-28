@@ -149,6 +149,45 @@ export const styles = StyleSheet.create({
     ...shadows.light,
     marginBottom: spacing.xs,
   },
+  emailPromptCard: {
+    backgroundColor: '#fff6df',
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: '#efd79a',
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  emailPromptHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  emailPromptCopy: {
+    flex: 1,
+  },
+  emailPromptTitle: {
+    fontSize: typography.md,
+    fontWeight: '700',
+    color: colours.textOnLight,
+    marginBottom: 4,
+  },
+  emailPromptText: {
+    fontSize: typography.sm,
+    lineHeight: 20,
+    color: colours.medium,
+  },
+  emailPromptButton: {
+    marginTop: spacing.sm,
+    alignSelf: 'flex-start',
+    backgroundColor: colours.primary,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  emailPromptButtonText: {
+    fontSize: typography.sm,
+    fontWeight: '700',
+    color: colours.white,
+  },
 
   // ── Info / action rows (inside cards) ─────────────────────────────────────
   row: {

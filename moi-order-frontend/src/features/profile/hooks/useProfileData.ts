@@ -13,7 +13,7 @@ export interface UseProfileDataResult {
   isRefreshing: boolean;
   isError: boolean;
   refetch: () => void;
-  updateMutation: ReturnType<typeof useMutation<User, ApiError, { name: string; dateOfBirth: string | null }>>;
+  updateMutation: ReturnType<typeof useMutation<User, ApiError, { name: string; email: string; dateOfBirth: string | null }>>;
   changePasswordMutation: ReturnType<typeof useMutation<void, ApiError, { currentPassword: string; newPassword: string; confirmPassword: string }>>;
   deleteAccountMutation: ReturnType<typeof useMutation<void, ApiError, void>>;
 }
@@ -28,8 +28,8 @@ export function useProfileData(): UseProfileDataResult {
     staleTime: CACHE_TTL.USER_DATA,
   });
 
-  const updateMutation = useMutation<User, ApiError, { name: string; dateOfBirth: string | null }>({
-    mutationFn: ({ name, dateOfBirth }) => updateProfile(name, dateOfBirth),
+  const updateMutation = useMutation<User, ApiError, { name: string; email: string; dateOfBirth: string | null }>({
+    mutationFn: ({ name, email, dateOfBirth }) => updateProfile(name, email, dateOfBirth),
     onSuccess: (updatedUser) => {
       queryClient.setQueryData(QUERY_KEYS.PROFILE.ME, updatedUser);
       updateUser(updatedUser);

@@ -3,10 +3,12 @@ import { ApiResponse, User } from '@/types/models';
 
 export async function updateProfile(
   name: string,
+  email: string,
   dateOfBirth: string | null,
 ): Promise<User> {
   const response = await apiClient.put<ApiResponse<User>>('/api/v1/profile', {
     name,
+    email,
     date_of_birth: dateOfBirth,
   });
   return response.data.data;
