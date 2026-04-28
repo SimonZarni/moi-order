@@ -33,7 +33,7 @@ class AppleAuthService
         $email   = $this->resolveEmail($payload, $dto);
         $name    = $this->resolveName($payload, $dto, $email);
 
-        if ($appleId === '' || $email === null) {
+        if ($appleId === '') {
             throw ValidationException::withMessages([
                 'id_token' => ['Apple sign-in failed. Please try again.'],
             ]);
@@ -238,7 +238,7 @@ class AppleAuthService
     /**
      * @param array<string, mixed> $payload
      */
-    private function resolveName(array $payload, AppleAuthDTO $dto, string $email): string
+    private function resolveName(array $payload, AppleAuthDTO $dto, ?string $email): string
     {
         $name = $dto->name;
 
@@ -247,15 +247,33 @@ class AppleAuthService
             $name = is_string($tokenName) && $tokenName !== '' ? $tokenName : null;
         }
 
-        return $name ?? $email;
+        return $name ?? $email ?? 'Apple User';
     }
 
     private function findOrCreateUser(string $appleId, string $email, string $name): User
     {
-        $user = User::where('apple_id', $appleId)->first();
+        $user = User::withTrashed()->where('apple_id', $appleId)->first();
 
         if ($user !== null) {
+            if ($user->trashed()) {
+                $user->restore();
+            }
+
+            if ($email !== null && $user->email !== $email) {
+                $user->update([
+                    'email' => $email,
+                    'name'  => $name,
+                ]);
+                return $user->fresh();
+            }
+
             return $user;
+        }
+
+        if ($email === null) {
+            throw ValidationException::withMessages([
+                'id_token' => ['Apple sign-in failed. Please try again.'],
+            ]);
         }
 
         $user = User::where('email', $email)->first();
