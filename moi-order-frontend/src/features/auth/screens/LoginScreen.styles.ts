@@ -124,6 +124,9 @@ export const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
+  socialButtonSpacing: {
+    marginTop: spacing.sm,
+  },
 
   // ── Footer ────────────────────────────────────────────────────────────────
   footer: {

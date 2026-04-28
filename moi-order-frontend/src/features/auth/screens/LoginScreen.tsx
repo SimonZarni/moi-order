@@ -13,6 +13,7 @@ import { ErrorBanner } from '@/shared/components/ErrorBanner/ErrorBanner';
 import { AppleSignInButton } from '@/shared/components/AppleSignInButton/AppleSignInButton';
 import { FormField } from '@/shared/components/FormField/FormField';
 import { GoogleSignInButton } from '@/shared/components/GoogleSignInButton/GoogleSignInButton';
+import { LineSignInButton } from '@/shared/components/LineSignInButton/LineSignInButton';
 import { useLoginScreen } from '@/features/auth/hooks/useLoginScreen';
 import { styles } from './LoginScreen.styles';
 
@@ -22,6 +23,7 @@ export function LoginScreen(): React.JSX.Element {
     isSubmitting,
     isGoogleSigningIn,
     isAppleSigningIn,
+    isLineSigningIn,
     bannerError,
     showPassword,
     handleEmailChange,
@@ -30,6 +32,7 @@ export function LoginScreen(): React.JSX.Element {
     handleSubmit,
     handleGoogleSignIn,
     handleAppleSignIn,
+    handleLineSignIn,
     handleGoToRegister,
   } = useLoginScreen();
 
@@ -112,14 +115,26 @@ export function LoginScreen(): React.JSX.Element {
             <GoogleSignInButton
               onPress={handleGoogleSignIn}
               isLoading={isGoogleSigningIn}
-              disabled={isSubmitting || isAppleSigningIn}
+              disabled={isSubmitting || isAppleSigningIn || isLineSigningIn}
             />
 
-            <AppleSignInButton
-              onPress={handleAppleSignIn}
-              isLoading={isAppleSigningIn}
-              disabled={isSubmitting || isGoogleSigningIn}
-            />
+            <View style={styles.socialButtonSpacing}>
+              <LineSignInButton
+                onPress={handleLineSignIn}
+                isLoading={isLineSigningIn}
+                disabled={isSubmitting || isGoogleSigningIn || isAppleSigningIn}
+              />
+            </View>
+
+            {Platform.OS === 'ios' && (
+              <View style={styles.socialButtonSpacing}>
+                <AppleSignInButton
+                  onPress={handleAppleSignIn}
+                  isLoading={isAppleSigningIn}
+                  disabled={isSubmitting || isGoogleSigningIn || isLineSigningIn}
+                />
+              </View>
+            )}
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>Don't have an account?</Text>

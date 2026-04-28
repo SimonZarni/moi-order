@@ -4,6 +4,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useAppleAuth } from '@/features/auth/hooks/useAppleAuth';
+import { useLineAuth } from '@/features/auth/hooks/useLineAuth';
 import { useLoginForm, UseLoginFormResult } from '@/features/auth/hooks/useLoginForm';
 import { useGoogleAuth } from '@/features/auth/hooks/useGoogleAuth';
 import { login } from '@/shared/api/auth';
@@ -17,6 +18,7 @@ export interface UseLoginScreenResult {
   isSubmitting: boolean;
   isGoogleSigningIn: boolean;
   isAppleSigningIn: boolean;
+  isLineSigningIn: boolean;
   bannerError: string;
   showPassword: boolean;
   handleEmailChange: (value: string) => void;
@@ -25,6 +27,7 @@ export interface UseLoginScreenResult {
   handleSubmit: () => void;
   handleGoogleSignIn: () => Promise<void>;
   handleAppleSignIn: () => Promise<void>;
+  handleLineSignIn: () => Promise<void>;
   handleGoToRegister: () => void;
 }
 
@@ -35,6 +38,7 @@ export function useLoginScreen(): UseLoginScreenResult {
   const { form, handleEmailChange, handlePasswordChange, validate, applyApiError } = useLoginForm();
   const { handleGoogleSignIn, isGoogleSigningIn, googleBannerError } = useGoogleAuth();
   const { handleAppleSignIn, isAppleSigningIn, appleBannerError } = useAppleAuth();
+  const { handleLineSignIn, isLineSigningIn, lineBannerError } = useLineAuth();
   const [bannerError, setBannerError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -74,7 +78,8 @@ export function useLoginScreen(): UseLoginScreenResult {
     isSubmitting,
     isGoogleSigningIn,
     isAppleSigningIn,
-    bannerError: bannerError || googleBannerError || appleBannerError,
+    isLineSigningIn,
+    bannerError: bannerError || googleBannerError || appleBannerError || lineBannerError,
     showPassword,
     handleEmailChange,
     handlePasswordChange,
@@ -82,6 +87,7 @@ export function useLoginScreen(): UseLoginScreenResult {
     handleSubmit,
     handleGoogleSignIn,
     handleAppleSignIn,
+    handleLineSignIn,
     handleGoToRegister,
   };
 }

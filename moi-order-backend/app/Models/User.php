@@ -40,6 +40,7 @@ class User extends Authenticatable
         'suspended_until',
         'google_id',
         'apple_id',
+        'line_id',
     ];
 
     /**

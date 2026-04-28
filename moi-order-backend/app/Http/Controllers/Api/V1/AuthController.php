@@ -6,17 +6,20 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\DTOs\AppleAuthDTO;
 use App\DTOs\GoogleAuthDTO;
+use App\DTOs\LineAuthDTO;
 use App\DTOs\LoginDTO;
 use App\DTOs\RegisterDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AppleAuthRequest;
 use App\Http\Requests\GoogleAuthRequest;
+use App\Http\Requests\LineAuthRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Services\AppleAuthService;
 use App\Http\Resources\UserResource;
 use App\Services\AuthService;
 use App\Services\GoogleAuthService;
+use App\Services\LineAuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -30,6 +33,7 @@ class AuthController extends Controller
         private readonly AuthService      $authService,
         private readonly GoogleAuthService $googleAuthService,
         private readonly AppleAuthService $appleAuthService,
+        private readonly LineAuthService  $lineAuthService,
     ) {}
 
     /** POST /api/v1/auth/login — intentionally public */
@@ -75,6 +79,19 @@ class AuthController extends Controller
     public function appleAuth(AppleAuthRequest $request): JsonResponse
     {
         $result = $this->appleAuthService->authenticate(AppleAuthDTO::fromRequest($request));
+
+        return response()->json([
+            'data' => [
+                'user'  => new UserResource($result['user']),
+                'token' => $result['token'],
+            ],
+        ]);
+    }
+
+    /** POST /api/v1/auth/line — intentionally public */
+    public function lineAuth(LineAuthRequest $request): JsonResponse
+    {
+        $result = $this->lineAuthService->authenticate(LineAuthDTO::fromRequest($request));
 
         return response()->json([
             'data' => [

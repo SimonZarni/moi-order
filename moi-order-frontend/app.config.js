@@ -1,4 +1,5 @@
 const mapboxDownloadToken = process.env.RNMAPBOX_MAPS_DOWNLOAD_TOKEN;
+const lineChannelId = process.env.EXPO_PUBLIC_LINE_CHANNEL_ID ?? '2008805625';
 
 /** @type {import('expo/config').ExpoConfig} */
 module.exports = {
@@ -31,6 +32,7 @@ module.exports = {
         NSLocationWhenInUseUsageDescription: 'Used to show nearby places on the map.',
         NSLocationAlwaysAndWhenInUseUsageDescription: 'Used to show nearby places on the map.',
         "ITSAppUsesNonExemptEncryption": false,
+        LSApplicationQueriesSchemes: ['lineauth2'],
       },
       bundleIdentifier: 'com.moiorder.app',
       appleTeamId: '3TULJRMNLT',
@@ -71,11 +73,20 @@ module.exports = {
         },
       ],
       [
+        'expo-build-properties',
+        {
+          ios: {
+            useFrameworks: 'static',
+          },
+        },
+      ],
+      [
         '@react-native-google-signin/google-signin',
         {
           iosUrlScheme: 'com.googleusercontent.apps.661538209777-o33avjo80379ui26kj2clbn4snla6j2g',
         },
       ],
+      '@xmartlabs/react-native-line',
       [
         'expo-image-picker',
         {
@@ -105,6 +116,7 @@ module.exports = {
       ],
     ],
     extra: {
+      lineChannelId,
       eas: {
         projectId: '299e73b6-58b0-43d0-9a56-c7a212af98e5',
       },

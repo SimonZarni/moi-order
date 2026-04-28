@@ -4,6 +4,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMutation } from '@tanstack/react-query';
 
 import { useAppleAuth } from '@/features/auth/hooks/useAppleAuth';
+import { useLineAuth } from '@/features/auth/hooks/useLineAuth';
 import { useRegisterForm, UseRegisterFormResult } from '@/features/auth/hooks/useRegisterForm';
 import { useGoogleAuth } from '@/features/auth/hooks/useGoogleAuth';
 import { register } from '@/shared/api/auth';
@@ -16,6 +17,7 @@ export interface UseRegisterScreenResult {
   isSubmitting: boolean;
   isGoogleSigningIn: boolean;
   isAppleSigningIn: boolean;
+  isLineSigningIn: boolean;
   bannerError: string;
   showPassword: boolean;
   handleNameChange: (value: string) => void;
@@ -26,6 +28,7 @@ export interface UseRegisterScreenResult {
   handleSubmit: () => void;
   handleGoogleSignIn: () => Promise<void>;
   handleAppleSignIn: () => Promise<void>;
+  handleLineSignIn: () => Promise<void>;
   handleGoToLogin: () => void;
 }
 
@@ -43,6 +46,7 @@ export function useRegisterScreen(): UseRegisterScreenResult {
   } = useRegisterForm();
   const { handleGoogleSignIn, isGoogleSigningIn, googleBannerError } = useGoogleAuth();
   const { handleAppleSignIn, isAppleSigningIn, appleBannerError } = useAppleAuth();
+  const { handleLineSignIn, isLineSigningIn, lineBannerError } = useLineAuth();
   const [bannerError, setBannerError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -80,7 +84,8 @@ export function useRegisterScreen(): UseRegisterScreenResult {
     isSubmitting,
     isGoogleSigningIn,
     isAppleSigningIn,
-    bannerError: bannerError || googleBannerError || appleBannerError,
+    isLineSigningIn,
+    bannerError: bannerError || googleBannerError || appleBannerError || lineBannerError,
     showPassword,
     handleNameChange,
     handleEmailChange,
@@ -90,6 +95,7 @@ export function useRegisterScreen(): UseRegisterScreenResult {
     handleSubmit,
     handleGoogleSignIn,
     handleAppleSignIn,
+    handleLineSignIn,
     handleGoToLogin,
   };
 }

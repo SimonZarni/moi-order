@@ -28,12 +28,14 @@ import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-rean
 configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false });
 
 import { GoogleSignin } from '@/shared/utils/googleSignin';
+import { Line } from '@/shared/utils/lineLogin';
 
 import { setMemoryToken, setMemoryLocale } from '@/shared/api/client';
 import { fetchMe } from '@/shared/api/auth';
-import { TOKEN_KEY, LOCALE_KEY, CACHE_TTL, GOOGLE_WEB_CLIENT_ID, GOOGLE_IOS_CLIENT_ID } from '@/shared/constants/config';
+import { TOKEN_KEY, LOCALE_KEY, CACHE_TTL, GOOGLE_WEB_CLIENT_ID, GOOGLE_IOS_CLIENT_ID, LINE_CHANNEL_ID } from '@/shared/constants/config';
 
 GoogleSignin.configure({ webClientId: GOOGLE_WEB_CLIENT_ID, iosClientId: GOOGLE_IOS_CLIENT_ID });
+void Line.setup({ channelId: LINE_CHANNEL_ID });
 import { useAuthStore } from '@/shared/store/authStore';
 import { useLocaleStore, Locale } from '@/shared/store/localeStore';
 import { colours } from '@/shared/theme/colours';

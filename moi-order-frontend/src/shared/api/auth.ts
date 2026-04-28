@@ -47,3 +47,17 @@ export async function appleAuth(
   });
   return response.data.data;
 }
+
+export async function lineAuth(
+  idToken: string,
+  nonce?: string,
+  name?: string,
+): Promise<AuthResponse['data']> {
+  const response = await apiClient.post<AuthResponse>('/api/v1/auth/line', {
+    id_token: idToken,
+    ...(nonce ? { nonce } : {}),
+    ...(name ? { name } : {}),
+  });
+
+  return response.data.data;
+}

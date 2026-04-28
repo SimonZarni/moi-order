@@ -49,6 +49,10 @@ return [
         'client_id' => env('APPLE_CLIENT_ID', 'com.moiorder.app'),
     ],
 
+    'line' => [
+        'channel_id' => env('LINE_CHANNEL_ID'),
+    ],
+
     'firebase' => [
         'project_id'       => env('FIREBASE_PROJECT_ID', 'rock-micron-493118-q1'),
         'credentials_path' => env('FIREBASE_CREDENTIALS_PATH', storage_path('app/firebase-service-account.json')),

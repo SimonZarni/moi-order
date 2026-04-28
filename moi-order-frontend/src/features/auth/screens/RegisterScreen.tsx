@@ -13,6 +13,7 @@ import { ErrorBanner } from '@/shared/components/ErrorBanner/ErrorBanner';
 import { AppleSignInButton } from '@/shared/components/AppleSignInButton/AppleSignInButton';
 import { FormField } from '@/shared/components/FormField/FormField';
 import { GoogleSignInButton } from '@/shared/components/GoogleSignInButton/GoogleSignInButton';
+import { LineSignInButton } from '@/shared/components/LineSignInButton/LineSignInButton';
 import { useRegisterScreen } from '@/features/auth/hooks/useRegisterScreen';
 import { styles } from './RegisterScreen.styles';
 
@@ -22,6 +23,7 @@ export function RegisterScreen(): React.JSX.Element {
     isSubmitting,
     isGoogleSigningIn,
     isAppleSigningIn,
+    isLineSigningIn,
     bannerError,
     showPassword,
     handleNameChange,
@@ -32,6 +34,7 @@ export function RegisterScreen(): React.JSX.Element {
     handleSubmit,
     handleGoogleSignIn,
     handleAppleSignIn,
+    handleLineSignIn,
     handleGoToLogin,
   } = useRegisterScreen();
 
@@ -135,14 +138,26 @@ export function RegisterScreen(): React.JSX.Element {
             <GoogleSignInButton
               onPress={handleGoogleSignIn}
               isLoading={isGoogleSigningIn}
-              disabled={isSubmitting || isAppleSigningIn}
+              disabled={isSubmitting || isAppleSigningIn || isLineSigningIn}
             />
 
-            <AppleSignInButton
-              onPress={handleAppleSignIn}
-              isLoading={isAppleSigningIn}
-              disabled={isSubmitting || isGoogleSigningIn}
-            />
+            <View style={styles.socialButtonSpacing}>
+              <LineSignInButton
+                onPress={handleLineSignIn}
+                isLoading={isLineSigningIn}
+                disabled={isSubmitting || isGoogleSigningIn || isAppleSigningIn}
+              />
+            </View>
+
+            {Platform.OS === 'ios' && (
+              <View style={styles.socialButtonSpacing}>
+                <AppleSignInButton
+                  onPress={handleAppleSignIn}
+                  isLoading={isAppleSigningIn}
+                  disabled={isSubmitting || isGoogleSigningIn || isLineSigningIn}
+                />
+              </View>
+            )}
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>Already have an account?</Text>
