@@ -29,6 +29,13 @@ export function useLineAuth(): UseLineAuthResult {
       setIsLineSigningIn(true);
 
       const result = await Line.login({ scopes: ['profile', 'openid', 'email'] });
+      console.log('LINE login result', {
+        scope: result.scope,
+        hasIdToken: Boolean(result.accessToken.idToken),
+        hasNonce: Boolean(result.idTokenNonce ?? result.IDTokenNonce),
+        displayName: result.userProfile?.displayName,
+      });
+
       const idToken = result.accessToken.idToken;
 
       if (!idToken) {
@@ -52,7 +59,19 @@ export function useLineAuth(): UseLineAuthResult {
 
       const asApiError = error as ApiError;
       if (typeof asApiError.status === 'number') {
-        setLineBannerError(getAccountErrorMessage(asApiError.code, asApiError.context));
+        const fieldMessage = asApiError.errors?.id_token?.[0];
+        const fallbackMessage = getAccountErrorMessage(asApiError.code, asApiError.context);
+        const resolvedMessage = fieldMessage ?? asApiError.message ?? fallbackMessage;
+
+        console.log('LINE auth API error', {
+          status: asApiError.status,
+          code: asApiError.code,
+          message: asApiError.message,
+          errors: asApiError.errors,
+          context: asApiError.context,
+        });
+
+        setLineBannerError(resolvedMessage);
       } else {
         setLineBannerError('LINE sign-in failed. Please try again.');
       }

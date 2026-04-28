@@ -28,8 +28,7 @@ export interface LineModule {
 
 // Safe shim for @xmartlabs/react-native-line.
 // Native LINE login is unavailable in Expo Go, so we show a clear alert instead of crashing.
-const isNativeAvailable = TurboModuleRegistry.get('RNLine') !== null
-  || TurboModuleRegistry.get('Line') !== null;
+const isNativeAvailable = TurboModuleRegistry.get('LineLogin') !== null;
 
 const LINE_CANCELLED = 'LINE_LOGIN_CANCELLED';
 

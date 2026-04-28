@@ -31,18 +31,19 @@ class LineAuthService
         $email  = isset($payload['email']) && is_string($payload['email']) && $payload['email'] !== ''
             ? $payload['email']
             : null;
+        $resolvedEmail = $email ?? $this->placeholderEmail($lineId);
         $name = $dto->name
             ?? (is_string($payload['name'] ?? null) && $payload['name'] !== '' ? $payload['name'] : null)
             ?? $email
             ?? 'LINE User';
 
-        if ($lineId === '' || $email === null) {
+        if ($lineId === '') {
             throw ValidationException::withMessages([
                 'id_token' => [self::TOKEN_ERROR],
             ]);
         }
 
-        $user = $this->findOrCreateUser($lineId, $email, $name);
+        $user = $this->findOrCreateUser($lineId, $resolvedEmail, $name, $email !== null);
 
         if ($user->isRestricted()) {
             $code    = $user->status->value === 'banned' ? 'account.banned' : 'account.suspended';
@@ -101,7 +102,7 @@ class LineAuthService
         return $verified;
     }
 
-    private function findOrCreateUser(string $lineId, string $email, string $name): User
+    private function findOrCreateUser(string $lineId, string $email, string $name, bool $hasVerifiedEmail): User
     {
         $user = User::withTrashed()->where('line_id', $lineId)->first();
 
@@ -110,11 +111,18 @@ class LineAuthService
                 $user->restore();
             }
 
-            if ($user->email !== $email || $user->name !== $name) {
-                $user->update([
-                    'email' => $email,
-                    'name'  => $name,
-                ]);
+            $updates = [];
+
+            if ($user->name !== $name) {
+                $updates['name'] = $name;
+            }
+
+            if ($hasVerifiedEmail && $user->email !== $email) {
+                $updates['email'] = $email;
+            }
+
+            if ($updates !== []) {
+                $user->update($updates);
 
                 return $user->fresh();
             }
@@ -122,7 +130,7 @@ class LineAuthService
             return $user;
         }
 
-        $user = User::where('email', $email)->first();
+        $user = $hasVerifiedEmail ? User::where('email', $email)->first() : null;
 
         if ($user !== null) {
             $user->update([
@@ -139,5 +147,10 @@ class LineAuthService
             'name'     => $name,
             'password' => null,
         ]);
+    }
+
+    private function placeholderEmail(string $lineId): string
+    {
+        return sprintf('line_%s@users.moiorder.local', $lineId);
     }
 }
