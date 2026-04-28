@@ -39,6 +39,7 @@ class User extends Authenticatable
         'status',
         'suspended_until',
         'google_id',
+        'apple_id',
     ];
 
     /**

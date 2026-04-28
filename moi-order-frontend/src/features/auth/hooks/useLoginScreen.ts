@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { useAppleAuth } from '@/features/auth/hooks/useAppleAuth';
 import { useLoginForm, UseLoginFormResult } from '@/features/auth/hooks/useLoginForm';
 import { useGoogleAuth } from '@/features/auth/hooks/useGoogleAuth';
 import { login } from '@/shared/api/auth';
@@ -15,6 +16,7 @@ export interface UseLoginScreenResult {
   form: UseLoginFormResult['form'];
   isSubmitting: boolean;
   isGoogleSigningIn: boolean;
+  isAppleSigningIn: boolean;
   bannerError: string;
   showPassword: boolean;
   handleEmailChange: (value: string) => void;
@@ -22,6 +24,7 @@ export interface UseLoginScreenResult {
   handleTogglePassword: () => void;
   handleSubmit: () => void;
   handleGoogleSignIn: () => Promise<void>;
+  handleAppleSignIn: () => Promise<void>;
   handleGoToRegister: () => void;
 }
 
@@ -31,6 +34,7 @@ export function useLoginScreen(): UseLoginScreenResult {
   const { setUser } = useAuthStore();
   const { form, handleEmailChange, handlePasswordChange, validate, applyApiError } = useLoginForm();
   const { handleGoogleSignIn, isGoogleSigningIn, googleBannerError } = useGoogleAuth();
+  const { handleAppleSignIn, isAppleSigningIn, appleBannerError } = useAppleAuth();
   const [bannerError, setBannerError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -69,13 +73,15 @@ export function useLoginScreen(): UseLoginScreenResult {
     form,
     isSubmitting,
     isGoogleSigningIn,
-    bannerError: bannerError || googleBannerError,
+    isAppleSigningIn,
+    bannerError: bannerError || googleBannerError || appleBannerError,
     showPassword,
     handleEmailChange,
     handlePasswordChange,
     handleTogglePassword,
     handleSubmit,
     handleGoogleSignIn,
+    handleAppleSignIn,
     handleGoToRegister,
   };
 }

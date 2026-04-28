@@ -5,6 +5,7 @@ module.exports = {
   expo: {
     name: 'moi-order-frontend',
     slug: 'moi-order-frontend',
+    owner: 'simonzarni',
     scheme: 'moiorder',
     version: '1.0.0',
     orientation: 'portrait',
@@ -29,9 +30,11 @@ module.exports = {
         UIViewControllerBasedStatusBarAppearance: false,
         NSLocationWhenInUseUsageDescription: 'Used to show nearby places on the map.',
         NSLocationAlwaysAndWhenInUseUsageDescription: 'Used to show nearby places on the map.',
+        "ITSAppUsesNonExemptEncryption": false,
       },
       bundleIdentifier: 'com.moiorder.app',
       appleTeamId: '3TULJRMNLT',
+      usesAppleSignIn: true,
     },
     android: {
       package: 'com.moiorder.app',
@@ -57,6 +60,7 @@ module.exports = {
       favicon: './assets/favicon.png',
     },
     plugins: [
+      "expo-apple-authentication",
       'expo-updates',
       'expo-secure-store',
       [

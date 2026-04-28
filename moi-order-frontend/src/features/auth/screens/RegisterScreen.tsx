@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ErrorBanner } from '@/shared/components/ErrorBanner/ErrorBanner';
+import { AppleSignInButton } from '@/shared/components/AppleSignInButton/AppleSignInButton';
 import { FormField } from '@/shared/components/FormField/FormField';
 import { GoogleSignInButton } from '@/shared/components/GoogleSignInButton/GoogleSignInButton';
 import { useRegisterScreen } from '@/features/auth/hooks/useRegisterScreen';
@@ -20,6 +21,7 @@ export function RegisterScreen(): React.JSX.Element {
     form,
     isSubmitting,
     isGoogleSigningIn,
+    isAppleSigningIn,
     bannerError,
     showPassword,
     handleNameChange,
@@ -29,6 +31,7 @@ export function RegisterScreen(): React.JSX.Element {
     handleTogglePassword,
     handleSubmit,
     handleGoogleSignIn,
+    handleAppleSignIn,
     handleGoToLogin,
   } = useRegisterScreen();
 
@@ -132,7 +135,13 @@ export function RegisterScreen(): React.JSX.Element {
             <GoogleSignInButton
               onPress={handleGoogleSignIn}
               isLoading={isGoogleSigningIn}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isAppleSigningIn}
+            />
+
+            <AppleSignInButton
+              onPress={handleAppleSignIn}
+              isLoading={isAppleSigningIn}
+              disabled={isSubmitting || isGoogleSigningIn}
             />
 
             <View style={styles.footer}>

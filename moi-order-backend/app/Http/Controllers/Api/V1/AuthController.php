@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\DTOs\AppleAuthDTO;
 use App\DTOs\GoogleAuthDTO;
 use App\DTOs\LoginDTO;
 use App\DTOs\RegisterDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AppleAuthRequest;
 use App\Http\Requests\GoogleAuthRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Services\AppleAuthService;
 use App\Http\Resources\UserResource;
 use App\Services\AuthService;
 use App\Services\GoogleAuthService;
@@ -24,8 +27,9 @@ use Illuminate\Http\Request;
 class AuthController extends Controller
 {
     public function __construct(
-        private readonly AuthService       $authService,
+        private readonly AuthService      $authService,
         private readonly GoogleAuthService $googleAuthService,
+        private readonly AppleAuthService $appleAuthService,
     ) {}
 
     /** POST /api/v1/auth/login — intentionally public */
@@ -58,6 +62,19 @@ class AuthController extends Controller
     public function googleAuth(GoogleAuthRequest $request): JsonResponse
     {
         $result = $this->googleAuthService->authenticate(GoogleAuthDTO::fromRequest($request));
+
+        return response()->json([
+            'data' => [
+                'user'  => new UserResource($result['user']),
+                'token' => $result['token'],
+            ],
+        ]);
+    }
+
+    /** POST /api/v1/auth/apple — intentionally public */
+    public function appleAuth(AppleAuthRequest $request): JsonResponse
+    {
+        $result = $this->appleAuthService->authenticate(AppleAuthDTO::fromRequest($request));
 
         return response()->json([
             'data' => [

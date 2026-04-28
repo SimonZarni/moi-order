@@ -34,3 +34,16 @@ export async function googleAuth(idToken: string): Promise<AuthResponse['data']>
   const response = await apiClient.post<AuthResponse>('/api/v1/auth/google', { id_token: idToken });
   return response.data.data;
 }
+
+export async function appleAuth(
+  idToken: string,
+  email?: string,
+  name?: string,
+): Promise<AuthResponse['data']> {
+  const response = await apiClient.post<AuthResponse>('/api/v1/auth/apple', {
+    id_token: idToken,
+    ...(email ? { email } : {}),
+    ...(name ? { name } : {}),
+  });
+  return response.data.data;
+}

@@ -18,6 +18,7 @@ Route::middleware('throttle:auth')->group(function (): void {
     Route::post('/auth/login',    [AuthController::class, 'login']);
     Route::post('/auth/register', [AuthController::class, 'register']);
     Route::post('/auth/google',   [AuthController::class, 'googleAuth']);
+    Route::post('/auth/apple',    [AuthController::class, 'appleAuth']);
 });
 
 // Places — public browsing, no auth required

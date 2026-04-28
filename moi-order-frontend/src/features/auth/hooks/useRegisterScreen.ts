@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMutation } from '@tanstack/react-query';
 
+import { useAppleAuth } from '@/features/auth/hooks/useAppleAuth';
 import { useRegisterForm, UseRegisterFormResult } from '@/features/auth/hooks/useRegisterForm';
 import { useGoogleAuth } from '@/features/auth/hooks/useGoogleAuth';
 import { register } from '@/shared/api/auth';
@@ -14,6 +15,7 @@ export interface UseRegisterScreenResult {
   form: UseRegisterFormResult['form'];
   isSubmitting: boolean;
   isGoogleSigningIn: boolean;
+  isAppleSigningIn: boolean;
   bannerError: string;
   showPassword: boolean;
   handleNameChange: (value: string) => void;
@@ -23,6 +25,7 @@ export interface UseRegisterScreenResult {
   handleTogglePassword: () => void;
   handleSubmit: () => void;
   handleGoogleSignIn: () => Promise<void>;
+  handleAppleSignIn: () => Promise<void>;
   handleGoToLogin: () => void;
 }
 
@@ -39,6 +42,7 @@ export function useRegisterScreen(): UseRegisterScreenResult {
     applyApiError,
   } = useRegisterForm();
   const { handleGoogleSignIn, isGoogleSigningIn, googleBannerError } = useGoogleAuth();
+  const { handleAppleSignIn, isAppleSigningIn, appleBannerError } = useAppleAuth();
   const [bannerError, setBannerError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -75,7 +79,8 @@ export function useRegisterScreen(): UseRegisterScreenResult {
     form,
     isSubmitting,
     isGoogleSigningIn,
-    bannerError: bannerError || googleBannerError,
+    isAppleSigningIn,
+    bannerError: bannerError || googleBannerError || appleBannerError,
     showPassword,
     handleNameChange,
     handleEmailChange,
@@ -84,6 +89,7 @@ export function useRegisterScreen(): UseRegisterScreenResult {
     handleTogglePassword,
     handleSubmit,
     handleGoogleSignIn,
+    handleAppleSignIn,
     handleGoToLogin,
   };
 }
