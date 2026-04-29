@@ -42,4 +42,7 @@ export const QUERY_KEYS = {
   TAGS: {
     LIST: () => ['tags', 'list'] as const,
   },
+  DOCUMENTS: {
+    LIST: (type: string) => ['documents', 'list', type] as const,
+  },
 } as const;

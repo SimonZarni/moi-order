@@ -102,14 +102,6 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarRemoveBtn: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    backgroundColor: colours.white,
-    borderRadius: 11,
-  },
-
   // Hero text
   heroName: {
     fontSize: typography.xl + 2,

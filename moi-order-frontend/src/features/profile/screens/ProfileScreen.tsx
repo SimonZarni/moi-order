@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { ProfileSkeleton } from '@/features/profile/components/ProfileSkeleton';
+import { DocumentShortcuts } from '@/features/profile/components/DocumentShortcuts';
 import { useProfileScreen } from '@/features/profile/hooks/useProfileScreen';
 import { useLinkedAccounts } from '@/features/profile/hooks/useLinkedAccounts';
 import { formatDate } from '@/shared/utils/formatDate';
@@ -40,7 +41,7 @@ export function ProfileScreen(): React.JSX.Element {
     handleChangePassword,
     handleGoToOrders, handleGoToPrivacyPolicy, handleGoToTerms, handleGoToPdpa, handleLogout,
     handleDeleteAccount, isDeletingAccount,
-    isUploadingPicture, isRemovingPicture, handlePickAndUpload, handleRemovePicture,
+    isUploadingPicture, isRemovingPicture, handleAvatarPress,
   } = useProfileScreen();
   const {
     isLinkingGoogle, isLinkingApple, isLinkingLine,
@@ -80,7 +81,7 @@ export function ProfileScreen(): React.JSX.Element {
           <View style={styles.avatarRing}>
             <Pressable
               style={styles.avatar}
-              onPress={handlePickAndUpload}
+              onPress={handleAvatarPress}
               disabled={isUploadingPicture || isRemovingPicture}
               accessibilityLabel="Change profile picture"
               accessibilityRole="button"
@@ -101,16 +102,6 @@ export function ProfileScreen(): React.JSX.Element {
                 : <Ionicons name="camera" size={12} color="#fff" />
               }
             </View>
-            {!!user?.profile_picture_url && !isUploadingPicture && !isRemovingPicture && (
-              <Pressable
-                style={styles.avatarRemoveBtn}
-                onPress={handleRemovePicture}
-                accessibilityLabel="Remove profile picture"
-                accessibilityRole="button"
-              >
-                <Ionicons name="close-circle" size={22} color={colours.danger} />
-              </Pressable>
-            )}
           </View>
 
           <Text style={styles.heroName}>{user?.name ?? name}</Text>
@@ -160,6 +151,9 @@ export function ProfileScreen(): React.JSX.Element {
               </Pressable>
             </View>
           )}
+
+          {/* § Document shortcuts */}
+          <DocumentShortcuts />
 
           {/* § Personal Info */}
           <View style={styles.sectionRow}>

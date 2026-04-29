@@ -100,4 +100,9 @@ export type RootStackParamList = {
   PrivacyPolicy: undefined;
   TermsAndConditions: undefined;
   PdpaNotice: undefined;
+
+  // ── Document vault (OCR) ──────────────────────────────────────────────────
+  PassportVault: undefined;
+  NinetyDayVault: undefined;
+  MyDocuments: undefined;
 };

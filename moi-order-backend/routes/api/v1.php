@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\DeviceTokenController;
+use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\DynamicSubmissionController;
 use App\Http\Controllers\Api\V1\FavoritePlaceController;
 use App\Http\Controllers\Api\V1\NotificationController;
@@ -34,6 +35,11 @@ Route::post('/profile/link/line',     [ProfileController::class, 'linkLine']);
 Route::delete('/profile/link/google', [ProfileController::class, 'unlinkGoogle']);
 Route::delete('/profile/link/apple',  [ProfileController::class, 'unlinkApple']);
 Route::delete('/profile/link/line',   [ProfileController::class, 'unlinkLine']);
+
+// Documents (passport, 90-day report, other — OCR via Claude vision)
+Route::get('/documents',       [DocumentController::class, 'index']);
+Route::post('/documents',      [DocumentController::class, 'store']);
+Route::delete('/documents/{id}', [DocumentController::class, 'destroy']);
 
 // Submissions
 Route::get('/submissions',                 [SubmissionController::class,       'index']);

@@ -11,8 +11,7 @@ import { ApiError, User } from '@/types/models';
 export interface UseProfilePictureResult {
   isUploadingPicture: boolean;
   isRemovingPicture: boolean;
-  handlePickAndUpload: () => Promise<void>;
-  handleRemovePicture: () => void;
+  handleAvatarPress: () => void;
 }
 
 export function useProfilePicture(user: User | null): UseProfilePictureResult {
@@ -25,7 +24,7 @@ export function useProfilePicture(user: User | null): UseProfilePictureResult {
     useAuthStore.getState().updateUser(updated);
   }, [queryClient]);
 
-  const handlePickAndUpload = useCallback(async (): Promise<void> => {
+  const launchPicker = useCallback(async (): Promise<void> => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
       Alert.alert('Permission required', 'Allow access to your photo library to set a profile picture.');
@@ -56,29 +55,31 @@ export function useProfilePicture(user: User | null): UseProfilePictureResult {
     }
   }, [syncUser]);
 
-  const handleRemovePicture = useCallback((): void => {
-    if (!user?.profile_picture_url) return;
+  const removePicture = useCallback(async (): Promise<void> => {
+    try {
+      setIsRemoving(true);
+      const updated = await removeProfilePicture();
+      syncUser(updated);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      Alert.alert('Error', apiError.message ?? 'Could not remove profile picture.');
+    } finally {
+      setIsRemoving(false);
+    }
+  }, [syncUser]);
 
-    Alert.alert('Remove photo', 'Remove your profile picture?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Remove',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            setIsRemoving(true);
-            const updated = await removeProfilePicture();
-            syncUser(updated);
-          } catch (error: unknown) {
-            const apiError = error as ApiError;
-            Alert.alert('Error', apiError.message ?? 'Could not remove profile picture.');
-          } finally {
-            setIsRemoving(false);
-          }
-        },
-      },
+  const handleAvatarPress = useCallback((): void => {
+    if (!user?.profile_picture_url) {
+      void launchPicker();
+      return;
+    }
+
+    Alert.alert('Profile Photo', undefined, [
+      { text: 'Edit Photo',   onPress: () => { void launchPicker(); } },
+      { text: 'Remove Photo', style: 'destructive', onPress: () => { void removePicture(); } },
+      { text: 'Cancel',       style: 'cancel' },
     ]);
-  }, [user?.profile_picture_url, syncUser]);
+  }, [user?.profile_picture_url, launchPicker, removePicture]);
 
-  return { isUploadingPicture, isRemovingPicture, handlePickAndUpload, handleRemovePicture };
+  return { isUploadingPicture, isRemovingPicture, handleAvatarPress };
 }

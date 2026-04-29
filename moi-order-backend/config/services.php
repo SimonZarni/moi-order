@@ -59,6 +59,12 @@ return [
         'sender' => env('THAIBULKSMS_SENDER'),
     ],
 
+    'anthropic' => [
+        'api_key' => env('ANTHROPIC_API_KEY'),
+        // claude-3-5-sonnet-20241022: best vision accuracy for document photos at lowest cost
+        'model'   => env('ANTHROPIC_MODEL', 'claude-3-5-sonnet-20241022'),
+    ],
+
     'firebase' => [
         'project_id'       => env('FIREBASE_PROJECT_ID', 'rock-micron-493118-q1'),
         'credentials_path' => env('FIREBASE_CREDENTIALS_PATH', storage_path('app/firebase-service-account.json')),

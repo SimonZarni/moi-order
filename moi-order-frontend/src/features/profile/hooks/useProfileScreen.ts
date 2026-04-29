@@ -71,8 +71,7 @@ export interface UseProfileScreenResult {
   // Profile picture
   isUploadingPicture: boolean;
   isRemovingPicture: boolean;
-  handlePickAndUpload: () => Promise<void>;
-  handleRemovePicture: () => void;
+  handleAvatarPress: () => void;
 }
 
 export function useProfileScreen(): UseProfileScreenResult {
@@ -292,9 +291,8 @@ export function useProfileScreen(): UseProfileScreenResult {
     handleLogout,
     handleDeleteAccount,
     isDeletingAccount:   deleteAccountMutation.isPending,
-    isUploadingPicture:  pictureMethods.isUploadingPicture,
-    isRemovingPicture:   pictureMethods.isRemovingPicture,
-    handlePickAndUpload: pictureMethods.handlePickAndUpload,
-    handleRemovePicture: pictureMethods.handleRemovePicture,
+    isUploadingPicture: pictureMethods.isUploadingPicture,
+    isRemovingPicture:  pictureMethods.isRemovingPicture,
+    handleAvatarPress:  pictureMethods.handleAvatarPress,
   };
 }

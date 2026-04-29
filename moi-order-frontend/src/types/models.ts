@@ -219,6 +219,22 @@ export interface NotificationsResponse {
   meta: { unread_count: number };
 }
 
+// ── Documents (OCR vault) ──────────────────────────────────────────────────
+
+export interface Document {
+  id: number;
+  type: import('./enums').DocumentType;
+  subtype: string | null;
+  file_url: string;
+  extracted_data: Record<string, string | null>;
+  expiry_date: string | null;    // YYYY-MM-DD
+  extension_date: string | null; // YYYY-MM-DD — next report date for 90-day slips
+  is_valid_type: boolean;
+  validation_message: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // ── API wrappers ───────────────────────────────────────────────────────────
 
 export interface ApiResponse<T> {

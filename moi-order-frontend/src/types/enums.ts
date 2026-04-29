@@ -47,6 +47,15 @@ export const PLACE_IMPORT_BATCH_STATUS = {
 
 export type PlaceImportBatchStatus = (typeof PLACE_IMPORT_BATCH_STATUS)[keyof typeof PLACE_IMPORT_BATCH_STATUS];
 
+// Mirrors App\Enums\DocumentType
+export const DOCUMENT_TYPE = {
+  Passport:        'passport',
+  NinetyDayReport: 'ninety_day_report',
+  Other:           'other',
+} as const;
+
+export type DocumentType = (typeof DOCUMENT_TYPE)[keyof typeof DOCUMENT_TYPE];
+
 // Mirrors App\Enums\FieldType
 export const FIELD_TYPE = {
   Text:     'text',

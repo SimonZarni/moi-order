@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\DocumentOcrInterface;
 use App\Contracts\FileStorageInterface;
 use App\Contracts\PaymentGatewayInterface;
 use App\Contracts\PushNotificationInterface;
+use App\Services\ClaudeOcrService;
+use App\Services\DocumentService;
 use App\Services\ExpoPushNotificationService;
 use App\Events\PaymentConfirmed;
 use App\Events\TicketOrderPaymentConfirmed;
@@ -82,6 +85,17 @@ class AppServiceProvider extends ServiceProvider
             \App\Services\DynamicSubmissionService::class,
             fn ($app) => new \App\Services\DynamicSubmissionService(
                 $app->make(FileStorageInterface::class)
+            )
+        );
+
+        // DIP: bind Claude vision adapter for document OCR.
+        $this->app->bind(DocumentOcrInterface::class, ClaudeOcrService::class);
+
+        $this->app->bind(
+            DocumentService::class,
+            fn ($app) => new DocumentService(
+                $app->make(DocumentOcrInterface::class),
+                $app->make(FileStorageInterface::class),
             )
         );
 

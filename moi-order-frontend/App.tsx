@@ -70,6 +70,9 @@ import { TicketDetailScreen } from '@/features/tickets/screens/TicketDetailScree
 import { TicketDateSelectionScreen } from '@/features/tickets/screens/TicketDateSelectionScreen';
 import { TicketOrderDetailScreen } from '@/features/tickets/screens/TicketOrderDetailScreen';
 import { NotificationsScreen } from '@/features/notifications/screens/NotificationsScreen';
+import { PassportVaultScreen } from '@/features/documents/screens/PassportVaultScreen';
+import { NinetyDayVaultScreen } from '@/features/documents/screens/NinetyDayVaultScreen';
+import { MyDocumentsScreen } from '@/features/documents/screens/MyDocumentsScreen';
 import { useNotificationsData } from '@/features/notifications/hooks/useNotificationsData';
 import { usePusherNotifications } from '@/features/notifications/hooks/usePusherNotifications';
 import { usePushNotifications } from '@/features/notifications/hooks/usePushNotifications';
@@ -137,6 +140,9 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="PrivacyPolicy"                 component={PrivacyPolicyScreen} />
       <Stack.Screen name="TermsAndConditions"            component={TermsAndConditionsScreen} />
       <Stack.Screen name="PdpaNotice"                    component={PdpaNoticeScreen} />
+      <Stack.Screen name="PassportVault"                 component={PassportVaultScreen} />
+      <Stack.Screen name="NinetyDayVault"                component={NinetyDayVaultScreen} />
+      <Stack.Screen name="MyDocuments"                   component={MyDocumentsScreen} />
     </Stack.Navigator>
   );
 }
