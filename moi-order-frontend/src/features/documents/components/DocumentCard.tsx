@@ -134,6 +134,13 @@ export function DocumentCard({ document: doc, onDelete, isDeleting }: Props): Re
               <Text style={styles.dateValue}>{formatDateDMY(doc.expiry_date)}</Text>
             </View>
           )}
+          {doc.type === DOCUMENT_TYPE.NinetyDayReport && doc.extracted_data?.['previous_report_date'] != null && (
+            <View style={styles.dateRow}>
+              <Ionicons name="checkmark-circle-outline" size={12} color={colours.medium} />
+              <Text style={styles.dateLabel}>Submitted</Text>
+              <Text style={styles.dateValue}>{formatDateDMY(doc.extracted_data['previous_report_date'] as string)}</Text>
+            </View>
+          )}
           {doc.extension_date !== null && (
             <View style={styles.dateRow}>
               <Ionicons name="refresh-outline" size={12} color={colours.primary} />
