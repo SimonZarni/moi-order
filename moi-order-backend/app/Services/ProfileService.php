@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\FileStorageInterface;
 use App\DTOs\ChangePasswordDTO;
 use App\DTOs\UpdateProfileDTO;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -18,6 +20,32 @@ use Illuminate\Validation\ValidationException;
  */
 class ProfileService
 {
+    public function __construct(
+        private readonly FileStorageInterface $fileStorage,
+    ) {}
+
+    public function uploadProfilePicture(User $user, UploadedFile $file): User
+    {
+        if ($user->profile_picture_path !== null) {
+            $this->fileStorage->delete($user->profile_picture_path);
+        }
+
+        $path = $this->fileStorage->store($file, 'profile-pictures');
+        $user->update(['profile_picture_path' => $path]);
+
+        return $user->fresh();
+    }
+
+    public function removeProfilePicture(User $user): User
+    {
+        if ($user->profile_picture_path !== null) {
+            $this->fileStorage->delete($user->profile_picture_path);
+            $user->update(['profile_picture_path' => null]);
+        }
+
+        return $user->fresh();
+    }
+
     public function updateProfile(User $user, UpdateProfileDTO $dto): User
     {
         $phoneNumber = $dto->phoneNumber !== null && trim($dto->phoneNumber) !== ''

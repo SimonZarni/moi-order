@@ -1,6 +1,25 @@
 import apiClient from '@/shared/api/client';
 import { ApiResponse, User } from '@/types/models';
 
+export async function uploadProfilePicture(imageUri: string): Promise<User> {
+  const filename = imageUri.split('/').pop() ?? 'photo.jpg';
+  const ext      = (/\.(\w+)$/.exec(filename) ?? [])[1] ?? 'jpg';
+  const type     = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+
+  const formData = new FormData();
+  formData.append('picture', { uri: imageUri, name: filename, type } as unknown as Blob);
+
+  const response = await apiClient.post<ApiResponse<User>>('/api/v1/profile/picture', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data.data;
+}
+
+export async function removeProfilePicture(): Promise<User> {
+  const response = await apiClient.delete<ApiResponse<User>>('/api/v1/profile/picture');
+  return response.data.data;
+}
+
 export async function updateProfile(
   name: string,
   email: string,

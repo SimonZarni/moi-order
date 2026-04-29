@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Contracts\FileStorageInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,11 +17,14 @@ class UserResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'                => $this->id,
-            'name'              => $this->name,
-            'email'             => $this->email,
-            'phone_number'      => $this->phone_number,
-            'has_password'      => $this->password !== null,
+            'id'                  => $this->id,
+            'name'                => $this->name,
+            'email'               => $this->email,
+            'phone_number'        => $this->phone_number,
+            'profile_picture_url' => $this->profile_picture_path
+                ? resolve(FileStorageInterface::class)->publicUrl($this->profile_picture_path)
+                : null,
+            'has_password'        => $this->password !== null,
             'has_google'        => $this->google_id !== null,
             'has_apple'         => $this->apple_id !== null,
             'has_line'          => $this->line_id !== null,

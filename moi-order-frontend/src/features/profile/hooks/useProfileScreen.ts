@@ -8,6 +8,7 @@ import type { DateTimePickerEvent } from '@react-native-community/datetimepicker
 import { useProfileData } from '@/features/profile/hooks/useProfileData';
 import { useProfileForm } from '@/features/profile/hooks/useProfileForm';
 import { useChangePasswordForm } from '@/features/profile/hooks/useChangePasswordForm';
+import { useProfilePicture } from '@/features/profile/hooks/useProfilePicture';
 import { unregisterDeviceToken } from '@/shared/api/deviceTokens';
 import { useAuthStore } from '@/shared/store/authStore';
 import { useNotificationStore } from '@/shared/store/notificationStore';
@@ -67,6 +68,11 @@ export interface UseProfileScreenResult {
   handleLogout: () => void;
   handleDeleteAccount: () => void;
   isDeletingAccount: boolean;
+  // Profile picture
+  isUploadingPicture: boolean;
+  isRemovingPicture: boolean;
+  handlePickAndUpload: () => Promise<void>;
+  handleRemovePicture: () => void;
 }
 
 export function useProfileScreen(): UseProfileScreenResult {
@@ -78,8 +84,9 @@ export function useProfileScreen(): UseProfileScreenResult {
   const { locale, setLocale } = useLocale();
 
   const { user, isLoading, isRefreshing, refetch, updateMutation, changePasswordMutation, deleteAccountMutation } = useProfileData();
-  const profileForm       = useProfileForm(user);
+  const profileForm        = useProfileForm(user);
   const changePasswordForm = useChangePasswordForm();
+  const pictureMethods     = useProfilePicture(user);
 
   const [showDatePicker, setShowDatePicker]         = useState(false);
   const [isPasswordSectionOpen, setPasswordSection] = useState(false);
@@ -284,6 +291,10 @@ export function useProfileScreen(): UseProfileScreenResult {
     handleGoToPdpa,
     handleLogout,
     handleDeleteAccount,
-    isDeletingAccount: deleteAccountMutation.isPending,
+    isDeletingAccount:   deleteAccountMutation.isPending,
+    isUploadingPicture:  pictureMethods.isUploadingPicture,
+    isRemovingPicture:   pictureMethods.isRemovingPicture,
+    handlePickAndUpload: pictureMethods.handlePickAndUpload,
+    handleRemovePicture: pictureMethods.handleRemovePicture,
   };
 }

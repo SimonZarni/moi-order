@@ -16,6 +16,7 @@ use App\Http\Requests\LinkAppleRequest;
 use App\Http\Requests\LinkGoogleRequest;
 use App\Http\Requests\LinkLineRequest;
 use App\Http\Requests\UpdateProfileRequest;
+use App\Http\Requests\UploadProfilePictureRequest;
 use App\Http\Resources\UserResource;
 use App\Services\AppleAuthService;
 use App\Services\GoogleAuthService;
@@ -96,6 +97,25 @@ class ProfileController extends Controller
             $request->user(),
             LineAuthDTO::fromRequest($request),
         );
+
+        return response()->json(['data' => new UserResource($user)]);
+    }
+
+    /** POST /api/v1/profile/picture */
+    public function uploadPicture(UploadProfilePictureRequest $request): JsonResponse
+    {
+        $user = $this->profileService->uploadProfilePicture(
+            $request->user(),
+            $request->file('picture'),
+        );
+
+        return response()->json(['data' => new UserResource($user)]);
+    }
+
+    /** DELETE /api/v1/profile/picture */
+    public function removePicture(Request $request): JsonResponse
+    {
+        $user = $this->profileService->removeProfilePicture($request->user());
 
         return response()->json(['data' => new UserResource($user)]);
     }

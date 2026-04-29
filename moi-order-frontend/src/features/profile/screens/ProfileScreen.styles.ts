@@ -86,6 +86,29 @@ export const styles = StyleSheet.create({
     color: colours.white,
     letterSpacing: 1,
   },
+  avatarImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  avatarCameraOverlay: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: colours.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarRemoveBtn: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: colours.white,
+    borderRadius: 11,
+  },
 
   // Hero text
   heroName: {

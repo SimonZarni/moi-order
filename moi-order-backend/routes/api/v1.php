@@ -23,9 +23,11 @@ Route::post('/auth/logout', [AuthController::class, 'logout']);
 Route::get('/auth/me',      [AuthController::class, 'me']);
 
 // Profile
-Route::put('/profile',          [ProfileController::class, 'update']);
-Route::put('/profile/password', [ProfileController::class, 'changePassword']);
-Route::delete('/profile',       [ProfileController::class, 'destroy']);
+Route::put('/profile',             [ProfileController::class, 'update']);
+Route::put('/profile/password',    [ProfileController::class, 'changePassword']);
+Route::post('/profile/picture',    [ProfileController::class, 'uploadPicture']);
+Route::delete('/profile/picture',  [ProfileController::class, 'removePicture']);
+Route::delete('/profile',          [ProfileController::class, 'destroy']);
 Route::post('/profile/link/google',   [ProfileController::class, 'linkGoogle']);
 Route::post('/profile/link/apple',    [ProfileController::class, 'linkApple']);
 Route::post('/profile/link/line',     [ProfileController::class, 'linkLine']);

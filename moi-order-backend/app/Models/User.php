@@ -42,6 +42,7 @@ class User extends Authenticatable
         'google_id',
         'apple_id',
         'line_id',
+        'profile_picture_path',
     ];
 
     /**

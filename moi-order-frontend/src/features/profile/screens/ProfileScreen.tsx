@@ -1,10 +1,12 @@
 import React from 'react';
 import {
+  ActivityIndicator,
   Platform,
   Pressable, RefreshControl,
   ScrollView, Text, TextInput, View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -38,6 +40,7 @@ export function ProfileScreen(): React.JSX.Element {
     handleChangePassword,
     handleGoToOrders, handleGoToPrivacyPolicy, handleGoToTerms, handleGoToPdpa, handleLogout,
     handleDeleteAccount, isDeletingAccount,
+    isUploadingPicture, isRemovingPicture, handlePickAndUpload, handleRemovePicture,
   } = useProfileScreen();
   const {
     isLinkingGoogle, isLinkingApple, isLinkingLine,
@@ -75,9 +78,39 @@ export function ProfileScreen(): React.JSX.Element {
           <View style={styles.orbC} />
 
           <View style={styles.avatarRing}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarInitials}>{initials}</Text>
+            <Pressable
+              style={styles.avatar}
+              onPress={handlePickAndUpload}
+              disabled={isUploadingPicture || isRemovingPicture}
+              accessibilityLabel="Change profile picture"
+              accessibilityRole="button"
+            >
+              {user?.profile_picture_url ? (
+                <Image
+                  source={{ uri: user.profile_picture_url }}
+                  style={styles.avatarImage}
+                  contentFit="cover"
+                />
+              ) : (
+                <Text style={styles.avatarInitials}>{initials}</Text>
+              )}
+            </Pressable>
+            <View style={styles.avatarCameraOverlay} pointerEvents="none">
+              {isUploadingPicture || isRemovingPicture
+                ? <ActivityIndicator size="small" color="#fff" />
+                : <Ionicons name="camera" size={12} color="#fff" />
+              }
             </View>
+            {!!user?.profile_picture_url && !isUploadingPicture && !isRemovingPicture && (
+              <Pressable
+                style={styles.avatarRemoveBtn}
+                onPress={handleRemovePicture}
+                accessibilityLabel="Remove profile picture"
+                accessibilityRole="button"
+              >
+                <Ionicons name="close-circle" size={22} color={colours.danger} />
+              </Pressable>
+            )}
           </View>
 
           <Text style={styles.heroName}>{user?.name ?? name}</Text>
