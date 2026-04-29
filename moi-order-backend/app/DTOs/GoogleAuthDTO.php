@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DTOs;
 
 use App\Http\Requests\GoogleAuthRequest;
+use Illuminate\Http\Request;
 
 /**
  * Principle: SRP — carries the Google ID token from controller to service.
@@ -16,7 +17,7 @@ readonly class GoogleAuthDTO
         public string $idToken,
     ) {}
 
-    public static function fromRequest(GoogleAuthRequest $request): self
+    public static function fromRequest(Request $request): self
     {
         return new self(
             idToken: $request->string('id_token')->toString(),

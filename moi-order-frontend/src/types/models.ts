@@ -50,6 +50,9 @@ export interface User {
   name: string;
   email: string;
   phone_number: string | null;
+  has_google: boolean;
+  has_apple: boolean;
+  has_line: boolean;
   date_of_birth: string | null;  // ISO date "YYYY-MM-DD"
   email_verified_at: string | null;
   created_at: string;

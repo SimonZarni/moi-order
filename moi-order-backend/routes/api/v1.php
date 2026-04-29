@@ -26,6 +26,9 @@ Route::get('/auth/me',      [AuthController::class, 'me']);
 Route::put('/profile',          [ProfileController::class, 'update']);
 Route::put('/profile/password', [ProfileController::class, 'changePassword']);
 Route::delete('/profile',       [ProfileController::class, 'destroy']);
+Route::post('/profile/link/google', [ProfileController::class, 'linkGoogle']);
+Route::post('/profile/link/apple',  [ProfileController::class, 'linkApple']);
+Route::post('/profile/link/line',   [ProfileController::class, 'linkLine']);
 
 // Submissions
 Route::get('/submissions',                 [SubmissionController::class,       'index']);

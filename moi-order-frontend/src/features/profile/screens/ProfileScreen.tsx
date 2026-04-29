@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Platform,
   Pressable, RefreshControl,
   ScrollView, Text, TextInput, View,
 } from 'react-native';
@@ -9,6 +10,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { ProfileSkeleton } from '@/features/profile/components/ProfileSkeleton';
 import { useProfileScreen } from '@/features/profile/hooks/useProfileScreen';
+import { useLinkedAccounts } from '@/features/profile/hooks/useLinkedAccounts';
 import { formatDate } from '@/shared/utils/formatDate';
 import { getProfileStrings } from '@/shared/constants/profileStrings';
 import { colours } from '@/shared/theme/colours';
@@ -36,8 +38,19 @@ export function ProfileScreen(): React.JSX.Element {
     handleGoToOrders, handleGoToPrivacyPolicy, handleGoToTerms, handleGoToPdpa, handleLogout,
     handleDeleteAccount, isDeletingAccount,
   } = useProfileScreen();
+  const {
+    isLinkingGoogle,
+    isLinkingApple,
+    isLinkingLine,
+    linkError,
+    handleLinkGoogle,
+    handleLinkApple,
+    handleLinkLine,
+  } = useLinkedAccounts();
 
   const t = getProfileStrings(locale);
+  const hasPhoneNumber = (user?.phone_number ?? '').trim() !== '';
+  const appleUnavailable = Platform.OS !== 'ios';
 
   if (isLoading) {
     return <ProfileSkeleton />;
@@ -97,6 +110,13 @@ export function ProfileScreen(): React.JSX.Element {
                   <Text style={styles.emailPromptButtonText}>Add Email</Text>
                 </Pressable>
               )}
+            </View>
+          )}
+
+          {!!linkError && (
+            <View style={styles.linkErrorCard}>
+              <Ionicons name="alert-circle-outline" size={16} color={colours.danger} />
+              <Text style={styles.linkErrorText}>{linkError}</Text>
             </View>
           )}
 
@@ -263,6 +283,110 @@ export function ProfileScreen(): React.JSX.Element {
                 </View>
               </>
             )}
+          </View>
+
+          {/* § Linked Accounts */}
+          <View style={styles.sectionRow}>
+            <Text style={styles.sectionLabel}>Linked Accounts</Text>
+            <View style={styles.sectionLine} />
+          </View>
+          <View style={styles.card}>
+            <View style={styles.linkRow}>
+              <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
+                <Ionicons name="logo-google" size={16} color={colours.primary} />
+              </View>
+              <View style={styles.linkCopy}>
+                <Text style={styles.linkTitle}>Google</Text>
+                <Text style={styles.linkSubtitle}>
+                  {user?.has_google ? 'Connected to this account' : 'Use Google to sign in later'}
+                </Text>
+              </View>
+              <Pressable
+                style={[styles.linkBtn, user?.has_google ? styles.linkBtnConnected : styles.linkBtnPrimary]}
+                onPress={handleLinkGoogle}
+                disabled={isLinkingGoogle}
+                accessibilityLabel={user?.has_google ? 'Reconnect Google account' : 'Link Google account'}
+                accessibilityRole="button"
+              >
+                <Text style={[styles.linkBtnText, user?.has_google && styles.linkBtnTextConnected]}>
+                  {isLinkingGoogle ? 'Linking…' : (user?.has_google ? 'Reconnect' : 'Connect')}
+                </Text>
+              </Pressable>
+            </View>
+            <View style={styles.rowSeparator} />
+            <View style={styles.linkRow}>
+              <View style={[styles.iconBadge, styles.iconBadgeSlate]}>
+                <Ionicons name="logo-apple" size={16} color={colours.medium} />
+              </View>
+              <View style={styles.linkCopy}>
+                <Text style={styles.linkTitle}>Apple</Text>
+                <Text style={styles.linkSubtitle}>
+                  {appleUnavailable
+                    ? 'Available on iPhone and iPad only'
+                    : (user?.has_apple ? 'Connected to this account' : 'Use Apple to sign in later')}
+                </Text>
+              </View>
+              <Pressable
+                style={[
+                  styles.linkBtn,
+                  user?.has_apple ? styles.linkBtnConnected : styles.linkBtnPrimary,
+                  appleUnavailable && styles.linkBtnDisabled,
+                ]}
+                onPress={handleLinkApple}
+                disabled={isLinkingApple || appleUnavailable}
+                accessibilityLabel={user?.has_apple ? 'Reconnect Apple account' : 'Link Apple account'}
+                accessibilityRole="button"
+              >
+                <Text style={[styles.linkBtnText, user?.has_apple && styles.linkBtnTextConnected]}>
+                  {appleUnavailable ? 'iOS only' : (isLinkingApple ? 'Linking…' : (user?.has_apple ? 'Reconnect' : 'Connect'))}
+                </Text>
+              </Pressable>
+            </View>
+            <View style={styles.rowSeparator} />
+            <View style={styles.linkRow}>
+              <View style={[styles.iconBadge, styles.iconBadgeTeal]}>
+                <Ionicons name="chatbubble-ellipses-outline" size={16} color={colours.tertiary} />
+              </View>
+              <View style={styles.linkCopy}>
+                <Text style={styles.linkTitle}>LINE</Text>
+                <Text style={styles.linkSubtitle}>
+                  {user?.has_line ? 'Connected to this account' : 'Use LINE to sign in later'}
+                </Text>
+              </View>
+              <Pressable
+                style={[styles.linkBtn, user?.has_line ? styles.linkBtnConnected : styles.linkBtnPrimary]}
+                onPress={handleLinkLine}
+                disabled={isLinkingLine}
+                accessibilityLabel={user?.has_line ? 'Reconnect LINE account' : 'Link LINE account'}
+                accessibilityRole="button"
+              >
+                <Text style={[styles.linkBtnText, user?.has_line && styles.linkBtnTextConnected]}>
+                  {isLinkingLine ? 'Linking…' : (user?.has_line ? 'Reconnect' : 'Connect')}
+                </Text>
+              </Pressable>
+            </View>
+            <View style={styles.rowSeparator} />
+            <View style={styles.linkRow}>
+              <View style={[styles.iconBadge, styles.iconBadgeAmber]}>
+                <Ionicons name="call-outline" size={16} color={colours.secondary} />
+              </View>
+              <View style={styles.linkCopy}>
+                <Text style={styles.linkTitle}>Phone</Text>
+                <Text style={styles.linkSubtitle}>
+                  {hasPhoneNumber ? `Linked: ${user?.phone_number}` : 'Add a Thai phone number for OTP login'}
+                </Text>
+              </View>
+              <Pressable
+                style={[styles.linkBtn, hasPhoneNumber ? styles.linkBtnConnected : styles.linkBtnPrimary]}
+                onPress={handleToggleEditProfile}
+                accessibilityLabel={hasPhoneNumber ? 'Update phone number' : 'Add phone number'}
+                accessibilityRole="button"
+              >
+                <Text style={[styles.linkBtnText, hasPhoneNumber && styles.linkBtnTextConnected]}>
+                  {hasPhoneNumber ? 'Update' : 'Add'}
+                </Text>
+              </Pressable>
+            </View>
           </View>
 
           {/* § Language */}

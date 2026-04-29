@@ -189,6 +189,26 @@ export const styles = StyleSheet.create({
     color: colours.white,
   },
 
+  linkErrorCard: {
+    backgroundColor: '#fff1f1',
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: '#f3b2b2',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  linkErrorText: {
+    flex: 1,
+    fontSize: typography.sm,
+    lineHeight: 20,
+    color: colours.danger,
+    fontWeight: '600',
+  },
+
   // ── Info / action rows (inside cards) ─────────────────────────────────────
   row: {
     flexDirection: 'row',
@@ -201,6 +221,56 @@ export const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colours.infoBg,
     marginHorizontal: spacing.md,
+  },
+
+  linkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    gap: spacing.sm,
+  },
+  linkCopy: {
+    flex: 1,
+    paddingRight: spacing.xs,
+  },
+  linkTitle: {
+    fontSize: typography.md,
+    color: colours.textOnLight,
+    fontWeight: '700',
+    lineHeight: 22,
+  },
+  linkSubtitle: {
+    fontSize: typography.xs,
+    color: colours.medium,
+    lineHeight: 18,
+    marginTop: 2,
+  },
+  linkBtn: {
+    minWidth: 92,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  linkBtnPrimary: {
+    backgroundColor: colours.primary,
+  },
+  linkBtnConnected: {
+    backgroundColor: `${colours.primary}14`,
+  },
+  linkBtnDisabled: {
+    opacity: 0.45,
+  },
+  linkBtnText: {
+    fontSize: typography.xs,
+    fontWeight: '700',
+    color: colours.white,
+    letterSpacing: 0.3,
+  },
+  linkBtnTextConnected: {
+    color: colours.primary,
   },
 
   // Icon badge — small coloured square, left of each row

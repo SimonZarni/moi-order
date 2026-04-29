@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DTOs;
 
 use App\Http\Requests\AppleAuthRequest;
+use Illuminate\Http\Request;
 
 /**
  * Principle: SRP — carries the Apple identity token and optional profile fields.
@@ -18,7 +19,7 @@ readonly class AppleAuthDTO
         public ?string $name,
     ) {}
 
-    public static function fromRequest(AppleAuthRequest $request): self
+    public static function fromRequest(Request $request): self
     {
         $email = trim($request->string('email')->toString());
         $name  = trim($request->string('name')->toString());

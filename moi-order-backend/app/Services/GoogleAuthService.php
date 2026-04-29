@@ -56,6 +56,40 @@ class GoogleAuthService
         return ['user' => $user, 'token' => $token];
     }
 
+    public function linkAccount(User $currentUser, GoogleAuthDTO $dto): User
+    {
+        $payload = $this->googleClient->verifyIdToken($dto->idToken);
+
+        if ($payload === false || empty($payload['email_verified'])) {
+            throw ValidationException::withMessages([
+                'id_token' => ['Google sign-in failed. Please try again.'],
+            ]);
+        }
+
+        $googleId = (string) $payload['sub'];
+        $email    = (string) $payload['email'];
+        $name     = (string) ($payload['name'] ?? $email);
+
+        $otherUser = User::where('google_id', $googleId)->where('id', '!=', $currentUser->id)->first();
+        if ($otherUser !== null) {
+            throw ValidationException::withMessages([
+                'id_token' => ['This Google account is already linked to another account.'],
+            ]);
+        }
+
+        $updates = ['google_id' => $googleId];
+        if ($this->shouldReplaceEmail($currentUser->email) && $email !== '') {
+            $updates['email'] = $email;
+        }
+        if ($currentUser->name === '' || $currentUser->name === 'Deleted User') {
+            $updates['name'] = $name;
+        }
+
+        $currentUser->update($updates);
+
+        return $currentUser->fresh();
+    }
+
     private function findOrCreateUser(string $googleId, string $email, string $name): User
     {
         // Prefer google_id lookup — immune to email change on the Google account side.
@@ -80,5 +114,10 @@ class GoogleAuthService
             'name'      => $name,
             'password'  => null,
         ]);
+    }
+
+    private function shouldReplaceEmail(string $email): bool
+    {
+        return str_ends_with($email, '@users.moiorder.local') || str_ends_with($email, '@deleted.invalid');
     }
 }

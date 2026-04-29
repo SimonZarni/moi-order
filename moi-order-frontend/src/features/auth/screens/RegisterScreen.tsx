@@ -7,10 +7,12 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ErrorBanner } from '@/shared/components/ErrorBanner/ErrorBanner';
 import { AppleSignInButton } from '@/shared/components/AppleSignInButton/AppleSignInButton';
+import { AuthMethod, AuthMethodTabs } from '@/shared/components/AuthMethodTabs/AuthMethodTabs';
 import { FormField } from '@/shared/components/FormField/FormField';
 import { GoogleSignInButton } from '@/shared/components/GoogleSignInButton/GoogleSignInButton';
 import { LineSignInButton } from '@/shared/components/LineSignInButton/LineSignInButton';
@@ -18,6 +20,7 @@ import { useRegisterScreen } from '@/features/auth/hooks/useRegisterScreen';
 import { styles } from './RegisterScreen.styles';
 
 export function RegisterScreen(): React.JSX.Element {
+  const [authMethod, setAuthMethod] = useState<AuthMethod>('email');
   const {
     form,
     isSubmitting,
@@ -68,154 +71,173 @@ export function RegisterScreen(): React.JSX.Element {
             <Text style={styles.cardTitle}>Get Started</Text>
             <Text style={styles.cardSubtitle}>Join thousands who trust MOI Order.</Text>
 
+            <AuthMethodTabs value={authMethod} onChange={setAuthMethod} />
             <ErrorBanner message={bannerError} />
 
-            <FormField
-              label="Full Name"
-              value={form.name}
-              onChangeText={handleNameChange}
-              accessibilityLabel="Full name"
-              error={form.errors['name']}
-              placeholder="John Doe"
-              autoCapitalize="words"
-              autoComplete="name"
-              returnKeyType="next"
-            />
+            {authMethod === 'email' ? (
+              <>
+                <FormField
+                  label="Full Name"
+                  value={form.name}
+                  onChangeText={handleNameChange}
+                  accessibilityLabel="Full name"
+                  error={form.errors['name']}
+                  placeholder="John Doe"
+                  autoCapitalize="words"
+                  autoComplete="name"
+                  returnKeyType="next"
+                />
 
-            <FormField
-              label="Email"
-              value={form.email}
-              onChangeText={handleEmailChange}
-              accessibilityLabel="Email address"
-              error={form.errors['email']}
-              placeholder="you@example.com"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-              returnKeyType="next"
-            />
+                <FormField
+                  label="Email"
+                  value={form.email}
+                  onChangeText={handleEmailChange}
+                  accessibilityLabel="Email address"
+                  error={form.errors['email']}
+                  placeholder="you@example.com"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  returnKeyType="next"
+                />
 
-            <FormField
-              label="Thai Phone Number"
-              value={phoneNumber}
-              onChangeText={handlePhoneNumberChange}
-              accessibilityLabel="Thai phone number"
-              placeholder="0812345678"
-              keyboardType="phone-pad"
-              returnKeyType="next"
-            />
+                <FormField
+                  label="Password"
+                  value={form.password}
+                  onChangeText={handlePasswordChange}
+                  accessibilityLabel="Password"
+                  error={form.errors['password']}
+                  placeholder="At least 8 characters"
+                  secureTextEntry={!showPassword}
+                  returnKeyType="next"
+                  rightElement={
+                    <Pressable
+                      style={styles.eyeBtn}
+                      onPress={handleTogglePassword}
+                      accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                      accessibilityRole="button"
+                    >
+                      <Text style={styles.eyeText}>{showPassword ? 'Hide' : 'Show'}</Text>
+                    </Pressable>
+                  }
+                />
 
-            <Text style={styles.otpHint}>Request an SMS code to create an account with your phone number.</Text>
+                <FormField
+                  label="Confirm Password"
+                  value={form.passwordConfirmation}
+                  onChangeText={handlePasswordConfirmationChange}
+                  accessibilityLabel="Confirm password"
+                  error={form.errors['password_confirmation']}
+                  placeholder="Repeat password"
+                  secureTextEntry={!showPassword}
+                  returnKeyType="done"
+                  onSubmitEditing={handleSubmit}
+                />
 
-            <FormField
-              label="Verification Code"
-              value={otpCode}
-              onChangeText={handleOtpCodeChange}
-              accessibilityLabel="Verification code"
-              placeholder="6-digit code"
-              keyboardType="number-pad"
-              returnKeyType="next"
-              onSubmitEditing={handleVerifyOtp}
-            />
-
-            <View style={styles.otpRow}>
-              <Pressable
-                style={[
-                  styles.otpButton,
-                  styles.otpButtonSecondary,
-                  (isRequestingOtp || resendSecondsLeft > 0) && styles.otpButtonDisabled,
-                ]}
-                onPress={handleRequestOtp}
-                disabled={isRequestingOtp || resendSecondsLeft > 0}
-                accessibilityLabel="Send SMS code"
-                accessibilityRole="button"
-              >
-                <Text style={[styles.otpButtonText, styles.otpButtonTextSecondary]}>
-                  {isRequestingOtp ? 'Sending…' : resendSecondsLeft > 0 ? `Resend in ${resendSecondsLeft}s` : 'Send OTP'}
-                </Text>
-              </Pressable>
-              <Pressable
-                style={[styles.otpButton, isVerifyingOtp && styles.otpButtonDisabled]}
-                onPress={handleVerifyOtp}
-                disabled={isVerifyingOtp}
-                accessibilityLabel="Create account with OTP"
-                accessibilityRole="button"
-              >
-                <Text style={styles.otpButtonText}>{isVerifyingOtp ? 'Checking…' : 'Create with OTP'}</Text>
-              </Pressable>
-            </View>
-
-            <FormField
-              label="Password"
-              value={form.password}
-              onChangeText={handlePasswordChange}
-              accessibilityLabel="Password"
-              error={form.errors['password']}
-              placeholder="At least 8 characters"
-              secureTextEntry={!showPassword}
-              returnKeyType="next"
-              rightElement={
                 <Pressable
-                  style={styles.eyeBtn}
-                  onPress={handleTogglePassword}
-                  accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                  style={[styles.submitBtn, isSubmitting && styles.submitBtnDisabled]}
+                  onPress={handleSubmit}
+                  disabled={isSubmitting}
+                  accessibilityLabel="Create account"
                   accessibilityRole="button"
                 >
-                  <Text style={styles.eyeText}>{showPassword ? 'Hide' : 'Show'}</Text>
+                  <Text style={styles.submitText}>{isSubmitting ? 'Creating account…' : 'Create Account'}</Text>
                 </Pressable>
-              }
-            />
 
-            <FormField
-              label="Confirm Password"
-              value={form.passwordConfirmation}
-              onChangeText={handlePasswordConfirmationChange}
-              accessibilityLabel="Confirm password"
-              error={form.errors['password_confirmation']}
-              placeholder="Repeat password"
-              secureTextEntry={!showPassword}
-              returnKeyType="done"
-              onSubmitEditing={handleSubmit}
-            />
+                <View style={styles.dividerRow}>
+                  <View style={styles.dividerLine} />
+                  <Text style={styles.dividerText}>or social sign-up</Text>
+                  <View style={styles.dividerLine} />
+                </View>
 
-            <Pressable
-              style={[styles.submitBtn, isSubmitting && styles.submitBtnDisabled]}
-              onPress={handleSubmit}
-              disabled={isSubmitting}
-              accessibilityLabel="Create account"
-              accessibilityRole="button"
-            >
-              <Text style={styles.submitText}>{isSubmitting ? 'Creating account…' : 'Create Account'}</Text>
-            </Pressable>
-
-            <View style={styles.dividerRow}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or social sign-up</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            <GoogleSignInButton
-              onPress={handleGoogleSignIn}
-              isLoading={isGoogleSigningIn}
-              disabled={isSubmitting || isAppleSigningIn || isLineSigningIn}
-            />
-
-            <View style={styles.socialButtonSpacing}>
-              <LineSignInButton
-                onPress={handleLineSignIn}
-                isLoading={isLineSigningIn}
-                disabled={isSubmitting || isGoogleSigningIn || isAppleSigningIn}
-              />
-            </View>
-
-            {Platform.OS === 'ios' && (
-              <View style={styles.socialButtonSpacing}>
-                <AppleSignInButton
-                  onPress={handleAppleSignIn}
-                  isLoading={isAppleSigningIn}
-                  disabled={isSubmitting || isGoogleSigningIn || isLineSigningIn}
+                <GoogleSignInButton
+                  onPress={handleGoogleSignIn}
+                  isLoading={isGoogleSigningIn}
+                  disabled={isSubmitting || isAppleSigningIn || isLineSigningIn}
                 />
-              </View>
+
+                <View style={styles.socialButtonSpacing}>
+                  <LineSignInButton
+                    onPress={handleLineSignIn}
+                    isLoading={isLineSigningIn}
+                    disabled={isSubmitting || isGoogleSigningIn || isAppleSigningIn}
+                  />
+                </View>
+
+                {Platform.OS === 'ios' && (
+                  <View style={styles.socialButtonSpacing}>
+                    <AppleSignInButton
+                      onPress={handleAppleSignIn}
+                      isLoading={isAppleSigningIn}
+                      disabled={isSubmitting || isGoogleSigningIn || isLineSigningIn}
+                    />
+                  </View>
+                )}
+              </>
+            ) : (
+              <>
+                <FormField
+                  label="Full Name"
+                  value={form.name}
+                  onChangeText={handleNameChange}
+                  accessibilityLabel="Full name"
+                  error={form.errors['name']}
+                  placeholder="John Doe"
+                  autoCapitalize="words"
+                  autoComplete="name"
+                  returnKeyType="next"
+                />
+
+                <FormField
+                  label="Thai Phone Number"
+                  value={phoneNumber}
+                  onChangeText={handlePhoneNumberChange}
+                  accessibilityLabel="Thai phone number"
+                  placeholder="0812345678"
+                  keyboardType="phone-pad"
+                  returnKeyType="next"
+                />
+
+                <Text style={styles.otpHint}>Request an SMS code to create an account with your phone number.</Text>
+
+                <FormField
+                  label="Verification Code"
+                  value={otpCode}
+                  onChangeText={handleOtpCodeChange}
+                  accessibilityLabel="Verification code"
+                  placeholder="6-digit code"
+                  keyboardType="number-pad"
+                  returnKeyType="next"
+                  onSubmitEditing={handleVerifyOtp}
+                />
+
+                <View style={styles.otpRow}>
+                  <Pressable
+                    style={[
+                      styles.otpButton,
+                      styles.otpButtonSecondary,
+                      (isRequestingOtp || resendSecondsLeft > 0) && styles.otpButtonDisabled,
+                    ]}
+                    onPress={handleRequestOtp}
+                    disabled={isRequestingOtp || resendSecondsLeft > 0}
+                    accessibilityLabel="Send SMS code"
+                    accessibilityRole="button"
+                  >
+                    <Text style={[styles.otpButtonText, styles.otpButtonTextSecondary]}>
+                      {isRequestingOtp ? 'Sending…' : resendSecondsLeft > 0 ? `Resend in ${resendSecondsLeft}s` : 'Send OTP'}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.otpButton, isVerifyingOtp && styles.otpButtonDisabled]}
+                    onPress={handleVerifyOtp}
+                    disabled={isVerifyingOtp}
+                    accessibilityLabel="Create account with OTP"
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.otpButtonText}>{isVerifyingOtp ? 'Checking…' : 'Create with OTP'}</Text>
+                  </Pressable>
+                </View>
+              </>
             )}
 
             <View style={styles.footer}>

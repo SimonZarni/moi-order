@@ -111,3 +111,34 @@ export async function verifyOtpRegister(
 
   return response.data.data;
 }
+
+export async function linkGoogleAccount(idToken: string): Promise<AuthResponse['data']> {
+  const response = await apiClient.post<AuthResponse>('/api/v1/profile/link/google', { id_token: idToken });
+  return response.data.data;
+}
+
+export async function linkAppleAccount(
+  idToken: string,
+  email?: string,
+  name?: string,
+): Promise<AuthResponse['data']> {
+  const response = await apiClient.post<AuthResponse>('/api/v1/profile/link/apple', {
+    id_token: idToken,
+    ...(email ? { email } : {}),
+    ...(name ? { name } : {}),
+  });
+  return response.data.data;
+}
+
+export async function linkLineAccount(
+  idToken: string,
+  nonce?: string,
+  name?: string,
+): Promise<AuthResponse['data']> {
+  const response = await apiClient.post<AuthResponse>('/api/v1/profile/link/line', {
+    id_token: idToken,
+    ...(nonce ? { nonce } : {}),
+    ...(name ? { name } : {}),
+  });
+  return response.data.data;
+}

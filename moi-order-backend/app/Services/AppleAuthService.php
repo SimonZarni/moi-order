@@ -54,6 +54,40 @@ class AppleAuthService
         return ['user' => $user, 'token' => $token];
     }
 
+    public function linkAccount(User $currentUser, AppleAuthDTO $dto): User
+    {
+        $payload = $this->verifyIdentityToken($dto->idToken);
+
+        $appleId = (string) ($payload['sub'] ?? '');
+        $email   = $this->resolveEmail($payload, $dto);
+        $name    = $this->resolveName($payload, $dto, $email);
+
+        if ($appleId === '') {
+            throw ValidationException::withMessages([
+                'id_token' => ['Apple sign-in failed. Please try again.'],
+            ]);
+        }
+
+        $otherUser = User::withTrashed()->where('apple_id', $appleId)->where('id', '!=', $currentUser->id)->first();
+        if ($otherUser !== null) {
+            throw ValidationException::withMessages([
+                'id_token' => ['This Apple ID is already linked to another account.'],
+            ]);
+        }
+
+        $updates = ['apple_id' => $appleId];
+        if ($email !== null && $this->shouldReplaceEmail($currentUser->email)) {
+            $updates['email'] = $email;
+        }
+        if ($currentUser->name === '' || $currentUser->name === 'Deleted User') {
+            $updates['name'] = $name;
+        }
+
+        $currentUser->update($updates);
+
+        return $currentUser->fresh();
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -289,5 +323,10 @@ class AppleAuthService
             'name'     => $name,
             'password' => null,
         ]);
+    }
+
+    private function shouldReplaceEmail(string $email): bool
+    {
+        return str_ends_with($email, '@users.moiorder.local') || str_ends_with($email, '@deleted.invalid');
     }
 }

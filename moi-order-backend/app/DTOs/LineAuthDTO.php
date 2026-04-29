@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DTOs;
 
 use App\Http\Requests\LineAuthRequest;
+use Illuminate\Http\Request;
 
 /**
  * Principle: SRP — carries the LINE identity token and optional verification data.
@@ -18,7 +19,7 @@ readonly class LineAuthDTO
         public ?string $name,
     ) {}
 
-    public static function fromRequest(LineAuthRequest $request): self
+    public static function fromRequest(Request $request): self
     {
         $nonce = trim($request->string('nonce')->toString());
         $name  = trim($request->string('name')->toString());

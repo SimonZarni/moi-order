@@ -5,12 +5,21 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\DTOs\ChangePasswordDTO;
+use App\DTOs\AppleAuthDTO;
+use App\DTOs\GoogleAuthDTO;
+use App\DTOs\LineAuthDTO;
 use App\DTOs\UpdateProfileDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\DeleteAccountRequest;
+use App\Http\Requests\LinkAppleRequest;
+use App\Http\Requests\LinkGoogleRequest;
+use App\Http\Requests\LinkLineRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
+use App\Services\AppleAuthService;
+use App\Services\GoogleAuthService;
+use App\Services\LineAuthService;
 use App\Services\ProfileService;
 use Illuminate\Http\JsonResponse;
 
@@ -22,6 +31,9 @@ class ProfileController extends Controller
 {
     public function __construct(
         private readonly ProfileService $profileService,
+        private readonly GoogleAuthService $googleAuthService,
+        private readonly AppleAuthService $appleAuthService,
+        private readonly LineAuthService $lineAuthService,
     ) {}
 
     /** PUT /api/v1/profile */
@@ -52,5 +64,38 @@ class ProfileController extends Controller
         $this->profileService->deleteAccount($request->user());
 
         return response()->json(null, 204);
+    }
+
+    /** POST /api/v1/profile/link/google */
+    public function linkGoogle(LinkGoogleRequest $request): JsonResponse
+    {
+        $user = $this->googleAuthService->linkAccount(
+            $request->user(),
+            GoogleAuthDTO::fromRequest($request),
+        );
+
+        return response()->json(['data' => new UserResource($user)]);
+    }
+
+    /** POST /api/v1/profile/link/apple */
+    public function linkApple(LinkAppleRequest $request): JsonResponse
+    {
+        $user = $this->appleAuthService->linkAccount(
+            $request->user(),
+            AppleAuthDTO::fromRequest($request),
+        );
+
+        return response()->json(['data' => new UserResource($user)]);
+    }
+
+    /** POST /api/v1/profile/link/line */
+    public function linkLine(LinkLineRequest $request): JsonResponse
+    {
+        $user = $this->lineAuthService->linkAccount(
+            $request->user(),
+            LineAuthDTO::fromRequest($request),
+        );
+
+        return response()->json(['data' => new UserResource($user)]);
     }
 }

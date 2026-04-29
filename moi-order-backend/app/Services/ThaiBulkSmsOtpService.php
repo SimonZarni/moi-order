@@ -20,11 +20,6 @@ class ThaiBulkSmsOtpService
             'msisdn' => $phoneNumber,
         ];
 
-        $sender = (string) config('services.thaibulksms.sender');
-        if ($sender !== '') {
-            $payload['sender'] = $sender;
-        }
-
         $response = Http::asForm()->timeout(15)->acceptJson()->post(self::REQUEST_URL, $payload);
 
         if (! $response->ok()) {
