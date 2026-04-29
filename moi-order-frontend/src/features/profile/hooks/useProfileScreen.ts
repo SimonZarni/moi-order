@@ -32,6 +32,8 @@ export interface UseProfileScreenResult {
   showDatePicker: boolean;
   isEditingProfile: boolean;
   needsEmailCompletion: boolean;
+  isPlaceholderEmail: boolean;
+  hasPassword: boolean;
   // Change password form
   currentPassword: string;
   newPassword: string;
@@ -82,7 +84,11 @@ export function useProfileScreen(): UseProfileScreenResult {
   const [showDatePicker, setShowDatePicker]         = useState(false);
   const [isPasswordSectionOpen, setPasswordSection] = useState(false);
   const [isEditingProfile, setIsEditingProfile]     = useState(false);
-  const needsEmailCompletion = user?.email.endsWith('@users.moiorder.local') ?? false;
+  const isPlaceholderEmail   = user?.email.endsWith('@users.moiorder.local') ?? false;
+  // OTP users have phone_{number}@users.moiorder.local — they have phone as login method so no warning needed.
+  // Social users (line_, google_, apple_ prefix) do need to add a real email.
+  const needsEmailCompletion = isPlaceholderEmail && !(user?.email.startsWith('phone_') ?? false);
+  const hasPassword          = user?.has_password ?? false;
 
   // Guard: navigate to Home when unauthenticated.
   // Guests cannot reach this screen via the tab bar (FloatingTabBar redirects them
@@ -249,6 +255,8 @@ export function useProfileScreen(): UseProfileScreenResult {
     showDatePicker,
     isEditingProfile,
     needsEmailCompletion,
+    isPlaceholderEmail,
+    hasPassword,
     currentPassword:        changePasswordForm.currentPassword,
     newPassword:            changePasswordForm.newPassword,
     confirmPassword:        changePasswordForm.confirmPassword,

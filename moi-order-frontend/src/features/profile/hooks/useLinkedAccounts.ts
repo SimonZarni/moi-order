@@ -1,41 +1,56 @@
 import { useCallback, useState } from 'react';
-import { Platform } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import * as AppleAuthentication from 'expo-apple-authentication';
 
 import { GoogleSignin, statusCodes } from '@/shared/utils/googleSignin';
 import { Line, lineErrorCodes } from '@/shared/utils/lineLogin';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
-import { linkAppleAccount, linkGoogleAccount, linkLineAccount } from '@/shared/api/auth';
+import {
+  linkAppleAccount, linkGoogleAccount, linkLineAccount,
+  unlinkAppleAccount, unlinkGoogleAccount, unlinkLineAccount,
+} from '@/shared/api/auth';
 import { useAuthStore } from '@/shared/store/authStore';
-import { ApiError } from '@/types/models';
+import { ApiError, User } from '@/types/models';
 
 export interface UseLinkedAccountsResult {
   isLinkingGoogle: boolean;
   isLinkingApple: boolean;
   isLinkingLine: boolean;
+  isUnlinkingGoogle: boolean;
+  isUnlinkingApple: boolean;
+  isUnlinkingLine: boolean;
   linkError: string;
   handleLinkGoogle: () => Promise<void>;
   handleLinkApple: () => Promise<void>;
   handleLinkLine: () => Promise<void>;
+  handleUnlinkGoogle: () => void;
+  handleUnlinkApple: () => void;
+  handleUnlinkLine: () => void;
+  dismissLinkError: () => void;
 }
 
 export function useLinkedAccounts(): UseLinkedAccountsResult {
   const queryClient = useQueryClient();
   const { setUser } = useAuthStore();
-  const [isLinkingGoogle, setIsLinkingGoogle] = useState(false);
-  const [isLinkingApple, setIsLinkingApple] = useState(false);
-  const [isLinkingLine, setIsLinkingLine] = useState(false);
-  const [linkError, setLinkError] = useState('');
+  const [isLinkingGoogle, setIsLinkingGoogle]     = useState(false);
+  const [isLinkingApple, setIsLinkingApple]       = useState(false);
+  const [isLinkingLine, setIsLinkingLine]         = useState(false);
+  const [isUnlinkingGoogle, setIsUnlinkingGoogle] = useState(false);
+  const [isUnlinkingApple, setIsUnlinkingApple]   = useState(false);
+  const [isUnlinkingLine, setIsUnlinkingLine]     = useState(false);
+  const [linkError, setLinkError]                 = useState('');
 
-  const syncUser = useCallback((user: Parameters<typeof setUser>[0], token: string | null = null): void => {
+  const syncUser = useCallback((user: User): void => {
     queryClient.setQueryData(QUERY_KEYS.AUTH.ME, user);
-    if (token !== null) {
-      setUser(user, token);
-    } else {
-      useAuthStore.getState().updateUser(user);
-    }
-  }, [queryClient, setUser]);
+    useAuthStore.getState().updateUser(user);
+  }, [queryClient]);
+
+  const dismissLinkError = useCallback((): void => {
+    setLinkError('');
+  }, []);
+
+  // ── Link handlers ───────────────────────────────────────────────────────────
 
   const handleLinkGoogle = useCallback(async (): Promise<void> => {
     try {
@@ -46,7 +61,7 @@ export function useLinkedAccounts(): UseLinkedAccountsResult {
       await GoogleSignin.signOut();
       await GoogleSignin.signIn();
       const { idToken } = await GoogleSignin.getTokens();
-      const { user } = await linkGoogleAccount(idToken);
+      const user = await linkGoogleAccount(idToken);
       syncUser(user);
     } catch (error: unknown) {
       const asGoogle = error as { code?: string };
@@ -82,7 +97,7 @@ export function useLinkedAccounts(): UseLinkedAccountsResult {
         .join(' ')
         .trim();
 
-      const { user } = await linkAppleAccount(
+      const user = await linkAppleAccount(
         credential.identityToken,
         credential.email ?? undefined,
         fullName !== '' ? fullName : undefined,
@@ -110,7 +125,7 @@ export function useLinkedAccounts(): UseLinkedAccountsResult {
         throw new Error('Missing LINE identity token.');
       }
 
-      const { user } = await linkLineAccount(
+      const user = await linkLineAccount(
         idToken,
         result.idTokenNonce ?? result.IDTokenNonce,
         result.userProfile?.displayName,
@@ -127,13 +142,91 @@ export function useLinkedAccounts(): UseLinkedAccountsResult {
     }
   }, [syncUser]);
 
+  // ── Unlink handlers ─────────────────────────────────────────────────────────
+
+  const handleUnlinkGoogle = useCallback((): void => {
+    Alert.alert('Unlink Google', 'Remove your Google account from this profile?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Unlink',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            setLinkError('');
+            setIsUnlinkingGoogle(true);
+            const user = await unlinkGoogleAccount();
+            syncUser(user);
+          } catch (error: unknown) {
+            const apiError = error as ApiError;
+            setLinkError(apiError.message ?? 'Failed to unlink Google account.');
+          } finally {
+            setIsUnlinkingGoogle(false);
+          }
+        },
+      },
+    ]);
+  }, [syncUser]);
+
+  const handleUnlinkApple = useCallback((): void => {
+    Alert.alert('Unlink Apple', 'Remove your Apple account from this profile?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Unlink',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            setLinkError('');
+            setIsUnlinkingApple(true);
+            const user = await unlinkAppleAccount();
+            syncUser(user);
+          } catch (error: unknown) {
+            const apiError = error as ApiError;
+            setLinkError(apiError.message ?? 'Failed to unlink Apple account.');
+          } finally {
+            setIsUnlinkingApple(false);
+          }
+        },
+      },
+    ]);
+  }, [syncUser]);
+
+  const handleUnlinkLine = useCallback((): void => {
+    Alert.alert('Unlink LINE', 'Remove your LINE account from this profile?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Unlink',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            setLinkError('');
+            setIsUnlinkingLine(true);
+            const user = await unlinkLineAccount();
+            syncUser(user);
+          } catch (error: unknown) {
+            const apiError = error as ApiError;
+            setLinkError(apiError.message ?? 'Failed to unlink LINE account.');
+          } finally {
+            setIsUnlinkingLine(false);
+          }
+        },
+      },
+    ]);
+  }, [syncUser]);
+
   return {
     isLinkingGoogle,
     isLinkingApple,
     isLinkingLine,
+    isUnlinkingGoogle,
+    isUnlinkingApple,
+    isUnlinkingLine,
     linkError,
     handleLinkGoogle,
     handleLinkApple,
     handleLinkLine,
+    handleUnlinkGoogle,
+    handleUnlinkApple,
+    handleUnlinkLine,
+    dismissLinkError,
   };
 }

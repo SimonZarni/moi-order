@@ -208,6 +208,13 @@ export const styles = StyleSheet.create({
     color: colours.danger,
     fontWeight: '600',
   },
+  linkErrorDismiss: {
+    padding: 4,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
   // ── Info / action rows (inside cards) ─────────────────────────────────────
   row: {
@@ -272,6 +279,17 @@ export const styles = StyleSheet.create({
   linkBtnTextConnected: {
     color: colours.primary,
   },
+  linkActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  unlinkBtn: {
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
   // Icon badge — small coloured square, left of each row
   iconBadge: {
@@ -299,6 +317,12 @@ export const styles = StyleSheet.create({
     color: colours.textOnLight,
     fontWeight: '500',
     lineHeight: 24,
+  },
+  rowDisabled: {
+    opacity: 0.45,
+  },
+  rowLabelDisabled: {
+    color: colours.textMuted,
   },
   rowValue: {
     fontSize: typography.sm,

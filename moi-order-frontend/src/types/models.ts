@@ -50,6 +50,7 @@ export interface User {
   name: string;
   email: string;
   phone_number: string | null;
+  has_password: boolean;
   has_google: boolean;
   has_apple: boolean;
   has_line: boolean;

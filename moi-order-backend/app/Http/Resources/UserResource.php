@@ -20,6 +20,7 @@ class UserResource extends JsonResource
             'name'              => $this->name,
             'email'             => $this->email,
             'phone_number'      => $this->phone_number,
+            'has_password'      => $this->password !== null,
             'has_google'        => $this->google_id !== null,
             'has_apple'         => $this->apple_id !== null,
             'has_line'          => $this->line_id !== null,

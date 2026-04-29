@@ -112,8 +112,8 @@ export async function verifyOtpRegister(
   return response.data.data;
 }
 
-export async function linkGoogleAccount(idToken: string): Promise<AuthResponse['data']> {
-  const response = await apiClient.post<AuthResponse>('/api/v1/profile/link/google', { id_token: idToken });
+export async function linkGoogleAccount(idToken: string): Promise<User> {
+  const response = await apiClient.post<ApiResponse<User>>('/api/v1/profile/link/google', { id_token: idToken });
   return response.data.data;
 }
 
@@ -121,8 +121,8 @@ export async function linkAppleAccount(
   idToken: string,
   email?: string,
   name?: string,
-): Promise<AuthResponse['data']> {
-  const response = await apiClient.post<AuthResponse>('/api/v1/profile/link/apple', {
+): Promise<User> {
+  const response = await apiClient.post<ApiResponse<User>>('/api/v1/profile/link/apple', {
     id_token: idToken,
     ...(email ? { email } : {}),
     ...(name ? { name } : {}),
@@ -134,11 +134,26 @@ export async function linkLineAccount(
   idToken: string,
   nonce?: string,
   name?: string,
-): Promise<AuthResponse['data']> {
-  const response = await apiClient.post<AuthResponse>('/api/v1/profile/link/line', {
+): Promise<User> {
+  const response = await apiClient.post<ApiResponse<User>>('/api/v1/profile/link/line', {
     id_token: idToken,
     ...(nonce ? { nonce } : {}),
     ...(name ? { name } : {}),
   });
+  return response.data.data;
+}
+
+export async function unlinkGoogleAccount(): Promise<User> {
+  const response = await apiClient.delete<ApiResponse<User>>('/api/v1/profile/link/google');
+  return response.data.data;
+}
+
+export async function unlinkAppleAccount(): Promise<User> {
+  const response = await apiClient.delete<ApiResponse<User>>('/api/v1/profile/link/apple');
+  return response.data.data;
+}
+
+export async function unlinkLineAccount(): Promise<User> {
+  const response = await apiClient.delete<ApiResponse<User>>('/api/v1/profile/link/line');
   return response.data.data;
 }

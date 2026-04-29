@@ -43,6 +43,31 @@ class ProfileService
         $user->tokens()->where('id', '!=', $currentTokenId)->delete();
     }
 
+    public function unlinkProvider(User $user, string $provider): User
+    {
+        $loginMethodCount = array_sum([
+            $user->password !== null      ? 1 : 0,
+            $user->google_id !== null     ? 1 : 0,
+            $user->apple_id !== null      ? 1 : 0,
+            $user->line_id !== null       ? 1 : 0,
+            $user->phone_number !== null  ? 1 : 0,
+        ]);
+
+        if ($loginMethodCount <= 1) {
+            throw new \DomainException('account.minimum_login_method');
+        }
+
+        $field = match ($provider) {
+            'google' => 'google_id',
+            'apple'  => 'apple_id',
+            'line'   => 'line_id',
+        };
+
+        $user->update([$field => null]);
+
+        return $user->fresh();
+    }
+
     public function deleteAccount(User $user): void
     {
         DB::transaction(function () use ($user): void {

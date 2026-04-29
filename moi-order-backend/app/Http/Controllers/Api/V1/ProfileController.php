@@ -22,6 +22,7 @@ use App\Services\GoogleAuthService;
 use App\Services\LineAuthService;
 use App\Services\ProfileService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 /**
  * Principle: SRP — HTTP layer only. ≤20 lines/action. One service call per action.
@@ -95,6 +96,30 @@ class ProfileController extends Controller
             $request->user(),
             LineAuthDTO::fromRequest($request),
         );
+
+        return response()->json(['data' => new UserResource($user)]);
+    }
+
+    /** DELETE /api/v1/profile/link/google */
+    public function unlinkGoogle(Request $request): JsonResponse
+    {
+        $user = $this->profileService->unlinkProvider($request->user(), 'google');
+
+        return response()->json(['data' => new UserResource($user)]);
+    }
+
+    /** DELETE /api/v1/profile/link/apple */
+    public function unlinkApple(Request $request): JsonResponse
+    {
+        $user = $this->profileService->unlinkProvider($request->user(), 'apple');
+
+        return response()->json(['data' => new UserResource($user)]);
+    }
+
+    /** DELETE /api/v1/profile/link/line */
+    public function unlinkLine(Request $request): JsonResponse
+    {
+        $user = $this->profileService->unlinkProvider($request->user(), 'line');
 
         return response()->json(['data' => new UserResource($user)]);
     }

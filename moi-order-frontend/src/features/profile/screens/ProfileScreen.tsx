@@ -26,7 +26,8 @@ function getInitials(name: string): string {
 export function ProfileScreen(): React.JSX.Element {
   const {
     user, isLoading, isRefreshing,
-    name, email, phoneNumber, dateOfBirth, profileErrors, isDirty, isSavingProfile, showDatePicker, isEditingProfile, needsEmailCompletion,
+    name, email, phoneNumber, dateOfBirth, profileErrors, isDirty, isSavingProfile, showDatePicker, isEditingProfile,
+    needsEmailCompletion, isPlaceholderEmail, hasPassword,
     currentPassword, newPassword, confirmPassword, passwordErrors,
     isPasswordSectionOpen, isChangingPassword,
     locale, handleSetLocale,
@@ -39,13 +40,12 @@ export function ProfileScreen(): React.JSX.Element {
     handleDeleteAccount, isDeletingAccount,
   } = useProfileScreen();
   const {
-    isLinkingGoogle,
-    isLinkingApple,
-    isLinkingLine,
+    isLinkingGoogle, isLinkingApple, isLinkingLine,
+    isUnlinkingGoogle, isUnlinkingApple, isUnlinkingLine,
     linkError,
-    handleLinkGoogle,
-    handleLinkApple,
-    handleLinkLine,
+    handleLinkGoogle, handleLinkApple, handleLinkLine,
+    handleUnlinkGoogle, handleUnlinkApple, handleUnlinkLine,
+    dismissLinkError,
   } = useLinkedAccounts();
 
   const t = getProfileStrings(locale);
@@ -96,7 +96,7 @@ export function ProfileScreen(): React.JSX.Element {
                 <View style={styles.emailPromptCopy}>
                   <Text style={styles.emailPromptTitle}>Add your real email</Text>
                   <Text style={styles.emailPromptText}>
-                    Your LINE account signed in without sharing an email. Update it here so your account can receive future updates.
+                    You signed in without an email address. Add one so your account can receive updates.
                   </Text>
                 </View>
               </View>
@@ -117,6 +117,14 @@ export function ProfileScreen(): React.JSX.Element {
             <View style={styles.linkErrorCard}>
               <Ionicons name="alert-circle-outline" size={16} color={colours.danger} />
               <Text style={styles.linkErrorText}>{linkError}</Text>
+              <Pressable
+                onPress={dismissLinkError}
+                style={styles.linkErrorDismiss}
+                accessibilityLabel="Dismiss error"
+                accessibilityRole="button"
+              >
+                <Ionicons name="close" size={16} color={colours.danger} />
+              </Pressable>
             </View>
           )}
 
@@ -258,8 +266,8 @@ export function ProfileScreen(): React.JSX.Element {
                   <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
                     <Ionicons name="mail-outline" size={16} color={colours.primary} />
                   </View>
-                  <Text style={[styles.infoValue, needsEmailCompletion && styles.infoPlaceholder]}>
-                    {needsEmailCompletion ? 'Add your real email address' : (email || '—')}
+                  <Text style={[styles.infoValue, isPlaceholderEmail && styles.infoPlaceholder]}>
+                    {isPlaceholderEmail ? 'Add your real email address' : (email || '—')}
                   </Text>
                 </View>
 
@@ -298,20 +306,33 @@ export function ProfileScreen(): React.JSX.Element {
               <View style={styles.linkCopy}>
                 <Text style={styles.linkTitle}>Google</Text>
                 <Text style={styles.linkSubtitle}>
-                  {user?.has_google ? 'Connected to this account' : 'Use Google to sign in later'}
+                  {user?.has_google ? 'Already connected to this account' : 'Use Google to sign in later'}
                 </Text>
               </View>
-              <Pressable
-                style={[styles.linkBtn, user?.has_google ? styles.linkBtnConnected : styles.linkBtnPrimary]}
-                onPress={handleLinkGoogle}
-                disabled={isLinkingGoogle}
-                accessibilityLabel={user?.has_google ? 'Reconnect Google account' : 'Link Google account'}
-                accessibilityRole="button"
-              >
-                <Text style={[styles.linkBtnText, user?.has_google && styles.linkBtnTextConnected]}>
-                  {isLinkingGoogle ? 'Linking…' : (user?.has_google ? 'Reconnect' : 'Connect')}
-                </Text>
-              </Pressable>
+              <View style={styles.linkActions}>
+                {user?.has_google && (
+                  <Pressable
+                    style={styles.unlinkBtn}
+                    onPress={handleUnlinkGoogle}
+                    disabled={isUnlinkingGoogle || isLinkingGoogle}
+                    accessibilityLabel="Unlink Google account"
+                    accessibilityRole="button"
+                  >
+                    <Ionicons name="remove-circle-outline" size={22} color={colours.danger} />
+                  </Pressable>
+                )}
+                <Pressable
+                  style={[styles.linkBtn, user?.has_google ? styles.linkBtnConnected : styles.linkBtnPrimary]}
+                  onPress={handleLinkGoogle}
+                  disabled={isLinkingGoogle || isUnlinkingGoogle}
+                  accessibilityLabel={user?.has_google ? 'Reconnect Google account' : 'Link Google account'}
+                  accessibilityRole="button"
+                >
+                  <Text style={[styles.linkBtnText, user?.has_google && styles.linkBtnTextConnected]}>
+                    {isUnlinkingGoogle ? 'Unlinking…' : isLinkingGoogle ? 'Linking…' : (user?.has_google ? 'Reconnect' : 'Connect')}
+                  </Text>
+                </Pressable>
+              </View>
             </View>
             <View style={styles.rowSeparator} />
             <View style={styles.linkRow}>
@@ -323,24 +344,37 @@ export function ProfileScreen(): React.JSX.Element {
                 <Text style={styles.linkSubtitle}>
                   {appleUnavailable
                     ? 'Available on iPhone and iPad only'
-                    : (user?.has_apple ? 'Connected to this account' : 'Use Apple to sign in later')}
+                    : (user?.has_apple ? 'Already connected to this account' : 'Use Apple to sign in later')}
                 </Text>
               </View>
-              <Pressable
-                style={[
-                  styles.linkBtn,
-                  user?.has_apple ? styles.linkBtnConnected : styles.linkBtnPrimary,
-                  appleUnavailable && styles.linkBtnDisabled,
-                ]}
-                onPress={handleLinkApple}
-                disabled={isLinkingApple || appleUnavailable}
-                accessibilityLabel={user?.has_apple ? 'Reconnect Apple account' : 'Link Apple account'}
-                accessibilityRole="button"
-              >
-                <Text style={[styles.linkBtnText, user?.has_apple && styles.linkBtnTextConnected]}>
-                  {appleUnavailable ? 'iOS only' : (isLinkingApple ? 'Linking…' : (user?.has_apple ? 'Reconnect' : 'Connect'))}
-                </Text>
-              </Pressable>
+              <View style={styles.linkActions}>
+                {user?.has_apple && !appleUnavailable && (
+                  <Pressable
+                    style={styles.unlinkBtn}
+                    onPress={handleUnlinkApple}
+                    disabled={isUnlinkingApple || isLinkingApple}
+                    accessibilityLabel="Unlink Apple account"
+                    accessibilityRole="button"
+                  >
+                    <Ionicons name="remove-circle-outline" size={22} color={colours.danger} />
+                  </Pressable>
+                )}
+                <Pressable
+                  style={[
+                    styles.linkBtn,
+                    user?.has_apple ? styles.linkBtnConnected : styles.linkBtnPrimary,
+                    appleUnavailable && styles.linkBtnDisabled,
+                  ]}
+                  onPress={handleLinkApple}
+                  disabled={isLinkingApple || isUnlinkingApple || appleUnavailable}
+                  accessibilityLabel={user?.has_apple ? 'Reconnect Apple account' : 'Link Apple account'}
+                  accessibilityRole="button"
+                >
+                  <Text style={[styles.linkBtnText, user?.has_apple && styles.linkBtnTextConnected]}>
+                    {appleUnavailable ? 'iOS only' : isUnlinkingApple ? 'Unlinking…' : isLinkingApple ? 'Linking…' : (user?.has_apple ? 'Reconnect' : 'Connect')}
+                  </Text>
+                </Pressable>
+              </View>
             </View>
             <View style={styles.rowSeparator} />
             <View style={styles.linkRow}>
@@ -350,20 +384,33 @@ export function ProfileScreen(): React.JSX.Element {
               <View style={styles.linkCopy}>
                 <Text style={styles.linkTitle}>LINE</Text>
                 <Text style={styles.linkSubtitle}>
-                  {user?.has_line ? 'Connected to this account' : 'Use LINE to sign in later'}
+                  {user?.has_line ? 'Already connected to this account' : 'Use LINE to sign in later'}
                 </Text>
               </View>
-              <Pressable
-                style={[styles.linkBtn, user?.has_line ? styles.linkBtnConnected : styles.linkBtnPrimary]}
-                onPress={handleLinkLine}
-                disabled={isLinkingLine}
-                accessibilityLabel={user?.has_line ? 'Reconnect LINE account' : 'Link LINE account'}
-                accessibilityRole="button"
-              >
-                <Text style={[styles.linkBtnText, user?.has_line && styles.linkBtnTextConnected]}>
-                  {isLinkingLine ? 'Linking…' : (user?.has_line ? 'Reconnect' : 'Connect')}
-                </Text>
-              </Pressable>
+              <View style={styles.linkActions}>
+                {user?.has_line && (
+                  <Pressable
+                    style={styles.unlinkBtn}
+                    onPress={handleUnlinkLine}
+                    disabled={isUnlinkingLine || isLinkingLine}
+                    accessibilityLabel="Unlink LINE account"
+                    accessibilityRole="button"
+                  >
+                    <Ionicons name="remove-circle-outline" size={22} color={colours.danger} />
+                  </Pressable>
+                )}
+                <Pressable
+                  style={[styles.linkBtn, user?.has_line ? styles.linkBtnConnected : styles.linkBtnPrimary]}
+                  onPress={handleLinkLine}
+                  disabled={isLinkingLine || isUnlinkingLine}
+                  accessibilityLabel={user?.has_line ? 'Reconnect LINE account' : 'Link LINE account'}
+                  accessibilityRole="button"
+                >
+                  <Text style={[styles.linkBtnText, user?.has_line && styles.linkBtnTextConnected]}>
+                    {isUnlinkingLine ? 'Unlinking…' : isLinkingLine ? 'Linking…' : (user?.has_line ? 'Reconnect' : 'Connect')}
+                  </Text>
+                </Pressable>
+              </View>
             </View>
             <View style={styles.rowSeparator} />
             <View style={styles.linkRow}>
@@ -446,16 +493,21 @@ export function ProfileScreen(): React.JSX.Element {
           </View>
           <View style={styles.card}>
             <Pressable
-              style={styles.row}
-              onPress={handleTogglePasswordSection}
-              accessibilityLabel="Change password"
+              style={[styles.row, !hasPassword && styles.rowDisabled]}
+              onPress={hasPassword ? handleTogglePasswordSection : undefined}
+              disabled={!hasPassword}
+              accessibilityLabel={hasPassword ? 'Change password' : 'Change password (not available — no password set)'}
               accessibilityRole="button"
             >
               <View style={[styles.iconBadge, styles.iconBadgeSlate]}>
-                <Ionicons name="lock-closed-outline" size={16} color={colours.medium} />
+                <Ionicons name="lock-closed-outline" size={16} color={hasPassword ? colours.medium : colours.textMuted} />
               </View>
-              <Text style={styles.rowLabel}>{t.changePassword}</Text>
-              <Ionicons name={isPasswordSectionOpen ? 'chevron-up' : 'chevron-forward'} size={18} color={colours.textMuted} />
+              <Text style={[styles.rowLabel, !hasPassword && styles.rowLabelDisabled]}>{t.changePassword}</Text>
+              <Ionicons
+                name={hasPassword ? (isPasswordSectionOpen ? 'chevron-up' : 'chevron-forward') : 'lock-closed'}
+                size={hasPassword ? 18 : 14}
+                color={colours.textMuted}
+              />
             </Pressable>
 
             {isPasswordSectionOpen && (
