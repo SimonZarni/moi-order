@@ -14,8 +14,8 @@ use Illuminate\Support\Collection;
  */
 class NotificationService
 {
-    private const MAX_COUNT   = 10;
-    private const TTL_DAYS    = 7;
+    private const MAX_COUNT   = 30;
+    private const TTL_DAYS    = 30;
 
     /**
      * @return array{notifications: Collection<int, DatabaseNotification>, unread_count: int}

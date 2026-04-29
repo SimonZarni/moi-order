@@ -14,6 +14,20 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     ...shadows.light,
   },
+  alertBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs + 2,
+    borderBottomWidth: 1,
+  },
+  alertText: {
+    flex: 1,
+    fontSize: typography.xs,
+    fontWeight: '600',
+    lineHeight: 16,
+  },
   warningBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -40,6 +54,17 @@ export const styles = StyleSheet.create({
     height: 110,
     borderRadius: radius.md,
     backgroundColor: colours.infoBg,
+  },
+  thumbnailOverlay: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+    width: 22,
+    height: 22,
+    borderRadius: radius.sm,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardInfo: {
     flex: 1,
