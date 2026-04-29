@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAppleAuth } from '@/features/auth/hooks/useAppleAuth';
 import { useLineAuth } from '@/features/auth/hooks/useLineAuth';
 import { useLoginForm, UseLoginFormResult } from '@/features/auth/hooks/useLoginForm';
+import { usePhoneOtpAuth } from '@/features/auth/hooks/usePhoneOtpAuth';
 import { useGoogleAuth } from '@/features/auth/hooks/useGoogleAuth';
 import { login } from '@/shared/api/auth';
 import { useAuthStore } from '@/shared/store/authStore';
@@ -19,12 +20,21 @@ export interface UseLoginScreenResult {
   isGoogleSigningIn: boolean;
   isAppleSigningIn: boolean;
   isLineSigningIn: boolean;
+  isRequestingOtp: boolean;
+  isVerifyingOtp: boolean;
+  resendSecondsLeft: number;
+  phoneNumber: string;
+  otpCode: string;
   bannerError: string;
   showPassword: boolean;
   handleEmailChange: (value: string) => void;
   handlePasswordChange: (value: string) => void;
+  handlePhoneNumberChange: (value: string) => void;
+  handleOtpCodeChange: (value: string) => void;
   handleTogglePassword: () => void;
   handleSubmit: () => void;
+  handleRequestOtp: () => Promise<void>;
+  handleVerifyOtp: () => Promise<void>;
   handleGoogleSignIn: () => Promise<void>;
   handleAppleSignIn: () => Promise<void>;
   handleLineSignIn: () => Promise<void>;
@@ -36,6 +46,7 @@ export function useLoginScreen(): UseLoginScreenResult {
   const queryClient = useQueryClient();
   const { setUser } = useAuthStore();
   const { form, handleEmailChange, handlePasswordChange, validate, applyApiError } = useLoginForm();
+  const phoneOtp = usePhoneOtpAuth({ purpose: 'login' });
   const { handleGoogleSignIn, isGoogleSigningIn, googleBannerError } = useGoogleAuth();
   const { handleAppleSignIn, isAppleSigningIn, appleBannerError } = useAppleAuth();
   const { handleLineSignIn, isLineSigningIn, lineBannerError } = useLineAuth();
@@ -79,12 +90,21 @@ export function useLoginScreen(): UseLoginScreenResult {
     isGoogleSigningIn,
     isAppleSigningIn,
     isLineSigningIn,
-    bannerError: bannerError || googleBannerError || appleBannerError || lineBannerError,
+    isRequestingOtp: phoneOtp.isRequestingOtp,
+    isVerifyingOtp: phoneOtp.isVerifyingOtp,
+    resendSecondsLeft: phoneOtp.resendSecondsLeft,
+    phoneNumber: phoneOtp.phoneNumber,
+    otpCode: phoneOtp.otpCode,
+    bannerError: bannerError || phoneOtp.otpError || googleBannerError || appleBannerError || lineBannerError,
     showPassword,
     handleEmailChange,
     handlePasswordChange,
+    handlePhoneNumberChange: phoneOtp.handlePhoneNumberChange,
+    handleOtpCodeChange: phoneOtp.handleOtpCodeChange,
     handleTogglePassword,
     handleSubmit,
+    handleRequestOtp: phoneOtp.handleRequestOtp,
+    handleVerifyOtp: phoneOtp.handleVerifyOtp,
     handleGoogleSignIn,
     handleAppleSignIn,
     handleLineSignIn,

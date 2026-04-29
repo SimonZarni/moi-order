@@ -24,6 +24,7 @@ export interface UseProfileScreenResult {
   // Profile form
   name: string;
   email: string;
+  phoneNumber: string;
   dateOfBirth: Date | null;
   profileErrors: ReturnType<typeof useProfileForm>['errors'];
   isDirty: boolean;
@@ -42,6 +43,7 @@ export interface UseProfileScreenResult {
   handleToggleEditProfile: () => void;
   handleNameChange: (text: string) => void;
   handleEmailChange: (text: string) => void;
+  handlePhoneNumberChange: (text: string) => void;
   handleDateFieldPress: () => void;
   handleDatePickerChange: (event: DateTimePickerEvent, date?: Date) => void;
   handleSaveProfile: () => void;
@@ -132,7 +134,12 @@ export function useProfileScreen(): UseProfileScreenResult {
       : null;
 
     updateMutation.mutate(
-      { name: profileForm.name.trim(), email: profileForm.email.trim(), dateOfBirth: dobStr },
+      {
+        name: profileForm.name.trim(),
+        email: profileForm.email.trim(),
+        phoneNumber: profileForm.phoneNumber.trim() !== '' ? profileForm.phoneNumber.trim() : null,
+        dateOfBirth: dobStr,
+      },
       {
         onSuccess: () => setIsEditingProfile(false),
         onError:   (err) => profileForm.applyApiError(err),
@@ -234,6 +241,7 @@ export function useProfileScreen(): UseProfileScreenResult {
     isRefreshing,
     name:            profileForm.name,
     email:           profileForm.email,
+    phoneNumber:     profileForm.phoneNumber,
     dateOfBirth:     profileForm.dateOfBirth,
     profileErrors:   profileForm.errors,
     isDirty:          profileForm.isDirty,
@@ -250,6 +258,7 @@ export function useProfileScreen(): UseProfileScreenResult {
     handleToggleEditProfile,
     handleNameChange:    profileForm.handleNameChange,
     handleEmailChange:   profileForm.handleEmailChange,
+    handlePhoneNumberChange: profileForm.handlePhoneNumberChange,
     handleDateFieldPress,
     handleDatePickerChange,
     handleSaveProfile,

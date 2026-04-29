@@ -53,6 +53,12 @@ return [
         'channel_id' => env('LINE_CHANNEL_ID'),
     ],
 
+    'thaibulksms' => [
+        'key' => env('THAIBULKSMS_KEY'),
+        'secret' => env('THAIBULKSMS_SECRET'),
+        'sender' => env('THAIBULKSMS_SENDER'),
+    ],
+
     'firebase' => [
         'project_id'       => env('FIREBASE_PROJECT_ID', 'rock-micron-493118-q1'),
         'credentials_path' => env('FIREBASE_CREDENTIALS_PATH', storage_path('app/firebase-service-account.json')),

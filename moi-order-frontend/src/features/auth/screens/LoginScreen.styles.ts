@@ -76,6 +76,40 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
     marginBottom: spacing.xl,
   },
+  otpHint: {
+    fontSize: typography.xs,
+    color: colours.textMuted,
+    marginTop: -spacing.sm,
+    marginBottom: spacing.md,
+    lineHeight: 18,
+  },
+  otpRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  otpButton: {
+    flex: 1,
+    backgroundColor: colours.primary,
+    borderRadius: radius.lg,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  otpButtonSecondary: {
+    backgroundColor: colours.infoBg,
+  },
+  otpButtonDisabled: {
+    opacity: 0.6,
+  },
+  otpButtonText: {
+    fontSize: typography.sm,
+    fontWeight: '700',
+    color: colours.white,
+  },
+  otpButtonTextSecondary: {
+    color: colours.primary,
+  },
 
   // ── Password eye toggle (rightElement passed to FormField) ─────────────────
   eyeBtn: {

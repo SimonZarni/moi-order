@@ -1,6 +1,12 @@
 import apiClient from '@/shared/api/client';
 import { ApiResponse, AuthResponse, User } from '@/types/models';
 
+export interface OtpRequestResponse {
+  otp_request_id: string;
+  expires_in: number;
+  phone_number: string;
+}
+
 export async function login(email: string, password: string): Promise<AuthResponse['data']> {
   const response = await apiClient.post<AuthResponse>('/api/v1/auth/login', { email, password });
   return response.data.data;
@@ -57,6 +63,50 @@ export async function lineAuth(
     id_token: idToken,
     ...(nonce ? { nonce } : {}),
     ...(name ? { name } : {}),
+  });
+
+  return response.data.data;
+}
+
+export async function requestOtp(
+  phoneNumber: string,
+  purpose: 'login' | 'register',
+): Promise<OtpRequestResponse> {
+  const response = await apiClient.post<ApiResponse<OtpRequestResponse>>('/api/v1/auth/otp/request', {
+    phone_number: phoneNumber,
+    purpose,
+  });
+
+  return response.data.data;
+}
+
+export async function verifyOtpLogin(
+  otpRequestId: string,
+  phoneNumber: string,
+  pin: string,
+): Promise<AuthResponse['data']> {
+  const response = await apiClient.post<AuthResponse>('/api/v1/auth/otp/verify', {
+    otp_request_id: otpRequestId,
+    phone_number: phoneNumber,
+    pin,
+    purpose: 'login',
+  });
+
+  return response.data.data;
+}
+
+export async function verifyOtpRegister(
+  name: string,
+  otpRequestId: string,
+  phoneNumber: string,
+  pin: string,
+): Promise<AuthResponse['data']> {
+  const response = await apiClient.post<AuthResponse>('/api/v1/auth/otp/verify', {
+    name,
+    otp_request_id: otpRequestId,
+    phone_number: phoneNumber,
+    pin,
+    purpose: 'register',
   });
 
   return response.data.data;

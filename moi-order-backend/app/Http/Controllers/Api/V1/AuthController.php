@@ -8,18 +8,23 @@ use App\DTOs\AppleAuthDTO;
 use App\DTOs\GoogleAuthDTO;
 use App\DTOs\LineAuthDTO;
 use App\DTOs\LoginDTO;
+use App\DTOs\OtpRequestDTO;
+use App\DTOs\OtpVerifyDTO;
 use App\DTOs\RegisterDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AppleAuthRequest;
 use App\Http\Requests\GoogleAuthRequest;
 use App\Http\Requests\LineAuthRequest;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\OtpRequestRequest;
+use App\Http\Requests\OtpVerifyRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Services\AppleAuthService;
 use App\Http\Resources\UserResource;
 use App\Services\AuthService;
 use App\Services\GoogleAuthService;
 use App\Services\LineAuthService;
+use App\Services\OtpAuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -34,6 +39,7 @@ class AuthController extends Controller
         private readonly GoogleAuthService $googleAuthService,
         private readonly AppleAuthService $appleAuthService,
         private readonly LineAuthService  $lineAuthService,
+        private readonly OtpAuthService   $otpAuthService,
     ) {}
 
     /** POST /api/v1/auth/login — intentionally public */
@@ -96,6 +102,27 @@ class AuthController extends Controller
         return response()->json([
             'data' => [
                 'user'  => new UserResource($result['user']),
+                'token' => $result['token'],
+            ],
+        ]);
+    }
+
+    /** POST /api/v1/auth/otp/request — intentionally public */
+    public function requestOtp(OtpRequestRequest $request): JsonResponse
+    {
+        return response()->json([
+            'data' => $this->otpAuthService->requestOtp(OtpRequestDTO::fromRequest($request)),
+        ]);
+    }
+
+    /** POST /api/v1/auth/otp/verify — intentionally public */
+    public function verifyOtp(OtpVerifyRequest $request): JsonResponse
+    {
+        $result = $this->otpAuthService->verifyOtp(OtpVerifyDTO::fromRequest($request));
+
+        return response()->json([
+            'data' => [
+                'user' => new UserResource($result['user']),
                 'token' => $result['token'],
             ],
         ]);

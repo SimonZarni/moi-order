@@ -24,12 +24,12 @@ function getInitials(name: string): string {
 export function ProfileScreen(): React.JSX.Element {
   const {
     user, isLoading, isRefreshing,
-    name, email, dateOfBirth, profileErrors, isDirty, isSavingProfile, showDatePicker, isEditingProfile, needsEmailCompletion,
+    name, email, phoneNumber, dateOfBirth, profileErrors, isDirty, isSavingProfile, showDatePicker, isEditingProfile, needsEmailCompletion,
     currentPassword, newPassword, confirmPassword, passwordErrors,
     isPasswordSectionOpen, isChangingPassword,
     locale, handleSetLocale,
     handleToggleEditProfile,
-    handleNameChange, handleEmailChange, handleDateFieldPress, handleDatePickerChange, handleSaveProfile, handleRefresh,
+    handleNameChange, handleEmailChange, handlePhoneNumberChange, handleDateFieldPress, handleDatePickerChange, handleSaveProfile, handleRefresh,
     handleTogglePasswordSection,
     handleCurrentPasswordChange, handleNewPasswordChange, handleConfirmPasswordChange,
     handleChangePassword,
@@ -159,6 +159,26 @@ export function ProfileScreen(): React.JSX.Element {
                   <Text style={styles.errorText}>{profileErrors.email}</Text>
                 )}
 
+                <View style={styles.inputRow}>
+                  <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
+                    <Ionicons name="call-outline" size={16} color={colours.primary} />
+                  </View>
+                  <TextInput
+                    style={[styles.inputField, profileErrors.phoneNumber !== null && styles.inputError]}
+                    value={phoneNumber}
+                    onChangeText={handlePhoneNumberChange}
+                    placeholder="0812345678"
+                    placeholderTextColor={colours.textMuted}
+                    autoCapitalize="none"
+                    keyboardType="phone-pad"
+                    returnKeyType="next"
+                    accessibilityLabel="Phone number"
+                  />
+                </View>
+                {profileErrors.phoneNumber !== null && (
+                  <Text style={styles.errorText}>{profileErrors.phoneNumber}</Text>
+                )}
+
                 {/* Date of birth input */}
                 <View style={[styles.inputRow, { marginTop: 4 }]}>
                   <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
@@ -220,6 +240,15 @@ export function ProfileScreen(): React.JSX.Element {
                   </View>
                   <Text style={[styles.infoValue, needsEmailCompletion && styles.infoPlaceholder]}>
                     {needsEmailCompletion ? 'Add your real email address' : (email || '—')}
+                  </Text>
+                </View>
+
+                <View style={styles.infoRow}>
+                  <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
+                    <Ionicons name="call-outline" size={16} color={colours.primary} />
+                  </View>
+                  <Text style={[styles.infoValue, phoneNumber === '' && styles.infoPlaceholder]}>
+                    {phoneNumber || 'Add a Thai phone number for OTP sign-in'}
                   </Text>
                 </View>
 

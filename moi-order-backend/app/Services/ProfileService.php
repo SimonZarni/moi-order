@@ -9,6 +9,7 @@ use App\DTOs\UpdateProfileDTO;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Principle: SRP — profile domain only (update info, change password).
@@ -19,9 +20,14 @@ class ProfileService
 {
     public function updateProfile(User $user, UpdateProfileDTO $dto): User
     {
+        $phoneNumber = $dto->phoneNumber !== null && trim($dto->phoneNumber) !== ''
+            ? $this->normalizeThaiPhoneNumber($dto->phoneNumber)
+            : null;
+
         $user->update([
             'name'          => $dto->name,
             'email'         => $dto->email,
+            'phone_number'  => $phoneNumber,
             'date_of_birth' => $dto->dateOfBirth,
         ]);
 
@@ -45,6 +51,7 @@ class ProfileService
             $user->update([
                 'name'          => 'Deleted User',
                 'email'         => 'deleted_' . $user->id . '@deleted.invalid',
+                'phone_number'  => null,
                 'date_of_birth' => null,
             ]);
 
@@ -55,5 +62,32 @@ class ProfileService
             // retain their user_id FK but the user is no longer queryable.
             $user->delete();
         });
+    }
+
+    private function normalizeThaiPhoneNumber(string $phoneNumber): string
+    {
+        $digits = preg_replace('/\D+/', '', $phoneNumber) ?? '';
+
+        if ($digits === '') {
+            throw ValidationException::withMessages([
+                'phone_number' => ['Phone number is required.'],
+            ]);
+        }
+
+        if (str_starts_with($digits, '66') && strlen($digits) === 11) {
+            return $digits;
+        }
+
+        if (str_starts_with($digits, '0') && strlen($digits) === 10) {
+            return '66' . substr($digits, 1);
+        }
+
+        if (strlen($digits) === 9 && in_array($digits[0], ['6', '8', '9'], true)) {
+            return '66' . $digits;
+        }
+
+        throw ValidationException::withMessages([
+            'phone_number' => ['Enter a valid Thai mobile number.'],
+        ]);
     }
 }

@@ -24,14 +24,23 @@ export function RegisterScreen(): React.JSX.Element {
     isGoogleSigningIn,
     isAppleSigningIn,
     isLineSigningIn,
+    isRequestingOtp,
+    isVerifyingOtp,
+    resendSecondsLeft,
+    phoneNumber,
+    otpCode,
     bannerError,
     showPassword,
     handleNameChange,
     handleEmailChange,
     handlePasswordChange,
     handlePasswordConfirmationChange,
+    handlePhoneNumberChange,
+    handleOtpCodeChange,
     handleTogglePassword,
     handleSubmit,
+    handleRequestOtp,
+    handleVerifyOtp,
     handleGoogleSignIn,
     handleAppleSignIn,
     handleLineSignIn,
@@ -87,6 +96,56 @@ export function RegisterScreen(): React.JSX.Element {
             />
 
             <FormField
+              label="Thai Phone Number"
+              value={phoneNumber}
+              onChangeText={handlePhoneNumberChange}
+              accessibilityLabel="Thai phone number"
+              placeholder="0812345678"
+              keyboardType="phone-pad"
+              returnKeyType="next"
+            />
+
+            <Text style={styles.otpHint}>Request an SMS code to create an account with your phone number.</Text>
+
+            <FormField
+              label="Verification Code"
+              value={otpCode}
+              onChangeText={handleOtpCodeChange}
+              accessibilityLabel="Verification code"
+              placeholder="6-digit code"
+              keyboardType="number-pad"
+              returnKeyType="next"
+              onSubmitEditing={handleVerifyOtp}
+            />
+
+            <View style={styles.otpRow}>
+              <Pressable
+                style={[
+                  styles.otpButton,
+                  styles.otpButtonSecondary,
+                  (isRequestingOtp || resendSecondsLeft > 0) && styles.otpButtonDisabled,
+                ]}
+                onPress={handleRequestOtp}
+                disabled={isRequestingOtp || resendSecondsLeft > 0}
+                accessibilityLabel="Send SMS code"
+                accessibilityRole="button"
+              >
+                <Text style={[styles.otpButtonText, styles.otpButtonTextSecondary]}>
+                  {isRequestingOtp ? 'Sending…' : resendSecondsLeft > 0 ? `Resend in ${resendSecondsLeft}s` : 'Send OTP'}
+                </Text>
+              </Pressable>
+              <Pressable
+                style={[styles.otpButton, isVerifyingOtp && styles.otpButtonDisabled]}
+                onPress={handleVerifyOtp}
+                disabled={isVerifyingOtp}
+                accessibilityLabel="Create account with OTP"
+                accessibilityRole="button"
+              >
+                <Text style={styles.otpButtonText}>{isVerifyingOtp ? 'Checking…' : 'Create with OTP'}</Text>
+              </Pressable>
+            </View>
+
+            <FormField
               label="Password"
               value={form.password}
               onChangeText={handlePasswordChange}
@@ -131,7 +190,7 @@ export function RegisterScreen(): React.JSX.Element {
 
             <View style={styles.dividerRow}>
               <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or</Text>
+              <Text style={styles.dividerText}>or social sign-up</Text>
               <View style={styles.dividerLine} />
             </View>
 
