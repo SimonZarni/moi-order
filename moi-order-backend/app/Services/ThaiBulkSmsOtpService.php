@@ -15,9 +15,23 @@ class ThaiBulkSmsOtpService
 
     public function requestOtp(string $phoneNumber): string
     {
+        $keyFromConfig  = (string) config('services.thaibulksms.key');
+        $keyFromEnv     = (string) env('THAIBULKSMS_KEY', '');
+        $secretFromConfig = (string) config('services.thaibulksms.secret');
+        $secretFromEnv  = (string) env('THAIBULKSMS_SECRET', '');
+
+        Log::error('ThaiBulkSMS credential diagnostic', [
+            'key_config_length'    => strlen($keyFromConfig),
+            'key_env_length'       => strlen($keyFromEnv),
+            'secret_config_length' => strlen($secretFromConfig),
+            'secret_env_length'    => strlen($secretFromEnv),
+            'key_config_empty'     => $keyFromConfig === '',
+            'secret_config_empty'  => $secretFromConfig === '',
+        ]);
+
         $payload = [
-            'key' => (string) config('services.thaibulksms.key'),
-            'secret' => (string) config('services.thaibulksms.secret'),
+            'key'    => $keyFromConfig,
+            'secret' => $secretFromConfig,
             'msisdn' => $phoneNumber,
         ];
 
