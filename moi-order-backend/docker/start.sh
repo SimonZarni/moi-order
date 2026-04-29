@@ -31,6 +31,11 @@ chmod -R 775 /var/www/html/storage/app/private
 # Laravel optimizations & migrations
 cd /var/www/html
 php artisan storage:link --force
+
+echo ">>> THAIBULKSMS_KEY length: ${#THAIBULKSMS_KEY}"
+echo ">>> THAIBULKSMS_SECRET length: ${#THAIBULKSMS_SECRET}"
+
+php artisan config:clear
 php artisan config:cache
 php artisan view:cache
 php artisan migrate --force
