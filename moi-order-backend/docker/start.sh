@@ -32,6 +32,8 @@ chmod -R 775 /var/www/html/storage/app/private
 cd /var/www/html
 php artisan storage:link --force
 
+echo ">>> All env var names available:"
+printenv | cut -d= -f1 | sort
 echo ">>> THAIBULKSMS_KEY length: ${#THAIBULKSMS_KEY}"
 echo ">>> THAIBULKSMS_SECRET length: ${#THAIBULKSMS_SECRET}"
 
