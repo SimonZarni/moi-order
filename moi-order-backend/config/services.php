@@ -61,8 +61,7 @@ return [
 
     'anthropic' => [
         'api_key' => env('ANTHROPIC_API_KEY'),
-        // claude-3-5-sonnet-20241022: best vision accuracy for document photos at lowest cost
-        'model'   => env('ANTHROPIC_MODEL', 'claude-3-5-sonnet-20241022'),
+        'model'   => env('ANTHROPIC_MODEL', 'claude-sonnet-4-6'),
     ],
 
     'firebase' => [
