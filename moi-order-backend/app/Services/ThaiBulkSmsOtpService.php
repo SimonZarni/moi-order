@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class ThaiBulkSmsOtpService
@@ -22,7 +23,20 @@ class ThaiBulkSmsOtpService
 
         $response = Http::asForm()->timeout(15)->acceptJson()->post(self::REQUEST_URL, $payload);
 
+        Log::debug('ThaiBulkSMS OTP request', [
+            'msisdn'      => $phoneNumber,
+            'http_status' => $response->status(),
+            'body'        => $response->body(),
+            'json'        => $response->json(),
+        ]);
+
         if (! $response->ok()) {
+            Log::error('ThaiBulkSMS OTP request failed', [
+                'msisdn'      => $phoneNumber,
+                'http_status' => $response->status(),
+                'body'        => $response->body(),
+            ]);
+
             throw ValidationException::withMessages([
                 'phone_number' => [$this->resolveErrorMessage($response->json())],
             ]);
@@ -30,7 +44,15 @@ class ThaiBulkSmsOtpService
 
         $token = $response->json('data.token') ?? $response->json('token');
 
+        Log::debug('ThaiBulkSMS OTP token extracted', [
+            'token_present' => is_string($token) && $token !== '',
+        ]);
+
         if (! is_string($token) || $token === '') {
+            Log::error('ThaiBulkSMS OTP token missing in success response', [
+                'json' => $response->json(),
+            ]);
+
             throw ValidationException::withMessages([
                 'phone_number' => ['OTP request failed. Please try again.'],
             ]);
@@ -50,7 +72,18 @@ class ThaiBulkSmsOtpService
 
         $response = Http::asForm()->timeout(15)->acceptJson()->post(self::VERIFY_URL, $payload);
 
+        Log::debug('ThaiBulkSMS OTP verify', [
+            'http_status' => $response->status(),
+            'body'        => $response->body(),
+            'json'        => $response->json(),
+        ]);
+
         if (! $response->ok()) {
+            Log::error('ThaiBulkSMS OTP verify failed', [
+                'http_status' => $response->status(),
+                'body'        => $response->body(),
+            ]);
+
             throw ValidationException::withMessages([
                 'pin' => [$this->resolveErrorMessage($response->json())],
             ]);
