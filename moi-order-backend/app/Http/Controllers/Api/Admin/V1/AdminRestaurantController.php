@@ -93,6 +93,7 @@ class AdminRestaurantController extends Controller
         $user->update(['is_merchant' => true]);
 
         $restaurant = $this->restaurantService->create($user, $data);
+        $restaurant->load('merchant');
 
         return response()->json([
             'data' => (new RestaurantResource($restaurant, $this->storage))->resolve($request),
@@ -102,6 +103,7 @@ class AdminRestaurantController extends Controller
     public function update(UpdateAdminRestaurantRequest $request, Restaurant $restaurant): JsonResponse
     {
         $restaurant = $this->restaurantService->update($restaurant, $request->validated());
+        $restaurant->load('merchant');
 
         return response()->json([
             'data' => (new RestaurantResource($restaurant, $this->storage))->resolve($request),

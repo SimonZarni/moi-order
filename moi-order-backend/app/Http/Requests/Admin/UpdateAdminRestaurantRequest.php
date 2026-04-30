@@ -39,9 +39,26 @@ class UpdateAdminRestaurantRequest extends FormRequest
 
     public function prepareForValidation(): void
     {
+        $merge = [];
+
+        // FormData sends booleans as "true"/"false" strings — coerce to real booleans.
+        if ($this->has('is_delivery_available')) {
+            $merge['is_delivery_available'] = $this->boolean('is_delivery_available');
+        }
+        if ($this->has('is_pickup_available')) {
+            $merge['is_pickup_available'] = $this->boolean('is_pickup_available');
+        }
+        if ($this->has('min_order_cents')) {
+            $merge['min_order_cents'] = (int) $this->input('min_order_cents');
+        }
+
         // FormData sends opening_hours as a JSON string — decode it back to array.
         if (is_string($this->input('opening_hours'))) {
-            $this->merge(['opening_hours' => json_decode($this->input('opening_hours'), true) ?? []]);
+            $merge['opening_hours'] = json_decode($this->input('opening_hours'), true) ?? [];
+        }
+
+        if (! empty($merge)) {
+            $this->merge($merge);
         }
     }
 
