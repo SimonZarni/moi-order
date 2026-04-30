@@ -29,7 +29,7 @@ class RestaurantBrowseController extends Controller
 
         return response()->json([
             'data' => collect($restaurants->items())
-                ->map(fn ($r) => (new RestaurantResource($r, $this->storage))->toArray($request))
+                ->map(fn ($r) => (new RestaurantResource($r, $this->storage))->resolve($request))
                 ->values(),
             'meta' => [
                 'current_page' => $restaurants->currentPage(),

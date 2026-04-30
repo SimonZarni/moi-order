@@ -6,16 +6,18 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
 import Table from '@mui/material/Table';
-import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
+import Button from '@mui/material/Button';
+import Switch from '@mui/material/Switch';
+import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import InputLabel from '@mui/material/InputLabel';
-import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -53,6 +55,19 @@ export function RestaurantsView() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterSearch, setFilterSearch] = useState('');
+  const [togglingId, setTogglingId] = useState<number | null>(null);
+
+  const handleToggleOpen = useCallback((row: RestaurantListItem) => {
+    const next = row.status === 'open' ? 'closed' : 'open';
+    setTogglingId(row.id);
+    restaurantsApi
+      .updateStatus(row.id, next as RestaurantListItem['status'])
+      .then(({ status }) => {
+        setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, status } : r)));
+      })
+      .catch(() => {})
+      .finally(() => setTogglingId(null));
+  }, []);
 
   const fetchRestaurants = useCallback(() => {
     setLoading(true);
@@ -185,9 +200,19 @@ export function RestaurantsView() {
                           </Box>
                         </TableCell>
                         <TableCell>
-                          <Label color={STATUS_COLOR[row.status] ?? 'default'}>
-                            {row.status}
-                          </Label>
+                          <Tooltip title={row.status === 'open' ? 'Click to close' : 'Click to open'}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <Switch
+                                size="small"
+                                checked={row.status === 'open'}
+                                disabled={togglingId === row.id}
+                                onChange={() => handleToggleOpen(row)}
+                              />
+                              <Label color={STATUS_COLOR[row.status] ?? 'default'}>
+                                {row.status}
+                              </Label>
+                            </Box>
+                          </Tooltip>
                         </TableCell>
                         <TableCell align="right">
                           <IconButton
