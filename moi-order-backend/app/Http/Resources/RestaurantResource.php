@@ -33,6 +33,11 @@ class RestaurantResource extends JsonResource
         return [
             'id'                    => $this->id,
             'name'                  => $this->name,
+            'merchant'              => $this->whenLoaded('merchant', fn () => [
+                'id'    => $this->merchant->id,
+                'name'  => $this->merchant->name,
+                'email' => $this->merchant->email,
+            ]),
             'description'           => $this->description,
             'address'               => $this->address,
             'latitude'              => $this->latitude,
