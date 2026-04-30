@@ -1,17 +1,18 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { styles } from './TagFilterSheet.styles';
 import type { Tag } from '@/types/models';
 
 interface Props {
-  visible:   boolean;
-  allTags:   Tag[];
+  visible:    boolean;
+  allTags:    Tag[];
+  isLoading:  boolean;
   activeTags: number[];
-  onApply:   (tagIds: number[]) => void;
-  onDismiss: () => void;
+  onApply:    (tagIds: number[]) => void;
+  onDismiss:  () => void;
 }
 
-export function TagFilterSheet({ visible, allTags, activeTags, onApply, onDismiss }: Props): React.JSX.Element {
+export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onApply, onDismiss }: Props): React.JSX.Element {
   const [selected, setSelected] = useState<Set<number>>(new Set(activeTags));
   const allSelected = selected.size === allTags.length && allTags.length > 0;
 
@@ -68,7 +69,11 @@ export function TagFilterSheet({ visible, allTags, activeTags, onApply, onDismis
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            {allTags.length === 0 ? (
+            {isLoading ? (
+              <View style={styles.empty}>
+                <ActivityIndicator size="small" />
+              </View>
+            ) : allTags.length === 0 ? (
               <View style={styles.empty}>
                 <Text style={styles.emptyText}>No tags available</Text>
               </View>

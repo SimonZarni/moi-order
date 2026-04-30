@@ -40,7 +40,7 @@ export function PlacesMapScreen(): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const {
     displayedPlaces, selectedPlace, selectedDetail,
-    isLoadingPlaces, isTabSwitching, isLoadingDetail, isError,
+    isLoadingPlaces, isLoadingTags, isTabSwitching, isLoadingDetail, isError,
     cameraRef, userLocation,
     searchQuery, placeSuggestions, geoSuggestions, isGeoLoading,
     categories, allTags, activeTab, activeCategory, activeTags,
@@ -194,6 +194,7 @@ export function PlacesMapScreen(): React.JSX.Element {
           <TagFilterSheet
             visible={showTagFilter}
             allTags={allTags}
+            isLoading={isLoadingTags}
             activeTags={activeTags}
             onApply={handleApplyTags}
             onDismiss={handleDismissTagFilter}

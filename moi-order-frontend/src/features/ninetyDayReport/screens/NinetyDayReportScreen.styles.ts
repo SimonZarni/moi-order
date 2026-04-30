@@ -48,10 +48,12 @@ export const styles = StyleSheet.create({
     fontSize: typography.md,
     color: colours.danger,
     textAlign: 'center',
+    lineHeight: 28,
   },
   emptyText: {
     fontSize: typography.md,
     color: colours.textMuted,
     textAlign: 'center',
+    lineHeight: 28,
   },
 });

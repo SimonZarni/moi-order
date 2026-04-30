@@ -4,7 +4,7 @@ const lineChannelId = process.env.EXPO_PUBLIC_LINE_CHANNEL_ID ?? "2008805625";
 /** @type {import('expo/config').ExpoConfig} */
 module.exports = {
   expo: {
-    name: "moi-order-frontend",
+    name: "Moi Order",
     slug: "moi-order-frontend",
     owner: "simonzarni",
     scheme: "moiorder",

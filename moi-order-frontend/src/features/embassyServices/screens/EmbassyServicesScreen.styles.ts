@@ -67,7 +67,7 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.textOnLight,
     letterSpacing: -0.3,
-    lineHeight: 28,
+    lineHeight: 32,
   },
   serviceCardPrice: {
     fontSize: typography.md,
@@ -98,10 +98,12 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     color: colours.danger,
     textAlign: 'center',
+    lineHeight: 24,
   },
   emptyText: {
     fontSize: typography.sm,
     color: colours.textMuted,
     textAlign: 'center',
+    lineHeight: 24,
   },
 });

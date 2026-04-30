@@ -38,6 +38,7 @@ export interface UsePlacesMapScreenResult {
   selectedPlace:    Place | null;
   selectedDetail:   Place | null;
   isLoadingPlaces:  boolean;
+  isLoadingTags:    boolean;
   isTabSwitching:   boolean;
   isLoadingDetail:  boolean;
   isError:          boolean;
@@ -109,7 +110,7 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const { places, isLoading: isLoadingPlaces, isError, refetch } = usePlacesList();
   const { place: selectedDetail, isLoading: isLoadingDetail } =
     usePlaceDetailForMap(selectedPlace?.id ?? null);
-  const { tags: fetchedTags } = useTagsList();
+  const { tags: fetchedTags, isLoading: isLoadingTags } = useTagsList();
 
   // ── GPS ───────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -142,21 +143,6 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
       return acc;
     }, []).sort((a, b) => a.name_en.localeCompare(b.name_en));
   }, [places]);
-
-  const allTags = useMemo<Tag[]>(() => {
-    if (fetchedTags.length > 0) {
-      return fetchedTags;
-    }
-
-    const byId = new Map<number, Tag>();
-    for (const place of places) {
-      for (const tag of place.tags ?? []) {
-        byId.set(tag.id, tag);
-      }
-    }
-
-    return [...byId.values()].sort((a, b) => a.name_en.localeCompare(b.name_en));
-  }, [fetchedTags, places]);
 
   const nearbyPlaces = useMemo(() => {
     const coords = userLocation?.coords ?? gpsCoords;
@@ -385,10 +371,10 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
 
   return {
     displayedPlaces, selectedPlace, selectedDetail,
-    isLoadingPlaces, isTabSwitching, isLoadingDetail, isError,
+    isLoadingPlaces, isLoadingTags, isTabSwitching, isLoadingDetail, isError,
     cameraRef, userLocation,
     searchQuery, placeSuggestions, geoSuggestions, isGeoLoading,
-    categories, allTags, activeTab, activeCategory, activeTags,
+    categories, allTags: fetchedTags, activeTab, activeCategory, activeTags,
     isFABOpen, showTagFilter,
     drivingRoute, walkingRoute, isLoadingRoutes,
     longPressCoords, showLocationOptions, longPressMarker,

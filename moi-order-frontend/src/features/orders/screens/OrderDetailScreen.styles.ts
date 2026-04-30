@@ -76,6 +76,7 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: colours.tertiary,
     letterSpacing: 0.2,
+    lineHeight: 24,
   },
 
   // Hero text
@@ -89,6 +90,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 2.5,
     textTransform: 'uppercase',
     marginBottom: 4,
+    lineHeight: 18,
   },
   heroTitle: {
     fontSize: 26,
@@ -123,6 +125,7 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
     letterSpacing: 2,
     textTransform: 'uppercase',
+    lineHeight: 20,
   },
   sectionLine: {
     flex: 1,
@@ -153,6 +156,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 1,
     textTransform: 'uppercase',
     marginBottom: 4,
+    lineHeight: 20,
   },
   statusCardServiceName: {
     fontSize: typography.md,
@@ -172,6 +176,7 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.textOnLight, // overridden inline per status
     letterSpacing: -0.2,
+    lineHeight: 32,
   },
   statusCardPrice: {
     fontSize: typography.xl,
@@ -194,6 +199,7 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.white,
     letterSpacing: 0.4,
+    lineHeight: 28,
   },
 
   // ── Download button ────────────────────────────────────────────────────────
@@ -210,6 +216,7 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.white,
     letterSpacing: 0.4,
+    lineHeight: 28,
   },
   downloadError: {
     fontSize: typography.xs,
@@ -276,7 +283,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.xs,
     color: colours.textMuted,
     fontWeight: '500',
-    lineHeight: 18,
+    lineHeight: 20,
   },
   infoValue: {
     fontSize: typography.sm,
@@ -284,7 +291,7 @@ export const styles = StyleSheet.create({
     color: colours.textOnLight,
     maxWidth: '60%',
     textAlign: 'right',
-    lineHeight: 22,
+    lineHeight: 24,
   },
 
   // ── Document row ────────────────────────────────────────────────────────────
@@ -314,7 +321,7 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: colours.textOnLight,
     flex: 1,
-    lineHeight: 22,
+    lineHeight: 24,
   },
   docCheck: {
     fontSize: 12,
@@ -331,7 +338,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.backgroundLight,
   },
   stateIcon: { fontSize: 36, marginBottom: spacing.sm, opacity: 0.5 },
-  stateTitle: { fontSize: typography.md, fontWeight: '700', color: colours.textOnLight, marginBottom: 4 },
-  stateSubtitle: { fontSize: typography.sm, color: colours.textMuted },
+  stateTitle: { fontSize: typography.md, fontWeight: '700', color: colours.textOnLight, marginBottom: 4, lineHeight: 28 },
+  stateSubtitle: { fontSize: typography.sm, color: colours.textMuted, lineHeight: 24 },
   spinner: { color: colours.tertiary } as unknown as { color: string },
 });

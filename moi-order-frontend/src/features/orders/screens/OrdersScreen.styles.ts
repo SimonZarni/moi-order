@@ -117,7 +117,7 @@ export const styles = StyleSheet.create({
     color: colours.textOnLight,
     letterSpacing: -0.2,
     marginRight: spacing.sm,
-    lineHeight: 24,
+    lineHeight: 28,
   },
   statusPill: {
     borderRadius: radius.full,
@@ -133,6 +133,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 0.8,
     textTransform: 'uppercase',
     color: colours.medium, // overridden per status inline
+    lineHeight: 18,
   },
   cardMetaRow: {
     flexDirection: 'row',
@@ -175,12 +176,13 @@ export const styles = StyleSheet.create({
     color: colours.textOnLight,
     marginBottom: 6,
     letterSpacing: -0.3,
+    lineHeight: 32,
   },
   emptySubtitle: {
     fontSize: typography.sm,
     color: colours.textMuted,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 24,
   },
 
   // ── Guest state ────────────────────────────────────────────────────────────
@@ -203,12 +205,13 @@ export const styles = StyleSheet.create({
     color: colours.textOnLight,
     marginBottom: 6,
     letterSpacing: -0.3,
+    lineHeight: 32,
   },
   guestSubtitle: {
     fontSize: typography.sm,
     color: colours.textMuted,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 24,
     marginBottom: spacing.lg,
   },
   guestBtn: {
@@ -225,6 +228,7 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.white,
     letterSpacing: 0.3,
+    lineHeight: 24,
   },
 
   // ── States ────────────────────────────────────────────────────────────────
@@ -245,10 +249,12 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.textOnLight,
     marginBottom: 4,
+    lineHeight: 28,
   },
   stateSubtitle: {
     fontSize: typography.sm,
     color: colours.textMuted,
+    lineHeight: 24,
   },
   spinner: {
     color: colours.tertiary,

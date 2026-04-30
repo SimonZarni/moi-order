@@ -25,15 +25,15 @@ export const styles = StyleSheet.create({
   // ── Sticky section (tab row, never scrolls) ──────────────────────────────
   stickyTabBar: {
     backgroundColor: colours.backgroundLight,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.md,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.xs,
   },
 
   // ── Tabs ──────────────────────────────────────────────────────────────────
   tabRow: {
     flexDirection: 'row',
     marginHorizontal: spacing.lg,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
     backgroundColor: 'rgba(0,0,0,0.05)',
     borderRadius: radius.full,
     padding: 3,

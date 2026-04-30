@@ -32,7 +32,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     color: colours.textMuted,
     marginTop: 2,
-    lineHeight: 22,
+    lineHeight: 24,
   },
   priceRow: {
     flexDirection: 'row',

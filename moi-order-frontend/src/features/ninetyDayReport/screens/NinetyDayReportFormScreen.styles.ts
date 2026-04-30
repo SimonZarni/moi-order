@@ -41,17 +41,20 @@ export const styles = StyleSheet.create({
     color: colours.tertiary,
     fontWeight: '600',
     letterSpacing: 0.2,
+    lineHeight: 24,
   },
   headerTypeName: {
     fontSize: typography.sm,
     color: colours.medium,
     fontWeight: '500',
+    lineHeight: 24,
   },
   headerTitle: {
-    fontSize: typography.xxl,
+    fontSize: 26,
     fontWeight: '900',
     color: colours.textOnDark,
     letterSpacing: -0.5,
+    lineHeight: 38,
   },
   headerPriceBadge: {
     backgroundColor: 'rgba(82,121,111,0.3)',
@@ -89,6 +92,7 @@ export const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginBottom: spacing.md,
     marginTop: spacing.md,
+    lineHeight: 20,
   },
 
   // ── Sticky submit bar ─────────────────────────────────────────────────────
@@ -120,5 +124,6 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.white,
     letterSpacing: 0.4,
+    lineHeight: 28,
   },
 });

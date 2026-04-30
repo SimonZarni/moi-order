@@ -80,11 +80,11 @@ export const styles = StyleSheet.create({
     marginBottom: 4,
   },
   title: {
-    fontSize: typography.hero,
+    fontSize: 26,
     fontWeight: '900',
     color: colours.textOnDark,
     letterSpacing: -0.8,
-    lineHeight: 36,
+    lineHeight: 38,
   },
   subtitle: {
     fontSize: typography.xs,

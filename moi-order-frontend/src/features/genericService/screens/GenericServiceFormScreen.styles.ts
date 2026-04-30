@@ -35,12 +35,14 @@ export const styles = StyleSheet.create({
     color: colours.tertiary,
     fontWeight: '600',
     letterSpacing: 0.2,
+    lineHeight: 24,
   },
   headerTitle: {
-    fontSize: typography.xxl,
+    fontSize: 26,
     fontWeight: '900',
     color: colours.textOnDark,
     letterSpacing: -0.5,
+    lineHeight: 38,
   },
   headerPriceBadge: {
     backgroundColor: 'rgba(82,121,111,0.3)',
@@ -76,13 +78,14 @@ export const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginBottom: spacing.md,
     marginTop: spacing.md,
+    lineHeight: 20,
   },
   emptySchemaText: {
     fontSize: typography.sm,
     color: colours.textMuted,
     textAlign: 'center',
     marginTop: spacing.xl,
-    lineHeight: 22,
+    lineHeight: 24,
   },
 
   // ── Field ─────────────────────────────────────────────────────────────────
@@ -94,6 +97,7 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: colours.textOnLight,
     marginBottom: 6,
+    lineHeight: 24,
   },
   fieldRequired: {
     color: colours.danger,
@@ -121,6 +125,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.xs,
     color: colours.danger,
     marginTop: 4,
+    lineHeight: 20,
   },
 
   // ── Select options ────────────────────────────────────────────────────────
@@ -148,6 +153,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     color: colours.textOnLight,
     fontWeight: '500',
+    lineHeight: 24,
   },
   optionBtnTextSelected: {
     color: colours.white,
@@ -170,6 +176,7 @@ export const styles = StyleSheet.create({
   boolLabel: {
     fontSize: typography.md,
     color: colours.textOnLight,
+    lineHeight: 28,
   },
 
   // ── File picker ───────────────────────────────────────────────────────────
@@ -193,6 +200,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     color: colours.textMuted,
     flex: 1,
+    lineHeight: 24,
   },
   fileBtnTextSelected: {
     color: colours.primary,
@@ -228,5 +236,6 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.white,
     letterSpacing: 0.4,
+    lineHeight: 28,
   },
 });

@@ -101,6 +101,7 @@ export const styles = StyleSheet.create({
   heroGreeting: {
     fontSize: typography.xs,
     color: colours.medium,
+    lineHeight: 20,
     marginBottom: 5,
   },
   heroTitle: {
@@ -108,6 +109,7 @@ export const styles = StyleSheet.create({
     fontWeight: "900",
     color: colours.textOnDark,
     letterSpacing: -0.5,
+    lineHeight: 38,
   },
   heroTitleAccent: {
     color: colours.tertiary,
@@ -175,7 +177,7 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
     letterSpacing: 2,
     textTransform: "uppercase",
-    lineHeight: 18,
+    lineHeight: 20,
   },
   sectionLine: {
     flex: 1,
@@ -239,7 +241,7 @@ export const styles = StyleSheet.create({
     fontWeight: "800",
     color: colours.textOnLight,
     letterSpacing: -0.2,
-    lineHeight: 28,
+    lineHeight: 32,
     marginBottom: 3,
   },
   cardSubtitle: {
