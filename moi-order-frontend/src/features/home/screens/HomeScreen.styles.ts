@@ -1,12 +1,12 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from "react-native";
 
-import { colours } from '@/shared/theme/colours';
-import { editorialPalette } from '@/shared/theme/editorialPalette';
-import { radius } from '@/shared/theme/radius';
-import { shadows } from '@/shared/theme/shadows';
-import { spacing } from '@/shared/theme/spacing';
-import { typography } from '@/shared/theme/typography';
-import { TAB_BAR_CLEARANCE } from '@/shared/components/FloatingTabBar/FloatingTabBar.styles';
+import { colours } from "@/shared/theme/colours";
+import { editorialPalette } from "@/shared/theme/editorialPalette";
+import { radius } from "@/shared/theme/radius";
+import { shadows } from "@/shared/theme/shadows";
+import { spacing } from "@/shared/theme/spacing";
+import { typography } from "@/shared/theme/typography";
+import { TAB_BAR_CLEARANCE } from "@/shared/components/FloatingTabBar/FloatingTabBar.styles";
 
 export const styles = StyleSheet.create({
   root: {
@@ -21,16 +21,16 @@ export const styles = StyleSheet.create({
   // ── Hero ──────────────────────────────────────────────────────────────────
   hero: {
     backgroundColor: colours.backgroundDark,
-    paddingHorizontal: spacing.xl + spacing.sm, // 40
+    paddingHorizontal: spacing.xl + spacing.sm,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.md,
-    overflow: 'hidden',
+    paddingBottom: spacing.xl, // ← increase this (was spacing.md)
+    overflow: "hidden",
     minHeight: 180,
   },
 
   // Decorative background orbs (pure shape, no blur — conveys depth)
   orbLarge: {
-    position: 'absolute',
+    position: "absolute",
     width: 200,
     height: 200,
     borderRadius: radius.orbLarge,
@@ -40,7 +40,7 @@ export const styles = StyleSheet.create({
     right: -50,
   },
   orbSmall: {
-    position: 'absolute',
+    position: "absolute",
     width: 80,
     height: 80,
     borderRadius: radius.orbSmall,
@@ -52,8 +52,8 @@ export const styles = StyleSheet.create({
 
   // Brand row
   brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 7,
   },
   brandDot: {
@@ -64,16 +64,16 @@ export const styles = StyleSheet.create({
   },
   brandLabel: {
     fontSize: typography.xs,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colours.tertiary,
     letterSpacing: 3,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
 
   heroTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
   },
   authBtn: {
@@ -85,12 +85,12 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.ghostBg,
     minWidth: 44,
     minHeight: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   authBtnText: {
     fontSize: typography.xs,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colours.textOnDark,
     letterSpacing: 0.4,
   },
@@ -105,7 +105,7 @@ export const styles = StyleSheet.create({
   },
   heroTitle: {
     fontSize: 26,
-    fontWeight: '900',
+    fontWeight: "900",
     color: colours.textOnDark,
     letterSpacing: -0.5,
   },
@@ -115,30 +115,37 @@ export const styles = StyleSheet.create({
 
   // ── Search row ────────────────────────────────────────────────────────────
   searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.sm,
     marginTop: spacing.md,
   },
   searchBox: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.12)',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.12)",
     borderRadius: radius.full,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     minHeight: 44,
     gap: spacing.xs,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.18)',
+    borderColor: "rgba(255,255,255,0.18)",
   },
-  searchIcon:        { fontSize: 14 },
-  searchPlaceholder: { fontSize: typography.xs, color: 'rgba(255,255,255,0.55)', flex: 1 },
+  searchIcon: { fontSize: 14 },
+  searchPlaceholder: {
+    fontSize: typography.xs,
+    color: "rgba(255,255,255,0.55)",
+    flex: 1,
+  },
   mapBtn: {
-    width: 44, height: 44, borderRadius: radius.full,
+    width: 44,
+    height: 44,
+    borderRadius: radius.full,
     backgroundColor: colours.tertiary,
-    alignItems: 'center', justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   mapBtnIcon: { fontSize: 20 },
 
@@ -148,7 +155,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.backgroundLight,
     borderTopLeftRadius: radius.sheet,
     borderTopRightRadius: radius.sheet,
-    marginTop: -spacing.xl,
+    marginTop: -radius.sheet, // only the curve overlaps
     paddingTop: spacing.lg,
     paddingHorizontal: spacing.lg,
     paddingBottom: TAB_BAR_CLEARANCE,
@@ -157,32 +164,31 @@ export const styles = StyleSheet.create({
 
   // Section label with trailing rule
   sectionLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.sm,
     marginBottom: spacing.md,
   },
   sectionLabel: {
     fontSize: typography.xs,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colours.textMuted,
     letterSpacing: 2,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     lineHeight: 18,
   },
   sectionLine: {
     flex: 1,
     height: 1,
-    backgroundColor: 'rgba(0,0,0,0.07)',
+    backgroundColor: "rgba(0,0,0,0.07)",
   },
 
   // ── 2×2 Grid ──────────────────────────────────────────────────────────────
   gridRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: spacing.md,
     marginBottom: spacing.md,
   },
-
 
   // ── Card base ─────────────────────────────────────────────────────────────
   card: {
@@ -200,37 +206,37 @@ export const styles = StyleSheet.create({
   },
 
   // Card accent border variants
-  cardAccentSage:  { borderTopColor: editorialPalette.sage },
+  cardAccentSage: { borderTopColor: editorialPalette.sage },
   cardAccentSlate: { borderTopColor: editorialPalette.slate },
-  cardAccentGold:  { borderTopColor: editorialPalette.gold },
-  cardAccentTeal:  { borderTopColor: editorialPalette.teal },
-  cardAccentRose:  { borderTopColor: editorialPalette.rose },
-  cardAccentSky:   { borderTopColor: editorialPalette.sky },
+  cardAccentGold: { borderTopColor: editorialPalette.gold },
+  cardAccentTeal: { borderTopColor: editorialPalette.teal },
+  cardAccentRose: { borderTopColor: editorialPalette.rose },
+  cardAccentSky: { borderTopColor: editorialPalette.sky },
   cardAccentIndigo: { borderTopColor: editorialPalette.indigo },
-  cardAccentCoral:  { borderTopColor: editorialPalette.coral },
-  cardAccentNavy:   { borderTopColor: editorialPalette.navy },
+  cardAccentCoral: { borderTopColor: editorialPalette.coral },
+  cardAccentNavy: { borderTopColor: editorialPalette.navy },
 
   // Card text
   cardTag: {
     fontSize: typography.xxs,
-    fontWeight: '700',
+    fontWeight: "700",
     letterSpacing: 1.2,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     marginBottom: spacing.xs,
   },
-  tagSage:  { color: editorialPalette.sage },
+  tagSage: { color: editorialPalette.sage },
   tagSlate: { color: editorialPalette.slate },
-  tagGold:  { color: editorialPalette.gold },
-  tagTeal:  { color: editorialPalette.teal },
-  tagRose:  { color: editorialPalette.rose },
-  tagSky:    { color: editorialPalette.sky },
+  tagGold: { color: editorialPalette.gold },
+  tagTeal: { color: editorialPalette.teal },
+  tagRose: { color: editorialPalette.rose },
+  tagSky: { color: editorialPalette.sky },
   tagIndigo: { color: editorialPalette.indigo },
-  tagCoral:  { color: editorialPalette.coral },
-  tagNavy:   { color: editorialPalette.navy },
+  tagCoral: { color: editorialPalette.coral },
+  tagNavy: { color: editorialPalette.navy },
 
   cardTitle: {
     fontSize: typography.lg,
-    fontWeight: '800',
+    fontWeight: "800",
     color: colours.textOnLight,
     letterSpacing: -0.2,
     lineHeight: 28,
@@ -243,7 +249,7 @@ export const styles = StyleSheet.create({
   },
 
   cardIcon: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 6,
     right: 8,
     opacity: 0.8,
@@ -251,21 +257,21 @@ export const styles = StyleSheet.create({
 
   // ── Coming-soon pill ──────────────────────────────────────────────────────
   soonPill: {
-    position: 'absolute',
+    position: "absolute",
     top: spacing.md,
     right: spacing.md,
     backgroundColor: colours.infoBg,
     borderRadius: radius.full,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.08)',
+    borderColor: "rgba(0,0,0,0.08)",
     paddingVertical: 2,
     paddingHorizontal: 7,
   },
   soonText: {
     fontSize: 8,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colours.textMuted,
     letterSpacing: 1,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
 });

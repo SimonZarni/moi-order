@@ -108,6 +108,7 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.textOnDark,
     letterSpacing: -0.4,
+    lineHeight: 36,
     marginBottom: 4,
   },
   heroEmail: {
@@ -331,7 +332,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.md,
     color: colours.textOnLight,
     fontWeight: '500',
-    lineHeight: 24,
+    lineHeight: 28,
   },
   rowDisabled: {
     opacity: 0.45,
@@ -430,6 +431,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.md,
     color: colours.textOnLight,
     fontWeight: '500',
+    lineHeight: 26,
     paddingBottom: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colours.infoBg,
@@ -453,7 +455,7 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.white,
     letterSpacing: 0.5,
-    lineHeight: 22,
+    lineHeight: 26,
   },
 
   // ── Expanded change-password form ──────────────────────────────────────────
@@ -492,7 +494,7 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.white,
     letterSpacing: 0.4,
-    lineHeight: 22,
+    lineHeight: 26,
   },
 
   // ── Language switcher ─────────────────────────────────────────────────────
@@ -519,7 +521,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     fontWeight: '600',
     color: colours.textMuted,
-    lineHeight: 22,
+    lineHeight: 26,
   },
   langBtnTextActive: {
     color: colours.primary,

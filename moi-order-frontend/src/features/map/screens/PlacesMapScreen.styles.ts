@@ -1,14 +1,15 @@
 import { StyleSheet } from 'react-native';
 import { MAP_COLORS } from '@/shared/theme/mapTheme';
+import { colours } from '@/shared/theme/colours';
 
 export const styles = StyleSheet.create({
   flex:      { flex: 1 },
-  safe:      { flex: 1, backgroundColor: MAP_COLORS.background },
+  safe:      { flex: 1, backgroundColor: colours.backgroundDark },
   container: { flex: 1 },
   map:       { flex: 1 },
 
   backBtn: {
-    position: 'absolute', top: 60, left: 16, zIndex: 20,
+    position: 'absolute', top: 16, left: 16, zIndex: 20,
     backgroundColor: MAP_COLORS.surface, borderRadius: 20,
     paddingHorizontal: 14, paddingVertical: 8,
     shadowColor: MAP_COLORS.black, shadowOffset: { width: 0, height: 2 },

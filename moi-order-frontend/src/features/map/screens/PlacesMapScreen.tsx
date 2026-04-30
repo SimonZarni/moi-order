@@ -1,7 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import MapboxGL from '@rnmapbox/maps';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -41,7 +40,7 @@ export function PlacesMapScreen(): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const {
     displayedPlaces, selectedPlace, selectedDetail,
-    isLoadingPlaces, isLoadingDetail, isError,
+    isLoadingPlaces, isTabSwitching, isLoadingDetail, isError,
     cameraRef, userLocation,
     searchQuery, placeSuggestions, geoSuggestions, isGeoLoading,
     categories, allTags, activeTab, activeCategory, activeTags,
@@ -58,14 +57,13 @@ export function PlacesMapScreen(): React.JSX.Element {
   } = usePlacesMapScreen();
 
   return (
-    <GestureHandlerRootView style={styles.flex}>
-      <SafeAreaView style={styles.safe} edges={['top']}>
-        {/* Back button */}
-        <View style={styles.backBtn}>
-          <Text style={styles.backText} onPress={() => navigation.goBack()}>← Back</Text>
-        </View>
-
+    <SafeAreaView style={styles.safe} edges={['top']}>
         <View style={styles.container}>
+          {/* Back button */}
+          <Pressable style={styles.backBtn} onPress={() => navigation.goBack()}
+            accessibilityRole="button" accessibilityLabel="Go back">
+            <Text style={styles.backText}>← Back</Text>
+          </Pressable>
           <MapboxGL.MapView
             style={styles.map}
             styleURL={MAPBOX_STYLE}
@@ -146,7 +144,7 @@ export function PlacesMapScreen(): React.JSX.Element {
             </View>
           )}
 
-          {isLoadingPlaces && (
+          {(isLoadingPlaces || isTabSwitching) && (
             <View style={styles.loadingOverlay}>
               <ActivityIndicator color={MAP_COLORS.primary} size="small" />
               <Text style={styles.loadingText}>Loading places…</Text>
@@ -201,7 +199,6 @@ export function PlacesMapScreen(): React.JSX.Element {
             onDismiss={handleDismissTagFilter}
           />
         </View>
-      </SafeAreaView>
-    </GestureHandlerRootView>
+    </SafeAreaView>
   );
 }

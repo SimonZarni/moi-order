@@ -62,6 +62,7 @@ export function PlaceBottomSheet({
       backgroundStyle={styles.sheetBg}
       handleIndicatorStyle={styles.handle}
       animateOnMount
+      overDragResistanceFactor={6}
     >
       <View style={styles.peekRow}>
         <View style={styles.peekThumb}>
@@ -143,7 +144,7 @@ export function PlaceBottomSheet({
                   </View>
                 ) : null}
                 {Array.isArray(detail.tags) && detail.tags.length > 0 && (
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tagsRow}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tagsRow} decelerationRate="fast">
                     {(detail.tags as Tag[]).map((tag) => (
                       <View key={tag.id} style={styles.tag}>
                         <Text style={styles.tagText}>{tag.name_en}</Text>

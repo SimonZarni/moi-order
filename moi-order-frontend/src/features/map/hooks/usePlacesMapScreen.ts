@@ -38,6 +38,7 @@ export interface UsePlacesMapScreenResult {
   selectedPlace:    Place | null;
   selectedDetail:   Place | null;
   isLoadingPlaces:  boolean;
+  isTabSwitching:   boolean;
   isLoadingDetail:  boolean;
   isError:          boolean;
   cameraRef:        React.RefObject<Camera | null>;
@@ -102,6 +103,8 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const [longPressCoords, setLongPressCoords]     = useState<[number, number] | null>(null);
   const [showLocationOptions, setShowLocationOptions] = useState(false);
   const [longPressMarker, setLongPressMarker]     = useState<[number, number] | null>(null);
+  const [isTabSwitching, setIsTabSwitching]       = useState(false);
+  const tabSwitchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { places, isLoading: isLoadingPlaces, isError, refetch } = usePlacesList();
   const { place: selectedDetail, isLoading: isLoadingDetail } =
@@ -221,6 +224,9 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     setDrivingRoute(null);
     setWalkingRoute(null);
     setIsFABOpen(false);
+    if (tabSwitchTimer.current) clearTimeout(tabSwitchTimer.current);
+    setIsTabSwitching(true);
+    tabSwitchTimer.current = setTimeout(() => setIsTabSwitching(false), 350);
   }, []);
 
   const handleToggleFAB = useCallback(() => setIsFABOpen(prev => !prev), []);
@@ -375,9 +381,11 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const handleClearSearch  = useCallback(() => { setSearchQuery(''); setGeoSuggestions([]); }, []);
   const handleRefetch      = useCallback(() => refetch(), [refetch]);
 
+  useEffect(() => () => { if (tabSwitchTimer.current) clearTimeout(tabSwitchTimer.current); }, []);
+
   return {
     displayedPlaces, selectedPlace, selectedDetail,
-    isLoadingPlaces, isLoadingDetail, isError,
+    isLoadingPlaces, isTabSwitching, isLoadingDetail, isError,
     cameraRef, userLocation,
     searchQuery, placeSuggestions, geoSuggestions, isGeoLoading,
     categories, allTags, activeTab, activeCategory, activeTags,

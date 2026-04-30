@@ -5,7 +5,7 @@ export const SEARCH_HEIGHT = 52;
 
 export const styles = StyleSheet.create({
   wrapper: {
-    position: 'absolute', top: 16, left: 16, right: 16, zIndex: 10, gap: 6,
+    position: 'absolute', top: 60, left: 16, right: 16, zIndex: 10, gap: 6,
   },
   row: {
     flexDirection: 'row', alignItems: 'center', gap: 8,

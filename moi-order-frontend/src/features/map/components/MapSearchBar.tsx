@@ -104,7 +104,8 @@ export function MapSearchBar({
       {/* ── Nearby / All tabs (shown when no dropdown) ── */}
       {!showDropdown && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabsRow} keyboardShouldPersistTaps="handled">
+          contentContainerStyle={styles.tabsRow} keyboardShouldPersistTaps="handled"
+          decelerationRate="fast">
           <Pressable onPress={() => onTabPress(TAB_NEARBY)}
             style={[styles.tab, activeTab === TAB_NEARBY && styles.tabActive]}
             accessibilityRole="button" accessibilityLabel="Show nearby places">
