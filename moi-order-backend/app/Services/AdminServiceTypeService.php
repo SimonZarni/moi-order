@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\DTOs\AdminStoreServiceTypeDTO;
 use App\DTOs\AdminUpdateServiceTypeDTO;
+use App\Exceptions\DomainException;
 use App\Models\Service;
 use App\Models\ServiceType;
 use Illuminate\Database\Eloquent\Collection;
@@ -17,7 +18,7 @@ class AdminServiceTypeService
 {
     public function index(Service $service): Collection
     {
-        return $service->types()->withTrashed()->get();
+        return $service->types()->get();
     }
 
     public function store(Service $service, AdminStoreServiceTypeDTO $dto): ServiceType
@@ -48,6 +49,10 @@ class AdminServiceTypeService
 
     public function destroy(ServiceType $type): void
     {
+        if ($type->submissions()->exists()) {
+            throw new DomainException('service_type.has_submissions');
+        }
+
         $type->delete();
     }
 }

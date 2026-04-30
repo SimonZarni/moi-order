@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -122,6 +123,7 @@ export function ServicesView() {
   const [loading, setLoading]             = useState(false);
   const [createOpen, setCreateOpen]       = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [deleteError, setDeleteError]     = useState('');
   const [submissionCounts, setSubmissionCounts] = useState<Record<number, number>>({});
 
   const fetchServices = useCallback(() => {
@@ -232,22 +234,23 @@ export function ServicesView() {
 
       <ServiceCreateDialog open={createOpen} onClose={() => setCreateOpen(false)} onCreated={fetchServices} />
 
-      <Dialog open={deleteConfirm !== null} onClose={() => setDeleteConfirm(null)} maxWidth="xs" fullWidth>
+      <Dialog open={deleteConfirm !== null} onClose={() => { setDeleteConfirm(null); setDeleteError(''); }} maxWidth="xs" fullWidth>
         <DialogTitle>Delete Service?</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary">
             This will permanently delete the service and all its types.
           </Typography>
+          {deleteError && <Alert severity="error" sx={{ mt: 2 }}>{deleteError}</Alert>}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteConfirm(null)}>Cancel</Button>
+          <Button onClick={() => { setDeleteConfirm(null); setDeleteError(''); }}>Cancel</Button>
           <Button
             variant="contained" color="error"
             onClick={() => {
               if (deleteConfirm !== null) {
                 servicesApi.remove(deleteConfirm)
-                  .then(() => { setDeleteConfirm(null); fetchServices(); })
-                  .catch(() => setDeleteConfirm(null));
+                  .then(() => { setDeleteConfirm(null); setDeleteError(''); fetchServices(); })
+                  .catch((err) => setDeleteError(err?.response?.data?.message ?? 'Failed to delete. Please try again.'));
               }
             }}
           >

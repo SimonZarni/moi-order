@@ -105,7 +105,7 @@ export function PaymentDetailView() {
   return (
     <DashboardContent>
       <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-        <IconButton onClick={() => router.push('/payments')}>
+        <IconButton onClick={() => router.back()}>
           <Iconify icon="eva:arrow-ios-forward-fill" width={20} sx={{ transform: 'rotate(180deg)' }} />
         </IconButton>
         <Box sx={{ flexGrow: 1 }}>

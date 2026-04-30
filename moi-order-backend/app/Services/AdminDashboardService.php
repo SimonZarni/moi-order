@@ -168,8 +168,8 @@ class AdminDashboardService
             ->join('services', 'service_types.service_id', '=', 'services.id')
             ->whereNull('service_types.deleted_at')
             ->whereNull('services.deleted_at')
-            ->selectRaw('services.name as service_name, COUNT(service_submissions.id) as cnt')
-            ->groupBy('services.name')
+            ->selectRaw('COALESCE(services.name_mm, services.name_en, services.name) as service_name, COUNT(service_submissions.id) as cnt')
+            ->groupBy('services.name_mm', 'services.name_en', 'services.name')
             ->get();
 
         $ticketCount = TicketOrder::count();
@@ -198,8 +198,8 @@ class AdminDashboardService
             ->join('services', 'service_types.service_id', '=', 'services.id')
             ->whereNull('service_types.deleted_at')
             ->whereNull('services.deleted_at')
-            ->selectRaw('services.id as service_id, services.name as service_name, COUNT(service_submissions.id) as total_cnt')
-            ->groupBy('services.id', 'services.name')
+            ->selectRaw('services.id as service_id, COALESCE(services.name_mm, services.name_en, services.name) as service_name, COUNT(service_submissions.id) as total_cnt')
+            ->groupBy('services.id', 'services.name_mm', 'services.name_en', 'services.name')
             ->orderByDesc('total_cnt')
             ->limit(5)
             ->get();

@@ -1,5 +1,6 @@
 import type { SelectChangeEvent } from '@mui/material/Select';
 
+import { useSearchParams } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
@@ -109,14 +110,25 @@ function SuspendDialog({ name, open, onClose, onConfirm }: SuspendDialogProps) {
 // ── Main view ────────────────────────────────────────────────────────────────
 
 export function UsersView() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState<UserData[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [filterName, setFilterName] = useState('');
-  const [filterRole, setFilterRole] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const page         = Number(searchParams.get('page')     ?? '0');
+  const rowsPerPage  = Number(searchParams.get('per_page') ?? '10');
+  const filterName   = searchParams.get('search') ?? '';
+  const filterRole   = searchParams.get('role')   ?? 'all';
+  const filterStatus = searchParams.get('status') ?? 'all';
+
+  const updateParams = useCallback(
+    (updates: Record<string, string>) => {
+      setSearchParams(
+        (prev) => { Object.entries(updates).forEach(([k, v]) => prev.set(k, v)); return prev; },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
 
   const [suspendDialog, setSuspendDialog] = useState<{ open: boolean; userId: number; userName: string } | null>(null);
 
@@ -195,14 +207,14 @@ export function UsersView() {
         <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
           <OutlinedInput
             value={filterName}
-            onChange={(e) => { setFilterName(e.target.value); setPage(0); }}
+            onChange={(e) => updateParams({ search: e.target.value, page: '0' })}
             placeholder="Search by name or email..."
             startAdornment={<InputAdornment position="start"><Iconify icon="eva:search-fill" /></InputAdornment>}
             sx={{ flexGrow: 1, maxWidth: 280, height: 40 }}
           />
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Role</InputLabel>
-            <Select value={filterRole} label="Role" onChange={(e: SelectChangeEvent) => setFilterRole(e.target.value)}>
+            <Select value={filterRole} label="Role" onChange={(e: SelectChangeEvent) => updateParams({ role: e.target.value })}>
               <MenuItem value="all">All</MenuItem>
               <MenuItem value="admin">Admin</MenuItem>
               <MenuItem value="user">User</MenuItem>
@@ -210,7 +222,7 @@ export function UsersView() {
           </FormControl>
           <FormControl size="small" sx={{ minWidth: 130 }}>
             <InputLabel>Status</InputLabel>
-            <Select value={filterStatus} label="Status" onChange={(e: SelectChangeEvent) => setFilterStatus(e.target.value)}>
+            <Select value={filterStatus} label="Status" onChange={(e: SelectChangeEvent) => updateParams({ status: e.target.value })}>
               <MenuItem value="all">All</MenuItem>
               <MenuItem value="active">Active</MenuItem>
               <MenuItem value="suspended">Suspended</MenuItem>
@@ -337,8 +349,8 @@ export function UsersView() {
           page={page}
           rowsPerPage={rowsPerPage}
           rowsPerPageOptions={[5, 10, 25]}
-          onPageChange={(_, newPage) => setPage(newPage)}
-          onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+          onPageChange={(_, newPage) => updateParams({ page: String(newPage) })}
+          onRowsPerPageChange={(e) => updateParams({ per_page: e.target.value, page: '0' })}
         />
       </Card>
 

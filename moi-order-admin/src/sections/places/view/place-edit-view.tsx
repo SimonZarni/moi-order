@@ -175,7 +175,7 @@ export function PlaceEditView() {
   return (
     <DashboardContent>
       <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <IconButton onClick={() => router.push('/places')}>
+        <IconButton onClick={() => router.back()}>
           <Iconify icon="eva:arrow-ios-forward-fill" width={20} sx={{ transform: 'rotate(180deg)' }} />
         </IconButton>
         <Box sx={{ flexGrow: 1 }}>

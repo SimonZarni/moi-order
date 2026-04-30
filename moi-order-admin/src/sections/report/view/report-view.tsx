@@ -9,6 +9,7 @@ import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
 import Select from '@mui/material/Select';
 import Checkbox from '@mui/material/Checkbox';
 import Collapse from '@mui/material/Collapse';
@@ -17,8 +18,11 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
+import DialogTitle from '@mui/material/DialogTitle';
 import FormControl from '@mui/material/FormControl';
 import CardContent from '@mui/material/CardContent';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
 import CircularProgress from '@mui/material/CircularProgress';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
@@ -363,6 +367,8 @@ export function ReportView() {
   const [loading, setLoading] = useState(true);
   const [formTarget, setFormTarget] = useState<LocalType | null | 'new'>(null);
   const [typeFormError, setTypeFormError] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [deleteError, setDeleteError] = useState('');
   const [documentTypes, setDocumentTypes] = useState<DocumentTypeData[]>([]);
 
   useEffect(() => {
@@ -422,10 +428,11 @@ export function ReportView() {
   const handleDeleteType = useCallback(
     (typeId: number) => {
       if (!reportService) return;
+      setDeleteError('');
       servicesApi
         .removeType(reportService.id, typeId)
         .then(() => setTypes((prev) => prev.filter((x) => x.id !== typeId)))
-        .catch(() => {});
+        .catch((err) => setDeleteError(err?.response?.data?.message ?? 'Failed to delete. Please try again.'));
     },
     [reportService]
   );
@@ -500,7 +507,7 @@ export function ReportView() {
                     <IconButton size="small" onClick={() => setFormTarget(t)} disabled={formTarget !== null}>
                       <Iconify icon="solar:pen-bold" width={16} />
                     </IconButton>
-                    <IconButton size="small" color="error" onClick={() => t.id && handleDeleteType(t.id)} disabled={formTarget !== null}>
+                    <IconButton size="small" color="error" onClick={() => t.id && setDeleteConfirm(t.id)} disabled={formTarget !== null}>
                       <Iconify icon="solar:trash-bin-trash-bold" width={16} />
                     </IconButton>
                   </Stack>
@@ -524,6 +531,30 @@ export function ReportView() {
           </Box>
         )}
       </Stack>
+      <Dialog open={deleteConfirm !== null} onClose={() => { setDeleteConfirm(null); setDeleteError(''); }} maxWidth="xs" fullWidth>
+        <DialogTitle>Delete Service Type?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            This will permanently delete this report type and its form fields.
+          </Typography>
+          {deleteError && <Alert severity="error" sx={{ mt: 2 }}>{deleteError}</Alert>}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { setDeleteConfirm(null); setDeleteError(''); }}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              if (deleteConfirm !== null) {
+                handleDeleteType(deleteConfirm);
+                setDeleteConfirm(null);
+              }
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </DashboardContent>
   );
 }

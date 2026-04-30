@@ -25,7 +25,7 @@ class AdminTicketController extends Controller
 
     public function index(): JsonResponse
     {
-        $tickets = Ticket::withTrashed()->orderBy('sort_order')->paginate(20);
+        $tickets = Ticket::orderBy('sort_order')->paginate(20);
 
         return response()->json([
             'data' => TicketResource::collection($tickets->items()),

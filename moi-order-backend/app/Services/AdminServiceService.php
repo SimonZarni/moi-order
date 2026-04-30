@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\DTOs\AdminStoreServiceDTO;
 use App\DTOs\AdminUpdateServiceDTO;
+use App\Exceptions\DomainException;
 use App\Models\Service;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
@@ -17,7 +18,6 @@ class AdminServiceService
     public function index(): LengthAwarePaginator
     {
         return Service::withCount('types')
-            ->withTrashed()
             ->latest()
             ->paginate(20);
     }
@@ -48,6 +48,14 @@ class AdminServiceService
 
     public function destroy(Service $service): void
     {
+        $hasSubmissions = $service->types()->withTrashed()
+            ->whereHas('submissions')
+            ->exists();
+
+        if ($hasSubmissions) {
+            throw new DomainException('service.has_submissions');
+        }
+
         $service->delete();
     }
 }

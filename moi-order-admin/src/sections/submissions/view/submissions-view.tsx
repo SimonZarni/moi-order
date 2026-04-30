@@ -70,15 +70,25 @@ type ServiceOption = { id: number; name: string };
 
 export function SubmissionsView() {
   const router = useRouter();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [submissions, setSubmissions] = useState<SubmissionListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [filterName, setFilterName] = useState('');
-  const [filterStatus, setFilterStatus] = useState(searchParams.get('status') ?? 'all');
-  const [filterService, setFilterService] = useState(searchParams.get('service') ?? 'all');
+  const page          = Number(searchParams.get('page')     ?? '0');
+  const rowsPerPage   = Number(searchParams.get('per_page') ?? '10');
+  const filterName    = searchParams.get('search')  ?? '';
+  const filterStatus  = searchParams.get('status')  ?? 'all';
+  const filterService = searchParams.get('service') ?? 'all';
+
+  const updateParams = useCallback(
+    (updates: Record<string, string>) => {
+      setSearchParams(
+        (prev) => { Object.entries(updates).forEach(([k, v]) => prev.set(k, v)); return prev; },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
   const [serviceOptions, setServiceOptions] = useState<ServiceOption[]>([]);
 
   useEffect(() => {
@@ -155,10 +165,7 @@ export function SubmissionsView() {
         <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
           <OutlinedInput
             value={filterName}
-            onChange={(e) => {
-              setFilterName(e.target.value);
-              setPage(0);
-            }}
+            onChange={(e) => updateParams({ search: e.target.value, page: '0' })}
             placeholder="Search by user or service..."
             startAdornment={
               <InputAdornment position="start">
@@ -172,10 +179,7 @@ export function SubmissionsView() {
             <Select
               value={filterService}
               label="Service"
-              onChange={(e: SelectChangeEvent) => {
-                setFilterService(e.target.value);
-                setPage(0);
-              }}
+              onChange={(e: SelectChangeEvent) => updateParams({ service: e.target.value, page: '0' })}
             >
               <MenuItem value="all">All Services</MenuItem>
               {serviceOptions.map((s) => (
@@ -190,10 +194,7 @@ export function SubmissionsView() {
             <Select
               value={filterStatus}
               label="Status"
-              onChange={(e: SelectChangeEvent) => {
-                setFilterStatus(e.target.value);
-                setPage(0);
-              }}
+              onChange={(e: SelectChangeEvent) => updateParams({ status: e.target.value, page: '0' })}
             >
               <MenuItem value="all">All</MenuItem>
               <MenuItem value="pending_payment">Pending Payment</MenuItem>
@@ -327,11 +328,8 @@ export function SubmissionsView() {
           page={page}
           rowsPerPage={rowsPerPage}
           rowsPerPageOptions={[5, 10, 25]}
-          onPageChange={(_, newPage) => setPage(newPage)}
-          onRowsPerPageChange={(e) => {
-            setRowsPerPage(parseInt(e.target.value, 10));
-            setPage(0);
-          }}
+          onPageChange={(_, newPage) => updateParams({ page: String(newPage) })}
+          onRowsPerPageChange={(e) => updateParams({ per_page: e.target.value, page: '0' })}
         />
       </Card>
     </DashboardContent>
