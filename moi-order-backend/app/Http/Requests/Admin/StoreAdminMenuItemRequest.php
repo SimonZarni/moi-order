@@ -22,6 +22,7 @@ class StoreAdminMenuItemRequest extends FormRequest
             'price_cents'      => ['required', 'integer', 'min:0'],
             'status'           => ['sometimes', Rule::enum(MenuItemStatus::class)],
             'sort_order'       => ['integer', 'min:0', 'max:9999'],
+            'photo'            => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ];
     }
 

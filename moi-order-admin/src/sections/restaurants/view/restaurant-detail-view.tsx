@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -115,6 +115,11 @@ export function RestaurantDetailView() {
   const [itemForm, setItemForm] = useState({ name: '', description: '', price_display: '', status: 'available' as 'available' | 'unavailable' });
   const [itemSaving, setItemSaving] = useState(false);
   const [itemError, setItemError] = useState('');
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  // Inline status toggling
+  const [togglingItemId, setTogglingItemId] = useState<number | null>(null);
 
   // Delete confirmations
   const [deletingCategoryId, setDeletingCategoryId] = useState<number | null>(null);
@@ -258,6 +263,7 @@ export function RestaurantDetailView() {
     setItemForm({ name: '', description: '', price_display: '', status: 'available' });
     setItemDialog({ open: true, categoryId, item: null });
     setItemError('');
+    setPhotoFile(null);
   }, []);
 
   const openEditItem = useCallback((item: MenuItemDetail, categoryId: number) => {
@@ -269,6 +275,7 @@ export function RestaurantDetailView() {
     });
     setItemDialog({ open: true, categoryId, item });
     setItemError('');
+    setPhotoFile(null);
   }, []);
 
   const handleSaveItem = useCallback(() => {
@@ -291,8 +298,8 @@ export function RestaurantDetailView() {
     };
 
     const request = itemDialog.item
-      ? restaurantsApi.updateItem(id, itemDialog.item.id, payload)
-      : restaurantsApi.addItem(id, payload);
+      ? restaurantsApi.updateItem(id, itemDialog.item.id, payload, photoFile)
+      : restaurantsApi.addItem(id, payload, photoFile);
 
     request
       .then((saved) => {
@@ -302,7 +309,6 @@ export function RestaurantDetailView() {
             ...prev,
             menu: prev.menu.map((cat) => {
               if (itemDialog.item) {
-                // edit — item may have moved category
                 const withoutOld = cat.items.filter((i) => i.id !== itemDialog.item!.id);
                 const withNew = cat.id === payload.menu_category_id ? [...withoutOld, saved] : withoutOld;
                 return { ...cat, items: withNew };
@@ -315,10 +321,11 @@ export function RestaurantDetailView() {
           };
         });
         setItemDialog({ open: false, categoryId: null, item: null });
+        setPhotoFile(null);
       })
       .catch((err) => setItemError(err?.response?.data?.message ?? 'Failed to save item.'))
       .finally(() => setItemSaving(false));
-  }, [id, itemDialog, itemForm]);
+  }, [id, itemDialog, itemForm, photoFile]);
 
   const handleDeleteItem = useCallback((itemId: number) => {
     if (!id) return;
@@ -333,6 +340,28 @@ export function RestaurantDetailView() {
       )
       .catch(() => {})
       .finally(() => setDeletingItemId(null));
+  }, [id]);
+
+  // ── Inline item status toggle ────────────────────────────────────────────────
+
+  const handleToggleItemStatus = useCallback((item: MenuItemDetail, categoryId: number) => {
+    if (!id) return;
+    const newStatus = item.status === 'available' ? 'unavailable' : 'available';
+    setTogglingItemId(item.id);
+    restaurantsApi
+      .updateItem(id, item.id, { status: newStatus })
+      .then((saved) => {
+        setRestaurant((prev) => prev ? {
+          ...prev,
+          menu: prev.menu.map((c) =>
+            c.id === categoryId
+              ? { ...c, items: c.items.map((i) => (i.id === item.id ? saved : i)) }
+              : c
+          ),
+        } : prev);
+      })
+      .catch(() => {})
+      .finally(() => setTogglingItemId(null));
   }, [id]);
 
   // ── Delete restaurant ────────────────────────────────────────────────────────
@@ -574,26 +603,48 @@ export function RestaurantDetailView() {
                   <Table size="small">
                     <TableHead>
                       <TableRow>
+                        <TableCell sx={{ width: 52 }} />
                         <TableCell>Item</TableCell>
                         <TableCell>Description</TableCell>
                         <TableCell align="right">Price</TableCell>
-                        <TableCell>Status</TableCell>
+                        <TableCell>In Stock</TableCell>
                         <TableCell align="right">Actions</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {category.items.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={5} sx={{ color: 'text.secondary', py: 2 }}>No items yet.</TableCell>
+                          <TableCell colSpan={6} sx={{ color: 'text.secondary', py: 2 }}>No items yet.</TableCell>
                         </TableRow>
                       )}
                       {category.items.map((item) => (
                         <TableRow key={item.id} hover>
+                          <TableCell sx={{ p: 0.5 }}>
+                            <Box
+                              sx={{
+                                width: 44,
+                                height: 44,
+                                borderRadius: 1,
+                                overflow: 'hidden',
+                                bgcolor: 'grey.100',
+                                flexShrink: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}
+                            >
+                              {item.photo_url ? (
+                                <Box component="img" src={item.photo_url} alt={item.name} sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              ) : (
+                                <Iconify icon="solar:cart-3-bold" width={20} sx={{ color: 'grey.400' }} />
+                              )}
+                            </Box>
+                          </TableCell>
                           <TableCell>
                             <Typography variant="body2" fontWeight={600}>{item.name}</Typography>
                           </TableCell>
                           <TableCell>
-                            <Typography variant="caption" color="text.secondary" sx={{ maxWidth: 280, display: 'block' }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ maxWidth: 240, display: 'block' }}>
                               {item.description ?? '—'}
                             </Typography>
                           </TableCell>
@@ -601,7 +652,14 @@ export function RestaurantDetailView() {
                             <Typography variant="body2" fontWeight={600}>{fCurrency(item.price_cents / 100)}</Typography>
                           </TableCell>
                           <TableCell>
-                            <Label color={item.status === 'available' ? 'success' : 'default'}>{item.status}</Label>
+                            <Tooltip title={item.status === 'available' ? 'Mark out of stock' : 'Mark available'}>
+                              <Switch
+                                size="small"
+                                checked={item.status === 'available'}
+                                disabled={togglingItemId === item.id}
+                                onChange={() => handleToggleItemStatus(item, category.id)}
+                              />
+                            </Tooltip>
                           </TableCell>
                           <TableCell align="right">
                             <Tooltip title="Edit item">
@@ -669,6 +727,54 @@ export function RestaurantDetailView() {
         <DialogContent dividers>
           {itemError && <Alert severity="error" sx={{ mb: 2 }}>{itemError}</Alert>}
           <Stack spacing={2.5}>
+            {/* Photo upload */}
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>Photo</Typography>
+              <Box
+                onClick={() => photoInputRef.current?.click()}
+                sx={{
+                  width: '100%',
+                  height: 160,
+                  border: '1.5px dashed',
+                  borderColor: 'grey.300',
+                  borderRadius: 1.5,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  overflow: 'hidden',
+                  '&:hover': { borderColor: 'primary.main', bgcolor: 'primary.lighter' },
+                }}
+              >
+                {(photoFile ?? itemDialog.item?.photo_url) ? (
+                  <Box
+                    component="img"
+                    src={photoFile ? URL.createObjectURL(photoFile) : itemDialog.item!.photo_url!}
+                    alt="preview"
+                    sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <>
+                    <Iconify icon="solar:restart-bold" width={28} sx={{ color: 'grey.400', mb: 0.5 }} />
+                    <Typography variant="caption" color="text.secondary">Click to upload photo</Typography>
+                  </>
+                )}
+              </Box>
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                style={{ display: 'none' }}
+                onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)}
+              />
+              {(photoFile ?? itemDialog.item?.photo_url) && (
+                <Button size="small" color="error" sx={{ mt: 0.5 }} onClick={() => setPhotoFile(null)}>
+                  Remove photo
+                </Button>
+              )}
+            </Box>
+
             <TextField label="Item Name" required value={itemForm.name} onChange={(e) => setItemForm({ ...itemForm, name: e.target.value })} fullWidth />
             <TextField label="Description" value={itemForm.description} onChange={(e) => setItemForm({ ...itemForm, description: e.target.value })} multiline rows={2} fullWidth />
             <TextField
@@ -680,18 +786,16 @@ export function RestaurantDetailView() {
               InputProps={{ startAdornment: <InputAdornment position="start">฿</InputAdornment> }}
               fullWidth
             />
-            {itemDialog.item && (
-              <TextField
-                select
-                label="Status"
-                value={itemForm.status}
-                onChange={(e) => setItemForm({ ...itemForm, status: e.target.value as 'available' | 'unavailable' })}
-                fullWidth
-              >
-                <MenuItem value="available">Available</MenuItem>
-                <MenuItem value="unavailable">Unavailable</MenuItem>
-              </TextField>
-            )}
+            <TextField
+              select
+              label="Status"
+              value={itemForm.status}
+              onChange={(e) => setItemForm({ ...itemForm, status: e.target.value as 'available' | 'unavailable' })}
+              fullWidth
+            >
+              <MenuItem value="available">Available</MenuItem>
+              <MenuItem value="unavailable">Unavailable (out of stock)</MenuItem>
+            </TextField>
             {itemDialog.item && restaurant.menu.length > 1 && (
               <TextField
                 select

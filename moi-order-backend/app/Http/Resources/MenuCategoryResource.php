@@ -24,8 +24,8 @@ class MenuCategoryResource extends JsonResource
             'name'          => $this->name,
             'sort_order'    => $this->sort_order,
             'items'         => $this->whenLoaded('menuItems', fn () =>
-                MenuItemResource::collection($this->menuItems)
-                    ->map(fn ($r) => new MenuItemResource($r->resource, $this->storage))
+                $this->menuItems
+                    ->map(fn ($item) => (new MenuItemResource($item, $this->storage))->toArray($request))
                     ->values()
             ),
         ];

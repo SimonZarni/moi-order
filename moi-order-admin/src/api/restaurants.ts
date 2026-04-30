@@ -27,9 +27,11 @@ export type OpeningHour = {
 
 export type MenuItemDetail = {
   id: number;
+  menu_category_id: number;
   name: string;
   description: string | null;
   price_cents: number;
+  photo_url: string | null;
   status: 'available' | 'unavailable';
   sort_order: number;
 };
@@ -121,14 +123,28 @@ export const restaurantsApi = {
     apiClient.delete(`/restaurants/${restaurantId}/categories/${categoryId}`),
 
   // ─── Items ────────────────────────────────────────────────────────────────
-  addItem: (restaurantId: number | string, payload: ItemPayload) =>
-    apiClient
-      .post<{ data: MenuItemDetail }>(`/restaurants/${restaurantId}/items`, payload)
-      .then((r) => r.data.data),
-  updateItem: (restaurantId: number | string, itemId: number, payload: UpdateItemPayload) =>
-    apiClient
-      .put<{ data: MenuItemDetail }>(`/restaurants/${restaurantId}/items/${itemId}`, payload)
-      .then((r) => r.data.data),
+  addItem: (restaurantId: number | string, payload: ItemPayload, photo?: File | null) => {
+    if (photo) {
+      const fd = new FormData();
+      (Object.entries(payload) as [string, unknown][]).forEach(([k, v]) => {
+        if (v != null) fd.append(k, String(v));
+      });
+      fd.append('photo', photo);
+      return apiClient.post<{ data: MenuItemDetail }>(`/restaurants/${restaurantId}/items`, fd).then((r) => r.data.data);
+    }
+    return apiClient.post<{ data: MenuItemDetail }>(`/restaurants/${restaurantId}/items`, payload).then((r) => r.data.data);
+  },
+  updateItem: (restaurantId: number | string, itemId: number, payload: UpdateItemPayload, photo?: File | null) => {
+    if (photo) {
+      const fd = new FormData();
+      (Object.entries(payload) as [string, unknown][]).forEach(([k, v]) => {
+        if (v != null) fd.append(k, String(v));
+      });
+      fd.append('photo', photo);
+      return apiClient.put<{ data: MenuItemDetail }>(`/restaurants/${restaurantId}/items/${itemId}`, fd).then((r) => r.data.data);
+    }
+    return apiClient.put<{ data: MenuItemDetail }>(`/restaurants/${restaurantId}/items/${itemId}`, payload).then((r) => r.data.data);
+  },
   deleteItem: (restaurantId: number | string, itemId: number) =>
     apiClient.delete(`/restaurants/${restaurantId}/items/${itemId}`),
 };
