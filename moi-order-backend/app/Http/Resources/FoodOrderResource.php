@@ -1,0 +1,49 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Resources;
+
+use App\Contracts\FileStorageInterface;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class FoodOrderResource extends JsonResource
+{
+    public function __construct($resource, private readonly ?FileStorageInterface $storage = null)
+    {
+        parent::__construct($resource);
+    }
+
+    /** @return array<string, mixed> */
+    public function toArray(Request $request): array
+    {
+        $restaurantLogoUrl = null;
+        if ($this->relationLoaded('restaurant') && $this->restaurant->logo_path !== null && $this->storage !== null) {
+            $restaurantLogoUrl = $this->storage->publicUrl($this->restaurant->logo_path);
+        }
+
+        return [
+            'id'                    => $this->id,
+            'restaurant_id'         => $this->restaurant_id,
+            'restaurant_name'       => $this->whenLoaded('restaurant', fn () => $this->restaurant->name),
+            'restaurant_logo_url'   => $restaurantLogoUrl,
+            'status'                => $this->status->value,
+            'payment_method'        => $this->payment_method->value,
+            'subtotal_cents'        => $this->subtotal_cents,
+            'total_cents'           => $this->total_cents,
+            'delivery_address'      => $this->delivery_address,
+            'customer_notes'        => $this->customer_notes,
+            'line_payment_url'      => $this->line_payment_url,
+            'can_show_line_pay_btn' => $this->canShowLinePayButton(),
+            'items'                 => $this->whenLoaded('items', fn () =>
+                FoodOrderItemResource::collection($this->items)
+            ),
+            'confirmed_at'          => $this->confirmed_at?->toIso8601String(),
+            'ready_at'              => $this->ready_at?->toIso8601String(),
+            'completed_at'          => $this->completed_at?->toIso8601String(),
+            'cancelled_at'          => $this->cancelled_at?->toIso8601String(),
+            'created_at'            => $this->created_at?->toIso8601String(),
+        ];
+    }
+}

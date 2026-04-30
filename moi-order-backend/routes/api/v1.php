@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\DeviceTokenController;
 use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\DynamicSubmissionController;
 use App\Http\Controllers\Api\V1\FavoritePlaceController;
+use App\Http\Controllers\Api\V1\FoodOrderController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ProfileController;
@@ -75,3 +76,8 @@ Route::delete('/notifications',           [NotificationController::class, 'destr
 // Device tokens — push notification registration
 Route::post('/device-tokens',   [DeviceTokenController::class, 'store']);
 Route::delete('/device-tokens', [DeviceTokenController::class, 'destroy']);
+
+// Food orders
+Route::get('/food-orders',      [FoodOrderController::class, 'index']);
+Route::post('/food-orders',     [FoodOrderController::class, 'store']);
+Route::get('/food-orders/{id}', [FoodOrderController::class, 'show']);

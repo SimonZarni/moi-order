@@ -50,6 +50,23 @@ export const navData: NavItem[] = [
     icon: icon('ic-analytics'),
   },
   {
+    title: 'Food & Restaurants',
+    path: '/restaurants',
+    icon: icon('ic-cart'),
+    children: [
+      {
+        title: 'Restaurants',
+        path: '/restaurants',
+        icon: icon('ic-cart'),
+      },
+      {
+        title: 'Food Orders',
+        path: '/food-orders',
+        icon: icon('ic-analytics'),
+      },
+    ],
+  },
+  {
     title: 'Other Services',
     path: '/services',
     icon: icon('ic-lock'),

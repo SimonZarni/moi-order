@@ -56,6 +56,42 @@ export const DOCUMENT_TYPE = {
 
 export type DocumentType = (typeof DOCUMENT_TYPE)[keyof typeof DOCUMENT_TYPE];
 
+// Mirrors App\Enums\FoodOrderStatus
+export const FOOD_ORDER_STATUS = {
+  Pending:   'pending',
+  Confirmed: 'confirmed',
+  Ready:     'ready',
+  Completed: 'completed',
+  Cancelled: 'cancelled',
+} as const;
+
+export type FoodOrderStatus = (typeof FOOD_ORDER_STATUS)[keyof typeof FOOD_ORDER_STATUS];
+
+// Mirrors App\Enums\FoodPaymentMethod
+export const FOOD_PAYMENT_METHOD = {
+  Cod:     'cod',
+  LinePay: 'line_pay',
+} as const;
+
+export type FoodPaymentMethod = (typeof FOOD_PAYMENT_METHOD)[keyof typeof FOOD_PAYMENT_METHOD];
+
+// Mirrors App\Enums\MenuItemStatus
+export const MENU_ITEM_STATUS = {
+  Available:   'available',
+  Unavailable: 'unavailable',
+} as const;
+
+export type MenuItemStatus = (typeof MENU_ITEM_STATUS)[keyof typeof MENU_ITEM_STATUS];
+
+// Mirrors App\Enums\RestaurantStatus
+export const RESTAURANT_STATUS = {
+  Open:   'open',
+  Closed: 'closed',
+  Paused: 'paused',
+} as const;
+
+export type RestaurantStatus = (typeof RESTAURANT_STATUS)[keyof typeof RESTAURANT_STATUS];
+
 // Mirrors App\Enums\FieldType
 export const FIELD_TYPE = {
   Text:     'text',

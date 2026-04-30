@@ -23,6 +23,7 @@ export function HomeScreen(): React.JSX.Element {
     handleNavigateToNotifications,
     handleNavigateToSearch,
     handleNavigateToMap,
+    handleNavigateToFood,
   } = useHomeScreen();
 
   const { locale } = useLocale();
@@ -154,12 +155,12 @@ export function HomeScreen(): React.JSX.Element {
               <View style={styles.cardIcon}><PassportIcon /></View>
             </Pressable>
 
-            <Pressable style={[styles.card, styles.cardAccentCoral, styles.cardDimmed]}
-              accessibilityLabel="Food ordering — coming soon" accessibilityRole="button">
+            <Pressable style={[styles.card, styles.cardAccentCoral]}
+              onPress={handleNavigateToFood}
+              accessibilityLabel="Food ordering" accessibilityRole="button">
               <Text style={[styles.cardTag, styles.tagCoral]}>Food</Text>
               <Text style={styles.cardTitle}>{t.foodOrder}</Text>
               <Text style={styles.cardSubtitle}>{t.foodOrderSubtitle}</Text>
-              <View style={styles.soonPill}><Text style={styles.soonText}>SOON</Text></View>
               <View style={styles.cardIcon}><FoodIcon /></View>
             </Pressable>
           </View>

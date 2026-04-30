@@ -39,6 +39,11 @@ export const ServiceDetailPage = lazy(() => import('src/pages/service-detail'));
 export const ContentPage = lazy(() => import('src/pages/content'));
 export const SupportPage = lazy(() => import('src/pages/support'));
 export const SubmissionDetailPage = lazy(() => import('src/pages/submission-detail'));
+export const RestaurantsPage = lazy(() => import('src/pages/restaurants'));
+export const RestaurantCreatePage = lazy(() => import('src/pages/restaurant-create'));
+export const RestaurantDetailPage = lazy(() => import('src/pages/restaurant-detail'));
+export const FoodOrdersPage = lazy(() => import('src/pages/food-orders'));
+export const FoodOrderDetailPage = lazy(() => import('src/pages/food-order-detail'));
 
 const renderFallback = () => (
   <Box sx={{ display: 'flex', flex: '1 1 auto', alignItems: 'center', justifyContent: 'center' }}>
@@ -86,6 +91,11 @@ export const routesSection: RouteObject[] = [
       { path: 'reviews', element: <ReviewsPage /> },
       { path: 'content', element: <ContentPage /> },
       { path: 'support', element: <SupportPage /> },
+      { path: 'restaurants', element: <RestaurantsPage /> },
+      { path: 'restaurants/new', element: <RestaurantCreatePage /> },
+      { path: 'restaurants/:id', element: <RestaurantDetailPage /> },
+      { path: 'food-orders', element: <FoodOrdersPage /> },
+      { path: 'food-orders/:id', element: <FoodOrderDetailPage /> },
       { path: 'account/profile', element: <ProfilePage /> },
       { path: 'account/settings', element: <SettingsPage /> },
     ],

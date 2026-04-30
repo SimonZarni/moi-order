@@ -1,0 +1,54 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\Contracts\FileStorageInterface;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\RestaurantResource;
+use App\Models\Restaurant;
+use App\Services\RestaurantService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class RestaurantBrowseController extends Controller
+{
+    public function __construct(
+        private readonly RestaurantService   $restaurantService,
+        private readonly FileStorageInterface $storage,
+    ) {}
+
+    /** GET /api/v1/restaurants */
+    public function index(Request $request): JsonResponse
+    {
+        $lat    = $request->query('lat')  ? (float) $request->query('lat')  : null;
+        $lng    = $request->query('lng')  ? (float) $request->query('lng')  : null;
+
+        $restaurants = $this->restaurantService->browse($lat, $lng);
+
+        return response()->json([
+            'data' => collect($restaurants->items())
+                ->map(fn ($r) => (new RestaurantResource($r, $this->storage))->toArray($request))
+                ->values(),
+            'meta' => [
+                'current_page' => $restaurants->currentPage(),
+                'last_page'    => $restaurants->lastPage(),
+                'per_page'     => $restaurants->perPage(),
+                'total'        => $restaurants->total(),
+            ],
+        ]);
+    }
+
+    /** GET /api/v1/restaurants/{id} */
+    public function show(Request $request, int $id): JsonResponse
+    {
+        $restaurant = Restaurant::with([
+            'openingHours',
+            'photos',
+            'menuCategories.menuItems' => fn ($q) => $q->available(),
+        ])->findOrFail($id);
+
+        return response()->json(['data' => new RestaurantResource($restaurant, $this->storage)]);
+    }
+}

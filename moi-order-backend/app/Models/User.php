@@ -37,6 +37,7 @@ class User extends Authenticatable
         'password',
         'date_of_birth',
         'is_admin',
+        'is_merchant',
         'status',
         'suspended_until',
         'google_id',
@@ -68,6 +69,7 @@ class User extends Authenticatable
             'password'          => 'hashed',
             'date_of_birth'     => 'date:Y-m-d',
             'is_admin'          => 'boolean',
+            'is_merchant'       => 'boolean',
             'status'            => UserStatusEnum::class,
             'suspended_until'   => 'datetime',
         ];
@@ -79,6 +81,11 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->is_admin === true;
+    }
+
+    public function isMerchant(): bool
+    {
+        return $this->is_merchant === true;
     }
 
     /**
@@ -139,5 +146,15 @@ class User extends Authenticatable
     public function deviceTokens(): HasMany
     {
         return $this->hasMany(DeviceToken::class);
+    }
+
+    public function restaurant(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Restaurant::class);
+    }
+
+    public function foodOrders(): HasMany
+    {
+        return $this->hasMany(FoodOrder::class);
     }
 }

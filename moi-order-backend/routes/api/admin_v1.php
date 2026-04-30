@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\Admin\V1\AdminAuthController;
 use App\Http\Controllers\Api\Admin\V1\AdminDashboardController;
+use App\Http\Controllers\Api\Admin\V1\AdminFoodOrderController;
+use App\Http\Controllers\Api\Admin\V1\AdminMenuCategoryController;
+use App\Http\Controllers\Api\Admin\V1\AdminMenuItemController;
+use App\Http\Controllers\Api\Admin\V1\AdminRestaurantController;
 use App\Http\Controllers\Api\Admin\V1\AdminNotificationController;
 use App\Http\Controllers\Api\Admin\V1\AdminCategoryController;
 use App\Http\Controllers\Api\Admin\V1\AdminDocumentTypeController;
@@ -154,6 +158,32 @@ Route::prefix('tags')->name('admin.tags.')->group(function (): void {
     // Restore requires withTrashed lookup — uses plain int $id, not route model binding
     Route::patch('/{id}/restore', [AdminTagController::class, 'restore'])->name('restore')
         ->whereNumber('id');
+});
+
+// ── Restaurants + nested menu ─────────────────────────────────────────────────
+Route::prefix('restaurants')->name('admin.restaurants.')->group(function (): void {
+    Route::get('/', [AdminRestaurantController::class, 'index'])->name('index');
+    Route::post('/', [AdminRestaurantController::class, 'store'])->name('store');
+    Route::get('/{restaurant}', [AdminRestaurantController::class, 'show'])->name('show');
+    Route::put('/{restaurant}', [AdminRestaurantController::class, 'update'])->name('update');
+    Route::delete('/{restaurant}', [AdminRestaurantController::class, 'destroy'])->name('destroy');
+    Route::patch('/{restaurant}/status', [AdminRestaurantController::class, 'updateStatus'])->name('update-status');
+
+    // Menu categories — scoped to restaurant
+    Route::post('/{restaurant}/categories', [AdminMenuCategoryController::class, 'store'])->name('categories.store');
+    Route::put('/{restaurant}/categories/{categoryId}', [AdminMenuCategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/{restaurant}/categories/{categoryId}', [AdminMenuCategoryController::class, 'destroy'])->name('categories.destroy');
+
+    // Menu items — scoped to restaurant
+    Route::post('/{restaurant}/items', [AdminMenuItemController::class, 'store'])->name('items.store');
+    Route::put('/{restaurant}/items/{itemId}', [AdminMenuItemController::class, 'update'])->name('items.update');
+    Route::delete('/{restaurant}/items/{itemId}', [AdminMenuItemController::class, 'destroy'])->name('items.destroy');
+});
+
+// ── Food Orders ───────────────────────────────────────────────────────────────
+Route::prefix('food-orders')->name('admin.food-orders.')->group(function (): void {
+    Route::get('/', [AdminFoodOrderController::class, 'index'])->name('index');
+    Route::get('/{foodOrder}', [AdminFoodOrderController::class, 'show'])->name('show');
 });
 
 // ── Document Types ────────────────────────────────────────────────────────────

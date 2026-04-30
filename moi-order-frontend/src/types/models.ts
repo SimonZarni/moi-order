@@ -235,6 +235,93 @@ export interface Document {
   updated_at: string;
 }
 
+// ── Food ordering ──────────────────────────────────────────────────────────
+
+export interface OpeningHour {
+  day_of_week: number; // 0 = Sunday … 6 = Saturday
+  opens_at: string | null;  // "HH:mm"
+  closes_at: string | null; // "HH:mm"
+  is_closed: boolean;
+}
+
+export interface RestaurantPhoto {
+  id: number;
+  url: string;
+  sort_order: number;
+}
+
+export interface MenuItem {
+  id: number;
+  menu_category_id: number;
+  restaurant_id: number;
+  name: string;
+  description: string | null;
+  price_cents: number;
+  photo_url: string | null;
+  status: import('./enums').MenuItemStatus;
+  sort_order: number;
+}
+
+export interface MenuCategory {
+  id: number;
+  restaurant_id: number;
+  name: string;
+  sort_order: number;
+  items?: MenuItem[];
+}
+
+export interface Restaurant {
+  id: number;
+  name: string;
+  description: string | null;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  phone: string | null;
+  cover_photo_url: string | null;
+  logo_url: string | null;
+  status: import('./enums').RestaurantStatus;
+  delivery_radius_km: number | null;
+  is_delivery_available: boolean;
+  is_pickup_available: boolean;
+  min_order_cents: number;
+  opening_hours?: OpeningHour[];
+  photos?: RestaurantPhoto[];
+  menu?: MenuCategory[];
+  created_at: string;
+}
+
+export interface FoodOrderItem {
+  id: number;
+  menu_item_id: number | null;
+  name: string;
+  price_cents: number;
+  quantity: number;
+  notes: string | null;
+  subtotal_cents: number;
+}
+
+export interface FoodOrder {
+  id: number;
+  restaurant_id: number;
+  restaurant_name: string | null;
+  restaurant_logo_url: string | null;
+  status: import('./enums').FoodOrderStatus;
+  payment_method: import('./enums').FoodPaymentMethod;
+  subtotal_cents: number;
+  total_cents: number;
+  delivery_address: string | null;
+  customer_notes: string | null;
+  line_payment_url: string | null;
+  can_show_line_pay_btn: boolean;
+  items?: FoodOrderItem[];
+  confirmed_at: string | null;
+  ready_at: string | null;
+  completed_at: string | null;
+  cancelled_at: string | null;
+  created_at: string;
+}
+
 // ── API wrappers ───────────────────────────────────────────────────────────
 
 export interface ApiResponse<T> {

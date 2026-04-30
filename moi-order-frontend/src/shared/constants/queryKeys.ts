@@ -45,4 +45,12 @@ export const QUERY_KEYS = {
   DOCUMENTS: {
     LIST: (type: string) => ['documents', 'list', type] as const,
   },
+  RESTAURANTS: {
+    LIST:   (page: number) => ['restaurants', 'list', page] as const,
+    DETAIL: (id: number)   => ['restaurants', 'detail', id] as const,
+  },
+  FOOD_ORDERS: {
+    LIST:   ['food-orders', 'list'] as const,
+    DETAIL: (id: number) => ['food-orders', 'detail', id] as const,
+  },
 } as const;

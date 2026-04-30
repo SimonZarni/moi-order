@@ -1,0 +1,33 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Resources;
+
+use App\Contracts\FileStorageInterface;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class MenuCategoryResource extends JsonResource
+{
+    public function __construct($resource, private readonly ?FileStorageInterface $storage = null)
+    {
+        parent::__construct($resource);
+    }
+
+    /** @return array<string, mixed> */
+    public function toArray(Request $request): array
+    {
+        return [
+            'id'            => $this->id,
+            'restaurant_id' => $this->restaurant_id,
+            'name'          => $this->name,
+            'sort_order'    => $this->sort_order,
+            'items'         => $this->whenLoaded('menuItems', fn () =>
+                MenuItemResource::collection($this->menuItems)
+                    ->map(fn ($r) => new MenuItemResource($r->resource, $this->storage))
+                    ->values()
+            ),
+        ];
+    }
+}

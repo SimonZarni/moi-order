@@ -1,0 +1,162 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services;
+
+use App\Contracts\FileStorageInterface;
+use App\Enums\RestaurantStatus;
+use App\Models\Restaurant;
+use App\Models\RestaurantOpeningHour;
+use App\Models\RestaurantPhoto;
+use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+
+/**
+ * Principle: SRP — restaurant CRUD + opening-hours management only.
+ * Principle: DIP — depends on FileStorageInterface, never calls Storage::disk() directly.
+ */
+class RestaurantService
+{
+    public function __construct(
+        private readonly FileStorageInterface $storage,
+    ) {}
+
+    public function getForMerchant(User $merchant): ?Restaurant
+    {
+        return $merchant->restaurant()->with(['openingHours', 'photos', 'menuCategories.menuItems'])->first();
+    }
+
+    /** @param array<string, mixed> $data */
+    public function create(User $merchant, array $data): Restaurant
+    {
+        return DB::transaction(function () use ($merchant, $data): Restaurant {
+            $coverPath = $this->storePhoto($data['cover_photo'] ?? null, 'restaurants/covers');
+            $logoPath  = $this->storePhoto($data['logo'] ?? null, 'restaurants/logos');
+
+            $restaurant = Restaurant::create([
+                'user_id'               => $merchant->id,
+                'name'                  => $data['name'],
+                'description'           => $data['description'] ?? null,
+                'address'               => $data['address'] ?? null,
+                'latitude'              => $data['latitude'] ?? null,
+                'longitude'             => $data['longitude'] ?? null,
+                'phone'                 => $data['phone'] ?? null,
+                'cover_photo_path'      => $coverPath,
+                'logo_path'             => $logoPath,
+                'status'                => RestaurantStatus::Closed,
+                'delivery_radius_km'    => $data['delivery_radius_km'] ?? null,
+                'is_delivery_available' => $data['is_delivery_available'] ?? true,
+                'is_pickup_available'   => $data['is_pickup_available'] ?? true,
+                'min_order_cents'       => $data['min_order_cents'] ?? 0,
+            ]);
+
+            if (! empty($data['opening_hours'])) {
+                $this->syncOpeningHours($restaurant, $data['opening_hours']);
+            }
+
+            return $restaurant->load(['openingHours', 'photos', 'menuCategories.menuItems']);
+        });
+    }
+
+    /** @param array<string, mixed> $data */
+    public function update(Restaurant $restaurant, array $data): Restaurant
+    {
+        return DB::transaction(function () use ($restaurant, $data): Restaurant {
+            $updates = array_filter([
+                'name'                  => $data['name'] ?? null,
+                'description'           => $data['description'] ?? null,
+                'address'               => $data['address'] ?? null,
+                'latitude'              => $data['latitude'] ?? null,
+                'longitude'             => $data['longitude'] ?? null,
+                'phone'                 => $data['phone'] ?? null,
+                'status'                => isset($data['status']) ? RestaurantStatus::from($data['status']) : null,
+                'delivery_radius_km'    => $data['delivery_radius_km'] ?? null,
+                'is_delivery_available' => $data['is_delivery_available'] ?? null,
+                'is_pickup_available'   => $data['is_pickup_available'] ?? null,
+                'min_order_cents'       => $data['min_order_cents'] ?? null,
+            ], fn ($v) => $v !== null);
+
+            // Handle photo replacements
+            if (isset($data['cover_photo'])) {
+                if ($restaurant->cover_photo_path !== null) {
+                    $this->storage->delete($restaurant->cover_photo_path);
+                }
+                $updates['cover_photo_path'] = $this->storePhoto($data['cover_photo'], 'restaurants/covers');
+            }
+            if (isset($data['logo'])) {
+                if ($restaurant->logo_path !== null) {
+                    $this->storage->delete($restaurant->logo_path);
+                }
+                $updates['logo_path'] = $this->storePhoto($data['logo'], 'restaurants/logos');
+            }
+
+            $restaurant->update($updates);
+
+            if (isset($data['opening_hours'])) {
+                $this->syncOpeningHours($restaurant, $data['opening_hours']);
+            }
+
+            return $restaurant->fresh(['openingHours', 'photos', 'menuCategories.menuItems']);
+        });
+    }
+
+    public function addPhoto(Restaurant $restaurant, UploadedFile $file): RestaurantPhoto
+    {
+        $path  = $this->storage->store($file, 'restaurants/gallery');
+        $order = RestaurantPhoto::where('restaurant_id', $restaurant->id)->max('sort_order') ?? 0;
+
+        return RestaurantPhoto::create([
+            'restaurant_id' => $restaurant->id,
+            'file_path'     => $path,
+            'sort_order'    => $order + 1,
+        ]);
+    }
+
+    public function deletePhoto(RestaurantPhoto $photo): void
+    {
+        DB::transaction(function () use ($photo): void {
+            $this->storage->delete($photo->file_path);
+            $photo->delete();
+        });
+    }
+
+    /**
+     * Browse open restaurants for customers, paginated.
+     * Optional lat/lng filtering by delivery radius.
+     */
+    public function browse(?float $lat = null, ?float $lng = null): LengthAwarePaginator
+    {
+        $query = Restaurant::open()
+            ->with(['openingHours'])
+            ->select('restaurants.*');
+
+        return $query->latest()->paginate(20);
+    }
+
+    /** @param list<array{day_of_week: int, opens_at: string|null, closes_at: string|null, is_closed: bool}> $hours */
+    private function syncOpeningHours(Restaurant $restaurant, array $hours): void
+    {
+        foreach ($hours as $hour) {
+            RestaurantOpeningHour::updateOrCreate(
+                ['restaurant_id' => $restaurant->id, 'day_of_week' => $hour['day_of_week']],
+                [
+                    'opens_at'  => $hour['opens_at']  ?? null,
+                    'closes_at' => $hour['closes_at'] ?? null,
+                    'is_closed' => $hour['is_closed']  ?? false,
+                ],
+            );
+        }
+    }
+
+    private function storePhoto(?UploadedFile $file, string $directory): ?string
+    {
+        if ($file === null) {
+            return null;
+        }
+
+        return $this->storage->store($file, $directory);
+    }
+}

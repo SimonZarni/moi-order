@@ -105,4 +105,11 @@ export type RootStackParamList = {
   PassportVault: undefined;
   NinetyDayVault: undefined;
   MyDocuments: undefined;
+
+  // ── Food ordering ─────────────────────────────────────────────────────────
+  Food: undefined;
+  RestaurantDetail: { restaurantId: number };
+  RestaurantMap: undefined;
+  Checkout: undefined;
+  FoodOrderDetail: { orderId: number };
 };

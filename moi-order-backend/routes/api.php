@@ -35,6 +35,16 @@ Route::prefix('admin/v1')->middleware(['auth:sanctum', 'abilities:admin', 'admin
     base_path('routes/api/admin_v1.php')
 );
 
+// Merchant public routes (login only) — intentionally unauthenticated
+Route::prefix('merchant/v1')->middleware(['throttle:auth'])->group(
+    base_path('routes/api/merchant_public.php')
+);
+
+// Merchant authenticated routes — token must carry the 'merchant' ability; merchant.auth asserts is_merchant
+Route::prefix('merchant/v1')->middleware(['auth:sanctum', 'abilities:merchant', 'merchant.auth', 'user.not_suspended', 'throttle:api'])->group(
+    base_path('routes/api/merchant_v1.php')
+);
+
 // Stripe webhook — no auth:sanctum; Stripe-Signature header IS the authentication.
 // intentionally public
 Route::post('/webhook/stripe', [StripeWebhookController::class, 'handle'])

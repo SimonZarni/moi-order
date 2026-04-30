@@ -1,0 +1,142 @@
+import { StyleSheet } from 'react-native';
+import { colours } from '@/shared/theme/colours';
+import { radius } from '@/shared/theme/radius';
+import { spacing } from '@/shared/theme/spacing';
+import { typography } from '@/shared/theme/typography';
+
+export const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: colours.backgroundLight },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    backgroundColor: colours.backgroundDark,
+    gap: spacing.sm,
+  },
+  headerTitle: {
+    fontSize: typography.lg,
+    fontWeight: '800',
+    color: colours.textOnDark,
+    flex: 1,
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scroll: { flex: 1 },
+  content: { padding: spacing.md, gap: spacing.md },
+  card: {
+    backgroundColor: colours.card,
+    borderRadius: radius.xl,
+    overflow: 'hidden',
+    paddingVertical: spacing.xs,
+  },
+  sectionTitle: {
+    fontSize: typography.xxs,
+    fontWeight: '700',
+    color: colours.textMuted,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    marginBottom: spacing.xs,
+  },
+  itemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
+  },
+  itemName: {
+    flex: 1,
+    fontSize: typography.sm,
+    color: colours.textOnLight,
+    fontWeight: '500',
+  },
+  itemQty: {
+    fontSize: typography.sm,
+    color: colours.medium,
+    marginRight: spacing.sm,
+  },
+  itemPrice: {
+    fontSize: typography.sm,
+    fontWeight: '700',
+    color: colours.textOnLight,
+  },
+  totalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  totalLabel: {
+    fontSize: typography.md,
+    fontWeight: '700',
+    color: colours.textOnLight,
+  },
+  totalValue: {
+    fontSize: typography.md,
+    fontWeight: '800',
+    color: colours.primary,
+  },
+  paymentOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
+    gap: spacing.sm,
+  },
+  paymentLabel: {
+    flex: 1,
+    fontSize: typography.md,
+    color: colours.textOnLight,
+    fontWeight: '500',
+  },
+  radioOuter: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: colours.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: colours.primary,
+  },
+  notesInput: {
+    backgroundColor: colours.card,
+    borderRadius: radius.xl,
+    padding: spacing.md,
+    fontSize: typography.sm,
+    color: colours.textOnLight,
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  placeBtn: {
+    backgroundColor: colours.primary,
+    borderRadius: radius.xl,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    marginTop: spacing.sm,
+    marginBottom: spacing.xl,
+  },
+  placeBtnDisabled: { opacity: 0.5 },
+  placeBtnText: {
+    fontSize: typography.md,
+    fontWeight: '700',
+    color: colours.white,
+    letterSpacing: 0.3,
+  },
+});

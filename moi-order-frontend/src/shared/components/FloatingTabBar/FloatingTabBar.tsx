@@ -27,8 +27,8 @@ interface TabItem {
 }
 
 const TAB_LABELS: Record<string, { en: string; mm: string }> = {
-  Home:    { en: 'Home',    mm: 'ပင်မ'      },
-  Places:  { en: 'Places',  mm: 'နေရာများ'  },
+  Home:    { en: 'Home',    mm: 'ပင်မ'       },
+  Places:  { en: 'Places',  mm: 'နေရာများ'   },
   Orders:  { en: 'Orders',  mm: 'အော်ဒါများ' },
   Profile: { en: 'Profile', mm: 'ပရိုဖိုင်'  },
 };

@@ -73,6 +73,12 @@ import { NotificationsScreen } from '@/features/notifications/screens/Notificati
 import { PassportVaultScreen } from '@/features/documents/screens/PassportVaultScreen';
 import { NinetyDayVaultScreen } from '@/features/documents/screens/NinetyDayVaultScreen';
 import { MyDocumentsScreen } from '@/features/documents/screens/MyDocumentsScreen';
+import { FoodScreen } from '@/features/food/screens/FoodScreen';
+import { RestaurantDetailScreen } from '@/features/food/screens/RestaurantDetailScreen';
+import { RestaurantMapScreen } from '@/features/food/screens/RestaurantMapScreen';
+import { CheckoutScreen } from '@/features/food/screens/CheckoutScreen';
+import { FoodOrderDetailScreen } from '@/features/food/screens/FoodOrderDetailScreen';
+
 import { useNotificationsData } from '@/features/notifications/hooks/useNotificationsData';
 import { usePusherNotifications } from '@/features/notifications/hooks/usePusherNotifications';
 import { usePushNotifications } from '@/features/notifications/hooks/usePushNotifications';
@@ -143,6 +149,11 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="PassportVault"                 component={PassportVaultScreen} />
       <Stack.Screen name="NinetyDayVault"                component={NinetyDayVaultScreen} />
       <Stack.Screen name="MyDocuments"                   component={MyDocumentsScreen} />
+      <Stack.Screen name="Food"                          component={FoodScreen} />
+      <Stack.Screen name="RestaurantDetail"              component={RestaurantDetailScreen} />
+      <Stack.Screen name="RestaurantMap"                 component={RestaurantMapScreen} options={{ animation: 'slide_from_bottom' }} />
+      <Stack.Screen name="Checkout"                      component={CheckoutScreen} />
+      <Stack.Screen name="FoodOrderDetail"               component={FoodOrderDetailScreen} />
     </Stack.Navigator>
   );
 }

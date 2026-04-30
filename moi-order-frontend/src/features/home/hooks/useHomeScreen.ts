@@ -25,6 +25,7 @@ export interface UseHomeScreenResult {
   handleLogout: () => void;
   handleNavigateToSearch: () => void;
   handleNavigateToMap: () => void;
+  handleNavigateToFood: () => void;
 }
 
 export function useHomeScreen(): UseHomeScreenResult {
@@ -92,6 +93,10 @@ export function useHomeScreen(): UseHomeScreenResult {
     navigation.navigate('PlacesMap');
   }, [navigation]);
 
+  const handleNavigateToFood = useCallback((): void => {
+    navigation.navigate('Food');
+  }, [navigation]);
+
   return {
     user,
     isLoggedIn,
@@ -107,5 +112,6 @@ export function useHomeScreen(): UseHomeScreenResult {
     handleLogout,
     handleNavigateToSearch,
     handleNavigateToMap,
+    handleNavigateToFood,
   };
 }
