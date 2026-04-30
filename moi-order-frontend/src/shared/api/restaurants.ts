@@ -3,13 +3,13 @@ import { Restaurant } from '@/types/models';
 import { ApiResponse, PaginatedResponse } from '@/types/models';
 
 export async function fetchRestaurants(page = 1): Promise<PaginatedResponse<Restaurant>> {
-  const res = await apiClient.get<PaginatedResponse<Restaurant>>('/v1/restaurants', {
+  const res = await apiClient.get<PaginatedResponse<Restaurant>>('/api/v1/restaurants', {
     params: { page },
   });
   return res.data;
 }
 
 export async function fetchRestaurantDetail(id: number): Promise<Restaurant> {
-  const res = await apiClient.get<ApiResponse<Restaurant>>(`/v1/restaurants/${id}`);
+  const res = await apiClient.get<ApiResponse<Restaurant>>(`/api/v1/restaurants/${id}`);
   return res.data.data;
 }

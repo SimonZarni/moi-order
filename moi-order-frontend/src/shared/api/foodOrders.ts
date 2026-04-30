@@ -17,18 +17,18 @@ export interface PlaceFoodOrderInput {
 }
 
 export async function fetchFoodOrders(page = 1): Promise<PaginatedResponse<FoodOrder>> {
-  const res = await apiClient.get<PaginatedResponse<FoodOrder>>('/v1/food-orders', {
+  const res = await apiClient.get<PaginatedResponse<FoodOrder>>('/api/v1/food-orders', {
     params: { page },
   });
   return res.data;
 }
 
 export async function fetchFoodOrderDetail(id: number): Promise<FoodOrder> {
-  const res = await apiClient.get<ApiResponse<FoodOrder>>(`/v1/food-orders/${id}`);
+  const res = await apiClient.get<ApiResponse<FoodOrder>>(`/api/v1/food-orders/${id}`);
   return res.data.data;
 }
 
 export async function placeFoodOrder(input: PlaceFoodOrderInput): Promise<FoodOrder> {
-  const res = await apiClient.post<ApiResponse<FoodOrder>>('/v1/food-orders', input);
+  const res = await apiClient.post<ApiResponse<FoodOrder>>('/api/v1/food-orders', input);
   return res.data.data;
 }

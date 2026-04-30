@@ -122,9 +122,9 @@ class AdminRestaurantController extends Controller
         $request->validate(['status' => ['required', 'string', 'in:open,closed,paused']]);
 
         match ($request->string('status')->toString()) {
-            'open'   => $restaurant->open(),
-            'closed' => $restaurant->close(),
-            'paused' => $restaurant->pause(),
+            'open'   => $restaurant->markAsOpen(),
+            'closed' => $restaurant->markAsClosed(),
+            'paused' => $restaurant->markAsPaused(),
         };
 
         return response()->json([

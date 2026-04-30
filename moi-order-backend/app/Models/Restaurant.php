@@ -51,17 +51,17 @@ class Restaurant extends Model
 
     // ─── Domain methods ───────────────────────────────────────────────────────
 
-    public function open(): void
+    public function markAsOpen(): void
     {
         $this->update(['status' => RestaurantStatus::Open]);
     }
 
-    public function close(): void
+    public function markAsClosed(): void
     {
         $this->update(['status' => RestaurantStatus::Closed]);
     }
 
-    public function pause(): void
+    public function markAsPaused(): void
     {
         $this->update(['status' => RestaurantStatus::Paused]);
     }
