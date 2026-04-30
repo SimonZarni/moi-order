@@ -97,6 +97,10 @@ export function RestaurantDetailView() {
   const [editInfo, setEditInfo] = useState<EditInfoState | null>(null);
   const [editInfoSaving, setEditInfoSaving] = useState(false);
   const [editInfoError, setEditInfoError] = useState('');
+  const [editCoverPhoto, setEditCoverPhoto] = useState<File | null>(null);
+  const [editLogoPhoto, setEditLogoPhoto] = useState<File | null>(null);
+  const editCoverRef = useRef<HTMLInputElement>(null);
+  const editLogoRef = useRef<HTMLInputElement>(null);
 
   // Opening hours inline edit
   const [editingHours, setEditingHours] = useState(false);
@@ -168,6 +172,8 @@ export function RestaurantDetailView() {
     });
     setEditInfoOpen(true);
     setEditInfoError('');
+    setEditCoverPhoto(null);
+    setEditLogoPhoto(null);
   }, [restaurant]);
 
   const handleSaveInfo = useCallback(() => {
@@ -186,11 +192,14 @@ export function RestaurantDetailView() {
         is_pickup_available:    editInfo.is_pickup_available,
         min_order_cents:        editInfo.min_order_display ? Math.round(parseFloat(editInfo.min_order_display) * 100) : 0,
         delivery_radius_km:     editInfo.delivery_radius_km ? parseFloat(editInfo.delivery_radius_km) : null,
+      }, editCoverPhoto, editLogoPhoto)
+      .then((updated) => {
+        setRestaurant((prev) => prev ? { ...updated, menu: prev.menu, opening_hours: prev.opening_hours } : prev);
+        setEditInfoOpen(false);
       })
-      .then((updated) => { setRestaurant((prev) => prev ? { ...updated, menu: prev.menu, opening_hours: prev.opening_hours } : prev); setEditInfoOpen(false); })
       .catch((err) => setEditInfoError(err?.response?.data?.message ?? 'Failed to save.'))
       .finally(() => setEditInfoSaving(false));
-  }, [id, editInfo]);
+  }, [id, editInfo, editCoverPhoto, editLogoPhoto]);
 
   // ── Opening hours ────────────────────────────────────────────────────────────
 
@@ -696,6 +705,42 @@ export function RestaurantDetailView() {
           {editInfoError && <Alert severity="error" sx={{ mb: 2 }}>{editInfoError}</Alert>}
           {editInfo && (
             <Stack spacing={2.5}>
+              {/* Cover photo + logo */}
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>Cover Photo</Typography>
+                  <Box
+                    onClick={() => editCoverRef.current?.click()}
+                    sx={{ height: 100, border: '1.5px dashed', borderColor: 'grey.300', borderRadius: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', '&:hover': { borderColor: 'primary.main' } }}
+                  >
+                    {editCoverPhoto ? (
+                      <Box component="img" src={URL.createObjectURL(editCoverPhoto)} sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : restaurant?.cover_photo_url ? (
+                      <Box component="img" src={restaurant.cover_photo_url} sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <Typography variant="caption" color="text.secondary">Click to upload</Typography>
+                    )}
+                  </Box>
+                  <input ref={editCoverRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} onChange={(e) => setEditCoverPhoto(e.target.files?.[0] ?? null)} />
+                </Box>
+                <Box sx={{ width: 100 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>Logo</Typography>
+                  <Box
+                    onClick={() => editLogoRef.current?.click()}
+                    sx={{ height: 100, border: '1.5px dashed', borderColor: 'grey.300', borderRadius: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', '&:hover': { borderColor: 'primary.main' } }}
+                  >
+                    {editLogoPhoto ? (
+                      <Box component="img" src={URL.createObjectURL(editLogoPhoto)} sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : restaurant?.logo_url ? (
+                      <Box component="img" src={restaurant.logo_url} sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <Typography variant="caption" color="text.secondary">Click to upload</Typography>
+                    )}
+                  </Box>
+                  <input ref={editLogoRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} onChange={(e) => setEditLogoPhoto(e.target.files?.[0] ?? null)} />
+                </Box>
+              </Box>
+
               <TextField label="Restaurant Name" required value={editInfo.name} onChange={(e) => setEditInfo({ ...editInfo, name: e.target.value })} fullWidth />
               <TextField label="Description" value={editInfo.description} onChange={(e) => setEditInfo({ ...editInfo, description: e.target.value })} multiline rows={3} fullWidth />
               <TextField label="Phone" value={editInfo.phone} onChange={(e) => setEditInfo({ ...editInfo, phone: e.target.value })} fullWidth />

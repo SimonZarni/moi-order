@@ -29,7 +29,7 @@ class AdminMenuItemController extends Controller
 
         $item = $this->menuService->createItem($restaurant, $category, $request->validated());
 
-        return response()->json(['data' => (new MenuItemResource($item, $this->storage))->toArray($request)], 201);
+        return response()->json(['data' => (new MenuItemResource($item, $this->storage))->resolve($request)], 201);
     }
 
     public function update(UpdateAdminMenuItemRequest $request, Restaurant $restaurant, int $itemId): JsonResponse
@@ -38,7 +38,7 @@ class AdminMenuItemController extends Controller
 
         $item = $this->menuService->updateItem($item, $request->validated());
 
-        return response()->json(['data' => (new MenuItemResource($item, $this->storage))->toArray($request)]);
+        return response()->json(['data' => (new MenuItemResource($item, $this->storage))->resolve($request)]);
     }
 
     public function destroy(Restaurant $restaurant, int $itemId): JsonResponse

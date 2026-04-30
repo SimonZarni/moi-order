@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\RestaurantStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -27,6 +28,9 @@ class StoreAdminRestaurantRequest extends FormRequest
             'is_delivery_available' => ['boolean'],
             'is_pickup_available'   => ['boolean'],
             'min_order_cents'       => ['integer', 'min:0'],
+            'status'                => ['sometimes', Rule::enum(RestaurantStatus::class)],
+            'cover_photo'           => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'logo'                  => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'opening_hours'                  => ['nullable', 'array'],
             'opening_hours.*.day_of_week'    => ['required', 'integer', 'between:0,6'],
             'opening_hours.*.opens_at'       => ['nullable', 'date_format:H:i'],
@@ -37,11 +41,18 @@ class StoreAdminRestaurantRequest extends FormRequest
 
     public function prepareForValidation(): void
     {
-        $this->merge([
+        $merge = [
             'is_delivery_available' => $this->boolean('is_delivery_available', true),
             'is_pickup_available'   => $this->boolean('is_pickup_available', true),
             'min_order_cents'       => (int) $this->input('min_order_cents', 0),
-        ]);
+        ];
+
+        // FormData sends opening_hours as a JSON string — decode it back to array.
+        if (is_string($this->input('opening_hours'))) {
+            $merge['opening_hours'] = json_decode($this->input('opening_hours'), true) ?? [];
+        }
+
+        $this->merge($merge);
     }
 
     /** @return array<string, string> */

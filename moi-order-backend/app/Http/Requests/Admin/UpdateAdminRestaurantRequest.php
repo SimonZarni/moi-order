@@ -27,12 +27,22 @@ class UpdateAdminRestaurantRequest extends FormRequest
             'is_delivery_available' => ['sometimes', 'boolean'],
             'is_pickup_available'   => ['sometimes', 'boolean'],
             'min_order_cents'       => ['sometimes', 'integer', 'min:0'],
+            'cover_photo'           => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'logo'                  => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'opening_hours'                  => ['sometimes', 'array'],
             'opening_hours.*.day_of_week'    => ['required', 'integer', 'between:0,6'],
             'opening_hours.*.opens_at'       => ['nullable', 'date_format:H:i'],
             'opening_hours.*.closes_at'      => ['nullable', 'date_format:H:i'],
             'opening_hours.*.is_closed'      => ['boolean'],
         ];
+    }
+
+    public function prepareForValidation(): void
+    {
+        // FormData sends opening_hours as a JSON string — decode it back to array.
+        if (is_string($this->input('opening_hours'))) {
+            $this->merge(['opening_hours' => json_decode($this->input('opening_hours'), true) ?? []]);
+        }
     }
 
     /** @return array<string, string> */

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -49,6 +49,7 @@ type FormState = {
   is_pickup_available: boolean;
   min_order_display: string;
   delivery_radius_km: string;
+  status: 'open' | 'closed' | 'paused';
 };
 
 const EMPTY_FORM: FormState = {
@@ -62,6 +63,7 @@ const EMPTY_FORM: FormState = {
   is_pickup_available: true,
   min_order_display: '',
   delivery_radius_km: '',
+  status: 'open',
 };
 
 // ----------------------------------------------------------------------
@@ -77,6 +79,10 @@ export function RestaurantCreateView() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [coverPhoto, setCoverPhoto] = useState<File | null>(null);
+  const [logoPhoto, setLogoPhoto] = useState<File | null>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   // Debounced user search
   useEffect(() => {
@@ -125,8 +131,9 @@ export function RestaurantCreateView() {
         is_pickup_available:    form.is_pickup_available,
         min_order_cents:        minOrderCents,
         delivery_radius_km:     form.delivery_radius_km ? parseFloat(form.delivery_radius_km) : null,
+        status:                 form.status,
         opening_hours:          hours,
-      })
+      }, coverPhoto, logoPhoto)
       .then((restaurant) => router.push(`/restaurants/${restaurant.id}`))
       .catch((err) => {
         if (err?.response?.status === 422) {
@@ -139,7 +146,7 @@ export function RestaurantCreateView() {
         }
       })
       .finally(() => setSaving(false));
-  }, [form, hours, selectedUser, router]);
+  }, [form, hours, selectedUser, router, coverPhoto, logoPhoto]);
 
   return (
     <DashboardContent>
@@ -176,6 +183,38 @@ export function RestaurantCreateView() {
               <CardHeader title="Basic Information" />
               <CardContent>
                 <Stack spacing={2.5}>
+                  {/* Cover photo + logo uploads */}
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>Cover Photo</Typography>
+                      <Box
+                        onClick={() => coverInputRef.current?.click()}
+                        sx={{ height: 110, border: '1.5px dashed', borderColor: 'grey.300', borderRadius: 1.5, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', '&:hover': { borderColor: 'primary.main' } }}
+                      >
+                        {coverPhoto ? (
+                          <Box component="img" src={URL.createObjectURL(coverPhoto)} sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', px: 1 }}>Click to upload</Typography>
+                        )}
+                      </Box>
+                      <input ref={coverInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} onChange={(e) => setCoverPhoto(e.target.files?.[0] ?? null)} />
+                    </Box>
+                    <Box sx={{ width: 110 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>Logo</Typography>
+                      <Box
+                        onClick={() => logoInputRef.current?.click()}
+                        sx={{ height: 110, border: '1.5px dashed', borderColor: 'grey.300', borderRadius: 1.5, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', '&:hover': { borderColor: 'primary.main' } }}
+                      >
+                        {logoPhoto ? (
+                          <Box component="img" src={URL.createObjectURL(logoPhoto)} sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', px: 1 }}>Click to upload</Typography>
+                        )}
+                      </Box>
+                      <input ref={logoInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} onChange={(e) => setLogoPhoto(e.target.files?.[0] ?? null)} />
+                    </Box>
+                  </Box>
+
                   <TextField
                     label="Restaurant Name"
                     required
@@ -340,6 +379,17 @@ export function RestaurantCreateView() {
               <CardHeader title="Delivery & Order Settings" />
               <CardContent>
                 <Stack spacing={2}>
+                  <TextField
+                    select
+                    label="Initial Status"
+                    value={form.status}
+                    onChange={(e) => set('status', e.target.value)}
+                    fullWidth
+                  >
+                    <MenuItem value="open">Open — visible to customers immediately</MenuItem>
+                    <MenuItem value="closed">Closed — hidden from customers</MenuItem>
+                    <MenuItem value="paused">Paused — temporarily unavailable</MenuItem>
+                  </TextField>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Typography variant="body2">Delivery available</Typography>
                     <Switch

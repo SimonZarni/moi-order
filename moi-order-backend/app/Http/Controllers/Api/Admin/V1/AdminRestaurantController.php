@@ -81,7 +81,7 @@ class AdminRestaurantController extends Controller
         $restaurant->load(['merchant', 'openingHours', 'menuCategories.menuItems']);
 
         return response()->json([
-            'data' => (new RestaurantResource($restaurant, $this->storage))->toArray(request()),
+            'data' => (new RestaurantResource($restaurant, $this->storage))->resolve(request()),
         ]);
     }
 
@@ -95,7 +95,7 @@ class AdminRestaurantController extends Controller
         $restaurant = $this->restaurantService->create($user, $data);
 
         return response()->json([
-            'data' => (new RestaurantResource($restaurant, $this->storage))->toArray($request),
+            'data' => (new RestaurantResource($restaurant, $this->storage))->resolve($request),
         ], 201);
     }
 
@@ -104,7 +104,7 @@ class AdminRestaurantController extends Controller
         $restaurant = $this->restaurantService->update($restaurant, $request->validated());
 
         return response()->json([
-            'data' => (new RestaurantResource($restaurant, $this->storage))->toArray($request),
+            'data' => (new RestaurantResource($restaurant, $this->storage))->resolve($request),
         ]);
     }
 
