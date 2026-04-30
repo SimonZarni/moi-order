@@ -86,6 +86,10 @@ class AdminFoodOrderController extends Controller
                     'name'  => $foodOrder->user->name,
                     'email' => $foodOrder->user->email,
                 ],
+                'restaurant' => [
+                    'id'   => $foodOrder->restaurant->id,
+                    'name' => $foodOrder->restaurant->name,
+                ],
             ],
         ]);
     }
