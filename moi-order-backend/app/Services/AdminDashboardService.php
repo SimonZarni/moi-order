@@ -288,7 +288,7 @@ class AdminDashboardService
             ->map(fn (ServiceSubmission $sub) => [
                 'id'          => "ss_{$sub->id}",
                 'title'       => 'Submission #' . $sub->id
-                    . ($sub->serviceType?->service?->name ? ' — ' . $sub->serviceType->service->name : ''),
+                    . ($sub->serviceType?->service ? ' — ' . ($sub->serviceType->service->name_mm ?? $sub->serviceType->service->name_en ?? $sub->serviceType->service->name) : ''),
                 'cover_url'   => '',
                 'description' => $sub->status->label() . ' · ' . ($sub->user?->name ?? 'Unknown'),
                 'posted_at'   => $sub->created_at->toISOString(),
