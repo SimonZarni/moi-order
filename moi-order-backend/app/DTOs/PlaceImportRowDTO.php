@@ -59,7 +59,7 @@ readonly class PlaceImportRowDTO
 
         $rawTags = $str($row['tags'] ?? '');
         $tags    = $rawTags !== ''
-            ? array_values(array_filter(array_map('trim', explode(',', $rawTags))))
+            ? array_values(array_filter(array_map('trim', preg_split('/[,၊]/u', $rawTags))))
             : [];
 
         $lat = $opt($row['latitude'] ?? null);
