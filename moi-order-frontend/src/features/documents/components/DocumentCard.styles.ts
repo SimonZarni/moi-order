@@ -90,6 +90,13 @@ export const styles = StyleSheet.create({
   nameText: {
     fontSize: typography.xs,
     color: colours.medium,
+    marginBottom: 2,
+  },
+  passportNumber: {
+    fontSize: typography.md,
+    fontWeight: '800',
+    color: colours.textOnLight,
+    letterSpacing: 1.2,
     marginBottom: spacing.xs,
   },
   dateRow: {

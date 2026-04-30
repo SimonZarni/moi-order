@@ -50,15 +50,29 @@ function subtypeLabel(subtype: string | null): string {
   return subtype.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
+const DATE_KEY_RE = /date/i;
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
 function extractedRows(data: Record<string, string | null>): Array<{ label: string; value: string }> {
-  const skip = new Set(['full_name', 'previous_report_date', 'next_report_date']);
+  // Handled explicitly in JSX — skip to avoid duplicates
+  const skip = new Set([
+    'full_name', 'type', 'country_code', 'passport_number',
+    'date_of_birth', 'expiry_date', 'issue_date',
+    'previous_report_date', 'next_report_date',
+  ]);
   return Object.entries(data)
     .filter(([key, val]) => val !== null && val !== '' && !skip.has(key))
-    .slice(0, 5)
-    .map(([key, val]) => ({
-      label: key.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-      value: String(val),
-    }));
+    .slice(0, 6)
+    .map(([key, val]) => {
+      const raw = String(val);
+      const value = ISO_DATE_RE.test(raw) || DATE_KEY_RE.test(key)
+        ? (() => { try { return formatDateDMY(raw); } catch { return raw; } })()
+        : raw;
+      return {
+        label: key.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+        value,
+      };
+    });
 }
 
 const ALERT_COLOURS = {
@@ -127,6 +141,45 @@ export function DocumentCard({ document: doc, onDelete, isDeleting }: Props): Re
 
           {name !== null && <Text style={styles.nameText}>{name}</Text>}
 
+          {/* Passport bio page — number (bold), type, country, DOB — expiry stays last */}
+          {doc.subtype === 'bio_page' && (
+            <>
+              {doc.extracted_data?.['passport_number'] != null && (
+                <Text style={styles.passportNumber}>
+                  {doc.extracted_data['passport_number'] as string}
+                </Text>
+              )}
+              {doc.extracted_data?.['type'] != null && (
+                <View style={styles.dateRow}>
+                  <Ionicons name="document-outline" size={12} color={colours.textMuted} />
+                  <Text style={styles.dateLabel}>Type</Text>
+                  <Text style={styles.dateValue}>{doc.extracted_data['type'] as string}</Text>
+                </View>
+              )}
+              {doc.extracted_data?.['country_code'] != null && (
+                <View style={styles.dateRow}>
+                  <Ionicons name="flag-outline" size={12} color={colours.textMuted} />
+                  <Text style={styles.dateLabel}>Country</Text>
+                  <Text style={styles.dateValue}>{doc.extracted_data['country_code'] as string}</Text>
+                </View>
+              )}
+              {doc.extracted_data?.['date_of_birth'] != null && (
+                <View style={styles.dateRow}>
+                  <Ionicons name="person-outline" size={12} color={colours.textMuted} />
+                  <Text style={styles.dateLabel}>Date of birth</Text>
+                  <Text style={styles.dateValue}>{formatDateDMY(doc.extracted_data['date_of_birth'] as string)}</Text>
+                </View>
+              )}
+            </>
+          )}
+
+          {doc.subtype === 'visa_page' && doc.extracted_data?.['issue_date'] != null && (
+            <View style={styles.dateRow}>
+              <Ionicons name="calendar-outline" size={12} color={colours.textMuted} />
+              <Text style={styles.dateLabel}>Issued</Text>
+              <Text style={styles.dateValue}>{formatDateDMY(doc.extracted_data['issue_date'] as string)}</Text>
+            </View>
+          )}
           {doc.expiry_date !== null && (
             <View style={styles.dateRow}>
               <Ionicons name="calendar-outline" size={12} color={colours.textMuted} />

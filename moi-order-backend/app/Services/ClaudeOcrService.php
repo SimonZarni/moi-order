@@ -127,7 +127,9 @@ A valid passport document is EITHER:
 Respond ONLY with a JSON object — no markdown, no explanation. Use this exact structure:
 
 For a bio data page:
-{"is_valid_document_type":true,"validation_message":null,"subtype":"bio_page","extracted_data":{"full_name":"JOHN DOE","passport_number":"AB123456","nationality":"Myanmar","date_of_birth":"1990-01-15","expiry_date":"2030-01-14","issuing_country":"Myanmar"},"expiry_date":"2030-01-14","extension_date":null}
+{"is_valid_document_type":true,"validation_message":null,"subtype":"bio_page","extracted_data":{"full_name":"JOHN DOE","type":"P","country_code":"MMR","passport_number":"AB123456","nationality":"Myanmar","date_of_birth":"1990-01-15","expiry_date":"2030-01-14","issuing_country":"Myanmar"},"expiry_date":"2030-01-14","extension_date":null}
+
+The "type" field is the document type code from the MRZ — 1 or 2 characters (e.g. "P" for regular, "PR" for restricted, "PV" for visa, "PE" for emergency, "PD" for diplomatic). The "country_code" is the 3-letter ISO country code from the MRZ (e.g. "MMR", "THA", "GBR").
 
 For a visa/stamp page:
 {"is_valid_document_type":true,"validation_message":null,"subtype":"visa_page","extracted_data":{"visa_type":"Tourist Visa","country":"Thailand","issue_date":"2025-01-01","expiry_date":"2025-07-01","entries":"Multiple"},"expiry_date":"2025-07-01","extension_date":null}

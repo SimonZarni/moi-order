@@ -15,6 +15,7 @@ import { DocumentShortcuts } from '@/features/profile/components/DocumentShortcu
 import { useProfileScreen } from '@/features/profile/hooks/useProfileScreen';
 import { useLinkedAccounts } from '@/features/profile/hooks/useLinkedAccounts';
 import { formatDate } from '@/shared/utils/formatDate';
+import { formatPhoneNumber } from '@/shared/utils/formatPhoneNumber';
 import { getProfileStrings } from '@/shared/constants/profileStrings';
 import { colours } from '@/shared/theme/colours';
 import { styles } from './ProfileScreen.styles';
@@ -303,7 +304,7 @@ export function ProfileScreen(): React.JSX.Element {
                     <Ionicons name="call-outline" size={16} color={colours.primary} />
                   </View>
                   <Text style={[styles.infoValue, phoneNumber === '' && styles.infoPlaceholder]}>
-                    {phoneNumber || 'Add a Thai phone number for OTP sign-in'}
+                    {phoneNumber ? formatPhoneNumber(phoneNumber) : 'Add a Thai phone number for OTP sign-in'}
                   </Text>
                 </View>
 
@@ -447,7 +448,7 @@ export function ProfileScreen(): React.JSX.Element {
               <View style={styles.linkCopy}>
                 <Text style={styles.linkTitle}>Phone</Text>
                 <Text style={styles.linkSubtitle}>
-                  {hasPhoneNumber ? `Linked: ${user?.phone_number}` : 'Add a Thai phone number for OTP login'}
+                  {hasPhoneNumber && user?.phone_number ? `Linked: ${formatPhoneNumber(user.phone_number)}` : 'Add a Thai phone number for OTP login'}
                 </Text>
               </View>
               <Pressable
