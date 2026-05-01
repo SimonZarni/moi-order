@@ -19,7 +19,7 @@ class HomeCardIconService
         return HomeCardIcon::active()->orderBy('label')->get()
             ->each(function (HomeCardIcon $icon): void {
                 if ($icon->type === HomeCardIconType::Custom && $icon->image_path) {
-                    $icon->image_url = $this->storage->url($icon->image_path);
+                    $icon->image_url = $this->storage->publicUrl($icon->image_path);
                 }
             });
     }
@@ -36,7 +36,7 @@ class HomeCardIconService
             'is_active'  => true,
         ]);
 
-        $icon->image_url = $this->storage->url($icon->image_path);
+        $icon->image_url = $this->storage->publicUrl($icon->image_path);
 
         return $icon;
     }

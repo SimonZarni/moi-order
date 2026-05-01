@@ -29,7 +29,7 @@ class HomeCardService
                 /** @var HomeCardIcon|null $icon */
                 $icon = $card->icon;
                 if ($icon && $icon->type === HomeCardIconType::Custom && $icon->image_path) {
-                    $icon->image_url = $this->storage->url($icon->image_path);
+                    $icon->image_url = $this->storage->publicUrl($icon->image_path);
                 }
             });
     }
