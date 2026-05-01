@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "Moi Order Merchant",
+    "slug": "moi-order-merchant",
+    "version": "1.0.0",
+    "scheme": "merchant",
+    "platforms": ["ios", "android", "web"],
+    "web": { "bundler": "metro", "output": "single" },
+    "extra": { "apiBaseUrl": "http://localhost:8000/api/merchant/v1" }
+  }
+}

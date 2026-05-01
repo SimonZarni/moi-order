@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\Admin\V1\AdminAccountController;
 use App\Http\Controllers\Api\Admin\V1\AdminAuthController;
+use App\Http\Controllers\Api\Admin\V1\AdminKycController;
+use App\Http\Controllers\Api\Admin\V1\AdminMerchantCreateController;
 use App\Http\Controllers\Api\Admin\V1\AdminHomeCardController;
-use App\Http\Controllers\Api\Admin\V1\AdminHomeCardIconController;
-use App\Http\Controllers\Api\Admin\V1\AdminHomeCardRouteController;
 use App\Http\Controllers\Api\Admin\V1\AdminDashboardController;
 use App\Http\Controllers\Api\Admin\V1\AdminDocumentTypeController;
 use App\Http\Controllers\Api\Admin\V1\AdminFoodOrderController;
@@ -264,6 +264,13 @@ Route::prefix('home-card-icons')->name('admin.home-card-icons.')->middleware('ch
     Route::get('/',  [AdminHomeCardIconController::class, 'index'])->name('index');
     Route::post('/', [AdminHomeCardIconController::class, 'store'])->name('store');
 });
+
+// ── KYC Applications ──────────────────────────────────────────────────────────
+Route::get('/merchants/kyc-badge',                              [AdminKycController::class, 'pendingCount']);
+Route::post('/merchants',                                       [AdminMerchantCreateController::class, 'store']);
+Route::get('/kyc-applications',                                 [AdminKycController::class, 'index']);
+Route::get('/kyc-applications/{application}',                   [AdminKycController::class, 'show']);
+Route::post('/kyc-applications/{application}/review',           [AdminKycController::class, 'review']);
 
 // ── Document Types ────────────────────────────────────────────────────────────
 Route::prefix('document-types')->name('admin.document-types.')->group(function (): void {

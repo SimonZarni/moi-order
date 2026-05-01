@@ -107,4 +107,21 @@ export const navData: NavItem[] = [
     path: '/support',
     icon: icon('ic-disabled'),
   },
+  {
+    title: 'Merchants',
+    path: '/merchants',
+    icon: icon('ic-user'),
+    children: [
+      {
+        title: 'KYC Applications',
+        path: '/merchants',
+        icon: icon('ic-user'),
+      },
+      {
+        title: 'Create Merchant',
+        path: '/merchants/new',
+        icon: icon('ic-user'),
+      },
+    ],
+  },
 ];
