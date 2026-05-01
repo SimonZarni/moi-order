@@ -23,10 +23,12 @@ class AdminRoleController extends Controller
         $roles       = AdminRole::with('permissions')->get();
         $permissions = Permission::orderBy('group')->orderBy('key')->get();
 
+        // Serialize manually — embedding Resource::collection() inside response()->json()
+        // causes Laravel to double-wrap: { data: { data: [...] } }.
         return response()->json([
             'data' => [
-                'roles'       => AdminRoleResource::collection($roles),
-                'permissions' => PermissionResource::collection($permissions),
+                'roles'       => $roles->map(fn (AdminRole $r) => (new AdminRoleResource($r))->toArray(request()))->values(),
+                'permissions' => $permissions->map(fn (Permission $p) => (new PermissionResource($p))->toArray(request()))->values(),
             ],
         ]);
     }

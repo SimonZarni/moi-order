@@ -1,7 +1,7 @@
-import type { AdminAccount, AdminRole, AdminRoleSlug, Permission } from 'src/types';
 import type { CreateAdminData } from 'src/api/roles';
+import type { AdminAccount, AdminRole, AdminRoleSlug, Permission } from 'src/types';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -12,42 +12,41 @@ import Dialog from '@mui/material/Dialog';
 import Select from '@mui/material/Select';
 import Switch from '@mui/material/Switch';
 import Divider from '@mui/material/Divider';
+import Checkbox from '@mui/material/Checkbox';
 import MenuItem from '@mui/material/MenuItem';
 import TableRow from '@mui/material/TableRow';
-import Checkbox from '@mui/material/Checkbox';
-import TextField from '@mui/material/TextField';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
-import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import CardHeader from '@mui/material/CardHeader';
 import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
-import CardHeader from '@mui/material/CardHeader';
+import Typography from '@mui/material/Typography';
+import CardContent from '@mui/material/CardContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import FormControl from '@mui/material/FormControl';
-import CardContent from '@mui/material/CardContent';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
+import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
 import { DashboardContent } from 'src/layouts/dashboard';
+import {
+  createAdminAccount,
+  deleteAdminAccount,
+  fetchAdminAccounts,
+  toggleAdminAccount,
+  updateAdminAccount,
+  fetchPermissionMatrix,
+  updateRolePermissions,
+} from 'src/api/roles';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
-
-import {
-  fetchAdminAccounts,
-  fetchPermissionMatrix,
-  createAdminAccount,
-  updateAdminAccount,
-  toggleAdminAccount,
-  deleteAdminAccount,
-  updateRolePermissions,
-} from 'src/api/roles';
 
 // ----------------------------------------------------------------------
 

@@ -30,13 +30,18 @@ export type UpdateAdminData = {
 // ── Permissions matrix ────────────────────────────────────────────────────────
 
 export async function fetchPermissionMatrix(): Promise<PermissionMatrix> {
-  const res = await fetch(`${BASE}/admin/v1/roles/permissions`, { headers: authHeaders() });
+  const res = await fetch(`${BASE}/roles/permissions`, { headers: authHeaders() });
+  if (!res.ok) return { roles: [], permissions: [] };
   const json = await res.json();
-  return json.data as PermissionMatrix;
+  const d = json.data ?? {};
+  return {
+    roles: Array.isArray(d.roles) ? d.roles : [],
+    permissions: Array.isArray(d.permissions) ? d.permissions : [],
+  };
 }
 
 export async function updateRolePermissions(roleId: number, permissionKeys: string[]): Promise<void> {
-  const res = await fetch(`${BASE}/admin/v1/roles/${roleId}/permissions`, {
+  const res = await fetch(`${BASE}/roles/${roleId}/permissions`, {
     method: 'PUT',
     headers: authHeaders(),
     body: JSON.stringify({ permission_keys: permissionKeys }),
@@ -51,13 +56,14 @@ export async function updateRolePermissions(roleId: number, permissionKeys: stri
 // ── Admin accounts ────────────────────────────────────────────────────────────
 
 export async function fetchAdminAccounts(): Promise<AdminAccount[]> {
-  const res = await fetch(`${BASE}/admin/v1/admins`, { headers: authHeaders() });
+  const res = await fetch(`${BASE}/admins`, { headers: authHeaders() });
+  if (!res.ok) return [];
   const json = await res.json();
-  return json.data as AdminAccount[];
+  return Array.isArray(json.data) ? json.data : [];
 }
 
 export async function createAdminAccount(data: CreateAdminData): Promise<AdminAccount> {
-  const res = await fetch(`${BASE}/admin/v1/admins`, {
+  const res = await fetch(`${BASE}/admins`, {
     method: 'POST',
     headers: authHeaders(),
     body: JSON.stringify(data),
@@ -73,7 +79,7 @@ export async function createAdminAccount(data: CreateAdminData): Promise<AdminAc
 }
 
 export async function updateAdminAccount(id: number, data: UpdateAdminData): Promise<AdminAccount> {
-  const res = await fetch(`${BASE}/admin/v1/admins/${id}`, {
+  const res = await fetch(`${BASE}/admins/${id}`, {
     method: 'PUT',
     headers: authHeaders(),
     body: JSON.stringify(data),
@@ -89,7 +95,7 @@ export async function updateAdminAccount(id: number, data: UpdateAdminData): Pro
 }
 
 export async function toggleAdminAccount(id: number): Promise<AdminAccount> {
-  const res = await fetch(`${BASE}/admin/v1/admins/${id}/toggle`, {
+  const res = await fetch(`${BASE}/admins/${id}/toggle`, {
     method: 'PATCH',
     headers: authHeaders(),
   });
@@ -104,7 +110,7 @@ export async function toggleAdminAccount(id: number): Promise<AdminAccount> {
 }
 
 export async function deleteAdminAccount(id: number): Promise<void> {
-  const res = await fetch(`${BASE}/admin/v1/admins/${id}`, {
+  const res = await fetch(`${BASE}/admins/${id}`, {
     method: 'DELETE',
     headers: authHeaders(),
   });
