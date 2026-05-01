@@ -9,8 +9,8 @@ import { useCheckoutScreen } from '../hooks/useCheckoutScreen';
 import { styles } from './CheckoutScreen.styles';
 
 const PAYMENT_OPTIONS: Array<{ value: FoodPaymentMethod; label: string; icon: string }> = [
-  { value: FOOD_PAYMENT_METHOD.Cod,     label: 'Cash on Delivery', icon: '💵' },
-  { value: FOOD_PAYMENT_METHOD.LinePay, label: 'LINE Pay',         icon: '💚' },
+  { value: FOOD_PAYMENT_METHOD.Cod,       label: 'Cash on Delivery', icon: '💵' },
+  { value: FOOD_PAYMENT_METHOD.PromptPay, label: 'PromptPay',        icon: '🔵' },
 ];
 
 export function CheckoutScreen(): React.JSX.Element {

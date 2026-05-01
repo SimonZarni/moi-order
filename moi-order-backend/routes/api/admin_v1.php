@@ -237,6 +237,7 @@ Route::prefix('restaurants')->name('admin.restaurants.')->group(function (): voi
 Route::prefix('food-orders')->name('admin.food-orders.')->group(function (): void {
     Route::get('/',            [AdminFoodOrderController::class, 'index'])->name('index');
     Route::get('/{foodOrder}', [AdminFoodOrderController::class, 'show'])->name('show');
+    Route::post('/{foodOrder}/confirm-payment', [AdminFoodOrderController::class, 'confirmPayment'])->name('confirm-payment');
 });
 
 // ── Home Cards ────────────────────────────────────────────────────────────────

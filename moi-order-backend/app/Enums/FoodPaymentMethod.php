@@ -6,14 +6,14 @@ namespace App\Enums;
 
 enum FoodPaymentMethod: string
 {
-    case Cod     = 'cod';
-    case LinePay = 'line_pay';
+    case Cod       = 'cod';
+    case PromptPay = 'prompt_pay';
 
     public function label(): string
     {
         return match($this) {
-            self::Cod     => 'Cash on Delivery',
-            self::LinePay => 'LINE Pay',
+            self::Cod       => 'Cash on Delivery',
+            self::PromptPay => 'PromptPay',
         };
     }
 }

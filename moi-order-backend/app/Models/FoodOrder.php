@@ -17,38 +17,42 @@ class FoodOrder extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'user_id',
-        'restaurant_id',
-        'status',
-        'payment_method',
-        'subtotal_cents',
-        'total_cents',
-        'delivery_address',
-        'delivery_lat',
-        'delivery_lng',
-        'customer_notes',
-        'idempotency_key',
-        'line_payment_url',
-        'confirmed_at',
-        'ready_at',
-        'completed_at',
-        'cancelled_at',
+        'order_number',
+        'user_id', 'restaurant_id', 'status', 'payment_method',
+        'subtotal_cents', 'total_cents', 'delivery_address',
+        'delivery_lat', 'delivery_lng', 'customer_notes',
+        'idempotency_key', 'prompt_pay_url',
+        'confirmed_at', 'payment_confirmed_at', 'preparing_at',
+        'picked_up_at', 'delivered_at', 'completed_at', 'cancelled_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'status'         => FoodOrderStatus::class,
-            'payment_method' => FoodPaymentMethod::class,
-            'subtotal_cents' => 'integer',
-            'total_cents'    => 'integer',
-            'delivery_lat'   => 'float',
-            'delivery_lng'   => 'float',
-            'confirmed_at'   => 'datetime',
-            'ready_at'       => 'datetime',
-            'completed_at'   => 'datetime',
-            'cancelled_at'   => 'datetime',
+            'status'               => FoodOrderStatus::class,
+            'payment_method'       => FoodPaymentMethod::class,
+            'subtotal_cents'       => 'integer',
+            'total_cents'          => 'integer',
+            'delivery_lat'         => 'float',
+            'delivery_lng'         => 'float',
+            'confirmed_at'         => 'datetime',
+            'payment_confirmed_at' => 'datetime',
+            'preparing_at'         => 'datetime',
+            'picked_up_at'         => 'datetime',
+            'delivered_at'         => 'datetime',
+            'completed_at'         => 'datetime',
+            'cancelled_at'         => 'datetime',
         ];
+    }
+
+    // ─── Static factories ─────────────────────────────────────────────────────
+
+    public static function generateOrderNumber(): string
+    {
+        $prefix = 'MOI';
+        $date   = now()->format('ymd'); // e.g. 260501
+        $random = strtoupper(substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 4));
+        return $prefix . $date . $random;
     }
 
     // ─── Domain methods ───────────────────────────────────────────────────────
@@ -58,27 +62,30 @@ class FoodOrder extends Model
     {
         if (! $this->status->canTransitionTo($next)) {
             throw new DomainException(
-                "order.invalid_status_transition",
-                409,
+                'order.invalid_status_transition', 409,
                 ['from' => $this->status->value, 'to' => $next->value],
             );
         }
 
         $timestamps = match($next) {
-            FoodOrderStatus::Confirmed => ['confirmed_at' => now()],
-            FoodOrderStatus::Ready     => ['ready_at'     => now()],
-            FoodOrderStatus::Completed => ['completed_at' => now()],
-            FoodOrderStatus::Cancelled => ['cancelled_at' => now()],
-            default                    => [],
+            FoodOrderStatus::WaitingForPayment  => ['confirmed_at'         => now()],
+            FoodOrderStatus::PaymentConfirmed   => ['payment_confirmed_at' => now()],
+            FoodOrderStatus::PreparingFood      => ['preparing_at'         => now()],
+            FoodOrderStatus::WaitingForDelivery => [],
+            FoodOrderStatus::DeliveryOnTheWay   => ['picked_up_at'         => now()],
+            FoodOrderStatus::Delivered          => ['delivered_at'         => now()],
+            FoodOrderStatus::Completed          => ['completed_at'         => now()],
+            FoodOrderStatus::Cancelled          => ['cancelled_at'         => now()],
+            default                             => [],
         };
 
         $this->update(array_merge(['status' => $next], $timestamps));
     }
 
-    public function canShowLinePayButton(): bool
+    public function canShowPromptPay(): bool
     {
-        return $this->payment_method === FoodPaymentMethod::LinePay
-            && $this->status !== FoodOrderStatus::Pending;
+        return $this->payment_method === FoodPaymentMethod::PromptPay
+            && $this->status === FoodOrderStatus::WaitingForPayment;
     }
 
     // ─── Scopes ───────────────────────────────────────────────────────────────

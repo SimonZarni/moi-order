@@ -110,6 +110,7 @@ export type RootStackParamList = {
   Food: undefined;
   RestaurantDetail: { restaurantId: number };
   RestaurantMap: undefined;
+  CartOrders: undefined;
   Checkout: undefined;
   FoodOrderDetail: { orderId: number };
 };

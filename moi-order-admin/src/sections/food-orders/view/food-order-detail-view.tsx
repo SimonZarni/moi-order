@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import TableRow from '@mui/material/TableRow';
@@ -31,17 +32,20 @@ import { Iconify } from 'src/components/iconify';
 // ----------------------------------------------------------------------
 
 const STATUS_COLOR: Record<string, 'success' | 'warning' | 'info' | 'error' | 'default'> = {
-  pending:   'warning',
-  confirmed: 'info',
-  ready:     'info',
-  completed: 'success',
-  cancelled: 'error',
+  order_placed:          'warning',
+  waiting_for_payment:   'warning',
+  payment_confirmed:     'info',
+  preparing_food:        'info',
+  waiting_for_delivery:  'info',
+  delivery_on_the_way:   'info',
+  delivered:             'info',
+  completed:             'success',
+  cancelled:             'error',
 };
 
 const PAYMENT_LABEL: Record<string, string> = {
-  credit_card: 'Credit Card',
-  line_pay:    'LINE Pay',
-  cash:        'Cash on Delivery',
+  cod:        'Cash on Delivery',
+  prompt_pay: 'PromptPay',
 };
 
 // ----------------------------------------------------------------------
@@ -51,6 +55,8 @@ export function FoodOrderDetailView() {
   const router = useRouter();
   const [order, setOrder] = useState<FoodOrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [confirming, setConfirming] = useState(false);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -61,6 +67,17 @@ export function FoodOrderDetailView() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [id]);
+
+  const handleConfirmPayment = useCallback(() => {
+    if (!id || !order) return;
+    setConfirming(true);
+    setConfirmError(null);
+    foodOrdersApi
+      .confirmPayment(id)
+      .then((updated) => setOrder(updated))
+      .catch(() => setConfirmError('Failed to confirm payment. Please try again.'))
+      .finally(() => setConfirming(false));
+  }, [id, order]);
 
   if (loading) {
     return (
@@ -93,8 +110,24 @@ export function FoodOrderDetailView() {
         <Typography variant="h4" sx={{ flexGrow: 1 }}>
           Order #{order.id}
         </Typography>
-        <Label color={STATUS_COLOR[order.status] ?? 'default'}>{order.status}</Label>
+        <Label color={STATUS_COLOR[order.status] ?? 'default'}>{order.status_label}</Label>
+
+        {order.status === 'waiting_for_payment' && (
+          <Button
+            variant="contained"
+            color="success"
+            disabled={confirming}
+            onClick={handleConfirmPayment}
+            startIcon={confirming ? <CircularProgress size={16} color="inherit" /> : <Iconify icon="eva:checkmark-fill" />}
+          >
+            Confirm Payment
+          </Button>
+        )}
       </Box>
+
+      {confirmError && (
+        <Alert severity="error" sx={{ mb: 3 }}>{confirmError}</Alert>
+      )}
 
       <Grid container spacing={3}>
         {/* Summary */}
@@ -113,7 +146,10 @@ export function FoodOrderDetailView() {
                 <Divider />
                 <InfoRow label="Placed" value={fDate(order.created_at)} />
                 {order.confirmed_at && <InfoRow label="Confirmed" value={fDate(order.confirmed_at)} />}
-                {order.ready_at && <InfoRow label="Ready" value={fDate(order.ready_at)} />}
+                {order.payment_confirmed_at && <InfoRow label="Payment Confirmed" value={fDate(order.payment_confirmed_at)} />}
+                {order.preparing_at && <InfoRow label="Preparing" value={fDate(order.preparing_at)} />}
+                {order.picked_up_at && <InfoRow label="Picked Up" value={fDate(order.picked_up_at)} />}
+                {order.delivered_at && <InfoRow label="Delivered" value={fDate(order.delivered_at)} />}
                 {order.completed_at && <InfoRow label="Completed" value={fDate(order.completed_at)} />}
                 {order.cancelled_at && <InfoRow label="Cancelled" value={fDate(order.cancelled_at)} />}
               </Stack>
@@ -187,7 +223,7 @@ export function FoodOrderDetailView() {
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <Box sx={{ display: 'flex', gap: 1 }}>
-      <Typography variant="body2" color="text.secondary" sx={{ minWidth: 110 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ minWidth: 140 }}>
         {label}
       </Typography>
       <Typography variant="body2">{value}</Typography>

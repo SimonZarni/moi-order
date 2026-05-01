@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { fetchRestaurants } from '@/shared/api/restaurants';
-import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { CACHE_TTL } from '@/shared/constants/config';
+import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { Restaurant } from '@/types/models';
 
 export interface UseRestaurantListDataResult {
@@ -14,10 +14,10 @@ export interface UseRestaurantListDataResult {
   refetch: () => void;
 }
 
-export function useRestaurantListData(): UseRestaurantListDataResult {
+export function useRestaurantListData(search?: string): UseRestaurantListDataResult {
   const query = useInfiniteQuery({
-    queryKey: QUERY_KEYS.RESTAURANTS.LIST(1),
-    queryFn: ({ pageParam }) => fetchRestaurants(pageParam as number),
+    queryKey:        QUERY_KEYS.RESTAURANTS.LIST(search),
+    queryFn:         ({ pageParam }) => fetchRestaurants(pageParam as number, search),
     initialPageParam: 1,
     getNextPageParam: (last) =>
       last.meta.current_page < last.meta.last_page ? last.meta.current_page + 1 : undefined,

@@ -36,10 +36,11 @@ class FoodOrderStatusUpdated implements ShouldBroadcast
     public function broadcastWith(): array
     {
         return [
-            'order_id'              => $this->order->id,
-            'status'                => $this->order->status->value,
-            'line_payment_url'      => $this->order->line_payment_url,
-            'can_show_line_pay_btn' => $this->order->canShowLinePayButton(),
+            'order_id'           => $this->order->id,
+            'status'             => $this->order->status->value,
+            'status_label'       => $this->order->status->label(),
+            'prompt_pay_url'     => $this->order->prompt_pay_url,
+            'can_show_prompt_pay' => $this->order->canShowPromptPay(),
         ];
     }
 }

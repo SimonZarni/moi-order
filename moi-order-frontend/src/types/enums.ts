@@ -58,19 +58,23 @@ export type DocumentType = (typeof DOCUMENT_TYPE)[keyof typeof DOCUMENT_TYPE];
 
 // Mirrors App\Enums\FoodOrderStatus
 export const FOOD_ORDER_STATUS = {
-  Pending:   'pending',
-  Confirmed: 'confirmed',
-  Ready:     'ready',
-  Completed: 'completed',
-  Cancelled: 'cancelled',
+  OrderPlaced:          'order_placed',
+  WaitingForPayment:    'waiting_for_payment',
+  PaymentConfirmed:     'payment_confirmed',
+  PreparingFood:        'preparing_food',
+  WaitingForDelivery:   'waiting_for_delivery',
+  DeliveryOnTheWay:     'delivery_on_the_way',
+  Delivered:            'delivered',
+  Completed:            'completed',
+  Cancelled:            'cancelled',
 } as const;
 
 export type FoodOrderStatus = (typeof FOOD_ORDER_STATUS)[keyof typeof FOOD_ORDER_STATUS];
 
 // Mirrors App\Enums\FoodPaymentMethod
 export const FOOD_PAYMENT_METHOD = {
-  Cod:     'cod',
-  LinePay: 'line_pay',
+  Cod:       'cod',
+  PromptPay: 'prompt_pay',
 } as const;
 
 export type FoodPaymentMethod = (typeof FOOD_PAYMENT_METHOD)[keyof typeof FOOD_PAYMENT_METHOD];

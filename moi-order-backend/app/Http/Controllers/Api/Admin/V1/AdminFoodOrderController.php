@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Admin\V1;
 
 use App\Contracts\FileStorageInterface;
+use App\Enums\FoodOrderStatus;
+use App\Events\FoodOrderStatusUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\FoodOrderResource;
 use App\Models\FoodOrder;
@@ -12,7 +14,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * SRP — HTTP layer only. Admin read-only food order management.
+ * SRP — HTTP layer only. Admin food order management.
+ * DIP — depends on FileStorageInterface, never on concrete implementations.
  */
 class AdminFoodOrderController extends Controller
 {
@@ -47,24 +50,26 @@ class AdminFoodOrderController extends Controller
 
         return response()->json([
             'data' => collect($orders->items())->map(fn (FoodOrder $o) => [
-                'id'              => $o->id,
-                'status'          => $o->status->value,
-                'payment_method'  => $o->payment_method->value,
-                'total_cents'     => $o->total_cents,
+                'id'               => $o->id,
+                'status'           => $o->status->value,
+                'status_label'     => $o->status->label(),
+                'payment_method'   => $o->payment_method->value,
+                'total_cents'      => $o->total_cents,
                 'delivery_address' => $o->delivery_address,
-                'restaurant'      => [
+                'restaurant'       => [
                     'id'   => $o->restaurant->id,
                     'name' => $o->restaurant->name,
                 ],
-                'user'            => [
+                'user'             => [
                     'id'    => $o->user->id,
                     'name'  => $o->user->name,
                     'email' => $o->user->email,
                 ],
-                'confirmed_at'    => $o->confirmed_at?->toIso8601String(),
-                'completed_at'    => $o->completed_at?->toIso8601String(),
-                'cancelled_at'    => $o->cancelled_at?->toIso8601String(),
-                'created_at'      => $o->created_at?->toIso8601String(),
+                'confirmed_at'           => $o->confirmed_at?->toIso8601String(),
+                'payment_confirmed_at'   => $o->payment_confirmed_at?->toIso8601String(),
+                'completed_at'           => $o->completed_at?->toIso8601String(),
+                'cancelled_at'           => $o->cancelled_at?->toIso8601String(),
+                'created_at'             => $o->created_at?->toIso8601String(),
             ]),
             'meta' => [
                 'current_page' => $orders->currentPage(),
@@ -89,6 +94,29 @@ class AdminFoodOrderController extends Controller
                 'restaurant' => [
                     'id'   => $foodOrder->restaurant->id,
                     'name' => $foodOrder->restaurant->name,
+                ],
+            ],
+        ]);
+    }
+
+    public function confirmPayment(FoodOrder $foodOrder): JsonResponse
+    {
+        $foodOrder->load(['restaurant', 'user', 'items']);
+        $foodOrder->transitionTo(FoodOrderStatus::PaymentConfirmed);
+        event(new FoodOrderStatusUpdated($foodOrder->fresh()));
+
+        $fresh = $foodOrder->fresh(['items', 'restaurant', 'user']);
+
+        return response()->json([
+            'data' => (new FoodOrderResource($fresh, $this->storage))->toArray(request()) + [
+                'user' => [
+                    'id'    => $fresh->user->id,
+                    'name'  => $fresh->user->name,
+                    'email' => $fresh->user->email,
+                ],
+                'restaurant' => [
+                    'id'   => $fresh->restaurant->id,
+                    'name' => $fresh->restaurant->name,
                 ],
             ],
         ]);

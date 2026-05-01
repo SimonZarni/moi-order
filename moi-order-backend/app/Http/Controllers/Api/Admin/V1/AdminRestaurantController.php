@@ -41,7 +41,8 @@ class AdminRestaurantController extends Controller
             $query->where(function ($q) use ($search): void {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('address', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhereHas('menuCategories.menuItems', fn ($mi) => $mi->where('name', 'like', "%{$search}%"));
             });
         }
 

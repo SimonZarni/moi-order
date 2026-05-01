@@ -126,12 +126,23 @@ class RestaurantService
     /**
      * Browse open restaurants for customers, paginated.
      * Optional lat/lng filtering by delivery radius.
+     * Optional search across name, description, and menu item names.
      */
-    public function browse(?float $lat = null, ?float $lng = null): LengthAwarePaginator
+    public function browse(?float $lat = null, ?float $lng = null, ?string $search = null): LengthAwarePaginator
     {
         $query = Restaurant::open()
             ->with(['openingHours'])
             ->select('restaurants.*');
+
+        if ($search !== null) {
+            $query->where(function ($q) use ($search): void {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhereHas('menuCategories.menuItems', fn ($mi) =>
+                      $mi->where('name', 'like', "%{$search}%")
+                  );
+            });
+        }
 
         return $query->latest()->paginate(20);
     }

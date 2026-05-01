@@ -46,8 +46,8 @@ export const QUERY_KEYS = {
     LIST: (type: string) => ['documents', 'list', type] as const,
   },
   RESTAURANTS: {
-    LIST:   (page: number) => ['restaurants', 'list', page] as const,
-    DETAIL: (id: number)   => ['restaurants', 'detail', id] as const,
+    LIST:   (search?: string) => ['restaurants', 'list', search ?? ''] as const,
+    DETAIL: (id: number)      => ['restaurants', 'detail', id] as const,
   },
   FOOD_ORDERS: {
     LIST:   ['food-orders', 'list'] as const,

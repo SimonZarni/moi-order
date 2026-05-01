@@ -104,7 +104,7 @@ export function RestaurantsView() {
       <Card>
         <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
           <OutlinedInput
-            placeholder="Search name, address, phone…"
+            placeholder="Search shops or menu items…"
             value={filterSearch}
             onChange={(e) => { setFilterSearch(e.target.value); setPage(0); }}
             startAdornment={<InputAdornment position="start"><Iconify icon="eva:search-fill" /></InputAdornment>}
@@ -227,7 +227,7 @@ export function RestaurantsView() {
                     {rows.length === 0 && (
                       <TableRow>
                         <TableCell colSpan={10} align="center" sx={{ py: 6, color: 'text.secondary' }}>
-                          No restaurants found
+                          No shops match your search — try different keywords.
                         </TableCell>
                       </TableRow>
                     )}
