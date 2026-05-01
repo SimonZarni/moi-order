@@ -87,10 +87,21 @@ return Application::configure(basePath: dirname(__DIR__))
                 'line'    => $e->getLine(),
             ]);
 
-            return response()->json([
+            $body = [
                 'message' => 'An unexpected error occurred.',
                 'code'    => 'internal',
-            ], 500);
+            ];
+
+            if (config('app.debug')) {
+                $body['debug'] = [
+                    'class'   => get_class($e),
+                    'message' => $e->getMessage(),
+                    'file'    => str_replace(base_path(), '', $e->getFile()),
+                    'line'    => $e->getLine(),
+                ];
+            }
+
+            return response()->json($body, 500);
         });
 
     })->create();
