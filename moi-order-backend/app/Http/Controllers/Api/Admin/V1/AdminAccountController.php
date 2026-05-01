@@ -40,7 +40,7 @@ class AdminAccountController extends Controller
 
         $this->service->update($user, $request->validated());
 
-        return new AdminAccountResource($user->fresh('adminRole'));
+        return (new AdminAccountResource($user->fresh('adminRole')))->response();
     }
 
     public function toggle(int $id): JsonResponse
@@ -53,7 +53,7 @@ class AdminAccountController extends Controller
 
         $this->service->toggle($user);
 
-        return new AdminAccountResource($user->fresh('adminRole'));
+        return (new AdminAccountResource($user->fresh('adminRole')))->response();
     }
 
     public function destroy(int $id): JsonResponse

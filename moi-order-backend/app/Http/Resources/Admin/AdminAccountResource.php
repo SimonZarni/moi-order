@@ -18,11 +18,11 @@ class AdminAccountResource extends JsonResource
             'email'      => $this->email,
             'is_active'  => $this->is_admin,
             'created_at' => $this->created_at->toISOString(),
-            'role'       => $this->whenLoaded('adminRole', fn (): array => [
+            'role'       => $this->whenLoaded('adminRole', fn (): array|null => $this->adminRole ? [
                 'id'    => $this->adminRole->id,
                 'slug'  => $this->adminRole->slug,
                 'label' => $this->adminRole->label,
-            ]),
+            ] : null),
         ];
     }
 }
