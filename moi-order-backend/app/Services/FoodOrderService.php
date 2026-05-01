@@ -83,7 +83,7 @@ class FoodOrderService
             $order = FoodOrder::create([
                 'user_id'          => $dto->userId,
                 'restaurant_id'    => $restaurant->id,
-                'status'           => FoodOrderStatus::Pending,
+                'status'           => FoodOrderStatus::OrderPlaced,
                 'payment_method'   => $dto->paymentMethod,
                 'subtotal_cents'   => $subtotal,
                 'total_cents'      => $subtotal, // delivery fee phase 2

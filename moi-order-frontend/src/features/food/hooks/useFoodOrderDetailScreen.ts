@@ -13,7 +13,7 @@ export interface UseFoodOrderDetailScreenResult {
   isLoading: boolean;
   isError: boolean;
   handleBack: () => void;
-  handleLinePayPress: () => void;
+  handlePromptPayPress: () => void;
   handleRefetch: () => void;
 }
 
@@ -26,14 +26,14 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
 
   const handleBack = useCallback(() => navigation.goBack(), [navigation]);
 
-  const handleLinePayPress = useCallback(() => {
-    const url = order?.line_payment_url;
+  const handlePromptPayPress = useCallback(() => {
+    const url = order?.prompt_pay_url;
     if (!url) {
-      Alert.alert('Payment pending', 'LINE Pay link is not yet available.');
+      Alert.alert('Payment pending', 'Payment link is not yet available.');
       return;
     }
     Linking.openURL(url).catch(() =>
-      Alert.alert('Cannot open LINE Pay', 'Please check that LINE is installed.'),
+      Alert.alert('Cannot open payment', 'Please try again or contact support.'),
     );
   }, [order]);
 
@@ -44,7 +44,7 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
     isLoading,
     isError,
     handleBack,
-    handleLinePayPress,
+    handlePromptPayPress,
     handleRefetch,
   };
 }

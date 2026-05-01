@@ -33,10 +33,27 @@ export const styles = StyleSheet.create({
     letterSpacing: -0.3,
     marginBottom: 4,
   },
+  description: {
+    fontSize: typography.sm,
+    color: colours.medium,
+    lineHeight: 20,
+    marginBottom: 4,
+  },
   address: {
     fontSize: typography.sm,
     color: colours.medium,
     lineHeight: 20,
+  },
+  closingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
+  closingText: {
+    fontSize: typography.xs,
+    color: colours.medium,
+    fontWeight: '500',
   },
   statusRow: {
     flexDirection: 'row',

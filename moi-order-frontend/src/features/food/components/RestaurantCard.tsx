@@ -30,7 +30,7 @@ export function RestaurantCard({ restaurant, onPress }: Props): React.JSX.Elemen
       accessibilityLabel={`${restaurant.name}, ${badge.label}`}
     >
       <Image
-        source={{ uri: restaurant.cover_photo_url ?? undefined }}
+        source={restaurant.cover_photo_url ? { uri: restaurant.cover_photo_url } : null}
         style={styles.cover}
         contentFit="cover"
         transition={200}

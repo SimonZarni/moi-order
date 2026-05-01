@@ -24,8 +24,9 @@ class RestaurantBrowseController extends Controller
     {
         $lat    = $request->query('lat')  ? (float) $request->query('lat')  : null;
         $lng    = $request->query('lng')  ? (float) $request->query('lng')  : null;
+        $search = $request->string('search')->trim()->toString();
 
-        $restaurants = $this->restaurantService->browse($lat, $lng);
+        $restaurants = $this->restaurantService->browse($lat, $lng, $search ?: null);
 
         return response()->json([
             'data' => collect($restaurants->items())

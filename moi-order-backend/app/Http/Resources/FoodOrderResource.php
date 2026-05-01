@@ -24,26 +24,30 @@ class FoodOrderResource extends JsonResource
         }
 
         return [
-            'id'                    => $this->id,
-            'restaurant_id'         => $this->restaurant_id,
-            'restaurant_name'       => $this->whenLoaded('restaurant', fn () => $this->restaurant->name),
-            'restaurant_logo_url'   => $restaurantLogoUrl,
-            'status'                => $this->status->value,
-            'payment_method'        => $this->payment_method->value,
-            'subtotal_cents'        => $this->subtotal_cents,
-            'total_cents'           => $this->total_cents,
-            'delivery_address'      => $this->delivery_address,
-            'customer_notes'        => $this->customer_notes,
-            'line_payment_url'      => $this->line_payment_url,
-            'can_show_line_pay_btn' => $this->canShowLinePayButton(),
-            'items'                 => $this->whenLoaded('items', fn () =>
+            'id'                     => $this->id,
+            'restaurant_id'          => $this->restaurant_id,
+            'restaurant_name'        => $this->whenLoaded('restaurant', fn () => $this->restaurant->name),
+            'restaurant_logo_url'    => $restaurantLogoUrl,
+            'status'                 => $this->status->value,
+            'status_label'           => $this->status->label(),
+            'payment_method'         => $this->payment_method->value,
+            'subtotal_cents'         => $this->subtotal_cents,
+            'total_cents'            => $this->total_cents,
+            'delivery_address'       => $this->delivery_address,
+            'customer_notes'         => $this->customer_notes,
+            'prompt_pay_url'         => $this->prompt_pay_url,
+            'can_show_prompt_pay'    => $this->canShowPromptPay(),
+            'items'                  => $this->whenLoaded('items', fn () =>
                 FoodOrderItemResource::collection($this->items)
             ),
-            'confirmed_at'          => $this->confirmed_at?->toIso8601String(),
-            'ready_at'              => $this->ready_at?->toIso8601String(),
-            'completed_at'          => $this->completed_at?->toIso8601String(),
-            'cancelled_at'          => $this->cancelled_at?->toIso8601String(),
-            'created_at'            => $this->created_at?->toIso8601String(),
+            'confirmed_at'           => $this->confirmed_at?->toIso8601String(),
+            'payment_confirmed_at'   => $this->payment_confirmed_at?->toIso8601String(),
+            'preparing_at'           => $this->preparing_at?->toIso8601String(),
+            'picked_up_at'           => $this->picked_up_at?->toIso8601String(),
+            'delivered_at'           => $this->delivered_at?->toIso8601String(),
+            'completed_at'           => $this->completed_at?->toIso8601String(),
+            'cancelled_at'           => $this->cancelled_at?->toIso8601String(),
+            'created_at'             => $this->created_at?->toIso8601String(),
         ];
     }
 }

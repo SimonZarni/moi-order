@@ -36,17 +36,20 @@ import { Scrollbar } from 'src/components/scrollbar';
 // ----------------------------------------------------------------------
 
 const STATUS_COLOR: Record<string, 'success' | 'warning' | 'info' | 'error' | 'default'> = {
-  pending:   'warning',
-  confirmed: 'info',
-  ready:     'info',
-  completed: 'success',
-  cancelled: 'error',
+  order_placed:          'warning',
+  waiting_for_payment:   'warning',
+  payment_confirmed:     'info',
+  preparing_food:        'info',
+  waiting_for_delivery:  'info',
+  delivery_on_the_way:   'info',
+  delivered:             'info',
+  completed:             'success',
+  cancelled:             'error',
 };
 
 const PAYMENT_LABEL: Record<string, string> = {
-  credit_card: 'Card',
-  line_pay:    'LINE Pay',
-  cash:        'Cash',
+  cod:        'Cash on Delivery',
+  prompt_pay: 'PromptPay',
 };
 
 // ----------------------------------------------------------------------
@@ -107,9 +110,13 @@ export function FoodOrdersView() {
               onChange={(e: SelectChangeEvent) => { setFilterStatus(e.target.value); setPage(0); }}
             >
               <MenuItem value="all">All</MenuItem>
-              <MenuItem value="pending">Pending</MenuItem>
-              <MenuItem value="confirmed">Confirmed</MenuItem>
-              <MenuItem value="ready">Ready</MenuItem>
+              <MenuItem value="order_placed">Order Placed</MenuItem>
+              <MenuItem value="waiting_for_payment">Waiting for Payment</MenuItem>
+              <MenuItem value="payment_confirmed">Payment Confirmed</MenuItem>
+              <MenuItem value="preparing_food">Preparing Food</MenuItem>
+              <MenuItem value="waiting_for_delivery">Waiting for Delivery</MenuItem>
+              <MenuItem value="delivery_on_the_way">Delivery on the Way</MenuItem>
+              <MenuItem value="delivered">Delivered</MenuItem>
               <MenuItem value="completed">Completed</MenuItem>
               <MenuItem value="cancelled">Cancelled</MenuItem>
             </Select>

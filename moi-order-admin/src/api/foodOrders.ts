@@ -1,17 +1,29 @@
 import apiClient from './client';
 
-export type FoodOrderStatus = 'pending' | 'confirmed' | 'ready' | 'completed' | 'cancelled';
-export type FoodPaymentMethod = 'credit_card' | 'line_pay' | 'cash';
+export type FoodOrderStatus =
+  | 'order_placed'
+  | 'waiting_for_payment'
+  | 'payment_confirmed'
+  | 'preparing_food'
+  | 'waiting_for_delivery'
+  | 'delivery_on_the_way'
+  | 'delivered'
+  | 'completed'
+  | 'cancelled';
+
+export type FoodPaymentMethod = 'cod' | 'prompt_pay';
 
 export type FoodOrderListItem = {
   id: number;
   status: FoodOrderStatus;
+  status_label: string;
   payment_method: FoodPaymentMethod;
   total_cents: number;
   delivery_address: string | null;
   restaurant: { id: number; name: string };
   user: { id: number; name: string; email: string };
   confirmed_at: string | null;
+  payment_confirmed_at: string | null;
   completed_at: string | null;
   cancelled_at: string | null;
   created_at: string;
@@ -28,8 +40,11 @@ export type FoodOrderItemDetail = {
 export type FoodOrderDetail = FoodOrderListItem & {
   subtotal_cents: number;
   customer_notes: string | null;
+  prompt_pay_url: string | null;
   items: FoodOrderItemDetail[];
-  ready_at: string | null;
+  preparing_at: string | null;
+  picked_up_at: string | null;
+  delivered_at: string | null;
 };
 
 type Meta = { current_page: number; last_page: number; per_page: number; total: number };
@@ -49,5 +64,9 @@ export const foodOrdersApi = {
   get: (id: number | string) =>
     apiClient
       .get<{ data: FoodOrderDetail }>(`/food-orders/${id}`)
+      .then((r) => r.data.data),
+  confirmPayment: (id: number | string) =>
+    apiClient
+      .post<{ data: FoodOrderDetail }>(`/food-orders/${id}/confirm-payment`)
       .then((r) => r.data.data),
 };
