@@ -29,31 +29,31 @@ export type HomeCardPayload = {
 export const homeCardsApi = {
   list: (params?: ListParams) =>
     apiClient
-      .get<{ data: HomeCard[]; meta: Meta }>('/admin/v1/home-cards', { params })
+      .get<{ data: HomeCard[]; meta: Meta }>('/home-cards', { params })
       .then((r) => r.data),
 
   get: (id: number) =>
     apiClient
-      .get<{ data: HomeCard }>(`/admin/v1/home-cards/${id}`)
+      .get<{ data: HomeCard }>(`/home-cards/${id}`)
       .then((r) => r.data.data),
 
   create: (payload: HomeCardPayload) =>
     apiClient
-      .post<{ data: HomeCard }>('/admin/v1/home-cards', payload)
+      .post<{ data: HomeCard }>('/home-cards', payload)
       .then((r) => r.data.data),
 
   update: (id: number, payload: HomeCardPayload) =>
     apiClient
-      .put<{ data: HomeCard }>(`/admin/v1/home-cards/${id}`, payload)
+      .put<{ data: HomeCard }>(`/home-cards/${id}`, payload)
       .then((r) => r.data.data),
 
-  remove: (id: number) => apiClient.delete(`/admin/v1/home-cards/${id}`),
+  remove: (id: number) => apiClient.delete(`/home-cards/${id}`),
 
   restore: (id: number) =>
     apiClient
-      .patch<{ data: HomeCard }>(`/admin/v1/home-cards/${id}/restore`)
+      .patch<{ data: HomeCard }>(`/home-cards/${id}/restore`)
       .then((r) => r.data.data),
 
   reorder: (order: number[]) =>
-    apiClient.put('/admin/v1/home-cards/reorder', { order }).then((r) => r.data),
+    apiClient.put('/home-cards/reorder', { order }).then((r) => r.data),
 };
