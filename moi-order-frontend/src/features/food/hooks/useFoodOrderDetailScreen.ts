@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Linking, Alert } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -12,9 +12,12 @@ export interface UseFoodOrderDetailScreenResult {
   order: FoodOrder | undefined;
   isLoading: boolean;
   isError: boolean;
+  invoiceVisible: boolean;
   handleBack: () => void;
   handlePromptPayPress: () => void;
   handleRefetch: () => void;
+  handleInvoiceOpen: () => void;
+  handleInvoiceClose: () => void;
 }
 
 export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
@@ -23,8 +26,11 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
   const { orderId } = route.params;
 
   const { order, isLoading, isError, refetch } = useFoodOrderDetailData(orderId);
+  const [invoiceVisible, setInvoiceVisible] = useState(false);
 
-  const handleBack = useCallback(() => navigation.goBack(), [navigation]);
+  const handleBack         = useCallback(() => navigation.goBack(), [navigation]);
+  const handleInvoiceOpen  = useCallback(() => setInvoiceVisible(true), []);
+  const handleInvoiceClose = useCallback(() => setInvoiceVisible(false), []);
 
   const handlePromptPayPress = useCallback(() => {
     const url = order?.prompt_pay_url;
@@ -43,8 +49,11 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
     order,
     isLoading,
     isError,
+    invoiceVisible,
     handleBack,
     handlePromptPayPress,
     handleRefetch,
+    handleInvoiceOpen,
+    handleInvoiceClose,
   };
 }

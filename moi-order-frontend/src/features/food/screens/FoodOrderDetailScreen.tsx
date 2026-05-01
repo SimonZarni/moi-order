@@ -6,12 +6,17 @@ import { colours } from '@/shared/theme/colours';
 import { FOOD_ORDER_STATUS } from '@/types/enums';
 import { FoodOrderItem } from '@/types/models';
 import { formatPrice } from '@/shared/utils/formatCurrency';
+import { InvoiceModal } from '../components/InvoiceModal';
 import { OrderProgressBar } from '../components/OrderProgressBar';
 import { useFoodOrderDetailScreen } from '../hooks/useFoodOrderDetailScreen';
 import { styles } from './FoodOrderDetailScreen.styles';
 
 export function FoodOrderDetailScreen(): React.JSX.Element {
-  const { order, isLoading, handleBack, handlePromptPayPress } = useFoodOrderDetailScreen();
+  const {
+    order, isLoading,
+    invoiceVisible, handleInvoiceOpen, handleInvoiceClose,
+    handleBack, handlePromptPayPress,
+  } = useFoodOrderDetailScreen();
 
   if (isLoading || !order) {
     return (
@@ -27,6 +32,8 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
     );
   }
 
+  const canViewInvoice = order.payment_confirmed_at !== null || order.status === FOOD_ORDER_STATUS.Completed;
+
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.header}>
@@ -34,7 +41,13 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
           <Ionicons name="chevron-back" size={22} color={colours.textOnDark} />
         </Pressable>
         <Text style={styles.headerTitle}>Order #{order.order_number ?? order.id}</Text>
+        {canViewInvoice && (
+          <Pressable style={styles.invoiceIconBtn} onPress={handleInvoiceOpen} accessibilityRole="button" accessibilityLabel="View invoice">
+            <Ionicons name="receipt-outline" size={18} color={colours.textOnDark} />
+          </Pressable>
+        )}
       </View>
+
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         {order.status === FOOD_ORDER_STATUS.Cancelled ? (
           <View style={styles.cancelledCard}>
@@ -47,6 +60,7 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
             onPromptPayPress={handlePromptPayPress}
           />
         )}
+
         <Text style={styles.sectionTitle}>Items</Text>
         <View style={styles.card}>
           {(order.items ?? []).map((item: FoodOrderItem) => (
@@ -61,6 +75,14 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
             <Text style={styles.totalValue}>{formatPrice(order.total_cents / 100)}</Text>
           </View>
         </View>
+
+        {canViewInvoice && (
+          <Pressable style={styles.invoiceBtn} onPress={handleInvoiceOpen} accessibilityRole="button" accessibilityLabel="View full invoice">
+            <Ionicons name="receipt-outline" size={16} color={colours.primary} />
+            <Text style={styles.invoiceBtnText}>View Invoice</Text>
+          </Pressable>
+        )}
+
         {order.customer_notes !== null && (
           <>
             <Text style={styles.sectionTitle}>Notes</Text>
@@ -68,6 +90,10 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
           </>
         )}
       </ScrollView>
+
+      {canViewInvoice && (
+        <InvoiceModal order={order} visible={invoiceVisible} onClose={handleInvoiceClose} />
+      )}
     </SafeAreaView>
   );
 }
