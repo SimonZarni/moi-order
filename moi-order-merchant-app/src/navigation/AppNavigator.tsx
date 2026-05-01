@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
 import { useQuery } from '@tanstack/react-query';
 import { getMe } from '../api/auth';
@@ -11,6 +12,9 @@ import { AuthNavigator } from './AuthNavigator';
 import { KycNavigator } from './KycNavigator';
 import { MerchantTabsNavigator } from './MerchantTabsNavigator';
 import { KYC_STATUS } from '../types/enums';
+import type { RootStackParamList } from '../types/navigation';
+
+const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 export function AppNavigator(): React.JSX.Element {
   const { token, user, isLoading, initFromStorage, setUser } = useAuthStore();
@@ -44,9 +48,15 @@ export function AppNavigator(): React.JSX.Element {
 
   return (
     <NavigationContainer>
-      {!token && <AuthNavigator />}
-      {!!token && needsKyc && <KycNavigator />}
-      {!!token && !needsKyc && <MerchantTabsNavigator />}
+      <RootStack.Navigator screenOptions={{ headerShown: false }}>
+        {!token ? (
+          <RootStack.Screen name="Auth" component={AuthNavigator} />
+        ) : needsKyc ? (
+          <RootStack.Screen name="Kyc" component={KycNavigator} />
+        ) : (
+          <RootStack.Screen name="Merchant" component={MerchantTabsNavigator} />
+        )}
+      </RootStack.Navigator>
     </NavigationContainer>
   );
 }
