@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\HomeCardController;
 use App\Http\Controllers\Api\V1\DeviceTokenController;
 use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\DynamicSubmissionController;
@@ -81,3 +82,6 @@ Route::delete('/device-tokens', [DeviceTokenController::class, 'destroy']);
 Route::get('/food-orders',      [FoodOrderController::class, 'index']);
 Route::post('/food-orders',     [FoodOrderController::class, 'store']);
 Route::get('/food-orders/{id}', [FoodOrderController::class, 'show']);
+
+// Home cards — active cards ordered by position for the mobile home screen
+Route::get('/home-cards', [HomeCardController::class, 'index']);

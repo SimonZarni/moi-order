@@ -3,27 +3,25 @@ import { Pressable, RefreshControl, Text, View, ScrollView } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useHomeScreen } from '@/features/home/hooks/useHomeScreen';
+import { HomeCardGrid, HomeCardGridSkeleton } from '@/features/home/components/HomeCardGrid';
 import { NotificationBell } from '@/features/notifications/components/NotificationBell';
 import { colours } from '@/shared/theme/colours';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { getHomeStrings } from '@/shared/constants/homeStrings';
-import { AirportIcon, BusIcon, CalendarIcon, EmbassyIcon, FlashIcon, FoodIcon, LocationIcon, PassportIcon } from '../components/HomeCardIcons';
 import { styles } from './HomeScreen.styles';
 
 export function HomeScreen(): React.JSX.Element {
   const {
     user,
     isRefreshing,
+    cards,
+    isLoadingCards,
+    airportServiceTypeId,
+    airportPrice,
     handleRefresh,
-    handleNavigateToNinetyDayReport,
-    handleNavigateToPlaces,
-    handleNavigateToOtherServices,
-    handleNavigateToEmbassyServices,
-    handleNavigateToAirportFastTrack,
     handleNavigateToNotifications,
     handleNavigateToSearch,
     handleNavigateToMap,
-    handleNavigateToFood,
   } = useHomeScreen();
 
   const { locale } = useLocale();
@@ -32,13 +30,12 @@ export function HomeScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <ScrollView
-          style={styles.scroll}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={colours.tertiary} />
-          }
-        >
-
+        style={styles.scroll}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={colours.tertiary} />
+        }
+      >
         {/* ── Hero ── */}
         <View style={styles.hero}>
           <View style={styles.orbLarge} />
@@ -61,7 +58,6 @@ export function HomeScreen(): React.JSX.Element {
             </Text>
           </View>
 
-          {/* Search row */}
           <View style={styles.searchRow}>
             <Pressable style={styles.searchBox} onPress={handleNavigateToSearch}
               accessibilityRole="button" accessibilityLabel="Search places, tickets, services">
@@ -82,90 +78,16 @@ export function HomeScreen(): React.JSX.Element {
             <View style={styles.sectionLine} />
           </View>
 
-          {/* Row 1 */}
-          <View style={styles.gridRow}>
-            <Pressable style={[styles.card, styles.cardAccentSage]}
-              onPress={handleNavigateToNinetyDayReport}
-              accessibilityLabel="90-Day Report service" accessibilityRole="button">
-              <Text style={[styles.cardTag, styles.tagSage]}>Immigration</Text>
-              <Text style={styles.cardTitle}>{t.ninetyDayReport}</Text>
-              <View style={styles.cardIcon}><CalendarIcon /></View>
-            </Pressable>
-
-            <Pressable style={[styles.card, styles.cardAccentGold]}
-              onPress={handleNavigateToPlaces}
-              accessibilityLabel="Places and Tickets" accessibilityRole="button">
-              <Text style={[styles.cardTag, styles.tagGold]}>Explore</Text>
-              <Text style={styles.cardTitle}>{t.placesAndTickets}</Text>
-              <Text style={styles.cardSubtitle}>{t.attractionsLandmarks}</Text>
-              <View style={styles.cardIcon}><LocationIcon /></View>
-            </Pressable>
-          </View>
-
-          {/* Row 2 */}
-          <View style={styles.gridRow}>
-            <Pressable style={[styles.card, styles.cardAccentTeal]}
-              onPress={handleNavigateToOtherServices}
-              accessibilityLabel="Other services" accessibilityRole="button">
-              <Text style={[styles.cardTag, styles.tagTeal]}>Registration</Text>
-              <Text style={styles.cardTitle}>{t.otherServices}</Text>
-              <Text style={styles.cardSubtitle}>{t.companyMore}</Text>
-              <View style={styles.cardIcon}><FlashIcon /></View>
-            </Pressable>
-
-            <Pressable style={[styles.card, styles.cardAccentRose]}
-              onPress={handleNavigateToEmbassyServices}
-              accessibilityLabel="Embassy support letters" accessibilityRole="button">
-              <Text style={[styles.cardTag, styles.tagRose]}>Embassy</Text>
-              <Text style={styles.cardTitle}>{t.embassyServices}</Text>
-              <Text style={styles.cardSubtitle}>{t.embassyMore}</Text>
-              <View style={styles.cardIcon}><EmbassyIcon /></View>
-            </Pressable>
-          </View>
-
-          {/* Row 3 */}
-          <View style={styles.gridRow}>
-            <Pressable style={[styles.card, styles.cardAccentSky]}
-              onPress={handleNavigateToAirportFastTrack}
-              accessibilityLabel="Airport Fast Track service" accessibilityRole="button">
-              <Text style={[styles.cardTag, styles.tagSky]}>Travel</Text>
-              <Text style={styles.cardTitle}>{t.airportFastTrack}</Text>
-              <Text style={styles.cardSubtitle}>{t.airportSubtitle}</Text>
-              <View style={styles.cardIcon}><AirportIcon /></View>
-            </Pressable>
-
-            <Pressable style={[styles.card, styles.cardAccentNavy, styles.cardDimmed]}
-              accessibilityLabel="Bus tickets — coming soon" accessibilityRole="button">
-              <Text style={[styles.cardTag, styles.tagNavy]}>Transport</Text>
-              <Text style={styles.cardTitle}>{t.busTickets}</Text>
-              <Text style={styles.cardSubtitle}>{t.busSubtitle}</Text>
-              <View style={styles.soonPill}><Text style={styles.soonText}>SOON</Text></View>
-              <View style={styles.cardIcon}><BusIcon /></View>
-            </Pressable>
-          </View>
-
-          {/* Row 4 */}
-          <View style={styles.gridRow}>
-            <Pressable style={[styles.card, styles.cardAccentIndigo, styles.cardDimmed]}
-              accessibilityLabel="Passport and CI services — coming soon" accessibilityRole="button">
-              <Text style={[styles.cardTag, styles.tagIndigo]}>Documents</Text>
-              <Text style={styles.cardTitle}>{t.passport}</Text>
-              <Text style={styles.cardSubtitle}>{t.passportSubtitle}</Text>
-              <View style={styles.soonPill}><Text style={styles.soonText}>SOON</Text></View>
-              <View style={styles.cardIcon}><PassportIcon /></View>
-            </Pressable>
-
-            <Pressable style={[styles.card, styles.cardAccentCoral]}
-              onPress={handleNavigateToFood}
-              accessibilityLabel="Food ordering" accessibilityRole="button">
-              <Text style={[styles.cardTag, styles.tagCoral]}>Food</Text>
-              <Text style={styles.cardTitle}>{t.foodOrder}</Text>
-              <Text style={styles.cardSubtitle}>{t.foodOrderSubtitle}</Text>
-              <View style={styles.cardIcon}><FoodIcon /></View>
-            </Pressable>
-          </View>
+          {isLoadingCards ? (
+            <HomeCardGridSkeleton />
+          ) : (
+            <HomeCardGrid
+              cards={cards}
+              airportServiceTypeId={airportServiceTypeId}
+              airportPrice={airportPrice}
+            />
+          )}
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );

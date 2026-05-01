@@ -92,6 +92,37 @@ export const RESTAURANT_STATUS = {
 
 export type RestaurantStatus = (typeof RESTAURANT_STATUS)[keyof typeof RESTAURANT_STATUS];
 
+// Mirrors App\Enums\HomeCardIconKey
+export const HOME_CARD_ICON_KEY = {
+  Calendar: 'calendar',
+  Location: 'location',
+  Flash:    'flash',
+  Embassy:  'embassy',
+  Airport:  'airport',
+  Bus:      'bus',
+  Passport: 'passport',
+  Food:     'food',
+  Ticket:   'ticket',
+} as const;
+
+export type HomeCardIconKey = (typeof HOME_CARD_ICON_KEY)[keyof typeof HOME_CARD_ICON_KEY];
+
+// Mirrors App\Enums\HomeCardNavigationScreen
+export const HOME_CARD_NAV_SCREEN = {
+  NinetyDayReport:  'NinetyDayReport',
+  Places:           'Places',
+  Tickets:          'Tickets',
+  OtherServices:    'OtherServices',
+  EmbassyServices:  'EmbassyServices',
+  AirportFastTrack: 'AirportFastTrack',
+  Food:             'Food',
+  PassportVault:    'PassportVault',
+  Search:           'Search',
+  PlacesMap:        'PlacesMap',
+} as const;
+
+export type HomeCardNavScreen = (typeof HOME_CARD_NAV_SCREEN)[keyof typeof HOME_CARD_NAV_SCREEN];
+
 // Mirrors App\Enums\FieldType
 export const FIELD_TYPE = {
   Text:     'text',

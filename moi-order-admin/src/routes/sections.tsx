@@ -44,6 +44,9 @@ export const RestaurantCreatePage = lazy(() => import('src/pages/restaurant-crea
 export const RestaurantDetailPage = lazy(() => import('src/pages/restaurant-detail'));
 export const FoodOrdersPage = lazy(() => import('src/pages/food-orders'));
 export const FoodOrderDetailPage = lazy(() => import('src/pages/food-order-detail'));
+export const HomeCardsPage = lazy(() => import('src/pages/home-cards'));
+export const HomeCardCreatePage = lazy(() => import('src/pages/home-card-create'));
+export const HomeCardEditPage = lazy(() => import('src/pages/home-card-edit'));
 
 const renderFallback = () => (
   <Box sx={{ display: 'flex', flex: '1 1 auto', alignItems: 'center', justifyContent: 'center' }}>
@@ -96,6 +99,9 @@ export const routesSection: RouteObject[] = [
       { path: 'restaurants/:id', element: <RestaurantDetailPage /> },
       { path: 'food-orders', element: <FoodOrdersPage /> },
       { path: 'food-orders/:id', element: <FoodOrderDetailPage /> },
+      { path: 'home-cards', element: <HomeCardsPage /> },
+      { path: 'home-cards/new', element: <HomeCardCreatePage /> },
+      { path: 'home-cards/:id/edit', element: <HomeCardEditPage /> },
       { path: 'account/profile', element: <ProfilePage /> },
       { path: 'account/settings', element: <SettingsPage /> },
     ],

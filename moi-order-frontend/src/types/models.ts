@@ -322,6 +322,26 @@ export interface FoodOrder {
   created_at: string;
 }
 
+// ── Home Cards ─────────────────────────────────────────────────────────────
+
+export interface HomeCard {
+  id: number;
+  slug: string;
+  position: number;
+  title_en: string;
+  title_mm: string;
+  subtitle_en: string | null;
+  subtitle_mm: string | null;
+  tag_en: string;
+  tag_mm: string;
+  accent_color: string;
+  icon_key: import('./enums').HomeCardIconKey;
+  navigation_screen: import('./enums').HomeCardNavScreen;
+  navigation_params: Record<string, unknown> | null;
+  is_active: boolean;
+  is_coming_soon: boolean;
+}
+
 // ── API wrappers ───────────────────────────────────────────────────────────
 
 export interface ApiResponse<T> {

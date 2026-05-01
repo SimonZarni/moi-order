@@ -84,6 +84,11 @@ export const navData: NavItem[] = [
     ],
   },
   {
+    title: 'Home Cards',
+    path: '/home-cards',
+    icon: icon('ic-blog'),
+  },
+  {
     title: 'Roles & Permissions',
     path: '/roles',
     icon: icon('ic-lock'),

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\Admin\V1\AdminAccountController;
 use App\Http\Controllers\Api\Admin\V1\AdminAuthController;
+use App\Http\Controllers\Api\Admin\V1\AdminHomeCardController;
 use App\Http\Controllers\Api\Admin\V1\AdminDashboardController;
 use App\Http\Controllers\Api\Admin\V1\AdminDocumentTypeController;
 use App\Http\Controllers\Api\Admin\V1\AdminFoodOrderController;
@@ -236,6 +237,17 @@ Route::prefix('restaurants')->name('admin.restaurants.')->group(function (): voi
 Route::prefix('food-orders')->name('admin.food-orders.')->group(function (): void {
     Route::get('/',            [AdminFoodOrderController::class, 'index'])->name('index');
     Route::get('/{foodOrder}', [AdminFoodOrderController::class, 'show'])->name('show');
+});
+
+// ── Home Cards ────────────────────────────────────────────────────────────────
+Route::prefix('home-cards')->name('admin.home-cards.')->middleware('check.permission:home_cards.manage')->group(function (): void {
+    Route::get('/',                            [AdminHomeCardController::class, 'index'])->name('index');
+    Route::post('/',                           [AdminHomeCardController::class, 'store'])->name('store');
+    Route::put('/reorder',                     [AdminHomeCardController::class, 'reorder'])->name('reorder');
+    Route::get('/{homeCard}',                  [AdminHomeCardController::class, 'show'])->name('show');
+    Route::put('/{homeCard}',                  [AdminHomeCardController::class, 'update'])->name('update');
+    Route::delete('/{homeCard}',               [AdminHomeCardController::class, 'destroy'])->name('destroy');
+    Route::patch('/{id}/restore',              [AdminHomeCardController::class, 'restore'])->name('restore')->whereNumber('id');
 });
 
 // ── Document Types ────────────────────────────────────────────────────────────

@@ -348,3 +348,50 @@ export type AdminAccount = {
   created_at: string;
   role: Pick<AdminRole, 'id' | 'slug' | 'label'>;
 };
+
+// ----------------------------------------------------------------------
+// Home Cards
+
+export type HomeCardIconKey =
+  | 'calendar'
+  | 'location'
+  | 'flash'
+  | 'embassy'
+  | 'airport'
+  | 'bus'
+  | 'passport'
+  | 'food'
+  | 'ticket';
+
+export type HomeCardNavigationScreen =
+  | 'NinetyDayReport'
+  | 'Places'
+  | 'Tickets'
+  | 'OtherServices'
+  | 'EmbassyServices'
+  | 'AirportFastTrack'
+  | 'Food'
+  | 'PassportVault'
+  | 'Search'
+  | 'PlacesMap';
+
+export type HomeCard = {
+  id: number;
+  slug: string;
+  position: number;
+  title_en: string;
+  title_mm: string;
+  subtitle_en: string | null;
+  subtitle_mm: string | null;
+  tag_en: string;
+  tag_mm: string;
+  accent_color: string;
+  icon_key: HomeCardIconKey;
+  navigation_screen: HomeCardNavigationScreen;
+  navigation_params: Record<string, unknown> | null;
+  is_active: boolean;
+  is_coming_soon: boolean;
+  deleted_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
