@@ -322,16 +322,29 @@ export type SupportTicket = {
 };
 
 // ----------------------------------------------------------------------
-// Roles & Permissions — no backend API yet; kept for UI
+// Roles & Permissions
 
-export type AdminRole = 'super_admin' | 'admin' | 'manager' | 'viewer';
+export type AdminRoleSlug = 'super_admin' | 'admin';
+
+export type AdminRole = {
+  id: number;
+  slug: AdminRoleSlug;
+  label: string;
+  permission_keys: string[];
+};
+
+export type Permission = {
+  id: number;
+  key: string;
+  label: string;
+  group: string;
+};
 
 export type AdminAccount = {
   id: number;
   name: string;
   email: string;
-  role: AdminRole;
-  avatarUrl: string;
-  isActive: boolean;
-  createdAt: string;
+  is_active: boolean;
+  created_at: string;
+  role: Pick<AdminRole, 'id' | 'slug' | 'label'>;
 };

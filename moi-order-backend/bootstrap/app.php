@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'admin.auth'          => \App\Http\Middleware\AdminAuthenticate::class,
+            'check.permission'    => \App\Http\Middleware\CheckPermission::class,
             'merchant.auth'       => \App\Http\Middleware\MerchantAuthenticate::class,
             'user.not_suspended'  => \App\Http\Middleware\CheckUserNotSuspended::class,
             'abilities'           => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,

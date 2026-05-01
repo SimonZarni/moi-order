@@ -1,28 +1,13 @@
-import type { SelectChangeEvent } from '@mui/material/Select';
+import type { AdminAccount, AdminRole, AdminRoleSlug, Permission } from 'src/types';
+import type { CreateAdminData } from 'src/api/roles';
 
-type AdminRole = 'super_admin' | 'admin' | 'manager' | 'viewer';
-
-type AdminAccount = {
-  id: string;
-  name: string;
-  email: string;
-  role: AdminRole;
-  avatarUrl: string;
-  isActive: boolean;
-  createdAt: Date;
-};
-
-import { useState, useCallback } from 'react';
-
-const genId = () => Math.random().toString(36).slice(2, 10);
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
-import Avatar from '@mui/material/Avatar';
 import Dialog from '@mui/material/Dialog';
 import Select from '@mui/material/Select';
 import Switch from '@mui/material/Switch';
@@ -54,70 +39,98 @@ import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 
-// ----------------------------------------------------------------------
-
-const ROLE_COLORS: Record<AdminRole, 'error' | 'warning' | 'info' | 'default'> = {
-  super_admin: 'error', admin: 'warning', manager: 'info', viewer: 'default',
-};
-
-const ROLE_LABELS: Record<AdminRole, string> = {
-  super_admin: 'Super Admin', admin: 'Admin', manager: 'Manager', viewer: 'Viewer',
-};
-
-type Permission = { key: string; label: string; super_admin: boolean; admin: boolean; manager: boolean; viewer: boolean };
-
-const PERMISSIONS: Permission[] = [
-  { key: 'places.manage', label: 'Manage Places', super_admin: true, admin: true, manager: true, viewer: false },
-  { key: 'attractions.manage', label: 'Manage Attractions', super_admin: true, admin: true, manager: true, viewer: false },
-  { key: 'bookings.view', label: 'View Bookings', super_admin: true, admin: true, manager: true, viewer: true },
-  { key: 'bookings.manage', label: 'Manage Bookings', super_admin: true, admin: true, manager: false, viewer: false },
-  { key: 'payments.view', label: 'View Payments', super_admin: true, admin: true, manager: true, viewer: false },
-  { key: 'payments.refund', label: 'Issue Refunds', super_admin: true, admin: true, manager: false, viewer: false },
-  { key: 'users.view', label: 'View Users', super_admin: true, admin: true, manager: true, viewer: true },
-  { key: 'users.ban', label: 'Ban/Unban Users', super_admin: true, admin: true, manager: false, viewer: false },
-  { key: 'services.manage', label: 'Manage Services', super_admin: true, admin: true, manager: true, viewer: false },
-  { key: 'submissions.view', label: 'View Submissions', super_admin: true, admin: true, manager: true, viewer: true },
-  { key: 'submissions.manage', label: 'Manage Submissions', super_admin: true, admin: true, manager: true, viewer: false },
-  { key: 'reports.view', label: 'View Reports', super_admin: true, admin: true, manager: true, viewer: true },
-  { key: 'roles.manage', label: 'Manage Roles & Admins', super_admin: true, admin: false, manager: false, viewer: false },
-];
-
-const MOCK_ADMINS: AdminAccount[] = [
-  { id: 'adm-1', name: 'Chris (Director)', email: 'chris@moiorder.com', role: 'super_admin', avatarUrl: '/assets/images/avatar/avatar-25.webp', isActive: true, createdAt: new Date(Date.now() - 86400000 * 365) },
-  { id: 'adm-2', name: 'Yan Paing Oo', email: 'yan@moiorder.com', role: 'admin', avatarUrl: '/assets/images/avatar/avatar-2.webp', isActive: true, createdAt: new Date(Date.now() - 86400000 * 180) },
-  { id: 'adm-3', name: 'Support Team', email: 'support@moiorder.com', role: 'manager', avatarUrl: '/assets/images/avatar/avatar-3.webp', isActive: true, createdAt: new Date(Date.now() - 86400000 * 90) },
-  { id: 'adm-4', name: 'Content Editor', email: 'editor@moiorder.com', role: 'viewer', avatarUrl: '/assets/images/avatar/avatar-4.webp', isActive: false, createdAt: new Date(Date.now() - 86400000 * 30) },
-];
+import {
+  fetchAdminAccounts,
+  fetchPermissionMatrix,
+  createAdminAccount,
+  updateAdminAccount,
+  toggleAdminAccount,
+  deleteAdminAccount,
+  updateRolePermissions,
+} from 'src/api/roles';
 
 // ----------------------------------------------------------------------
 
-type AdminDialogProps = { open: boolean; admin: AdminAccount | null; onClose: () => void; onSave: (a: AdminAccount) => void };
+const ROLE_COLORS: Record<AdminRoleSlug, 'error' | 'warning'> = {
+  super_admin: 'error',
+  admin: 'warning',
+};
 
-function AdminDialog({ open, admin, onClose, onSave }: AdminDialogProps) {
-  const [name, setName] = useState(admin?.name ?? '');
-  const [email, setEmail] = useState(admin?.email ?? '');
-  const [role, setRole] = useState<AdminRole>(admin?.role ?? 'viewer');
+// ----------------------------------------------------------------------
 
-  const handleSave = () => {
-    onSave({ id: admin?.id ?? genId(), name, email, role, avatarUrl: admin?.avatarUrl ?? '/assets/images/avatar/avatar-25.webp', isActive: admin?.isActive ?? true, createdAt: admin?.createdAt ?? new Date() });
-    onClose();
-  };
+type AdminDialogProps = {
+  open: boolean;
+  admin: AdminAccount | null;
+  roles: AdminRole[];
+  onClose: () => void;
+  onSaved: (a: AdminAccount) => void;
+};
+
+function AdminDialog({ open, admin, roles, onClose, onSaved }: AdminDialogProps) {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [roleId, setRoleId] = useState<number | ''>('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (open) {
+      setName(admin?.name ?? '');
+      setEmail(admin?.email ?? '');
+      setPassword('');
+      setRoleId(admin?.role.id ?? '');
+      setError('');
+    }
+  }, [open, admin]);
+
+  const handleSave = useCallback(async () => {
+    if (!roleId) return;
+    setSaving(true);
+    setError('');
+    try {
+      let saved: AdminAccount;
+      if (admin) {
+        saved = await updateAdminAccount(admin.id, { name, email, admin_role_id: roleId as number });
+      } else {
+        const data: CreateAdminData = { name, email, password, admin_role_id: roleId as number };
+        saved = await createAdminAccount(data);
+      }
+      onSaved(saved);
+      onClose();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Something went wrong.');
+    } finally {
+      setSaving(false);
+    }
+  }, [admin, name, email, password, roleId, onSaved, onClose]);
+
+  const isValid = name.trim() && email.trim() && roleId !== '' && (admin ? true : password.trim().length >= 8);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle>{admin ? 'Edit Admin Account' : 'Add Admin Account'}</DialogTitle>
       <DialogContent>
         <Stack spacing={2.5} sx={{ mt: 1 }}>
+          {error && <Typography variant="caption" color="error">{error}</Typography>}
           <TextField fullWidth label="Full Name" value={name} onChange={(e) => setName(e.target.value)} />
           <TextField fullWidth label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          {!admin && (
+            <TextField
+              fullWidth
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              helperText="Minimum 8 characters"
+            />
+          )}
           <FormControl fullWidth>
             <InputLabel>Role</InputLabel>
-            <Select value={role} label="Role" onChange={(e) => setRole(e.target.value as AdminRole)}>
-              {(Object.keys(ROLE_LABELS) as AdminRole[]).map((r) => (
-                <MenuItem key={r} value={r}>
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <Label color={ROLE_COLORS[r]}>{ROLE_LABELS[r]}</Label>
-                  </Stack>
+            <Select value={roleId} label="Role" onChange={(e) => setRoleId(e.target.value as number)}>
+              {roles.filter((r) => r.slug !== 'super_admin').map((r) => (
+                <MenuItem key={r.id} value={r.id}>
+                  <Label color={ROLE_COLORS[r.slug]}>{r.label}</Label>
                 </MenuItem>
               ))}
             </Select>
@@ -125,8 +138,10 @@ function AdminDialog({ open, admin, onClose, onSave }: AdminDialogProps) {
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" color="primary" onClick={handleSave} disabled={!name.trim() || !email.trim()}>{admin ? 'Save' : 'Add Admin'}</Button>
+        <Button onClick={onClose} disabled={saving}>Cancel</Button>
+        <Button variant="contained" onClick={handleSave} disabled={!isValid || saving}>
+          {saving ? 'Saving…' : admin ? 'Save' : 'Add Admin'}
+        </Button>
       </DialogActions>
     </Dialog>
   );
@@ -135,150 +150,289 @@ function AdminDialog({ open, admin, onClose, onSave }: AdminDialogProps) {
 // ----------------------------------------------------------------------
 
 export function RolesView() {
-  const [admins, setAdmins] = useState<AdminAccount[]>(MOCK_ADMINS);
+  const [admins, setAdmins] = useState<AdminAccount[]>([]);
+  const [roles, setRoles] = useState<AdminRole[]>([]);
+  const [permissions, setPermissions] = useState<Permission[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filterName, setFilterName] = useState('');
   const [page, setPage] = useState(0);
-  const [rowsPerPage] = useState(10);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editAdmin, setEditAdmin] = useState<AdminAccount | null>(null);
 
-  const filtered = admins.filter((a) => a.name.toLowerCase().includes(filterName.toLowerCase()) || a.email.toLowerCase().includes(filterName.toLowerCase()));
-  const paginated = filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  // Local editable permission keys per role id
+  const [localKeys, setLocalKeys] = useState<Record<number, Set<string>>>({});
+  const [savingRoleId, setSavingRoleId] = useState<number | null>(null);
+  const [saveError, setSaveError] = useState('');
 
-  const handleSave = useCallback((a: AdminAccount) => {
-    setAdmins((prev) => { const e = prev.find((x) => x.id === a.id); return e ? prev.map((x) => (x.id === a.id ? a : x)) : [...prev, a]; });
+  useEffect(() => {
+    Promise.all([fetchAdminAccounts(), fetchPermissionMatrix()])
+      .then(([accountsData, matrixData]) => {
+        setAdmins(accountsData);
+        setRoles(matrixData.roles);
+        setPermissions(matrixData.permissions);
+
+        const initial: Record<number, Set<string>> = {};
+        matrixData.roles.forEach((r) => {
+          initial[r.id] = new Set(r.permission_keys);
+        });
+        setLocalKeys(initial);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const toggleActive = (id: string) => {
-    setAdmins((prev) => prev.map((a) => (a.id === id ? { ...a, isActive: !a.isActive } : a)));
-  };
+  const grouped = useMemo(() => {
+    const map: Record<string, Permission[]> = {};
+    permissions.forEach((p) => {
+      if (!map[p.group]) map[p.group] = [];
+      map[p.group].push(p);
+    });
+    return map;
+  }, [permissions]);
+
+  const handleTogglePermission = useCallback((roleId: number, key: string) => {
+    setLocalKeys((prev) => {
+      const next = new Set(prev[roleId]);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return { ...prev, [roleId]: next };
+    });
+  }, []);
+
+  const handleSavePermissions = useCallback(async (role: AdminRole) => {
+    setSavingRoleId(role.id);
+    setSaveError('');
+    try {
+      await updateRolePermissions(role.id, Array.from(localKeys[role.id] ?? []));
+    } catch (err: unknown) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to save.');
+    } finally {
+      setSavingRoleId(null);
+    }
+  }, [localKeys]);
+
+  const handleToggleActive = useCallback(async (admin: AdminAccount) => {
+    try {
+      const updated = await toggleAdminAccount(admin.id);
+      setAdmins((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
+    } catch {
+      // silently ignore — UI stays unchanged
+    }
+  }, []);
+
+  const handleDelete = useCallback(async (admin: AdminAccount) => {
+    try {
+      await deleteAdminAccount(admin.id);
+      setAdmins((prev) => prev.filter((a) => a.id !== admin.id));
+    } catch {
+      // silently ignore
+    }
+  }, []);
+
+  const handleSaved = useCallback((saved: AdminAccount) => {
+    setAdmins((prev) => {
+      const exists = prev.find((a) => a.id === saved.id);
+      return exists ? prev.map((a) => (a.id === saved.id ? saved : a)) : [saved, ...prev];
+    });
+  }, []);
+
+  const filtered = useMemo(
+    () => admins.filter((a) =>
+      a.name.toLowerCase().includes(filterName.toLowerCase()) ||
+      a.email.toLowerCase().includes(filterName.toLowerCase())
+    ),
+    [admins, filterName],
+  );
+
+  const paginated = filtered.slice(page * 10, page * 10 + 10);
+
+  const editableRoles = roles.filter((r) => r.slug !== 'super_admin');
+  const superAdminRole = roles.find((r) => r.slug === 'super_admin');
 
   return (
     <DashboardContent>
       <Box sx={{ mb: 5, display: 'flex', alignItems: 'center' }}>
         <Box>
           <Typography variant="h4">Roles & Permissions</Typography>
-          <Typography variant="body2" color="text.secondary">Manage admin accounts and access control</Typography>
+          <Typography variant="body2" color="text.secondary">Manage admin accounts and role permissions</Typography>
         </Box>
         <Box sx={{ flexGrow: 1 }} />
-        <Button variant="contained" color="primary" startIcon={<Iconify icon="mingcute:add-line" />} onClick={() => { setEditAdmin(null); setDialogOpen(true); }}>
+        <Button
+          variant="contained"
+          startIcon={<Iconify icon="mingcute:add-line" />}
+          onClick={() => { setEditAdmin(null); setDialogOpen(true); }}
+        >
           Add Admin
         </Button>
       </Box>
 
-      <Grid container spacing={3}>
-        {/* Admin Accounts Table */}
-        <Grid size={{ xs: 12 }}>
-          <Card>
-            <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <OutlinedInput
-                value={filterName}
-                onChange={(e) => setFilterName(e.target.value)}
-                placeholder="Search admin accounts..."
-                startAdornment={<InputAdornment position="start"><Iconify icon="eva:search-fill" /></InputAdornment>}
-                sx={{ flexGrow: 1, maxWidth: 320, height: 40 }}
-              />
-            </Box>
-            <Scrollbar>
-              <TableContainer sx={{ overflow: 'unset' }}>
-                <Table sx={{ minWidth: 700 }}>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Admin</TableCell>
-                      <TableCell>Role</TableCell>
-                      <TableCell>Login Access</TableCell>
-                      <TableCell align="center">Active</TableCell>
-                      <TableCell align="right">Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {paginated.map((row) => (
-                      <TableRow key={row.id} hover>
-                        <TableCell>
-                          <Stack direction="row" alignItems="center" spacing={1.5}>
-                            <Avatar src={row.avatarUrl} />
-                            <Box>
-                              <Typography variant="body2" fontWeight={600}>{row.name}</Typography>
-                              <Typography variant="caption" color="text.secondary">{row.email}</Typography>
-                            </Box>
-                          </Stack>
-                        </TableCell>
-                        <TableCell><Label color={ROLE_COLORS[row.role]}>{ROLE_LABELS[row.role]}</Label></TableCell>
-                        <TableCell>
-                          <Stack direction="row" spacing={0.5}>
-                            <Iconify icon="socials:google" width={18} />
-                            <Iconify icon="eva:checkmark-fill" width={18} sx={{ color: 'text.disabled' }} />
-                          </Stack>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Switch checked={row.isActive} onChange={() => toggleActive(row.id)} size="small" color="primary" />
-                        </TableCell>
-                        <TableCell align="right">
-                          <IconButton size="small" onClick={() => { setEditAdmin(row); setDialogOpen(true); }}>
-                            <Iconify icon="solar:pen-bold" width={16} />
-                          </IconButton>
-                          <IconButton size="small" color="error" disabled={row.role === 'super_admin'}>
-                            <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Scrollbar>
-            <TablePagination
-              component="div"
-              count={filtered.length}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              rowsPerPageOptions={[10]}
-              onPageChange={(_, newPage) => setPage(newPage)}
-              onRowsPerPageChange={() => {}}
-            />
-          </Card>
-        </Grid>
+      {/* Admin Accounts Table */}
+      <Card sx={{ mb: 3 }}>
+        <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center' }}>
+          <OutlinedInput
+            value={filterName}
+            onChange={(e) => setFilterName(e.target.value)}
+            placeholder="Search admin accounts…"
+            startAdornment={<InputAdornment position="start"><Iconify icon="eva:search-fill" /></InputAdornment>}
+            sx={{ flexGrow: 1, maxWidth: 320, height: 40 }}
+          />
+        </Box>
+        <Scrollbar>
+          <TableContainer sx={{ overflow: 'unset' }}>
+            <Table sx={{ minWidth: 680 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Admin</TableCell>
+                  <TableCell>Role</TableCell>
+                  <TableCell align="center">Active</TableCell>
+                  <TableCell align="right">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={4} align="center" sx={{ py: 4, color: 'text.secondary' }}>Loading…</TableCell>
+                  </TableRow>
+                ) : paginated.map((row) => (
+                  <TableRow key={row.id} hover>
+                    <TableCell>
+                      <Box>
+                        <Typography variant="body2" fontWeight={600}>{row.name}</Typography>
+                        <Typography variant="caption" color="text.secondary">{row.email}</Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Label color={ROLE_COLORS[row.role.slug]}>{row.role.label}</Label>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Switch
+                        checked={row.is_active}
+                        onChange={() => handleToggleActive(row)}
+                        size="small"
+                        disabled={row.role.slug === 'super_admin'}
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton
+                        size="small"
+                        onClick={() => { setEditAdmin(row); setDialogOpen(true); }}
+                        disabled={row.role.slug === 'super_admin'}
+                      >
+                        <Iconify icon="solar:pen-bold" width={16} />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        disabled={row.role.slug === 'super_admin'}
+                        onClick={() => handleDelete(row)}
+                      >
+                        <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Scrollbar>
+        <TablePagination
+          component="div"
+          count={filtered.length}
+          page={page}
+          rowsPerPage={10}
+          rowsPerPageOptions={[10]}
+          onPageChange={(_, p) => setPage(p)}
+          onRowsPerPageChange={() => {}}
+        />
+      </Card>
 
-        {/* Permissions Matrix */}
-        <Grid size={{ xs: 12 }}>
-          <Card>
-            <CardHeader title="Permissions Matrix" subheader="What each role can do" />
-            <Divider />
-            <CardContent sx={{ p: 0 }}>
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ minWidth: 220 }}>Permission</TableCell>
-                      {(Object.keys(ROLE_LABELS) as AdminRole[]).map((r) => (
-                        <TableCell key={r} align="center"><Label color={ROLE_COLORS[r]}>{ROLE_LABELS[r]}</Label></TableCell>
-                      ))}
+      {/* Permissions Matrix */}
+      <Card>
+        <CardHeader
+          title="Permissions Matrix"
+          subheader="Super Admin always has all permissions and cannot be edited"
+        />
+        <Divider />
+        {saveError && (
+          <Box sx={{ px: 3, pt: 2 }}>
+            <Typography variant="caption" color="error">{saveError}</Typography>
+          </Box>
+        )}
+        <CardContent sx={{ p: 0 }}>
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ minWidth: 220 }}>Permission</TableCell>
+                  {superAdminRole && (
+                    <TableCell align="center">
+                      <Label color="error">{superAdminRole.label}</Label>
+                    </TableCell>
+                  )}
+                  {editableRoles.map((r) => (
+                    <TableCell key={r.id} align="center">
+                      <Stack alignItems="center" spacing={1}>
+                        <Label color={ROLE_COLORS[r.slug]}>{r.label}</Label>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          disabled={savingRoleId === r.id}
+                          onClick={() => handleSavePermissions(r)}
+                        >
+                          {savingRoleId === r.id ? 'Saving…' : 'Save'}
+                        </Button>
+                      </Stack>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {Object.entries(grouped).map(([group, perms]) => (
+                  <>
+                    <TableRow key={`group-${group}`}>
+                      <TableCell
+                        colSpan={1 + roles.length}
+                        sx={{ bgcolor: 'background.neutral', py: 0.75 }}
+                      >
+                        <Typography variant="overline" color="text.secondary">{group}</Typography>
+                      </TableCell>
                     </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {PERMISSIONS.map((perm) => (
+                    {perms.map((perm) => (
                       <TableRow key={perm.key} hover>
-                        <TableCell><Typography variant="body2">{perm.label}</Typography></TableCell>
-                        {(['super_admin', 'admin', 'manager', 'viewer'] as AdminRole[]).map((role) => (
-                          <TableCell key={role} align="center">
-                            {perm[role] ? (
-                              <Iconify icon="eva:checkmark-fill" width={18} sx={{ color: 'success.main' }} />
-                            ) : (
-                              <Iconify icon="mingcute:close-line" width={18} sx={{ color: 'text.disabled' }} />
-                            )}
+                        <TableCell>
+                          <Typography variant="body2">{perm.label}</Typography>
+                          <Typography variant="caption" color="text.disabled">{perm.key}</Typography>
+                        </TableCell>
+                        {superAdminRole && (
+                          <TableCell align="center">
+                            <Checkbox checked disabled size="small" />
+                          </TableCell>
+                        )}
+                        {editableRoles.map((role) => (
+                          <TableCell key={role.id} align="center">
+                            <Checkbox
+                              size="small"
+                              checked={localKeys[role.id]?.has(perm.key) ?? false}
+                              onChange={() => handleTogglePermission(role.id, perm.key)}
+                            />
                           </TableCell>
                         ))}
                       </TableRow>
                     ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+                  </>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
+      </Card>
 
-      <AdminDialog open={dialogOpen} admin={editAdmin} onClose={() => setDialogOpen(false)} onSave={handleSave} />
+      <AdminDialog
+        open={dialogOpen}
+        admin={editAdmin}
+        roles={roles}
+        onClose={() => setDialogOpen(false)}
+        onSaved={handleSaved}
+      />
     </DashboardContent>
   );
 }

@@ -8,6 +8,7 @@ use App\Enums\UserStatusEnum;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -37,6 +38,7 @@ class User extends Authenticatable
         'password',
         'date_of_birth',
         'is_admin',
+        'admin_role_id',
         'is_merchant',
         'status',
         'suspended_until',
@@ -83,6 +85,11 @@ class User extends Authenticatable
         return $this->is_admin === true;
     }
 
+    public function isSuperAdmin(): bool
+    {
+        return $this->adminRole?->slug === 'super_admin';
+    }
+
     public function isMerchant(): bool
     {
         return $this->is_merchant === true;
@@ -127,6 +134,11 @@ class User extends Authenticatable
     }
 
     // ─── Relationships ────────────────────────────────────────────────────────
+
+    public function adminRole(): BelongsTo
+    {
+        return $this->belongsTo(AdminRole::class, 'admin_role_id');
+    }
 
     public function favoritePlaces(): BelongsToMany
     {
