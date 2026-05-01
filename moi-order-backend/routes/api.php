@@ -40,6 +40,11 @@ Route::prefix('merchant/v1')->middleware(['throttle:auth'])->group(
     base_path('routes/api/merchant_public.php')
 );
 
+// Merchant KYC routes — token with 'merchant' ability; no is_merchant gate (KYC is how they earn it)
+Route::prefix('merchant/v1')->middleware(['auth:sanctum', 'abilities:merchant', 'user.not_suspended', 'throttle:api'])->group(
+    base_path('routes/api/merchant_kyc.php')
+);
+
 // Merchant authenticated routes — token must carry the 'merchant' ability; merchant.auth asserts is_merchant
 Route::prefix('merchant/v1')->middleware(['auth:sanctum', 'abilities:merchant', 'merchant.auth', 'user.not_suspended', 'throttle:api'])->group(
     base_path('routes/api/merchant_v1.php')

@@ -48,6 +48,9 @@ export const HomeCardsPage = lazy(() => import('src/pages/home-cards'));
 export const HomeCardCreatePage = lazy(() => import('src/pages/home-card-create'));
 export const HomeCardEditPage = lazy(() => import('src/pages/home-card-edit'));
 export const UnauthorizedPage = lazy(() => import('src/pages/unauthorized'));
+export const MerchantsPage = lazy(() => import('src/pages/merchants'));
+export const KycDetailPage = lazy(() => import('src/pages/kyc-detail'));
+export const MerchantCreatePage = lazy(() => import('src/pages/merchant-create'));
 
 const renderFallback = () => (
   <Box sx={{ display: 'flex', flex: '1 1 auto', alignItems: 'center', justifyContent: 'center' }}>
@@ -125,11 +128,15 @@ export const routesSection: RouteObject[] = [
       // Food Orders — no backend permission guard
       { path: 'food-orders', element: <FoodOrdersPage /> },
       { path: 'food-orders/:id', element: <FoodOrderDetailPage /> },
-
       // Home Cards — requires home_cards.manage
       { path: 'home-cards', element: guard('home_cards.manage', <HomeCardsPage />) },
       { path: 'home-cards/new', element: guard('home_cards.manage', <HomeCardCreatePage />) },
       { path: 'home-cards/:id/edit', element: guard('home_cards.manage', <HomeCardEditPage />) },
+
+      // Merchants
+      { path: 'merchants', element: <MerchantsPage /> },
+      { path: 'merchants/kyc/:id', element: <KycDetailPage /> },
+      { path: 'merchants/new', element: <MerchantCreatePage /> },
 
       { path: 'account/profile', element: <ProfilePage /> },
       { path: 'account/settings', element: <SettingsPage /> },

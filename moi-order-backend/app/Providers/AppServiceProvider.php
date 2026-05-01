@@ -115,6 +115,15 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(\App\Services\FoodOrderService::class);
         $this->app->bind(\App\Services\MerchantAuthService::class);
+        $this->app->bind(\App\Services\MerchantOtpService::class);
+        $this->app->bind(\App\Services\MerchantRegistrationService::class);
+
+        $this->app->bind(
+            \App\Services\KycService::class,
+            fn ($app) => new \App\Services\KycService(
+                $app->make(FileStorageInterface::class)
+            )
+        );
 
         // DIP: bind Expo push adapter. To switch to FCM direct, swap ExpoPushNotificationService.
         $this->app->bind(PushNotificationInterface::class, ExpoPushNotificationService::class);
