@@ -7,8 +7,6 @@ namespace App\Http\Controllers\Api\Admin\V1;
 use App\Exceptions\DomainException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateRolePermissionsRequest;
-use App\Http\Resources\Admin\AdminRoleResource;
-use App\Http\Resources\Admin\PermissionResource;
 use App\Models\AdminRole;
 use App\Models\Permission;
 use App\Services\AdminRoleService;
@@ -23,12 +21,20 @@ class AdminRoleController extends Controller
         $roles       = AdminRole::with('permissions')->get();
         $permissions = Permission::orderBy('group')->orderBy('key')->get();
 
-        // Serialize manually — embedding Resource::collection() inside response()->json()
-        // causes Laravel to double-wrap: { data: { data: [...] } }.
         return response()->json([
             'data' => [
-                'roles'       => $roles->map(fn (AdminRole $r) => (new AdminRoleResource($r))->toArray(request()))->values(),
-                'permissions' => $permissions->map(fn (Permission $p) => (new PermissionResource($p))->toArray(request()))->values(),
+                'roles' => $roles->map(fn ($r) => [
+                    'id'              => $r->id,
+                    'slug'            => $r->slug,
+                    'label'           => $r->label,
+                    'permission_keys' => $r->permissions->pluck('key')->all(),
+                ])->values(),
+                'permissions' => $permissions->map(fn ($p) => [
+                    'id'    => $p->id,
+                    'key'   => $p->key,
+                    'label' => $p->label,
+                    'group' => $p->group,
+                ])->values(),
             ],
         ]);
     }
