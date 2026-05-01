@@ -87,13 +87,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 'line'    => $e->getLine(),
             ]);
 
-            // TEMP DEBUG — remove after identifying root cause
             return response()->json([
-                'message' => $e->getMessage(),
+                'message' => 'An unexpected error occurred.',
                 'code'    => 'internal',
-                'class'   => get_class($e),
-                'file'    => str_replace(base_path(), '', $e->getFile()),
-                'line'    => $e->getLine(),
             ], 500);
         });
 

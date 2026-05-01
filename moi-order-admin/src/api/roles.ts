@@ -1,10 +1,13 @@
 import type { AdminAccount, AdminRole, Permission } from 'src/types';
 
+import { TOKEN_KEY } from 'src/api/client';
+
 const BASE = import.meta.env.VITE_API_BASE_URL;
 
 const authHeaders = (): Record<string, string> => ({
   'Content-Type': 'application/json',
-  Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
+  'Accept': 'application/json',
+  Authorization: `Bearer ${localStorage.getItem(TOKEN_KEY) ?? ''}`,
 });
 
 // ── Types ─────────────────────────────────────────────────────────────────────
