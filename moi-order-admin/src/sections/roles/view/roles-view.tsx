@@ -162,9 +162,16 @@ export function RolesView() {
   const [localKeys, setLocalKeys] = useState<Record<number, Set<string>>>({});
   const [savingRoleId, setSavingRoleId] = useState<number | null>(null);
   const [saveError, setSaveError] = useState('');
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
-    Promise.all([fetchAdminAccounts(), fetchPermissionMatrix()])
+    Promise.all([
+      fetchAdminAccounts().catch((err: unknown) => {
+        setLoadError(err instanceof Error ? err.message : 'Failed to load admin accounts.');
+        return [] as AdminAccount[];
+      }),
+      fetchPermissionMatrix().catch(() => ({ roles: [], permissions: [] })),
+    ])
       .then(([accountsData, matrixData]) => {
         setAdmins(accountsData);
         setRoles(matrixData.roles);
@@ -263,6 +270,12 @@ export function RolesView() {
           Add Admin
         </Button>
       </Box>
+
+      {loadError && (
+        <Box sx={{ mb: 2, p: 2, bgcolor: 'error.lighter', borderRadius: 1 }}>
+          <Typography variant="body2" color="error.dark">{loadError}</Typography>
+        </Box>
+      )}
 
       {/* Admin Accounts Table */}
       <Card sx={{ mb: 3 }}>

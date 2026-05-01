@@ -57,7 +57,10 @@ export async function updateRolePermissions(roleId: number, permissionKeys: stri
 
 export async function fetchAdminAccounts(): Promise<AdminAccount[]> {
   const res = await fetch(`${BASE}/admins`, { headers: authHeaders() });
-  if (!res.ok) return [];
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
+    throw new Error(json.message ?? `Server error ${res.status}`);
+  }
   const json = await res.json();
   return Array.isArray(json.data) ? json.data : [];
 }

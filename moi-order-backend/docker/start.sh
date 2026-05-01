@@ -41,7 +41,7 @@ php artisan config:clear
 php artisan config:cache
 php artisan view:cache
 php artisan migrate --force
-php artisan db:seed --class=TicketSeeder --force
+php artisan db:seed --class=TicketSeeder --force || echo "⚠️  TicketSeeder failed (non-fatal, skipping)"
 php artisan db:seed --class=PermissionSeeder --force
 
 echo "✅ Starting Supervisor (PHP-FPM + Nginx + Queue)..."
