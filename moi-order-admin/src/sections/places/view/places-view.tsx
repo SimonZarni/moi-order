@@ -35,6 +35,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import { useRouter } from 'src/routes/hooks';
 
+import { useAuth } from 'src/context/auth-context';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { placesApi, type PlaceData, type PlaceLocale, type ImportBatchData } from 'src/api/places';
 
@@ -210,6 +211,10 @@ function ImportDialog({ open, uploading, batch, error, onClose }: ImportDialogPr
 
 export function PlacesView() {
   const router = useRouter();
+  const { hasPermission } = useAuth();
+  const canCreate = hasPermission('places.create');
+  const canUpdate = hasPermission('places.update');
+  const canDelete = hasPermission('places.delete');
   const [searchParams, setSearchParams] = useSearchParams();
   const [places, setPlaces] = useState<PlaceData[]>([]);
   const [total, setTotal] = useState(0);
@@ -374,33 +379,38 @@ export function PlacesView() {
         >
           Export Excel
         </Button>
-        <Button
-          variant="outlined"
-          color="inherit"
-          size="small"
-          startIcon={<Iconify icon="eva:trending-up-fill" width={16} />}
-          onClick={handleImportClick}
-        >
-          Import Excel
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={() => router.push('/places/new')}
-        >
-          Add Place
-        </Button>
+        {canCreate && (
+          <Button
+            variant="outlined"
+            color="inherit"
+            size="small"
+            startIcon={<Iconify icon="eva:trending-up-fill" width={16} />}
+            onClick={handleImportClick}
+          >
+            Import Excel
+          </Button>
+        )}
+        {canCreate && (
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<Iconify icon="mingcute:add-line" />}
+            onClick={() => router.push('/places/new')}
+          >
+            Add Place
+          </Button>
+        )}
       </Box>
 
-      {/* Hidden file input for Excel import */}
-      <input
-        ref={importInputRef}
-        type="file"
-        accept=".xlsx,.xls,.csv"
-        style={{ display: 'none' }}
-        onChange={handleImportFileChange}
-      />
+      {canCreate && (
+        <input
+          ref={importInputRef}
+          type="file"
+          accept=".xlsx,.xls,.csv"
+          style={{ display: 'none' }}
+          onChange={handleImportFileChange}
+        />
+      )}
 
       <Card>
         <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
@@ -428,7 +438,7 @@ export function PlacesView() {
               <MenuItem value="inactive">Inactive</MenuItem>
             </Select>
           </FormControl>
-          {selected.length > 0 && (
+          {canDelete && selected.length > 0 && (
             <Stack direction="row" spacing={1} alignItems="center">
               <Chip
                 label={`${selected.length} selected`}
@@ -457,13 +467,15 @@ export function PlacesView() {
             <Table sx={{ minWidth: 800 }}>
               <TableHead>
                 <TableRow>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      indeterminate={selected.length > 0 && selected.length < places.length}
-                      checked={places.length > 0 && selected.length === places.length}
-                      onChange={(e) => handleSelectAll(e.target.checked)}
-                    />
-                  </TableCell>
+                  {canDelete && (
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        indeterminate={selected.length > 0 && selected.length < places.length}
+                        checked={places.length > 0 && selected.length === places.length}
+                        onChange={(e) => handleSelectAll(e.target.checked)}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell>Place</TableCell>
                   <TableCell>Category</TableCell>
                   <TableCell>City</TableCell>
@@ -476,7 +488,7 @@ export function PlacesView() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
+                    <TableCell colSpan={canDelete ? 8 : 7} align="center" sx={{ py: 6 }}>
                       <CircularProgress size={28} />
                     </TableCell>
                   </TableRow>
@@ -484,21 +496,23 @@ export function PlacesView() {
                   <>
                     {places.map((row) => (
                       <TableRow key={row.id} hover selected={selected.includes(row.id)}>
-                        <TableCell padding="checkbox">
-                          <Checkbox
-                            checked={selected.includes(row.id)}
-                            onChange={() => handleSelect(row.id)}
-                          />
-                        </TableCell>
+                        {canDelete && (
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              checked={selected.includes(row.id)}
+                              onChange={() => handleSelect(row.id)}
+                            />
+                          </TableCell>
+                        )}
                         <TableCell>
                           <Typography
                             variant="body2"
                             fontWeight={600}
-                            sx={{
+                            sx={canUpdate ? {
                               cursor: 'pointer',
                               '&:hover': { color: 'primary.main', textDecoration: 'underline' },
-                            }}
-                            onClick={() => setEditConfirm(row)}
+                            } : undefined}
+                            onClick={canUpdate ? () => setEditConfirm(row) : undefined}
                           >
                             {row.name_my}
                           </Typography>
@@ -530,23 +544,27 @@ export function PlacesView() {
                           </Label>
                         </TableCell>
                         <TableCell align="right">
-                          <IconButton size="small" onClick={() => setEditConfirm(row)}>
-                            <Iconify icon="solar:pen-bold" width={16} />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => setDeleteConfirm(row.id)}
-                          >
-                            <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                          </IconButton>
+                          {canUpdate && (
+                            <IconButton size="small" onClick={() => setEditConfirm(row)}>
+                              <Iconify icon="solar:pen-bold" width={16} />
+                            </IconButton>
+                          )}
+                          {canDelete && (
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => setDeleteConfirm(row.id)}
+                            >
+                              <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                            </IconButton>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
                     {places.length === 0 && (
                       <TableRow>
                         <TableCell
-                          colSpan={8}
+                          colSpan={canDelete ? 8 : 7}
                           align="center"
                           sx={{ py: 6, color: 'text.secondary' }}
                         >

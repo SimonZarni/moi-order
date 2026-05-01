@@ -15,6 +15,8 @@ type AuthState = {
 type AuthContextValue = AuthState & {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  hasPermission: (key: string) => boolean;
+  isSuperAdmin: () => boolean;
 };
 
 // ----------------------------------------------------------------------
@@ -52,8 +54,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAdmin(null);
   }, []);
 
+  const isSuperAdmin = useCallback((): boolean => admin?.role?.slug === 'super_admin', [admin]);
+
+  const hasPermission = useCallback(
+    (key: string): boolean => {
+      if (!admin) return false;
+      if (admin.role?.slug === 'super_admin') return true;
+      return admin.role?.permission_keys.includes(key) ?? false;
+    },
+    [admin]
+  );
+
   return (
-    <AuthContext.Provider value={{ admin, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ admin, isLoading, login, logout, hasPermission, isSuperAdmin }}>
       {children}
     </AuthContext.Provider>
   );

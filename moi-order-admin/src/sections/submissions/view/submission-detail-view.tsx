@@ -25,6 +25,7 @@ import { fDate } from 'src/utils/format-time';
 import { fCurrency } from 'src/utils/format-number';
 
 import { paymentsApi } from 'src/api/payments';
+import { useAuth } from 'src/context/auth-context';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { submissionsApi, type SubmissionStatus, type SubmissionDetailData } from 'src/api/submissions';
 
@@ -54,6 +55,9 @@ const WRITABLE_STATUSES: Partial<Record<SubmissionStatus, { value: SubmissionSta
 export function SubmissionDetailView() {
   const { id } = useParams();
   const router = useRouter();
+  const { hasPermission } = useAuth();
+  const canManage = hasPermission('submissions.manage');
+  const canManagePayments = hasPermission('payments.manage');
 
   const [submission, setSubmission] = useState<SubmissionDetailData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -256,30 +260,32 @@ export function SubmissionDetailView() {
               </Card>
             )}
 
-            <Card>
-              <CardHeader title="Update Status" />
-              <CardContent>
-                {WRITABLE_STATUSES[submission.status as SubmissionStatus] ? (
-                  <>
-                    <FormControl fullWidth size="small">
-                      <InputLabel>Status</InputLabel>
-                      <Select value={status} label="Status" onChange={(e) => setStatus(e.target.value as SubmissionStatus)}>
-                        {(WRITABLE_STATUSES[submission.status as SubmissionStatus] ?? []).map((opt) => (
-                          <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    <Button fullWidth variant="contained" color="primary" sx={{ mt: 2 }} onClick={handleSaveStatus} disabled={saving}>
-                      Save Status
-                    </Button>
-                  </>
-                ) : (
-                  <Typography variant="body2" color="text.disabled" sx={{ textAlign: 'center', py: 1 }}>
-                    This submission cannot be updated.
-                  </Typography>
-                )}
-              </CardContent>
-            </Card>
+            {canManage && (
+              <Card>
+                <CardHeader title="Update Status" />
+                <CardContent>
+                  {WRITABLE_STATUSES[submission.status as SubmissionStatus] ? (
+                    <>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Status</InputLabel>
+                        <Select value={status} label="Status" onChange={(e) => setStatus(e.target.value as SubmissionStatus)}>
+                          {(WRITABLE_STATUSES[submission.status as SubmissionStatus] ?? []).map((opt) => (
+                            <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      <Button fullWidth variant="contained" color="primary" sx={{ mt: 2 }} onClick={handleSaveStatus} disabled={saving}>
+                        Save Status
+                      </Button>
+                    </>
+                  ) : (
+                    <Typography variant="body2" color="text.disabled" sx={{ textAlign: 'center', py: 1 }}>
+                      This submission cannot be updated.
+                    </Typography>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Result File */}
             {(submission.status === 'processing' || submission.status === 'completed') && (
@@ -293,7 +299,7 @@ export function SubmissionDetailView() {
                   )}
                 />
                 <CardContent>
-                  {(submission.status === 'processing' || submission.status === 'completed') && (
+                  {canManage && (submission.status === 'processing' || submission.status === 'completed') && (
                     <>
                       <input
                         ref={fileInputRef}
@@ -388,7 +394,7 @@ export function SubmissionDetailView() {
                     </Box>
                   )}
 
-                  {submission.payment.status === 'pending' && (
+                  {canManagePayments && submission.payment.status === 'pending' && (
                     <Stack spacing={1} sx={{ mt: 2 }}>
                       {confirmError && <Alert severity="error" sx={{ py: 0.5 }}>{confirmError}</Alert>}
                       <Button

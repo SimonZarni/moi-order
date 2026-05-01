@@ -34,6 +34,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import { fDate, fDateTime } from 'src/utils/format-time';
 
+import { useAuth } from 'src/context/auth-context';
 import { type UserData, usersApi } from 'src/api/users';
 import { DashboardContent } from 'src/layouts/dashboard';
 
@@ -110,6 +111,9 @@ function SuspendDialog({ name, open, onClose, onConfirm }: SuspendDialogProps) {
 // ── Main view ────────────────────────────────────────────────────────────────
 
 export function UsersView() {
+  const { hasPermission } = useAuth();
+  const canManage = hasPermission('users.manage');
+  const canDelete = hasPermission('users.delete');
   const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState<UserData[]>([]);
   const [total, setTotal] = useState(0);
@@ -297,31 +301,39 @@ export function UsersView() {
                           <TableCell align="right">
                             <Stack direction="row" justifyContent="flex-end" spacing={0.5}>
                               {isDeleted ? (
-                                <IconButton size="small" color="primary" onClick={() => handleRestore(row.id)} title="Restore account">
-                                  <Iconify icon="eva:checkmark-fill" width={16} />
-                                </IconButton>
+                                canManage && (
+                                  <IconButton size="small" color="primary" onClick={() => handleRestore(row.id)} title="Restore account">
+                                    <Iconify icon="eva:checkmark-fill" width={16} />
+                                  </IconButton>
+                                )
                               ) : (
                                 <>
-                                  {isRestricted ? (
-                                    <IconButton size="small" color="success" onClick={() => handleActivate(row.id)} title="Activate account">
-                                      <Iconify icon="eva:checkmark-fill" width={16} />
-                                    </IconButton>
-                                  ) : (
-                                    <IconButton size="small" color="warning" onClick={() => setSuspendDialog({ open: true, userId: row.id, userName: row.name })} title="Suspend account">
-                                      <Iconify icon="solar:pause-bold" width={16} />
-                                    </IconButton>
+                                  {canManage && (
+                                    isRestricted ? (
+                                      <IconButton size="small" color="success" onClick={() => handleActivate(row.id)} title="Activate account">
+                                        <Iconify icon="eva:checkmark-fill" width={16} />
+                                      </IconButton>
+                                    ) : (
+                                      <IconButton size="small" color="warning" onClick={() => setSuspendDialog({ open: true, userId: row.id, userName: row.name })} title="Suspend account">
+                                        <Iconify icon="solar:pause-bold" width={16} />
+                                      </IconButton>
+                                    )
                                   )}
-                                  {row.status !== 'banned' && (
+                                  {canManage && row.status !== 'banned' && (
                                     <IconButton size="small" color="error" onClick={() => handleBan(row.id)} title="Ban account">
                                       <Iconify icon="solar:stop-bold" width={16} />
                                     </IconButton>
                                   )}
-                                  <IconButton size="small" onClick={() => handleToggleAdmin(row.id)} title={row.is_admin ? 'Remove admin' : 'Make admin'}>
-                                    <Iconify icon={row.is_admin ? 'solar:eye-closed-bold' : 'solar:check-circle-bold'} width={16} />
-                                  </IconButton>
-                                  <IconButton size="small" color="error" onClick={() => handleDelete(row.id, row.name)} title="Delete account">
-                                    <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                                  </IconButton>
+                                  {canManage && (
+                                    <IconButton size="small" onClick={() => handleToggleAdmin(row.id)} title={row.is_admin ? 'Remove admin' : 'Make admin'}>
+                                      <Iconify icon={row.is_admin ? 'solar:eye-closed-bold' : 'solar:check-circle-bold'} width={16} />
+                                    </IconButton>
+                                  )}
+                                  {canDelete && (
+                                    <IconButton size="small" color="error" onClick={() => handleDelete(row.id, row.name)} title="Delete account">
+                                      <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                                    </IconButton>
+                                  )}
                                 </>
                               )}
                             </Stack>

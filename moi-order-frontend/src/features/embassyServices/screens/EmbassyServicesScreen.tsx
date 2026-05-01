@@ -1,13 +1,13 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { StandaloneFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
-import { colours } from '@/shared/theme/colours';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
+import { EmbassyServiceCardSkeleton } from '@/features/embassyServices/components/EmbassyServiceCardSkeleton';
 import { useEmbassyServicesScreen } from '@/features/embassyServices/hooks/useEmbassyServicesScreen';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { localeName } from '@/shared/utils/localeName';
@@ -41,9 +41,12 @@ export function EmbassyServicesScreen(): React.JSX.Element {
           <Text style={styles.sectionLabel}>Available Services</Text>
 
           {isLoading && (
-            <View style={styles.centered}>
-              <ActivityIndicator color={colours.primary} size="large" />
-            </View>
+            <>
+              <EmbassyServiceCardSkeleton />
+              <EmbassyServiceCardSkeleton />
+              <EmbassyServiceCardSkeleton />
+              <EmbassyServiceCardSkeleton />
+            </>
           )}
 
           {isError && (

@@ -26,6 +26,7 @@ import DialogContent from '@mui/material/DialogContent';
 import CircularProgress from '@mui/material/CircularProgress';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
+import { useAuth } from 'src/context/auth-context';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { documentTypesApi, type DocumentTypeData } from 'src/api/documentTypes';
 import { servicesApi, type ServiceData, type ServiceTypeData } from 'src/api/services';
@@ -361,6 +362,8 @@ function ServiceTypeForm({ initial, documentTypes, onSave, onCancel, apiError }:
 // ----------------------------------------------------------------------
 
 export function ReportView() {
+  const { hasPermission } = useAuth();
+  const canEdit = hasPermission('services.update');
   const [reportService, setReportService] = useState<ServiceData | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [types, setTypes] = useState<LocalType[]>([]);
@@ -472,15 +475,17 @@ export function ReportView() {
             {reportService.name} · {types.length} type(s)
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={() => setFormTarget('new')}
-          disabled={formTarget !== null}
-        >
-          Add Type
-        </Button>
+        {canEdit && (
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<Iconify icon="mingcute:add-line" />}
+            onClick={() => setFormTarget('new')}
+            disabled={formTarget !== null}
+          >
+            Add Type
+          </Button>
+        )}
       </Box>
 
       <Stack spacing={2}>
@@ -504,12 +509,16 @@ export function ReportView() {
                         {t.price.toFixed(0)} THB · {t.fields.length} field(s)
                       </Typography>
                     </Box>
-                    <IconButton size="small" onClick={() => setFormTarget(t)} disabled={formTarget !== null}>
-                      <Iconify icon="solar:pen-bold" width={16} />
-                    </IconButton>
-                    <IconButton size="small" color="error" onClick={() => t.id && setDeleteConfirm(t.id)} disabled={formTarget !== null}>
-                      <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                    </IconButton>
+                    {canEdit && (
+                      <IconButton size="small" onClick={() => setFormTarget(t)} disabled={formTarget !== null}>
+                        <Iconify icon="solar:pen-bold" width={16} />
+                      </IconButton>
+                    )}
+                    {canEdit && (
+                      <IconButton size="small" color="error" onClick={() => t.id && setDeleteConfirm(t.id)} disabled={formTarget !== null}>
+                        <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                      </IconButton>
+                    )}
                   </Stack>
                 </CardContent>
               </Card>
@@ -525,9 +534,11 @@ export function ReportView() {
           <Box sx={{ py: 10, textAlign: 'center', color: 'text.secondary' }}>
             <Iconify icon={REPORT_ICON} width={48} sx={{ mb: 2, opacity: 0.3 }} />
             <Typography variant="body1">No report types yet</Typography>
-            <Button sx={{ mt: 2 }} variant="contained" color="primary" onClick={() => setFormTarget('new')}>
-              Add First Type
-            </Button>
+            {canEdit && (
+              <Button sx={{ mt: 2 }} variant="contained" color="primary" onClick={() => setFormTarget('new')}>
+                Add First Type
+              </Button>
+            )}
           </Box>
         )}
       </Stack>

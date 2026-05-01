@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { StandaloneFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
@@ -7,6 +7,7 @@ import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBac
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { ServiceTypeCard } from '@/features/ninetyDayReport/components/ServiceTypeCard';
+import { ServiceTypeCardSkeleton } from '@/features/ninetyDayReport/components/ServiceTypeCardSkeleton';
 import { useNinetyDayReportScreen } from '@/features/ninetyDayReport/hooks/useNinetyDayReportScreen';
 import { styles } from './NinetyDayReportScreen.styles';
 
@@ -38,9 +39,12 @@ export function NinetyDayReportScreen(): React.JSX.Element {
           <Text style={styles.sectionLabel}>Select Type</Text>
 
           {isLoading && (
-            <View style={styles.centered}>
-              <ActivityIndicator color={editorialPalette.sage} size="large" />
-            </View>
+            <>
+              <ServiceTypeCardSkeleton />
+              <ServiceTypeCardSkeleton />
+              <ServiceTypeCardSkeleton />
+              <ServiceTypeCardSkeleton />
+            </>
           )}
 
           {isError && (

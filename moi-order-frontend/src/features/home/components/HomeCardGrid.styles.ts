@@ -59,18 +59,9 @@ export const styles = StyleSheet.create({
     opacity: 0.8,
   },
 
-  customIconWrapper: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-
   customIconImage: {
-    width: 34,
-    height: 34,
+    width: 40,
+    height: 40,
   },
 
   soonPill: {
@@ -93,17 +84,9 @@ export const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
 
-  skeletonRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginBottom: spacing.md,
-  },
-
-  skeletonCard: {
+  skeletonCardWrap: {
     flex: 1,
-    height: 148,
     borderRadius: radius.xl,
-    backgroundColor: colours.card,
-    opacity: 0.6,
+    overflow: 'hidden',
   },
 });

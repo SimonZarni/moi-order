@@ -1,5 +1,6 @@
 import type { Breakpoint } from '@mui/material/styles';
 
+import { useMemo } from 'react';
 import { merge } from 'es-toolkit';
 import { useBoolean } from 'minimal-shared/hooks';
 
@@ -7,11 +8,12 @@ import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 
+import { useAuth } from 'src/context/auth-context';
+
 import { NavMobile, NavDesktop } from './nav';
 import { layoutClasses } from '../core/classes';
 import { _account } from '../nav-config-account';
 import { dashboardLayoutVars } from './css-vars';
-import { navData } from '../nav-config-dashboard';
 import { MainSection } from '../core/main-section';
 import { Searchbar } from '../components/searchbar';
 import { _workspaces } from '../nav-config-workspace';
@@ -19,6 +21,7 @@ import { MenuButton } from '../components/menu-button';
 import { HeaderSection } from '../core/header-section';
 import { LayoutSection } from '../core/layout-section';
 import { AccountPopover } from '../components/account-popover';
+import { navData, type NavItem } from '../nav-config-dashboard';
 import { NotificationsPopover } from '../components/notifications-popover';
 
 import type { MainSectionProps } from '../core/main-section';
@@ -37,6 +40,20 @@ export type DashboardLayoutProps = LayoutBaseProps & {
   };
 };
 
+function filterNavData(items: NavItem[], can: (p: string) => boolean): NavItem[] {
+  return items.reduce<NavItem[]>((acc, item) => {
+    if (item.children) {
+      const visibleChildren = item.children.filter((c) => !c.permission || can(c.permission));
+      if (visibleChildren.length === 0) return acc;
+      acc.push({ ...item, children: visibleChildren });
+      return acc;
+    }
+    if (item.permission && !can(item.permission)) return acc;
+    acc.push(item);
+    return acc;
+  }, []);
+}
+
 export function DashboardLayout({
   sx,
   cssVars,
@@ -45,6 +62,9 @@ export function DashboardLayout({
   layoutQuery = 'lg',
 }: DashboardLayoutProps) {
   const theme = useTheme();
+  const { hasPermission } = useAuth();
+
+  const filteredNav = useMemo(() => filterNavData(navData, hasPermission), [hasPermission]);
 
   const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
 
@@ -68,7 +88,7 @@ export function DashboardLayout({
             onClick={onOpen}
             sx={{ mr: 1, ml: -1, [theme.breakpoints.up(layoutQuery)]: { display: 'none' } }}
           />
-          <NavMobile data={navData} open={open} onClose={onClose} workspaces={_workspaces} />
+          <NavMobile data={filteredNav} open={open} onClose={onClose} workspaces={_workspaces} />
         </>
       ),
       rightArea: (
@@ -111,7 +131,7 @@ export function DashboardLayout({
        * @Sidebar
        *************************************** */
       sidebarSection={
-        <NavDesktop data={navData} layoutQuery={layoutQuery} workspaces={_workspaces} />
+        <NavDesktop data={filteredNav} layoutQuery={layoutQuery} workspaces={_workspaces} />
       }
       /** **************************************
        * @Footer

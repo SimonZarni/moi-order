@@ -21,6 +21,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 
 import { useRouter } from 'src/routes/hooks';
 
+import { useAuth } from 'src/context/auth-context';
 import { submissionsApi } from 'src/api/submissions';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { servicesApi, type ServiceData } from 'src/api/services';
@@ -119,6 +120,10 @@ function ServiceCreateDialog({ open, onClose, onCreated }: ServiceCreateDialogPr
 
 export function ServicesView() {
   const router = useRouter();
+  const { hasPermission } = useAuth();
+  const canCreate = hasPermission('services.create');
+  const canUpdate = hasPermission('services.update');
+  const canDelete = hasPermission('services.delete');
   const [services, setServices]           = useState<ServiceData[]>([]);
   const [loading, setLoading]             = useState(false);
   const [createOpen, setCreateOpen]       = useState(false);
@@ -154,13 +159,15 @@ export function ServicesView() {
           <Typography variant="body2" color="text.secondary">Manage service types and form fields</Typography>
         </Box>
         <Box sx={{ flexGrow: 1 }} />
-        <Button
-          variant="contained" color="primary"
-          startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={() => setCreateOpen(true)}
-        >
-          New Service
-        </Button>
+        {canCreate && (
+          <Button
+            variant="contained" color="primary"
+            startIcon={<Iconify icon="mingcute:add-line" />}
+            onClick={() => setCreateOpen(true)}
+          >
+            New Service
+          </Button>
+        )}
       </Box>
 
       {loading ? (
@@ -202,17 +209,21 @@ export function ServicesView() {
 
                 <Divider />
                 <Stack direction="row" sx={{ p: 1.5 }} spacing={1}>
-                  <Button
-                    size="small"
-                    startIcon={<Iconify icon="solar:pen-bold" width={14} />}
-                    onClick={() => router.push(`/services/${service.id}`)}
-                    sx={{ flexGrow: 1 }}
-                  >
-                    Edit Types
-                  </Button>
-                  <IconButton size="small" color="error" onClick={() => setDeleteConfirm(service.id)}>
-                    <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                  </IconButton>
+                  {canUpdate && (
+                    <Button
+                      size="small"
+                      startIcon={<Iconify icon="solar:pen-bold" width={14} />}
+                      onClick={() => router.push(`/services/${service.id}`)}
+                      sx={{ flexGrow: 1 }}
+                    >
+                      Edit Types
+                    </Button>
+                  )}
+                  {canDelete && (
+                    <IconButton size="small" color="error" onClick={() => setDeleteConfirm(service.id)}>
+                      <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                    </IconButton>
+                  )}
                 </Stack>
               </Card>
             </Grid>
@@ -223,9 +234,11 @@ export function ServicesView() {
               <Box sx={{ py: 10, textAlign: 'center', color: 'text.secondary' }}>
                 <Iconify icon="solar:settings-bold-duotone" width={48} sx={{ mb: 2, opacity: 0.3 }} />
                 <Typography variant="body1">No services yet</Typography>
-                <Button sx={{ mt: 2 }} variant="contained" color="primary" onClick={() => setCreateOpen(true)}>
-                  Create First Service
-                </Button>
+                {canCreate && (
+                  <Button sx={{ mt: 2 }} variant="contained" color="primary" onClick={() => setCreateOpen(true)}>
+                    Create First Service
+                  </Button>
+                )}
               </Box>
             </Grid>
           )}

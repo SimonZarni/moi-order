@@ -10,7 +10,7 @@ import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgr
 import { AuthLayout } from 'src/layouts/auth';
 import { DashboardLayout } from 'src/layouts/dashboard';
 
-import { AuthGuard } from './components';
+import { AuthGuard, PermissionRouteGuard } from './components';
 
 // ----------------------------------------------------------------------
 
@@ -47,6 +47,7 @@ export const FoodOrderDetailPage = lazy(() => import('src/pages/food-order-detai
 export const HomeCardsPage = lazy(() => import('src/pages/home-cards'));
 export const HomeCardCreatePage = lazy(() => import('src/pages/home-card-create'));
 export const HomeCardEditPage = lazy(() => import('src/pages/home-card-edit'));
+export const UnauthorizedPage = lazy(() => import('src/pages/unauthorized'));
 
 const renderFallback = () => (
   <Box sx={{ display: 'flex', flex: '1 1 auto', alignItems: 'center', justifyContent: 'center' }}>
@@ -59,6 +60,10 @@ const renderFallback = () => (
       }}
     />
   </Box>
+);
+
+const guard = (permission: string, element: React.ReactNode) => (
+  <PermissionRouteGuard permission={permission}>{element}</PermissionRouteGuard>
 );
 
 export const routesSection: RouteObject[] = [
@@ -74,36 +79,62 @@ export const routesSection: RouteObject[] = [
     ),
     children: [
       { index: true, element: <DashboardPage /> },
+
+      // Places — list open to all; create/edit are permission-gated
       { path: 'places', element: <PlacesPage /> },
-      { path: 'places/new', element: <PlaceCreatePage /> },
-      { path: 'places/:id/edit', element: <PlaceEditPage /> },
+      { path: 'places/new', element: guard('places.create', <PlaceCreatePage />) },
+      { path: 'places/:id/edit', element: guard('places.update', <PlaceEditPage />) },
+
+      // Attractions — no backend permission guard
       { path: 'attractions', element: <AttractionsPage /> },
       { path: 'attractions/new', element: <AttractionCreatePage /> },
       { path: 'attractions/:id', element: <AttractionDetailPage /> },
+
+      // Bookings — no backend permission guard
       { path: 'bookings', element: <BookingsPage /> },
       { path: 'bookings/:id', element: <BookingDetailPage /> },
       { path: 'bookings/report', element: <ReportPage /> },
+
+      // Users — list open, actions guarded per-button
       { path: 'users', element: <UsersPage /> },
-      { path: 'payments', element: <PaymentsPage /> },
-      { path: 'payments/:id', element: <PaymentDetailPage /> },
+
+      // Payments — requires payments.view
+      { path: 'payments', element: guard('payments.view', <PaymentsPage />) },
+      { path: 'payments/:id', element: guard('payments.view', <PaymentDetailPage />) },
+
+      // Services — list open; detail page requires services.update
       { path: 'services', element: <ServicesPage /> },
-      { path: 'services/submissions', element: <SubmissionsPage /> },
-      { path: 'services/submissions/:id', element: <SubmissionDetailPage /> },
-      { path: 'services/:id', element: <ServiceDetailPage /> },
-      { path: 'roles', element: <RolesPage /> },
+      { path: 'services/:id', element: guard('services.update', <ServiceDetailPage />) },
+
+      // Submissions — requires submissions.view
+      { path: 'services/submissions', element: guard('submissions.view', <SubmissionsPage />) },
+      { path: 'services/submissions/:id', element: guard('submissions.view', <SubmissionDetailPage />) },
+
+      // Roles — requires admins.manage
+      { path: 'roles', element: guard('admins.manage', <RolesPage />) },
+
       { path: 'reviews', element: <ReviewsPage /> },
       { path: 'content', element: <ContentPage /> },
       { path: 'support', element: <SupportPage /> },
-      { path: 'restaurants', element: <RestaurantsPage /> },
-      { path: 'restaurants/new', element: <RestaurantCreatePage /> },
-      { path: 'restaurants/:id', element: <RestaurantDetailPage /> },
+
+      // Restaurants — requires restaurants.manage
+      { path: 'restaurants', element: guard('restaurants.manage', <RestaurantsPage />) },
+      { path: 'restaurants/new', element: guard('restaurants.manage', <RestaurantCreatePage />) },
+      { path: 'restaurants/:id', element: guard('restaurants.manage', <RestaurantDetailPage />) },
+
+      // Food Orders — no backend permission guard
       { path: 'food-orders', element: <FoodOrdersPage /> },
       { path: 'food-orders/:id', element: <FoodOrderDetailPage /> },
-      { path: 'home-cards', element: <HomeCardsPage /> },
-      { path: 'home-cards/new', element: <HomeCardCreatePage /> },
-      { path: 'home-cards/:id/edit', element: <HomeCardEditPage /> },
+
+      // Home Cards — requires home_cards.manage
+      { path: 'home-cards', element: guard('home_cards.manage', <HomeCardsPage />) },
+      { path: 'home-cards/new', element: guard('home_cards.manage', <HomeCardCreatePage />) },
+      { path: 'home-cards/:id/edit', element: guard('home_cards.manage', <HomeCardEditPage />) },
+
       { path: 'account/profile', element: <ProfilePage /> },
       { path: 'account/settings', element: <SettingsPage /> },
+
+      { path: 'unauthorized', element: <UnauthorizedPage /> },
     ],
   },
   {

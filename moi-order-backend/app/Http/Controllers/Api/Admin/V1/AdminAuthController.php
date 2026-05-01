@@ -26,6 +26,7 @@ class AdminAuthController extends Controller
     public function login(AdminLoginRequest $request): JsonResponse
     {
         $result = $this->authService->login(AdminLoginDTO::fromRequest($request));
+        $result['user']->loadMissing('adminRole.permissions');
 
         return response()->json([
             'data' => [
@@ -46,6 +47,9 @@ class AdminAuthController extends Controller
     /** GET /api/admin/v1/auth/me — requires auth:sanctum + admin.auth */
     public function me(Request $request): JsonResponse
     {
-        return response()->json(['data' => new AdminUserResource($request->user())]);
+        $user = $request->user();
+        $user->loadMissing('adminRole.permissions');
+
+        return response()->json(['data' => new AdminUserResource($user)]);
     }
 }

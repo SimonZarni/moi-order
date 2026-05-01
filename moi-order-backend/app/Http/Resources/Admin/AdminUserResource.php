@@ -27,6 +27,12 @@ class AdminUserResource extends JsonResource
             'email_verified_at' => $this->email_verified_at?->toISOString(),
             'created_at'        => $this->created_at->toISOString(),
             'deleted_at'        => $this->deleted_at?->toISOString(),
+            'role'              => $this->adminRole ? [
+                'id'              => $this->adminRole->id,
+                'slug'            => $this->adminRole->slug,
+                'label'           => $this->adminRole->label,
+                'permission_keys' => $this->adminRole->permissions->pluck('key')->all(),
+            ] : null,
         ];
     }
 }

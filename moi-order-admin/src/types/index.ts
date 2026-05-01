@@ -133,6 +133,12 @@ export type AppUser = {
   email_verified_at: string | null;
   created_at: string;
   deleted_at: string | null;
+  role: {
+    id: number;
+    slug: string;
+    label: string;
+    permission_keys: string[];
+  } | null;
 };
 
 // ----------------------------------------------------------------------

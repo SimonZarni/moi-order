@@ -9,6 +9,7 @@ export type NavItem = {
   path: string;
   icon: React.ReactNode;
   info?: React.ReactNode;
+  permission?: string;
   children?: Omit<NavItem, 'children'>[];
 };
 
@@ -47,6 +48,7 @@ export const navData: NavItem[] = [
     title: 'Payments',
     path: '/payments',
     icon: icon('ic-analytics'),
+    permission: 'payments.view',
   },
   {
     title: 'Food & Restaurants',
@@ -57,6 +59,7 @@ export const navData: NavItem[] = [
         title: 'Restaurants',
         path: '/restaurants',
         icon: icon('ic-cart'),
+        permission: 'restaurants.manage',
       },
       {
         title: 'Food Orders',
@@ -79,6 +82,7 @@ export const navData: NavItem[] = [
         title: 'Submissions',
         path: '/services/submissions',
         icon: icon('ic-disabled'),
+        permission: 'submissions.view',
       },
     ],
   },
@@ -86,11 +90,13 @@ export const navData: NavItem[] = [
     title: 'Home Cards',
     path: '/home-cards',
     icon: icon('ic-blog'),
+    permission: 'home_cards.manage',
   },
   {
     title: 'Roles & Permissions',
     path: '/roles',
     icon: icon('ic-lock'),
+    permission: 'admins.manage',
   },
   {
     title: 'Reviews',

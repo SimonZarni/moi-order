@@ -11,15 +11,16 @@ export interface UseHomeCardsResult {
 }
 
 export function useHomeCards(): UseHomeCardsResult {
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending, isError, refetch } = useQuery({
     queryKey: ['home-cards'],
     queryFn: fetchHomeCards,
     staleTime: 5 * 60 * 1000,
+    gcTime:    30 * 60 * 1000,
   });
 
   return {
     cards: data ?? [],
-    isLoading,
+    isLoading: isPending,
     isError,
     refetch,
   };

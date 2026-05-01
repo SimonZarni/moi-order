@@ -28,6 +28,11 @@ apiClient.interceptors.response.use(
       localStorage.removeItem(TOKEN_KEY);
       window.location.href = '/sign-in';
     }
+    if (error.response?.status === 403) {
+      const message =
+        error.response.data?.message ?? "You don't have permission to perform this action.";
+      window.dispatchEvent(new CustomEvent('api:forbidden', { detail: { message } }));
+    }
     if (error.response?.status === 429) {
       console.warn('[API] Rate limit hit — too many requests.');
     }

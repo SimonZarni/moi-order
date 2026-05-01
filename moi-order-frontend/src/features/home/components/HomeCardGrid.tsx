@@ -8,6 +8,8 @@ import { HomeCard } from '@/types/models';
 import { HOME_CARD_ICON_TYPE } from '@/types/enums';
 import { RootStackParamList } from '@/types/navigation';
 import { navigateToCardScreen } from '@/features/home/utils/homeCardNavigation';
+import { SkeletonBox } from '@/shared/components/SkeletonBox/SkeletonBox';
+import { useLocale } from '@/shared/hooks/useLocale';
 import {
   AirportIcon,
   BusIcon,
@@ -41,16 +43,11 @@ interface CardIconProps {
   iconKey: string;
   iconType: string;
   iconUrl: string | null;
-  accentColor: string;
 }
 
-function CardIcon({ iconKey, iconType, iconUrl, accentColor }: CardIconProps): React.JSX.Element | null {
+function CardIcon({ iconKey, iconType, iconUrl }: CardIconProps): React.JSX.Element | null {
   if (iconType === HOME_CARD_ICON_TYPE.Custom && iconUrl) {
-    return (
-      <View style={[styles.customIconWrapper, { backgroundColor: accentColor + '25' }]}>
-        <Image source={{ uri: iconUrl }} style={styles.customIconImage} contentFit="contain" />
-      </View>
-    );
+    return <Image source={{ uri: iconUrl }} style={styles.customIconImage} contentFit="contain" />;
   }
   const Icon = BUILTIN_ICON_MAP[iconKey];
   return Icon ? <Icon /> : null;
@@ -72,6 +69,7 @@ export function HomeCardGrid({
   airportPrice,
 }: HomeCardGridProps): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { locale } = useLocale();
 
   const handlePress = useCallback(
     (card: HomeCard) => {
@@ -103,15 +101,19 @@ export function HomeCardGrid({
                 card.is_coming_soon && styles.cardDimmed,
               ]}
               onPress={() => handlePress(card)}
-              accessibilityLabel={card.title_en}
+              accessibilityLabel={locale === 'mm' ? card.title_mm : card.title_en}
               accessibilityRole="button"
             >
               <Text style={[styles.cardTag, { color: card.accent_color }]}>
-                {card.tag_en}
+                {locale === 'mm' ? card.tag_mm : card.tag_en}
               </Text>
-              <Text style={styles.cardTitle}>{card.title_en}</Text>
-              {card.subtitle_en ? (
-                <Text style={styles.cardSubtitle}>{card.subtitle_en}</Text>
+              <Text style={styles.cardTitle}>
+                {locale === 'mm' ? card.title_mm : card.title_en}
+              </Text>
+              {(locale === 'mm' ? (card.subtitle_mm ?? card.subtitle_en) : card.subtitle_en) ? (
+                <Text style={styles.cardSubtitle}>
+                  {locale === 'mm' ? (card.subtitle_mm ?? card.subtitle_en) : card.subtitle_en}
+                </Text>
               ) : null}
               {card.is_coming_soon && (
                 <View style={styles.soonPill}>
@@ -119,7 +121,7 @@ export function HomeCardGrid({
                 </View>
               )}
               <View style={styles.cardIcon}>
-                <CardIcon iconKey={card.icon_key} iconType={card.icon_type} iconUrl={card.icon_url} accentColor={card.accent_color} />
+                <CardIcon iconKey={card.icon_key} iconType={card.icon_type} iconUrl={card.icon_url} />
               </View>
             </Pressable>
           ))}
@@ -133,13 +135,24 @@ export function HomeCardGrid({
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
+const SKEL_BASE  = '#e8eae9';
+const SKEL_SHINE = 'rgba(255,255,255,0.65)';
+
+function HomeSkeletonCard(): React.JSX.Element {
+  return (
+    <View style={styles.skeletonCardWrap}>
+      <SkeletonBox height={148} baseColor={SKEL_BASE} shimmerColor={SKEL_SHINE} />
+    </View>
+  );
+}
+
 export function HomeCardGridSkeleton(): React.JSX.Element {
   return (
     <>
       {[0, 1, 2, 3].map((i) => (
-        <View key={i} style={styles.skeletonRow}>
-          <View style={styles.skeletonCard} />
-          <View style={styles.skeletonCard} />
+        <View key={i} style={styles.gridRow}>
+          <HomeSkeletonCard />
+          <HomeSkeletonCard />
         </View>
       ))}
     </>
