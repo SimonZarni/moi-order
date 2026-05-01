@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\HomeCardController;
 use App\Http\Controllers\Api\V1\PlaceController;
 use App\Http\Controllers\Api\V1\RestaurantBrowseController;
 use App\Http\Controllers\Api\V1\ServiceCategoryController;
@@ -43,3 +44,6 @@ Route::get('/tickets/{ticket}', [TicketController::class, 'show']);
 // Restaurants — public browsing, no auth required
 Route::get('/restaurants',      [RestaurantBrowseController::class, 'index']);
 Route::get('/restaurants/{id}', [RestaurantBrowseController::class, 'show']);
+
+// Home cards — public, no auth required (shown on home screen before login)
+Route::get('/home-cards', [HomeCardController::class, 'index']);
