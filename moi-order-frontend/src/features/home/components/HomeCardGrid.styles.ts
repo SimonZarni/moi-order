@@ -59,6 +59,20 @@ export const styles = StyleSheet.create({
     opacity: 0.8,
   },
 
+  customIconWrapper: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+
+  customIconImage: {
+    width: 34,
+    height: 34,
+  },
+
   soonPill: {
     position: 'absolute',
     top: spacing.md,

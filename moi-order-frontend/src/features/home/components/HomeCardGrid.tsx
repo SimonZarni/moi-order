@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -40,11 +41,16 @@ interface CardIconProps {
   iconKey: string;
   iconType: string;
   iconUrl: string | null;
+  accentColor: string;
 }
 
-function CardIcon({ iconKey, iconType, iconUrl }: CardIconProps): React.JSX.Element | null {
+function CardIcon({ iconKey, iconType, iconUrl, accentColor }: CardIconProps): React.JSX.Element | null {
   if (iconType === HOME_CARD_ICON_TYPE.Custom && iconUrl) {
-    return <Image source={{ uri: iconUrl }} style={{ width: 40, height: 40 }} resizeMode="contain" />;
+    return (
+      <View style={[styles.customIconWrapper, { backgroundColor: accentColor + '25' }]}>
+        <Image source={{ uri: iconUrl }} style={styles.customIconImage} contentFit="contain" />
+      </View>
+    );
   }
   const Icon = BUILTIN_ICON_MAP[iconKey];
   return Icon ? <Icon /> : null;
@@ -113,7 +119,7 @@ export function HomeCardGrid({
                 </View>
               )}
               <View style={styles.cardIcon}>
-                <CardIcon iconKey={card.icon_key} iconType={card.icon_type} iconUrl={card.icon_url} />
+                <CardIcon iconKey={card.icon_key} iconType={card.icon_type} iconUrl={card.icon_url} accentColor={card.accent_color} />
               </View>
             </Pressable>
           ))}
