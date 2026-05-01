@@ -1,6 +1,6 @@
 import type { HomeCard } from 'src/types';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import Box from '@mui/material/Box';

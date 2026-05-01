@@ -31,6 +31,7 @@ class PermissionSeeder extends Seeder
         ['key' => 'places.delete',           'label' => 'Delete Places',         'group' => 'Places'],
         ['key' => 'restaurants.manage',      'label' => 'Manage Restaurants',    'group' => 'Restaurants'],
         ['key' => 'document_types.manage',   'label' => 'Manage Document Types', 'group' => 'Document Types'],
+        ['key' => 'home_cards.manage',        'label' => 'Manage Home Cards',     'group' => 'Home Cards'],
     ];
 
     public function run(): void
