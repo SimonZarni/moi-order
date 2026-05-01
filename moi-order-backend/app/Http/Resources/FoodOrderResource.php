@@ -25,6 +25,7 @@ class FoodOrderResource extends JsonResource
 
         return [
             'id'                     => $this->id,
+            'order_number'           => $this->order_number,
             'restaurant_id'          => $this->restaurant_id,
             'restaurant_name'        => $this->whenLoaded('restaurant', fn () => $this->restaurant->name),
             'restaurant_logo_url'    => $restaurantLogoUrl,

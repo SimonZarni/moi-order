@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { colours } from '@/shared/theme/colours';
+import { radius } from '@/shared/theme/radius';
 import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 import { TAB_BAR_CLEARANCE } from '@/shared/components/FloatingTabBar/FloatingTabBar.styles';
@@ -20,6 +21,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginBottom: spacing.md,
   },
   heroTitle: {
     fontSize: typography.xxl,
@@ -57,6 +59,51 @@ export const styles = StyleSheet.create({
     color: colours.white,
     lineHeight: 12,
   },
+  // Search bar
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.sm,
+    height: 40,
+    marginBottom: spacing.sm,
+    gap: spacing.xs,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: typography.sm,
+    color: colours.textOnDark,
+    height: 40,
+  },
+  // Category pills
+  categoryScroll: {
+    marginBottom: spacing.xs,
+  },
+  categoryPillsContent: {
+    gap: spacing.xs,
+    flexDirection: 'row',
+  },
+  categoryPill: {
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.35)',
+  },
+  categoryPillActive: {
+    backgroundColor: colours.primary,
+    borderColor: colours.primary,
+  },
+  categoryPillText: {
+    fontSize: typography.xs,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.75)',
+  },
+  categoryPillTextActive: {
+    color: colours.white,
+  },
+  // Body
   body: {
     flex: 1,
     backgroundColor: colours.backgroundLight,

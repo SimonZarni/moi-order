@@ -33,7 +33,7 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
         <Pressable style={styles.backBtn} onPress={handleBack} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="chevron-back" size={22} color={colours.textOnDark} />
         </Pressable>
-        <Text style={styles.headerTitle}>Order #{order.id}</Text>
+        <Text style={styles.headerTitle}>Order #{order.order_number ?? order.id}</Text>
       </View>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         {order.status === FOOD_ORDER_STATUS.Cancelled ? (

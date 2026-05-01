@@ -303,6 +303,7 @@ export interface FoodOrderItem {
 
 export interface FoodOrder {
   id: number;
+  order_number: string | null;
   restaurant_id: number;
   restaurant_name: string | null;
   restaurant_logo_url: string | null;

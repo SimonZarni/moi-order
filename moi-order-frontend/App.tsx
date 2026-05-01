@@ -76,6 +76,7 @@ import { MyDocumentsScreen } from '@/features/documents/screens/MyDocumentsScree
 import { FoodScreen } from '@/features/food/screens/FoodScreen';
 import { RestaurantDetailScreen } from '@/features/food/screens/RestaurantDetailScreen';
 import { RestaurantMapScreen } from '@/features/food/screens/RestaurantMapScreen';
+import { CartOrdersScreen } from '@/features/food/screens/CartOrdersScreen';
 import { CheckoutScreen } from '@/features/food/screens/CheckoutScreen';
 import { FoodOrderDetailScreen } from '@/features/food/screens/FoodOrderDetailScreen';
 
@@ -152,6 +153,7 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="Food"                          component={FoodScreen} />
       <Stack.Screen name="RestaurantDetail"              component={RestaurantDetailScreen} />
       <Stack.Screen name="RestaurantMap"                 component={RestaurantMapScreen} options={{ animation: 'slide_from_bottom' }} />
+      <Stack.Screen name="CartOrders"                    component={CartOrdersScreen} />
       <Stack.Screen name="Checkout"                      component={CheckoutScreen} />
       <Stack.Screen name="FoodOrderDetail"               component={FoodOrderDetailScreen} />
     </Stack.Navigator>

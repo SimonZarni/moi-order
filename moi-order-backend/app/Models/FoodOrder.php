@@ -17,6 +17,7 @@ class FoodOrder extends Model
     use SoftDeletes;
 
     protected $fillable = [
+        'order_number',
         'user_id', 'restaurant_id', 'status', 'payment_method',
         'subtotal_cents', 'total_cents', 'delivery_address',
         'delivery_lat', 'delivery_lng', 'customer_notes',
@@ -42,6 +43,16 @@ class FoodOrder extends Model
             'completed_at'         => 'datetime',
             'cancelled_at'         => 'datetime',
         ];
+    }
+
+    // ─── Static factories ─────────────────────────────────────────────────────
+
+    public static function generateOrderNumber(): string
+    {
+        $prefix = 'MOI';
+        $date   = now()->format('ymd'); // e.g. 260501
+        $random = strtoupper(substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 4));
+        return $prefix . $date . $random;
     }
 
     // ─── Domain methods ───────────────────────────────────────────────────────

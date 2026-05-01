@@ -96,6 +96,8 @@ class FoodOrderService
 
             $order->items()->createMany($lines);
 
+            $order->update(['order_number' => FoodOrder::generateOrderNumber()]);
+
             event(new NewFoodOrder($order->load('restaurant')));
 
             return $order->load(['items', 'restaurant']);

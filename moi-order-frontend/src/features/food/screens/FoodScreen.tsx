@@ -1,17 +1,19 @@
 import React from 'react';
-import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { Restaurant } from '@/types/models';
 import { RestaurantCard } from '../components/RestaurantCard';
-import { useFoodScreen } from '../hooks/useFoodScreen';
+import { FOOD_CATEGORIES, FoodCategory, useFoodScreen } from '../hooks/useFoodScreen';
 import { styles } from './FoodScreen.styles';
 
 export function FoodScreen(): React.JSX.Element {
   const {
     restaurants, isLoading, isError, isFetchingNextPage,
     hasNextPage, fetchNextPage, cartItemCount,
+    searchText, activeCategory,
+    setSearchText, setActiveCategory,
     handleRestaurantPress, handleMapPress, handleCartPress,
   } = useFoodScreen();
 
@@ -34,6 +36,46 @@ export function FoodScreen(): React.JSX.Element {
             </Pressable>
           </View>
         </View>
+
+        <View style={styles.searchContainer}>
+          <Ionicons name="search-outline" size={16} color="rgba(255,255,255,0.6)" />
+          <TextInput
+            style={styles.searchInput}
+            value={searchText}
+            onChangeText={setSearchText}
+            placeholder="Search restaurants or dishes…"
+            placeholderTextColor="rgba(255,255,255,0.45)"
+            returnKeyType="search"
+            accessibilityLabel="Search restaurants"
+          />
+          {searchText.length > 0 && (
+            <Pressable onPress={() => setSearchText('')} accessibilityRole="button" accessibilityLabel="Clear search">
+              <Ionicons name="close-circle" size={16} color="rgba(255,255,255,0.6)" />
+            </Pressable>
+          )}
+        </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.categoryScroll}
+          contentContainerStyle={styles.categoryPillsContent}
+        >
+          {FOOD_CATEGORIES.map((cat: FoodCategory) => (
+            <Pressable
+              key={cat}
+              style={[styles.categoryPill, activeCategory === cat && styles.categoryPillActive]}
+              onPress={() => setActiveCategory(cat)}
+              accessibilityRole="button"
+              accessibilityLabel={`Filter by ${cat}`}
+              accessibilityState={{ selected: activeCategory === cat }}
+            >
+              <Text style={[styles.categoryPillText, activeCategory === cat && styles.categoryPillTextActive]}>
+                {cat}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
       </View>
 
       <View style={styles.body}>
@@ -49,7 +91,7 @@ export function FoodScreen(): React.JSX.Element {
           onEndReached={() => hasNextPage && fetchNextPage()}
           onEndReachedThreshold={0.4}
           ListFooterComponent={isFetchingNextPage ? <ActivityIndicator color={colours.primary} /> : null}
-          ListEmptyComponent={!isLoading ? <View style={styles.emptyState}><Text style={styles.emptyText}>No restaurants open right now</Text></View> : null}
+          ListEmptyComponent={!isLoading ? <View style={styles.emptyState}><Text style={styles.emptyText}>No restaurants found</Text></View> : null}
           showsVerticalScrollIndicator={false}
         />
       </View>
