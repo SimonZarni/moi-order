@@ -4,27 +4,25 @@ declare(strict_types=1);
 
 namespace App\DTOs;
 
-use App\Enums\HomeCardIconKey;
-use App\Enums\HomeCardNavigationScreen;
 use App\Http\Requests\Admin\StoreHomeCardRequest;
 use App\Http\Requests\Admin\UpdateHomeCardRequest;
 
 readonly class HomeCardDTO
 {
     public function __construct(
-        public string                   $slug,
-        public string                   $titleEn,
-        public string                   $titleMm,
-        public ?string                  $subtitleEn,
-        public ?string                  $subtitleMm,
-        public string                   $tagEn,
-        public string                   $tagMm,
-        public string                   $accentColor,
-        public HomeCardIconKey           $iconKey,
-        public HomeCardNavigationScreen  $navigationScreen,
-        public ?array                   $navigationParams,
-        public bool                     $isActive,
-        public bool                     $isComingSoon,
+        public string  $slug,
+        public string  $titleEn,
+        public string  $titleMm,
+        public ?string $subtitleEn,
+        public ?string $subtitleMm,
+        public string  $tagEn,
+        public string  $tagMm,
+        public string  $accentColor,
+        public string  $iconKey,
+        public string  $navigationScreen,
+        public ?array  $navigationParams,
+        public bool    $isActive,
+        public bool    $isComingSoon,
     ) {}
 
     public static function fromStoreRequest(StoreHomeCardRequest $request): self
@@ -38,8 +36,8 @@ readonly class HomeCardDTO
             tagEn:            $request->string('tag_en')->toString(),
             tagMm:            $request->string('tag_mm')->toString(),
             accentColor:      $request->string('accent_color')->toString(),
-            iconKey:          HomeCardIconKey::from($request->string('icon_key')->toString()),
-            navigationScreen: HomeCardNavigationScreen::from($request->string('navigation_screen')->toString()),
+            iconKey:          $request->string('icon_key')->toString(),
+            navigationScreen: $request->string('navigation_screen')->toString(),
             navigationParams: $request->input('navigation_params'),
             isActive:         $request->boolean('is_active'),
             isComingSoon:     $request->boolean('is_coming_soon'),
@@ -57,8 +55,8 @@ readonly class HomeCardDTO
             tagEn:            $request->string('tag_en')->toString(),
             tagMm:            $request->string('tag_mm')->toString(),
             accentColor:      $request->string('accent_color')->toString(),
-            iconKey:          HomeCardIconKey::from($request->string('icon_key')->toString()),
-            navigationScreen: HomeCardNavigationScreen::from($request->string('navigation_screen')->toString()),
+            iconKey:          $request->string('icon_key')->toString(),
+            navigationScreen: $request->string('navigation_screen')->toString(),
             navigationParams: $request->input('navigation_params'),
             isActive:         $request->boolean('is_active'),
             isComingSoon:     $request->boolean('is_coming_soon'),

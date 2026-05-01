@@ -1,17 +1,18 @@
 import type { HomeCardPayload } from 'src/api/home-cards';
-import type { HomeCard, HomeCardIconKey, HomeCardNavigationScreen } from 'src/types';
+import type { HomeCard, HomeCardIcon, HomeCardRoute } from 'src/types';
 
-import { useState, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
-import Switch from '@mui/material/Switch';
 import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
 import Select from '@mui/material/Select';
-import Tooltip from '@mui/material/Tooltip';
+import Switch from '@mui/material/Switch';
 import Divider from '@mui/material/Divider';
+import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import CardHeader from '@mui/material/CardHeader';
@@ -19,14 +20,21 @@ import InputLabel from '@mui/material/InputLabel';
 import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
 import CardContent from '@mui/material/CardContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import ToggleButton from '@mui/material/ToggleButton';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
 import FormHelperText from '@mui/material/FormHelperText';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import CircularProgress from '@mui/material/CircularProgress';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import { useRouter } from 'src/routes/hooks';
 
 import { homeCardsApi } from 'src/api/home-cards';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { homeCardIconsApi } from 'src/api/home-card-icons';
+import { homeCardRoutesApi } from 'src/api/home-card-routes';
 
 // ----------------------------------------------------------------------
 
@@ -43,51 +51,11 @@ const ACCENT_SWATCHES = [
   { label: 'Amber',  value: '#c4813b' },
 ];
 
-const ICON_OPTIONS: { label: string; value: HomeCardIconKey }[] = [
-  { label: 'Calendar',  value: 'calendar'  },
-  { label: 'Location',  value: 'location'  },
-  { label: 'Flash',     value: 'flash'     },
-  { label: 'Embassy',   value: 'embassy'   },
-  { label: 'Airport',   value: 'airport'   },
-  { label: 'Bus',       value: 'bus'       },
-  { label: 'Passport',  value: 'passport'  },
-  { label: 'Food',      value: 'food'      },
-  { label: 'Ticket',    value: 'ticket'    },
-];
+const AUTO_SLUG_CREATE_NEW = '__create_new__';
 
-const NAVIGATION_GROUPS: { group: string; options: { label: string; value: HomeCardNavigationScreen }[] }[] = [
-  {
-    group: 'Services',
-    options: [
-      { label: '90-Day Report',    value: 'NinetyDayReport'  },
-      { label: 'Other Services',   value: 'OtherServices'    },
-      { label: 'Embassy Services', value: 'EmbassyServices'  },
-      { label: 'Airport Fast Track', value: 'AirportFastTrack' },
-    ],
-  },
-  {
-    group: 'Explore',
-    options: [
-      { label: 'Places',  value: 'Places'  },
-      { label: 'Tickets', value: 'Tickets' },
-    ],
-  },
-  {
-    group: 'Food',
-    options: [{ label: 'Food', value: 'Food' }],
-  },
-  {
-    group: 'Documents',
-    options: [{ label: 'Passport Vault', value: 'PassportVault' }],
-  },
-  {
-    group: 'Other',
-    options: [
-      { label: 'Search',     value: 'Search'    },
-      { label: 'Places Map', value: 'PlacesMap' },
-    ],
-  },
-];
+function toSlug(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
 
 // ----------------------------------------------------------------------
 
@@ -100,9 +68,9 @@ type FormState = {
   tag_en: string;
   tag_mm: string;
   accent_color: string;
-  icon_key: HomeCardIconKey;
-  navigation_screen: HomeCardNavigationScreen;
-  navigation_params_raw: string; // raw JSON string for the textarea
+  icon_key: string;
+  navigation_screen: string;
+  navigation_params_raw: string;
   is_active: boolean;
   is_coming_soon: boolean;
 };
@@ -141,6 +109,126 @@ export function HomeCardFormView({ mode, card }: Props) {
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  // ── Dynamic icon & route lists ──────────────────────────────────────────────
+  const [icons, setIcons] = useState<HomeCardIcon[]>([]);
+  const [iconsLoading, setIconsLoading] = useState(true);
+  const [routes, setRoutes] = useState<HomeCardRoute[]>([]);
+  const [routesLoading, setRoutesLoading] = useState(true);
+
+  useEffect(() => {
+    homeCardIconsApi.list()
+      .then(setIcons)
+      .finally(() => setIconsLoading(false));
+    homeCardRoutesApi.list()
+      .then(setRoutes)
+      .finally(() => setRoutesLoading(false));
+  }, []);
+
+  // ── Create Icon dialog ──────────────────────────────────────────────────────
+  const [createIconOpen, setCreateIconOpen] = useState(false);
+  const [newIconLabel, setNewIconLabel] = useState('');
+  const [newIconKey, setNewIconKey] = useState('');
+  const [newIconFile, setNewIconFile] = useState<File | null>(null);
+  const [newIconPreview, setNewIconPreview] = useState<string | null>(null);
+  const [creatingIcon, setCreatingIcon] = useState(false);
+  const [createIconError, setCreateIconError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleNewIconLabelChange = useCallback((value: string) => {
+    setNewIconLabel(value);
+    setNewIconKey(toSlug(value));
+  }, []);
+
+  const handleIconFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setNewIconFile(file);
+    setNewIconPreview(file ? URL.createObjectURL(file) : null);
+  }, []);
+
+  const handleCloseIconDialog = useCallback(() => {
+    setCreateIconOpen(false);
+    setNewIconLabel('');
+    setNewIconKey('');
+    setNewIconFile(null);
+    setNewIconPreview(null);
+    setCreateIconError('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }, []);
+
+  const handleSaveIcon = useCallback(() => {
+    if (!newIconFile) return;
+    const formData = new FormData();
+    formData.append('key', newIconKey);
+    formData.append('label', newIconLabel);
+    formData.append('image', newIconFile);
+
+    setCreatingIcon(true);
+    setCreateIconError('');
+    homeCardIconsApi.create(formData)
+      .then((newIcon) => {
+        setIcons((prev) => [...prev, newIcon]);
+        setForm((prev) => ({ ...prev, icon_key: newIcon.key }));
+        handleCloseIconDialog();
+      })
+      .catch((err) => {
+        const msg = err?.response?.data?.errors?.key?.[0]
+          ?? err?.response?.data?.message
+          ?? 'Failed to create icon.';
+        setCreateIconError(msg);
+      })
+      .finally(() => setCreatingIcon(false));
+  }, [newIconFile, newIconKey, newIconLabel, handleCloseIconDialog]);
+
+  // ── Create Route dialog ─────────────────────────────────────────────────────
+  const [createRouteOpen, setCreateRouteOpen] = useState(false);
+  const [newRouteLabelEn, setNewRouteLabelEn] = useState('');
+  const [newRouteLabelMm, setNewRouteLabelMm] = useState('');
+  const [newRouteKey, setNewRouteKey] = useState('');
+  const [newRouteType, setNewRouteType] = useState<'internal' | 'external_url'>('internal');
+  const [newRouteUrl, setNewRouteUrl] = useState('');
+  const [creatingRoute, setCreatingRoute] = useState(false);
+  const [createRouteError, setCreateRouteError] = useState('');
+
+  const handleNewRouteLabelEnChange = useCallback((value: string) => {
+    setNewRouteLabelEn(value);
+    setNewRouteKey(toSlug(value));
+  }, []);
+
+  const handleCloseRouteDialog = useCallback(() => {
+    setCreateRouteOpen(false);
+    setNewRouteLabelEn('');
+    setNewRouteLabelMm('');
+    setNewRouteKey('');
+    setNewRouteType('internal');
+    setNewRouteUrl('');
+    setCreateRouteError('');
+  }, []);
+
+  const handleSaveRoute = useCallback(() => {
+    setCreatingRoute(true);
+    setCreateRouteError('');
+    homeCardRoutesApi.create({
+      key:      newRouteKey,
+      label_en: newRouteLabelEn,
+      label_mm: newRouteLabelMm,
+      type:     newRouteType,
+      url:      newRouteType === 'external_url' ? newRouteUrl : null,
+    })
+      .then((newRoute) => {
+        setRoutes((prev) => [...prev, newRoute]);
+        setForm((prev) => ({ ...prev, navigation_screen: newRoute.key }));
+        handleCloseRouteDialog();
+      })
+      .catch((err) => {
+        const msg = err?.response?.data?.errors?.key?.[0]
+          ?? err?.response?.data?.message
+          ?? 'Failed to create route.';
+        setCreateRouteError(msg);
+      })
+      .finally(() => setCreatingRoute(false));
+  }, [newRouteKey, newRouteLabelEn, newRouteLabelMm, newRouteType, newRouteUrl, handleCloseRouteDialog]);
+
+  // ── Main form ───────────────────────────────────────────────────────────────
   const update = useCallback(<K extends keyof FormState>(field: K, value: FormState[K]) => {
     setSaved(false);
     setFieldErrors((prev) => { const n = { ...prev }; delete n[field]; return n; });
@@ -209,6 +297,7 @@ export function HomeCardFormView({ mode, card }: Props) {
   }, [mode, card, buildPayload, router]);
 
   const title = mode === 'create' ? 'Add Home Card' : 'Edit Home Card';
+  const selectedRoute = routes.find((r) => r.key === form.navigation_screen);
 
   return (
     <DashboardContent>
@@ -247,9 +336,7 @@ export function HomeCardFormView({ mode, card }: Props) {
               <Grid container spacing={2.5}>
                 <Grid size={{ xs: 12 }}>
                   <TextField
-                    fullWidth
-                    required
-                    label="Slug"
+                    fullWidth required label="Slug"
                     placeholder="ninety-day-report"
                     value={form.slug}
                     onChange={(e) => update('slug', e.target.value)}
@@ -295,6 +382,7 @@ export function HomeCardFormView({ mode, card }: Props) {
             </CardContent>
           </Card>
 
+          {/* ── Appearance ── */}
           <Card sx={{ mb: 3 }}>
             <CardHeader title="Appearance" subheader="Accent colour and icon shown on the card" />
             <CardContent>
@@ -305,16 +393,12 @@ export function HomeCardFormView({ mode, card }: Props) {
                     <Box
                       onClick={() => update('accent_color', swatch.value)}
                       sx={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: '50%',
-                        bgcolor: swatch.value,
-                        cursor: 'pointer',
+                        width: 40, height: 40, borderRadius: '50%',
+                        bgcolor: swatch.value, cursor: 'pointer',
                         border: form.accent_color === swatch.value ? '3px solid' : '3px solid transparent',
                         borderColor: form.accent_color === swatch.value ? 'primary.main' : 'transparent',
                         outline: form.accent_color === swatch.value ? '2px solid white' : 'none',
-                        outlineOffset: -4,
-                        transition: 'border-color 0.15s',
+                        outlineOffset: -4, transition: 'border-color 0.15s',
                       }}
                     />
                   </Tooltip>
@@ -324,37 +408,72 @@ export function HomeCardFormView({ mode, card }: Props) {
               <Divider sx={{ mb: 3 }} />
 
               <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Icon</Typography>
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                {ICON_OPTIONS.map((icon) => (
-                  <Tooltip key={icon.value} title={icon.label}>
+              {iconsLoading ? (
+                <CircularProgress size={20} />
+              ) : (
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                  {icons.map((icon) => (
+                    <Tooltip key={icon.key} title={icon.label}>
+                      <Box
+                        onClick={() => update('icon_key', icon.key)}
+                        sx={{
+                          width: 64, height: 64, borderRadius: 2,
+                          display: 'flex', flexDirection: 'column',
+                          alignItems: 'center', justifyContent: 'center',
+                          gap: 0.5, cursor: 'pointer', border: '2px solid',
+                          overflow: 'hidden',
+                          borderColor: form.icon_key === icon.key ? 'primary.main' : 'divider',
+                          bgcolor: form.icon_key === icon.key ? 'primary.lighter' : 'background.neutral',
+                          transition: 'all 0.15s',
+                        }}
+                      >
+                        {icon.type === 'custom' && icon.image_url && (
+                          <Box
+                            component="img"
+                            src={icon.image_url}
+                            alt={icon.label}
+                            sx={{ width: 32, height: 32, objectFit: 'contain' }}
+                          />
+                        )}
+                        <Typography
+                          variant="caption" fontWeight={600} noWrap
+                          sx={{
+                            px: 0.5, fontSize: '0.6rem',
+                            color: form.icon_key === icon.key ? 'primary.dark' : 'text.secondary',
+                          }}
+                        >
+                          {icon.label}
+                        </Typography>
+                      </Box>
+                    </Tooltip>
+                  ))}
+
+                  {/* New Icon tile */}
+                  <Tooltip title="Add custom icon">
                     <Box
-                      onClick={() => update('icon_key', icon.value)}
+                      onClick={() => setCreateIconOpen(true)}
                       sx={{
-                        width: 64,
-                        height: 64,
-                        borderRadius: 2,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 0.5,
-                        cursor: 'pointer',
-                        border: '2px solid',
-                        borderColor: form.icon_key === icon.value ? 'primary.main' : 'divider',
-                        bgcolor: form.icon_key === icon.value ? 'primary.lighter' : 'background.neutral',
-                        transition: 'all 0.15s',
+                        width: 64, height: 64, borderRadius: 2,
+                        display: 'flex', flexDirection: 'column',
+                        alignItems: 'center', justifyContent: 'center',
+                        gap: 0.5, cursor: 'pointer',
+                        border: '2px dashed', borderColor: 'primary.main',
+                        bgcolor: 'background.neutral', transition: 'all 0.15s',
+                        '&:hover': { bgcolor: 'primary.lighter' },
                       }}
                     >
-                      <Typography variant="caption" fontWeight={600} color={form.icon_key === icon.value ? 'primary.dark' : 'text.secondary'}>
-                        {icon.label}
+                      <Typography variant="h6" color="primary.main" lineHeight={1}>＋</Typography>
+                      <Typography variant="caption" color="primary.main" fontWeight={600} sx={{ fontSize: '0.6rem' }}>
+                        New Icon
                       </Typography>
                     </Box>
                   </Tooltip>
-                ))}
-              </Box>
+                </Box>
+              )}
             </CardContent>
           </Card>
 
+          {/* ── Navigation ── */}
           <Card sx={{ mb: 3 }}>
             <CardHeader title="Navigation" subheader="Where the card takes the user when tapped" />
             <CardContent>
@@ -364,19 +483,35 @@ export function HomeCardFormView({ mode, card }: Props) {
                     <InputLabel>Tap Destination</InputLabel>
                     <Select
                       label="Tap Destination"
-                      value={form.navigation_screen}
-                      onChange={(e) => update('navigation_screen', e.target.value as HomeCardNavigationScreen)}
+                      value={routesLoading ? '' : form.navigation_screen}
+                      disabled={routesLoading}
+                      onChange={(e) => {
+                        if (e.target.value === AUTO_SLUG_CREATE_NEW) {
+                          setCreateRouteOpen(true);
+                        } else {
+                          update('navigation_screen', e.target.value);
+                        }
+                      }}
                     >
-                      {NAVIGATION_GROUPS.map((group) => [
-                        <MenuItem key={`header-${group.group}`} disabled sx={{ fontWeight: 700, fontSize: 11, letterSpacing: 1, color: 'text.disabled', textTransform: 'uppercase' }}>
-                          {group.group}
-                        </MenuItem>,
-                        ...group.options.map((opt) => (
-                          <MenuItem key={opt.value} value={opt.value} sx={{ pl: 3 }}>
-                            {opt.label}
-                          </MenuItem>
-                        )),
-                      ])}
+                      {routes.filter((r) => r.type === 'internal').map((route) => (
+                        <MenuItem key={route.key} value={route.key}>
+                          {route.label_en}
+                        </MenuItem>
+                      ))}
+                      {routes.some((r) => r.type === 'external_url') && (
+                        <MenuItem disabled sx={{ fontWeight: 700, fontSize: 11, letterSpacing: 1, color: 'text.disabled', textTransform: 'uppercase' }}>
+                          External URLs
+                        </MenuItem>
+                      )}
+                      {routes.filter((r) => r.type === 'external_url').map((route) => (
+                        <MenuItem key={route.key} value={route.key} sx={{ pl: 3 }}>
+                          {route.label_en}
+                        </MenuItem>
+                      ))}
+                      <Divider />
+                      <MenuItem value={AUTO_SLUG_CREATE_NEW} sx={{ color: 'primary.main', fontWeight: 600 }}>
+                        ＋ Add new route…
+                      </MenuItem>
                     </Select>
                     {fieldErrors.navigation_screen && (
                       <FormHelperText>{fieldErrors.navigation_screen}</FormHelperText>
@@ -386,9 +521,7 @@ export function HomeCardFormView({ mode, card }: Props) {
 
                 <Grid size={{ xs: 12 }}>
                   <TextField
-                    fullWidth
-                    multiline
-                    rows={3}
+                    fullWidth multiline rows={3}
                     label="Extra Params (JSON)"
                     placeholder="{}"
                     value={form.navigation_params_raw}
@@ -402,6 +535,7 @@ export function HomeCardFormView({ mode, card }: Props) {
             </CardContent>
           </Card>
 
+          {/* ── Settings ── */}
           <Card>
             <CardHeader title="Settings" />
             <CardContent>
@@ -426,21 +560,16 @@ export function HomeCardFormView({ mode, card }: Props) {
             <CardContent>
               <Box
                 sx={{
-                  borderRadius: 2,
-                  bgcolor: 'background.paper',
-                  border: '1px solid',
-                  borderColor: 'divider',
+                  borderRadius: 2, bgcolor: 'background.paper',
+                  border: '1px solid', borderColor: 'divider',
                   borderTop: `4px solid ${form.accent_color}`,
-                  p: 2,
-                  minHeight: 120,
-                  position: 'relative',
+                  p: 2, minHeight: 120, position: 'relative',
                   opacity: form.is_coming_soon ? 0.5 : 1,
                   boxShadow: 2,
                 }}
               >
                 <Typography
-                  variant="caption"
-                  fontWeight={700}
+                  variant="caption" fontWeight={700}
                   sx={{ textTransform: 'uppercase', letterSpacing: 1, color: form.accent_color, display: 'block', mb: 0.5 }}
                 >
                   {form.tag_en || 'TAG'}
@@ -453,46 +582,173 @@ export function HomeCardFormView({ mode, card }: Props) {
                     {form.subtitle_en}
                   </Typography>
                 )}
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    bottom: 6,
-                    right: 8,
-                    width: 28,
-                    height: 28,
-                    borderRadius: 1,
-                    bgcolor: form.accent_color,
-                    opacity: 0.25,
-                  }}
-                />
+                <Box sx={{ position: 'absolute', bottom: 6, right: 8, width: 28, height: 28, borderRadius: 1, bgcolor: form.accent_color, opacity: 0.25 }} />
                 {form.is_coming_soon && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 10,
-                      right: 10,
-                      bgcolor: 'grey.100',
-                      borderRadius: 99,
-                      px: 1,
-                      py: 0.25,
-                      border: '1px solid',
-                      borderColor: 'divider',
-                    }}
-                  >
-                    <Typography variant="caption" fontWeight={700} sx={{ fontSize: 9, letterSpacing: 1 }}>
-                      SOON
-                    </Typography>
+                  <Box sx={{ position: 'absolute', top: 10, right: 10, bgcolor: 'grey.100', borderRadius: 99, px: 1, py: 0.25, border: '1px solid', borderColor: 'divider' }}>
+                    <Typography variant="caption" fontWeight={700} sx={{ fontSize: 9, letterSpacing: 1 }}>SOON</Typography>
                   </Box>
                 )}
               </Box>
-
               <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 1.5, textAlign: 'center' }}>
-                Icon: {form.icon_key} · Goes to: {form.navigation_screen}
+                Icon: {form.icon_key}
+                {selectedRoute ? ` · Goes to: ${selectedRoute.label_en}` : ` · Goes to: ${form.navigation_screen}`}
+                {selectedRoute?.type === 'external_url' && ' (ext)'}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
+
+      {/* ── Create Icon Dialog ── */}
+      <Dialog open={createIconOpen} onClose={handleCloseIconDialog} maxWidth="xs" fullWidth>
+        <DialogTitle>Add Custom Icon</DialogTitle>
+        <DialogContent>
+          {createIconError && <Alert severity="error" sx={{ mb: 2 }}>{createIconError}</Alert>}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            <TextField
+              fullWidth label="Label"
+              placeholder="Hotel"
+              value={newIconLabel}
+              onChange={(e) => handleNewIconLabelChange(e.target.value)}
+            />
+            <TextField
+              fullWidth label="Key"
+              placeholder="hotel"
+              value={newIconKey}
+              onChange={(e) => setNewIconKey(e.target.value)}
+              helperText="Lowercase letters and hyphens only"
+            />
+
+            {/* Upload zone */}
+            <Box
+              component="label"
+              sx={{
+                border: '2px dashed', borderColor: 'divider', borderRadius: 2,
+                p: 3, display: 'flex', flexDirection: 'column',
+                alignItems: 'center', cursor: 'pointer',
+                transition: 'all 0.15s',
+                '&:hover': { borderColor: 'primary.main', bgcolor: 'primary.lighter' },
+              }}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg"
+                hidden
+                onChange={handleIconFileChange}
+              />
+              {newIconPreview ? (
+                <Box sx={{ textAlign: 'center' }}>
+                  <Box
+                    component="img"
+                    src={newIconPreview}
+                    alt="preview"
+                    sx={{ width: 80, height: 80, objectFit: 'contain', display: 'block', mx: 'auto' }}
+                  />
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                    {newIconFile?.name} · {((newIconFile?.size ?? 0) / 1024).toFixed(0)} KB
+                  </Typography>
+                  <Button
+                    size="small" color="error" sx={{ mt: 0.5 }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setNewIconFile(null);
+                      setNewIconPreview(null);
+                      if (fileInputRef.current) fileInputRef.current.value = '';
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </Box>
+              ) : (
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">↑ Drop image here or click to browse</Typography>
+                  <Typography variant="caption" color="text.disabled">PNG or JPEG · max 2 MB</Typography>
+                </Box>
+              )}
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseIconDialog}>Cancel</Button>
+          <Button
+            variant="contained"
+            disabled={!newIconKey || !newIconLabel || !newIconFile || creatingIcon}
+            startIcon={creatingIcon ? <CircularProgress size={14} /> : undefined}
+            onClick={handleSaveIcon}
+          >
+            {creatingIcon ? 'Saving…' : 'Save Icon'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ── Create Route Dialog ── */}
+      <Dialog open={createRouteOpen} onClose={handleCloseRouteDialog} maxWidth="xs" fullWidth>
+        <DialogTitle>Add Navigation Route</DialogTitle>
+        <DialogContent>
+          {createRouteError && <Alert severity="error" sx={{ mb: 2 }}>{createRouteError}</Alert>}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField
+                fullWidth label="Label (English)"
+                placeholder="Hotels"
+                value={newRouteLabelEn}
+                onChange={(e) => handleNewRouteLabelEnChange(e.target.value)}
+              />
+              <TextField
+                fullWidth label="Label (Myanmar)"
+                value={newRouteLabelMm}
+                onChange={(e) => setNewRouteLabelMm(e.target.value)}
+              />
+            </Box>
+
+            <TextField
+              fullWidth label="Route Key"
+              value={newRouteKey}
+              onChange={(e) => setNewRouteKey(e.target.value)}
+              helperText="Must match the mobile screen name for internal routes"
+            />
+
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>Route Type</Typography>
+              <ToggleButtonGroup
+                exclusive
+                value={newRouteType}
+                onChange={(_, v) => { if (v) setNewRouteType(v); }}
+                size="small"
+              >
+                <ToggleButton value="internal">Internal Screen</ToggleButton>
+                <ToggleButton value="external_url">External URL</ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+
+            {newRouteType === 'external_url' && (
+              <TextField
+                fullWidth label="URL"
+                placeholder="https://..."
+                value={newRouteUrl}
+                onChange={(e) => setNewRouteUrl(e.target.value)}
+                helperText="Tapping the card will open this URL in the app"
+              />
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseRouteDialog}>Cancel</Button>
+          <Button
+            variant="contained"
+            disabled={
+              !newRouteKey || !newRouteLabelEn || !newRouteLabelMm
+              || (newRouteType === 'external_url' && !newRouteUrl)
+              || creatingRoute
+            }
+            startIcon={creatingRoute ? <CircularProgress size={14} /> : undefined}
+            onClick={handleSaveRoute}
+          >
+            {creatingRoute ? 'Saving…' : 'Save Route'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </DashboardContent>
   );
 }

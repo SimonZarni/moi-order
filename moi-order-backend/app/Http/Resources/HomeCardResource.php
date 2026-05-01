@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Enums\HomeCardIconType;
+use App\Enums\HomeCardRouteType;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -22,8 +24,12 @@ class HomeCardResource extends JsonResource
             'tag_en'            => $this->tag_en,
             'tag_mm'            => $this->tag_mm,
             'accent_color'      => $this->accent_color,
-            'icon_key'          => $this->icon_key->value,
-            'navigation_screen' => $this->navigation_screen->value,
+            'icon_key'          => $this->icon_key,
+            'icon_type'         => $this->whenLoaded('icon', fn () => $this->icon?->type?->value ?? HomeCardIconType::Builtin->value, HomeCardIconType::Builtin->value),
+            'icon_url'          => $this->whenLoaded('icon', fn () => $this->icon?->image_url ?? null, null),
+            'navigation_screen' => $this->navigation_screen,
+            'route_type'        => $this->whenLoaded('route', fn () => $this->route?->type?->value ?? HomeCardRouteType::Internal->value, HomeCardRouteType::Internal->value),
+            'route_url'         => $this->whenLoaded('route', fn () => $this->route?->url, null),
             'navigation_params' => $this->navigation_params,
             'is_active'         => $this->is_active,
             'is_coming_soon'    => $this->is_coming_soon,

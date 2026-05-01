@@ -352,28 +352,24 @@ export type AdminAccount = {
 // ----------------------------------------------------------------------
 // Home Cards
 
-export type HomeCardIconKey =
-  | 'calendar'
-  | 'location'
-  | 'flash'
-  | 'embassy'
-  | 'airport'
-  | 'bus'
-  | 'passport'
-  | 'food'
-  | 'ticket';
+export type HomeCardRoute = {
+  id: number;
+  key: string;
+  label_en: string;
+  label_mm: string;
+  type: 'internal' | 'external_url';
+  url: string | null;
+  is_active: boolean;
+};
 
-export type HomeCardNavigationScreen =
-  | 'NinetyDayReport'
-  | 'Places'
-  | 'Tickets'
-  | 'OtherServices'
-  | 'EmbassyServices'
-  | 'AirportFastTrack'
-  | 'Food'
-  | 'PassportVault'
-  | 'Search'
-  | 'PlacesMap';
+export type HomeCardIcon = {
+  id: number;
+  key: string;
+  label: string;
+  type: 'builtin' | 'custom';
+  image_url: string | null;
+  is_active: boolean;
+};
 
 export type HomeCard = {
   id: number;
@@ -386,8 +382,8 @@ export type HomeCard = {
   tag_en: string;
   tag_mm: string;
   accent_color: string;
-  icon_key: HomeCardIconKey;
-  navigation_screen: HomeCardNavigationScreen;
+  icon_key: string;
+  navigation_screen: string;
   navigation_params: Record<string, unknown> | null;
   is_active: boolean;
   is_coming_soon: boolean;

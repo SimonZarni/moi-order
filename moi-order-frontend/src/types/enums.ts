@@ -96,7 +96,7 @@ export const RESTAURANT_STATUS = {
 
 export type RestaurantStatus = (typeof RESTAURANT_STATUS)[keyof typeof RESTAURANT_STATUS];
 
-// Mirrors App\Enums\HomeCardIconKey
+// Builtin icon keys — kept as reference constants for the SVG component map
 export const HOME_CARD_ICON_KEY = {
   Calendar: 'calendar',
   Location: 'location',
@@ -109,9 +109,7 @@ export const HOME_CARD_ICON_KEY = {
   Ticket:   'ticket',
 } as const;
 
-export type HomeCardIconKey = (typeof HOME_CARD_ICON_KEY)[keyof typeof HOME_CARD_ICON_KEY];
-
-// Mirrors App\Enums\HomeCardNavigationScreen
+// Builtin nav screen keys — kept for the switch-case in homeCardNavigation.ts
 export const HOME_CARD_NAV_SCREEN = {
   NinetyDayReport:  'NinetyDayReport',
   Places:           'Places',
@@ -125,7 +123,21 @@ export const HOME_CARD_NAV_SCREEN = {
   PlacesMap:        'PlacesMap',
 } as const;
 
-export type HomeCardNavScreen = (typeof HOME_CARD_NAV_SCREEN)[keyof typeof HOME_CARD_NAV_SCREEN];
+// Mirrors App\Enums\HomeCardIconType
+export const HOME_CARD_ICON_TYPE = {
+  Builtin: 'builtin',
+  Custom:  'custom',
+} as const;
+
+export type HomeCardIconType = (typeof HOME_CARD_ICON_TYPE)[keyof typeof HOME_CARD_ICON_TYPE];
+
+// Mirrors App\Enums\HomeCardRouteType
+export const HOME_CARD_ROUTE_TYPE = {
+  Internal:    'internal',
+  ExternalUrl: 'external_url',
+} as const;
+
+export type HomeCardRouteType = (typeof HOME_CARD_ROUTE_TYPE)[keyof typeof HOME_CARD_ROUTE_TYPE];
 
 // Mirrors App\Enums\FieldType
 export const FIELD_TYPE = {

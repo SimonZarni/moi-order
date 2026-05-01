@@ -340,8 +340,12 @@ export interface HomeCard {
   tag_en: string;
   tag_mm: string;
   accent_color: string;
-  icon_key: import('./enums').HomeCardIconKey;
-  navigation_screen: import('./enums').HomeCardNavScreen;
+  icon_key: string;
+  icon_type: import('./enums').HomeCardIconType;
+  icon_url: string | null;
+  navigation_screen: string;
+  route_type: import('./enums').HomeCardRouteType;
+  route_url: string | null;
   navigation_params: Record<string, unknown> | null;
   is_active: boolean;
   is_coming_soon: boolean;

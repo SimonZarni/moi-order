@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
-use App\Enums\HomeCardIconKey;
-use App\Enums\HomeCardNavigationScreen;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -29,8 +27,8 @@ class UpdateHomeCardRequest extends FormRequest
             'tag_en'            => ['sometimes', 'string', 'max:50'],
             'tag_mm'            => ['sometimes', 'string', 'max:100'],
             'accent_color'      => ['sometimes', 'string', 'max:20', 'regex:/^#[0-9a-fA-F]{6}$/'],
-            'icon_key'          => ['sometimes', 'string', Rule::enum(HomeCardIconKey::class)],
-            'navigation_screen' => ['sometimes', 'string', Rule::enum(HomeCardNavigationScreen::class)],
+            'icon_key'          => ['sometimes', 'string', Rule::exists('home_card_icons', 'key')],
+            'navigation_screen' => ['sometimes', 'string', Rule::exists('home_card_routes', 'key')],
             'navigation_params' => ['nullable', 'array'],
             'is_active'         => ['sometimes', 'boolean'],
             'is_coming_soon'    => ['sometimes', 'boolean'],

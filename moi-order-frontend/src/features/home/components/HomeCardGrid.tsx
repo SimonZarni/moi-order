@@ -1,9 +1,10 @@
 import React, { useCallback } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { HomeCard } from '@/types/models';
+import { HOME_CARD_ICON_TYPE } from '@/types/enums';
 import { RootStackParamList } from '@/types/navigation';
 import { navigateToCardScreen } from '@/features/home/utils/homeCardNavigation';
 import {
@@ -23,7 +24,7 @@ import { styles } from './HomeCardGrid.styles';
 
 type IconComponent = () => React.JSX.Element;
 
-const ICON_MAP: Record<string, IconComponent> = {
+const BUILTIN_ICON_MAP: Record<string, IconComponent> = {
   calendar: CalendarIcon,
   location: LocationIcon,
   flash:    FlashIcon,
@@ -35,8 +36,17 @@ const ICON_MAP: Record<string, IconComponent> = {
   ticket:   TicketIcon,
 };
 
-function CardIcon({ iconKey }: { iconKey: string }): React.JSX.Element | null {
-  const Icon = ICON_MAP[iconKey];
+interface CardIconProps {
+  iconKey: string;
+  iconType: string;
+  iconUrl: string | null;
+}
+
+function CardIcon({ iconKey, iconType, iconUrl }: CardIconProps): React.JSX.Element | null {
+  if (iconType === HOME_CARD_ICON_TYPE.Custom && iconUrl) {
+    return <Image source={{ uri: iconUrl }} style={{ width: 40, height: 40 }} resizeMode="contain" />;
+  }
+  const Icon = BUILTIN_ICON_MAP[iconKey];
   return Icon ? <Icon /> : null;
 }
 
@@ -60,7 +70,7 @@ export function HomeCardGrid({
   const handlePress = useCallback(
     (card: HomeCard) => {
       if (card.is_coming_soon) return;
-      navigateToCardScreen(navigation, card.navigation_screen, {
+      navigateToCardScreen(navigation, card.navigation_screen, card.route_type, card.route_url, {
         serviceTypeId: airportServiceTypeId,
         price:         airportPrice,
       });
@@ -103,7 +113,7 @@ export function HomeCardGrid({
                 </View>
               )}
               <View style={styles.cardIcon}>
-                <CardIcon iconKey={card.icon_key} />
+                <CardIcon iconKey={card.icon_key} iconType={card.icon_type} iconUrl={card.icon_url} />
               </View>
             </Pressable>
           ))}

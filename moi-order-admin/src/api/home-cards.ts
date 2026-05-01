@@ -1,4 +1,4 @@
-import type { HomeCard, HomeCardIconKey, HomeCardNavigationScreen } from 'src/types';
+import type { HomeCard } from 'src/types';
 
 import apiClient from './client';
 
@@ -17,8 +17,8 @@ export type HomeCardPayload = {
   tag_en: string;
   tag_mm: string;
   accent_color: string;
-  icon_key: HomeCardIconKey;
-  navigation_screen: HomeCardNavigationScreen;
+  icon_key: string;
+  navigation_screen: string;
   navigation_params: Record<string, unknown> | null;
   is_active: boolean;
   is_coming_soon: boolean;

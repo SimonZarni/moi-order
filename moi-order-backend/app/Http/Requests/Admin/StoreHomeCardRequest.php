@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
-use App\Enums\HomeCardIconKey;
-use App\Enums\HomeCardNavigationScreen;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -27,8 +25,8 @@ class StoreHomeCardRequest extends FormRequest
             'tag_en'            => ['required', 'string', 'max:50'],
             'tag_mm'            => ['required', 'string', 'max:100'],
             'accent_color'      => ['required', 'string', 'max:20', 'regex:/^#[0-9a-fA-F]{6}$/'],
-            'icon_key'          => ['required', 'string', Rule::enum(HomeCardIconKey::class)],
-            'navigation_screen' => ['required', 'string', Rule::enum(HomeCardNavigationScreen::class)],
+            'icon_key'          => ['required', 'string', Rule::exists('home_card_icons', 'key')],
+            'navigation_screen' => ['required', 'string', Rule::exists('home_card_routes', 'key')],
             'navigation_params' => ['nullable', 'array'],
             'is_active'         => ['required', 'boolean'],
             'is_coming_soon'    => ['required', 'boolean'],

@@ -1,22 +1,36 @@
-import { NavigationProp } from '@react-navigation/native';
+import { Linking } from 'react-native';
 
-import { HOME_CARD_NAV_SCREEN, HomeCardNavScreen } from '@/types/enums';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+import { HOME_CARD_NAV_SCREEN, HOME_CARD_ROUTE_TYPE } from '@/types/enums';
 import { RootStackParamList } from '@/types/navigation';
 
-type Nav = NavigationProp<RootStackParamList>;
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 type AirportParams = { serviceTypeId: number | null; price: number | null };
 
 /**
- * Navigates to the screen associated with a home card's navigation_screen value.
- * Airport Fast Track requires runtime params fetched separately; pass them via airportParams.
- * Unknown screen values are a no-op — they never crash the app.
+ * Navigates to the screen associated with a home card.
+ * External URL routes open in the system browser via Linking.
+ * Internal routes map to known mobile screens via switch-case.
+ * Unknown internal keys are a safe no-op — they never crash the app.
  */
 export function navigateToCardScreen(
   navigation: Nav,
-  screen: HomeCardNavScreen,
+  screen: string,
+  routeType: string,
+  routeUrl: string | null,
   airportParams: AirportParams
 ): void {
+  if (routeType === HOME_CARD_ROUTE_TYPE.ExternalUrl) {
+    if (routeUrl) {
+      Linking.openURL(routeUrl).catch(() => {
+        // silent failure — URL may be malformed or app not installed
+      });
+    }
+    return;
+  }
+
   switch (screen) {
     case HOME_CARD_NAV_SCREEN.NinetyDayReport:
       navigation.navigate('NinetyDayReport');
@@ -54,7 +68,7 @@ export function navigateToCardScreen(
       navigation.navigate('PlacesMap');
       break;
     default:
-      // Unknown screen from a newer backend — safe no-op
+      // Internal route key unknown to this app version — safe no-op
       break;
   }
 }

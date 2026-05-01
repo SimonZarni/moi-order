@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\FileStorageInterface;
 use App\DTOs\HomeCardDTO;
+use App\Enums\HomeCardIconType;
 use App\Models\HomeCard;
+use App\Models\HomeCardIcon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class HomeCardService
 {
+    public function __construct(private readonly FileStorageInterface $storage) {}
+
     public function indexForAdmin(int $perPage = 20): LengthAwarePaginator
     {
         return HomeCard::withTrashed()->orderBy('position')->paginate($perPage);
@@ -19,7 +24,14 @@ class HomeCardService
 
     public function indexForUser(): Collection
     {
-        return HomeCard::visible()->get();
+        return HomeCard::visible()->with(['icon', 'route'])->get()
+            ->each(function (HomeCard $card): void {
+                /** @var HomeCardIcon|null $icon */
+                $icon = $card->icon;
+                if ($icon && $icon->type === HomeCardIconType::Custom && $icon->image_path) {
+                    $icon->image_url = $this->storage->url($icon->image_path);
+                }
+            });
     }
 
     public function show(HomeCard $card): HomeCard

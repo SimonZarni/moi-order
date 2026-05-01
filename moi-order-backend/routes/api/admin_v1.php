@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\Admin\V1\AdminAccountController;
 use App\Http\Controllers\Api\Admin\V1\AdminAuthController;
 use App\Http\Controllers\Api\Admin\V1\AdminHomeCardController;
+use App\Http\Controllers\Api\Admin\V1\AdminHomeCardIconController;
+use App\Http\Controllers\Api\Admin\V1\AdminHomeCardRouteController;
 use App\Http\Controllers\Api\Admin\V1\AdminDashboardController;
 use App\Http\Controllers\Api\Admin\V1\AdminDocumentTypeController;
 use App\Http\Controllers\Api\Admin\V1\AdminFoodOrderController;
@@ -249,6 +251,18 @@ Route::prefix('home-cards')->name('admin.home-cards.')->middleware('check.permis
     Route::put('/{homeCard}',                  [AdminHomeCardController::class, 'update'])->name('update');
     Route::delete('/{homeCard}',               [AdminHomeCardController::class, 'destroy'])->name('destroy');
     Route::patch('/{id}/restore',              [AdminHomeCardController::class, 'restore'])->name('restore')->whereNumber('id');
+});
+
+// ── Home Card Routes (tap destinations) ───────────────────────────────────────
+Route::prefix('home-card-routes')->name('admin.home-card-routes.')->middleware('check.permission:home_cards.manage')->group(function (): void {
+    Route::get('/',  [AdminHomeCardRouteController::class, 'index'])->name('index');
+    Route::post('/', [AdminHomeCardRouteController::class, 'store'])->name('store');
+});
+
+// ── Home Card Icons ────────────────────────────────────────────────────────────
+Route::prefix('home-card-icons')->name('admin.home-card-icons.')->middleware('check.permission:home_cards.manage')->group(function (): void {
+    Route::get('/',  [AdminHomeCardIconController::class, 'index'])->name('index');
+    Route::post('/', [AdminHomeCardIconController::class, 'store'])->name('store');
 });
 
 // ── Document Types ────────────────────────────────────────────────────────────
