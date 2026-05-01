@@ -5,6 +5,16 @@
     "version": "1.0.0",
     "scheme": "merchant",
     "platforms": ["ios", "android", "web"],
+    "ios": {
+      "bundleIdentifier": "com.moiorder.merchant",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.moiorder.merchant",
+      "adaptiveIcon": {
+        "backgroundColor": "#f97316"
+      }
+    },
     "web": { "bundler": "metro", "output": "single" },
     "extra": { "apiBaseUrl": "http://localhost:8000/api/merchant/v1" }
   }

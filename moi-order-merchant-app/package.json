@@ -1,7 +1,7 @@
 {
   "name": "moi-order-merchant-app",
   "version": "1.0.0",
-  "main": "App.tsx",
+  "main": "expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",

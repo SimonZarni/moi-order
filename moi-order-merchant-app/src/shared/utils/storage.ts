@@ -1,8 +1,5 @@
 import { Platform } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
 
-// expo-secure-store on web uses localStorage internally, but can be unreliable
-// in some metro web builds. This wrapper uses localStorage directly on web.
 const webStorage = {
   getItemAsync: async (key: string): Promise<string | null> =>
     typeof localStorage !== 'undefined' ? localStorage.getItem(key) : null,
@@ -14,4 +11,17 @@ const webStorage = {
   },
 };
 
-export const storage = Platform.OS === 'web' ? webStorage : SecureStore;
+// Lazy-load expo-secure-store only on native to avoid web bundle side-effects
+function getNativeStorage() {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  return require('expo-secure-store') as typeof import('expo-secure-store');
+}
+
+export const storage =
+  Platform.OS === 'web'
+    ? webStorage
+    : {
+        getItemAsync: (key: string) => getNativeStorage().getItemAsync(key),
+        setItemAsync: (key: string, value: string) => getNativeStorage().setItemAsync(key, value),
+        deleteItemAsync: (key: string) => getNativeStorage().deleteItemAsync(key),
+      };
