@@ -11,10 +11,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('food_orders', function (Blueprint $table): void {
-            // Rename payment URL column (prompt_pay replaces line_pay)
-            $table->renameColumn('line_payment_url', 'prompt_pay_url');
+        // MariaDB does not support RENAME COLUMN; use CHANGE with full column definition
+        DB::statement('ALTER TABLE food_orders CHANGE line_payment_url prompt_pay_url VARCHAR(2048) NULL');
 
+        Schema::table('food_orders', function (Blueprint $table): void {
             // New timestamp columns for granular status tracking
             $table->timestamp('payment_confirmed_at')->nullable()->after('confirmed_at');
             $table->timestamp('preparing_at')->nullable()->after('payment_confirmed_at');
@@ -43,8 +43,9 @@ return new class extends Migration
         DB::table('food_orders')->where('status', 'delivered')->update(['status' => 'completed']);
         DB::table('food_orders')->where('payment_method', 'prompt_pay')->update(['payment_method' => 'line_pay']);
 
+        DB::statement('ALTER TABLE food_orders CHANGE prompt_pay_url line_payment_url VARCHAR(2048) NULL');
+
         Schema::table('food_orders', function (Blueprint $table): void {
-            $table->renameColumn('prompt_pay_url', 'line_payment_url');
             $table->dropColumn(['payment_confirmed_at', 'preparing_at', 'picked_up_at', 'delivered_at']);
         });
     }
