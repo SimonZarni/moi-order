@@ -19,11 +19,18 @@ Broadcast::channel('user.{id}', function ($user, int $id): bool {
     return (int) $user->id === $id;
 });
 
-// Order chat — customer who owns the order, or any authenticated admin.
+// Order chat — customer who owns the order, merchant who received the order, or any authenticated admin.
 Broadcast::channel('order.{foodOrderId}', function ($user, int $foodOrderId): bool {
     // Admin token carries the 'admin' ability.
     if ($user->currentAccessToken()?->can('admin')) {
         return true;
+    }
+
+    // Merchant: must own the restaurant that received this order.
+    if ($user->currentAccessToken()?->can('merchant')) {
+        return $user->restaurant()
+            ->whereHas('foodOrders', fn ($q) => $q->where('id', $foodOrderId))
+            ->exists();
     }
 
     // Customer: must own the order.

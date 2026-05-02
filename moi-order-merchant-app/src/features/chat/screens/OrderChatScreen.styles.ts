@@ -72,6 +72,19 @@ export const styles = StyleSheet.create({
   bubbleTime: { fontSize: typography.xxs, alignSelf: 'flex-end' },
   bubbleTimeMerchant: { color: 'rgba(255,255,255,0.6)' },
   bubbleTimeOther: { color: colours.textMuted },
+  // Send error
+  sendErrorBanner: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    backgroundColor: '#fee2e2',
+    borderTopWidth: 1,
+    borderTopColor: '#fca5a5',
+  },
+  sendErrorText: {
+    fontSize: typography.xxs,
+    color: '#dc2626',
+    textAlign: 'center',
+  },
   // Input bar
   inputBar: {
     flexDirection: 'row',

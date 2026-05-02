@@ -47,8 +47,8 @@ function MessageBubble({ msg }: BubbleProps): React.JSX.Element {
 
 export function OrderChatScreen(): React.JSX.Element {
   const {
-    orderNumber, messages, isLoading, isError,
-    text, isSending, bottomInset, listRef,
+    restaurantName, orderNumber, messages, isLoading, isError,
+    sendError, text, isSending, inputBarPadding, listRef,
     handleBack, handleTextChange, handleSend, handlePickImage,
   } = useOrderChatScreen();
 
@@ -59,7 +59,7 @@ export function OrderChatScreen(): React.JSX.Element {
           <Ionicons name="chevron-back" size={22} color={colours.textOnDark} />
         </Pressable>
         <View style={styles.headerInfo}>
-          <Text style={styles.headerTitle}>Chat with Restaurant</Text>
+          <Text style={styles.headerTitle} numberOfLines={1}>{restaurantName ?? 'Chat with Restaurant'}</Text>
           {orderNumber !== null && (
             <Text style={styles.headerSub}>Order #{orderNumber}</Text>
           )}
@@ -103,7 +103,12 @@ export function OrderChatScreen(): React.JSX.Element {
           />
         )}
 
-        <View style={[styles.inputBar, { paddingBottom: Math.max(bottomInset, 8) + 8 }]}>
+        {sendError !== null && (
+          <View style={styles.sendErrorBanner}>
+            <Text style={styles.sendErrorText}>{sendError}</Text>
+          </View>
+        )}
+        <View style={[styles.inputBar, { paddingBottom: inputBarPadding }]}>
           <Pressable
             style={styles.attachBtn}
             onPress={handlePickImage}

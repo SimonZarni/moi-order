@@ -66,9 +66,10 @@ const CANCEL_REASONS = [
 interface OrderDetailScreenProps {
   orderId: number;
   onBack?: () => void;
+  onChatPress?: (orderId: number) => void;
 }
 
-export function OrderDetailScreen({ orderId, onBack }: OrderDetailScreenProps): React.JSX.Element {
+export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailScreenProps): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
 
   const {
@@ -114,7 +115,11 @@ export function OrderDetailScreen({ orderId, onBack }: OrderDetailScreenProps): 
   };
 
   const handleChatPress = (): void => {
-    navigation.navigate('OrderChat', { orderId });
+    if (onChatPress !== undefined) {
+      onChatPress(orderId);
+    } else {
+      navigation.navigate('OrderChat', { orderId });
+    }
   };
 
   return (

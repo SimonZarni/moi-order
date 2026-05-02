@@ -100,6 +100,19 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.backgroundLight,
     paddingHorizontal: spacing.sm,
   },
+  // Send error
+  sendErrorBanner: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    backgroundColor: '#fee2e2',
+    borderTopWidth: 1,
+    borderTopColor: '#fca5a5',
+  },
+  sendErrorText: {
+    fontSize: typography.xs,
+    color: '#dc2626',
+    textAlign: 'center',
+  },
   // Input bar
   inputBar: {
     flexDirection: 'row',

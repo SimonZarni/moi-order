@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Modal, PanResponder, Pressable, ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { formatPrice } from '@/shared/utils/formatCurrency';
@@ -47,6 +48,7 @@ function InfoRow({ label, value }: { label: string; value: string }): React.JSX.
 }
 
 export function InvoiceModal({ order, visible, onClose }: Props): React.JSX.Element {
+  const { bottom: bottomInset } = useSafeAreaInsets();
   const isPaid = order.payment_confirmed_at !== null || order.payment_method === FOOD_PAYMENT_METHOD.Cod;
 
   const dragY = useRef(0);
@@ -76,7 +78,11 @@ export function InvoiceModal({ order, visible, onClose }: Props): React.JSX.Elem
             </Pressable>
           </View>
 
-          <ScrollView style={styles.scroll} contentContainerStyle={styles.invoice} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={[styles.invoice, { paddingBottom: Math.max(bottomInset, 16) + 16 }]}
+            showsVerticalScrollIndicator={false}
+          >
             {/* Title block */}
             <Text style={styles.invoiceTitle}>MOI ORDER</Text>
             <Text style={styles.invoiceSubtitle}>TAX INVOICE / RECEIPT</Text>

@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from 'react';
-import { FlatList } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { FlatList, Keyboard } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
@@ -11,9 +11,10 @@ interface UseOrderChatScreenResult {
   messages: OrderChatMessage[];
   isLoading: boolean;
   isError: boolean;
+  sendError: string | null;
   text: string;
   isSending: boolean;
-  bottomInset: number;
+  inputBarPadding: number;
   listRef: React.RefObject<FlatList | null>;
   handleTextChange: (v: string) => void;
   handleSend: () => void;
@@ -24,6 +25,8 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
   const queryClient = useQueryClient();
   const { bottom: bottomInset } = useSafeAreaInsets();
   const [text, setText] = useState('');
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const listRef = useRef<FlatList>(null);
 
   const { data, isLoading, isError } = useQuery({
@@ -33,6 +36,18 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
   });
 
   const messages = data ?? [];
+
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
+  // Collapse safe-area gap when keyboard is visible (keyboard fills that space)
+  const inputBarPadding = keyboardVisible ? 8 : Math.max(bottomInset, 8) + 8;
 
   const { mutate, isPending: isSending } = useMutation({
     mutationFn: ({ body, image }: { body: string | null; image: { uri: string; name: string; type: string } | null }) =>
@@ -50,7 +65,11 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
   const handleSend = useCallback(() => {
     const trimmed = text.trim();
     if (!trimmed || isSending) return;
-    mutate({ body: trimmed, image: null });
+    setSendError(null);
+    mutate(
+      { body: trimmed, image: null },
+      { onError: () => setSendError('Failed to send. Please try again.') },
+    );
     setText('');
   }, [text, isSending, mutate]);
 
@@ -63,8 +82,15 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
     const asset = result.assets[0];
     if (!asset) return;
     const ext = asset.uri.split('.').pop() ?? 'jpg';
-    mutate({ body: null, image: { uri: asset.uri, name: `chat.${ext}`, type: `image/${ext}` } });
+    setSendError(null);
+    mutate(
+      { body: null, image: { uri: asset.uri, name: `chat.${ext}`, type: `image/${ext}` } },
+      { onError: () => setSendError('Failed to send image. Please try again.') },
+    );
   }, [mutate]);
 
-  return { messages, isLoading, isError, text, isSending, bottomInset, listRef, handleTextChange, handleSend, handlePickImage };
+  return {
+    messages, isLoading, isError, sendError, text, isSending,
+    inputBarPadding, listRef, handleTextChange, handleSend, handlePickImage,
+  };
 }

@@ -42,13 +42,16 @@ function MessageBubble({ msg }: BubbleProps): React.JSX.Element {
   );
 }
 
-export function OrderChatScreen(): React.JSX.Element {
-  const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
-  const route = useRoute<Route>();
-  const { orderId } = route.params;
+// ── Shared content (used by both mobile route and web prop variant) ───────────
 
+interface ContentProps {
+  orderId: number;
+  onBack: () => void;
+}
+
+export function OrderChatContent({ orderId, onBack }: ContentProps): React.JSX.Element {
   const {
-    messages, isLoading, isError, text, isSending, bottomInset, listRef,
+    messages, isLoading, isError, sendError, text, isSending, inputBarPadding, listRef,
     handleTextChange, handleSend, handlePickImage,
   } = useOrderChatScreen(orderId);
 
@@ -57,7 +60,7 @@ export function OrderChatScreen(): React.JSX.Element {
       <View style={styles.topBar}>
         <Pressable
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={onBack}
           accessibilityLabel="Go back"
           accessibilityRole="button"
         >
@@ -99,7 +102,13 @@ export function OrderChatScreen(): React.JSX.Element {
           />
         )}
 
-        <View style={[styles.inputBar, { paddingBottom: Math.max(bottomInset, 8) + 8 }]}>
+        {sendError !== null && (
+          <View style={styles.sendErrorBanner}>
+            <Text style={styles.sendErrorText}>{sendError}</Text>
+          </View>
+        )}
+
+        <View style={[styles.inputBar, { paddingBottom: inputBarPadding }]}>
           <Pressable
             style={styles.attachBtn}
             onPress={handlePickImage}
@@ -134,4 +143,13 @@ export function OrderChatScreen(): React.JSX.Element {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
+}
+
+// ── Mobile route wrapper ──────────────────────────────────────────────────────
+
+export function OrderChatScreen(): React.JSX.Element {
+  const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
+  const route = useRoute<Route>();
+  const { orderId } = route.params;
+  return <OrderChatContent orderId={orderId} onBack={() => navigation.goBack()} />;
 }

@@ -13,7 +13,7 @@ return new class extends Migration
         Schema::create('order_chat_messages', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('food_order_id')->constrained('food_orders')->cascadeOnDelete();
-            $table->string('sender_type', 10);  // 'user' | 'admin' — CHECK constraint below
+            $table->string('sender_type', 10);  // 'customer' | 'merchant' | 'admin' — CHECK constraint below
             $table->unsignedBigInteger('sender_id');
             $table->string('sender_name');
             $table->text('body')->nullable();

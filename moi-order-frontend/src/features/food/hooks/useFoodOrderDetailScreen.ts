@@ -64,8 +64,9 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
     navigation.navigate('OrderChat', {
       orderId,
       orderNumber: order?.order_number ?? null,
+      restaurantName: order?.restaurant_name ?? null,
     });
-  }, [navigation, orderId, order?.order_number]);
+  }, [navigation, orderId, order?.order_number, order?.restaurant_name]);
 
   const handleRefetch = useCallback(() => refetch(), [refetch]);
 

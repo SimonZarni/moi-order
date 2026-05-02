@@ -16,6 +16,8 @@ export const styles = StyleSheet.create({
     borderTopRightRadius: radius.sheet,
     maxHeight: '92%',
     minHeight: '65%',
+    // flex:1 gives ScrollView a concrete bounded parent height so it can scroll
+    flex: 1,
   },
   dragBarWrapper: {
     paddingVertical: spacing.sm,

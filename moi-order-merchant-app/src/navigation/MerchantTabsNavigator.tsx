@@ -14,7 +14,7 @@ import type {
 import { DashboardScreen } from '../features/dashboard/screens/DashboardScreen';
 import { OrdersScreen } from '../features/orders/screens/OrdersScreen';
 import { OrderDetailScreen } from '../features/orders/screens/OrderDetailScreen';
-import { OrderChatScreen } from '../features/chat/screens/OrderChatScreen';
+import { OrderChatContent, OrderChatScreen } from '../features/chat/screens/OrderChatScreen';
 import { MenuScreen } from '../features/menu/screens/MenuScreen';
 import { RestaurantScreen } from '../features/restaurant/screens/RestaurantScreen';
 import { AnalyticsScreen } from '../features/analytics/screens/AnalyticsScreen';
@@ -92,7 +92,11 @@ function OrderDetailRoute(
 ): React.JSX.Element {
   const { orderId } = route.params;
   const handleBack = useCallback(() => navigation.goBack(), [navigation]);
-  return <OrderDetailScreen orderId={orderId} onBack={handleBack} />;
+  const handleChatPress = useCallback(
+    (id: number) => navigation.navigate('OrderChat', { orderId: id }),
+    [navigation],
+  );
+  return <OrderDetailScreen orderId={orderId} onBack={handleBack} onChatPress={handleChatPress} />;
 }
 
 function MobileNavigator(): React.JSX.Element {
@@ -110,30 +114,45 @@ function MobileNavigator(): React.JSX.Element {
 function WebMerchantLayout(): React.JSX.Element {
   const [activeScreen, setActiveScreen] = useState<WebScreen>('Dashboard');
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+  const [chatOrderId, setChatOrderId] = useState<number | null>(null);
   const logout = useAuthStore((s) => s.logout);
 
   const handleNavigate = useCallback((screen: WebScreen) => {
     setActiveScreen(screen);
     setSelectedOrderId(null);
+    setChatOrderId(null);
   }, []);
 
   const handleSelectOrder = useCallback((orderId: number) => {
     setSelectedOrderId(orderId);
+    setChatOrderId(null);
   }, []);
 
   const handleBackFromOrder = useCallback(() => {
     setSelectedOrderId(null);
   }, []);
 
+  const handleChatOpen = useCallback((orderId: number) => {
+    setChatOrderId(orderId);
+  }, []);
+
+  const handleChatClose = useCallback(() => {
+    setChatOrderId(null);
+  }, []);
+
   const sidebarActiveScreen: WebScreen =
-    selectedOrderId !== null ? 'Orders' : activeScreen;
+    selectedOrderId !== null || chatOrderId !== null ? 'Orders' : activeScreen;
 
   const renderContent = (): React.JSX.Element => {
+    if (chatOrderId !== null) {
+      return <OrderChatContent orderId={chatOrderId} onBack={handleChatClose} />;
+    }
     if (selectedOrderId !== null) {
       return (
         <OrderDetailScreen
           orderId={selectedOrderId}
           onBack={handleBackFromOrder}
+          onChatPress={handleChatOpen}
         />
       );
     }
