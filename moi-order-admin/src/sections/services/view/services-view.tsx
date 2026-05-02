@@ -26,7 +26,7 @@ import { useRouter } from 'src/routes/hooks';
 import { useAuth } from 'src/context/auth-context';
 import { submissionsApi } from 'src/api/submissions';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { servicesApi, serviceCategoriesApi, type ServiceData, type ServiceCategoryData } from 'src/api/services';
+import { servicesApi, type ServiceData, serviceCategoriesApi, type ServiceCategoryData } from 'src/api/services';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';

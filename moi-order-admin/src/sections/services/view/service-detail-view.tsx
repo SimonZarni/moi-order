@@ -32,7 +32,7 @@ import { useRouter } from 'src/routes/hooks';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { documentTypesApi, type DocumentTypeData } from 'src/api/documentTypes';
-import { servicesApi, serviceCategoriesApi, type ServiceData, type ServiceTypeData, type ServiceCategoryData } from 'src/api/services';
+import { servicesApi, type ServiceData, serviceCategoriesApi, type ServiceTypeData, type ServiceCategoryData } from 'src/api/services';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
