@@ -30,6 +30,7 @@ export function RegisterScreen(): React.JSX.Element {
 
         <TextInput style={styles.input} placeholder="Password" placeholderTextColor={colours.medium}
           value={password} onChangeText={setPassword} secureTextEntry accessibilityLabel="Password" />
+        <Text style={styles.inputHint}>Min 8 characters · uppercase · lowercase · number</Text>
         {fieldErrors.password !== undefined && <Text style={styles.fieldError}>{fieldErrors.password}</Text>}
 
         <Pressable

@@ -43,6 +43,13 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.xs,
     minHeight: 44,
   },
+  inputHint: {
+    fontSize: typography.xs,
+    color: colours.textMuted,
+    marginTop: -spacing.xs,
+    marginBottom: spacing.sm,
+    marginLeft: spacing.xs,
+  },
   fieldError: {
     color: colours.error,
     fontSize: typography.xs,

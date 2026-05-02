@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import type { KycApplication, KycDocument } from '../types/models';
 import type { KycDocType } from '../types/enums';
 import { apiClient } from './client';
@@ -36,22 +37,27 @@ export async function uploadKycDocument(
 ): Promise<KycDocument> {
   const formData = new FormData();
   formData.append('type', type);
-  formData.append('file', {
-    uri: file.uri,
-    name: file.name,
-    type: file.type,
-  } as unknown as Blob);
+
+  if (Platform.OS === 'web') {
+    // On web, asset.uri is a blob:/data: URL. Appending a plain object to FormData
+    // would serialise it as "[object Object]" — the server receives no file.
+    // Fetch the real bytes and create a File so the browser sends proper multipart.
+    const blob = await fetch(file.uri).then((r) => r.blob());
+    formData.append('file', new File([blob], file.name, { type: file.type }));
+  } else {
+    // On native, RN's FormData understands { uri, name, type } directly.
+    formData.append('file', { uri: file.uri, name: file.name, type: file.type } as unknown as Blob);
+  }
 
   const response = await apiClient.post<{ data: KycDocument }>(
     '/kyc/documents',
     formData,
-    {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      // transformRequest bypasses Axios JSON serialisation — RN is not a browser
-      // env so Axios would otherwise call stringifySafely(formData) → "{}" and the
-      // server would receive an empty body, failing the `file` required rule.
-      transformRequest: [(data: FormData) => data],
-    },
+    Platform.OS === 'web'
+      ? {} // Browser sets Content-Type + boundary automatically for FormData
+      : {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          transformRequest: [(data: FormData) => data], // Prevents Axios JSON-serialising in RN
+        },
   );
   return response.data.data;
 }
