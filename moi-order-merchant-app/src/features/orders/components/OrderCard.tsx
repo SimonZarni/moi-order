@@ -12,23 +12,27 @@ interface OrderAction {
   nextStatus: string;
 }
 
+// Every merchant-triggered forward transition in the correct order.
 const ORDER_ACTIONS: Partial<Record<string, OrderAction>> = {
-  [ORDER_STATUS.PaymentConfirmed]: { label: 'Start Preparing', nextStatus: ORDER_STATUS.PreparingFood },
-  [ORDER_STATUS.PreparingFood]: { label: 'Ready for Delivery', nextStatus: ORDER_STATUS.WaitingForDelivery },
-  [ORDER_STATUS.WaitingForDelivery]: { label: 'Mark Picked Up', nextStatus: ORDER_STATUS.DeliveryOnTheWay },
-  [ORDER_STATUS.DeliveryOnTheWay]: { label: 'Mark Delivered', nextStatus: ORDER_STATUS.Delivered },
+  [ORDER_STATUS.OrderPlaced]:          { label: 'Accept Order',       nextStatus: ORDER_STATUS.WaitingForPayment },
+  [ORDER_STATUS.PaymentConfirmed]:     { label: 'Start Preparing',    nextStatus: ORDER_STATUS.PreparingFood },
+  [ORDER_STATUS.PreparingFood]:        { label: 'Mark Ready',         nextStatus: ORDER_STATUS.WaitingForDelivery },
+  [ORDER_STATUS.WaitingForDelivery]:   { label: 'Mark Picked Up',     nextStatus: ORDER_STATUS.DeliveryOnTheWay },
+  [ORDER_STATUS.DeliveryOnTheWay]:     { label: 'Mark Delivered',     nextStatus: ORDER_STATUS.Delivered },
+  [ORDER_STATUS.Delivered]:            { label: 'Complete Order',      nextStatus: ORDER_STATUS.Completed },
+  // WaitingForPayment: customer pays — no merchant action button needed
 };
 
 const STATUS_COLOURS: Record<string, string> = {
-  [ORDER_STATUS.OrderPlaced]: colours.warning,
-  [ORDER_STATUS.WaitingForPayment]: colours.warning,
-  [ORDER_STATUS.PaymentConfirmed]: colours.primary,
-  [ORDER_STATUS.PreparingFood]: colours.primary,
+  [ORDER_STATUS.OrderPlaced]:        colours.warning,
+  [ORDER_STATUS.WaitingForPayment]:  colours.warning,
+  [ORDER_STATUS.PaymentConfirmed]:   colours.primary,
+  [ORDER_STATUS.PreparingFood]:      colours.primary,
   [ORDER_STATUS.WaitingForDelivery]: colours.primaryDark,
-  [ORDER_STATUS.DeliveryOnTheWay]: colours.primaryDark,
-  [ORDER_STATUS.Delivered]: colours.success,
-  [ORDER_STATUS.Completed]: colours.success,
-  [ORDER_STATUS.Cancelled]: colours.error,
+  [ORDER_STATUS.DeliveryOnTheWay]:   colours.primaryDark,
+  [ORDER_STATUS.Delivered]:          colours.success,
+  [ORDER_STATUS.Completed]:          colours.success,
+  [ORDER_STATUS.Cancelled]:          colours.error,
 };
 
 interface OrderCardProps {

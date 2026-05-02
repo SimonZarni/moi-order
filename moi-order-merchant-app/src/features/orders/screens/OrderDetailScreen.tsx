@@ -11,28 +11,51 @@ import { formatPrice } from '../../../shared/utils/formatCurrency';
 import { formatDateTime } from '../../../shared/utils/formatDate';
 import { ORDER_STATUS } from '../../../types/enums';
 
-interface OrderAction {
-  label: string;
-  nextStatus: string;
-}
-
-const ORDER_ACTIONS: Partial<Record<string, OrderAction>> = {
-  [ORDER_STATUS.PaymentConfirmed]: { label: 'Start Preparing', nextStatus: ORDER_STATUS.PreparingFood },
-  [ORDER_STATUS.PreparingFood]: { label: 'Ready for Pickup / Delivery', nextStatus: ORDER_STATUS.WaitingForDelivery },
-  [ORDER_STATUS.WaitingForDelivery]: { label: 'Mark Picked Up', nextStatus: ORDER_STATUS.DeliveryOnTheWay },
-  [ORDER_STATUS.DeliveryOnTheWay]: { label: 'Mark Delivered', nextStatus: ORDER_STATUS.Delivered },
+// Every merchant-triggered forward transition in the correct order.
+const ORDER_ACTIONS: Partial<Record<string, string>> = {
+  [ORDER_STATUS.OrderPlaced]:        ORDER_STATUS.WaitingForPayment,
+  [ORDER_STATUS.PaymentConfirmed]:   ORDER_STATUS.PreparingFood,
+  [ORDER_STATUS.PreparingFood]:      ORDER_STATUS.WaitingForDelivery,
+  [ORDER_STATUS.WaitingForDelivery]: ORDER_STATUS.DeliveryOnTheWay,
+  [ORDER_STATUS.DeliveryOnTheWay]:   ORDER_STATUS.Delivered,
+  [ORDER_STATUS.Delivered]:          ORDER_STATUS.Completed,
 };
 
+const ACTION_LABELS: Partial<Record<string, string>> = {
+  [ORDER_STATUS.OrderPlaced]:        'Accept Order',
+  [ORDER_STATUS.PaymentConfirmed]:   'Start Preparing',
+  [ORDER_STATUS.PreparingFood]:      'Mark Ready for Pickup / Delivery',
+  [ORDER_STATUS.WaitingForDelivery]: 'Mark Picked Up by Rider',
+  [ORDER_STATUS.DeliveryOnTheWay]:   'Mark Delivered',
+  [ORDER_STATUS.Delivered]:          'Complete Order',
+};
+
+// Cancel is allowed from every state that has at least one other allowed transition.
+// Prohibited: delivered (no cancel in enum), completed, cancelled.
+const CANCELLABLE_STATUSES = new Set<string>([
+  ORDER_STATUS.OrderPlaced,
+  ORDER_STATUS.WaitingForPayment,
+  ORDER_STATUS.PaymentConfirmed,
+  ORDER_STATUS.PreparingFood,
+  ORDER_STATUS.WaitingForDelivery,
+  ORDER_STATUS.DeliveryOnTheWay,
+]);
+
 const STATUS_COLOURS: Record<string, string> = {
-  [ORDER_STATUS.OrderPlaced]: colours.warning,
-  [ORDER_STATUS.WaitingForPayment]: colours.warning,
-  [ORDER_STATUS.PaymentConfirmed]: colours.primary,
-  [ORDER_STATUS.PreparingFood]: colours.primary,
+  [ORDER_STATUS.OrderPlaced]:        colours.warning,
+  [ORDER_STATUS.WaitingForPayment]:  colours.warning,
+  [ORDER_STATUS.PaymentConfirmed]:   colours.primary,
+  [ORDER_STATUS.PreparingFood]:      colours.primary,
   [ORDER_STATUS.WaitingForDelivery]: colours.primaryDark,
-  [ORDER_STATUS.DeliveryOnTheWay]: colours.primaryDark,
-  [ORDER_STATUS.Delivered]: colours.success,
-  [ORDER_STATUS.Completed]: colours.success,
-  [ORDER_STATUS.Cancelled]: colours.error,
+  [ORDER_STATUS.DeliveryOnTheWay]:   colours.primaryDark,
+  [ORDER_STATUS.Delivered]:          colours.success,
+  [ORDER_STATUS.Completed]:          colours.success,
+  [ORDER_STATUS.Cancelled]:          colours.error,
+};
+
+// Informational note shown for statuses where the merchant waits on an external actor.
+const WAITING_NOTES: Partial<Record<string, string>> = {
+  [ORDER_STATUS.WaitingForPayment]: 'Waiting for customer to complete payment.',
 };
 
 interface OrderDetailScreenProps {
@@ -57,12 +80,7 @@ export function OrderDetailScreen({ orderId, onBack }: OrderDetailScreenProps): 
         <Ionicons name="alert-circle-outline" size={44} color={colours.error} />
         <Text style={styles.errorText}>Order could not be loaded</Text>
         {onBack !== undefined && (
-          <Pressable
-            style={{ marginTop: 4 }}
-            onPress={onBack}
-            accessibilityLabel="Go back"
-            accessibilityRole="button"
-          >
+          <Pressable onPress={onBack} accessibilityRole="button" style={{ marginTop: 4 }}>
             <Text style={{ color: colours.primary, fontWeight: '600' }}>← Go back</Text>
           </Pressable>
         )}
@@ -70,9 +88,11 @@ export function OrderDetailScreen({ orderId, onBack }: OrderDetailScreenProps): 
     );
   }
 
-  const action = ORDER_ACTIONS[order.status];
+  const nextStatus = ORDER_ACTIONS[order.status];
+  const actionLabel = ACTION_LABELS[order.status];
+  const waitingNote = WAITING_NOTES[order.status];
+  const canCancel = CANCELLABLE_STATUSES.has(order.status);
   const statusColour = STATUS_COLOURS[order.status] ?? colours.medium;
-  const canCancel = order.status === ORDER_STATUS.OrderPlaced || order.status === ORDER_STATUS.PaymentConfirmed;
 
   const handleCallCustomer = (): void => {
     if (order.user.phone !== null) {
@@ -115,7 +135,9 @@ export function OrderDetailScreen({ orderId, onBack }: OrderDetailScreenProps): 
               <View style={styles.row}>
                 <Text style={styles.label}>Phone</Text>
                 <Pressable onPress={handleCallCustomer} accessibilityRole="link">
-                  <Text style={[styles.value, { color: colours.primary }]}>{order.user.phone}</Text>
+                  <Text style={[styles.value, { color: colours.primary }]}>
+                    {order.user.phone}
+                  </Text>
                 </Pressable>
               </View>
             )}
@@ -183,23 +205,33 @@ export function OrderDetailScreen({ orderId, onBack }: OrderDetailScreenProps): 
           </View>
         </View>
 
-        {action !== undefined && (
+        {/* Status-specific waiting note */}
+        {waitingNote !== undefined && (
+          <View style={styles.infoNote}>
+            <Ionicons name="time-outline" size={16} color={colours.warning} />
+            <Text style={styles.infoNoteText}>{waitingNote}</Text>
+          </View>
+        )}
+
+        {/* Primary action: advance to next status */}
+        {nextStatus !== undefined && actionLabel !== undefined && (
           <Pressable
             style={({ pressed }) => [
               styles.actionButton,
               (isUpdating || pressed) && styles.actionButtonDisabled,
             ]}
-            onPress={() => handleUpdateStatus(action.nextStatus)}
+            onPress={() => handleUpdateStatus(nextStatus)}
             disabled={isUpdating}
-            accessibilityLabel={action.label}
+            accessibilityLabel={actionLabel}
             accessibilityRole="button"
           >
             <Text style={styles.actionButtonText}>
-              {isUpdating ? 'Updating…' : action.label}
+              {isUpdating ? 'Updating…' : actionLabel}
             </Text>
           </Pressable>
         )}
 
+        {/* Cancel — only when the enum permits it */}
         {canCancel && (
           <Pressable
             style={[styles.cancelButton, isUpdating && styles.actionButtonDisabled]}

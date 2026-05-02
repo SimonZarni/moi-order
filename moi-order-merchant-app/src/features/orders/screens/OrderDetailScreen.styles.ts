@@ -185,6 +185,23 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     fontWeight: '600',
   },
+  infoNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    backgroundColor: colours.warningBg,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderWidth: 1,
+    borderColor: colours.warning + '33',
+  },
+  infoNoteText: {
+    flex: 1,
+    fontSize: typography.sm,
+    color: colours.warning,
+    fontWeight: '500',
+  },
   centered: {
     flex: 1,
     justifyContent: 'center',

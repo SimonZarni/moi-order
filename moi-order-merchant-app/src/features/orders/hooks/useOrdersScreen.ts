@@ -18,18 +18,22 @@ interface UseOrdersScreenResult extends OrderGroups {
   handleUpdateStatus: (orderId: number, newStatus: string) => void;
 }
 
+// Statuses requiring immediate merchant attention.
 const NEW_STATUSES: ReadonlySet<OrderStatus> = new Set<OrderStatus>([
   ORDER_STATUS.OrderPlaced,
   ORDER_STATUS.WaitingForPayment,
 ]);
+// Active orders — merchant has a pending action or is waiting on delivery.
+// Delivered is kept here because merchant still needs to mark it Completed.
 const IN_PROGRESS_STATUSES: ReadonlySet<OrderStatus> = new Set<OrderStatus>([
   ORDER_STATUS.PaymentConfirmed,
   ORDER_STATUS.PreparingFood,
   ORDER_STATUS.WaitingForDelivery,
   ORDER_STATUS.DeliveryOnTheWay,
-]);
-const DONE_STATUSES: ReadonlySet<OrderStatus> = new Set<OrderStatus>([
   ORDER_STATUS.Delivered,
+]);
+// Terminal statuses — no further action possible.
+const DONE_STATUSES: ReadonlySet<OrderStatus> = new Set<OrderStatus>([
   ORDER_STATUS.Completed,
   ORDER_STATUS.Cancelled,
 ]);

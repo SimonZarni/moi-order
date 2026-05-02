@@ -20,7 +20,7 @@ export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.El
   const sections: Section[] = [
     { title: 'New Orders', data: newOrders },
     { title: 'In Progress', data: inProgressOrders },
-    { title: 'Completed / Cancelled', data: doneOrders },
+    { title: 'Completed & Cancelled', data: doneOrders },
   ].filter((s) => s.data.length > 0);
 
   if (isLoading) {
