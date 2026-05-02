@@ -38,6 +38,11 @@ class FoodOrderResource extends JsonResource
             'customer_notes'         => $this->customer_notes,
             'prompt_pay_url'         => $this->prompt_pay_url,
             'can_show_prompt_pay'    => $this->canShowPromptPay(),
+            'user'                   => $this->whenLoaded('user', fn () => [
+                'id'    => $this->user->id,
+                'name'  => $this->user->name,
+                'phone' => $this->user->phone_number,
+            ]),
             'items'                  => $this->whenLoaded('items', fn () =>
                 FoodOrderItemResource::collection($this->items)
             ),

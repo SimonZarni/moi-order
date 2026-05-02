@@ -125,7 +125,7 @@ class FoodOrderService
     public function listForRestaurant(int $restaurantId, int $perPage = 30): LengthAwarePaginator
     {
         return FoodOrder::forRestaurant($restaurantId)
-            ->with(['items'])
+            ->with(['items', 'user'])
             ->latest()
             ->paginate($perPage);
     }
