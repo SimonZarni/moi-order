@@ -25,6 +25,7 @@ interface UseKycWizardResult {
   uploadedTypes: Set<KycDocType>;
   isLoading: boolean;
   error: string | null;
+  handleBack: () => void;
   handleStep1Submit: (data: Step1Data) => Promise<void>;
   handleDocUpload: (type: KycDocType, file: UploadFileRef) => Promise<void>;
   handleSubmitKyc: () => Promise<void>;
@@ -44,6 +45,11 @@ export function useKycWizard(): UseKycWizardResult {
   const [uploadedTypes, setUploadedTypes] = useState<Set<KycDocType>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleBack = useCallback(() => {
+    setCurrentStep((s) => (s > 1 ? ((s - 1) as WizardStep) : s));
+    setError(null);
+  }, []);
 
   const handleStep1Submit = useCallback(async (data: Step1Data) => {
     setIsLoading(true);
@@ -95,6 +101,7 @@ export function useKycWizard(): UseKycWizardResult {
     uploadedTypes,
     isLoading,
     error,
+    handleBack,
     handleStep1Submit,
     handleDocUpload,
     handleSubmitKyc,

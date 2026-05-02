@@ -45,7 +45,13 @@ export async function uploadKycDocument(
   const response = await apiClient.post<{ data: KycDocument }>(
     '/kyc/documents',
     formData,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
+    {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      // transformRequest bypasses Axios JSON serialisation — RN is not a browser
+      // env so Axios would otherwise call stringifySafely(formData) → "{}" and the
+      // server would receive an empty body, failing the `file` required rule.
+      transformRequest: [(data: FormData) => data],
+    },
   );
   return response.data.data;
 }

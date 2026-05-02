@@ -8,6 +8,19 @@ export const styles = StyleSheet.create({
   container: {
     padding: spacing.lg,
   },
+  backRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.lg,
+    alignSelf: 'flex-start',
+    minHeight: 44,
+  },
+  backText: {
+    fontSize: typography.sm,
+    color: colours.primary,
+    fontWeight: '600',
+  },
   sectionTitle: {
     fontSize: typography.lg,
     fontWeight: '700',

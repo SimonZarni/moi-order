@@ -6,6 +6,7 @@ import { styles } from './Step2Documents.styles';
 import { colours } from '../../../shared/theme/colours';
 import { KYC_DOC_TYPE, type KycDocType } from '../../../types/enums';
 import type { UploadFileRef } from '../../../api/kyc';
+import type { ImagePickerAsset } from 'expo-image-picker';
 
 interface DocCard {
   type: KycDocType;
@@ -23,6 +24,7 @@ const DOC_CARDS: DocCard[] = [
 interface Step2DocumentsProps {
   uploadedTypes: Set<KycDocType>;
   isLoading: boolean;
+  onBack: () => void;
   onUpload: (type: KycDocType, file: UploadFileRef) => void;
   onSubmit: () => void;
 }
@@ -30,29 +32,45 @@ interface Step2DocumentsProps {
 export function Step2Documents({
   uploadedTypes,
   isLoading,
+  onBack,
   onUpload,
   onSubmit,
 }: Step2DocumentsProps): React.JSX.Element {
+  const buildFileRef = useCallback((asset: ImagePickerAsset): UploadFileRef => {
+    const mimeType = asset.mimeType ?? 'image/jpeg';
+    const ext = mimeType.split('/')[1] ?? 'jpg';
+    const name = asset.fileName ?? `document.${ext}`;
+    return { uri: asset.uri, name, type: mimeType };
+  }, []);
+
   const handlePickImage = useCallback(
-    (type: KycDocType) => async () => {
+    (docType: KycDocType) => async () => {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         quality: 0.8,
       });
       if (!result.canceled && result.assets[0]) {
-        const asset = result.assets[0];
-        const name = asset.uri.split('/').pop() ?? 'document.jpg';
-        onUpload(type, { uri: asset.uri, name, type: 'image/jpeg' });
+        onUpload(docType, buildFileRef(result.assets[0]));
       }
     },
-    [onUpload],
+    [onUpload, buildFileRef],
   );
 
   const allUploaded = DOC_CARDS.every((c) => uploadedTypes.has(c.type));
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <Pressable
+        style={styles.backRow}
+        onPress={onBack}
+        accessibilityRole="button"
+        accessibilityLabel="Back to business info"
+      >
+        <Ionicons name="arrow-back" size={18} color={colours.primary} />
+        <Text style={styles.backText}>Back</Text>
+      </Pressable>
+
       <Text style={styles.sectionTitle}>Required Documents</Text>
       <Text style={styles.subtitle}>Upload all four documents to continue</Text>
 
