@@ -9,6 +9,7 @@ use App\Enums\FoodOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Merchant\UpdateFoodOrderStatusRequest;
 use App\Http\Resources\FoodOrderResource;
+use App\Models\FoodOrder;
 use App\Services\FoodOrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -28,8 +29,8 @@ class MerchantOrderController extends Controller
         $orders = $this->orderService->listForRestaurant($restaurant->id);
 
         return response()->json([
-            'data' => FoodOrderResource::collection($orders->items())
-                ->map(fn ($r) => (new FoodOrderResource($r->resource, $this->storage))->toArray($request))
+            'data' => collect($orders->items())
+                ->map(fn (FoodOrder $order) => (new FoodOrderResource($order, $this->storage))->toArray($request))
                 ->values(),
             'meta' => [
                 'current_page' => $orders->currentPage(),
