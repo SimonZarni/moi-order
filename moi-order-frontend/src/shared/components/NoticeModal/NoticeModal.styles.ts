@@ -39,6 +39,7 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
     lineHeight: 24,
     marginBottom: spacing.xl,
+    textAlign: 'center',
   },
   closeButton: {
     backgroundColor: colours.primary,

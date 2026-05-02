@@ -1,7 +1,11 @@
+import type { DragEndEvent } from '@dnd-kit/core';
 import type { IconifyName } from 'src/components/iconify';
 
+import { CSS } from '@dnd-kit/utilities';
 import { useParams } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
+import { useSensor, DndContext, useSensors, closestCenter, PointerSensor } from '@dnd-kit/core';
+import { arrayMove, useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -135,6 +139,56 @@ function typeToPayload(t: LocalType, index: number) {
       ...(f.type === 'photo' ? { accepts: ['image'], document_type: f.document_type ?? null } : {}),
     })),
   };
+}
+
+// ----------------------------------------------------------------------
+
+interface SortableTypeRowProps {
+  type: LocalType;
+}
+
+function SortableTypeRow({ type }: SortableTypeRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: type.id!,
+  });
+
+  return (
+    <Box
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform) ?? undefined, transition }}
+      sx={{
+        p: 2,
+        border: '1px solid',
+        borderColor: isDragging ? 'primary.main' : 'divider',
+        borderRadius: 1.5,
+        bgcolor: isDragging ? 'action.selected' : 'background.paper',
+        position: 'relative',
+        zIndex: isDragging ? 999 : 'auto',
+        boxShadow: isDragging ? 4 : 0,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1.5,
+        cursor: 'grab',
+        userSelect: 'none',
+        '&:active': { cursor: 'grabbing' },
+      }}
+      {...attributes}
+      {...listeners}
+    >
+      <Iconify icon="custom:drag-handle" width={18} sx={{ color: 'text.disabled', flexShrink: 0 }} />
+      <Box sx={{ flexGrow: 1 }}>
+        <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
+          <Typography variant="subtitle2">{type.name_mm || type.name_en || type.name}</Typography>
+          <Label color={type.is_active ? 'success' : 'default'} variant="soft">
+            {type.is_active ? 'Active' : 'Inactive'}
+          </Label>
+        </Stack>
+        <Typography variant="caption" color="text.secondary">
+          {type.price.toFixed(0)} THB · {type.fields.length} field(s)
+        </Typography>
+      </Box>
+    </Box>
+  );
 }
 
 // ----------------------------------------------------------------------
@@ -403,6 +457,10 @@ export function ServiceDetailView() {
   const { id } = useParams<{ id: string }>();
   const router  = useRouter();
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
+
   const [service, setService]   = useState<ServiceData | null>(null);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState('');
@@ -419,10 +477,15 @@ export function ServiceDetailView() {
   const [documentTypes, setDocumentTypes] = useState<DocumentTypeData[]>([]);
 
   // types state
-  const [types, setTypes]         = useState<LocalType[]>([]);
-  const [formTarget, setFormTarget] = useState<LocalType | null | 'new'>(null);
-  const [savingType, setSavingType] = useState(false);
+  const [types, setTypes]             = useState<LocalType[]>([]);
+  const [formTarget, setFormTarget]   = useState<LocalType | null | 'new'>(null);
+  const [savingType, setSavingType]   = useState(false);
   const [typeFormError, setTypeFormError] = useState('');
+
+  // reorder state
+  const [reorderMode, setReorderMode] = useState(false);
+  const [reorderIds, setReorderIds]   = useState<number[]>([]);
+  const [savingOrder, setSavingOrder] = useState(false);
 
   useEffect(() => {
     documentTypesApi.all().then(setDocumentTypes).catch(() => {});
@@ -489,6 +552,53 @@ export function ServiceDetailView() {
       .then(() => setTypes((prev) => prev.filter((x) => x.id !== typeId)))
       .catch(() => {});
   };
+
+  const handleEnterReorder = useCallback(() => {
+    const savedIds = types.filter((t) => t.id !== undefined).map((t) => t.id!);
+    setReorderIds(savedIds);
+    setReorderMode(true);
+  }, [types]);
+
+  const handleCancelReorder = useCallback(() => {
+    setReorderMode(false);
+    setReorderIds([]);
+  }, []);
+
+  const handleSaveOrder = useCallback(async () => {
+    if (!id) return;
+    setSavingOrder(true);
+    try {
+      await servicesApi.reorderTypes(id, reorderIds);
+      setTypes((prev) => {
+        const byId = new Map(prev.map((t) => [t.id, t]));
+        const reordered = reorderIds.map((tid) => byId.get(tid)).filter((t): t is LocalType => !!t);
+        const unsaved = prev.filter((t) => !t.id);
+        return [...reordered, ...unsaved];
+      });
+      setReorderMode(false);
+      setReorderIds([]);
+    } catch {
+      // error is non-critical — user can retry
+    } finally {
+      setSavingOrder(false);
+    }
+  }, [id, reorderIds]);
+
+  const handleTypeDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    setReorderIds((prev) => {
+      const oldIdx = prev.indexOf(active.id as number);
+      const newIdx = prev.indexOf(over.id as number);
+      return arrayMove(prev, oldIdx, newIdx);
+    });
+  }, []);
+
+  const savedTypesCount = types.filter((t) => t.id !== undefined).length;
+
+  const orderedTypes = reorderMode
+    ? reorderIds.map((tid) => types.find((t) => t.id === tid)).filter((t): t is LocalType => !!t)
+    : types;
 
   if (loading) {
     return (
@@ -560,61 +670,110 @@ export function ServiceDetailView() {
           <Card>
             <CardHeader
               title={`Service Types (${types.length})`}
-              subheader="Each type has its own price and form fields"
+              subheader={
+                reorderMode
+                  ? 'Drag rows to set the display order'
+                  : 'Each type has its own price and form fields'
+              }
               action={
-                <Button
-                  size="small" variant="outlined"
-                  startIcon={<Iconify icon="mingcute:add-line" width={14} />}
-                  onClick={() => setFormTarget('new')}
-                  disabled={formTarget !== null}
-                >
-                  Add Type
-                </Button>
+                reorderMode ? (
+                  <Stack direction="row" spacing={1}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={handleCancelReorder}
+                      disabled={savingOrder}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={handleSaveOrder}
+                      disabled={savingOrder}
+                    >
+                      {savingOrder ? 'Saving…' : 'Save Order'}
+                    </Button>
+                  </Stack>
+                ) : (
+                  <Stack direction="row" spacing={1}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<Iconify icon="carbon:chevron-sort" width={14} />}
+                      disabled={savedTypesCount < 2 || formTarget !== null}
+                      onClick={handleEnterReorder}
+                    >
+                      Reorder
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<Iconify icon="mingcute:add-line" width={14} />}
+                      onClick={() => setFormTarget('new')}
+                      disabled={formTarget !== null}
+                    >
+                      Add Type
+                    </Button>
+                  </Stack>
+                )
               }
             />
             <Divider />
             <CardContent>
-              <Stack spacing={2}>
-                {types.map((t) => (
-                  <Box key={t.tempId}>
-                    {formTarget !== null && typeof formTarget === 'object' && formTarget.tempId === t.tempId ? (
-                      <ServiceTypeForm initial={t} documentTypes={documentTypes} saving={savingType} onSave={handleSaveType} onCancel={() => { setFormTarget(null); setTypeFormError(''); }} apiError={typeFormError} />
-                    ) : (
-                      <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1.5 }}>
-                        <Stack direction="row" alignItems="center" spacing={1.5}>
-                          <Box sx={{ flexGrow: 1 }}>
-                            <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
-                              <Typography variant="subtitle2">{t.name_mm || t.name_en || t.name}</Typography>
-                              <Label color={t.is_active ? 'success' : 'default'} variant="soft">
-                                {t.is_active ? 'Active' : 'Inactive'}
-                              </Label>
-                            </Stack>
-                            <Typography variant="caption" color="text.secondary">
-                              {t.price.toFixed(0)} THB · {t.fields.length} field(s)
-                            </Typography>
-                          </Box>
-                          <IconButton size="small" onClick={() => setFormTarget(t)} disabled={formTarget !== null}>
-                            <Iconify icon="solar:pen-bold" width={16} />
-                          </IconButton>
-                          <IconButton size="small" color="error" onClick={() => t.id && handleDeleteType(t.id)} disabled={formTarget !== null}>
-                            <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                          </IconButton>
-                        </Stack>
-                      </Box>
-                    )}
-                  </Box>
-                ))}
+              {reorderMode ? (
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleTypeDragEnd}>
+                  <SortableContext items={reorderIds} strategy={verticalListSortingStrategy}>
+                    <Stack spacing={1.5}>
+                      {orderedTypes.map((t) => (
+                        <SortableTypeRow key={t.id} type={t} />
+                      ))}
+                    </Stack>
+                  </SortableContext>
+                </DndContext>
+              ) : (
+                <Stack spacing={2}>
+                  {types.map((t) => (
+                    <Box key={t.tempId}>
+                      {formTarget !== null && typeof formTarget === 'object' && formTarget.tempId === t.tempId ? (
+                        <ServiceTypeForm initial={t} documentTypes={documentTypes} saving={savingType} onSave={handleSaveType} onCancel={() => { setFormTarget(null); setTypeFormError(''); }} apiError={typeFormError} />
+                      ) : (
+                        <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1.5 }}>
+                          <Stack direction="row" alignItems="center" spacing={1.5}>
+                            <Box sx={{ flexGrow: 1 }}>
+                              <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
+                                <Typography variant="subtitle2">{t.name_mm || t.name_en || t.name}</Typography>
+                                <Label color={t.is_active ? 'success' : 'default'} variant="soft">
+                                  {t.is_active ? 'Active' : 'Inactive'}
+                                </Label>
+                              </Stack>
+                              <Typography variant="caption" color="text.secondary">
+                                {t.price.toFixed(0)} THB · {t.fields.length} field(s)
+                              </Typography>
+                            </Box>
+                            <IconButton size="small" onClick={() => setFormTarget(t)} disabled={formTarget !== null}>
+                              <Iconify icon="solar:pen-bold" width={16} />
+                            </IconButton>
+                            <IconButton size="small" color="error" onClick={() => t.id && handleDeleteType(t.id)} disabled={formTarget !== null}>
+                              <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                            </IconButton>
+                          </Stack>
+                        </Box>
+                      )}
+                    </Box>
+                  ))}
 
-                {formTarget === 'new' && (
-                  <ServiceTypeForm initial={buildNewTypeInitial(types)} documentTypes={documentTypes} saving={savingType} onSave={handleSaveType} onCancel={() => { setFormTarget(null); setTypeFormError(''); }} apiError={typeFormError} />
-                )}
+                  {formTarget === 'new' && (
+                    <ServiceTypeForm initial={buildNewTypeInitial(types)} documentTypes={documentTypes} saving={savingType} onSave={handleSaveType} onCancel={() => { setFormTarget(null); setTypeFormError(''); }} apiError={typeFormError} />
+                  )}
 
-                {types.length === 0 && formTarget === null && (
-                  <Box sx={{ py: 5, textAlign: 'center', color: 'text.disabled', border: '1px dashed', borderColor: 'divider', borderRadius: 1 }}>
-                    <Typography variant="body2">No types yet. Click &quot;Add Type&quot; to create one.</Typography>
-                  </Box>
-                )}
-              </Stack>
+                  {types.length === 0 && formTarget === null && (
+                    <Box sx={{ py: 5, textAlign: 'center', color: 'text.disabled', border: '1px dashed', borderColor: 'divider', borderRadius: 1 }}>
+                      <Typography variant="body2">No types yet. Click &quot;Add Type&quot; to create one.</Typography>
+                    </Box>
+                  )}
+                </Stack>
+              )}
             </CardContent>
           </Card>
         </Grid>

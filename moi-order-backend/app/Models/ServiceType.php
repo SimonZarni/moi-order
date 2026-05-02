@@ -28,6 +28,7 @@ class ServiceType extends Model
         'name_mm',
         'price',
         'is_active',
+        'position',
         'field_schema',
     ];
 

@@ -83,10 +83,12 @@ export function usePlaceDetailScreen(placeId: number): UsePlaceDetailScreenResul
   }, [place?.website]);
 
   const handleOpenMaps = useCallback(() => {
-    if (place?.latitude && place?.longitude) {
+    if (place?.google_map_url) {
+      Linking.openURL(place.google_map_url);
+    } else if (place?.latitude && place?.longitude) {
       Linking.openURL(`https://maps.google.com/?q=${place.latitude},${place.longitude}`);
     }
-  }, [place?.latitude, place?.longitude]);
+  }, [place?.google_map_url, place?.latitude, place?.longitude]);
 
   return {
     place,

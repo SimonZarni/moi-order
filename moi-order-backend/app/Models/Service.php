@@ -27,6 +27,7 @@ class Service extends Model
         'name_mm',
         'slug',
         'is_active',
+        'position',
         'service_category_id',
     ];
 
@@ -46,7 +47,7 @@ class Service extends Model
 
     public function types(): HasMany
     {
-        return $this->hasMany(ServiceType::class);
+        return $this->hasMany(ServiceType::class)->orderBy('position');
     }
 
     // ─── Scopes ───────────────────────────────────────────────────────────────

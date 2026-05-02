@@ -19,7 +19,9 @@ export type ServiceData = {
   name_mm: string | null;
   slug: string;
   is_active: boolean;
+  position: number;
   types_count: number | null;
+  types?: ServiceTypeData[];
   created_at: string;
   deleted_at: string | null;
 };
@@ -32,9 +34,20 @@ export type ServiceTypeData = {
   name_mm: string | null;
   price: number;
   is_active: boolean;
+  position: number;
   field_schema: ServiceFieldData[];
   created_at: string;
   deleted_at: string | null;
+};
+
+export type ServiceCategoryData = {
+  id: number;
+  name: string;
+  name_en: string | null;
+  name_mm: string | null;
+  slug: string;
+  is_active: boolean;
+  services: ServiceData[];
 };
 
 export const servicesApi = {
@@ -42,6 +55,10 @@ export const servicesApi = {
     apiClient.get<{ data: ServiceData[] }>('/services').then((r) => r.data.data),
   get: (id: number | string) =>
     apiClient.get<{ data: ServiceData }>(`/services/${id}`).then((r) => r.data.data),
+  getBySlug: (slug: string) =>
+    apiClient.get<{ data: ServiceData }>(`/services/slug/${slug}`).then((r) => r.data.data),
+  toggle: (id: number | string) =>
+    apiClient.patch<{ data: ServiceData }>(`/services/${id}/toggle`).then((r) => r.data.data),
   create: (payload: Record<string, unknown>) =>
     apiClient.post<{ data: ServiceData }>('/services', payload).then((r) => r.data.data),
   update: (id: number | string, payload: Record<string, unknown>) =>
@@ -50,6 +67,12 @@ export const servicesApi = {
   listTypes: (serviceId: number | string) =>
     apiClient
       .get<{ data: ServiceTypeData[] }>(`/services/${serviceId}/types`)
+      .then((r) => r.data.data),
+  reorderTypes: (serviceId: number | string, order: number[]) =>
+    apiClient.put(`/services/${serviceId}/types/reorder`, { order }),
+  toggleType: (serviceId: number | string, typeId: number | string) =>
+    apiClient
+      .patch<{ data: ServiceTypeData }>(`/services/${serviceId}/types/${typeId}/toggle`)
       .then((r) => r.data.data),
   createType: (serviceId: number | string, payload: Record<string, unknown>) =>
     apiClient
@@ -61,4 +84,13 @@ export const servicesApi = {
       .then((r) => r.data.data),
   removeType: (serviceId: number | string, typeId: number | string) =>
     apiClient.delete(`/services/${serviceId}/types/${typeId}`),
+};
+
+export const serviceCategoriesApi = {
+  get: (slug: string) =>
+    apiClient
+      .get<{ data: ServiceCategoryData }>(`/service-categories/${slug}`)
+      .then((r) => r.data.data),
+  reorderServices: (slug: string, order: number[]) =>
+    apiClient.put(`/service-categories/${slug}/services/reorder`, { order }),
 };

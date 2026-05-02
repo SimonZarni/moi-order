@@ -18,6 +18,7 @@ class AdminServiceTypeResource extends JsonResource
             'name_en'      => $this->name_en,
             'name_mm'      => $this->name_mm,
             'price'        => $this->price,
+            'position'     => $this->position,
             'is_active'    => $this->is_active,
             'field_schema' => $this->field_schema ?? [],
             'created_at'   => $this->created_at->toISOString(),

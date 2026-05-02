@@ -13,6 +13,7 @@ use App\Http\Requests\Admin\AdminStoreServiceRequest;
 use App\Http\Requests\Admin\AdminStoreServiceTypeRequest;
 use App\Http\Requests\Admin\AdminUpdateServiceRequest;
 use App\Http\Requests\Admin\AdminUpdateServiceTypeRequest;
+use App\Http\Requests\Admin\ReorderServiceTypesRequest;
 use App\Http\Resources\Admin\AdminServiceResource;
 use App\Http\Resources\Admin\AdminServiceTypeResource;
 use App\Models\Service;
@@ -38,6 +39,14 @@ class AdminServiceController extends Controller
         return AdminServiceResource::collection($this->serviceService->index());
     }
 
+    /** GET /api/admin/v1/services/slug/{slug} */
+    public function showBySlug(string $slug): JsonResponse
+    {
+        $service = $this->serviceService->findBySlug($slug);
+
+        return response()->json(['data' => new AdminServiceResource($service)]);
+    }
+
     /** GET /api/admin/v1/services/{service} */
     public function show(Service $service): JsonResponse
     {
@@ -56,6 +65,14 @@ class AdminServiceController extends Controller
     public function update(AdminUpdateServiceRequest $request, Service $service): JsonResponse
     {
         $updated = $this->serviceService->update($service, AdminUpdateServiceDTO::fromRequest($request));
+
+        return response()->json(['data' => new AdminServiceResource($updated)]);
+    }
+
+    /** PATCH /api/admin/v1/services/{service}/toggle */
+    public function toggle(Service $service): JsonResponse
+    {
+        $updated = $this->serviceService->toggle($service);
 
         return response()->json(['data' => new AdminServiceResource($updated)]);
     }
@@ -82,10 +99,26 @@ class AdminServiceController extends Controller
         return response()->json(['data' => new AdminServiceTypeResource($type)], 201);
     }
 
+    /** PUT /api/admin/v1/services/{service}/types/reorder */
+    public function reorderTypes(ReorderServiceTypesRequest $request, Service $service): JsonResponse
+    {
+        $this->typeService->reorder($service, $request->input('order'));
+
+        return response()->json(null, 204);
+    }
+
     /** PUT /api/admin/v1/services/{service}/types/{type} */
     public function updateType(AdminUpdateServiceTypeRequest $request, Service $service, ServiceType $type): JsonResponse
     {
         $updated = $this->typeService->update($type, AdminUpdateServiceTypeDTO::fromRequest($request));
+
+        return response()->json(['data' => new AdminServiceTypeResource($updated)]);
+    }
+
+    /** PATCH /api/admin/v1/services/{service}/types/{type}/toggle */
+    public function toggleType(Service $service, ServiceType $type): JsonResponse
+    {
+        $updated = $this->typeService->toggle($type);
 
         return response()->json(['data' => new AdminServiceTypeResource($updated)]);
     }

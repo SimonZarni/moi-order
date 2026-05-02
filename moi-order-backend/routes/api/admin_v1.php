@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\Admin\V1\AdminPaymentController;
 use App\Http\Controllers\Api\Admin\V1\AdminPlaceController;
 use App\Http\Controllers\Api\Admin\V1\AdminRestaurantController;
 use App\Http\Controllers\Api\Admin\V1\AdminRoleController;
+use App\Http\Controllers\Api\Admin\V1\AdminServiceCategoryController;
 use App\Http\Controllers\Api\Admin\V1\AdminServiceController;
 use App\Http\Controllers\Api\Admin\V1\AdminSubmissionController;
 use App\Http\Controllers\Api\Admin\V1\AdminTagController;
@@ -96,8 +97,12 @@ Route::prefix('services')->name('admin.services.')->group(function (): void {
     Route::get('/', [AdminServiceController::class, 'index'])->name('index');
     Route::post('/', [AdminServiceController::class, 'store'])->name('store')
         ->middleware('check.permission:services.create');
+    // slug lookup must come before /{service} to avoid model binding capturing "slug"
+    Route::get('/slug/{slug}', [AdminServiceController::class, 'showBySlug'])->name('showBySlug');
     Route::get('/{service}', [AdminServiceController::class, 'show'])->name('show');
     Route::put('/{service}', [AdminServiceController::class, 'update'])->name('update')
+        ->middleware('check.permission:services.update');
+    Route::patch('/{service}/toggle', [AdminServiceController::class, 'toggle'])->name('toggle')
         ->middleware('check.permission:services.update');
     Route::delete('/{service}', [AdminServiceController::class, 'destroy'])->name('destroy')
         ->middleware('check.permission:services.delete');
@@ -105,10 +110,23 @@ Route::prefix('services')->name('admin.services.')->group(function (): void {
     Route::get('/{service}/types', [AdminServiceController::class, 'types'])->name('types.index');
     Route::post('/{service}/types', [AdminServiceController::class, 'storeType'])->name('types.store')
         ->middleware('check.permission:service_types.create');
+    // reorder must come before /{service}/types/{type} to avoid {type} binding capturing "reorder"
+    Route::put('/{service}/types/reorder', [AdminServiceController::class, 'reorderTypes'])->name('types.reorder')
+        ->middleware('check.permission:service_types.update');
     Route::put('/{service}/types/{type}', [AdminServiceController::class, 'updateType'])->name('types.update')
+        ->middleware('check.permission:service_types.update');
+    Route::patch('/{service}/types/{type}/toggle', [AdminServiceController::class, 'toggleType'])->name('types.toggle')
         ->middleware('check.permission:service_types.update');
     Route::delete('/{service}/types/{type}', [AdminServiceController::class, 'destroyType'])->name('types.destroy')
         ->middleware('check.permission:service_types.delete');
+});
+
+// ── Service Categories ────────────────────────────────────────────────────────
+Route::prefix('service-categories')->name('admin.service-categories.')->group(function (): void {
+    Route::get('/{slug}', [AdminServiceCategoryController::class, 'show'])->name('show');
+    Route::put('/{slug}/services/reorder', [AdminServiceCategoryController::class, 'reorderServices'])
+        ->name('services.reorder')
+        ->middleware('check.permission:services.update');
 });
 
 // ── Users ─────────────────────────────────────────────────────────────────────

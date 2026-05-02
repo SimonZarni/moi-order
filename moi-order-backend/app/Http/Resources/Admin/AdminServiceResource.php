@@ -7,6 +7,8 @@ namespace App\Http\Resources\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+// Principle: OCP — types are optionally embedded via whenLoaded; callers eager-load as needed.
+
 class AdminServiceResource extends JsonResource
 {
     public function toArray(Request $request): array
@@ -17,8 +19,10 @@ class AdminServiceResource extends JsonResource
             'name_en'     => $this->name_en,
             'name_mm'     => $this->name_mm,
             'slug'        => $this->slug,
+            'position'    => $this->position,
             'is_active'   => $this->is_active,
             'types_count' => $this->types_count ?? null,
+            'types'       => AdminServiceTypeResource::collection($this->whenLoaded('types')),
             'created_at'  => $this->created_at->toISOString(),
             'deleted_at'  => $this->deleted_at?->toISOString(),
         ];

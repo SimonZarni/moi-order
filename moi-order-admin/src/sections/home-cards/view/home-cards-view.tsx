@@ -1,6 +1,10 @@
 import type { HomeCard } from 'src/types';
+import type { DragEndEvent } from '@dnd-kit/core';
 
+import { CSS } from '@dnd-kit/utilities';
 import { useState, useEffect, useCallback } from 'react';
+import { useSensor, DndContext, useSensors, closestCenter, PointerSensor } from '@dnd-kit/core';
+import { arrayMove, useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -45,8 +49,167 @@ const NAV_SCREEN_LABELS: Record<string, string> = {
 
 // ----------------------------------------------------------------------
 
+interface SortableRowProps {
+  card: HomeCard;
+  index: number;
+  total: number;
+  reorderMode: boolean;
+  reorderBusy: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+function SortableRow({
+  card,
+  index,
+  total,
+  reorderMode,
+  reorderBusy,
+  onMoveUp,
+  onMoveDown,
+  onEdit,
+  onDelete,
+}: SortableRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: card.id,
+    disabled: !reorderMode,
+  });
+
+  return (
+    <TableRow
+      ref={setNodeRef}
+      hover={!isDragging}
+      style={{ transform: CSS.Transform.toString(transform) ?? undefined, transition }}
+      sx={{
+        opacity: card.deleted_at ? 0.45 : 1,
+        position: 'relative',
+        zIndex: isDragging ? 999 : 'auto',
+        boxShadow: isDragging ? 8 : 0,
+        bgcolor: isDragging ? 'background.paper' : 'transparent',
+      }}
+    >
+      {/* Order / drag handle */}
+      <TableCell>
+        {reorderMode ? (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.75,
+              color: 'text.disabled',
+              cursor: 'grab',
+              userSelect: 'none',
+              '&:active': { cursor: 'grabbing' },
+            }}
+            {...attributes}
+            {...listeners}
+          >
+            <Iconify icon="custom:drag-handle" width={18} />
+            <Typography variant="caption">{index + 1}</Typography>
+          </Box>
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25 }}>
+            <IconButton
+              size="small"
+              disabled={index === 0 || reorderBusy || !!card.deleted_at}
+              onClick={onMoveUp}
+            >
+              <Iconify icon="eva:arrow-ios-upward-fill" width={16} />
+            </IconButton>
+            <Typography variant="caption" color="text.disabled">
+              {index + 1}
+            </Typography>
+            <IconButton
+              size="small"
+              disabled={index === total - 1 || reorderBusy || !!card.deleted_at}
+              onClick={onMoveDown}
+            >
+              <Iconify icon="eva:arrow-ios-downward-fill" width={16} />
+            </IconButton>
+          </Box>
+        )}
+      </TableCell>
+
+      {/* Card preview */}
+      <TableCell>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box
+            sx={{
+              width: 6,
+              height: 44,
+              borderRadius: 1,
+              bgcolor: card.accent_color,
+              flexShrink: 0,
+            }}
+          />
+          <Box>
+            <Typography variant="subtitle2">{card.title_en}</Typography>
+            {card.subtitle_en && (
+              <Typography variant="caption" color="text.secondary">
+                {card.subtitle_en}
+              </Typography>
+            )}
+          </Box>
+        </Box>
+      </TableCell>
+
+      {/* Tag */}
+      <TableCell>
+        <Typography
+          variant="caption"
+          fontWeight={700}
+          sx={{ textTransform: 'uppercase', letterSpacing: 0.8, color: card.accent_color }}
+        >
+          {card.tag_en}
+        </Typography>
+      </TableCell>
+
+      {/* Navigation target */}
+      <TableCell>
+        <Typography variant="body2" color="text.secondary">
+          {NAV_SCREEN_LABELS[card.navigation_screen] ?? card.navigation_screen}
+        </Typography>
+      </TableCell>
+
+      {/* Status */}
+      <TableCell>
+        <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+          {card.deleted_at ? (
+            <Label color="error">Deleted</Label>
+          ) : card.is_coming_soon ? (
+            <Label color="warning">Coming Soon</Label>
+          ) : card.is_active ? (
+            <Label color="success">Active</Label>
+          ) : (
+            <Label color="default">Inactive</Label>
+          )}
+        </Box>
+      </TableCell>
+
+      {/* Actions — hidden in reorder mode */}
+      {!reorderMode && (
+        <TableCell align="right">
+          <IconButton size="small" disabled={!!card.deleted_at} onClick={onEdit}>
+            <Iconify icon="solar:pen-bold" width={16} />
+          </IconButton>
+          <IconButton size="small" color="error" disabled={!!card.deleted_at} onClick={onDelete}>
+            <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+          </IconButton>
+        </TableCell>
+      )}
+    </TableRow>
+  );
+}
+
+// ----------------------------------------------------------------------
+
 export function HomeCardsView() {
   const router = useRouter();
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
 
   const [cards, setCards] = useState<HomeCard[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,6 +217,9 @@ export function HomeCardsView() {
   const [reordering, setReordering] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<HomeCard | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [reorderMode, setReorderMode] = useState(false);
+  const [reorderIds, setReorderIds] = useState<number[]>([]);
+  const [savingOrder, setSavingOrder] = useState(false);
 
   const fetchCards = useCallback(() => {
     setLoading(true);
@@ -67,6 +233,12 @@ export function HomeCardsView() {
   useEffect(() => {
     fetchCards();
   }, [fetchCards]);
+
+  const activeCount = cards.filter((c) => !c.deleted_at && c.is_active).length;
+
+  const orderedCards = reorderMode
+    ? reorderIds.map((id) => cards.find((c) => c.id === id)).filter((c): c is HomeCard => !!c)
+    : cards;
 
   const move = useCallback(
     (index: number, direction: 'up' | 'down') => {
@@ -97,7 +269,44 @@ export function HomeCardsView() {
       .finally(() => setDeleting(false));
   }, [deleteTarget]);
 
-  const activeCount = cards.filter((c) => !c.deleted_at && c.is_active).length;
+  const handleEnterReorder = useCallback(() => {
+    setReorderIds(cards.filter((c) => !c.deleted_at).map((c) => c.id));
+    setReorderMode(true);
+  }, [cards]);
+
+  const handleCancelReorder = useCallback(() => {
+    setReorderMode(false);
+  }, []);
+
+  const handleSaveOrder = useCallback(async () => {
+    setSavingOrder(true);
+    try {
+      await homeCardsApi.reorder(reorderIds);
+      setCards((prev) => {
+        const byId = new Map(prev.map((c) => [c.id, c]));
+        const reordered = reorderIds.map((id) => byId.get(id)!).filter(Boolean) as HomeCard[];
+        const deleted = prev.filter((c) => c.deleted_at);
+        return [...reordered, ...deleted];
+      });
+      setReorderMode(false);
+    } catch {
+      setError('Failed to save new order.');
+    } finally {
+      setSavingOrder(false);
+    }
+  }, [reorderIds]);
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    setReorderIds((prev) => {
+      const oldIdx = prev.indexOf(active.id as number);
+      const newIdx = prev.indexOf(over.id as number);
+      return arrayMove(prev, oldIdx, newIdx);
+    });
+  }, []);
+
+  const colSpan = reorderMode ? 5 : 6;
 
   return (
     <DashboardContent>
@@ -105,17 +314,48 @@ export function HomeCardsView() {
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
         <Box>
           <Typography variant="h4">Home Cards</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            {activeCount} active card{activeCount !== 1 ? 's' : ''} shown on the mobile home screen
-          </Typography>
+          {reorderMode ? (
+            <Typography variant="body2" color="primary" sx={{ mt: 0.5 }}>
+              Drag rows to set the display order on the mobile home screen
+            </Typography>
+          ) : (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              {activeCount} active card{activeCount !== 1 ? 's' : ''} shown on the mobile home
+              screen
+            </Typography>
+          )}
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={() => router.push('/home-cards/new')}
-        >
-          Add Card
-        </Button>
+
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          {reorderMode ? (
+            <>
+              <Button variant="outlined" onClick={handleCancelReorder} disabled={savingOrder}>
+                Cancel
+              </Button>
+              <Button variant="contained" onClick={handleSaveOrder} disabled={savingOrder}>
+                {savingOrder ? 'Saving…' : 'Save Order'}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="outlined"
+                startIcon={<Iconify icon="carbon:chevron-sort" />}
+                disabled={loading || cards.filter((c) => !c.deleted_at).length < 2}
+                onClick={handleEnterReorder}
+              >
+                Reorder
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<Iconify icon="mingcute:add-line" />}
+                onClick={() => router.push('/home-cards/new')}
+              >
+                Add Card
+              </Button>
+            </>
+          )}
+        </Box>
       </Box>
 
       {error && (
@@ -126,134 +366,64 @@ export function HomeCardsView() {
 
       <Card>
         <Scrollbar>
-          <Table sx={{ minWidth: 720 }}>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ width: 80 }}>Order</TableCell>
-                <TableCell>Card</TableCell>
-                <TableCell>Tag</TableCell>
-                <TableCell>Goes To</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="right">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
-                    <CircularProgress size={28} />
-                  </TableCell>
-                </TableRow>
-              ) : cards.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      No cards yet. Add your first card.
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                cards.map((card, index) => (
-                  <TableRow key={card.id} hover sx={{ opacity: card.deleted_at ? 0.45 : 1 }}>
-                    {/* Position arrows */}
-                    <TableCell>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25 }}>
-                        <IconButton
-                          size="small"
-                          disabled={index === 0 || reordering || !!card.deleted_at}
-                          onClick={() => move(index, 'up')}
-                        >
-                          <Iconify icon="eva:arrow-ios-upward-fill" width={16} />
-                        </IconButton>
-                        <Typography variant="caption" color="text.disabled">
-                          {index + 1}
-                        </Typography>
-                        <IconButton
-                          size="small"
-                          disabled={index === cards.length - 1 || reordering || !!card.deleted_at}
-                          onClick={() => move(index, 'down')}
-                        >
-                          <Iconify icon="eva:arrow-ios-downward-fill" width={16} />
-                        </IconButton>
-                      </Box>
-                    </TableCell>
-
-                    {/* Card preview */}
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box
-                          sx={{
-                            width: 6,
-                            height: 44,
-                            borderRadius: 1,
-                            bgcolor: card.accent_color,
-                            flexShrink: 0,
-                          }}
-                        />
-                        <Box>
-                          <Typography variant="subtitle2">{card.title_en}</Typography>
-                          {card.subtitle_en && (
-                            <Typography variant="caption" color="text.secondary">
-                              {card.subtitle_en}
-                            </Typography>
-                          )}
-                        </Box>
-                      </Box>
-                    </TableCell>
-
-                    {/* Tag */}
-                    <TableCell>
-                      <Typography variant="caption" fontWeight={700} sx={{ textTransform: 'uppercase', letterSpacing: 0.8, color: card.accent_color }}>
-                        {card.tag_en}
-                      </Typography>
-                    </TableCell>
-
-                    {/* Navigation target */}
-                    <TableCell>
-                      <Typography variant="body2" color="text.secondary">
-                        {NAV_SCREEN_LABELS[card.navigation_screen] ?? card.navigation_screen}
-                      </Typography>
-                    </TableCell>
-
-                    {/* Status badges */}
-                    <TableCell>
-                      <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
-                        {card.deleted_at ? (
-                          <Label color="error">Deleted</Label>
-                        ) : card.is_coming_soon ? (
-                          <Label color="warning">Coming Soon</Label>
-                        ) : card.is_active ? (
-                          <Label color="success">Active</Label>
-                        ) : (
-                          <Label color="default">Inactive</Label>
-                        )}
-                      </Box>
-                    </TableCell>
-
-                    {/* Actions */}
-                    <TableCell align="right">
-                      <IconButton
-                        size="small"
-                        disabled={!!card.deleted_at}
-                        onClick={() => router.push(`/home-cards/${card.id}/edit`)}
-                      >
-                        <Iconify icon="solar:pen-bold" width={16} />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        disabled={!!card.deleted_at}
-                        onClick={() => setDeleteTarget(card)}
-                      >
-                        <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                      </IconButton>
-                    </TableCell>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={reorderMode ? reorderIds : []}
+              strategy={verticalListSortingStrategy}
+            >
+              <Table sx={{ minWidth: 720 }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ width: 80 }}>Order</TableCell>
+                    <TableCell>Card</TableCell>
+                    <TableCell>Tag</TableCell>
+                    <TableCell>Goes To</TableCell>
+                    <TableCell>Status</TableCell>
+                    {!reorderMode && <TableCell align="right">Actions</TableCell>}
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                </TableHead>
+
+                <TableBody>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={colSpan} align="center" sx={{ py: 6 }}>
+                        <CircularProgress size={28} />
+                      </TableCell>
+                    </TableRow>
+                  ) : orderedCards.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={colSpan} align="center" sx={{ py: 6 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          {reorderMode
+                            ? 'No active cards to reorder.'
+                            : 'No cards yet. Add your first card.'}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    orderedCards.map((card, index) => (
+                      <SortableRow
+                        key={card.id}
+                        card={card}
+                        index={index}
+                        total={orderedCards.length}
+                        reorderMode={reorderMode}
+                        reorderBusy={reordering}
+                        onMoveUp={() => move(index, 'up')}
+                        onMoveDown={() => move(index, 'down')}
+                        onEdit={() => router.push(`/home-cards/${card.id}/edit`)}
+                        onDelete={() => setDeleteTarget(card)}
+                      />
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </SortableContext>
+          </DndContext>
         </Scrollbar>
       </Card>
 
