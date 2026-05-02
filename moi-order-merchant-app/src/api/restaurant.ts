@@ -1,5 +1,18 @@
 import type { Restaurant } from '../types/models';
+import type { RestaurantStatus } from '../types/enums';
 import { apiClient } from './client';
+
+export interface UpdateRestaurantPayload {
+  name?: string;
+  description?: string;
+  address?: string;
+  phone?: string;
+  status?: RestaurantStatus;
+  delivery_radius_km?: number | null;
+  is_delivery_available?: boolean;
+  is_pickup_available?: boolean;
+  min_order_cents?: number;
+}
 
 export async function getRestaurant(): Promise<Restaurant> {
   const response = await apiClient.get<{ data: Restaurant }>('/restaurant');
@@ -7,7 +20,7 @@ export async function getRestaurant(): Promise<Restaurant> {
 }
 
 export async function updateRestaurant(
-  data: Partial<Pick<Restaurant, 'name' | 'description' | 'address'>>,
+  data: UpdateRestaurantPayload,
 ): Promise<Restaurant> {
   const response = await apiClient.patch<{ data: Restaurant }>(
     '/restaurant',

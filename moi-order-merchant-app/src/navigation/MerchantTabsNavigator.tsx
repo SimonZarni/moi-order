@@ -1,27 +1,58 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { Platform, View, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-import type { MerchantTabParamList } from '../types/navigation';
+import type {
+  MerchantTabParamList,
+  MerchantStackParamList,
+  WebScreen,
+} from '../types/navigation';
+import { DashboardScreen } from '../features/dashboard/screens/DashboardScreen';
 import { OrdersScreen } from '../features/orders/screens/OrdersScreen';
+import { OrderDetailScreen } from '../features/orders/screens/OrderDetailScreen';
 import { MenuScreen } from '../features/menu/screens/MenuScreen';
-import { ProfileScreen } from '../features/profile/screens/ProfileScreen';
+import { RestaurantScreen } from '../features/restaurant/screens/RestaurantScreen';
+import { AnalyticsScreen } from '../features/analytics/screens/AnalyticsScreen';
 import { WebSidebar } from '../shared/components/WebSidebar/WebSidebar';
 import { colours } from '../shared/theme/colours';
 import { WEB_SIDEBAR_WIDTH } from '../shared/constants/config';
 import { useAuthStore } from '../store/authStore';
 
+// ── Mobile ─────────────────────────────────────────────────────────────────────
+
 const Tab = createBottomTabNavigator<MerchantTabParamList>();
-const Stack = createNativeStackNavigator<MerchantTabParamList>();
+const MobileStack = createNativeStackNavigator<MerchantStackParamList>();
 
 type TabName = keyof MerchantTabParamList;
 
-const TAB_ICONS: Record<TabName, { focused: string; unfocused: string }> = {
-  Orders: { focused: 'receipt', unfocused: 'receipt-outline' },
-  Menu: { focused: 'restaurant', unfocused: 'restaurant-outline' },
-  Profile: { focused: 'person', unfocused: 'person-outline' },
+const TAB_ICONS: Record<TabName, { focused: keyof typeof Ionicons.glyphMap; unfocused: keyof typeof Ionicons.glyphMap }> = {
+  Dashboard:  { focused: 'grid',       unfocused: 'grid-outline' },
+  Orders:     { focused: 'receipt',    unfocused: 'receipt-outline' },
+  Menu:       { focused: 'restaurant', unfocused: 'restaurant-outline' },
+  Restaurant: { focused: 'storefront', unfocused: 'storefront-outline' },
 };
+
+function DashboardTab(): React.JSX.Element {
+  const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
+  const handleSelectOrder = useCallback(
+    (orderId: number) => navigation.navigate('OrderDetail', { orderId }),
+    [navigation],
+  );
+  return <DashboardScreen onSelectOrder={handleSelectOrder} />;
+}
+
+function OrdersTab(): React.JSX.Element {
+  const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
+  const handleSelectOrder = useCallback(
+    (orderId: number) => navigation.navigate('OrderDetail', { orderId }),
+    [navigation],
+  );
+  return <OrdersScreen onSelectOrder={handleSelectOrder} />;
+}
 
 function MobileTabNavigator(): React.JSX.Element {
   return (
@@ -31,13 +62,15 @@ function MobileTabNavigator(): React.JSX.Element {
         headerTintColor: colours.textOnDark,
         tabBarActiveTintColor: colours.primary,
         tabBarInactiveTintColor: colours.medium,
-        tabBarStyle: { backgroundColor: colours.backgroundDark, borderTopColor: colours.backgroundDark },
+        tabBarStyle: {
+          backgroundColor: colours.backgroundDark,
+          borderTopColor: colours.dividerDark,
+        },
         tabBarIcon: ({ focused, size }) => {
           const icons = TAB_ICONS[route.name as TabName];
-          const iconName = focused ? icons.focused : icons.unfocused;
           return (
             <Ionicons
-              name={iconName as keyof typeof Ionicons.glyphMap}
+              name={focused ? icons.focused : icons.unfocused}
               size={size}
               color={focused ? colours.primary : colours.medium}
             />
@@ -45,46 +78,107 @@ function MobileTabNavigator(): React.JSX.Element {
         },
       })}
     >
-      <Tab.Screen name="Orders" component={OrdersScreen} options={{ title: 'Orders' }} />
-      <Tab.Screen name="Menu" component={MenuScreen} options={{ title: 'Menu' }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profile' }} />
+      <Tab.Screen name="Dashboard"  component={DashboardTab}    options={{ title: 'Dashboard' }} />
+      <Tab.Screen name="Orders"     component={OrdersTab}       options={{ title: 'Orders' }} />
+      <Tab.Screen name="Menu"       component={MenuScreen}      options={{ title: 'Menu' }} />
+      <Tab.Screen name="Restaurant" component={RestaurantScreen} options={{ title: 'Restaurant' }} />
     </Tab.Navigator>
   );
 }
 
-function WebStackNavigator(): React.JSX.Element {
+function OrderDetailRoute(
+  { route, navigation }: NativeStackScreenProps<MerchantStackParamList, 'OrderDetail'>,
+): React.JSX.Element {
+  const { orderId } = route.params;
+  const handleBack = useCallback(() => navigation.goBack(), [navigation]);
+  return <OrderDetailScreen orderId={orderId} onBack={handleBack} />;
+}
+
+function MobileNavigator(): React.JSX.Element {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Orders" component={OrdersScreen} />
-      <Stack.Screen name="Menu" component={MenuScreen} />
-      <Stack.Screen name="Profile" component={ProfileScreen} />
-    </Stack.Navigator>
+    <MobileStack.Navigator screenOptions={{ headerShown: false }}>
+      <MobileStack.Screen name="Tabs" component={MobileTabNavigator} />
+      <MobileStack.Screen name="OrderDetail" component={OrderDetailRoute} />
+    </MobileStack.Navigator>
   );
 }
 
-export function MerchantTabsNavigator(): React.JSX.Element {
+// ── Web ────────────────────────────────────────────────────────────────────────
+
+function WebMerchantLayout(): React.JSX.Element {
+  const [activeScreen, setActiveScreen] = useState<WebScreen>('Dashboard');
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const logout = useAuthStore((s) => s.logout);
 
-  if (Platform.OS !== 'web') {
-    return <MobileTabNavigator />;
-  }
+  const handleNavigate = useCallback((screen: WebScreen) => {
+    setActiveScreen(screen);
+    setSelectedOrderId(null);
+  }, []);
+
+  const handleSelectOrder = useCallback((orderId: number) => {
+    setSelectedOrderId(orderId);
+  }, []);
+
+  const handleBackFromOrder = useCallback(() => {
+    setSelectedOrderId(null);
+  }, []);
+
+  const sidebarActiveScreen: WebScreen =
+    selectedOrderId !== null ? 'Orders' : activeScreen;
+
+  const renderContent = (): React.JSX.Element => {
+    if (selectedOrderId !== null) {
+      return (
+        <OrderDetailScreen
+          orderId={selectedOrderId}
+          onBack={handleBackFromOrder}
+        />
+      );
+    }
+    switch (activeScreen) {
+      case 'Dashboard':
+        return <DashboardScreen onSelectOrder={handleSelectOrder} />;
+      case 'Orders':
+        return <OrdersScreen onSelectOrder={handleSelectOrder} />;
+      case 'Menu':
+        return <MenuScreen />;
+      case 'Restaurant':
+        return <RestaurantScreen />;
+      case 'Analytics':
+        return <AnalyticsScreen />;
+    }
+  };
 
   return (
-    <View style={styles.webLayout}>
-      <WebSidebar onLogout={logout} />
-      <View style={styles.webContent}>
-        <WebStackNavigator />
+    <View style={webStyles.layout}>
+      <WebSidebar
+        activeScreen={sidebarActiveScreen}
+        onNavigate={handleNavigate}
+        onLogout={logout}
+      />
+      <View style={webStyles.content}>
+        {renderContent()}
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  webLayout: {
+// ── Root export ────────────────────────────────────────────────────────────────
+
+export function MerchantTabsNavigator(): React.JSX.Element {
+  if (Platform.OS !== 'web') {
+    return <MobileNavigator />;
+  }
+  return <WebMerchantLayout />;
+}
+
+const webStyles = StyleSheet.create({
+  layout: {
     flex: 1,
     flexDirection: 'row',
+    backgroundColor: colours.backgroundLight,
   },
-  webContent: {
+  content: {
     flex: 1,
     marginLeft: WEB_SIDEBAR_WIDTH,
   },

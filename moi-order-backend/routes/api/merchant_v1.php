@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\Merchant\V1\MerchantAnalyticsController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantAuthController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantOrderController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantRestaurantController;
@@ -31,7 +32,11 @@ Route::put('/menu/items/{id}',    [MenuItemController::class, 'update']);
 Route::patch('/menu/items/{id}',  [MenuItemController::class, 'update']);
 Route::delete('/menu/items/{id}', [MenuItemController::class, 'destroy']);
 
+// ── Analytics ─────────────────────────────────────────────────────────────────
+Route::get('/analytics', [MerchantAnalyticsController::class, 'index']);
+
 // ── Orders ────────────────────────────────────────────────────────────────────
 Route::get('/orders',                [MerchantOrderController::class, 'index']);
+Route::get('/orders/{id}',           [MerchantOrderController::class, 'show']);
 Route::put('/orders/{id}/status',    [MerchantOrderController::class, 'updateStatus']);
 Route::patch('/orders/{id}/status',  [MerchantOrderController::class, 'updateStatus']);

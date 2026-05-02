@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, FlatList, ActivityIndicator, SectionList } from 'react-native';
+import { View, Text, SectionList, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useOrdersScreen } from '../hooks/useOrdersScreen';
 import { OrderCard } from '../components/OrderCard';
@@ -9,7 +9,11 @@ import type { FoodOrder } from '../../../types/models';
 
 type Section = { title: string; data: FoodOrder[] };
 
-export function OrdersScreen(): React.JSX.Element {
+interface OrdersScreenProps {
+  onSelectOrder?: (orderId: number) => void;
+}
+
+export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.Element {
   const { newOrders, inProgressOrders, doneOrders, isLoading, handleUpdateStatus } = useOrdersScreen();
 
   const sections: Section[] = [
@@ -32,7 +36,11 @@ export function OrdersScreen(): React.JSX.Element {
         sections={sections}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
-          <OrderCard order={item} onUpdateStatus={handleUpdateStatus} />
+          <OrderCard
+            order={item}
+            onUpdateStatus={handleUpdateStatus}
+            onPress={onSelectOrder !== undefined ? () => onSelectOrder(item.id) : undefined}
+          />
         )}
         renderSectionHeader={({ section }) => (
           <Text style={styles.sectionHeader}>{section.title}</Text>

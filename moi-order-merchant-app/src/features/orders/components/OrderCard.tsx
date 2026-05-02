@@ -34,9 +34,10 @@ const STATUS_COLOURS: Record<string, string> = {
 interface OrderCardProps {
   order: FoodOrder;
   onUpdateStatus: (orderId: number, newStatus: string) => void;
+  onPress?: () => void;
 }
 
-export function OrderCard({ order, onUpdateStatus }: OrderCardProps): React.JSX.Element {
+export function OrderCard({ order, onUpdateStatus, onPress }: OrderCardProps): React.JSX.Element {
   const action = ORDER_ACTIONS[order.status];
   const statusColour = STATUS_COLOURS[order.status] ?? colours.medium;
   const itemsSummary = order.items.map((i) => `${i.quantity}× ${i.name}`).join(', ');
@@ -46,7 +47,12 @@ export function OrderCard({ order, onUpdateStatus }: OrderCardProps): React.JSX.
   }, [action, order.id, onUpdateStatus]);
 
   return (
-    <View style={styles.card}>
+    <Pressable
+      style={styles.card}
+      onPress={onPress}
+      accessibilityLabel={`View order ${order.order_number ?? order.id}`}
+      accessibilityRole="button"
+    >
       <View style={styles.header}>
         <Text style={styles.orderNumber}>
           {order.order_number ?? `#${order.id}`}
@@ -78,6 +84,6 @@ export function OrderCard({ order, onUpdateStatus }: OrderCardProps): React.JSX.
           <Text style={styles.actionButtonText}>{action.label}</Text>
         </Pressable>
       )}
-    </View>
+    </Pressable>
   );
 }

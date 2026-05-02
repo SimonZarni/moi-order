@@ -1,0 +1,27 @@
+import { useQuery } from '@tanstack/react-query';
+import { getAnalytics } from '../../../api/analytics';
+import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
+import { CACHE_TTL } from '../../../shared/constants/config';
+import type { AnalyticsData } from '../../../types/models';
+
+interface UseAnalyticsScreenResult {
+  analytics: AnalyticsData | undefined;
+  isLoading: boolean;
+  isError: boolean;
+  refetch: () => void;
+}
+
+export function useAnalyticsScreen(): UseAnalyticsScreenResult {
+  const { data: analytics, isLoading, isError, refetch } = useQuery({
+    queryKey: QUERY_KEYS.ANALYTICS,
+    queryFn: getAnalytics,
+    staleTime: CACHE_TTL.ORDERS,
+  });
+
+  return {
+    analytics,
+    isLoading,
+    isError,
+    refetch: () => { void refetch(); },
+  };
+}

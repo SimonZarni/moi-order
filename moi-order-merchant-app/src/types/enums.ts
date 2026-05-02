@@ -35,3 +35,10 @@ export const MENU_ITEM_STATUS = {
 } as const;
 export type MenuItemStatus =
   (typeof MENU_ITEM_STATUS)[keyof typeof MENU_ITEM_STATUS];
+
+export const RESTAURANT_STATUS = {
+  Open: 'open',
+  Closed: 'closed',
+  Paused: 'paused',
+} as const;
+export type RestaurantStatus = (typeof RESTAURANT_STATUS)[keyof typeof RESTAURANT_STATUS];

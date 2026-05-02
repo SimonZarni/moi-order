@@ -41,6 +41,17 @@ class MerchantOrderController extends Controller
         ]);
     }
 
+    /** GET /api/merchant/v1/orders/{id} */
+    public function show(Request $request, int $id): JsonResponse
+    {
+        $restaurant = $request->user()->restaurant()->firstOrFail();
+        $order      = $restaurant->foodOrders()->with(['items', 'user'])->findOrFail($id);
+
+        return response()->json([
+            'data' => (new FoodOrderResource($order, $this->storage))->toArray($request),
+        ]);
+    }
+
     /** PUT /api/merchant/v1/orders/{id}/status */
     public function updateStatus(UpdateFoodOrderStatusRequest $request, int $id): JsonResponse
     {

@@ -10,7 +10,7 @@ export const PAGINATION = {
   MAX_PER_PAGE: 100,
 } as const;
 
-export const WEB_SIDEBAR_WIDTH = 220 as const;
+export const WEB_SIDEBAR_WIDTH = 260 as const;
 
 export const TOKEN_KEY = 'merchant_token' as const;
 

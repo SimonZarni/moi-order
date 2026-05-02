@@ -1,4 +1,4 @@
-import type { KycDocType, KycStatus, MenuItemStatus, OrderStatus } from './enums';
+import type { KycDocType, KycStatus, MenuItemStatus, OrderStatus, RestaurantStatus } from './enums';
 
 export interface MerchantUser {
   id: number;
@@ -89,9 +89,28 @@ export interface Restaurant {
   name: string;
   description: string | null;
   address: string | null;
-  status: string;
+  phone: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  status: RestaurantStatus;
   cover_photo_url: string | null;
   logo_url: string | null;
+  delivery_radius_km: number | null;
+  is_delivery_available: boolean;
+  is_pickup_available: boolean;
+  min_order_cents: number;
+}
+
+export interface PeriodStats {
+  order_count: number;
+  revenue_cents: number;
+}
+
+export interface AnalyticsData {
+  today: PeriodStats;
+  this_week: PeriodStats;
+  this_month: PeriodStats;
+  pending_count: number;
 }
 
 export interface PaginationMeta {

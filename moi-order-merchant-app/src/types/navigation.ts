@@ -10,9 +10,15 @@ export type KycStackParamList = {
 };
 
 export type MerchantTabParamList = {
+  Dashboard: undefined;
   Orders: undefined;
   Menu: undefined;
-  Profile: undefined;
+  Restaurant: undefined;
+};
+
+export type MerchantStackParamList = {
+  Tabs: undefined;
+  OrderDetail: { orderId: number };
 };
 
 export type RootStackParamList = {
@@ -20,3 +26,5 @@ export type RootStackParamList = {
   Kyc: undefined;
   Merchant: undefined;
 };
+
+export type WebScreen = 'Dashboard' | 'Orders' | 'Menu' | 'Restaurant' | 'Analytics';
