@@ -6,8 +6,5 @@
       "EXPO_PUBLIC_API_URL": "https://moi-order-production.up.railway.app/api/merchant/v1"
     }
   },
-  "env": {
-    "EXPO_PUBLIC_API_URL": "https://moi-order-production.up.railway.app/api/merchant/v1"
-  },
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }

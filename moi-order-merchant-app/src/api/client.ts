@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const BASE_URL =
-  (typeof globalThis !== 'undefined' && (globalThis as any).process?.env?.EXPO_PUBLIC_API_URL) ??
-  'http://localhost:8000/api/merchant/v1';
+  process.env.EXPO_PUBLIC_API_URL ??
+  'https://moi-order-production.up.railway.app/api/merchant/v1';
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
