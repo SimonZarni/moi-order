@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import { FlatList } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { RootStackParamList } from '@/types/navigation';
 import { useOrderChatData, useSendChatMessage } from './useOrderChatData';
@@ -16,7 +17,8 @@ export interface UseOrderChatScreenResult {
   isError: boolean;
   text: string;
   isSending: boolean;
-  listRef: React.RefObject<FlatList>;
+  bottomInset: number;
+  listRef: React.RefObject<FlatList | null>;
   handleBack: () => void;
   handleTextChange: (v: string) => void;
   handleSend: () => void;
@@ -27,6 +29,7 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<Route>();
   const { orderId, orderNumber } = route.params;
+  const { bottom: bottomInset } = useSafeAreaInsets();
 
   const { messages, isLoading, isError } = useOrderChatData(orderId);
   const sendMutation = useSendChatMessage();
@@ -67,6 +70,7 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
     isError,
     text,
     isSending: sendMutation.isPending,
+    bottomInset,
     listRef,
     handleBack,
     handleTextChange,

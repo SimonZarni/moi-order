@@ -3,12 +3,17 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   Text,
   TextInput,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+const KEYBOARD_BEHAVIOR = Platform.OS === 'ios' ? 'padding' : 'height';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { OrderChatMessage } from '@/types/models';
@@ -43,7 +48,7 @@ function MessageBubble({ msg }: BubbleProps): React.JSX.Element {
 export function OrderChatScreen(): React.JSX.Element {
   const {
     orderNumber, messages, isLoading, isError,
-    text, isSending, listRef,
+    text, isSending, bottomInset, listRef,
     handleBack, handleTextChange, handleSend, handlePickImage,
   } = useOrderChatScreen();
 
@@ -61,7 +66,7 @@ export function OrderChatScreen(): React.JSX.Element {
         </View>
       </View>
 
-      <View style={styles.body}>
+      <KeyboardAvoidingView behavior={KEYBOARD_BEHAVIOR} style={styles.body}>
         <View style={styles.noticeBanner}>
           <Ionicons name="information-circle-outline" size={14} color={colours.textMuted} />
           <Text style={styles.noticeText}>
@@ -70,18 +75,18 @@ export function OrderChatScreen(): React.JSX.Element {
         </View>
 
         {isLoading ? (
-          <View style={styles.loaderWrap}>
+          <Pressable style={styles.loaderWrap} onPress={Keyboard.dismiss}>
             <ActivityIndicator color={colours.primary} />
-          </View>
+          </Pressable>
         ) : isError ? (
-          <View style={styles.emptyWrap}>
+          <Pressable style={styles.emptyWrap} onPress={Keyboard.dismiss}>
             <Text style={styles.emptyText}>Could not load messages.</Text>
-          </View>
+          </Pressable>
         ) : messages.length === 0 ? (
-          <View style={styles.emptyWrap}>
+          <Pressable style={styles.emptyWrap} onPress={Keyboard.dismiss}>
             <Ionicons name="chatbubbles-outline" size={44} color={colours.textMuted} />
             <Text style={[styles.emptyText, { marginTop: 8 }]}>No messages yet. Say hello!</Text>
-          </View>
+          </Pressable>
         ) : (
           <FlatList
             ref={listRef}
@@ -93,10 +98,12 @@ export function OrderChatScreen(): React.JSX.Element {
             onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
             accessibilityRole="list"
             showsVerticalScrollIndicator={false}
+            keyboardDismissMode="on-drag"
+            keyboardShouldPersistTaps="handled"
           />
         )}
 
-        <View style={styles.inputBar}>
+        <View style={[styles.inputBar, { paddingBottom: Math.max(bottomInset, 8) + 8 }]}>
           <Pressable
             style={styles.attachBtn}
             onPress={handlePickImage}
@@ -129,7 +136,7 @@ export function OrderChatScreen(): React.JSX.Element {
             )}
           </Pressable>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

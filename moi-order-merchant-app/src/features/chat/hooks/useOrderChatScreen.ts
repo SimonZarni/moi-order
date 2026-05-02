@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { FlatList } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 import { fetchOrderChat, sendOrderChatMessage } from '../../../api/chat';
@@ -12,6 +13,7 @@ interface UseOrderChatScreenResult {
   isError: boolean;
   text: string;
   isSending: boolean;
+  bottomInset: number;
   listRef: React.RefObject<FlatList | null>;
   handleTextChange: (v: string) => void;
   handleSend: () => void;
@@ -20,6 +22,7 @@ interface UseOrderChatScreenResult {
 
 export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
   const queryClient = useQueryClient();
+  const { bottom: bottomInset } = useSafeAreaInsets();
   const [text, setText] = useState('');
   const listRef = useRef<FlatList>(null);
 
@@ -63,5 +66,5 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
     mutate({ body: null, image: { uri: asset.uri, name: `chat.${ext}`, type: `image/${ext}` } });
   }, [mutate]);
 
-  return { messages, isLoading, isError, text, isSending, listRef, handleTextChange, handleSend, handlePickImage };
+  return { messages, isLoading, isError, text, isSending, bottomInset, listRef, handleTextChange, handleSend, handlePickImage };
 }

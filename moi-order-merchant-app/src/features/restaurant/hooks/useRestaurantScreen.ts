@@ -20,6 +20,8 @@ interface UseRestaurantScreenResult {
   isSaving: boolean;
   isUploadingCover: boolean;
   isUploadingLogo: boolean;
+  isEditingDelivery: boolean;
+  minOrderInput: string;
   form: EditForm;
   handleStartEdit: () => void;
   handleCancelEdit: () => void;
@@ -30,11 +32,17 @@ interface UseRestaurantScreenResult {
   handleRemoveCoverPhoto: () => void;
   handleUploadLogo: (uri: string, name: string, type: string) => void;
   handleRemoveLogo: () => void;
+  handleEditDelivery: () => void;
+  handleCancelDelivery: () => void;
+  handleMinOrderChange: (v: string) => void;
+  handleSaveDelivery: () => void;
 }
 
 export function useRestaurantScreen(): UseRestaurantScreenResult {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingDelivery, setIsEditingDelivery] = useState(false);
+  const [minOrderInput, setMinOrderInput] = useState('');
   const [form, setForm] = useState<EditForm>({
     name: '',
     description: '',
@@ -48,6 +56,10 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     staleTime: CACHE_TTL.USER,
   });
 
+  const invalidateRestaurant = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.RESTAURANT });
+  }, [queryClient]);
+
   const { mutate: save, isPending: isSaving } = useMutation({
     mutationFn: updateRestaurant,
     onSuccess: (updated) => {
@@ -56,24 +68,32 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     },
   });
 
+  const { mutate: saveDelivery, isPending: isSavingDelivery } = useMutation({
+    mutationFn: updateRestaurant,
+    onSuccess: (updated) => {
+      queryClient.setQueryData(QUERY_KEYS.RESTAURANT, updated);
+      setIsEditingDelivery(false);
+    },
+  });
+
   const { mutate: mutateCoverUpload, isPending: isUploadingCover } = useMutation({
     mutationFn: (formData: FormData) => uploadRestaurantPhoto('cover_photo', formData),
-    onSuccess: (updated) => queryClient.setQueryData(QUERY_KEYS.RESTAURANT, updated),
+    onSuccess: invalidateRestaurant,
   });
 
   const { mutate: mutateLogoUpload, isPending: isUploadingLogo } = useMutation({
     mutationFn: (formData: FormData) => uploadRestaurantPhoto('logo', formData),
-    onSuccess: (updated) => queryClient.setQueryData(QUERY_KEYS.RESTAURANT, updated),
+    onSuccess: invalidateRestaurant,
   });
 
   const { mutate: mutateCoverRemove } = useMutation({
     mutationFn: () => removeRestaurantPhoto('cover_photo'),
-    onSuccess: (updated) => queryClient.setQueryData(QUERY_KEYS.RESTAURANT, updated),
+    onSuccess: invalidateRestaurant,
   });
 
   const { mutate: mutateLogoRemove } = useMutation({
     mutationFn: () => removeRestaurantPhoto('logo'),
-    onSuccess: (updated) => queryClient.setQueryData(QUERY_KEYS.RESTAURANT, updated),
+    onSuccess: invalidateRestaurant,
   });
 
   const handleStartEdit = useCallback(() => {
@@ -124,13 +144,33 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
 
   const handleRemoveLogo = useCallback(() => mutateLogoRemove(), [mutateLogoRemove]);
 
+  const handleEditDelivery = useCallback(() => {
+    const displayValue = ((restaurant?.min_order_cents ?? 0) / 100).toFixed(0);
+    setMinOrderInput(displayValue);
+    setIsEditingDelivery(true);
+  }, [restaurant]);
+
+  const handleCancelDelivery = useCallback(() => setIsEditingDelivery(false), []);
+
+  const handleMinOrderChange = useCallback((v: string) => {
+    if (/^\d*$/.test(v)) setMinOrderInput(v);
+  }, []);
+
+  const handleSaveDelivery = useCallback(() => {
+    const cents = Math.round(parseFloat(minOrderInput || '0') * 100);
+    if (isNaN(cents) || cents < 0) return;
+    saveDelivery({ min_order_cents: cents });
+  }, [saveDelivery, minOrderInput]);
+
   return {
     restaurant,
     isLoading,
     isEditing,
-    isSaving,
+    isSaving: isSaving || isSavingDelivery,
     isUploadingCover,
     isUploadingLogo,
+    isEditingDelivery,
+    minOrderInput,
     form,
     handleStartEdit,
     handleCancelEdit,
@@ -141,5 +181,9 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     handleRemoveCoverPhoto,
     handleUploadLogo,
     handleRemoveLogo,
+    handleEditDelivery,
+    handleCancelDelivery,
+    handleMinOrderChange,
+    handleSaveDelivery,
   };
 }

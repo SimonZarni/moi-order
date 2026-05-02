@@ -8,9 +8,11 @@ import { formatPrice } from '@/shared/utils/formatCurrency';
 import { useCheckoutScreen } from '../hooks/useCheckoutScreen';
 import { styles } from './CheckoutScreen.styles';
 
-const PAYMENT_OPTIONS: Array<{ value: FoodPaymentMethod; label: string; icon: string }> = [
-  { value: FOOD_PAYMENT_METHOD.Cod,       label: 'Cash on Delivery', icon: '💵' },
-  { value: FOOD_PAYMENT_METHOD.PromptPay, label: 'PromptPay',        icon: '🔵' },
+const LINE_GREEN = '#00B900';
+
+const PAYMENT_OPTIONS: Array<{ value: FoodPaymentMethod; label: string; iconName: string; iconColor?: string }> = [
+  { value: FOOD_PAYMENT_METHOD.Cod,       label: 'Cash on Delivery',  iconName: 'cash-outline' },
+  { value: FOOD_PAYMENT_METHOD.PromptPay, label: 'PromptPay / LINE Pay', iconName: 'chatbubble-ellipses', iconColor: LINE_GREEN },
 ];
 
 export function CheckoutScreen(): React.JSX.Element {
@@ -57,7 +59,11 @@ export function CheckoutScreen(): React.JSX.Element {
               accessibilityLabel={opt.label}
               accessibilityState={{ checked: paymentMethod === opt.value }}
             >
-              <Text>{opt.icon}</Text>
+              <Ionicons
+                name={opt.iconName as React.ComponentProps<typeof Ionicons>['name']}
+                size={22}
+                color={opt.iconColor ?? colours.textMuted}
+              />
               <Text style={styles.paymentLabel}>{opt.label}</Text>
               <View style={styles.radioOuter}>
                 {paymentMethod === opt.value && <View style={styles.radioInner} />}
@@ -79,19 +85,26 @@ export function CheckoutScreen(): React.JSX.Element {
         />
 
         <Pressable
-          style={[styles.placeBtn, isPlacing && styles.placeBtnDisabled]}
+          style={[
+            styles.placeBtn,
+            paymentMethod === FOOD_PAYMENT_METHOD.PromptPay && styles.placeBtnLine,
+            isPlacing && styles.placeBtnDisabled,
+          ]}
           onPress={handlePlaceOrder}
           disabled={isPlacing || items.length === 0}
           accessibilityRole="button"
           accessibilityLabel="Place order"
         >
-          <Text style={styles.placeBtnText}>
-            {isPlacing
-              ? 'Placing order…'
-              : paymentMethod === FOOD_PAYMENT_METHOD.PromptPay
-                ? 'Place Order & Pay via LINE'
-                : 'Place Order'}
-          </Text>
+          {isPlacing ? (
+            <Text style={styles.placeBtnText}>Placing order…</Text>
+          ) : paymentMethod === FOOD_PAYMENT_METHOD.PromptPay ? (
+            <View style={styles.placeBtnRow}>
+              <Ionicons name="chatbubble-ellipses" size={18} color={colours.white} />
+              <Text style={styles.placeBtnText}>Place Order & Pay via LINE</Text>
+            </View>
+          ) : (
+            <Text style={styles.placeBtnText}>Place Order</Text>
+          )}
         </Pressable>
       </ScrollView>
     </SafeAreaView>

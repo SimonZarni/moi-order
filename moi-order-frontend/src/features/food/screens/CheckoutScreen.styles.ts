@@ -132,7 +132,15 @@ export const styles = StyleSheet.create({
     marginTop: spacing.sm,
     marginBottom: spacing.xl,
   },
+  placeBtnLine: {
+    backgroundColor: '#00B900',
+  },
   placeBtnDisabled: { opacity: 0.5 },
+  placeBtnRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   placeBtnText: {
     fontSize: typography.md,
     fontWeight: '700',

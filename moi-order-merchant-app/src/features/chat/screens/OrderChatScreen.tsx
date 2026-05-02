@@ -1,7 +1,10 @@
 import React from 'react';
 import {
-  ActivityIndicator, FlatList, Image, Pressable, Text, TextInput, View,
+  ActivityIndicator, FlatList, Image, Keyboard, KeyboardAvoidingView,
+  Platform, Pressable, Text, TextInput, View,
 } from 'react-native';
+
+const KEYBOARD_BEHAVIOR = Platform.OS === 'ios' ? 'padding' : 'height';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -45,7 +48,7 @@ export function OrderChatScreen(): React.JSX.Element {
   const { orderId } = route.params;
 
   const {
-    messages, isLoading, isError, text, isSending, listRef,
+    messages, isLoading, isError, text, isSending, bottomInset, listRef,
     handleTextChange, handleSend, handlePickImage,
   } = useOrderChatScreen(orderId);
 
@@ -66,20 +69,20 @@ export function OrderChatScreen(): React.JSX.Element {
         </View>
       </View>
 
-      <View style={styles.body}>
+      <KeyboardAvoidingView behavior={KEYBOARD_BEHAVIOR} style={styles.body}>
         {isLoading ? (
-          <View style={styles.loaderWrap}>
+          <Pressable style={styles.loaderWrap} onPress={Keyboard.dismiss}>
             <ActivityIndicator color={colours.primary} />
-          </View>
+          </Pressable>
         ) : isError ? (
-          <View style={styles.emptyWrap}>
+          <Pressable style={styles.emptyWrap} onPress={Keyboard.dismiss}>
             <Text style={styles.emptyText}>Could not load messages.</Text>
-          </View>
+          </Pressable>
         ) : messages.length === 0 ? (
-          <View style={styles.emptyWrap}>
+          <Pressable style={styles.emptyWrap} onPress={Keyboard.dismiss}>
             <Ionicons name="chatbubbles-outline" size={44} color={colours.medium} />
             <Text style={styles.emptyText}>No messages yet.</Text>
-          </View>
+          </Pressable>
         ) : (
           <FlatList
             ref={listRef}
@@ -91,10 +94,12 @@ export function OrderChatScreen(): React.JSX.Element {
             onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
             accessibilityRole="list"
             showsVerticalScrollIndicator={false}
+            keyboardDismissMode="on-drag"
+            keyboardShouldPersistTaps="handled"
           />
         )}
 
-        <View style={styles.inputBar}>
+        <View style={[styles.inputBar, { paddingBottom: Math.max(bottomInset, 8) + 8 }]}>
           <Pressable
             style={styles.attachBtn}
             onPress={handlePickImage}
@@ -126,7 +131,7 @@ export function OrderChatScreen(): React.JSX.Element {
             }
           </Pressable>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

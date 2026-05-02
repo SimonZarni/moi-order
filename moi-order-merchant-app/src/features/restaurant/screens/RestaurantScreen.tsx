@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import {
-  View, Text, ScrollView, Pressable, TextInput, ActivityIndicator, Image, Linking,
+  View, Text, ScrollView, Pressable, TextInput, ActivityIndicator, Image, Linking, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,10 +24,13 @@ export function RestaurantScreen(): React.JSX.Element {
   const {
     restaurant, isLoading, isEditing, isSaving,
     isUploadingCover, isUploadingLogo,
+    isEditingDelivery, minOrderInput,
     form, handleStartEdit, handleCancelEdit,
     handleFieldChange, handleSave, handleToggleStatus,
     handleUploadCoverPhoto, handleRemoveCoverPhoto,
     handleUploadLogo, handleRemoveLogo,
+    handleEditDelivery, handleCancelDelivery,
+    handleMinOrderChange, handleSaveDelivery,
   } = useRestaurantScreen();
 
   const handlePickCoverPhoto = useCallback(async () => {
@@ -273,6 +276,17 @@ export function RestaurantScreen(): React.JSX.Element {
           <View style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={styles.cardTitle}>Delivery Settings</Text>
+              {!isEditingDelivery && (
+                <Pressable
+                  style={styles.editDeliveryBtn}
+                  onPress={handleEditDelivery}
+                  accessibilityRole="button"
+                  accessibilityLabel="Edit min order"
+                >
+                  <Ionicons name="pencil-outline" size={12} color={colours.primary} />
+                  <Text style={styles.editDeliveryBtnText}>Edit</Text>
+                </Pressable>
+              )}
             </View>
             <View style={styles.cardBody}>
               <InfoRow
@@ -285,10 +299,36 @@ export function RestaurantScreen(): React.JSX.Element {
                 value={restaurant.is_pickup_available ? '✓ Available' : '✗ Not available'}
               />
               <View style={styles.divider} />
-              <InfoRow
-                label="Min Order"
-                value={formatPrice(restaurant.min_order_cents)}
-              />
+              {isEditingDelivery ? (
+                <View style={styles.deliveryEditRow}>
+                  <Text style={styles.infoLabel}>Min Order</Text>
+                  <View style={styles.deliveryEditInputWrap}>
+                    <TextInput
+                      style={styles.deliveryEditInput}
+                      value={minOrderInput}
+                      onChangeText={handleMinOrderChange}
+                      keyboardType="number-pad"
+                      placeholder="0"
+                      placeholderTextColor={colours.medium}
+                      accessibilityLabel="Minimum order amount"
+                    />
+                    <Text style={styles.deliveryEditCurrency}>฿</Text>
+                  </View>
+                  <View style={styles.deliveryEditActions}>
+                    <Pressable style={styles.deliveryEditCancel} onPress={handleCancelDelivery} accessibilityRole="button">
+                      <Text style={styles.deliveryEditCancelText}>Cancel</Text>
+                    </Pressable>
+                    <Pressable style={[styles.deliveryEditSave, isSaving && styles.saveButtonDisabled]} onPress={handleSaveDelivery} disabled={isSaving} accessibilityRole="button">
+                      <Text style={styles.deliveryEditSaveText}>{isSaving ? 'Saving…' : 'Save'}</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              ) : (
+                <InfoRow
+                  label="Min Order"
+                  value={formatPrice(restaurant.min_order_cents)}
+                />
+              )}
               {restaurant.delivery_radius_km !== null && (
                 <>
                   <View style={styles.divider} />
