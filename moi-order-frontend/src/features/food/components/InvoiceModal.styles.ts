@@ -15,6 +15,7 @@ export const styles = StyleSheet.create({
     borderTopLeftRadius: radius.sheet,
     borderTopRightRadius: radius.sheet,
     maxHeight: '92%',
+    minHeight: '65%',
   },
   dragBar: {
     width: 36,

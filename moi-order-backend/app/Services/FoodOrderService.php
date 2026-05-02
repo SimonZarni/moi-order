@@ -114,6 +114,28 @@ class FoodOrderService
         return $order->fresh(['items', 'user']);
     }
 
+    /**
+     * Customer completes a delivered order, optionally leaving a rating + review.
+     * Also used by the auto-complete command (rating/review are null in that case).
+     */
+    public function completeByCustomer(FoodOrder $order, ?int $rating, ?string $review): FoodOrder
+    {
+        DB::transaction(function () use ($order, $rating, $review): void {
+            $order->transitionTo(FoodOrderStatus::Completed);
+
+            if ($rating !== null || $review !== null) {
+                $order->update(array_filter([
+                    'rating'          => $rating,
+                    'customer_review' => $review,
+                ], fn ($v) => $v !== null));
+            }
+
+            event(new FoodOrderStatusUpdated($order->fresh()));
+        });
+
+        return $order->fresh(['items', 'user']);
+    }
+
     public function listForUser(int $userId, int $perPage = 20): LengthAwarePaginator
     {
         return FoodOrder::forUser($userId)

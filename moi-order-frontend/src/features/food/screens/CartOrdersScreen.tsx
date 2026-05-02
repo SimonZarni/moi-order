@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { FoodOrder } from '@/types/models';
 import { formatPrice } from '@/shared/utils/formatCurrency';
-import { formatDate } from '@/shared/utils/formatDate';
+import { formatDateTime } from '@/shared/utils/formatDate';
 import { CartItem } from '@/shared/store/cartStore';
 import { useCartOrdersScreen } from '../hooks/useCartOrdersScreen';
 import { ORDER_STATUS_COLOURS, styles } from './CartOrdersScreen.styles';
@@ -86,7 +86,7 @@ export function CartOrdersScreen(): React.JSX.Element {
                     {order.restaurant_name != null && (
                       <Text style={styles.orderRestaurant} numberOfLines={1}>{order.restaurant_name}</Text>
                     )}
-                    <Text style={styles.orderDate}>{formatDate(order.created_at)}</Text>
+                    <Text style={styles.orderDate}>{formatDateTime(order.created_at)}</Text>
                   </View>
                   <View style={styles.orderRight}>
                     <Text style={styles.orderTotal}>{formatPrice(order.total_cents / 100)}</Text>

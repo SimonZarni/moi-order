@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Contracts\FileStorageInterface;
+use App\DTOs\CompleteFoodOrderDTO;
 use App\DTOs\StoreFoodOrderDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\CompleteFoodOrderRequest;
 use App\Http\Requests\Api\StoreFoodOrderRequest;
 use App\Http\Resources\FoodOrderResource;
 use App\Models\FoodOrder;
@@ -53,5 +55,16 @@ class FoodOrderController extends Controller
         $order = $this->orderService->place(StoreFoodOrderDTO::fromRequest($request));
 
         return response()->json(['data' => new FoodOrderResource($order, $this->storage)], 201);
+    }
+
+    /** POST /api/v1/food-orders/{id}/complete */
+    public function complete(CompleteFoodOrderRequest $request, int $id): JsonResponse
+    {
+        $order = FoodOrder::forUser($request->user()->id)->findOrFail($id);
+        $dto   = CompleteFoodOrderDTO::fromRequest($request);
+
+        $order = $this->orderService->completeByCustomer($order, $dto->rating, $dto->review);
+
+        return response()->json(['data' => new FoodOrderResource($order, $this->storage)]);
     }
 }

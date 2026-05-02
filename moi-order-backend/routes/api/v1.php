@@ -78,7 +78,10 @@ Route::post('/device-tokens',   [DeviceTokenController::class, 'store']);
 Route::delete('/device-tokens', [DeviceTokenController::class, 'destroy']);
 
 // Food orders
-Route::get('/food-orders',      [FoodOrderController::class, 'index']);
-Route::post('/food-orders',     [FoodOrderController::class, 'store']);
-Route::get('/food-orders/{id}', [FoodOrderController::class, 'show']);
+Route::get('/food-orders',               [FoodOrderController::class, 'index']);
+Route::post('/food-orders',              [FoodOrderController::class, 'store']);
+Route::get('/food-orders/{id}',          [FoodOrderController::class, 'show']);
+Route::post('/food-orders/{id}/complete',[FoodOrderController::class, 'complete']);
+Route::get('/food-orders/{id}/chat',     [\App\Http\Controllers\Api\V1\OrderChatController::class, 'index']);
+Route::post('/food-orders/{id}/chat',    [\App\Http\Controllers\Api\V1\OrderChatController::class, 'store']);
 

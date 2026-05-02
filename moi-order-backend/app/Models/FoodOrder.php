@@ -24,6 +24,7 @@ class FoodOrder extends Model
         'idempotency_key', 'prompt_pay_url',
         'confirmed_at', 'payment_confirmed_at', 'preparing_at',
         'picked_up_at', 'delivered_at', 'completed_at', 'cancelled_at',
+        'rating', 'customer_review',
     ];
 
     protected function casts(): array
@@ -42,6 +43,7 @@ class FoodOrder extends Model
             'delivered_at'         => 'datetime',
             'completed_at'         => 'datetime',
             'cancelled_at'         => 'datetime',
+            'rating'               => 'integer',
         ];
     }
 
@@ -124,5 +126,10 @@ class FoodOrder extends Model
     public function items(): HasMany
     {
         return $this->hasMany(FoodOrderItem::class);
+    }
+
+    public function chatMessages(): HasMany
+    {
+        return $this->hasMany(\App\Models\OrderChatMessage::class)->orderBy('created_at');
     }
 }

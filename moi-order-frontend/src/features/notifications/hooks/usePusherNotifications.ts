@@ -3,8 +3,9 @@
  * Mounted at the auth root (AppShell in App.tsx) — active for the entire session,
  * not tied to any single screen. Disconnects automatically on logout (userId → null).
  *
- * Security: channel auth uses the existing Axios client, which attaches the Bearer token.
- *   Never reads credentials directly; always goes through api/client.ts.
+ * Channels managed:
+ *   private-App.Models.User.{id}  — in-app notifications (notification.created)
+ *   private-user.{id}             — food-order status updates (food-order.status-updated)
  */
 import { useEffect } from 'react';
 import { AppState } from 'react-native';
@@ -19,9 +20,15 @@ import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { useAuthStore } from '@/shared/store/authStore';
 import { useNotificationStore } from '@/shared/store/notificationStore';
 
+interface FoodOrderStatusPayload {
+  order_id: number;
+  status: string;
+  status_label: string;
+}
+
 export function usePusherNotifications(): void {
-  const userId      = useAuthStore((state) => state.user?.id ?? null);
-  const queryClient = useQueryClient();
+  const userId          = useAuthStore((state) => state.user?.id ?? null);
+  const queryClient     = useQueryClient();
   const incrementUnread = useNotificationStore((state) => state.incrementUnread);
 
   useEffect(() => {
@@ -45,15 +52,29 @@ export function usePusherNotifications(): void {
       },
     });
 
-    const channelName = `private-App.Models.User.${userId}`;
-    const channel     = pusher.subscribe(channelName);
+    // ── Notification bell channel ───────────────────────────────────────────
+    const notifChannelName = `private-App.Models.User.${userId}`;
+    const notifChannel     = pusher.subscribe(notifChannelName);
 
-    channel.bind('notification.created', () => {
+    notifChannel.bind('notification.created', () => {
       incrementUnread();
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.LIST });
     });
 
-    // Reconnect when app returns to foreground after a background gap.
+    // ── Food-order status channel ───────────────────────────────────────────
+    // Invalidate rather than patch cache — the broadcast payload is partial;
+    // patching would corrupt the full FoodOrder objects stored in TanStack Query.
+    const orderChannelName = `private-user.${userId}`;
+    const orderChannel     = pusher.subscribe(orderChannelName);
+
+    orderChannel.bind('food-order.status-updated', (payload: FoodOrderStatusPayload) => {
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOOD_ORDERS.DETAIL(payload.order_id) });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOOD_ORDERS.LIST });
+      // Badge increment because a status notification is also written to the database channel.
+      incrementUnread();
+    });
+
+    // ── Reconnect on foreground restore ────────────────────────────────────
     const appStateSub = AppState.addEventListener('change', (state) => {
       if (state === 'active' && pusher.connection.state !== 'connected') {
         pusher.connect();
@@ -62,8 +83,10 @@ export function usePusherNotifications(): void {
 
     return () => {
       appStateSub.remove();
-      channel.unbind_all();
-      pusher.unsubscribe(channelName);
+      notifChannel.unbind_all();
+      orderChannel.unbind_all();
+      pusher.unsubscribe(notifChannelName);
+      pusher.unsubscribe(orderChannelName);
       pusher.disconnect();
     };
   }, [userId, queryClient, incrementUnread]);

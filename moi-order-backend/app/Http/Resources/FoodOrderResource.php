@@ -46,6 +46,8 @@ class FoodOrderResource extends JsonResource
             'items'                  => $this->whenLoaded('items', fn () =>
                 FoodOrderItemResource::collection($this->items)
             ),
+            'rating'                 => $this->rating,
+            'customer_review'        => $this->customer_review,
             'confirmed_at'           => $this->confirmed_at?->toIso8601String(),
             'payment_confirmed_at'   => $this->payment_confirmed_at?->toIso8601String(),
             'preparing_at'           => $this->preparing_at?->toIso8601String(),
