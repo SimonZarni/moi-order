@@ -4,6 +4,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/types/navigation';
 import { FoodOrder } from '@/types/models';
+import { LINE_OA_URL } from '@/shared/constants/config';
 import { useFoodOrderDetailData } from './useFoodOrdersData';
 
 type DetailRoute = RouteProp<RootStackParamList, 'FoodOrderDetail'>;
@@ -33,15 +34,10 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
   const handleInvoiceClose = useCallback(() => setInvoiceVisible(false), []);
 
   const handlePromptPayPress = useCallback(() => {
-    const url = order?.prompt_pay_url;
-    if (!url) {
-      Alert.alert('Payment pending', 'Payment link is not yet available.');
-      return;
-    }
-    Linking.openURL(url).catch(() =>
-      Alert.alert('Cannot open payment', 'Please try again or contact support.'),
+    Linking.openURL(LINE_OA_URL).catch(() =>
+      Alert.alert('Cannot open LINE', 'Please open LINE and search for @moiorder to complete payment.'),
     );
-  }, [order]);
+  }, []);
 
   const handleRefetch = useCallback(() => refetch(), [refetch]);
 

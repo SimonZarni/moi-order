@@ -14,13 +14,13 @@ interface OrderAction {
 
 // Every merchant-triggered forward transition in the correct order.
 const ORDER_ACTIONS: Partial<Record<string, OrderAction>> = {
-  [ORDER_STATUS.OrderPlaced]:          { label: 'Accept Order',       nextStatus: ORDER_STATUS.WaitingForPayment },
-  [ORDER_STATUS.PaymentConfirmed]:     { label: 'Start Preparing',    nextStatus: ORDER_STATUS.PreparingFood },
-  [ORDER_STATUS.PreparingFood]:        { label: 'Mark Ready',         nextStatus: ORDER_STATUS.WaitingForDelivery },
-  [ORDER_STATUS.WaitingForDelivery]:   { label: 'Mark Picked Up',     nextStatus: ORDER_STATUS.DeliveryOnTheWay },
-  [ORDER_STATUS.DeliveryOnTheWay]:     { label: 'Mark Delivered',     nextStatus: ORDER_STATUS.Delivered },
-  [ORDER_STATUS.Delivered]:            { label: 'Complete Order',      nextStatus: ORDER_STATUS.Completed },
-  // WaitingForPayment: customer pays — no merchant action button needed
+  [ORDER_STATUS.OrderPlaced]:          { label: 'Accept Order',   nextStatus: ORDER_STATUS.WaitingForPayment },
+  [ORDER_STATUS.PaymentConfirmed]:     { label: 'Start Preparing', nextStatus: ORDER_STATUS.PreparingFood },
+  [ORDER_STATUS.PreparingFood]:        { label: 'Mark Ready',     nextStatus: ORDER_STATUS.WaitingForDelivery },
+  [ORDER_STATUS.WaitingForDelivery]:   { label: 'Mark Picked Up', nextStatus: ORDER_STATUS.DeliveryOnTheWay },
+  [ORDER_STATUS.DeliveryOnTheWay]:     { label: 'Mark Delivered', nextStatus: ORDER_STATUS.Delivered },
+  [ORDER_STATUS.Delivered]:            { label: 'Complete Order',  nextStatus: ORDER_STATUS.Completed },
+  // WaitingForPayment: customer pays via LINE — no merchant action button needed
 };
 
 const STATUS_COLOURS: Record<string, string> = {
@@ -44,40 +44,50 @@ interface OrderCardProps {
 export function OrderCard({ order, onUpdateStatus, onPress }: OrderCardProps): React.JSX.Element {
   const action = ORDER_ACTIONS[order.status];
   const statusColour = STATUS_COLOURS[order.status] ?? colours.medium;
-  const itemsSummary = order.items.map((i) => `${i.quantity}× ${i.name}`).join(', ');
+  const itemsSummary = order.items?.map((i) => `${i.quantity}× ${i.name}`).join(', ') ?? '';
 
   const handleAction = useCallback(() => {
     if (action) onUpdateStatus(order.id, action.nextStatus);
   }, [action, order.id, onUpdateStatus]);
 
-  return (
-    <Pressable
-      style={styles.card}
-      onPress={onPress}
-      accessibilityLabel={`View order ${order.order_number ?? order.id}`}
-      accessibilityRole="button"
-    >
+  // Card info shared between pressable and non-pressable variants
+  const cardInfo = (
+    <>
       <View style={styles.header}>
-        <Text style={styles.orderNumber}>
-          {order.order_number ?? `#${order.id}`}
-        </Text>
+        <Text style={styles.orderNumber}>{order.order_number ?? `#${order.id}`}</Text>
         <View style={[styles.statusBadge, { backgroundColor: statusColour + '22' }]}>
           <Text style={[styles.statusText, { color: statusColour }]}>{order.status_label}</Text>
         </View>
       </View>
-
       <Text style={styles.customer}>{order.user.name}</Text>
       {order.user.phone !== null && (
         <Text style={styles.meta}>{order.user.phone}</Text>
       )}
-
       <Text style={styles.items} numberOfLines={2}>{itemsSummary}</Text>
-
       <View style={styles.footer}>
         <Text style={styles.total}>{formatPrice(order.total_cents)}</Text>
         <Text style={styles.date}>{formatDateTime(order.created_at)}</Text>
       </View>
+    </>
+  );
 
+  return (
+    // Outer View — never a Pressable, so the action button inside is never a nested <button>
+    <View style={styles.card}>
+      {onPress !== undefined ? (
+        <Pressable
+          style={styles.cardContent}
+          onPress={onPress}
+          accessibilityLabel={`View order ${order.order_number ?? order.id}`}
+          accessibilityRole="button"
+        >
+          {cardInfo}
+        </Pressable>
+      ) : (
+        <View style={styles.cardContent}>{cardInfo}</View>
+      )}
+
+      {/* Action button is always a sibling, never nested inside another Pressable */}
       {action !== undefined && (
         <Pressable
           style={styles.actionButton}
@@ -88,6 +98,6 @@ export function OrderCard({ order, onUpdateStatus, onPress }: OrderCardProps): R
           <Text style={styles.actionButtonText}>{action.label}</Text>
         </Pressable>
       )}
-    </Pressable>
+    </View>
   );
 }

@@ -200,9 +200,9 @@ export function OrderProgressBar({ status, canShowPromptPay, onPromptPayPress }:
           style={styles.promptPayBtn}
           onPress={onPromptPayPress}
           accessibilityRole="button"
-          accessibilityLabel="Pay via PromptPay"
+          accessibilityLabel="Pay via LINE"
         >
-          <Text style={styles.promptPayText}>Pay via PromptPay</Text>
+          <Text style={styles.promptPayText}>Pay via LINE</Text>
         </Pressable>
       )}
     </>

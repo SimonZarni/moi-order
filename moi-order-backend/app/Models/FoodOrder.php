@@ -84,8 +84,9 @@ class FoodOrder extends Model
 
     public function canShowPromptPay(): bool
     {
-        return $this->payment_method === FoodPaymentMethod::PromptPay
-            && $this->status === FoodOrderStatus::WaitingForPayment;
+        // Payment is processed via LINE channel regardless of payment_method.
+        // Show the LINE payment button whenever the order is awaiting customer payment.
+        return $this->status === FoodOrderStatus::WaitingForPayment;
     }
 
     // ─── Scopes ───────────────────────────────────────────────────────────────

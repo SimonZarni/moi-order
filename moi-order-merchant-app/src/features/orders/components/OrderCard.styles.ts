@@ -7,10 +7,14 @@ import { radius } from '../../../shared/theme/radius';
 export const styles = StyleSheet.create({
   card: {
     backgroundColor: colours.surface,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colours.divider,
+  },
+  // Tappable info section — separate from the action button to avoid nested <button> on web
+  cardContent: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
     gap: spacing.xs,
   },
   header: {
@@ -68,9 +72,10 @@ export const styles = StyleSheet.create({
     borderRadius: radius.md,
     paddingVertical: spacing.sm,
     alignItems: 'center',
-    marginTop: spacing.xs,
     minHeight: 40,
     justifyContent: 'center',
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
   },
   actionButtonText: {
     color: colours.white,
