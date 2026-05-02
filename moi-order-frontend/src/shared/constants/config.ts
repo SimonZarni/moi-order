@@ -2,7 +2,7 @@ export const TOKEN_KEY  = 'auth_token'  as const;
 export const LOCALE_KEY = 'app_locale'  as const;
 
 // MOI Order LINE Official Account — customer contacts here to complete payment
-export const LINE_OA_URL = process.env['EXPO_PUBLIC_LINE_OA_URL'] ?? 'https://line.me/R/ti/p/@moiorder';
+export const LINE_OA_URL = process.env['EXPO_PUBLIC_LINE_OA_URL'] ?? 'https://line.me/R/ti/p/%40moiorder';
 
 export const PUSHER_APP_KEY     = process.env['EXPO_PUBLIC_PUSHER_KEY']     ?? '';
 export const PUSHER_APP_CLUSTER = process.env['EXPO_PUBLIC_PUSHER_CLUSTER'] ?? 'ap1';

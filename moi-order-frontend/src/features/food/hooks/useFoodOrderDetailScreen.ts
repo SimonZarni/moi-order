@@ -35,7 +35,7 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
 
   const handlePromptPayPress = useCallback(() => {
     Linking.openURL(LINE_OA_URL).catch(() =>
-      Alert.alert('Cannot open LINE', 'Please open LINE and search for @moiorder to complete payment.'),
+      Alert.alert('Cannot open LINE', 'Please open LINE and search for @moiorder to complete your payment.'),
     );
   }, []);
 
