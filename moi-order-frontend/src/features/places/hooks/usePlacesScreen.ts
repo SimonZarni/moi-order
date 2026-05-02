@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { FlatList } from 'react-native';
 import { Image } from 'expo-image';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -20,6 +21,9 @@ const SEARCH_DEBOUNCE_MS = 300;
 export type PlacesTab = 'places' | 'tickets';
 
 export interface UsePlacesScreenResult {
+  // List refs for scroll-to-top on focus
+  placesListRef: React.RefObject<FlatList<Place>>;
+  ticketsListRef: React.RefObject<FlatList<Ticket>>;
   // Tab
   activeTab: PlacesTab;
   handleTabChange: (tab: PlacesTab) => void;
@@ -57,6 +61,9 @@ export function usePlacesScreen(): UsePlacesScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const queryClient = useQueryClient();
 
+  const placesListRef = useRef<FlatList<Place>>(null);
+  const ticketsListRef = useRef<FlatList<Ticket>>(null);
+
   const [activeTab, setActiveTab] = useState<PlacesTab>('places');
   const [query, setQuery] = useState('');
   const [ticketsQuery, setTicketsQuery] = useState('');
@@ -65,6 +72,9 @@ export function usePlacesScreen(): UsePlacesScreenResult {
 
   useFocusEffect(
     useCallback(() => {
+      placesListRef.current?.scrollToOffset({ offset: 0, animated: false });
+      ticketsListRef.current?.scrollToOffset({ offset: 0, animated: false });
+
       return () => {
         setQuery('');
         setTicketsQuery('');
@@ -186,6 +196,8 @@ export function usePlacesScreen(): UsePlacesScreenResult {
   }, [navigation]);
 
   return {
+    placesListRef,
+    ticketsListRef,
     activeTab,
     handleTabChange,
     filteredPlaces,

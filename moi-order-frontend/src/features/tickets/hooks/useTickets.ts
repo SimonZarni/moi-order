@@ -25,7 +25,7 @@ export function useTickets(): UseTicketsResult {
         ? last.meta.current_page + 1
         : undefined,
     initialPageParam: 1,
-    staleTime: CACHE_TTL.USER_DATA,
+    staleTime: CACHE_TTL.STATIC_DATA,
     select: (data) => ({
       ...data,
       tickets: data.pages.flatMap((p) => p.data),

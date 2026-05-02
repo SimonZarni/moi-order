@@ -26,8 +26,10 @@ export const IOS_APP_STORE_ID = '' as const;
 export const GOOGLE_IOS_CLIENT_ID = '661538209777-o33avjo80379ui26kj2clbn4snla6j2g.apps.googleusercontent.com' as const;
 
 export const CACHE_TTL = {
-  USER_DATA: 5 * 60 * 1000,
-  STATIC_DATA: Infinity,
-  LIVE_DATA: 0,
+  USER_DATA:       5  * 60 * 1000,
+  REFERENCE_DATA:  24 * 60 * 60 * 1000,
+  STATIC_DATA:     Infinity,
+  LIVE_DATA:       0,
   NOTIFICATION_POLL: 30 * 1000,
+  GC_EXTENDED:     30 * 60 * 1000,
 } as const;

@@ -56,6 +56,7 @@ function TabBar({ activeTab, onTabChange }: TabBarProps): React.JSX.Element {
 
 export function PlacesScreen(): React.JSX.Element {
   const {
+    placesListRef, ticketsListRef,
     activeTab, handleTabChange,
     filteredPlaces, categories, isPlacesLoading, isPlacesError,
     isPlacesRefreshing, isPlacesFetchingNextPage,
@@ -173,6 +174,7 @@ export function PlacesScreen(): React.JSX.Element {
         {hero}
         {stickySection}
         <FlatList
+          ref={placesListRef}
           data={filteredPlaces}
           keyExtractor={(item: Place) => String(item.id)}
           renderItem={({ item }) => <PlaceCard place={item} onPress={handlePlacePress} />}
@@ -210,6 +212,7 @@ export function PlacesScreen(): React.JSX.Element {
       {hero}
       {stickySection}
       <FlatList
+        ref={ticketsListRef}
         data={filteredTickets}
         keyExtractor={(item: Ticket) => String(item.id)}
         renderItem={({ item }) => (

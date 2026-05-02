@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 
 import { HomeCard } from '@/types/models';
 import { fetchHomeCards } from '@/shared/api/homeCards';
+import { CACHE_TTL } from '@/shared/constants/config';
+import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 
 export interface UseHomeCardsResult {
   cards: HomeCard[];
@@ -12,10 +14,10 @@ export interface UseHomeCardsResult {
 
 export function useHomeCards(): UseHomeCardsResult {
   const { data, isPending, isError, refetch } = useQuery({
-    queryKey: ['home-cards'],
-    queryFn: fetchHomeCards,
-    staleTime: 5 * 60 * 1000,
-    gcTime:    30 * 60 * 1000,
+    queryKey: QUERY_KEYS.HOME_CARDS.LIST,
+    queryFn:  fetchHomeCards,
+    staleTime: CACHE_TTL.STATIC_DATA,
+    gcTime:    CACHE_TTL.GC_EXTENDED,
   });
 
   return {

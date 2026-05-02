@@ -16,7 +16,7 @@ export function usePlacesList(): UsePlacesListResult {
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey:  QUERY_KEYS.PLACES.ALL(),
     queryFn:   fetchAllPlaces,
-    staleTime: CACHE_TTL.USER_DATA,
+    staleTime: CACHE_TTL.REFERENCE_DATA,
   });
 
   return { places: data ?? [], isLoading, isError, refetch };
@@ -47,7 +47,7 @@ export function useTagsList(): UseTagsListResult {
   const { data, isLoading } = useQuery({
     queryKey:  QUERY_KEYS.TAGS.LIST(),
     queryFn:   fetchTags,
-    staleTime: CACHE_TTL.USER_DATA,
+    staleTime: CACHE_TTL.STATIC_DATA,
   });
 
   return { tags: data ?? [], isLoading };

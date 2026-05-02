@@ -98,12 +98,12 @@ export function useSearchScreen(): UseSearchScreenResult {
   const { data: ticketsData, isLoading: ticketsLoading } = useQuery({
     queryKey: QUERY_KEYS.TICKETS.LIST,
     queryFn:  () => fetchTickets(1),
-    staleTime: 5 * 60 * 1000,
+    staleTime: CACHE_TTL.STATIC_DATA,
   });
   const { data: servicesData, isLoading: servicesLoading } = useQuery({
     queryKey: QUERY_KEYS.SERVICES.LIST,
     queryFn:  fetchServices,
-    staleTime: 5 * 60 * 1000,
+    staleTime: CACHE_TTL.STATIC_DATA,
   });
 
   const isLoading = placesLoading || ticketsLoading || servicesLoading;
