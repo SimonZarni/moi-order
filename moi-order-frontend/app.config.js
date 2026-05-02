@@ -1,5 +1,9 @@
 const mapboxDownloadToken = process.env.RNMAPBOX_MAPS_DOWNLOAD_TOKEN;
-const lineChannelId = process.env.EXPO_PUBLIC_LINE_CHANNEL_ID ?? "2008805625";
+const lineChannelId = process.env.EXPO_PUBLIC_LINE_CHANNEL_ID ?? '';
+const googleIosClientId =
+  process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ??
+  '661538209777-o33avjo80379ui26kj2clbn4snla6j2g.apps.googleusercontent.com';
+const googleIosUrlScheme = `com.googleusercontent.apps.${googleIosClientId.replace('.apps.googleusercontent.com', '')}`;
 
 /** @type {import('expo/config').ExpoConfig} */
 module.exports = {
@@ -85,8 +89,7 @@ module.exports = {
       [
         "@react-native-google-signin/google-signin",
         {
-          iosUrlScheme:
-            "com.googleusercontent.apps.661538209777-o33avjo80379ui26kj2clbn4snla6j2g",
+          iosUrlScheme: googleIosUrlScheme,
         },
       ],
       [

@@ -27,7 +27,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   setUser: (user: User, token: string): void => {
     setMemoryToken(token);
     // Persist token for app restart — fire-and-forget, never await in sync context.
-    SecureStore.setItemAsync(TOKEN_KEY, token).catch(() => {});
+    SecureStore.setItemAsync(TOKEN_KEY, token).catch((e: unknown) => {
+      if (__DEV__) console.error('SecureStore.setItemAsync failed', e);
+    });
     set({ user, isLoggedIn: true });
   },
 
@@ -38,7 +40,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   clearAuth: (): void => {
     setMemoryToken(null);
     // Remove persisted token — fire-and-forget.
-    SecureStore.deleteItemAsync(TOKEN_KEY).catch(() => {});
+    SecureStore.deleteItemAsync(TOKEN_KEY).catch((e: unknown) => {
+      if (__DEV__) console.error('SecureStore.deleteItemAsync failed', e);
+    });
     set({ user: null, isLoggedIn: false });
   },
 }));

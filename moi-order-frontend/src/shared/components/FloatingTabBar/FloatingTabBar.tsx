@@ -166,7 +166,7 @@ export function StandaloneFloatingTabBar(): React.JSX.Element {
       return;
     }
     // Navigate root stack to MainTabs and specify which tab to show.
-    (navigation as any).navigate('MainTabs', { screen: tab.route });
+    navigation.navigate('MainTabs', { screen: tab.route });
   }
 
   return (
