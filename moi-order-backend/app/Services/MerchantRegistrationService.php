@@ -10,11 +10,10 @@ use App\Enums\KycApplicationStatus;
 use App\Models\KycApplication;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
 /**
  * Principle: SRP — owns admin-initiated merchant account creation only.
- * Principle: Security — password hashed with Hash::make() (bcrypt cost ≥12 from config).
+ * Principle: Security — password stored via User model's 'hashed' cast (bcrypt, cost≥12).
  *   Admin-created merchants skip KYC document upload; application created pre-approved.
  * Principle: DB::transaction — two-table write (users + kyc_applications).
  */
@@ -33,7 +32,7 @@ class MerchantRegistrationService
             $user = User::create([
                 'name'        => $dto->name,
                 'email'       => $dto->email,
-                'password'    => Hash::make($dto->password),
+                'password'    => $dto->password,
                 'is_merchant' => false,
             ]);
 
@@ -60,7 +59,7 @@ class MerchantRegistrationService
             $user = User::create([
                 'name'        => $dto->name,
                 'email'       => $dto->email,
-                'password'    => Hash::make($dto->password),
+                'password'    => $dto->password,
                 'is_merchant' => true,
             ]);
 

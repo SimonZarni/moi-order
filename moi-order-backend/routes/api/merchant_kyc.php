@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\Merchant\V1\KycController;
+use App\Http\Controllers\Api\Merchant\V1\MerchantAuthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +15,10 @@ use Illuminate\Support\Facades\Route;
 |       token — including applicants who have not yet been approved.
 |--------------------------------------------------------------------------
 */
+
+// ── Auth (accessible to any merchant-ability token, including pre-KYC) ────────
+Route::post('/auth/logout', [MerchantAuthController::class, 'logout']);
+Route::get('/auth/me',      [MerchantAuthController::class, 'me']);
 
 Route::prefix('kyc')->group(function (): void {
     Route::get('/',           [KycController::class, 'show']);

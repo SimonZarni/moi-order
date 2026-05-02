@@ -55,7 +55,7 @@ class AuthService
         $user = User::create([
             'name'     => $dto->name,
             'email'    => $dto->email,
-            'password' => Hash::make($dto->password),
+            'password' => $dto->password,
         ]);
 
         $token = $user->createToken('user-auth', ['user'], now()->addDays(30))->plainTextToken;

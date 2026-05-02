@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Enums\UserStatusEnum;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 
 class AdminAccountService
 {
@@ -18,7 +17,7 @@ class AdminAccountService
         return User::create([
             'name'          => $data['name'],
             'email'         => $data['email'],
-            'password'      => Hash::make($data['password']),
+            'password'      => $data['password'],
             'is_admin'      => true,
             'admin_role_id' => $data['admin_role_id'],
             'status'        => UserStatusEnum::Active,

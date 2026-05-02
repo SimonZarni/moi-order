@@ -10,7 +10,6 @@ use App\DTOs\UpdateProfileDTO;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -64,7 +63,7 @@ class ProfileService
 
     public function changePassword(User $user, ChangePasswordDTO $dto): void
     {
-        $user->update(['password' => Hash::make($dto->newPassword)]);
+        $user->update(['password' => $dto->newPassword]);
 
         // Revoke all other active tokens — any session on another device must re-authenticate.
         $currentTokenId = $user->currentAccessToken()->id;
