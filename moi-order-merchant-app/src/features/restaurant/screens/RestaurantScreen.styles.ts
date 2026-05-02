@@ -14,18 +14,21 @@ export const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.md,
+    paddingBottom: spacing.xl,
     gap: spacing.md,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: spacing.xs,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.xs,
   },
   headerTitle: {
     fontSize: typography.xxl,
     fontWeight: '700',
     color: colours.textOnLight,
+    letterSpacing: -0.5,
   },
   editButton: {
     flexDirection: 'row',
@@ -44,36 +47,44 @@ export const styles = StyleSheet.create({
   card: {
     backgroundColor: colours.surface,
     borderRadius: radius.lg,
-    padding: spacing.md,
-    gap: spacing.sm,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    overflow: 'hidden',
+  },
+  cardHeader: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    backgroundColor: colours.surfaceMuted,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
   },
   cardTitle: {
-    fontSize: typography.sm,
+    fontSize: typography.xs,
     fontWeight: '700',
     color: colours.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: spacing.xs / 2,
+    letterSpacing: 0.6,
+  },
+  cardBody: {
+    padding: spacing.md,
+    gap: spacing.xs + 2,
   },
   divider: {
     height: 1,
     backgroundColor: colours.divider,
+    marginVertical: 2,
   },
   infoRow: {
     flexDirection: 'row',
     gap: spacing.sm,
-    paddingVertical: spacing.xs / 2,
+    alignItems: 'flex-start',
   },
   infoLabel: {
     width: 90,
     fontSize: typography.sm,
     color: colours.textMuted,
     fontWeight: '500',
+    flexShrink: 0,
   },
   infoValue: {
     flex: 1,
@@ -84,11 +95,12 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.sm,
     flexWrap: 'wrap',
+    padding: spacing.md,
   },
   statusChip: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs + 2,
-    borderRadius: radius.full ?? 100,
+    borderRadius: radius.full,
     borderWidth: 1.5,
     borderColor: colours.divider,
   },
@@ -100,13 +112,15 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: colours.textMuted,
   },
+  inputGroup: {
+    gap: spacing.xs,
+  },
   inputLabel: {
     fontSize: typography.xs,
     fontWeight: '600',
     color: colours.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: spacing.xs / 2,
   },
   input: {
     borderWidth: 1.5,
@@ -118,14 +132,25 @@ export const styles = StyleSheet.create({
     color: colours.textOnLight,
     backgroundColor: colours.surfaceMuted,
   },
+  inputFocused: {
+    borderColor: colours.primary,
+    backgroundColor: colours.surface,
+  },
   inputMultiline: {
     minHeight: 72,
     textAlignVertical: 'top',
   },
+  formBody: {
+    padding: spacing.md,
+    gap: spacing.md,
+  },
   formActions: {
     flexDirection: 'row',
     gap: spacing.sm,
-    marginTop: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colours.divider,
   },
   saveButton: {
     flex: 1,
@@ -161,20 +186,6 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colours.backgroundLight,
-  },
-  toggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  toggleLabel: {
-    fontSize: typography.sm,
-    color: colours.textOnLight,
-    fontWeight: '500',
-  },
-  toggleSub: {
-    fontSize: typography.xs,
-    color: colours.textMuted,
-    marginTop: 2,
+    gap: spacing.sm,
   },
 });

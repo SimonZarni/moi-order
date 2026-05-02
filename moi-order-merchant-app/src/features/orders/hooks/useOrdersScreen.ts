@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getOrders, updateOrderStatus } from '../../../api/orders';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
-import { CACHE_TTL } from '../../../shared/constants/config';
+import { CACHE_TTL, GC_TIME, QUERY_RETRY } from '../../../shared/constants/config';
 import { ORDER_STATUS, type OrderStatus } from '../../../types/enums';
 import type { FoodOrder } from '../../../types/models';
 
@@ -41,7 +41,9 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     queryKey: QUERY_KEYS.ORDERS(),
     queryFn: () => getOrders(),
     staleTime: CACHE_TTL.ORDERS,
+    gcTime: GC_TIME.DEFAULT,
     refetchInterval: CACHE_TTL.ORDERS,
+    retry: QUERY_RETRY,
   });
 
   const { mutate: mutateStatus } = useMutation({
@@ -49,6 +51,7 @@ export function useOrdersScreen(): UseOrdersScreenResult {
       updateOrderStatus(id, status),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS() });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ANALYTICS });
     },
   });
 

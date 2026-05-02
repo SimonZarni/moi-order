@@ -14,36 +14,37 @@ export const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.md,
+    paddingBottom: spacing.xl,
     gap: spacing.md,
   },
   header: {
-    marginBottom: spacing.xs,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.xs,
   },
   headerTitle: {
     fontSize: typography.xxl,
     fontWeight: '700',
     color: colours.textOnLight,
+    letterSpacing: -0.5,
   },
   headerSub: {
     fontSize: typography.sm,
     color: colours.textMuted,
-    marginTop: spacing.xs / 2,
+    marginTop: 2,
   },
   card: {
     backgroundColor: colours.surface,
     borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colours.divider,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
   },
   cardHeader: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 4,
     borderBottomWidth: 1,
     borderBottomColor: colours.divider,
+    backgroundColor: colours.surfaceMuted,
   },
   cardTitle: {
     fontSize: typography.md,
@@ -71,20 +72,21 @@ export const styles = StyleSheet.create({
     color: colours.textOnLight,
   },
   periodRevenue: {
-    fontSize: typography.sm,
+    fontSize: typography.md,
     fontWeight: '700',
     color: colours.primary,
   },
   barTrack: {
-    height: 8,
-    backgroundColor: colours.backgroundLight,
-    borderRadius: radius.full ?? 100,
+    height: 6,
+    backgroundColor: colours.divider,
+    borderRadius: radius.full,
     overflow: 'hidden',
   },
   barFill: {
-    height: 8,
+    height: 6,
     backgroundColor: colours.primary,
-    borderRadius: radius.full ?? 100,
+    borderRadius: radius.full,
+    minWidth: 4,
   },
   periodMeta: {
     fontSize: typography.xs,
@@ -108,6 +110,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.xl,
     fontWeight: '700',
     color: colours.textOnLight,
+    letterSpacing: -0.5,
   },
   summaryLabel: {
     fontSize: typography.xs,
@@ -122,7 +125,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     borderWidth: 1,
-    borderColor: colours.warning + '33',
+    borderColor: colours.warning + '44',
   },
   pendingTextCol: {
     flex: 1,
@@ -142,5 +145,6 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colours.backgroundLight,
+    gap: spacing.sm,
   },
 });

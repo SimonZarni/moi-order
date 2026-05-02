@@ -12,9 +12,9 @@ import { RESTAURANT_STATUS } from '../../../types/enums';
 import type { RestaurantStatus } from '../../../types/enums';
 
 const STATUS_CONFIG: Record<RestaurantStatus, { label: string; color: string; bg: string }> = {
-  [RESTAURANT_STATUS.Open]:   { label: 'Open',   color: colours.success,     bg: colours.successBg },
-  [RESTAURANT_STATUS.Closed]: { label: 'Closed', color: colours.error,       bg: colours.errorBg },
-  [RESTAURANT_STATUS.Paused]: { label: 'Paused', color: colours.warning,     bg: colours.warningBg },
+  [RESTAURANT_STATUS.Open]:   { label: '🟢 Open',   color: colours.success,  bg: colours.successBg },
+  [RESTAURANT_STATUS.Closed]: { label: '🔴 Closed', color: colours.error,    bg: colours.errorBg },
+  [RESTAURANT_STATUS.Paused]: { label: '🟡 Paused', color: colours.warning,  bg: colours.warningBg },
 };
 
 export function RestaurantScreen(): React.JSX.Element {
@@ -48,13 +48,15 @@ export function RestaurantScreen(): React.JSX.Element {
               accessibilityRole="button"
             >
               <Ionicons name="pencil-outline" size={14} color={colours.white} />
-              <Text style={styles.editButtonText}>Edit</Text>
+              <Text style={styles.editButtonText}>Edit Profile</Text>
             </Pressable>
           )}
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Status</Text>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Status</Text>
+          </View>
           <View style={styles.statusRow}>
             {(Object.values(RESTAURANT_STATUS) as RestaurantStatus[]).map((s) => {
               const cfg = STATUS_CONFIG[s];
@@ -67,7 +69,7 @@ export function RestaurantScreen(): React.JSX.Element {
                     isActive && [styles.statusChipActive, { backgroundColor: cfg.bg }],
                   ]}
                   onPress={() => handleToggleStatus(s)}
-                  accessibilityLabel={`Set status to ${cfg.label}`}
+                  accessibilityLabel={`Set status to ${s}`}
                   accessibilityRole="button"
                 >
                   <Text style={[styles.statusChipText, isActive && { color: cfg.color }]}>
@@ -81,59 +83,58 @@ export function RestaurantScreen(): React.JSX.Element {
 
         {isEditing ? (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Edit Profile</Text>
-
-            <View>
-              <Text style={styles.inputLabel}>Restaurant Name</Text>
-              <TextInput
-                style={styles.input}
-                value={form.name}
-                onChangeText={(v) => handleFieldChange('name', v)}
-                placeholder="Restaurant name"
-                placeholderTextColor={colours.medium}
-                accessibilityLabel="Restaurant name"
-              />
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>Edit Profile</Text>
             </View>
-
-            <View>
-              <Text style={styles.inputLabel}>Description</Text>
-              <TextInput
-                style={[styles.input, styles.inputMultiline]}
-                value={form.description}
-                onChangeText={(v) => handleFieldChange('description', v)}
-                placeholder="Tell customers about your restaurant"
-                placeholderTextColor={colours.medium}
-                multiline
-                numberOfLines={3}
-                accessibilityLabel="Restaurant description"
-              />
+            <View style={styles.formBody}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Restaurant Name</Text>
+                <TextInput
+                  style={styles.input}
+                  value={form.name}
+                  onChangeText={(v) => handleFieldChange('name', v)}
+                  placeholder="Restaurant name"
+                  placeholderTextColor={colours.medium}
+                  accessibilityLabel="Restaurant name"
+                />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Description</Text>
+                <TextInput
+                  style={[styles.input, styles.inputMultiline]}
+                  value={form.description}
+                  onChangeText={(v) => handleFieldChange('description', v)}
+                  placeholder="Tell customers about your restaurant"
+                  placeholderTextColor={colours.medium}
+                  multiline
+                  numberOfLines={3}
+                  accessibilityLabel="Restaurant description"
+                />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Address</Text>
+                <TextInput
+                  style={styles.input}
+                  value={form.address}
+                  onChangeText={(v) => handleFieldChange('address', v)}
+                  placeholder="Restaurant address"
+                  placeholderTextColor={colours.medium}
+                  accessibilityLabel="Restaurant address"
+                />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Phone</Text>
+                <TextInput
+                  style={styles.input}
+                  value={form.phone}
+                  onChangeText={(v) => handleFieldChange('phone', v)}
+                  placeholder="+66 xx xxx xxxx"
+                  placeholderTextColor={colours.medium}
+                  keyboardType="phone-pad"
+                  accessibilityLabel="Restaurant phone number"
+                />
+              </View>
             </View>
-
-            <View>
-              <Text style={styles.inputLabel}>Address</Text>
-              <TextInput
-                style={styles.input}
-                value={form.address}
-                onChangeText={(v) => handleFieldChange('address', v)}
-                placeholder="Restaurant address"
-                placeholderTextColor={colours.medium}
-                accessibilityLabel="Restaurant address"
-              />
-            </View>
-
-            <View>
-              <Text style={styles.inputLabel}>Phone</Text>
-              <TextInput
-                style={styles.input}
-                value={form.phone}
-                onChangeText={(v) => handleFieldChange('phone', v)}
-                placeholder="+66 xx xxx xxxx"
-                placeholderTextColor={colours.medium}
-                keyboardType="phone-pad"
-                accessibilityLabel="Restaurant phone number"
-              />
-            </View>
-
             <View style={styles.formActions}>
               <Pressable
                 style={styles.cancelButton}
@@ -158,43 +159,48 @@ export function RestaurantScreen(): React.JSX.Element {
           </View>
         ) : (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Profile</Text>
-            <InfoRow label="Name" value={restaurant?.name ?? '—'} />
-            <View style={styles.divider} />
-            <InfoRow label="Description" value={restaurant?.description ?? '—'} />
-            <View style={styles.divider} />
-            <InfoRow label="Address" value={restaurant?.address ?? '—'} />
-            <View style={styles.divider} />
-            <InfoRow label="Phone" value={restaurant?.phone ?? '—'} />
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>Profile</Text>
+            </View>
+            <View style={styles.cardBody}>
+              <InfoRow label="Name" value={restaurant?.name ?? '—'} />
+              <View style={styles.divider} />
+              <InfoRow label="Description" value={restaurant?.description ?? '—'} />
+              <View style={styles.divider} />
+              <InfoRow label="Address" value={restaurant?.address ?? '—'} />
+              <View style={styles.divider} />
+              <InfoRow label="Phone" value={restaurant?.phone ?? '—'} />
+            </View>
           </View>
         )}
 
         {restaurant !== undefined && (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Delivery Settings</Text>
-            <InfoRow
-              label="Delivery"
-              value={restaurant.is_delivery_available ? 'Available' : 'Not available'}
-            />
-            <View style={styles.divider} />
-            <InfoRow
-              label="Pickup"
-              value={restaurant.is_pickup_available ? 'Available' : 'Not available'}
-            />
-            <View style={styles.divider} />
-            <InfoRow
-              label="Min Order"
-              value={formatPrice(restaurant.min_order_cents)}
-            />
-            {restaurant.delivery_radius_km !== null && (
-              <>
-                <View style={styles.divider} />
-                <InfoRow
-                  label="Radius"
-                  value={`${restaurant.delivery_radius_km} km`}
-                />
-              </>
-            )}
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>Delivery Settings</Text>
+            </View>
+            <View style={styles.cardBody}>
+              <InfoRow
+                label="Delivery"
+                value={restaurant.is_delivery_available ? '✓ Available' : '✗ Not available'}
+              />
+              <View style={styles.divider} />
+              <InfoRow
+                label="Pickup"
+                value={restaurant.is_pickup_available ? '✓ Available' : '✗ Not available'}
+              />
+              <View style={styles.divider} />
+              <InfoRow
+                label="Min Order"
+                value={formatPrice(restaurant.min_order_cents)}
+              />
+              {restaurant.delivery_radius_km !== null && (
+                <>
+                  <View style={styles.divider} />
+                  <InfoRow label="Radius" value={`${restaurant.delivery_radius_km} km`} />
+                </>
+              )}
+            </View>
           </View>
         )}
       </ScrollView>

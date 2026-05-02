@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getOrder, updateOrderStatus } from '../../../api/orders';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
-import { CACHE_TTL } from '../../../shared/constants/config';
+import { CACHE_TTL, GC_TIME } from '../../../shared/constants/config';
 import type { FoodOrder } from '../../../types/models';
 
 interface UseOrderDetailScreenResult {
@@ -20,6 +20,8 @@ export function useOrderDetailScreen(orderId: number): UseOrderDetailScreenResul
     queryKey: QUERY_KEYS.ORDER_DETAIL(orderId),
     queryFn: () => getOrder(orderId),
     staleTime: CACHE_TTL.ORDERS,
+    gcTime: GC_TIME.DEFAULT,
+    retry: 0,   // fail fast — don't mask a real 404 with 3 retries + 7s delay
   });
 
   const { mutate, isPending: isUpdating } = useMutation({
@@ -27,6 +29,7 @@ export function useOrderDetailScreen(orderId: number): UseOrderDetailScreenResul
     onSuccess: (updated) => {
       queryClient.setQueryData(QUERY_KEYS.ORDER_DETAIL(orderId), updated);
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS() });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ANALYTICS });
     },
   });
 

@@ -19,6 +19,7 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color={colours.primary} />
+        <Text style={styles.loadingText}>Loading dashboard…</Text>
       </View>
     );
   }
@@ -37,19 +38,19 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
 
         <View style={styles.statsGrid}>
           <StatCard
-            label="Today's Revenue"
+            label="Today Revenue"
             value={formatPrice(analytics?.today.revenue_cents ?? 0)}
             sub={`${analytics?.today.order_count ?? 0} orders`}
             iconName="cash-outline"
-            iconBg={colours.successBg}
-            iconColor={colours.success}
+            iconBg={colours.primaryBg}
+            iconColor={colours.primaryDark}
           />
           <StatCard
             label="This Week"
             value={formatPrice(analytics?.this_week.revenue_cents ?? 0)}
             sub={`${analytics?.this_week.order_count ?? 0} orders`}
             iconName="calendar-outline"
-            iconBg={colours.infoBgBlue}
+            iconBg={colours.infoBg}
             iconColor={colours.info}
           />
           <StatCard
@@ -57,13 +58,13 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
             value={formatPrice(analytics?.this_month.revenue_cents ?? 0)}
             sub={`${analytics?.this_month.order_count ?? 0} orders`}
             iconName="trending-up-outline"
-            iconBg={colours.primaryLight}
-            iconColor={colours.primaryDark}
+            iconBg={colours.primaryBg}
+            iconColor={colours.primary}
           />
           <StatCard
-            label="Pending Orders"
+            label="Pending"
             value={String(analytics?.pending_count ?? 0)}
-            sub="awaiting action"
+            sub="need action"
             iconName="time-outline"
             iconBg={colours.warningBg}
             iconColor={colours.warning}
@@ -83,7 +84,7 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
           </View>
           {recentOrders.length === 0 ? (
             <View style={styles.emptyState}>
-              <Ionicons name="receipt-outline" size={32} color={colours.medium} />
+              <Ionicons name="receipt-outline" size={36} color={colours.medium} />
               <Text style={styles.emptyText}>No orders yet</Text>
             </View>
           ) : (
@@ -92,7 +93,7 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
                 key={order.id}
                 order={order}
                 onUpdateStatus={() => { void refetch(); }}
-                onPress={onSelectOrder ? () => onSelectOrder(order.id) : undefined}
+                onPress={onSelectOrder !== undefined ? () => onSelectOrder(order.id) : undefined}
               />
             ))
           )}
@@ -118,7 +119,7 @@ function StatCard({ label, value, sub, iconName, iconBg, iconColor }: StatCardPr
         <View style={[styles.statIconBg, { backgroundColor: iconBg }]}>
           <Ionicons name={iconName} size={16} color={iconColor} />
         </View>
-        <Text style={styles.statLabel}>{label}</Text>
+        <Text style={styles.statLabel} numberOfLines={1}>{label}</Text>
       </View>
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statSub}>{sub}</Text>

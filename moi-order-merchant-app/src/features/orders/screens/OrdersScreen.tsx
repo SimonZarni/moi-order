@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, SectionList, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, SectionList, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useOrdersScreen } from '../hooks/useOrdersScreen';
 import { OrderCard } from '../components/OrderCard';
 import { styles } from './OrdersScreen.styles';
@@ -46,7 +47,12 @@ export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.El
           <Text style={styles.sectionHeader}>{section.title}</Text>
         )}
         contentContainerStyle={styles.list}
-        ListEmptyComponent={<Text style={styles.empty}>No orders yet</Text>}
+        ListEmptyComponent={
+          <View style={styles.centered}>
+            <Ionicons name="receipt-outline" size={40} color={colours.medium} />
+            <Text style={styles.empty}>No orders yet</Text>
+          </View>
+        }
         stickySectionHeadersEnabled={false}
       />
     </SafeAreaView>

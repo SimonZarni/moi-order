@@ -27,9 +27,9 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
   },
   logoMark: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.sm,
+    width: 38,
+    height: 38,
+    borderRadius: radius.md,
     backgroundColor: colours.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -49,17 +49,17 @@ export const styles = StyleSheet.create({
     color: colours.textSubtle,
     fontSize: typography.xxs,
     textTransform: 'uppercase',
-    letterSpacing: 1.2,
+    letterSpacing: 1.4,
     lineHeight: 14,
   },
   divider: {
     height: 1,
     backgroundColor: colours.dividerDark,
-    marginVertical: spacing.sm,
+    marginVertical: spacing.xs,
   },
   navItems: {
     flex: 1,
-    gap: spacing.xs / 2,
+    gap: 2,
     marginTop: spacing.sm,
   },
   navItem: {
@@ -72,7 +72,7 @@ export const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   navItemActive: {
-    backgroundColor: colours.primaryDark + '26',
+    backgroundColor: colours.primary + '1a',
   },
   navItemPressed: {
     backgroundColor: colours.dividerDark,
@@ -80,8 +80,8 @@ export const styles = StyleSheet.create({
   activeIndicator: {
     position: 'absolute',
     left: 0,
-    top: 8,
-    bottom: 8,
+    top: 10,
+    bottom: 10,
     width: 3,
     backgroundColor: colours.primary,
     borderRadius: 2,
@@ -99,7 +99,7 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
   bottomSection: {
-    marginTop: spacing.sm,
+    marginTop: spacing.xs,
   },
   logoutLabel: {
     color: colours.error,

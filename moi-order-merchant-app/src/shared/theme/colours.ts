@@ -1,22 +1,29 @@
 export const colours = {
-  primary: '#f97316',
-  primaryDark: '#ea580c',
-  primaryLight: '#fed7aa',
-  backgroundDark: '#1c1917',
-  backgroundMid: '#292524',
-  backgroundLight: '#f5f5f4',
+  // ── Brand ────────────────────────────────────────────────────────────────
+  primary: '#22c55e',
+  primaryDark: '#16a34a',
+  primaryLight: '#bbf7d0',
+  primaryBg: '#f0fdf4',
+
+  // ── Backgrounds ──────────────────────────────────────────────────────────
+  backgroundDark: '#0f1a14',
+  backgroundMid: '#1a2e20',
+  backgroundLight: '#f8faf8',
   surface: '#ffffff',
-  surfaceMuted: '#fafaf9',
-  card: '#ffffff',
+  surfaceMuted: '#f9fafb',
+
+  // ── Text ─────────────────────────────────────────────────────────────────
   textOnDark: '#ffffff',
-  textOnLight: '#1c1917',
-  textMuted: '#78716c',
-  textSubtle: '#a8a29e',
-  medium: '#a8a29e',
-  divider: '#e7e5e4',
-  dividerDark: '#44403c',
-  infoBg: '#f0fdf4',
-  white: '#ffffff',
+  textOnLight: '#111827',
+  textMuted: '#6b7280',
+  textSubtle: '#9ca3af',
+  medium: '#9ca3af',
+
+  // ── Borders / dividers ────────────────────────────────────────────────────
+  divider: '#e5e7eb',
+  dividerDark: '#1f3527',
+
+  // ── Semantic ─────────────────────────────────────────────────────────────
   success: '#16a34a',
   successBg: '#f0fdf4',
   error: '#dc2626',
@@ -24,6 +31,11 @@ export const colours = {
   warning: '#d97706',
   warningBg: '#fffbeb',
   info: '#2563eb',
+  infoBg: '#eff6ff',
   infoBgBlue: '#eff6ff',
+
+  // ── Misc ─────────────────────────────────────────────────────────────────
+  card: '#ffffff',
+  white: '#ffffff',
   overlay: 'rgba(0,0,0,0.4)',
 } as const;
