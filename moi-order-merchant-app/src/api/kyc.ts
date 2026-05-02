@@ -49,15 +49,20 @@ export async function uploadKycDocument(
     formData.append('file', { uri: file.uri, name: file.name, type: file.type } as unknown as Blob);
   }
 
+  // Both web and native need the same config:
+  //   • Content-Type 'multipart/form-data' overrides the instance default
+  //     'application/json', which prevents Axios 1.7's transformRequest from
+  //     taking the hasJSONContentType branch and calling JSON.stringify(formData).
+  //   • transformRequest bypass is belt-and-suspenders for the native path.
+  //   • On web the XHR adapter then deletes Content-Type so the browser can
+  //     append the correct boundary; on native RN networking does the same.
   const response = await apiClient.post<{ data: KycDocument }>(
     '/kyc/documents',
     formData,
-    Platform.OS === 'web'
-      ? {} // Browser sets Content-Type + boundary automatically for FormData
-      : {
-          headers: { 'Content-Type': 'multipart/form-data' },
-          transformRequest: [(data: FormData) => data], // Prevents Axios JSON-serialising in RN
-        },
+    {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      transformRequest: [(data: FormData) => data],
+    },
   );
   return response.data.data;
 }
