@@ -15,7 +15,6 @@
         "backgroundColor": "#f97316"
       }
     },
-    "web": { "bundler": "metro", "output": "single" },
-    "extra": { "apiBaseUrl": "http://localhost:8000/api/merchant/v1" }
+    "web": { "bundler": "metro", "output": "single" }
   }
 }
