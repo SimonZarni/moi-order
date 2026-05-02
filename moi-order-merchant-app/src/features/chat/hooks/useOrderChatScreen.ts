@@ -15,10 +15,13 @@ interface UseOrderChatScreenResult {
   text: string;
   isSending: boolean;
   inputBarPadding: number;
+  selectedPhoto: string | null;
   listRef: React.RefObject<FlatList | null>;
   handleTextChange: (v: string) => void;
   handleSend: () => void;
   handlePickImage: () => Promise<void>;
+  handlePhotoPress: (uri: string) => void;
+  handlePhotoClose: () => void;
 }
 
 export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
@@ -27,6 +30,7 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
   const [text, setText] = useState('');
   const [sendError, setSendError] = useState<string | null>(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const listRef = useRef<FlatList>(null);
 
   const { data, isLoading, isError } = useQuery({
@@ -89,8 +93,13 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
     );
   }, [mutate]);
 
+  const handlePhotoPress = useCallback((uri: string) => setSelectedPhoto(uri), []);
+  const handlePhotoClose = useCallback(() => setSelectedPhoto(null), []);
+
   return {
     messages, isLoading, isError, sendError, text, isSending,
-    inputBarPadding, listRef, handleTextChange, handleSend, handlePickImage,
+    inputBarPadding, selectedPhoto, listRef,
+    handleTextChange, handleSend, handlePickImage,
+    handlePhotoPress, handlePhotoClose,
   };
 }

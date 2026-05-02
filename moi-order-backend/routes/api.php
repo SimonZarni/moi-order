@@ -38,7 +38,7 @@ Route::prefix('admin/v1')->middleware(['auth:sanctum', 'abilities:admin', 'admin
 // Merchant public routes (login only) — intentionally unauthenticated
 Route::prefix('merchant/v1')->middleware(['throttle:auth'])->group(
     base_path('routes/api/merchant_public.php')
-);
+); 
 
 // Merchant KYC routes — token with 'merchant' ability; no is_merchant gate (KYC is how they earn it)
 Route::prefix('merchant/v1')->middleware(['auth:sanctum', 'abilities:merchant', 'user.not_suspended', 'throttle:api'])->group(

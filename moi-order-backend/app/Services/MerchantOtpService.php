@@ -40,7 +40,19 @@ class MerchantOtpService
      */
     public function requestOtp(MerchantOtpRequestDTO $dto): array
     {
-        $phoneNumber  = $this->normalizeThaiPhoneNumber($dto->phoneNumber);
+        $phoneNumber = $this->normalizeThaiPhoneNumber($dto->phoneNumber);
+
+        // Only registered users may request an OTP for the merchant dashboard.
+        // New accounts must be created through the customer app first.
+        if (! User::where('phone_number', $phoneNumber)->exists()) {
+            throw ValidationException::withMessages([
+                'phone_number' => [
+                    'No account is associated with this number. ' .
+                    'Please create an account in the MOI ORDER app first.',
+                ],
+            ]);
+        }
+
         $providerToken = $this->thaiBulkSmsOtpService->requestOtp($phoneNumber);
         $otpRequestId  = (string) Str::uuid();
 
@@ -94,7 +106,7 @@ class MerchantOtpService
         // Single-use: consumed after successful verification.
         Cache::forget($cacheKey);
 
-        $user = $this->findOrCreateMerchantUser($phoneNumber);
+        $user = $this->findMerchantUser($phoneNumber);
 
         $this->assertNotRestricted($user);
 
@@ -115,22 +127,21 @@ class MerchantOtpService
 
     // ─── Private ─────────────────────────────────────────────────────────────
 
-    private function findOrCreateMerchantUser(string $phoneNumber): User
+    private function findMerchantUser(string $phoneNumber): User
     {
         $user = User::where('phone_number', $phoneNumber)->first();
 
-        if ($user !== null) {
-            return $user;
+        if ($user === null) {
+            // Guard: requestOtp already blocked unknown numbers — this is belt-and-suspenders.
+            throw ValidationException::withMessages([
+                'phone_number' => [
+                    'No account is associated with this number. ' .
+                    'Please create an account in the MOI ORDER app first.',
+                ],
+            ]);
         }
 
-        // New user — no email yet; placeholder follows the same convention as OtpAuthService.
-        return User::create([
-            'name'         => 'Merchant',
-            'email'        => 'merchant_phone_' . $phoneNumber . '@users.moiorder.local',
-            'phone_number' => $phoneNumber,
-            'password'     => null,
-            'is_merchant'  => false,
-        ]);
+        return $user;
     }
 
     private function assertNotRestricted(User $user): void

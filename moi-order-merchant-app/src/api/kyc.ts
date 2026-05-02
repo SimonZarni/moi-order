@@ -16,9 +16,7 @@ export interface UploadFileRef {
 
 export async function getKycApplication(): Promise<KycApplication | null> {
   try {
-    const response = await apiClient.get<{ data: KycApplication }>(
-      '/kyc/application',
-    );
+    const response = await apiClient.get<{ data: KycApplication }>('/kyc');
     return response.data.data;
   } catch {
     return null;
@@ -28,10 +26,7 @@ export async function getKycApplication(): Promise<KycApplication | null> {
 export async function upsertKycApplication(
   data: UpsertKycData,
 ): Promise<KycApplication> {
-  const response = await apiClient.post<{ data: KycApplication }>(
-    '/kyc/application',
-    data,
-  );
+  const response = await apiClient.post<{ data: KycApplication }>('/kyc', data);
   return response.data.data;
 }
 
@@ -41,7 +36,6 @@ export async function uploadKycDocument(
 ): Promise<KycDocument> {
   const formData = new FormData();
   formData.append('type', type);
-  // React Native FormData accepts this shape
   formData.append('file', {
     uri: file.uri,
     name: file.name,
@@ -57,8 +51,6 @@ export async function uploadKycDocument(
 }
 
 export async function submitKycApplication(): Promise<KycApplication> {
-  const response = await apiClient.post<{ data: KycApplication }>(
-    '/kyc/application/submit',
-  );
+  const response = await apiClient.post<{ data: KycApplication }>('/kyc/submit');
   return response.data.data;
 }

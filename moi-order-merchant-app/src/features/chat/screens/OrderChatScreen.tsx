@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   ActivityIndicator, FlatList, Image, Keyboard, KeyboardAvoidingView,
-  Platform, Pressable, Text, TextInput, View,
+  Modal, Platform, Pressable, Text, TextInput, View,
 } from 'react-native';
 
 const KEYBOARD_BEHAVIOR = Platform.OS === 'ios' ? 'padding' : 'height';
@@ -17,9 +17,12 @@ import { styles } from './OrderChatScreen.styles';
 
 type Route = RouteProp<MerchantStackParamList, 'OrderChat'>;
 
-interface BubbleProps { msg: OrderChatMessage }
+interface BubbleProps {
+  msg: OrderChatMessage;
+  onPhotoPress: (uri: string) => void;
+}
 
-function MessageBubble({ msg }: BubbleProps): React.JSX.Element {
+function MessageBubble({ msg, onPhotoPress }: BubbleProps): React.JSX.Element {
   const isMerchant = msg.sender_type === 'merchant';
   const time = new Date(msg.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   return (
@@ -27,7 +30,9 @@ function MessageBubble({ msg }: BubbleProps): React.JSX.Element {
       <View style={[styles.bubble, isMerchant ? styles.bubbleMerchant : styles.bubbleOther]}>
         {!isMerchant && <Text style={styles.senderName}>{msg.sender_name}</Text>}
         {msg.image_url !== null && (
-          <Image source={{ uri: msg.image_url }} style={styles.bubbleImage} resizeMode="cover" />
+          <Pressable onPress={() => onPhotoPress(msg.image_url!)} accessibilityRole="button" accessibilityLabel="View full photo">
+            <Image source={{ uri: msg.image_url }} style={styles.bubbleImage} resizeMode="cover" />
+          </Pressable>
         )}
         {msg.body !== null && (
           <Text style={[styles.bubbleText, isMerchant ? styles.bubbleTextMerchant : styles.bubbleTextOther]}>
@@ -51,8 +56,9 @@ interface ContentProps {
 
 export function OrderChatContent({ orderId, onBack }: ContentProps): React.JSX.Element {
   const {
-    messages, isLoading, isError, sendError, text, isSending, inputBarPadding, listRef,
-    handleTextChange, handleSend, handlePickImage,
+    messages, isLoading, isError, sendError, text, isSending, inputBarPadding,
+    selectedPhoto, listRef,
+    handleTextChange, handleSend, handlePickImage, handlePhotoPress, handlePhotoClose,
   } = useOrderChatScreen(orderId);
 
   return (
@@ -91,7 +97,7 @@ export function OrderChatContent({ orderId, onBack }: ContentProps): React.JSX.E
             ref={listRef}
             data={messages}
             keyExtractor={(m) => String(m.id)}
-            renderItem={({ item }) => <MessageBubble msg={item} />}
+            renderItem={({ item }) => <MessageBubble msg={item} onPhotoPress={handlePhotoPress} />}
             style={styles.list}
             contentContainerStyle={styles.listContent}
             onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
@@ -141,6 +147,17 @@ export function OrderChatContent({ orderId, onBack }: ContentProps): React.JSX.E
           </Pressable>
         </View>
       </KeyboardAvoidingView>
+
+      <Modal visible={selectedPhoto !== null} transparent animationType="fade" onRequestClose={handlePhotoClose}>
+        <Pressable style={styles.photoOverlay} onPress={handlePhotoClose} accessibilityRole="button" accessibilityLabel="Close photo">
+          {selectedPhoto !== null && (
+            <Image source={{ uri: selectedPhoto }} style={styles.photoFull} resizeMode="contain" />
+          )}
+          <Pressable style={styles.photoCloseBtn} onPress={handlePhotoClose} accessibilityRole="button" accessibilityLabel="Close">
+            <Ionicons name="close" size={22} color={colours.white} />
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
