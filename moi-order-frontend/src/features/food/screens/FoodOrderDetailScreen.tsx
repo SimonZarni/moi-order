@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
@@ -8,6 +8,9 @@ import { FoodOrderItem } from '@/types/models';
 import { formatPrice } from '@/shared/utils/formatCurrency';
 import { InvoiceModal } from '../components/InvoiceModal';
 import { OrderProgressBar } from '../components/OrderProgressBar';
+import { OrderRatingInput } from '../components/OrderRatingInput';
+import { OrderChatSection } from '../components/OrderChatSection';
+import { SlideToComplete } from '../components/SlideToComplete';
 import { useFoodOrderDetailScreen } from '../hooks/useFoodOrderDetailScreen';
 import { styles } from './FoodOrderDetailScreen.styles';
 
@@ -15,7 +18,12 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
   const {
     order, isLoading,
     invoiceVisible, handleInvoiceOpen, handleInvoiceClose,
+    completeModalVisible, isCompleting,
+    rating, review,
     handleBack, handlePromptPayPress,
+    handleSlideComplete, handleCompleteConfirm, handleCompleteCancel,
+    handleRatingChange, handleReviewChange,
+    handleCallRestaurant,
   } = useFoodOrderDetailScreen();
 
   if (isLoading || !order) {
@@ -32,7 +40,11 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
     );
   }
 
-  const canViewInvoice = order.payment_confirmed_at !== null || order.status === FOOD_ORDER_STATUS.Completed;
+  const canViewInvoice    = order.payment_confirmed_at !== null || order.status === FOOD_ORDER_STATUS.Completed;
+  const canComplete       = order.status === FOOD_ORDER_STATUS.Delivered;
+  const isCompleted       = order.status === FOOD_ORDER_STATUS.Completed;
+  const isCancelled       = order.status === FOOD_ORDER_STATUS.Cancelled;
+  const hasRestaurantPhone = order.restaurant_phone != null;
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -49,7 +61,7 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-        {order.status === FOOD_ORDER_STATUS.Cancelled ? (
+        {isCancelled ? (
           <View style={styles.cancelledCard}>
             <Text style={styles.cancelledText}>This order has been cancelled.</Text>
           </View>
@@ -83,6 +95,29 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
           </Pressable>
         )}
 
+        {canComplete && (
+          <View style={styles.completeSection}>
+            <SlideToComplete onComplete={handleSlideComplete} />
+            <Text style={styles.autoCompleteNotice}>
+              Order will complete automatically in 10 minutes if not confirmed.
+            </Text>
+            {hasRestaurantPhone && (
+              <Pressable style={styles.callBtn} onPress={handleCallRestaurant} accessibilityRole="button" accessibilityLabel="Call restaurant">
+                <Ionicons name="call-outline" size={14} color={colours.primary} />
+                <Text style={styles.callBtnText}>Contact Restaurant</Text>
+              </Pressable>
+            )}
+          </View>
+        )}
+
+        {!isCancelled && (
+          <View style={styles.card}>
+            <View style={styles.chatPad}>
+              <OrderChatSection order={order} />
+            </View>
+          </View>
+        )}
+
         {order.customer_notes !== null && (
           <>
             <Text style={styles.sectionTitle}>Notes</Text>
@@ -94,6 +129,33 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
       {canViewInvoice && (
         <InvoiceModal order={order} visible={invoiceVisible} onClose={handleInvoiceClose} />
       )}
+
+      {/* Complete order confirmation modal */}
+      <Modal visible={completeModalVisible} transparent animationType="fade" onRequestClose={handleCompleteCancel}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Mark this order as complete?</Text>
+            <Text style={styles.modalSub}>You can also leave a rating and review.</Text>
+            <OrderRatingInput
+              rating={rating}
+              review={review}
+              onRatingChange={handleRatingChange}
+              onReviewChange={handleReviewChange}
+            />
+            <View style={styles.modalActions}>
+              <Pressable style={styles.modalCancelBtn} onPress={handleCompleteCancel} accessibilityRole="button" accessibilityLabel="Cancel">
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={styles.modalDoneBtn} onPress={handleCompleteConfirm} disabled={isCompleting} accessibilityRole="button" accessibilityLabel="Confirm complete">
+                {isCompleting
+                  ? <ActivityIndicator size="small" color={colours.white} />
+                  : <Text style={styles.modalDoneText}>Done</Text>
+                }
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

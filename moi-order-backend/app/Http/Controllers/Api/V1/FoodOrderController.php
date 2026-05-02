@@ -44,7 +44,7 @@ class FoodOrderController extends Controller
     /** GET /api/v1/food-orders/{id} */
     public function show(Request $request, int $id): JsonResponse
     {
-        $order = FoodOrder::forUser($request->user()->id)->with(['items', 'restaurant'])->findOrFail($id);
+        $order = FoodOrder::forUser($request->user()->id)->with(['items', 'restaurant', 'user'])->findOrFail($id);
 
         return response()->json(['data' => new FoodOrderResource($order, $this->storage)]);
     }

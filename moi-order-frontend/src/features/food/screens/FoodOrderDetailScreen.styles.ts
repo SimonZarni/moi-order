@@ -5,7 +5,7 @@ import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 
 export const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colours.backgroundLight },
+  root: { flex: 1, backgroundColor: colours.backgroundDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -28,14 +28,17 @@ export const styles = StyleSheet.create({
     color: colours.textOnDark,
     flex: 1,
   },
-  scroll: { flex: 1 },
-  content: { padding: spacing.md, gap: spacing.sm },
+  scroll: { flex: 1, backgroundColor: colours.backgroundLight },
+  content: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xxl },
   // Items
   card: {
     backgroundColor: colours.card,
     borderRadius: radius.xl,
     overflow: 'hidden',
     paddingVertical: spacing.xs,
+  },
+  chatPad: {
+    padding: spacing.md,
   },
   sectionTitle: {
     fontSize: typography.xxs,
@@ -60,7 +63,7 @@ export const styles = StyleSheet.create({
     color: colours.textOnLight,
     fontWeight: '500',
   },
-  itemQty: { fontSize: typography.sm, color: colours.medium, marginRight: spacing.sm },
+  itemQty:   { fontSize: typography.sm, color: colours.medium, marginRight: spacing.sm },
   itemPrice: { fontSize: typography.sm, fontWeight: '700', color: colours.textOnLight },
   totalRow: {
     flexDirection: 'row',
@@ -78,15 +81,15 @@ export const styles = StyleSheet.create({
     padding: spacing.md,
   },
   notesText: { fontSize: typography.sm, color: colours.medium, lineHeight: 20 },
-  // State boxes
-  stateBox: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
-  stateText: { fontSize: typography.md, color: colours.textMuted, textAlign: 'center', marginTop: spacing.sm },
+  // State
+  stateBox: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl, backgroundColor: colours.backgroundLight },
   cancelledCard: {
     backgroundColor: '#fee2e2',
     borderRadius: radius.xl,
     padding: spacing.md,
   },
   cancelledText: { fontSize: typography.sm, color: '#b91c1c', fontWeight: '600', textAlign: 'center' },
+  // Invoice
   invoiceBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -95,7 +98,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.card,
     borderRadius: radius.xl,
     paddingVertical: spacing.md,
-    marginTop: spacing.sm,
+    marginTop: spacing.xs,
     borderWidth: 1.5,
     borderColor: colours.primary,
   },
@@ -111,5 +114,83 @@ export const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  // Complete section
+  completeSection: {
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  autoCompleteNotice: {
+    fontSize: typography.xxs,
+    color: colours.textMuted,
+    textAlign: 'center',
+  },
+  callBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    alignSelf: 'center',
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md,
+  },
+  callBtnText: {
+    fontSize: typography.xs,
+    color: colours.primary,
+    fontWeight: '600',
+  },
+  // Confirmation modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    justifyContent: 'center',
+    padding: spacing.md,
+  },
+  modalCard: {
+    backgroundColor: colours.card,
+    borderRadius: radius.xl,
+    padding: spacing.lg,
+    gap: spacing.md,
+  },
+  modalTitle: {
+    fontSize: typography.lg,
+    fontWeight: '800',
+    color: colours.textOnLight,
+    textAlign: 'center',
+  },
+  modalSub: {
+    fontSize: typography.sm,
+    color: colours.textMuted,
+    textAlign: 'center',
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  modalCancelBtn: {
+    flex: 1,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colours.divider,
+  },
+  modalCancelText: {
+    fontSize: typography.md,
+    fontWeight: '600',
+    color: colours.textMuted,
+  },
+  modalDoneBtn: {
+    flex: 1,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    backgroundColor: '#16a34a',
+  },
+  modalDoneText: {
+    fontSize: typography.md,
+    fontWeight: '700',
+    color: colours.white,
   },
 });

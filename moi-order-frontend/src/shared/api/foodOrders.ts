@@ -1,5 +1,5 @@
 import apiClient from './client';
-import { FoodOrder } from '@/types/models';
+import { FoodOrder, OrderChatMessage } from '@/types/models';
 import { ApiResponse, PaginatedResponse } from '@/types/models';
 import { FoodPaymentMethod } from '@/types/enums';
 
@@ -16,6 +16,11 @@ export interface PlaceFoodOrderInput {
   }>;
 }
 
+export interface CompleteFoodOrderInput {
+  rating?: number | null;
+  review?: string | null;
+}
+
 export async function fetchFoodOrders(page = 1): Promise<PaginatedResponse<FoodOrder>> {
   const res = await apiClient.get<PaginatedResponse<FoodOrder>>('/api/v1/food-orders', {
     params: { page },
@@ -30,5 +35,33 @@ export async function fetchFoodOrderDetail(id: number): Promise<FoodOrder> {
 
 export async function placeFoodOrder(input: PlaceFoodOrderInput): Promise<FoodOrder> {
   const res = await apiClient.post<ApiResponse<FoodOrder>>('/api/v1/food-orders', input);
+  return res.data.data;
+}
+
+export async function completeFoodOrder(id: number, input: CompleteFoodOrderInput): Promise<FoodOrder> {
+  const res = await apiClient.post<ApiResponse<FoodOrder>>(`/api/v1/food-orders/${id}/complete`, input);
+  return res.data.data;
+}
+
+export async function fetchOrderChat(orderId: number): Promise<OrderChatMessage[]> {
+  const res = await apiClient.get<{ data: OrderChatMessage[] }>(`/api/v1/food-orders/${orderId}/chat`);
+  return res.data.data;
+}
+
+export async function sendOrderChatMessage(
+  orderId: number,
+  body: string | null,
+  image: { uri: string; name: string; type: string } | null,
+): Promise<OrderChatMessage> {
+  const form = new FormData();
+  if (body) form.append('body', body);
+  if (image) {
+    form.append('image', { uri: image.uri, name: image.name, type: image.type } as unknown as Blob);
+  }
+  const res = await apiClient.post<ApiResponse<OrderChatMessage>>(
+    `/api/v1/food-orders/${orderId}/chat`,
+    form,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
   return res.data.data;
 }

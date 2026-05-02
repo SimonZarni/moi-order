@@ -17,14 +17,16 @@ export const styles = StyleSheet.create({
     maxHeight: '92%',
     minHeight: '65%',
   },
+  dragBarWrapper: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xl,
+    alignItems: 'center',
+  },
   dragBar: {
     width: 36,
     height: 4,
     borderRadius: 2,
     backgroundColor: colours.divider,
-    alignSelf: 'center',
-    marginTop: spacing.sm,
-    marginBottom: spacing.xs,
   },
   // Header row inside modal
   modalHeader: {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
@@ -24,6 +24,7 @@ function todayHours(hours: OpeningHour[] | undefined): OpeningHour | null {
 }
 
 export function RestaurantDetailScreen(): React.JSX.Element {
+  const insets = useSafeAreaInsets();
   const {
     restaurant, isLoading, isError,
     cartItemCount, cartTotalCents, getQuantity,
@@ -48,8 +49,8 @@ export function RestaurantDetailScreen(): React.JSX.Element {
   const todayHour  = todayHours(restaurant.opening_hours);
 
   return (
-    <SafeAreaView style={styles.root} edges={['top']}>
-      <Pressable style={styles.backBtn} onPress={handleBack} accessibilityRole="button" accessibilityLabel="Go back">
+    <SafeAreaView style={styles.root} edges={[]}>
+      <Pressable style={[styles.backBtn, { top: insets.top + 8 }]} onPress={handleBack} accessibilityRole="button" accessibilityLabel="Go back">
         <Ionicons name="chevron-back" size={22} color={colours.white} />
       </Pressable>
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>

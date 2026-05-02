@@ -307,6 +307,7 @@ export interface FoodOrder {
   restaurant_id: number;
   restaurant_name: string | null;
   restaurant_logo_url: string | null;
+  restaurant_phone: string | null;
   status: import('./enums').FoodOrderStatus;
   status_label: string;
   payment_method: import('./enums').FoodPaymentMethod;
@@ -317,6 +318,8 @@ export interface FoodOrder {
   prompt_pay_url: string | null;
   can_show_prompt_pay: boolean;
   items?: FoodOrderItem[];
+  rating: number | null;
+  customer_review: string | null;
   confirmed_at: string | null;
   payment_confirmed_at: string | null;
   preparing_at: string | null;
@@ -324,6 +327,17 @@ export interface FoodOrder {
   delivered_at: string | null;
   completed_at: string | null;
   cancelled_at: string | null;
+  created_at: string;
+}
+
+export interface OrderChatMessage {
+  id: number;
+  sender_type: 'customer' | 'admin';
+  sender_id: number;
+  sender_name: string;
+  body: string | null;
+  image_url: string | null;
+  read_at: string | null;
   created_at: string;
 }
 

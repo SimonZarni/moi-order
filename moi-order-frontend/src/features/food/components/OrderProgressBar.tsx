@@ -19,8 +19,8 @@ const STATUS_INDEX: Record<FoodOrderStatus, number> = {
   [FOOD_ORDER_STATUS.WaitingForDelivery]: 4,
   [FOOD_ORDER_STATUS.DeliveryOnTheWay]:   5,
   [FOOD_ORDER_STATUS.Delivered]:          6,
-  [FOOD_ORDER_STATUS.Completed]:          7,
-  [FOOD_ORDER_STATUS.Cancelled]:          7,
+  [FOOD_ORDER_STATUS.Completed]:          8,
+  [FOOD_ORDER_STATUS.Cancelled]:          8,
 };
 
 // ─── Step definitions ─────────────────────────────────────────────────────────

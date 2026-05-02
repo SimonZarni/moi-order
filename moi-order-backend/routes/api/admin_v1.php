@@ -249,6 +249,8 @@ Route::prefix('food-orders')->name('admin.food-orders.')->group(function (): voi
     Route::get('/',            [AdminFoodOrderController::class, 'index'])->name('index');
     Route::get('/{foodOrder}', [AdminFoodOrderController::class, 'show'])->name('show');
     Route::post('/{foodOrder}/confirm-payment', [AdminFoodOrderController::class, 'confirmPayment'])->name('confirm-payment');
+    Route::get('/{foodOrderId}/chat',  [\App\Http\Controllers\Api\Admin\V1\AdminOrderChatController::class, 'index'])->name('chat.index');
+    Route::post('/{foodOrderId}/chat', [\App\Http\Controllers\Api\Admin\V1\AdminOrderChatController::class, 'store'])->name('chat.store');
 });
 
 // ── Home Cards ────────────────────────────────────────────────────────────────

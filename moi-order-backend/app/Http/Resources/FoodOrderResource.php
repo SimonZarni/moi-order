@@ -29,6 +29,7 @@ class FoodOrderResource extends JsonResource
             'restaurant_id'          => $this->restaurant_id,
             'restaurant_name'        => $this->whenLoaded('restaurant', fn () => $this->restaurant->name),
             'restaurant_logo_url'    => $restaurantLogoUrl,
+            'restaurant_phone'       => $this->whenLoaded('restaurant', fn () => $this->restaurant->phone),
             'status'                 => $this->status->value,
             'status_label'           => $this->status->label(),
             'payment_method'         => $this->payment_method->value,
@@ -47,7 +48,7 @@ class FoodOrderResource extends JsonResource
                 FoodOrderItemResource::collection($this->items)
             ),
             'rating'                 => $this->rating,
-            'customer_review'        => $this->customer_review,
+            'customer_review'        => $this->customer_review ?? null,
             'confirmed_at'           => $this->confirmed_at?->toIso8601String(),
             'payment_confirmed_at'   => $this->payment_confirmed_at?->toIso8601String(),
             'preparing_at'           => $this->preparing_at?->toIso8601String(),

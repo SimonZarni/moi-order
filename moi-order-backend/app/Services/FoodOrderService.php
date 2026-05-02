@@ -133,7 +133,7 @@ class FoodOrderService
             event(new FoodOrderStatusUpdated($order->fresh()));
         });
 
-        return $order->fresh(['items', 'user']);
+        return $order->fresh(['items', 'restaurant', 'user']);
     }
 
     public function listForUser(int $userId, int $perPage = 20): LengthAwarePaginator

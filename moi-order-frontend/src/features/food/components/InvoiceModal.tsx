@@ -1,5 +1,5 @@
-import React from 'react';
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import React, { useRef } from 'react';
+import { Modal, PanResponder, Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { formatPrice } from '@/shared/utils/formatCurrency';
@@ -49,11 +49,25 @@ function InfoRow({ label, value }: { label: string; value: string }): React.JSX.
 export function InvoiceModal({ order, visible, onClose }: Props): React.JSX.Element {
   const isPaid = order.payment_confirmed_at !== null || order.payment_method === FOOD_PAYMENT_METHOD.Cod;
 
+  const dragY = useRef(0);
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderMove: (_, gs) => { dragY.current = gs.dy; },
+      onPanResponderRelease: () => {
+        if (dragY.current > 60) onClose();
+        dragY.current = 0;
+      },
+    }),
+  ).current;
+
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <View style={styles.sheet}>
-          <View style={styles.dragBar} />
+      <Pressable style={styles.overlay} onPress={onClose} accessibilityRole="button" accessibilityLabel="Close invoice">
+        <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
+          <View style={styles.dragBarWrapper} {...panResponder.panHandlers}>
+            <View style={styles.dragBar} />
+          </View>
 
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Invoice</Text>
@@ -115,11 +129,11 @@ export function InvoiceModal({ order, visible, onClose }: Props): React.JSX.Elem
             <View style={styles.footer}>
               <Text style={styles.footerLogo}>MOI ORDER</Text>
               <Text style={styles.footerSub}>Thank you for your order!</Text>
-              <Text style={styles.footerSub}>support@moi-order.com</Text>
+              <Text style={styles.footerSub}>hello@moiorder.com</Text>
             </View>
           </ScrollView>
-        </View>
-      </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }

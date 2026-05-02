@@ -51,10 +51,16 @@ class FoodOrder extends Model
 
     public static function generateOrderNumber(): string
     {
-        $prefix = 'MOI';
-        $date   = now()->format('ymd'); // e.g. 260501
-        $random = strtoupper(substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 4));
-        return $prefix . $date . $random;
+        // Format: MO{dd}{mm}{yy}R{seq3}
+        // MO  = MOI ORDER prefix
+        // R   = service type (R = Restaurant; expand to T = Tickets, S = Services)
+        // seq = 3-digit daily sequence, zero-padded, resets at 00:00
+        $datePart = now()->format('dmy'); // e.g. 010226 for 1 Feb 2026
+        $today    = now()->startOfDay();
+
+        $seq = static::where('created_at', '>=', $today)->count() + 1;
+
+        return sprintf('MO%sR%03d', $datePart, $seq);
     }
 
     // ─── Domain methods ───────────────────────────────────────────────────────

@@ -17,7 +17,7 @@ export const ORDER_STATUS_COLOURS: Record<string, { bg: string; text: string }> 
 };
 
 export const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colours.backgroundLight },
+  root: { flex: 1, backgroundColor: colours.backgroundDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
