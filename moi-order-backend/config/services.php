@@ -65,7 +65,7 @@ return [
     ],
 
     'firebase' => [
-        'project_id'       => env('FIREBASE_PROJECT_ID', 'rock-micron-493118-q1'),
+        'project_id'       => env('FIREBASE_PROJECT_ID'),
         'credentials_path' => env('FIREBASE_CREDENTIALS_PATH', storage_path('app/firebase-service-account.json')),
     ],
 

@@ -9,7 +9,6 @@ import { fNumber } from 'src/utils/format-number';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { AnalyticsNews } from '../analytics-news';
-import { AnalyticsTasks } from '../analytics-tasks';
 import { AnalyticsCurrentVisits } from '../analytics-current-visits';
 import { AnalyticsOrderTimeline } from '../analytics-order-timeline';
 import { AnalyticsWebsiteVisits } from '../analytics-website-visits';
@@ -23,12 +22,6 @@ import { useDashboardStats, getLastEightMonthLabels } from '../hooks/useDashboar
 const EMPTY_EIGHT = [0, 0, 0, 0, 0, 0, 0, 0];
 const MONTH_LABELS = getLastEightMonthLabels();
 
-const STATIC_TASKS = [
-  { id: '2', name: 'Respond to partner onboarding requests' },
-  { id: '3', name: 'Check recent payment confirmations' },
-  { id: '4', name: 'Review new user registrations' },
-  { id: '5', name: "Update this week's service listings" },
-];
 
 export function OverviewAnalyticsView() {
   const { stats, isLoading, error } = useDashboardStats();
@@ -73,12 +66,6 @@ export function OverviewAnalyticsView() {
   };
 
   const statusBreakdown = stats!.submission_status_breakdown;
-
-  const pendingCount = stats!.pending_submissions_count;
-  const adminTasks = [
-    { id: '1', name: `Review pending submissions (${pendingCount})` },
-    ...STATIC_TASKS,
-  ];
 
   return (
     <DashboardContent maxWidth="xl">
@@ -176,9 +163,6 @@ export function OverviewAnalyticsView() {
           <AnalyticsOrderTimeline title="Payment Timeline" list={stats!.payment_timeline} />
         </Grid>
 
-        <Grid size={{ xs: 12 }}>
-          <AnalyticsTasks title="Admin Tasks" list={adminTasks} />
-        </Grid>
       </Grid>
     </DashboardContent>
   );

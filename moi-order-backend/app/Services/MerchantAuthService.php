@@ -44,7 +44,7 @@ class MerchantAuthService
             throw new AuthorizationException('Account is suspended.');
         }
 
-        $token = $user->createToken('merchant-auth', ['merchant'])->plainTextToken;
+        $token = $user->createToken('merchant-auth', ['merchant'], now()->addDays(30))->plainTextToken;
 
         return ['user' => $user, 'token' => $token];
     }

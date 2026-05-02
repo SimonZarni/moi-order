@@ -42,7 +42,7 @@ class AdminAuthService
             throw new AuthorizationException('Admin access required.');
         }
 
-        $token = $user->createToken('admin-auth', ['admin'])->plainTextToken;
+        $token = $user->createToken('admin-auth', ['admin'], now()->addHours(8))->plainTextToken;
 
         return ['user' => $user, 'token' => $token];
     }

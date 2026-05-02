@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Stripe\StripeClient;
 
@@ -142,6 +143,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
+
         $this->configureRateLimiting();
 
         // Broadcast auth — must use auth:sanctum so mobile Bearer tokens are accepted.
@@ -174,11 +179,10 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($request->ip());
         });
 
-        // 1000 requests/minute per authenticated user — admin endpoints are already
-        // protected by auth:sanctum + abilities:admin + admin.auth; a per-user
-        // rate limit mainly guards against runaway scripts, not interactive use.
+        // 120 requests/minute per authenticated admin — guards against runaway scripts
+        // and bulk data-scraping while comfortably accommodating normal dashboard use.
         RateLimiter::for('admin', function (Request $request): Limit {
-            return Limit::perMinute(1000)->by(
+            return Limit::perMinute(120)->by(
                 $request->user()?->id ?? $request->ip()
             );
         });
