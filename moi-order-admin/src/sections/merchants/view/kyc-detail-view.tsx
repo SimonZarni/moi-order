@@ -160,9 +160,12 @@ export function KycDetailView() {
                   <InfoRow label="Email"           value={application.user_email} />
                   <InfoRow label="Phone"           value={application.user_phone ?? '—'} />
                   <Divider />
-                  <InfoRow label="Business Name"   value={application.business_name} />
-                  <InfoRow label="Business Type"   value={application.business_type} />
+                  <InfoRow label="Business Name"    value={application.business_name} />
+                  <InfoRow label="Business Type"    value={application.business_type} />
                   <InfoRow label="Business Address" value={application.business_address} />
+                  {application.business_phone && (
+                    <InfoRow label="Business Phone" value={application.business_phone} />
+                  )}
                   <Divider />
                   <InfoRow
                     label="Submitted"

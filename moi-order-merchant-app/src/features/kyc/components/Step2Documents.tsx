@@ -97,7 +97,7 @@ export function Step2Documents({
               <Image
                 source={{ uri: previewUri }}
                 style={styles.preview}
-                resizeMode="cover"
+                resizeMode="contain"
                 accessibilityLabel={`Preview of ${card.label}`}
               />
             )}

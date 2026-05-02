@@ -32,6 +32,7 @@ export type KycApplication = {
   business_name: string;
   business_type: string;
   business_address: string;
+  business_phone: string | null;
   status: KycApplicationStatus;
   status_label: string;
   review_notes: string | null;
@@ -63,17 +64,17 @@ type KycListParams = { status?: string; page?: number; per_page?: number };
 export const merchantsApi = {
   getKycApplications: (params: KycListParams) =>
     apiClient
-      .get<{ data: KycApplication[]; meta: Meta }>('/api/admin/v1/kyc-applications', { params })
+      .get<{ data: KycApplication[]; meta: Meta }>('/kyc-applications', { params })
       .then((r) => r.data),
 
   getKycApplication: (id: string) =>
     apiClient
-      .get<{ data: KycApplication }>(`/api/admin/v1/kyc-applications/${id}`)
+      .get<{ data: KycApplication }>(`/kyc-applications/${id}`)
       .then((r) => r.data.data),
 
   reviewKycApplication: (id: string, action: 'approve' | 'reject', notes?: string) =>
     apiClient
-      .post<{ data: KycApplication }>(`/api/admin/v1/kyc-applications/${id}/review`, {
+      .post<{ data: KycApplication }>(`/kyc-applications/${id}/review`, {
         action,
         notes,
       })
@@ -81,11 +82,11 @@ export const merchantsApi = {
 
   getKycBadgeCount: () =>
     apiClient
-      .get<{ data: { count: number } }>('/api/admin/v1/merchants/kyc-badge')
+      .get<{ data: { count: number } }>('/merchants/kyc-badge')
       .then((r) => r.data.data.count),
 
   createMerchant: (payload: CreateMerchantPayload) =>
     apiClient
-      .post<{ data: CreateMerchantResponse }>('/api/admin/v1/merchants', payload)
+      .post<{ data: CreateMerchantResponse }>('/merchants', payload)
       .then((r) => r.data.data),
 };

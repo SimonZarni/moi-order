@@ -65,7 +65,7 @@ export const styles = StyleSheet.create({
   },
   preview: {
     width: '100%',
-    height: 120,
+    aspectRatio: 4 / 3,
     borderRadius: radius.sm,
     marginBottom: spacing.sm,
     backgroundColor: colours.divider,
