@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Exceptions\DomainException;
 use App\Models\Service;
 use App\Models\ServiceCategory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -14,6 +15,13 @@ use Illuminate\Support\Facades\DB;
  */
 class AdminServiceCategoryService
 {
+    public function index(): Collection
+    {
+        return ServiceCategory::active()
+            ->orderBy('name_en')
+            ->get();
+    }
+
     public function show(string $slug): ServiceCategory
     {
         return ServiceCategory::where('slug', $slug)

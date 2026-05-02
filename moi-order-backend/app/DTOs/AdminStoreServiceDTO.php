@@ -14,16 +14,18 @@ readonly class AdminStoreServiceDTO
         public ?string $nameMm,
         public string  $slug,
         public bool    $isActive,
+        public ?int    $serviceCategoryId,
     ) {}
 
     public static function fromRequest(AdminStoreServiceRequest $request): self
     {
         return new self(
-            name:     $request->string('name')->toString(),
-            nameEn:   $request->string('name_en')->toString(),
-            nameMm:   $request->filled('name_mm') ? $request->string('name_mm')->toString() : null,
-            slug:     $request->string('slug')->toString(),
-            isActive: $request->boolean('is_active'),
+            name:              $request->string('name')->toString(),
+            nameEn:            $request->string('name_en')->toString(),
+            nameMm:            $request->filled('name_mm') ? $request->string('name_mm')->toString() : null,
+            slug:              $request->string('slug')->toString(),
+            isActive:          $request->boolean('is_active'),
+            serviceCategoryId: $request->filled('service_category_id') ? $request->integer('service_category_id') : null,
         );
     }
 }

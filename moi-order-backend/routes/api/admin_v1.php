@@ -123,6 +123,7 @@ Route::prefix('services')->name('admin.services.')->group(function (): void {
 
 // ── Service Categories ────────────────────────────────────────────────────────
 Route::prefix('service-categories')->name('admin.service-categories.')->group(function (): void {
+    Route::get('/', [AdminServiceCategoryController::class, 'index'])->name('index');
     Route::get('/{slug}', [AdminServiceCategoryController::class, 'show'])->name('show');
     Route::put('/{slug}/services/reorder', [AdminServiceCategoryController::class, 'reorderServices'])
         ->name('services.reorder')

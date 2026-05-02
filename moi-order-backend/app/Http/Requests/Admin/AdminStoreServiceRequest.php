@@ -14,11 +14,12 @@ class AdminStoreServiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'      => ['required', 'string', 'max:255'],
-            'name_en'   => ['required', 'string', 'max:255'],
-            'name_mm'   => ['nullable', 'string', 'max:255'],
-            'slug'      => ['required', 'string', 'max:100', Rule::unique('services', 'slug')],
-            'is_active' => ['required', 'boolean'],
+            'name'                => ['required', 'string', 'max:255'],
+            'name_en'             => ['required', 'string', 'max:255'],
+            'name_mm'             => ['nullable', 'string', 'max:255'],
+            'slug'                => ['required', 'string', 'max:100', Rule::unique('services', 'slug')],
+            'is_active'           => ['required', 'boolean'],
+            'service_category_id' => ['nullable', 'integer', Rule::exists('service_categories', 'id')->whereNull('deleted_at')],
         ];
     }
 

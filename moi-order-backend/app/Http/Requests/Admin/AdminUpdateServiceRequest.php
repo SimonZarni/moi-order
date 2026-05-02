@@ -16,11 +16,12 @@ class AdminUpdateServiceRequest extends FormRequest
         $serviceId = $this->route('service')?->id;
 
         return [
-            'name'      => ['sometimes', 'string', 'max:255'],
-            'name_en'   => ['sometimes', 'string', 'max:255'],
-            'name_mm'   => ['sometimes', 'nullable', 'string', 'max:255'],
-            'slug'      => ['sometimes', 'string', 'max:100', Rule::unique('services', 'slug')->ignore($serviceId)],
-            'is_active' => ['sometimes', 'boolean'],
+            'name'                => ['sometimes', 'string', 'max:255'],
+            'name_en'             => ['sometimes', 'string', 'max:255'],
+            'name_mm'             => ['sometimes', 'nullable', 'string', 'max:255'],
+            'slug'                => ['sometimes', 'string', 'max:100', Rule::unique('services', 'slug')->ignore($serviceId)],
+            'is_active'           => ['sometimes', 'boolean'],
+            'service_category_id' => ['sometimes', 'nullable', 'integer', Rule::exists('service_categories', 'id')->whereNull('deleted_at')],
         ];
     }
 

@@ -10,6 +10,7 @@ use App\Http\Resources\Admin\AdminServiceCategoryResource;
 use App\Models\ServiceCategory;
 use App\Services\AdminServiceCategoryService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
  * Principle: SRP — HTTP layer only for service category sub-resources.
@@ -19,6 +20,12 @@ class AdminServiceCategoryController extends Controller
     public function __construct(
         private readonly AdminServiceCategoryService $categoryService,
     ) {}
+
+    /** GET /api/admin/v1/service-categories */
+    public function index(): AnonymousResourceCollection
+    {
+        return AdminServiceCategoryResource::collection($this->categoryService->index());
+    }
 
     /** GET /api/admin/v1/service-categories/{slug} */
     public function show(string $slug): JsonResponse

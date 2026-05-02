@@ -29,26 +29,35 @@ class AdminServiceService
         $nextPosition = (Service::max('position') ?? 0) + 1;
 
         return Service::create([
-            'name'      => $dto->name,
-            'name_en'   => $dto->nameEn,
-            'name_mm'   => $dto->nameMm,
-            'slug'      => $dto->slug,
-            'is_active' => $dto->isActive,
-            'position'  => $nextPosition,
+            'name'                => $dto->name,
+            'name_en'             => $dto->nameEn,
+            'name_mm'             => $dto->nameMm,
+            'slug'                => $dto->slug,
+            'is_active'           => $dto->isActive,
+            'position'            => $nextPosition,
+            'service_category_id' => $dto->serviceCategoryId,
         ]);
     }
 
     public function update(Service $service, AdminUpdateServiceDTO $dto): Service
     {
-        $service->update(array_filter([
+        $fields = array_filter([
             'name'      => $dto->name,
             'name_en'   => $dto->nameEn,
             'name_mm'   => $dto->nameMm,
             'slug'      => $dto->slug,
             'is_active' => $dto->isActive,
-        ], fn ($v) => $v !== null));
+        ], fn ($v) => $v !== null);
 
-        return $service->fresh();
+        // null is a valid value for service_category_id (moves service to OtherServices),
+        // so we cannot rely on array_filter — use explicit flag from the DTO.
+        if ($dto->hasCategoryChange) {
+            $fields['service_category_id'] = $dto->serviceCategoryId;
+        }
+
+        $service->update($fields);
+
+        return $service->fresh(['serviceCategory']);
     }
 
     public function findBySlug(string $slug): Service

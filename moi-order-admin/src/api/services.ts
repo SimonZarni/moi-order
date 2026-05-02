@@ -20,6 +20,8 @@ export type ServiceData = {
   slug: string;
   is_active: boolean;
   position: number;
+  service_category_id: number | null;
+  service_category_slug: string | null;
   types_count: number | null;
   types?: ServiceTypeData[];
   created_at: string;
@@ -46,6 +48,7 @@ export type ServiceCategoryData = {
   name_en: string | null;
   name_mm: string | null;
   slug: string;
+  navigation_screen: string | null;
   is_active: boolean;
   services: ServiceData[];
 };
@@ -87,6 +90,10 @@ export const servicesApi = {
 };
 
 export const serviceCategoriesApi = {
+  list: () =>
+    apiClient
+      .get<{ data: ServiceCategoryData[] }>('/service-categories')
+      .then((r) => r.data.data),
   get: (slug: string) =>
     apiClient
       .get<{ data: ServiceCategoryData }>(`/service-categories/${slug}`)

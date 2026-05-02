@@ -32,7 +32,7 @@ import { useRouter } from 'src/routes/hooks';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { documentTypesApi, type DocumentTypeData } from 'src/api/documentTypes';
-import { servicesApi, type ServiceData, type ServiceTypeData } from 'src/api/services';
+import { servicesApi, serviceCategoriesApi, type ServiceData, type ServiceTypeData, type ServiceCategoryData } from 'src/api/services';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
@@ -466,12 +466,16 @@ export function ServiceDetailView() {
   const [error, setError]       = useState('');
 
   // service info edit state
-  const [name, setName]         = useState('');
-  const [nameEn, setNameEn]     = useState('');
-  const [nameMm, setNameMm]     = useState('');
-  const [slug, setSlug]         = useState('');
-  const [isActive, setIsActive] = useState(true);
-  const [savingInfo, setSavingInfo] = useState(false);
+  const [name, setName]               = useState('');
+  const [nameEn, setNameEn]           = useState('');
+  const [nameMm, setNameMm]           = useState('');
+  const [slug, setSlug]               = useState('');
+  const [isActive, setIsActive]       = useState(true);
+  const [categoryId, setCategoryId]   = useState<string>('null');
+  const [savingInfo, setSavingInfo]   = useState(false);
+
+  // available categories for the home screen selector
+  const [categories, setCategories] = useState<ServiceCategoryData[]>([]);
 
   // document types for dropdown
   const [documentTypes, setDocumentTypes] = useState<DocumentTypeData[]>([]);
@@ -489,6 +493,7 @@ export function ServiceDetailView() {
 
   useEffect(() => {
     documentTypesApi.all().then(setDocumentTypes).catch(() => {});
+    serviceCategoriesApi.list().then(setCategories).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -504,6 +509,7 @@ export function ServiceDetailView() {
         setNameMm(svc.name_mm ?? '');
         setSlug(svc.slug);
         setIsActive(svc.is_active);
+        setCategoryId(svc.service_category_id !== null ? String(svc.service_category_id) : 'null');
         setTypes(typeList.map(toLocalType));
       })
       .catch(() => setError('Failed to load service.'))
@@ -514,7 +520,14 @@ export function ServiceDetailView() {
     if (!id || !name.trim() || !slug.trim()) return;
     setSavingInfo(true);
     servicesApi
-      .update(id, { name, name_en: nameEn || name, name_mm: nameMm || null, slug, is_active: isActive })
+      .update(id, {
+        name,
+        name_en:             nameEn || name,
+        name_mm:             nameMm || null,
+        slug,
+        is_active:           isActive,
+        service_category_id: categoryId === 'null' ? null : Number(categoryId),
+      })
       .then((updated) => setService(updated))
       .catch(() => {})
       .finally(() => setSavingInfo(false));
@@ -648,6 +661,35 @@ export function ServiceDetailView() {
                   onChange={(e) => setSlug(e.target.value)}
                   helperText="Lowercase letters, numbers, hyphens only"
                 />
+
+                <FormControl fullWidth size="small">
+                  <InputLabel>Home Screen</InputLabel>
+                  <Select
+                    value={categoryId}
+                    label="Home Screen"
+                    onChange={(e) => setCategoryId(e.target.value)}
+                  >
+                    <MenuItem value="null">
+                      <Stack>
+                        <Typography variant="body2">Other Services</Typography>
+                        <Typography variant="caption" color="text.secondary">OtherServices screen</Typography>
+                      </Stack>
+                    </MenuItem>
+                    {categories.map((cat) => (
+                      <MenuItem key={cat.id} value={String(cat.id)}>
+                        <Stack>
+                          <Typography variant="body2">{cat.name_en}</Typography>
+                          {cat.navigation_screen && (
+                            <Typography variant="caption" color="text.secondary">
+                              {cat.navigation_screen} screen
+                            </Typography>
+                          )}
+                        </Stack>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
                 <FormControlLabel
                   control={<Checkbox checked={isActive} onChange={(e) => setIsActive(e.target.checked)} size="small" />}
                   label="Active"

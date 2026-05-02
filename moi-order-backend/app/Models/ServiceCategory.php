@@ -21,6 +21,7 @@ class ServiceCategory extends Model
         'name_en',
         'name_mm',
         'slug',
+        'navigation_screen',
         'is_active',
     ];
 
