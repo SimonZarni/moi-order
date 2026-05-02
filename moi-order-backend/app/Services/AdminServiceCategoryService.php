@@ -7,7 +7,9 @@ namespace App\Services;
 use App\Exceptions\DomainException;
 use App\Models\Service;
 use App\Models\ServiceCategory;
+use App\Support\CacheKeys;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -17,9 +19,9 @@ class AdminServiceCategoryService
 {
     public function index(): Collection
     {
-        return ServiceCategory::active()
-            ->orderBy('name_en')
-            ->get();
+        return Cache::remember(CacheKeys::SERVICE_CATEGORIES_ACTIVE, now()->addHours(24), fn (): Collection =>
+            ServiceCategory::active()->orderBy('name_en')->get()
+        );
     }
 
     public function show(string $slug): ServiceCategory
@@ -45,5 +47,7 @@ class AdminServiceCategoryService
                     ->update(['position' => $position + 1]);
             }
         });
+
+        Cache::forget(CacheKeys::SERVICE_CATEGORIES_ACTIVE);
     }
 }

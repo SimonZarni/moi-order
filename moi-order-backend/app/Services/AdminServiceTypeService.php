@@ -9,7 +9,9 @@ use App\DTOs\AdminUpdateServiceTypeDTO;
 use App\Exceptions\DomainException;
 use App\Models\Service;
 use App\Models\ServiceType;
+use App\Support\CacheKeys;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -26,7 +28,7 @@ class AdminServiceTypeService
     {
         $nextPosition = ($service->types()->max('position') ?? 0) + 1;
 
-        return $service->types()->create([
+        $type = $service->types()->create([
             'name'         => $dto->name,
             'name_en'      => $dto->nameEn,
             'name_mm'      => $dto->nameMm,
@@ -35,6 +37,10 @@ class AdminServiceTypeService
             'field_schema' => $dto->fieldSchema,
             'position'     => $nextPosition,
         ]);
+
+        Cache::forget(CacheKeys::SERVICE_CATEGORIES_ACTIVE);
+
+        return $type;
     }
 
     public function update(ServiceType $type, AdminUpdateServiceTypeDTO $dto): ServiceType
@@ -48,12 +54,16 @@ class AdminServiceTypeService
             'field_schema' => $dto->fieldSchema,
         ], fn ($v) => $v !== null));
 
+        Cache::forget(CacheKeys::SERVICE_CATEGORIES_ACTIVE);
+
         return $type->fresh();
     }
 
     public function toggle(ServiceType $type): ServiceType
     {
         $type->update(['is_active' => ! $type->is_active]);
+
+        Cache::forget(CacheKeys::SERVICE_CATEGORIES_ACTIVE);
 
         return $type->fresh();
     }
@@ -74,6 +84,8 @@ class AdminServiceTypeService
                     ->update(['position' => $position + 1]);
             }
         });
+
+        Cache::forget(CacheKeys::SERVICE_CATEGORIES_ACTIVE);
     }
 
     public function destroy(ServiceType $type): void
@@ -83,5 +95,7 @@ class AdminServiceTypeService
         }
 
         $type->delete();
+
+        Cache::forget(CacheKeys::SERVICE_CATEGORIES_ACTIVE);
     }
 }

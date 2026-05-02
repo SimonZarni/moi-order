@@ -8,7 +8,9 @@ use App\Contracts\FileStorageInterface;
 use App\DTOs\StoreHomeCardIconDTO;
 use App\Enums\HomeCardIconType;
 use App\Models\HomeCardIcon;
+use App\Support\CacheKeys;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class HomeCardIconService
 {
@@ -16,12 +18,15 @@ class HomeCardIconService
 
     public function index(): Collection
     {
-        return HomeCardIcon::active()->orderBy('label')->get()
-            ->each(function (HomeCardIcon $icon): void {
-                if ($icon->type === HomeCardIconType::Custom && $icon->image_path) {
-                    $icon->image_url = $this->storage->publicUrl($icon->image_path);
-                }
-            });
+        // TTL matches signed URL expiry (30 min) with a 5-min safety margin
+        return Cache::remember(CacheKeys::HOME_CARD_ICONS_ACTIVE, now()->addMinutes(25), function (): Collection {
+            return HomeCardIcon::active()->orderBy('label')->get()
+                ->each(function (HomeCardIcon $icon): void {
+                    if ($icon->type === HomeCardIconType::Custom && $icon->image_path) {
+                        $icon->image_url = $this->storage->publicUrl($icon->image_path);
+                    }
+                });
+        });
     }
 
     public function store(StoreHomeCardIconDTO $dto): HomeCardIcon
@@ -37,6 +42,8 @@ class HomeCardIconService
         ]);
 
         $icon->image_url = $this->storage->publicUrl($icon->image_path);
+
+        Cache::forget(CacheKeys::HOME_CARD_ICONS_ACTIVE);
 
         return $icon;
     }

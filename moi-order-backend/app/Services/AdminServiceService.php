@@ -8,8 +8,10 @@ use App\DTOs\AdminStoreServiceDTO;
 use App\DTOs\AdminUpdateServiceDTO;
 use App\Exceptions\DomainException;
 use App\Models\Service;
+use App\Support\CacheKeys;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Principle: SRP — owns admin CRUD for service catalog entries only.
@@ -28,7 +30,7 @@ class AdminServiceService
     {
         $nextPosition = (Service::max('position') ?? 0) + 1;
 
-        return Service::create([
+        $service = Service::create([
             'name'                => $dto->name,
             'name_en'             => $dto->nameEn,
             'name_mm'             => $dto->nameMm,
@@ -37,6 +39,10 @@ class AdminServiceService
             'position'            => $nextPosition,
             'service_category_id' => $dto->serviceCategoryId,
         ]);
+
+        Cache::forget(CacheKeys::SERVICE_CATEGORIES_ACTIVE);
+
+        return $service;
     }
 
     public function update(Service $service, AdminUpdateServiceDTO $dto): Service
@@ -57,6 +63,8 @@ class AdminServiceService
 
         $service->update($fields);
 
+        Cache::forget(CacheKeys::SERVICE_CATEGORIES_ACTIVE);
+
         return $service->fresh(['serviceCategory']);
     }
 
@@ -70,6 +78,8 @@ class AdminServiceService
     public function toggle(Service $service): Service
     {
         $service->update(['is_active' => ! $service->is_active]);
+
+        Cache::forget(CacheKeys::SERVICE_CATEGORIES_ACTIVE);
 
         return $service->fresh();
     }
@@ -85,5 +95,7 @@ class AdminServiceService
         }
 
         $service->delete();
+
+        Cache::forget(CacheKeys::SERVICE_CATEGORIES_ACTIVE);
     }
 }
