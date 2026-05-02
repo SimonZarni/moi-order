@@ -99,6 +99,11 @@ export const navData: NavItem[] = [
     permission: 'admins.manage',
   },
   {
+    title: 'Push Notifications',
+    path: '/push-notifications',
+    icon: icon('ic-disabled'),
+  },
+  {
     title: 'Reviews',
     path: '/reviews',
     icon: icon('ic-disabled'),

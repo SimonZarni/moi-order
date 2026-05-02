@@ -203,7 +203,7 @@ export interface TicketOrder {
 
 export interface AppNotification {
   id: string;
-  type: 'submission_status' | 'ticket_order_status' | string;
+  type: 'submission_status' | 'ticket_order_status' | 'custom_announcement' | string;
   title: string;
   body: string;
   data: {

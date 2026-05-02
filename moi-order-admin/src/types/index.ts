@@ -1,4 +1,18 @@
 // ----------------------------------------------------------------------
+// Custom Notifications
+
+export type CustomNotification = {
+  id: number;
+  title: string;
+  body: string;
+  target_type: 'all' | 'single';
+  target_user_email: string | null;
+  recipients_count: number;
+  sent_by: string | null;
+  sent_at: string;
+};
+
+// ----------------------------------------------------------------------
 // Places
 
 export type Place = {

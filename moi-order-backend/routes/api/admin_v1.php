@@ -7,12 +7,15 @@ use App\Http\Controllers\Api\Admin\V1\AdminAuthController;
 use App\Http\Controllers\Api\Admin\V1\AdminKycController;
 use App\Http\Controllers\Api\Admin\V1\AdminMerchantCreateController;
 use App\Http\Controllers\Api\Admin\V1\AdminHomeCardController;
+use App\Http\Controllers\Api\Admin\V1\AdminHomeCardRouteController;
+use App\Http\Controllers\Api\Admin\V1\AdminHomeCardIconController;
 use App\Http\Controllers\Api\Admin\V1\AdminDashboardController;
 use App\Http\Controllers\Api\Admin\V1\AdminDocumentTypeController;
 use App\Http\Controllers\Api\Admin\V1\AdminFoodOrderController;
 use App\Http\Controllers\Api\Admin\V1\AdminMenuCategoryController;
 use App\Http\Controllers\Api\Admin\V1\AdminMenuItemController;
 use App\Http\Controllers\Api\Admin\V1\AdminNotificationController;
+use App\Http\Controllers\Api\Admin\V1\AdminCustomNotificationController;
 use App\Http\Controllers\Api\Admin\V1\AdminCategoryController;
 use App\Http\Controllers\Api\Admin\V1\AdminPaymentController;
 use App\Http\Controllers\Api\Admin\V1\AdminPlaceController;
@@ -36,13 +39,19 @@ use Illuminate\Support\Facades\Route;
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
-// ── Notifications ─────────────────────────────────────────────────────────────
+// ── Notifications (admin bell) ────────────────────────────────────────────────
 Route::prefix('notifications')->name('admin.notifications.')->group(function (): void {
     Route::get('/', [AdminNotificationController::class, 'index'])->name('index');
     Route::put('/read-all', [AdminNotificationController::class, 'markAllRead'])->name('read-all');
     Route::patch('/{id}/read', [AdminNotificationController::class, 'markOneRead'])->name('read');
     Route::delete('/{id}', [AdminNotificationController::class, 'destroy'])->name('destroy');
     Route::delete('/', [AdminNotificationController::class, 'destroyAll'])->name('destroy-all');
+});
+
+// ── Custom Notifications (push broadcasts to users) ───────────────────────────
+Route::prefix('custom-notifications')->name('admin.custom-notifications.')->group(function (): void {
+    Route::get('/',  [AdminCustomNotificationController::class, 'index'])->name('index');
+    Route::post('/', [AdminCustomNotificationController::class, 'store'])->name('store');
 });
 
 // ── Auth ─────────────────────────────────────────────────────────────────────

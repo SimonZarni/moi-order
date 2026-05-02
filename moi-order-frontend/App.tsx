@@ -84,6 +84,8 @@ import { useNotificationsData } from '@/features/notifications/hooks/useNotifica
 import { usePusherNotifications } from '@/features/notifications/hooks/usePusherNotifications';
 import { usePushNotifications } from '@/features/notifications/hooks/usePushNotifications';
 import { useAppUpdate } from '@/shared/hooks/useAppUpdate';
+import { useNoticeModal } from '@/shared/hooks/useNoticeModal';
+import { NoticeModal } from '@/shared/components/NoticeModal/NoticeModal';
 import { PlacesMapScreen } from '@/features/map/screens/PlacesMapScreen';
 import { SearchScreen } from '@/features/search/screens/SearchScreen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -111,7 +113,9 @@ function AppShell(): React.JSX.Element {
   usePusherNotifications();
   usePushNotifications();
   useNotificationsData();
+  const { isVisible: noticeVisible, dismiss: dismissNotice } = useNoticeModal();
   return (
+    <>
     <Stack.Navigator
       initialRouteName="MainTabs"
       screenOptions={{
@@ -157,6 +161,8 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="Checkout"                      component={CheckoutScreen} />
       <Stack.Screen name="FoodOrderDetail"               component={FoodOrderDetailScreen} />
     </Stack.Navigator>
+    <NoticeModal isVisible={noticeVisible} onClose={dismissNotice} />
+    </>
   );
 }
 
