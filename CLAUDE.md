@@ -114,9 +114,24 @@ PAGINATION (all list endpoints):
   RN: TanStack Query useInfiniteQuery for all paginated lists.
   Never load all records without explicit justification.
 
-EVENTS+LISTENERS: registered in EventServiceProvider. Listeners=ShouldQueue
-  by default. Synchronous only for session/token revocation.
-  Listener failure never rolls back original transaction.
+EVENTS+LISTENERS: Listeners=ShouldQueue by default. Synchronous only for
+  session/token revocation. Listener failure never rolls back original transaction.
+
+  LISTENER REGISTRATION — SINGLE SOURCE OF TRUTH (HARD RULE):
+  Laravel auto-discovers any listener in app/Listeners/ whose handle() method
+  is type-hinted with an event class. This project relies on auto-discovery
+  exclusively for ALL notification/queued listeners.
+  NEVER also add Event::listen() in AppServiceProvider for the same listener.
+  Doing so registers it twice → every event fires the listener twice →
+  duplicate push notifications and duplicate database rows.
+  RULE: if the listener file exists in app/Listeners/ with a typed handle(),
+  do NOT add Event::listen() for it anywhere. Auto-discovery is sufficient.
+  Only use Event::listen() in AppServiceProvider for infrastructure listeners
+  that are NOT in app/Listeners/ (e.g. inline Closures) or need guaranteed
+  ordering relative to other boot() logic.
+  VERIFY before shipping: run `php artisan event:list` and confirm each
+  listener appears exactly once (as `ListenerClass@handle`, not both
+  `ListenerClass` AND `ListenerClass@handle`).
 
 EXCEPTION HANDLER (app/Exceptions/Handler.php):
   DomainException → 409 {message, code}

@@ -154,20 +154,10 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(PaymentConfirmed::class, MarkSubmissionProcessing::class);
         Event::listen(TicketOrderPaymentConfirmed::class, MarkTicketOrderProcessing::class);
 
-        // Push notification to merchant when a new food order is placed (queued).
-        Event::listen(\App\Events\NewFoodOrder::class, \App\Listeners\NotifyMerchantOfNewOrder::class);
-
-        // Push + database notification to customer on every food order status change (queued).
-        Event::listen(\App\Events\FoodOrderStatusUpdated::class, \App\Listeners\NotifyCustomerOfFoodOrderStatus::class);
-
-        // Admin real-time notifications for "created" events are registered via Laravel
-        // listener auto-discovery (NotifyAdminsOfNewSubmission / NotifyAdminsOfNewTicketOrder).
-        // Do not also register those with Event::listen(), or each event is handled twice and
-        // creates duplicate database notification rows.
-        //
-        // Admin payment notifications (NotifyAdminsOfServicePayment / NotifyAdminsOfTicketPayment)
-        // are also registered via auto-discovery for the same reason: avoid duplicate rows caused
-        // by combining discovery with explicit Event::listen() registration.
+        // Food order listeners (NotifyMerchantOfNewOrder, NotifyCustomerOfFoodOrderStatus) are
+        // registered automatically via Laravel's event auto-discovery — no manual listen() needed.
+        // Do NOT add them here with Event::listen(); doing so registers them twice and every
+        // status change fires the listener twice → duplicate push notifications.
     }
 
     private function configureRateLimiting(): void
