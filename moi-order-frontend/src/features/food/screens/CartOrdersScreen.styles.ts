@@ -40,7 +40,7 @@ export const styles = StyleSheet.create({
     color: colours.textOnDark,
     flex: 1,
   },
-  scroll: { flex: 1 },
+  scroll: { flex: 1, backgroundColor: colours.backgroundLight },
   content: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xxl },
   // Section labels
   sectionLabel: {

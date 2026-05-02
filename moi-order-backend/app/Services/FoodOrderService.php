@@ -114,6 +114,20 @@ class FoodOrderService
         return $order->fresh(['items', 'user']);
     }
 
+    public function cancelByMerchant(FoodOrder $order, ?string $reason, ?string $description): FoodOrder
+    {
+        DB::transaction(function () use ($order, $reason, $description): void {
+            $order->transitionTo(FoodOrderStatus::Cancelled);
+            $order->update(array_filter([
+                'cancel_reason'      => $reason,
+                'cancel_description' => $description,
+            ], fn ($v) => $v !== null));
+            event(new FoodOrderStatusUpdated($order->fresh()));
+        });
+
+        return $order->fresh(['items', 'user']);
+    }
+
     /**
      * Customer completes a delivered order, optionally leaving a rating + review.
      * Also used by the auto-complete command (rating/review are null in that case).

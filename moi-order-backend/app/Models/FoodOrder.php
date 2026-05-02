@@ -24,6 +24,7 @@ class FoodOrder extends Model
         'idempotency_key', 'prompt_pay_url',
         'confirmed_at', 'payment_confirmed_at', 'preparing_at',
         'picked_up_at', 'delivered_at', 'completed_at', 'cancelled_at',
+        'cancel_reason', 'cancel_description',
         'rating', 'customer_review',
     ];
 

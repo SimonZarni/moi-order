@@ -1,0 +1,142 @@
+import { StyleSheet } from 'react-native';
+import { colours } from '@/shared/theme/colours';
+import { radius } from '@/shared/theme/radius';
+import { spacing } from '@/shared/theme/spacing';
+import { typography } from '@/shared/theme/typography';
+
+export const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: colours.backgroundDark },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colours.backgroundDark,
+    gap: spacing.sm,
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerInfo: { flex: 1 },
+  headerTitle: {
+    fontSize: typography.md,
+    fontWeight: '800',
+    color: colours.textOnDark,
+  },
+  headerSub: {
+    fontSize: typography.xxs,
+    color: 'rgba(255,255,255,0.55)',
+    marginTop: 1,
+  },
+  body: { flex: 1, backgroundColor: colours.backgroundLight },
+  noticeBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+    backgroundColor: colours.infoBg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
+  },
+  noticeText: {
+    flex: 1,
+    fontSize: typography.xxs,
+    color: colours.textMuted,
+    lineHeight: 16,
+  },
+  list: { flex: 1 },
+  listContent: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    gap: spacing.xs,
+  },
+  emptyWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xxl },
+  emptyText: { fontSize: typography.sm, color: colours.textMuted, textAlign: 'center' },
+  loaderWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  // Bubbles
+  bubbleRow: { flexDirection: 'row' },
+  bubbleRowRight: { justifyContent: 'flex-end' },
+  bubbleRowLeft: { justifyContent: 'flex-start' },
+  bubble: {
+    maxWidth: '78%',
+    borderRadius: radius.xl,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    gap: 4,
+  },
+  bubbleCustomer: {
+    backgroundColor: colours.primary,
+    borderBottomRightRadius: 4,
+  },
+  bubbleOther: {
+    backgroundColor: colours.card,
+    borderBottomLeftRadius: 4,
+    borderWidth: 1,
+    borderColor: colours.divider,
+  },
+  senderName: {
+    fontSize: typography.xxs,
+    fontWeight: '700',
+    color: colours.textMuted,
+  },
+  bubbleImage: { width: 180, height: 140, borderRadius: radius.lg },
+  bubbleText: { fontSize: typography.sm, lineHeight: 20 },
+  bubbleTextCustomer: { color: colours.white },
+  bubbleTextOther: { color: colours.textOnLight },
+  bubbleTime: { fontSize: typography.xxs, alignSelf: 'flex-end' },
+  bubbleTimeCustomer: { color: 'rgba(255,255,255,0.6)' },
+  bubbleTimeOther: { color: colours.textMuted },
+  // Date separator
+  dateSep: { alignItems: 'center', marginVertical: spacing.sm },
+  dateSepText: {
+    fontSize: typography.xxs,
+    color: colours.textMuted,
+    backgroundColor: colours.backgroundLight,
+    paddingHorizontal: spacing.sm,
+  },
+  // Input bar
+  inputBar: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colours.card,
+    borderTopWidth: 1,
+    borderTopColor: colours.divider,
+  },
+  attachBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  textInput: {
+    flex: 1,
+    backgroundColor: colours.backgroundLight,
+    borderRadius: radius.xl,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    fontSize: typography.sm,
+    color: colours.textOnLight,
+    maxHeight: 100,
+    borderWidth: 1,
+    borderColor: colours.divider,
+  },
+  sendBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colours.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sendBtnDisabled: { opacity: 0.4 },
+});

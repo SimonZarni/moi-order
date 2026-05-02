@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, FlatList, SectionList, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, SectionList, ActivityIndicator, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useOrdersScreen } from '../hooks/useOrdersScreen';
+import { useOrdersScreen, type StatusFilter } from '../hooks/useOrdersScreen';
 import { OrderCard } from '../components/OrderCard';
 import { styles } from './OrdersScreen.styles';
 import { colours } from '../../../shared/theme/colours';
@@ -10,51 +10,105 @@ import type { FoodOrder } from '../../../types/models';
 
 type Section = { title: string; data: FoodOrder[] };
 
+const STATUS_TABS: { key: StatusFilter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'new', label: 'New' },
+  { key: 'in_progress', label: 'In Progress' },
+  { key: 'done', label: 'Done' },
+];
+
+function formatDateLabel(dateFilter: string | null): string {
+  if (dateFilter === null) return 'Today';
+  const d = new Date(dateFilter + 'T00:00:00');
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 interface OrdersScreenProps {
   onSelectOrder?: (orderId: number) => void;
 }
 
 export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.Element {
-  const { newOrders, inProgressOrders, doneOrders, isLoading, handleUpdateStatus } = useOrdersScreen();
+  const {
+    sections, isLoading,
+    statusFilter, dateFilter,
+    handleUpdateStatus, handleStatusFilterChange,
+    handleDatePrev, handleDateNext, handleDateToday,
+  } = useOrdersScreen();
 
-  const sections: Section[] = [
-    { title: 'New Orders', data: newOrders },
-    { title: 'In Progress', data: inProgressOrders },
-    { title: 'Completed & Cancelled', data: doneOrders },
-  ].filter((s) => s.data.length > 0);
-
-  if (isLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colours.primary} />
-      </View>
-    );
-  }
+  const isToday = dateFilter === null;
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
-      <SectionList
-        sections={sections}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => (
-          <OrderCard
-            order={item}
-            onUpdateStatus={handleUpdateStatus}
-            onPress={onSelectOrder !== undefined ? () => onSelectOrder(item.id) : undefined}
-          />
-        )}
-        renderSectionHeader={({ section }) => (
-          <Text style={styles.sectionHeader}>{section.title}</Text>
-        )}
-        contentContainerStyle={styles.list}
-        ListEmptyComponent={
-          <View style={styles.centered}>
-            <Ionicons name="receipt-outline" size={40} color={colours.medium} />
-            <Text style={styles.empty}>No orders yet</Text>
-          </View>
-        }
-        stickySectionHeadersEnabled={false}
-      />
+      <View style={styles.filterBar}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statusTabsScroll}>
+          {STATUS_TABS.map((tab) => {
+            const isActive = statusFilter === tab.key;
+            return (
+              <Pressable
+                key={tab.key}
+                style={[styles.statusTab, isActive && styles.statusTabActive]}
+                onPress={() => handleStatusFilterChange(tab.key)}
+                accessibilityRole="button"
+                accessibilityLabel={`Filter by ${tab.label}`}
+              >
+                <Text style={[styles.statusTabText, isActive && styles.statusTabTextActive]}>
+                  {tab.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+
+        <View style={styles.dateRow}>
+          <Pressable style={styles.dateArrow} onPress={handleDatePrev} accessibilityRole="button" accessibilityLabel="Previous day">
+            <Ionicons name="chevron-back" size={16} color={colours.textMuted} />
+          </Pressable>
+          <Text style={styles.dateLabel}>{formatDateLabel(dateFilter)}</Text>
+          <Pressable
+            style={styles.dateArrow}
+            onPress={handleDateNext}
+            disabled={isToday}
+            accessibilityRole="button"
+            accessibilityLabel="Next day"
+          >
+            <Ionicons name="chevron-forward" size={16} color={isToday ? colours.divider : colours.textMuted} />
+          </Pressable>
+          {!isToday && (
+            <Pressable style={styles.dateTodayBtn} onPress={handleDateToday} accessibilityRole="button" accessibilityLabel="Go to today">
+              <Text style={styles.dateTodayText}>Today</Text>
+            </Pressable>
+          )}
+        </View>
+      </View>
+
+      {isLoading ? (
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={colours.primary} />
+        </View>
+      ) : (
+        <SectionList<FoodOrder, Section>
+          sections={sections}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={({ item }) => (
+            <OrderCard
+              order={item}
+              onUpdateStatus={handleUpdateStatus}
+              onPress={onSelectOrder !== undefined ? () => onSelectOrder(item.id) : undefined}
+            />
+          )}
+          renderSectionHeader={({ section }) => (
+            <Text style={styles.sectionHeader}>{section.title}</Text>
+          )}
+          contentContainerStyle={styles.list}
+          ListEmptyComponent={
+            <View style={styles.centered}>
+              <Ionicons name="receipt-outline" size={40} color={colours.medium} />
+              <Text style={styles.empty}>No orders found</Text>
+            </View>
+          }
+          stickySectionHeadersEnabled={false}
+        />
+      )}
     </SafeAreaView>
   );
 }

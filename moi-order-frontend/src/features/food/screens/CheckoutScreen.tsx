@@ -85,7 +85,13 @@ export function CheckoutScreen(): React.JSX.Element {
           accessibilityRole="button"
           accessibilityLabel="Place order"
         >
-          <Text style={styles.placeBtnText}>{isPlacing ? 'Placing order…' : 'Place Order'}</Text>
+          <Text style={styles.placeBtnText}>
+            {isPlacing
+              ? 'Placing order…'
+              : paymentMethod === FOOD_PAYMENT_METHOD.PromptPay
+                ? 'Place Order & Pay via LINE'
+                : 'Place Order'}
+          </Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>

@@ -101,6 +101,16 @@ export interface Restaurant {
   min_order_cents: number;
 }
 
+export interface OrderChatMessage {
+  id: number;
+  sender_type: 'customer' | 'merchant' | 'admin';
+  sender_id: number;
+  sender_name: string;
+  body: string | null;
+  image_url: string | null;
+  created_at: string;
+}
+
 export interface PeriodStats {
   order_count: number;
   revenue_cents: number;

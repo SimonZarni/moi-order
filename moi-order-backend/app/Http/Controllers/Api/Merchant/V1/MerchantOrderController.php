@@ -58,10 +58,17 @@ class MerchantOrderController extends Controller
         $restaurant = $request->user()->restaurant()->firstOrFail();
         $order      = $restaurant->foodOrders()->findOrFail($id);
 
-        $order = $this->orderService->updateStatus(
-            $order,
-            FoodOrderStatus::from($request->validated('status')),
-        );
+        $newStatus = FoodOrderStatus::from($request->validated('status'));
+
+        if ($newStatus === FoodOrderStatus::Cancelled) {
+            $order = $this->orderService->cancelByMerchant(
+                $order,
+                $request->validated('cancel_reason'),
+                $request->validated('cancel_description'),
+            );
+        } else {
+            $order = $this->orderService->updateStatus($order, $newStatus);
+        }
 
         return response()->json(['data' => new FoodOrderResource($order, $this->storage)]);
     }

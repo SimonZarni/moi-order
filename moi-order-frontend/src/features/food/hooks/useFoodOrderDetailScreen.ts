@@ -24,6 +24,7 @@ export interface UseFoodOrderDetailScreenResult {
   review: string;
   handleBack: () => void;
   handlePromptPayPress: () => void;
+  handleChatPress: () => void;
   handleRefetch: () => void;
   handleInvoiceOpen: () => void;
   handleInvoiceClose: () => void;
@@ -58,6 +59,13 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
       Alert.alert('Cannot open LINE', 'Please open LINE and search for @moiorder to complete your payment.'),
     );
   }, []);
+
+  const handleChatPress = useCallback(() => {
+    navigation.navigate('OrderChat', {
+      orderId,
+      orderNumber: order?.order_number ?? null,
+    });
+  }, [navigation, orderId, order?.order_number]);
 
   const handleRefetch = useCallback(() => refetch(), [refetch]);
 
@@ -107,6 +115,7 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
     review,
     handleBack,
     handlePromptPayPress,
+    handleChatPress,
     handleRefetch,
     handleInvoiceOpen,
     handleInvoiceClose,

@@ -12,6 +12,7 @@ interface CategorySectionProps {
   onDeleteCategory: (id: number) => void;
   onToggleItemStatus: (itemId: number, status: MenuItemStatus) => void;
   onDeleteItem: (id: number) => void;
+  onAddItem: (categoryId: number) => void;
 }
 
 export function CategorySection({
@@ -19,6 +20,7 @@ export function CategorySection({
   onDeleteCategory,
   onToggleItemStatus,
   onDeleteItem,
+  onAddItem,
 }: CategorySectionProps): React.JSX.Element {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -29,6 +31,10 @@ export function CategorySection({
   const handleDeleteCategory = useCallback(() => {
     onDeleteCategory(category.id);
   }, [category.id, onDeleteCategory]);
+
+  const handleAddItem = useCallback(() => {
+    onAddItem(category.id);
+  }, [category.id, onAddItem]);
 
   return (
     <View style={styles.container}>
@@ -70,6 +76,15 @@ export function CategorySection({
           {category.items.length === 0 && (
             <Text style={styles.empty}>No items in this category</Text>
           )}
+          <Pressable
+            style={styles.addItemButton}
+            onPress={handleAddItem}
+            accessibilityLabel={`Add item to ${category.name}`}
+            accessibilityRole="button"
+          >
+            <Ionicons name="add" size={16} color={colours.primary} />
+            <Text style={styles.addItemText}>Add Item</Text>
+          </Pressable>
         </View>
       )}
     </View>

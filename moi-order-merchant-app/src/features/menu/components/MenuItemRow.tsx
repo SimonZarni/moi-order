@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, Text, Pressable, Image } from 'react-native';
+import { Alert, View, Text, Pressable, Image } from 'react-native';
 import { styles } from './MenuItemRow.styles';
 import { colours } from '../../../shared/theme/colours';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
@@ -18,12 +18,6 @@ const STATUS_COLOURS: Record<MenuItemStatus, string> = {
   [MENU_ITEM_STATUS.Hidden]: colours.medium,
 };
 
-const NEXT_STATUS: Record<MenuItemStatus, MenuItemStatus> = {
-  [MENU_ITEM_STATUS.Available]: MENU_ITEM_STATUS.OutOfStock,
-  [MENU_ITEM_STATUS.OutOfStock]: MENU_ITEM_STATUS.Available,
-  [MENU_ITEM_STATUS.Hidden]: MENU_ITEM_STATUS.Available,
-};
-
 interface MenuItemRowProps {
   item: MenuItem;
   onToggleStatus: (id: number, status: MenuItemStatus) => void;
@@ -32,15 +26,29 @@ interface MenuItemRowProps {
 
 export function MenuItemRow({ item, onToggleStatus, onDelete }: MenuItemRowProps): React.JSX.Element {
   const statusColour = STATUS_COLOURS[item.status];
-  const nextStatus = NEXT_STATUS[item.status];
 
-  const handleToggle = useCallback(() => {
-    onToggleStatus(item.id, nextStatus);
-  }, [item.id, nextStatus, onToggleStatus]);
-
-  const handleDelete = useCallback(() => {
-    onDelete(item.id);
-  }, [item.id, onDelete]);
+  const handleStatusPress = useCallback(() => {
+    Alert.alert(
+      item.name,
+      'Set item status',
+      [
+        {
+          text: 'Available',
+          onPress: () => onToggleStatus(item.id, MENU_ITEM_STATUS.Available),
+        },
+        {
+          text: 'Out of Stock',
+          onPress: () => onToggleStatus(item.id, MENU_ITEM_STATUS.OutOfStock),
+        },
+        {
+          text: 'Delete Item',
+          style: 'destructive',
+          onPress: () => onDelete(item.id),
+        },
+        { text: 'Cancel', style: 'cancel' },
+      ],
+    );
+  }, [item.id, item.name, onToggleStatus, onDelete]);
 
   return (
     <View style={styles.row}>
@@ -54,21 +62,13 @@ export function MenuItemRow({ item, onToggleStatus, onDelete }: MenuItemRowProps
       <View style={styles.actions}>
         <Pressable
           style={[styles.statusBadge, { backgroundColor: statusColour + '22' }]}
-          onPress={handleToggle}
-          accessibilityLabel={`Toggle status for ${item.name}, currently ${STATUS_LABELS[item.status]}`}
+          onPress={handleStatusPress}
+          accessibilityLabel={`Manage ${item.name}, status: ${STATUS_LABELS[item.status]}`}
           accessibilityRole="button"
         >
           <Text style={[styles.statusText, { color: statusColour }]}>
             {STATUS_LABELS[item.status]}
           </Text>
-        </Pressable>
-        <Pressable
-          style={styles.deleteButton}
-          onPress={handleDelete}
-          accessibilityLabel={`Delete menu item ${item.name}`}
-          accessibilityRole="button"
-        >
-          <Text style={styles.deleteText}>✕</Text>
         </Pressable>
       </View>
     </View>

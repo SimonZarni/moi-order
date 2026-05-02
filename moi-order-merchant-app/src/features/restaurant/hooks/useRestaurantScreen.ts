@@ -1,9 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getRestaurant, updateRestaurant } from '../../../api/restaurant';
+import { getRestaurant, updateRestaurant, uploadRestaurantPhoto, removeRestaurantPhoto } from '../../../api/restaurant';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { CACHE_TTL } from '../../../shared/constants/config';
-import { RESTAURANT_STATUS } from '../../../types/enums';
 import type { Restaurant } from '../../../types/models';
 import type { RestaurantStatus } from '../../../types/enums';
 
@@ -19,12 +18,18 @@ interface UseRestaurantScreenResult {
   isLoading: boolean;
   isEditing: boolean;
   isSaving: boolean;
+  isUploadingCover: boolean;
+  isUploadingLogo: boolean;
   form: EditForm;
   handleStartEdit: () => void;
   handleCancelEdit: () => void;
   handleFieldChange: (field: keyof EditForm, value: string) => void;
   handleSave: () => void;
   handleToggleStatus: (status: RestaurantStatus) => void;
+  handleUploadCoverPhoto: (uri: string, name: string, type: string) => void;
+  handleRemoveCoverPhoto: () => void;
+  handleUploadLogo: (uri: string, name: string, type: string) => void;
+  handleRemoveLogo: () => void;
 }
 
 export function useRestaurantScreen(): UseRestaurantScreenResult {
@@ -49,6 +54,26 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
       queryClient.setQueryData(QUERY_KEYS.RESTAURANT, updated);
       setIsEditing(false);
     },
+  });
+
+  const { mutate: mutateCoverUpload, isPending: isUploadingCover } = useMutation({
+    mutationFn: (formData: FormData) => uploadRestaurantPhoto('cover_photo', formData),
+    onSuccess: (updated) => queryClient.setQueryData(QUERY_KEYS.RESTAURANT, updated),
+  });
+
+  const { mutate: mutateLogoUpload, isPending: isUploadingLogo } = useMutation({
+    mutationFn: (formData: FormData) => uploadRestaurantPhoto('logo', formData),
+    onSuccess: (updated) => queryClient.setQueryData(QUERY_KEYS.RESTAURANT, updated),
+  });
+
+  const { mutate: mutateCoverRemove } = useMutation({
+    mutationFn: () => removeRestaurantPhoto('cover_photo'),
+    onSuccess: (updated) => queryClient.setQueryData(QUERY_KEYS.RESTAURANT, updated),
+  });
+
+  const { mutate: mutateLogoRemove } = useMutation({
+    mutationFn: () => removeRestaurantPhoto('logo'),
+    onSuccess: (updated) => queryClient.setQueryData(QUERY_KEYS.RESTAURANT, updated),
   });
 
   const handleStartEdit = useCallback(() => {
@@ -83,16 +108,38 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     [save],
   );
 
+  const handleUploadCoverPhoto = useCallback((uri: string, name: string, type: string) => {
+    const fd = new FormData();
+    fd.append('photo', { uri, name, type } as unknown as Blob);
+    mutateCoverUpload(fd);
+  }, [mutateCoverUpload]);
+
+  const handleRemoveCoverPhoto = useCallback(() => mutateCoverRemove(), [mutateCoverRemove]);
+
+  const handleUploadLogo = useCallback((uri: string, name: string, type: string) => {
+    const fd = new FormData();
+    fd.append('photo', { uri, name, type } as unknown as Blob);
+    mutateLogoUpload(fd);
+  }, [mutateLogoUpload]);
+
+  const handleRemoveLogo = useCallback(() => mutateLogoRemove(), [mutateLogoRemove]);
+
   return {
     restaurant,
     isLoading,
     isEditing,
     isSaving,
+    isUploadingCover,
+    isUploadingLogo,
     form,
     handleStartEdit,
     handleCancelEdit,
     handleFieldChange,
     handleSave,
     handleToggleStatus,
+    handleUploadCoverPhoto,
+    handleRemoveCoverPhoto,
+    handleUploadLogo,
+    handleRemoveLogo,
   };
 }

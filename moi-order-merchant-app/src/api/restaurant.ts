@@ -40,3 +40,12 @@ export async function uploadRestaurantPhoto(
   );
   return response.data.data;
 }
+
+export async function removeRestaurantPhoto(
+  field: 'cover_photo' | 'logo',
+): Promise<Restaurant> {
+  const response = await apiClient.delete<{ data: Restaurant }>(
+    `/restaurant/${field}`,
+  );
+  return response.data.data;
+}

@@ -79,6 +79,7 @@ import { RestaurantMapScreen } from '@/features/food/screens/RestaurantMapScreen
 import { CartOrdersScreen } from '@/features/food/screens/CartOrdersScreen';
 import { CheckoutScreen } from '@/features/food/screens/CheckoutScreen';
 import { FoodOrderDetailScreen } from '@/features/food/screens/FoodOrderDetailScreen';
+import { OrderChatScreen } from '@/features/food/screens/OrderChatScreen';
 
 import { useNotificationsData } from '@/features/notifications/hooks/useNotificationsData';
 import { usePusherNotifications } from '@/features/notifications/hooks/usePusherNotifications';
@@ -160,6 +161,7 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="CartOrders"                    component={CartOrdersScreen} />
       <Stack.Screen name="Checkout"                      component={CheckoutScreen} />
       <Stack.Screen name="FoodOrderDetail"               component={FoodOrderDetailScreen} />
+      <Stack.Screen name="OrderChat"                     component={OrderChatScreen} />
     </Stack.Navigator>
     <NoticeModal isVisible={noticeVisible} onClose={dismissNotice} />
     </>

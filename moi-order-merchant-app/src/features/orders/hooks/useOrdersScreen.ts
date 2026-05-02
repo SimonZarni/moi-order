@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getOrders, updateOrderStatus } from '../../../api/orders';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
@@ -6,25 +6,30 @@ import { CACHE_TTL, GC_TIME, QUERY_RETRY } from '../../../shared/constants/confi
 import { ORDER_STATUS, type OrderStatus } from '../../../types/enums';
 import type { FoodOrder } from '../../../types/models';
 
-interface OrderGroups {
-  newOrders: FoodOrder[];
-  inProgressOrders: FoodOrder[];
-  doneOrders: FoodOrder[];
+export type StatusFilter = 'all' | 'new' | 'in_progress' | 'done';
+
+export interface OrderSection {
+  title: string;
+  data: FoodOrder[];
 }
 
-interface UseOrdersScreenResult extends OrderGroups {
+interface UseOrdersScreenResult {
+  sections: OrderSection[];
   isLoading: boolean;
   isError: boolean;
+  statusFilter: StatusFilter;
+  dateFilter: string | null;
   handleUpdateStatus: (orderId: number, newStatus: string) => void;
+  handleStatusFilterChange: (filter: StatusFilter) => void;
+  handleDatePrev: () => void;
+  handleDateNext: () => void;
+  handleDateToday: () => void;
 }
 
-// Statuses requiring immediate merchant attention.
 const NEW_STATUSES: ReadonlySet<OrderStatus> = new Set<OrderStatus>([
   ORDER_STATUS.OrderPlaced,
   ORDER_STATUS.WaitingForPayment,
 ]);
-// Active orders — merchant has a pending action or is waiting on delivery.
-// Delivered is kept here because merchant still needs to mark it Completed.
 const IN_PROGRESS_STATUSES: ReadonlySet<OrderStatus> = new Set<OrderStatus>([
   ORDER_STATUS.PaymentConfirmed,
   ORDER_STATUS.PreparingFood,
@@ -32,18 +37,32 @@ const IN_PROGRESS_STATUSES: ReadonlySet<OrderStatus> = new Set<OrderStatus>([
   ORDER_STATUS.DeliveryOnTheWay,
   ORDER_STATUS.Delivered,
 ]);
-// Terminal statuses — no further action possible.
 const DONE_STATUSES: ReadonlySet<OrderStatus> = new Set<OrderStatus>([
   ORDER_STATUS.Completed,
   ORDER_STATUS.Cancelled,
 ]);
 
+function toDateString(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function shiftDate(dateStr: string, days: number): string {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + days);
+  return toDateString(d);
+}
+
 export function useOrdersScreen(): UseOrdersScreenResult {
   const queryClient = useQueryClient();
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [dateFilter, setDateFilter] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: QUERY_KEYS.ORDERS(),
-    queryFn: () => getOrders(),
+    queryKey: QUERY_KEYS.ORDERS(dateFilter ?? undefined),
+    queryFn: () => getOrders(dateFilter !== null ? { date: dateFilter } : undefined),
     staleTime: CACHE_TTL.ORDERS,
     gcTime: GC_TIME.DEFAULT,
     refetchInterval: CACHE_TTL.ORDERS,
@@ -61,20 +80,25 @@ export function useOrdersScreen(): UseOrdersScreenResult {
 
   const orders = useMemo(() => data?.data ?? [], [data]);
 
-  const newOrders = useMemo(
-    () => orders.filter((o) => NEW_STATUSES.has(o.status)),
-    [orders],
-  );
-
-  const inProgressOrders = useMemo(
-    () => orders.filter((o) => IN_PROGRESS_STATUSES.has(o.status)),
-    [orders],
-  );
-
-  const doneOrders = useMemo(
-    () => orders.filter((o) => DONE_STATUSES.has(o.status)),
-    [orders],
-  );
+  const sections = useMemo<OrderSection[]>(() => {
+    if (statusFilter === 'new') {
+      const filtered = orders.filter((o) => NEW_STATUSES.has(o.status));
+      return filtered.length > 0 ? [{ title: 'New Orders', data: filtered }] : [];
+    }
+    if (statusFilter === 'in_progress') {
+      const filtered = orders.filter((o) => IN_PROGRESS_STATUSES.has(o.status));
+      return filtered.length > 0 ? [{ title: 'In Progress', data: filtered }] : [];
+    }
+    if (statusFilter === 'done') {
+      const filtered = orders.filter((o) => DONE_STATUSES.has(o.status));
+      return filtered.length > 0 ? [{ title: 'Completed & Cancelled', data: filtered }] : [];
+    }
+    return [
+      { title: 'New Orders', data: orders.filter((o) => NEW_STATUSES.has(o.status)) },
+      { title: 'In Progress', data: orders.filter((o) => IN_PROGRESS_STATUSES.has(o.status)) },
+      { title: 'Completed & Cancelled', data: orders.filter((o) => DONE_STATUSES.has(o.status)) },
+    ].filter((s) => s.data.length > 0);
+  }, [orders, statusFilter]);
 
   const handleUpdateStatus = useCallback(
     (orderId: number, newStatus: string) => {
@@ -83,12 +107,36 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     [mutateStatus],
   );
 
+  const handleStatusFilterChange = useCallback((filter: StatusFilter) => {
+    setStatusFilter(filter);
+  }, []);
+
+  const handleDatePrev = useCallback(() => {
+    setDateFilter((prev) => shiftDate(prev ?? toDateString(new Date()), -1));
+  }, []);
+
+  const handleDateNext = useCallback(() => {
+    setDateFilter((prev) => {
+      const next = shiftDate(prev ?? toDateString(new Date()), 1);
+      const today = toDateString(new Date());
+      return next > today ? null : next;
+    });
+  }, []);
+
+  const handleDateToday = useCallback(() => {
+    setDateFilter(null);
+  }, []);
+
   return {
-    newOrders,
-    inProgressOrders,
-    doneOrders,
+    sections,
     isLoading,
     isError,
+    statusFilter,
+    dateFilter,
     handleUpdateStatus,
+    handleStatusFilterChange,
+    handleDatePrev,
+    handleDateNext,
+    handleDateToday,
   };
 }

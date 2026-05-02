@@ -19,7 +19,9 @@ class UpdateFoodOrderStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', Rule::enum(FoodOrderStatus::class)],
+            'status'             => ['required', Rule::enum(FoodOrderStatus::class)],
+            'cancel_reason'      => ['nullable', 'string', 'in:closing_soon,sold_out,out_of_range', 'max:100'],
+            'cancel_description' => ['nullable', 'string', 'max:500'],
         ];
     }
 

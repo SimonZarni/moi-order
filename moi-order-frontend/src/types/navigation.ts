@@ -113,4 +113,5 @@ export type RootStackParamList = {
   CartOrders: undefined;
   Checkout: undefined;
   FoodOrderDetail: { orderId: number };
+  OrderChat: { orderId: number; orderNumber: string | null };
 };

@@ -3,6 +3,7 @@ import { apiClient } from './client';
 
 export interface OrdersParams {
   status?: string;
+  date?: string;
   page?: number;
 }
 
@@ -31,3 +32,20 @@ export async function updateOrderStatus(
   );
   return response.data.data;
 }
+
+export interface CancelOrderPayload {
+  cancel_reason: string;
+  cancel_description: string | null;
+}
+
+export async function cancelOrderWithReason(
+  id: number,
+  payload: CancelOrderPayload,
+): Promise<FoodOrder> {
+  const response = await apiClient.patch<{ data: FoodOrder }>(
+    `/orders/${id}/status`,
+    { status: 'cancelled', ...payload },
+  );
+  return response.data.data;
+}
+

@@ -14,6 +14,7 @@ import type {
 import { DashboardScreen } from '../features/dashboard/screens/DashboardScreen';
 import { OrdersScreen } from '../features/orders/screens/OrdersScreen';
 import { OrderDetailScreen } from '../features/orders/screens/OrderDetailScreen';
+import { OrderChatScreen } from '../features/chat/screens/OrderChatScreen';
 import { MenuScreen } from '../features/menu/screens/MenuScreen';
 import { RestaurantScreen } from '../features/restaurant/screens/RestaurantScreen';
 import { AnalyticsScreen } from '../features/analytics/screens/AnalyticsScreen';
@@ -99,6 +100,7 @@ function MobileNavigator(): React.JSX.Element {
     <MobileStack.Navigator screenOptions={{ headerShown: false }}>
       <MobileStack.Screen name="Tabs" component={MobileTabNavigator} />
       <MobileStack.Screen name="OrderDetail" component={OrderDetailRoute} />
+      <MobileStack.Screen name="OrderChat" component={OrderChatScreen} />
     </MobileStack.Navigator>
   );
 }

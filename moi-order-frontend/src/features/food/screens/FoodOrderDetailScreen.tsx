@@ -9,7 +9,6 @@ import { formatPrice } from '@/shared/utils/formatCurrency';
 import { InvoiceModal } from '../components/InvoiceModal';
 import { OrderProgressBar } from '../components/OrderProgressBar';
 import { OrderRatingInput } from '../components/OrderRatingInput';
-import { OrderChatSection } from '../components/OrderChatSection';
 import { SlideToComplete } from '../components/SlideToComplete';
 import { useFoodOrderDetailScreen } from '../hooks/useFoodOrderDetailScreen';
 import { styles } from './FoodOrderDetailScreen.styles';
@@ -20,7 +19,7 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
     invoiceVisible, handleInvoiceOpen, handleInvoiceClose,
     completeModalVisible, isCompleting,
     rating, review,
-    handleBack, handlePromptPayPress,
+    handleBack, handlePromptPayPress, handleChatPress,
     handleSlideComplete, handleCompleteConfirm, handleCompleteCancel,
     handleRatingChange, handleReviewChange,
     handleCallRestaurant,
@@ -110,12 +109,16 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
           </View>
         )}
 
-        {!isCancelled && (
-          <View style={styles.card}>
-            <View style={styles.chatPad}>
-              <OrderChatSection order={order} />
-            </View>
-          </View>
+        {!isCancelled && canViewInvoice && (
+          <Pressable
+            style={styles.chatBtn}
+            onPress={handleChatPress}
+            accessibilityRole="button"
+            accessibilityLabel="Open chat with restaurant"
+          >
+            <Ionicons name="chatbubbles-outline" size={18} color={colours.textOnDark} />
+            <Text style={styles.chatBtnText}>Chat with Restaurant</Text>
+          </Pressable>
         )}
 
         {order.customer_notes !== null && (

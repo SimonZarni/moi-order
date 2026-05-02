@@ -139,6 +139,22 @@ export const styles = StyleSheet.create({
     color: colours.primary,
     fontWeight: '600',
   },
+  // Chat button
+  chatBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: colours.primary,
+    borderRadius: radius.xl,
+    paddingVertical: spacing.md,
+    marginTop: spacing.xs,
+  },
+  chatBtnText: {
+    fontSize: typography.md,
+    fontWeight: '700',
+    color: colours.white,
+  },
   // Confirmation modal
   modalOverlay: {
     flex: 1,

@@ -50,4 +50,18 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     textAlign: 'center',
   },
+  addItemButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.sm,
+    marginTop: spacing.xs,
+    alignSelf: 'flex-start',
+    minHeight: 44,
+  },
+  addItemText: {
+    fontSize: typography.sm,
+    color: colours.primary,
+    fontWeight: '600',
+  },
 });

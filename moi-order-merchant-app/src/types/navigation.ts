@@ -19,6 +19,7 @@ export type MerchantTabParamList = {
 export type MerchantStackParamList = {
   Tabs: undefined;
   OrderDetail: { orderId: number };
+  OrderChat: { orderId: number };
 };
 
 export type RootStackParamList = {

@@ -5,7 +5,7 @@ import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 
 export const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colours.backgroundLight },
+  root: { flex: 1, backgroundColor: colours.backgroundDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -28,7 +28,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  scroll: { flex: 1 },
+  scroll: { flex: 1, backgroundColor: colours.backgroundLight },
   content: { padding: spacing.md, gap: spacing.md },
   card: {
     backgroundColor: colours.card,

@@ -1,17 +1,19 @@
 import React from 'react';
 import {
-  View, Text, ScrollView, Pressable, ActivityIndicator, Linking,
+  View, Text, ScrollView, Pressable, ActivityIndicator, Linking, Modal, TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useOrderDetailScreen } from '../hooks/useOrderDetailScreen';
 import { styles } from './OrderDetailScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
 import { formatDateTime } from '../../../shared/utils/formatDate';
 import { ORDER_STATUS } from '../../../types/enums';
+import type { MerchantStackParamList } from '../../../types/navigation';
 
-// Every merchant-triggered forward transition in the correct order.
 const ORDER_ACTIONS: Partial<Record<string, string>> = {
   [ORDER_STATUS.OrderPlaced]:        ORDER_STATUS.WaitingForPayment,
   [ORDER_STATUS.PaymentConfirmed]:   ORDER_STATUS.PreparingFood,
@@ -30,8 +32,6 @@ const ACTION_LABELS: Partial<Record<string, string>> = {
   [ORDER_STATUS.Delivered]:          'Complete Order',
 };
 
-// Cancel is allowed from every state that has at least one other allowed transition.
-// Prohibited: delivered (no cancel in enum), completed, cancelled.
 const CANCELLABLE_STATUSES = new Set<string>([
   ORDER_STATUS.OrderPlaced,
   ORDER_STATUS.WaitingForPayment,
@@ -53,10 +53,15 @@ const STATUS_COLOURS: Record<string, string> = {
   [ORDER_STATUS.Cancelled]:          colours.error,
 };
 
-// Informational note shown for statuses where the merchant waits on an external actor.
 const WAITING_NOTES: Partial<Record<string, string>> = {
   [ORDER_STATUS.WaitingForPayment]: 'Waiting for customer to complete payment.',
 };
+
+const CANCEL_REASONS = [
+  { value: 'closing_soon', label: 'Closing soon' },
+  { value: 'sold_out',     label: 'Sold out' },
+  { value: 'out_of_range', label: 'Delivery address out of range' },
+];
 
 interface OrderDetailScreenProps {
   orderId: number;
@@ -64,7 +69,14 @@ interface OrderDetailScreenProps {
 }
 
 export function OrderDetailScreen({ orderId, onBack }: OrderDetailScreenProps): React.JSX.Element {
-  const { order, isLoading, isError, isUpdating, handleUpdateStatus } = useOrderDetailScreen(orderId);
+  const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
+
+  const {
+    order, isLoading, isError, isUpdating,
+    cancelModalVisible, cancelReason, cancelDescription,
+    handleUpdateStatus, handleCancelPress, handleCancelModalClose,
+    handleCancelReasonChange, handleCancelDescriptionChange, handleCancelConfirm,
+  } = useOrderDetailScreen(orderId);
 
   if (isLoading) {
     return (
@@ -93,11 +105,16 @@ export function OrderDetailScreen({ orderId, onBack }: OrderDetailScreenProps): 
   const waitingNote = WAITING_NOTES[order.status];
   const canCancel = CANCELLABLE_STATUSES.has(order.status);
   const statusColour = STATUS_COLOURS[order.status] ?? colours.medium;
+  const canChat = order.payment_confirmed_at !== null && order.status !== ORDER_STATUS.Cancelled;
 
   const handleCallCustomer = (): void => {
     if (order.user.phone !== null) {
       void Linking.openURL(`tel:${order.user.phone}`);
     }
+  };
+
+  const handleChatPress = (): void => {
+    navigation.navigate('OrderChat', { orderId });
   };
 
   return (
@@ -205,7 +222,6 @@ export function OrderDetailScreen({ orderId, onBack }: OrderDetailScreenProps): 
           </View>
         </View>
 
-        {/* Status-specific waiting note */}
         {waitingNote !== undefined && (
           <View style={styles.infoNote}>
             <Ionicons name="time-outline" size={16} color={colours.warning} />
@@ -213,7 +229,18 @@ export function OrderDetailScreen({ orderId, onBack }: OrderDetailScreenProps): 
           </View>
         )}
 
-        {/* Primary action: advance to next status */}
+        {canChat && (
+          <Pressable
+            style={styles.chatButton}
+            onPress={handleChatPress}
+            accessibilityLabel="Chat with customer"
+            accessibilityRole="button"
+          >
+            <Ionicons name="chatbubbles-outline" size={16} color={colours.primary} />
+            <Text style={styles.chatButtonText}>Chat with Customer</Text>
+          </Pressable>
+        )}
+
         {nextStatus !== undefined && actionLabel !== undefined && (
           <Pressable
             style={({ pressed }) => [
@@ -231,11 +258,10 @@ export function OrderDetailScreen({ orderId, onBack }: OrderDetailScreenProps): 
           </Pressable>
         )}
 
-        {/* Cancel — only when the enum permits it */}
         {canCancel && (
           <Pressable
             style={[styles.cancelButton, isUpdating && styles.actionButtonDisabled]}
-            onPress={() => handleUpdateStatus(ORDER_STATUS.Cancelled)}
+            onPress={handleCancelPress}
             disabled={isUpdating}
             accessibilityLabel="Cancel this order"
             accessibilityRole="button"
@@ -244,6 +270,75 @@ export function OrderDetailScreen({ orderId, onBack }: OrderDetailScreenProps): 
           </Pressable>
         )}
       </ScrollView>
+
+      <Modal
+        visible={cancelModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={handleCancelModalClose}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Cancel Order</Text>
+
+            <View>
+              <Text style={styles.modalLabel}>Reason</Text>
+              {CANCEL_REASONS.map((r) => (
+                <Pressable
+                  key={r.value}
+                  style={styles.reasonOption}
+                  onPress={() => handleCancelReasonChange(r.value)}
+                  accessibilityRole="radio"
+                  accessibilityLabel={r.label}
+                  accessibilityState={{ checked: cancelReason === r.value }}
+                >
+                  <View style={styles.radioOuter}>
+                    {cancelReason === r.value && <View style={styles.radioInner} />}
+                  </View>
+                  <Text style={styles.reasonOptionText}>{r.label}</Text>
+                </Pressable>
+              ))}
+            </View>
+
+            <View>
+              <Text style={styles.modalLabel}>Additional Details (optional)</Text>
+              <TextInput
+                style={styles.modalTextInput}
+                value={cancelDescription}
+                onChangeText={handleCancelDescriptionChange}
+                placeholder="Describe the reason in more detail…"
+                placeholderTextColor={colours.textMuted}
+                multiline
+                maxLength={500}
+                accessibilityLabel="Cancel description"
+              />
+            </View>
+
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.modalCancelBtn}
+                onPress={handleCancelModalClose}
+                accessibilityRole="button"
+                accessibilityLabel="Keep order"
+              >
+                <Text style={styles.modalCancelText}>Keep Order</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.modalConfirmBtn, isUpdating && { opacity: 0.6 }]}
+                onPress={handleCancelConfirm}
+                disabled={isUpdating}
+                accessibilityRole="button"
+                accessibilityLabel="Confirm cancellation"
+              >
+                {isUpdating
+                  ? <ActivityIndicator size="small" color={colours.white} />
+                  : <Text style={styles.modalConfirmText}>Confirm Cancel</Text>
+                }
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
