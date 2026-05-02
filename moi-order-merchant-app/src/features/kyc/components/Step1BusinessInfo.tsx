@@ -9,6 +9,7 @@ interface Step1Data {
   business_name: string;
   business_type: string;
   business_address: string;
+  business_phone: string;
 }
 
 interface Step1BusinessInfoProps {
@@ -25,14 +26,16 @@ export function Step1BusinessInfo({
   const [businessName, setBusinessName] = useState(initialData.business_name);
   const [businessType, setBusinessType] = useState(initialData.business_type);
   const [businessAddress, setBusinessAddress] = useState(initialData.business_address);
+  const [businessPhone, setBusinessPhone] = useState(initialData.business_phone);
 
   const handleSubmit = useCallback(() => {
     onSubmit({
       business_name: businessName.trim(),
       business_type: businessType,
       business_address: businessAddress.trim(),
+      business_phone: businessPhone.trim(),
     });
-  }, [businessName, businessType, businessAddress, onSubmit]);
+  }, [businessName, businessType, businessAddress, businessPhone, onSubmit]);
 
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
@@ -75,6 +78,18 @@ export function Step1BusinessInfo({
         multiline
         numberOfLines={3}
         accessibilityLabel="Business address"
+      />
+
+      <Text style={styles.label}>Business Phone <Text style={styles.labelOptional}>(optional)</Text></Text>
+      <TextInput
+        style={styles.input}
+        placeholder="e.g. +959 123 456 789"
+        placeholderTextColor={colours.medium}
+        value={businessPhone}
+        onChangeText={setBusinessPhone}
+        keyboardType="phone-pad"
+        autoComplete="tel"
+        accessibilityLabel="Business phone number"
       />
 
       <Pressable

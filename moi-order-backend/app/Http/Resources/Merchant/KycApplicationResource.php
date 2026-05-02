@@ -27,6 +27,7 @@ class KycApplicationResource extends JsonResource
             'business_name'    => $this->business_name,
             'business_type'    => $this->business_type,
             'business_address' => $this->business_address,
+            'business_phone'   => $this->business_phone,
             'status'           => $this->status->value,
             'status_label'     => $this->status->label(),
             'review_notes'     => $this->review_notes,

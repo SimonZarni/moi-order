@@ -20,6 +20,11 @@ export const styles = StyleSheet.create({
     color: colours.textOnLight,
     marginBottom: spacing.xs,
   },
+  labelOptional: {
+    fontWeight: '400',
+    color: colours.textMuted,
+    fontSize: typography.xs,
+  },
   input: {
     backgroundColor: colours.card,
     borderWidth: 1,

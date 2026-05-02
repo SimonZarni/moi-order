@@ -7,6 +7,7 @@ export interface UpsertKycData {
   business_name: string;
   business_type: string;
   business_address: string;
+  business_phone?: string | null;
 }
 
 export interface UploadFileRef {

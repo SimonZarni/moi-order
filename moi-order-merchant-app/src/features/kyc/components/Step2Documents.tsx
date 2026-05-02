@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, Text, Pressable, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, ScrollView, ActivityIndicator, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './Step2Documents.styles';
@@ -23,6 +23,7 @@ const DOC_CARDS: DocCard[] = [
 
 interface Step2DocumentsProps {
   uploadedTypes: Set<KycDocType>;
+  previewUris: Partial<Record<KycDocType, string>>;
   isLoading: boolean;
   onBack: () => void;
   onUpload: (type: KycDocType, file: UploadFileRef) => void;
@@ -31,6 +32,7 @@ interface Step2DocumentsProps {
 
 export function Step2Documents({
   uploadedTypes,
+  previewUris,
   isLoading,
   onBack,
   onUpload,
@@ -76,6 +78,7 @@ export function Step2Documents({
 
       {DOC_CARDS.map((card) => {
         const uploaded = uploadedTypes.has(card.type);
+        const previewUri = previewUris[card.type];
         return (
           <View key={card.type} style={[styles.card, uploaded && styles.cardUploaded]}>
             <View style={styles.cardHeader}>
@@ -89,6 +92,16 @@ export function Step2Documents({
                 <Text style={styles.cardDesc}>{card.description}</Text>
               </View>
             </View>
+
+            {previewUri !== undefined && (
+              <Image
+                source={{ uri: previewUri }}
+                style={styles.preview}
+                resizeMode="cover"
+                accessibilityLabel={`Preview of ${card.label}`}
+              />
+            )}
+
             <Pressable
               style={[styles.uploadButton, uploaded && styles.uploadButtonDone]}
               onPress={handlePickImage(card.type)}

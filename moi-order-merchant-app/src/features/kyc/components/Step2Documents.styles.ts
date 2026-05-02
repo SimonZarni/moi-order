@@ -63,6 +63,13 @@ export const styles = StyleSheet.create({
     fontSize: typography.xs,
     color: colours.textMuted,
   },
+  preview: {
+    width: '100%',
+    height: 120,
+    borderRadius: radius.sm,
+    marginBottom: spacing.sm,
+    backgroundColor: colours.divider,
+  },
   uploadButton: {
     borderWidth: 1,
     borderColor: colours.primary,

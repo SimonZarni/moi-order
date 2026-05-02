@@ -11,7 +11,7 @@ import { useAuthStore } from '../../../store/authStore';
 export function KycWizardScreen(): React.JSX.Element {
   const logout = useAuthStore((s) => s.logout);
   const {
-    currentStep, step1Data, uploadedTypes, isLoading, error,
+    currentStep, step1Data, uploadedTypes, previewUris, isLoading, error,
     handleBack, handleStep1Submit, handleDocUpload, handleSubmitKyc,
   } = useKycWizard();
 
@@ -39,6 +39,7 @@ export function KycWizardScreen(): React.JSX.Element {
       {currentStep === 2 && (
         <Step2Documents
           uploadedTypes={uploadedTypes}
+          previewUris={previewUris}
           isLoading={isLoading}
           onBack={handleBack}
           onUpload={handleDocUpload}

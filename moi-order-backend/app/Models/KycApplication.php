@@ -29,6 +29,7 @@ class KycApplication extends Model
         'business_name',
         'business_type',
         'business_address',
+        'business_phone',
         'status',
         'review_notes',
         'reviewed_by',
@@ -92,7 +93,9 @@ class KycApplication extends Model
     }
 
     /**
-     * Returns the set of uploaded KycDocumentType values for this application.
+     * Returns the set of uploaded KycDocumentType string values for this application.
+     * pluck('type') returns enum instances due to the KycDocument cast — map to ->value
+     * so in_array() string comparisons work correctly in hasAllRequiredDocuments().
      *
      * @return array<string>
      */
@@ -100,6 +103,7 @@ class KycApplication extends Model
     {
         return $this->documents()
             ->pluck('type')
+            ->map(fn (KycDocumentType $t) => $t->value)
             ->toArray();
     }
 

@@ -25,6 +25,7 @@ class CreateKycApplicationRequest extends FormRequest
             'business_name'    => ['required', 'string', 'max:255'],
             'business_type'    => ['required', 'string', 'max:100'],
             'business_address' => ['required', 'string', 'max:1000'],
+            'business_phone'   => ['nullable', 'string', 'max:50'],
         ];
     }
 
@@ -38,6 +39,7 @@ class CreateKycApplicationRequest extends FormRequest
             'business_type.max'         => 'Business type may not exceed 100 characters.',
             'business_address.required' => 'Business address is required.',
             'business_address.max'      => 'Business address may not exceed 1000 characters.',
+            'business_phone.max'        => 'Business phone may not exceed 50 characters.',
         ];
     }
 
@@ -48,6 +50,7 @@ class CreateKycApplicationRequest extends FormRequest
             'business_name'    => 'business name',
             'business_type'    => 'business type',
             'business_address' => 'business address',
+            'business_phone'   => 'business phone',
         ];
     }
 }

@@ -23,6 +23,7 @@ export interface KycApplication {
   business_name: string;
   business_type: string;
   business_address: string;
+  business_phone: string | null;
   status: KycStatus;
   status_label: string;
   review_notes: string | null;

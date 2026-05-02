@@ -16,6 +16,7 @@ readonly class KycApplicationDTO
         public string $businessName,
         public string $businessType,
         public string $businessAddress,
+        public ?string $businessPhone,
     ) {}
 
     public static function fromRequest(CreateKycApplicationRequest $request): self
@@ -24,6 +25,7 @@ readonly class KycApplicationDTO
             businessName:    $request->validated('business_name'),
             businessType:    $request->validated('business_type'),
             businessAddress: $request->validated('business_address'),
+            businessPhone:   $request->validated('business_phone'),
         );
     }
 }

@@ -77,6 +77,7 @@ class KycService
             'business_name'    => $dto->businessName,
             'business_type'    => $dto->businessType,
             'business_address' => $dto->businessAddress,
+            'business_phone'   => $dto->businessPhone,
         ]);
 
         return $app->fresh();

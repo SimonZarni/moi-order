@@ -13,16 +13,18 @@ import { extractApiError } from '../../../api/client';
 
 type WizardStep = 1 | 2 | 3;
 
-interface Step1Data {
+export interface Step1Data {
   business_name: string;
   business_type: string;
   business_address: string;
+  business_phone: string;
 }
 
 interface UseKycWizardResult {
   currentStep: WizardStep;
   step1Data: Step1Data;
   uploadedTypes: Set<KycDocType>;
+  previewUris: Partial<Record<KycDocType, string>>;
   isLoading: boolean;
   error: string | null;
   handleBack: () => void;
@@ -41,8 +43,10 @@ export function useKycWizard(): UseKycWizardResult {
     business_name: '',
     business_type: '',
     business_address: '',
+    business_phone: '',
   });
   const [uploadedTypes, setUploadedTypes] = useState<Set<KycDocType>>(new Set());
+  const [previewUris, setPreviewUris] = useState<Partial<Record<KycDocType, string>>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,6 +76,7 @@ export function useKycWizard(): UseKycWizardResult {
       try {
         await uploadKycDocument(type, file);
         setUploadedTypes((prev) => new Set([...prev, type]));
+        setPreviewUris((prev) => ({ ...prev, [type]: file.uri }));
       } catch (e) {
         setError(extractApiError(e).message);
       } finally {
@@ -99,6 +104,7 @@ export function useKycWizard(): UseKycWizardResult {
     currentStep,
     step1Data,
     uploadedTypes,
+    previewUris,
     isLoading,
     error,
     handleBack,
