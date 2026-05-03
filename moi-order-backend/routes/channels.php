@@ -19,6 +19,16 @@ Broadcast::channel('user.{id}', function ($user, int $id): bool {
     return (int) $user->id === $id;
 });
 
+// Presence channel — any authenticated user can join; their id/name is shared with subscribers.
+// Admin dashboard subscribes to see who's currently online.
+Broadcast::channel('presence-online-users', function ($user): array|false {
+    if ($user === null) {
+        return false;
+    }
+
+    return ['id' => $user->id, 'name' => $user->name];
+});
+
 // Order chat — customer who owns the order, merchant who received the order, or any authenticated admin.
 Broadcast::channel('order.{foodOrderId}', function ($user, int $foodOrderId): bool {
     // Admin token carries the 'admin' ability.

@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\Admin\V1\AdminTicketController;
 use App\Http\Controllers\Api\Admin\V1\AdminTicketOrderController;
 use App\Http\Controllers\Api\Admin\V1\AdminTicketVariantController;
 use App\Http\Controllers\Api\Admin\V1\AdminUserController;
+use App\Http\Controllers\Api\Admin\V1\AdminUserDocumentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -150,6 +151,13 @@ Route::prefix('users')->name('admin.users.')->group(function (): void {
     Route::patch('/{user}/ban',      [AdminUserController::class, 'ban'])->name('ban')
         ->middleware('check.permission:users.manage');
     Route::patch('/{user}/activate', [AdminUserController::class, 'activate'])->name('activate')
+        ->middleware('check.permission:users.manage');
+
+    // User document sub-routes
+    Route::get('/{user}/documents',                    [AdminUserDocumentController::class, 'index'])->name('documents.index');
+    Route::post('/{user}/documents',                   [AdminUserDocumentController::class, 'store'])->name('documents.store')
+        ->middleware('check.permission:users.manage');
+    Route::delete('/{user}/documents/{document}',      [AdminUserDocumentController::class, 'destroy'])->name('documents.destroy')
         ->middleware('check.permission:users.manage');
 });
 

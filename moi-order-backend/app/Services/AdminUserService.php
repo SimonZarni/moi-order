@@ -46,7 +46,12 @@ class AdminUserService
 
     public function show(User $user): User
     {
-        return $user->load('serviceSubmissions.serviceType.service');
+        return $user->load([
+            'adminRole.permissions',
+            'documents',
+            'ticketOrders.ticket',
+            'foodOrders.restaurant',
+        ]);
     }
 
     public function update(User $user, AdminUpdateUserDTO $dto): User

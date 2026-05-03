@@ -6,6 +6,8 @@
  * Channels managed:
  *   private-App.Models.User.{id}  — in-app notifications (notification.created)
  *   private-user.{id}             — food-order status updates (food-order.status-updated)
+ *   presence-online-users          — presence channel; joining signals the user is active
+ *                                    (admin dashboard reads membership to show online status)
  */
 import { useEffect } from 'react';
 import { AppState } from 'react-native';
@@ -74,6 +76,12 @@ export function usePusherNotifications(): void {
       incrementUnread();
     });
 
+    // ── Presence channel — signals this user is online to the admin dashboard ─
+    const presenceChannelName = 'presence-online-users';
+    const presenceChannel     = pusher.subscribe(presenceChannelName);
+    // No event bindings needed — membership itself is the signal.
+    void presenceChannel;
+
     // ── Reconnect on foreground restore ────────────────────────────────────
     const appStateSub = AppState.addEventListener('change', (state) => {
       if (state === 'active' && pusher.connection.state !== 'connected') {
@@ -87,6 +95,7 @@ export function usePusherNotifications(): void {
       orderChannel.unbind_all();
       pusher.unsubscribe(notifChannelName);
       pusher.unsubscribe(orderChannelName);
+      pusher.unsubscribe(presenceChannelName);
       pusher.disconnect();
     };
   }, [userId, queryClient, incrementUnread]);

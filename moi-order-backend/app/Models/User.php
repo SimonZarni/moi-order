@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Document;
+use App\Models\TicketOrder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -46,6 +48,7 @@ class User extends Authenticatable
         'apple_id',
         'line_id',
         'profile_picture_path',
+        'last_active_at',
     ];
 
     /**
@@ -74,6 +77,7 @@ class User extends Authenticatable
             'is_merchant'       => 'boolean',
             'status'            => UserStatusEnum::class,
             'suspended_until'   => 'datetime',
+            'last_active_at'    => 'datetime',
         ];
     }
 
@@ -168,5 +172,22 @@ class User extends Authenticatable
     public function foodOrders(): HasMany
     {
         return $this->hasMany(FoodOrder::class);
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class);
+    }
+
+    public function ticketOrders(): HasMany
+    {
+        return $this->hasMany(TicketOrder::class);
+    }
+
+    /** Online = made an API request within the last 5 minutes. */
+    public function isOnline(): bool
+    {
+        return $this->last_active_at !== null
+            && $this->last_active_at->isAfter(now()->subMinutes(5));
     }
 }

@@ -28,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'user.not_suspended'  => \App\Http\Middleware\CheckUserNotSuspended::class,
             'abilities'           => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
             'ability'             => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
+            'update.last_active'  => \App\Http\Middleware\UpdateLastActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

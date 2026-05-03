@@ -21,7 +21,7 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(
 );
 
 // User API routes — token must carry the 'user' ability; status checked on every request
-Route::prefix('v1')->middleware(['auth:sanctum', 'abilities:user', 'user.not_suspended', 'throttle:api'])->group(
+Route::prefix('v1')->middleware(['auth:sanctum', 'abilities:user', 'user.not_suspended', 'update.last_active', 'throttle:api'])->group(
     base_path('routes/api/v1.php')
 );
 

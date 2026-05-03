@@ -35,6 +35,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { fDate, fDateTime } from 'src/utils/format-time';
 
 import { useAuth } from 'src/context/auth-context';
+import { useRouter } from 'src/routes/hooks';
 import { type UserData, usersApi } from 'src/api/users';
 import { DashboardContent } from 'src/layouts/dashboard';
 
@@ -112,6 +113,7 @@ function SuspendDialog({ name, open, onClose, onConfirm }: SuspendDialogProps) {
 
 export function UsersView() {
   const { hasPermission } = useAuth();
+  const router    = useRouter();
   const canManage = hasPermission('users.manage');
   const canDelete = hasPermission('users.delete');
   const [searchParams, setSearchParams] = useSearchParams();
@@ -267,10 +269,29 @@ export function UsersView() {
                       const isRestricted = row.status !== 'active';
 
                       return (
-                        <TableRow key={row.id} hover sx={{ opacity: isDeleted ? 0.55 : 1 }}>
+                        <TableRow
+                          key={row.id}
+                          hover
+                          sx={{ opacity: isDeleted ? 0.55 : 1, cursor: 'pointer' }}
+                          onClick={() => router.push(`/users/${row.id}`)}
+                        >
                           <TableCell>
                             <Stack direction="row" alignItems="center" spacing={1.5}>
-                              <Avatar alt={row.name}>{row.name.charAt(0).toUpperCase()}</Avatar>
+                              <Box sx={{ position: 'relative' }}>
+                                <Avatar src={row.profile_picture_url ?? undefined} alt={row.name}>
+                                  {row.name.charAt(0).toUpperCase()}
+                                </Avatar>
+                                {row.is_online && (
+                                  <Box
+                                    sx={{
+                                      position: 'absolute', bottom: 0, right: 0,
+                                      width: 10, height: 10, borderRadius: '50%',
+                                      bgcolor: 'success.main',
+                                      border: '2px solid white',
+                                    }}
+                                  />
+                                )}
+                              </Box>
                               <Box>
                                 <Typography variant="body2" fontWeight={600}>{row.name}</Typography>
                                 <Typography variant="caption" color="text.secondary">{row.email}</Typography>
@@ -298,7 +319,7 @@ export function UsersView() {
                               )}
                             </Stack>
                           </TableCell>
-                          <TableCell align="right">
+                          <TableCell align="right" onClick={(e) => e.stopPropagation()}>
                             <Stack direction="row" justifyContent="flex-end" spacing={0.5}>
                               {isDeleted ? (
                                 canManage && (

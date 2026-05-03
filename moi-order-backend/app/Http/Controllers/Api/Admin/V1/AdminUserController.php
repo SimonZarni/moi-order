@@ -13,6 +13,7 @@ use App\Http\Requests\Admin\AdminUpdateUserRequest;
 use App\Http\Requests\Admin\AdminUserIndexRequest;
 use Carbon\Carbon;
 use App\Http\Resources\Admin\AdminUserResource;
+use App\Http\Resources\Admin\AdminUserDetailResource;
 use App\Models\User;
 use App\Services\AdminUserService;
 use Illuminate\Http\JsonResponse;
@@ -43,7 +44,7 @@ class AdminUserController extends Controller
     /** GET /api/admin/v1/users/{user} */
     public function show(User $user): JsonResponse
     {
-        return response()->json(['data' => new AdminUserResource($this->service->show($user))]);
+        return response()->json(['data' => new AdminUserDetailResource($this->service->show($user))]);
     }
 
     /** PUT /api/admin/v1/users/{user} */

@@ -12,6 +12,7 @@ export type BookingData = {
   created_at: string;
   has_eticket: boolean;
   ticket: { id: number; name: string } | null;
+  user: { id: number; name: string; email: string } | null;
 };
 
 export type BookingItemData = {

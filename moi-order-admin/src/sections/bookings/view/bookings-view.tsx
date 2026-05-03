@@ -126,6 +126,7 @@ export function BookingsView() {
               <TableHead>
                 <TableRow>
                   <TableCell>#</TableCell>
+                  <TableCell>User</TableCell>
                   <TableCell>Ticket</TableCell>
                   <TableCell>Visit Date</TableCell>
                   <TableCell align="right">Total</TableCell>
@@ -138,7 +139,7 @@ export function BookingsView() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
+                    <TableCell colSpan={9} align="center" sx={{ py: 6 }}>
                       <CircularProgress size={28} />
                     </TableCell>
                   </TableRow>
@@ -150,6 +151,10 @@ export function BookingsView() {
                           <Typography variant="body2" fontWeight={600} color="primary.main">
                             #{row.id}
                           </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" fontWeight={600}>{row.user?.name ?? '—'}</Typography>
+                          <Typography variant="caption" color="text.secondary">{row.user?.email ?? ''}</Typography>
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2">{row.ticket?.name ?? '—'}</Typography>
@@ -181,7 +186,7 @@ export function BookingsView() {
                     ))}
                     {bookings.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                        <TableCell colSpan={9} align="center" sx={{ py: 6, color: 'text.secondary' }}>
                           No bookings found
                         </TableCell>
                       </TableRow>

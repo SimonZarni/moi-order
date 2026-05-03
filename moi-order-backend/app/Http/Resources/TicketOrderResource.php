@@ -42,6 +42,14 @@ class TicketOrderResource extends JsonResource
                 $this->relationLoaded('payment') && $this->payment !== null,
                 fn () => new PaymentResource($this->payment),
             ),
+            'user'         => $this->when(
+                $this->relationLoaded('user') && $this->user !== null,
+                fn () => [
+                    'id'    => $this->user->id,
+                    'name'  => $this->user->name,
+                    'email' => $this->user->email,
+                ],
+            ),
         ];
     }
 }
