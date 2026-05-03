@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
+import { BackButton } from '@/shared/components/BackButton/BackButton';
 import { useOrderDetailScreen } from '@/features/orders/hooks/useOrderDetailScreen';
 import { formatDate } from '@/shared/utils/formatDate';
 import { formatPrice } from '@/shared/utils/formatCurrency';
@@ -43,6 +43,7 @@ export function OrderDetailScreen(): React.JSX.Element {
     <View style={styles.hero}>
       <View style={styles.orbLarge} />
       <View style={styles.orbSmall} />
+      <BackButton onPress={handleBack} />
       {submission !== null && (
         <View style={styles.heroTextBlock}>
           <Text style={styles.heroEyebrow}>Order #{submission.id}</Text>
@@ -58,7 +59,6 @@ export function OrderDetailScreen(): React.JSX.Element {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        <StickyBackButton onPress={handleBack} label="Orders" />
         {hero}
         <View style={styles.stateBox}>
           <ActivityIndicator size="large" color={styles.spinner.color} />
@@ -70,7 +70,6 @@ export function OrderDetailScreen(): React.JSX.Element {
   if (isError || submission === null) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        <StickyBackButton onPress={handleBack} label="Orders" />
         {hero}
         <View style={styles.stateBox}>
           <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
@@ -85,8 +84,6 @@ export function OrderDetailScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <StickyBackButton onPress={handleBack} label="Orders" />
-
       {/* ── Image preview modal ── */}
       <Modal
         visible={previewImageUrl !== null}

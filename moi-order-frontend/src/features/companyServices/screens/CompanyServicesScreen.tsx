@@ -1,20 +1,19 @@
 import React from 'react';
-import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { StandaloneFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
-import { EmbassyServiceCardSkeleton } from '@/features/embassyServices/components/EmbassyServiceCardSkeleton';
-import { useEmbassyServicesScreen } from '@/features/embassyServices/hooks/useEmbassyServicesScreen';
+import { useCompanyServicesScreen } from '@/features/companyServices/hooks/useCompanyServicesScreen';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { localeName } from '@/shared/utils/localeName';
-import { styles } from './EmbassyServicesScreen.styles';
+import { styles } from './CompanyServicesScreen.styles';
 
-export function EmbassyServicesScreen(): React.JSX.Element {
+export function CompanyServicesScreen(): React.JSX.Element {
   const { services, isLoading, isRefreshing, isError, handleRefresh, handleSelectService, handleBack } =
-    useEmbassyServicesScreen();
+    useCompanyServicesScreen();
   const { locale } = useLocale();
 
   return (
@@ -23,13 +22,14 @@ export function EmbassyServicesScreen(): React.JSX.Element {
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={editorialPalette.rose} />
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={editorialPalette.gold} />
         }
       >
         <HeroHeader
-          accentColor={editorialPalette.rose}
-          titleNode={<Text style={styles.heroTitle}>သံရုံးထောက်ခံစာများ</Text>}
-          subtitle="Embassy support letters and documentation services."
+          accentColor={editorialPalette.gold}
+          eyebrow="Business & Company"
+          title="Company Services"
+          subtitle="Company registration and business documentation."
           onBack={handleBack}
           backLabel="Home"
         />
@@ -38,12 +38,9 @@ export function EmbassyServicesScreen(): React.JSX.Element {
           <Text style={styles.sectionLabel}>Available Services</Text>
 
           {isLoading && (
-            <>
-              <EmbassyServiceCardSkeleton />
-              <EmbassyServiceCardSkeleton />
-              <EmbassyServiceCardSkeleton />
-              <EmbassyServiceCardSkeleton />
-            </>
+            <View style={styles.centered}>
+              <ActivityIndicator color={editorialPalette.gold} size="large" />
+            </View>
           )}
 
           {isError && (
@@ -54,7 +51,7 @@ export function EmbassyServicesScreen(): React.JSX.Element {
 
           {!isLoading && !isError && services.length === 0 && (
             <View style={styles.centered}>
-              <Text style={styles.emptyText}>No embassy services available at the moment.</Text>
+              <Text style={styles.emptyText}>No services available at the moment.</Text>
             </View>
           )}
 

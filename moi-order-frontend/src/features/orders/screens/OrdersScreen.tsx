@@ -7,7 +7,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { localeName } from '@/shared/utils/localeName';
 
-import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { OrderCardSkeleton } from '@/features/orders/components/OrderCardSkeleton';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
@@ -143,7 +142,6 @@ export function OrdersScreen(): React.JSX.Element {
         subtitle="Your service submissions & tickets"
         onBack={handleBack}
         backLabel="Back"
-        hideBack
       />
       <View style={styles.bodyGap} />
     </>
@@ -154,7 +152,6 @@ export function OrdersScreen(): React.JSX.Element {
   if (!isLoggedIn) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        <StickyBackButton onPress={handleBack} label="Back" />
         <View style={styles.flatList}>
           {hero}{tabBar}
           <View style={styles.guestWrap}>
@@ -176,7 +173,6 @@ export function OrdersScreen(): React.JSX.Element {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        <StickyBackButton onPress={handleBack} label="Back" />
         <View style={styles.flatList}>
           {hero}{tabBar}
           <OrderCardSkeleton /><OrderCardSkeleton /><OrderCardSkeleton />
@@ -189,7 +185,6 @@ export function OrdersScreen(): React.JSX.Element {
   if (isError) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        <StickyBackButton onPress={handleBack} label="Back" />
         <View style={styles.flatList}>
           {hero}{tabBar}
           <View style={styles.stateBox}>
@@ -205,7 +200,6 @@ export function OrdersScreen(): React.JSX.Element {
   if (activeTab === 'services') {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        <StickyBackButton onPress={handleBack} label="Back" />
         {hero}
         {tabBar}
         <FlatList
@@ -245,7 +239,6 @@ export function OrdersScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <StickyBackButton onPress={handleBack} label="Back" />
       {hero}
       {tabBar}
       <FlatList

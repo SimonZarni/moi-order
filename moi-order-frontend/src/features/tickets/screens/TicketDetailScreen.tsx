@@ -8,7 +8,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { formatPrice } from '@/shared/utils/formatCurrency';
 import { useTicketDetailScreen } from '@/features/tickets/hooks/useTicketDetailScreen';
-import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
+import { BackButton } from '@/shared/components/BackButton/BackButton';
 import { TicketDetailSkeleton } from '@/features/tickets/components/TicketDetailSkeleton';
 import { TicketVariant } from '@/types/models';
 import { styles } from './TicketDetailScreen.styles';
@@ -28,7 +28,9 @@ export function TicketDetailScreen(): React.JSX.Element {
   if (isError) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        <StickyBackButton onPress={handleBack} label="Back" />
+        <View style={styles.errorBackWrap}>
+          <BackButton onPress={handleBack} />
+        </View>
         <View style={styles.stateBox}>
           <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
           <Text style={styles.stateTitle}>Could not load ticket</Text>
@@ -40,10 +42,12 @@ export function TicketDetailScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <StickyBackButton onPress={handleBack} label="Back" />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View>
+        <View style={styles.coverWrap}>
           <Image source={{ uri: ticket.cover_image_url ?? undefined }} style={styles.cover} contentFit="cover" cachePolicy="disk" priority="high" transition={200} />
+          <View style={styles.coverBackWrap}>
+            <BackButton onPress={handleBack} />
+          </View>
         </View>
 
         <View style={styles.infoBlock}>

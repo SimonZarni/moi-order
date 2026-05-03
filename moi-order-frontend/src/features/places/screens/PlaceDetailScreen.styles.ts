@@ -53,6 +53,12 @@ export const styles = StyleSheet.create({
     position: 'relative',
     minHeight: 60,
   },
+  heroBackWrap: {
+    position: 'absolute',
+    top: spacing.sm,
+    left: spacing.md,
+    zIndex: 10,
+  },
   heroImage: {
     width: '100%',
     height: 300,

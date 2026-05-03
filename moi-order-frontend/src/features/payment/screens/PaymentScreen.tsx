@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { BackButton } from '@/shared/components/BackButton/BackButton';
 import { QrCodeDisplay } from '@/features/payment/components/QrCodeDisplay';
 import { usePaymentScreen } from '@/features/payment/hooks/usePaymentScreen';
 import { formatCurrency } from '@/shared/utils/formatCurrency';
@@ -28,15 +29,7 @@ export function PaymentScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.header}>
-        <Pressable
-          style={styles.backBtn}
-          onPress={handleBack}
-          accessibilityLabel="Go back"
-          accessibilityRole="button"
-        >
-          <Ionicons name="chevron-back" size={20} color={colours.tertiary} />
-          <Text style={styles.backLabel}>Back</Text>
-        </Pressable>
+        <BackButton onPress={handleBack} />
         <Text style={styles.headerTitle}>Pay with PromptPay</Text>
       </View>
 

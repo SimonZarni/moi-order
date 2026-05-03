@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { FOOD_PAYMENT_METHOD, FoodPaymentMethod } from '@/types/enums';
 import { formatPrice } from '@/shared/utils/formatCurrency';
+import { BackButton } from '@/shared/components/BackButton/BackButton';
 import { useCheckoutScreen } from '../hooks/useCheckoutScreen';
 import { styles } from './CheckoutScreen.styles';
 
@@ -25,9 +26,7 @@ export function CheckoutScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={handleBack} accessibilityRole="button" accessibilityLabel="Go back">
-          <Ionicons name="chevron-back" size={22} color={colours.textOnDark} />
-        </Pressable>
+        <BackButton onPress={handleBack} />
         <Text style={styles.headerTitle}>Checkout</Text>
       </View>
 

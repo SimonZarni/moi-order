@@ -10,6 +10,7 @@ enum HomeCardNavigationScreen: string
     case Places            = 'Places';
     case Tickets           = 'Tickets';
     case OtherServices     = 'OtherServices';
+    case CompanyServices   = 'CompanyServices';
     case EmbassyServices   = 'EmbassyServices';
     case AirportFastTrack  = 'AirportFastTrack';
     case Food              = 'Food';
@@ -24,6 +25,7 @@ enum HomeCardNavigationScreen: string
             self::Places           => 'Places',
             self::Tickets          => 'Tickets',
             self::OtherServices    => 'Other Services',
+            self::CompanyServices  => 'Company Services',
             self::EmbassyServices  => 'Embassy Services',
             self::AirportFastTrack => 'Airport Fast Track',
             self::Food             => 'Food',

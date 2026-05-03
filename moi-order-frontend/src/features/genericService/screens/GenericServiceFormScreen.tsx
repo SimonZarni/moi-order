@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, ScrollView, Switch, Text, TextInput, View
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BackButton } from '@/shared/components/BackButton/BackButton';
 import { DocumentPickerField } from '@/shared/components/DocumentPickerField/DocumentPickerField';
 import { ErrorBanner } from '@/shared/components/ErrorBanner/ErrorBanner';
 import { useGenericServiceFormScreen } from '@/features/genericService/hooks/useGenericServiceFormScreen';
@@ -173,15 +174,7 @@ export function GenericServiceFormScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.header}>
-        <Pressable
-          style={styles.backBtn}
-          onPress={handleBack}
-          accessibilityLabel="Go back"
-          accessibilityRole="button"
-        >
-          <Ionicons name="chevron-back" size={20} color={colours.tertiary} />
-          <Text style={styles.backLabel}>Other Services</Text>
-        </Pressable>
+        <BackButton onPress={handleBack} />
         <Text style={styles.headerTitle}>{serviceName}</Text>
         <View style={styles.headerPriceBadge}>
           <Text style={styles.headerPrice}>{priceFormatted}</Text>

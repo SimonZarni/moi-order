@@ -30,6 +30,7 @@ export type RootStackParamList = {
   };
   OtherServices: undefined;
   EmbassyServices: undefined;
+  CompanyServices: undefined;
   CompanyRegistrationForm: {
     serviceTypeId: number;
     price: number;

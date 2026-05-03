@@ -42,30 +42,14 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
 
-  // Pill back button
   backBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.38)',
+    width: 38,
+    height: 38,
     borderRadius: radius.full,
-    paddingVertical: spacing.xs + 2,
-    paddingHorizontal: spacing.sm + 2,
-    minHeight: 36,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: spacing.sm,
-  },
-  backArrow: {
-    fontSize: 22,
-    color: colours.tertiary,
-    lineHeight: 26,
-    fontWeight: '300',
-  },
-  backLabel: {
-    fontSize: typography.sm,
-    fontWeight: '600',
-    color: colours.tertiary,
-    letterSpacing: 0.2,
   },
 
   textBlock: {

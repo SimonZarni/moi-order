@@ -4,15 +4,16 @@ import { colours } from '@/shared/theme/colours';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BackButton } from '@/shared/components/BackButton/BackButton';
 import { DocumentPickerField } from '@/shared/components/DocumentPickerField/DocumentPickerField';
 import { ErrorBanner } from '@/shared/components/ErrorBanner/ErrorBanner';
 import { FormField } from '@/shared/components/FormField/FormField';
 import { SuccessState } from '@/shared/components/SuccessState/SuccessState';
 import { useEmbassyCarLicenseFormScreen } from '@/features/embassyCarLicense/hooks/useEmbassyCarLicenseFormScreen';
 import { useLocale } from '@/shared/hooks/useLocale';
+import { styles } from './EmbassyCarLicenseFormScreen.styles';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
-import { styles } from './EmbassyCarLicenseFormScreen.styles';
 
 export function EmbassyCarLicenseFormScreen(): React.JSX.Element {
   const {
@@ -38,15 +39,7 @@ export function EmbassyCarLicenseFormScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.header}>
-        <Pressable
-          style={styles.backBtn}
-          onPress={handleBack}
-          accessibilityLabel="Go back"
-          accessibilityRole="button"
-        >
-          <Ionicons name="chevron-back" size={20} color={colours.tertiary} />
-          <Text style={styles.backLabel}>Other Services</Text>
-        </Pressable>
+        <BackButton onPress={handleBack} />
         <Text style={styles.headerTitle}>Embassy Car License</Text>
         <View style={styles.headerPriceBadge}>
           <Text style={styles.headerPrice}>{priceFormatted}</Text>

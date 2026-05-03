@@ -4,7 +4,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { StandaloneFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
-import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
+import { BackButton } from '@/shared/components/BackButton/BackButton';
 import type { LegalSection } from '@/features/legal/types';
 import { styles } from './LegalDocumentLayout.styles';
 
@@ -29,13 +29,13 @@ export function LegalDocumentLayout({
 }: LegalDocumentLayoutProps): React.JSX.Element {
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <StickyBackButton onPress={onBack} label="Back" />
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {/* ── Hero ── */}
         <View style={styles.hero}>
           <View style={styles.orbLarge} />
           <View style={styles.orbSmall} />
+          <BackButton onPress={onBack} />
 
           <View style={styles.heroContent}>
             <Text style={[styles.eyebrow, { color: accentColor }]}>{eyebrow}</Text>

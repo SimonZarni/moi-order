@@ -7,6 +7,7 @@ import { FoodOrder } from '@/types/models';
 import { formatPrice } from '@/shared/utils/formatCurrency';
 import { formatDateTime } from '@/shared/utils/formatDate';
 import { CartItem } from '@/shared/store/cartStore';
+import { BackButton } from '@/shared/components/BackButton/BackButton';
 import { useCartOrdersScreen } from '../hooks/useCartOrdersScreen';
 import { ORDER_STATUS_COLOURS, styles } from './CartOrdersScreen.styles';
 
@@ -21,9 +22,7 @@ export function CartOrdersScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={handleBack} accessibilityRole="button" accessibilityLabel="Go back">
-          <Ionicons name="chevron-back" size={22} color={colours.textOnDark} />
-        </Pressable>
+        <BackButton onPress={handleBack} />
         <Text style={styles.headerTitle}>Cart & Orders</Text>
       </View>
 

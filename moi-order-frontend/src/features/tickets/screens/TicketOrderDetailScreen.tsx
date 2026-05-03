@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { formatDate } from '@/shared/utils/formatDate';
 import { formatPrice } from '@/shared/utils/formatCurrency';
-import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
+import { BackButton } from '@/shared/components/BackButton/BackButton';
 import { useTicketOrderDetailScreen } from '@/features/tickets/hooks/useTicketOrderDetailScreen';
 import { TicketOrderItem } from '@/types/models';
 import { styles, TICKET_STATUS_COLOURS } from './TicketOrderDetailScreen.styles';
@@ -24,6 +24,7 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
     <View style={styles.hero}>
       <View style={styles.orbLarge} />
       <View style={styles.orbSmall} />
+      <BackButton onPress={handleBack} />
       {order !== undefined && (
         <>
           <Text style={styles.heroEyebrow}>Ticket Order #{order.id}</Text>
@@ -37,7 +38,6 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        <StickyBackButton onPress={handleBack} label="My Tickets" />
         {hero}
         <View style={styles.stateBox}>
           <ActivityIndicator size="large" color={styles.spinner.color} />
@@ -49,7 +49,6 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
   if (isError || order === undefined) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        <StickyBackButton onPress={handleBack} label="My Tickets" />
         {hero}
         <View style={styles.stateBox}>
           <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
@@ -64,8 +63,6 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <StickyBackButton onPress={handleBack} label="My Tickets" />
-
       {/* ── Image preview modal ── */}
       <Modal
         visible={previewImageUrl !== null}

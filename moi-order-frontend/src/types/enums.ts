@@ -122,6 +122,7 @@ export const HOME_CARD_NAV_SCREEN = {
   PassportVault:    'PassportVault',
   Search:           'Search',
   PlacesMap:        'PlacesMap',
+  CompanyServices:  'CompanyServices',
 } as const;
 
 // Mirrors App\Enums\HomeCardIconType

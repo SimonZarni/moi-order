@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { usePlaceDetailScreen } from '@/features/places/hooks/usePlaceDetailScreen';
-import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
+import { BackButton } from '@/shared/components/BackButton/BackButton';
 import { colours } from '@/shared/theme/colours';
 import { PlaceDetailSkeleton } from '@/features/places/components/PlaceDetailSkeleton';
 import { PlaceImageViewer } from '@/features/places/components/PlaceImageViewer';
@@ -44,7 +44,6 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <StickyBackButton onPress={handleBack} label="Places" />
       <ScrollView
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
@@ -56,6 +55,9 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
 
         {/* ── Hero ────────────────────────────────────────── */}
         <View style={styles.heroContainer}>
+          <View style={styles.heroBackWrap}>
+            <BackButton onPress={handleBack} />
+          </View>
           {coverImage !== null && (
             <Pressable onPress={() => handleImagePress(0)} accessibilityLabel="View cover image" accessibilityRole="imagebutton">
               <Image

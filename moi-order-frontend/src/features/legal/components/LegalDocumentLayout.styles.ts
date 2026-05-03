@@ -21,7 +21,7 @@ export const styles = StyleSheet.create({
   // ── Hero ──────────────────────────────────────────────────────────────────
   hero: {
     backgroundColor: colours.backgroundDark,
-    paddingTop: spacing.xxl + spacing.sm,
+    paddingTop: spacing.sm,
     paddingBottom: spacing.xxl + spacing.xl,
     paddingHorizontal: spacing.lg,
     overflow: 'hidden',

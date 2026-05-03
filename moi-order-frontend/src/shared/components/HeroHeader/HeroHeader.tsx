@@ -45,8 +45,7 @@ export function HeroHeader({
           accessibilityLabel="Go back"
           accessibilityRole="button"
         >
-          <Ionicons name="chevron-back" size={20} color={colours.tertiary} />
-          <Text style={styles.backLabel}>{backLabel}</Text>
+          <Ionicons name="arrow-back" size={20} color={colours.textOnDark} />
         </Pressable>
       )}
 

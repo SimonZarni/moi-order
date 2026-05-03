@@ -1,9 +1,9 @@
 import React from 'react';
-import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BackButton } from '@/shared/components/BackButton/BackButton';
 import { useTicketDateSelectionScreen, DateOption } from '@/features/tickets/hooks/useTicketDateSelectionScreen';
 import { styles } from './TicketDateSelectionScreen.styles';
 
@@ -17,10 +17,7 @@ export function TicketDateSelectionScreen(): React.JSX.Element {
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.hero}>
         <View style={styles.orbLarge} />
-        <Pressable style={styles.backBtn} onPress={handleBack} accessibilityLabel="Go back" accessibilityRole="button">
-          <Ionicons name="chevron-back" size={20} color={colours.tertiary} />
-          <Text style={styles.backLabel}>Back</Text>
-        </Pressable>
+        <BackButton onPress={handleBack} />
         <Text style={styles.heroEyebrow}>Select Date</Text>
         <Text style={styles.heroTitle}>When are you visiting?</Text>
         <Text style={styles.heroSubtitle}>Available for the next 7 days</Text>

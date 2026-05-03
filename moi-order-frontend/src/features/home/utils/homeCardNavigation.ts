@@ -46,6 +46,9 @@ export function navigateToCardScreen(
     case HOME_CARD_NAV_SCREEN.OtherServices:
       navigation.navigate('OtherServices');
       break;
+    case HOME_CARD_NAV_SCREEN.CompanyServices:
+      navigation.navigate('CompanyServices');
+      break;
     case HOME_CARD_NAV_SCREEN.EmbassyServices:
       navigation.navigate('EmbassyServices');
       break;

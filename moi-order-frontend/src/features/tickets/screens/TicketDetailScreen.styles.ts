@@ -13,9 +13,22 @@ export const styles = StyleSheet.create({
   scrollContent: { paddingBottom: 180 },
 
   // ── Cover image ───────────────────────────────────────────────────────────
+  coverWrap: { position: 'relative' },
   cover: { width: '100%', height: 220, backgroundColor: colours.backgroundDark },
+  coverBackWrap: {
+    position: 'absolute',
+    top: spacing.sm,
+    left: spacing.md,
+    zIndex: 10,
+  },
+  errorBackWrap: {
+    position: 'absolute',
+    top: spacing.sm,
+    left: spacing.md,
+    zIndex: 10,
+  },
 
-  // ── Back button over image ────────────────────────────────────────────────
+  // ── Legacy back button styles (kept for reference) ────────────────────────
   backBtn: {
     position: 'absolute',
     top: spacing.md,

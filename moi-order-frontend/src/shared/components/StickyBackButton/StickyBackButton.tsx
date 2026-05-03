@@ -21,7 +21,7 @@ export function StickyBackButton({ onPress, label }: StickyBackButtonProps): Rea
       accessibilityLabel="Go back"
       accessibilityRole="button"
     >
-      <Ionicons name="chevron-back" size={20} color={colours.tertiary} />
+      <Ionicons name="arrow-back" size={20} color={colours.tertiary} />
       <Text style={styles.label}>{label}</Text>
     </Pressable>
   );

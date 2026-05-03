@@ -6,7 +6,6 @@ import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { StandaloneFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
-import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
 import { TicketCard } from '@/features/tickets/components/TicketCard';
 import { TicketCardSkeleton } from '@/features/tickets/components/TicketCardSkeleton';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
@@ -36,7 +35,6 @@ export function TicketsScreen(): React.JSX.Element {
         subtitle="Book attractions & experiences"
         onBack={handleBack}
         backLabel="Back"
-        hideBack
         minHeight={HERO_MIN_HEIGHT}
       />
       <View style={styles.bodyGap} />
@@ -46,7 +44,6 @@ export function TicketsScreen(): React.JSX.Element {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        <StickyBackButton onPress={handleBack} label="Back" />
         <ScrollView style={styles.flatList} showsVerticalScrollIndicator={false} scrollEnabled={false} contentContainerStyle={styles.list}>
           {header}
           <View style={styles.cardsContainer}>
@@ -63,7 +60,6 @@ export function TicketsScreen(): React.JSX.Element {
   if (isError) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        <StickyBackButton onPress={handleBack} label="Back" />
         {header}
         <View style={styles.stateBox}>
           <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
@@ -77,7 +73,6 @@ export function TicketsScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <StickyBackButton onPress={handleBack} label="Back" />
       <FlatList
         style={styles.flatList}
         data={tickets}
