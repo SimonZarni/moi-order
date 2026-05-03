@@ -41,11 +41,6 @@ export const styles = StyleSheet.create({
     color: colours.tertiary,
     marginTop: 1,
   },
-  headerEmoji: {
-    fontSize: 28,
-    marginLeft: spacing.xs,
-  },
-
   // ── Body sheet ────────────────────────────────────────────────────────────
   scroll: {
     flex: 1,

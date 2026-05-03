@@ -38,7 +38,7 @@ export function MoiVerifiedScreen(): React.JSX.Element {
           <Text style={styles.headerTitle}>Become Moi Verified</Text>
           <Text style={styles.headerSubtitle}>Unlock your full account potential</Text>
         </View>
-        <Text style={styles.headerEmoji}>😊</Text>
+        <Ionicons name="checkmark-circle" size={28} color="#1D9BF0" />
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>

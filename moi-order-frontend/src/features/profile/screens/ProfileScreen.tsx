@@ -169,7 +169,8 @@ export function ProfileScreen(): React.JSX.Element {
               <View style={[styles.iconBadge, styles.iconBadgeTeal]}>
                 <Ionicons name="shield-checkmark-outline" size={16} color={colours.tertiary} />
               </View>
-              <Text style={styles.rowLabel}>Become Moi Verified 😊</Text>
+              <Text style={styles.rowLabel}>Become Moi Verified</Text>
+              <Ionicons name="checkmark-circle" size={16} color="#1D9BF0" />
               <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </View>
           </Pressable>
