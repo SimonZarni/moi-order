@@ -23,7 +23,7 @@ class CreateTicketOrderRequest extends FormRequest
     {
         return [
             'ticket_id'      => ['required', 'integer', Rule::exists('tickets', 'id')->whereNull('deleted_at')],
-            'visit_date'     => ['required', 'date_format:Y-m-d', 'after_or_equal:today', 'before_or_equal:' . now()->addDays(6)->toDateString()],
+            'visit_date'     => ['required', 'date_format:Y-m-d', 'after_or_equal:today', 'before_or_equal:' . now()->addDays(9)->toDateString()],
             'idempotency_key' => ['required', 'string', 'uuid'],
             'items'          => ['required', 'array', 'min:1'],
             'items.*.ticket_variant_id' => [

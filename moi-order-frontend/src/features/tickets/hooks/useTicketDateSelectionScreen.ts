@@ -31,14 +31,17 @@ export interface UseTicketDateSelectionScreenResult {
 function buildDateOptions(): DateOption[] {
   const options: DateOption[] = [];
   const now = new Date();
-  for (let i = 0; i < 7; i++) {
+  for (let i = 1; i <= 7; i++) {
     const d = new Date(now);
     d.setDate(now.getDate() + i);
-    const iso = d.toISOString().slice(0, 10);
+    const y   = d.getFullYear();
+    const m   = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const iso = `${y}-${m}-${day}`;
     options.push({
       date: iso,
       label: d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }),
-      isToday: i === 0,
+      isToday: false,
     });
   }
   return options;

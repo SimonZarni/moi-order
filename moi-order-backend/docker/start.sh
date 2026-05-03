@@ -41,11 +41,11 @@ php artisan config:clear
 php artisan config:cache
 php artisan view:cache
 php artisan migrate --force
-php artisan db:seed --class=TicketSeeder --force || echo "⚠️  TicketSeeder failed (non-fatal, skipping)"
-php artisan db:seed --class=PermissionSeeder --force
-php artisan db:seed --class=HomeCardSeeder --force || echo "⚠️  HomeCardSeeder failed (non-fatal, skipping)"
-php artisan db:seed --class=HomeCardRouteSeeder --force || echo "⚠️  HomeCardRouteSeeder failed (non-fatal, skipping)"
-php artisan db:seed --class=HomeCardIconSeeder --force || echo "⚠️  HomeCardIconSeeder failed (non-fatal, skipping)"
+# php artisan db:seed --class=TicketSeeder --force || echo "⚠️  TicketSeeder failed (non-fatal, skipping)"
+# php artisan db:seed --class=PermissionSeeder --force
+# php artisan db:seed --class=HomeCardSeeder --force || echo "⚠️  HomeCardSeeder failed (non-fatal, skipping)"
+# php artisan db:seed --class=HomeCardRouteSeeder --force || echo "⚠️  HomeCardRouteSeeder failed (non-fatal, skipping)"
+# php artisan db:seed --class=HomeCardIconSeeder --force || echo "⚠️  HomeCardIconSeeder failed (non-fatal, skipping)"
 
 echo "✅ Starting Supervisor (PHP-FPM + Nginx + Queue)..."
 exec supervisord -c /etc/supervisord.conf
