@@ -147,6 +147,11 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
+        // Enable _method spoofing so multipart/form-data POST requests with _method=PATCH
+        // are treated as PATCH. PHP only populates $_FILES for POST, so file uploads must
+        // always POST — method spoofing bridges the gap for REST PATCH routes.
+        \Illuminate\Http\Request::enableHttpMethodParameterOverride();
+
         $this->configureRateLimiting();
 
         // Broadcast auth — must use auth:sanctum so mobile Bearer tokens are accepted.

@@ -68,7 +68,7 @@ class AdminUserDocumentController extends Controller
                 'expiry_date'        => $validated['expiry_date'] ?? null,
                 'extension_date'     => $validated['extension_date'] ?? null,
                 'is_valid_type'      => $validated['is_valid_type'] ?? true,
-                'validation_message' => $validated['validation_message'] ?? null,
+                'validation_message' => $validated['validation_message'] ?: null,
                 'extracted_data'     => $validated['extracted_data'] ?? null,
                 'file_path'          => $filePath,
                 'is_admin_created'   => true,
@@ -113,14 +113,19 @@ class AdminUserDocumentController extends Controller
 
         DB::transaction(function () use ($validated, $document, $filePath): void {
             $updates = array_filter([
-                'type'               => $validated['type']               ?? null,
-                'subtype'            => $validated['subtype']            ?? null,
-                'expiry_date'        => $validated['expiry_date']        ?? null,
-                'extension_date'     => $validated['extension_date']     ?? null,
-                'is_valid_type'      => $validated['is_valid_type']      ?? null,
-                'validation_message' => $validated['validation_message'] ?? null,
-                'file_path'          => $filePath,
+                'type'           => $validated['type']          ?? null,
+                'subtype'        => $validated['subtype']        ?? null,
+                'expiry_date'    => $validated['expiry_date']    ?? null,
+                'extension_date' => $validated['extension_date'] ?? null,
+                'is_valid_type'  => $validated['is_valid_type']  ?? null,
+                'file_path'      => $filePath,
             ], fn ($v) => $v !== null);
+
+            // validation_message is always sent by the frontend ('' = clear it).
+            // Must be set outside array_filter so it can be explicitly nulled.
+            if (array_key_exists('validation_message', $validated)) {
+                $updates['validation_message'] = $validated['validation_message'] ?: null;
+            }
 
             if (array_key_exists('extracted_data', $validated)) {
                 // Merge so existing OCR keys not included in the patch are preserved.

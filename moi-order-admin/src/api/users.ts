@@ -93,9 +93,10 @@ function buildDocFormData(payload: CreateDocumentPayload): FormData {
   const fd = new FormData();
   fd.append('type', payload.type);
   fd.append('subtype', payload.subtype);
-  if (payload.expiry_date)        fd.append('expiry_date',        payload.expiry_date);
-  if (payload.extension_date)     fd.append('extension_date',     payload.extension_date);
-  if (payload.validation_message) fd.append('validation_message', payload.validation_message);
+  if (payload.expiry_date)    fd.append('expiry_date',    payload.expiry_date);
+  if (payload.extension_date) fd.append('extension_date', payload.extension_date);
+  // Always append so the backend can save or clear the note (empty string → null on backend)
+  fd.append('validation_message', payload.validation_message ?? '');
   fd.append('is_valid_type', String(payload.is_valid_type ?? true));
   if (payload.extracted_data) {
     Object.entries(payload.extracted_data).forEach(([k, v]) => {
@@ -133,16 +134,14 @@ export const usersApi = {
       apiClient.get<{ data: UserDocument[] }>(`/users/${userId}/documents`).then((r) => r.data.data),
     create: (userId: number | string, payload: CreateDocumentPayload) => {
       const fd = buildDocFormData(payload);
-      return apiClient.post<{ data: UserDocument }>(`/users/${userId}/documents`, fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      }).then((r) => r.data.data);
+      // Do NOT set Content-Type manually — Axios sets multipart/form-data + boundary automatically
+      return apiClient.post<{ data: UserDocument }>(`/users/${userId}/documents`, fd).then((r) => r.data.data);
     },
     update: (userId: number | string, documentId: number | string, payload: CreateDocumentPayload) => {
       const fd = buildDocFormData(payload);
       fd.append('_method', 'PATCH');
-      return apiClient.post<{ data: UserDocument }>(`/users/${userId}/documents/${documentId}`, fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      }).then((r) => r.data.data);
+      // Do NOT set Content-Type manually — Axios sets multipart/form-data + boundary automatically
+      return apiClient.post<{ data: UserDocument }>(`/users/${userId}/documents/${documentId}`, fd).then((r) => r.data.data);
     },
     delete: (userId: number | string, documentId: number | string) =>
       apiClient.delete(`/users/${userId}/documents/${documentId}`),
