@@ -39,8 +39,8 @@ import { fCurrency } from 'src/utils/format-number';
 import { fDate, fToNow } from 'src/utils/format-time';
 
 import { useAuth } from 'src/context/auth-context';
-import { usersApi, type UserDocument, type UserDetailData, type CreateDocumentPayload } from 'src/api/users';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { usersApi, type UserDocument, type UserDetailData, type CreateDocumentPayload } from 'src/api/users';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
