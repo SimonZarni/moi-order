@@ -32,11 +32,12 @@ import TablePagination from '@mui/material/TablePagination';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import CircularProgress from '@mui/material/CircularProgress';
 
+import { useRouter } from 'src/routes/hooks';
+
 import { fDate, fDateTime } from 'src/utils/format-time';
 
 import { useAuth } from 'src/context/auth-context';
-import { useRouter } from 'src/routes/hooks';
-import { type UserData, usersApi } from 'src/api/users';
+import { usersApi, type UserData } from 'src/api/users';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Label } from 'src/components/label';

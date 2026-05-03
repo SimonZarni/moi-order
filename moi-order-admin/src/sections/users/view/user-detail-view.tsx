@@ -33,12 +33,13 @@ import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { fDate, fToNow } from 'src/utils/format-time';
-import { fCurrency } from 'src/utils/format-number';
-
 import { useRouter } from 'src/routes/hooks';
+
+import { fCurrency } from 'src/utils/format-number';
+import { fDate, fToNow } from 'src/utils/format-time';
+
 import { useAuth } from 'src/context/auth-context';
-import { type UserDetailData, type UserDocument, type CreateDocumentPayload, usersApi } from 'src/api/users';
+import { usersApi, type UserDocument, type UserDetailData, type CreateDocumentPayload } from 'src/api/users';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Label } from 'src/components/label';
