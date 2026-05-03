@@ -13,17 +13,12 @@ use App\Services\WebPushService;
 use App\Services\ClaudeOcrService;
 use App\Services\DocumentService;
 use App\Services\ExpoPushNotificationService;
-use App\Events\PaymentConfirmed;
-use App\Events\TicketOrderPaymentConfirmed;
-use App\Listeners\MarkSubmissionProcessing;
-use App\Listeners\MarkTicketOrderProcessing;
 use App\Services\TicketOrderService;
 use App\Services\FileStorageService;
 use App\Services\StripePaymentService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
@@ -166,16 +161,11 @@ class AppServiceProvider extends ServiceProvider
         Broadcast::routes(['middleware' => ['auth:sanctum']]);
         require base_path('routes/channels.php');
 
-        // Mark as processing after payment confirmation (synchronous, inside transaction).
-        // Notification listeners (SendSubmissionNotification, SendTicketOrderNotification) are
-        // registered automatically via Laravel's event auto-discovery — no manual listen() needed.
-        Event::listen(PaymentConfirmed::class, MarkSubmissionProcessing::class);
-        Event::listen(TicketOrderPaymentConfirmed::class, MarkTicketOrderProcessing::class);
-
-        // Food order listeners (NotifyMerchantOfNewOrder, NotifyCustomerOfFoodOrderStatus) are
-        // registered automatically via Laravel's event auto-discovery — no manual listen() needed.
-        // Do NOT add them here with Event::listen(); doing so registers them twice and every
-        // status change fires the listener twice → duplicate push notifications.
+        // All listeners (MarkSubmissionProcessing, MarkTicketOrderProcessing,
+        // NotifyMerchantOfNewOrder, NotifyCustomerOfFoodOrderStatus, SendWebPushToAdmins*, etc.)
+        // are registered automatically via Laravel's event auto-discovery — their handle() methods
+        // are type-hinted with the event class.
+        // Do NOT add Event::listen() here; doing so registers them twice → duplicate side-effects.
     }
 
     private function configureRateLimiting(): void
