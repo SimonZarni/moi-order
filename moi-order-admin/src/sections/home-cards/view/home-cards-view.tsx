@@ -2,7 +2,7 @@ import type { HomeCard } from 'src/types';
 import type { DragEndEvent } from '@dnd-kit/core';
 
 import { CSS } from '@dnd-kit/utilities';
-import { useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { useSensor, DndContext, useSensors, closestCenter, PointerSensor } from '@dnd-kit/core';
 import { arrayMove, useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
@@ -46,6 +46,11 @@ const NAV_SCREEN_LABELS: Record<string, string> = {
   Search:           'Search',
   PlacesMap:        'Places Map',
 };
+
+function navLabel(screen: string | null): string {
+  if (!screen) return '—';
+  return NAV_SCREEN_LABELS[screen] ?? screen;
+}
 
 // ----------------------------------------------------------------------
 
@@ -169,7 +174,7 @@ function SortableRow({
       {/* Navigation target */}
       <TableCell>
         <Typography variant="body2" color="text.secondary">
-          {NAV_SCREEN_LABELS[card.navigation_screen] ?? card.navigation_screen}
+          {navLabel(card.navigation_screen)}
         </Typography>
       </TableCell>
 
@@ -205,6 +210,101 @@ function SortableRow({
 
 // ----------------------------------------------------------------------
 
+interface ChildRowProps {
+  card: HomeCard;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+function ChildRow({ card, onEdit, onDelete }: ChildRowProps) {
+  return (
+    <TableRow
+      hover
+      sx={{
+        opacity: card.deleted_at ? 0.45 : 1,
+        bgcolor: 'background.neutral',
+      }}
+    >
+      {/* Indent marker */}
+      <TableCell sx={{ pl: 3, color: 'text.disabled' }}>
+        <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
+          ↳
+        </Typography>
+      </TableCell>
+
+      {/* Card preview — indented */}
+      <TableCell>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pl: 1.5 }}>
+          <Box
+            sx={{
+              width: 4,
+              height: 36,
+              borderRadius: 1,
+              bgcolor: card.accent_color,
+              flexShrink: 0,
+            }}
+          />
+          <Box>
+            <Typography variant="body2" fontWeight={600}>
+              {card.title_en}
+            </Typography>
+            {card.subtitle_en && (
+              <Typography variant="caption" color="text.secondary">
+                {card.subtitle_en}
+              </Typography>
+            )}
+          </Box>
+        </Box>
+      </TableCell>
+
+      {/* Tag */}
+      <TableCell>
+        <Typography
+          variant="caption"
+          fontWeight={700}
+          sx={{ textTransform: 'uppercase', letterSpacing: 0.8, color: card.accent_color }}
+        >
+          {card.tag_en}
+        </Typography>
+      </TableCell>
+
+      {/* Navigation target */}
+      <TableCell>
+        <Typography variant="body2" color="text.secondary">
+          {navLabel(card.navigation_screen)}
+        </Typography>
+      </TableCell>
+
+      {/* Status */}
+      <TableCell>
+        <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+          {card.deleted_at ? (
+            <Label color="error">Deleted</Label>
+          ) : card.is_coming_soon ? (
+            <Label color="warning">Coming Soon</Label>
+          ) : card.is_active ? (
+            <Label color="success">Active</Label>
+          ) : (
+            <Label color="default">Inactive</Label>
+          )}
+        </Box>
+      </TableCell>
+
+      {/* Actions */}
+      <TableCell align="right">
+        <IconButton size="small" disabled={!!card.deleted_at} onClick={onEdit}>
+          <Iconify icon="solar:pen-bold" width={16} />
+        </IconButton>
+        <IconButton size="small" color="error" disabled={!!card.deleted_at} onClick={onDelete}>
+          <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+        </IconButton>
+      </TableCell>
+    </TableRow>
+  );
+}
+
+// ----------------------------------------------------------------------
+
 export function HomeCardsView() {
   const router = useRouter();
   const sensors = useSensors(
@@ -234,26 +334,57 @@ export function HomeCardsView() {
     fetchCards();
   }, [fetchCards]);
 
+  // ── Derived hierarchy ──────────────────────────────────────────────────────
+
+  const rootCards = useMemo(
+    () => cards.filter((c) => c.parent_id === null),
+    [cards],
+  );
+
+  const childrenByParentId = useMemo(() => {
+    const map = new Map<number, HomeCard[]>();
+    cards
+      .filter((c) => c.parent_id !== null)
+      .forEach((c) => {
+        const arr = map.get(c.parent_id!) ?? [];
+        arr.push(c);
+        map.set(c.parent_id!, arr);
+      });
+    return map;
+  }, [cards]);
+
   const activeCount = cards.filter((c) => !c.deleted_at && c.is_active).length;
 
-  const orderedCards = reorderMode
-    ? reorderIds.map((id) => cards.find((c) => c.id === id)).filter((c): c is HomeCard => !!c)
-    : cards;
+  // In reorder mode, only root cards participate. Children stay fixed under their parent.
+  const activeRootCards = useMemo(
+    () => rootCards.filter((c) => !c.deleted_at),
+    [rootCards],
+  );
+
+  const orderedRootCards = reorderMode
+    ? reorderIds.map((id) => rootCards.find((c) => c.id === id)).filter((c): c is HomeCard => !!c)
+    : rootCards;
+
+  // ── Actions ────────────────────────────────────────────────────────────────
 
   const move = useCallback(
     (index: number, direction: 'up' | 'down') => {
-      const next = [...cards];
+      const next = [...activeRootCards];
       const swapIndex = direction === 'up' ? index - 1 : index + 1;
       if (swapIndex < 0 || swapIndex >= next.length) return;
       [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
-      setCards(next);
+
+      const deletedRoots = rootCards.filter((c) => !!c.deleted_at);
+      const children = cards.filter((c) => c.parent_id !== null);
+      setCards([...next, ...deletedRoots, ...children]);
+
       setReordering(true);
       homeCardsApi
         .reorder(next.map((c) => c.id))
         .catch(() => setError('Failed to save new order.'))
         .finally(() => setReordering(false));
     },
-    [cards]
+    [activeRootCards, rootCards, cards],
   );
 
   const handleDelete = useCallback(() => {
@@ -270,9 +401,9 @@ export function HomeCardsView() {
   }, [deleteTarget]);
 
   const handleEnterReorder = useCallback(() => {
-    setReorderIds(cards.filter((c) => !c.deleted_at).map((c) => c.id));
+    setReorderIds(activeRootCards.map((c) => c.id));
     setReorderMode(true);
-  }, [cards]);
+  }, [activeRootCards]);
 
   const handleCancelReorder = useCallback(() => {
     setReorderMode(false);
@@ -285,8 +416,9 @@ export function HomeCardsView() {
       setCards((prev) => {
         const byId = new Map(prev.map((c) => [c.id, c]));
         const reordered = reorderIds.map((id) => byId.get(id)!).filter(Boolean) as HomeCard[];
-        const deleted = prev.filter((c) => c.deleted_at);
-        return [...reordered, ...deleted];
+        const deletedRoots = prev.filter((c) => c.parent_id === null && !!c.deleted_at);
+        const children = prev.filter((c) => c.parent_id !== null);
+        return [...reordered, ...deletedRoots, ...children];
       });
       setReorderMode(false);
     } catch {
@@ -316,7 +448,7 @@ export function HomeCardsView() {
           <Typography variant="h4">Home Cards</Typography>
           {reorderMode ? (
             <Typography variant="body2" color="primary" sx={{ mt: 0.5 }}>
-              Drag rows to set the display order on the mobile home screen
+              Drag rows to set the display order. Children always follow their parent.
             </Typography>
           ) : (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -341,7 +473,7 @@ export function HomeCardsView() {
               <Button
                 variant="outlined"
                 startIcon={<Iconify icon="carbon:chevron-sort" />}
-                disabled={loading || cards.filter((c) => !c.deleted_at).length < 2}
+                disabled={loading || activeRootCards.length < 2}
                 onClick={handleEnterReorder}
               >
                 Reorder
@@ -394,7 +526,7 @@ export function HomeCardsView() {
                         <CircularProgress size={28} />
                       </TableCell>
                     </TableRow>
-                  ) : orderedCards.length === 0 ? (
+                  ) : orderedRootCards.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={colSpan} align="center" sx={{ py: 6 }}>
                         <Typography variant="body2" color="text.secondary">
@@ -405,20 +537,33 @@ export function HomeCardsView() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    orderedCards.map((card, index) => (
-                      <SortableRow
-                        key={card.id}
-                        card={card}
-                        index={index}
-                        total={orderedCards.length}
-                        reorderMode={reorderMode}
-                        reorderBusy={reordering}
-                        onMoveUp={() => move(index, 'up')}
-                        onMoveDown={() => move(index, 'down')}
-                        onEdit={() => router.push(`/home-cards/${card.id}/edit`)}
-                        onDelete={() => setDeleteTarget(card)}
-                      />
-                    ))
+                    orderedRootCards.map((card, index) => {
+                      const children = childrenByParentId.get(card.id) ?? [];
+                      return (
+                        <React.Fragment key={card.id}>
+                          <SortableRow
+                            card={card}
+                            index={index}
+                            total={activeRootCards.length}
+                            reorderMode={reorderMode}
+                            reorderBusy={reordering}
+                            onMoveUp={() => move(index, 'up')}
+                            onMoveDown={() => move(index, 'down')}
+                            onEdit={() => router.push(`/home-cards/${card.id}/edit`)}
+                            onDelete={() => setDeleteTarget(card)}
+                          />
+                          {!reorderMode &&
+                            children.map((child) => (
+                              <ChildRow
+                                key={child.id}
+                                card={child}
+                                onEdit={() => router.push(`/home-cards/${child.id}/edit`)}
+                                onDelete={() => setDeleteTarget(child)}
+                              />
+                            ))}
+                        </React.Fragment>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>

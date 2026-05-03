@@ -393,6 +393,7 @@ export type HomeCardIcon = {
 
 export type HomeCard = {
   id: number;
+  parent_id: number | null;
   slug: string;
   position: number;
   title_en: string;
@@ -403,7 +404,7 @@ export type HomeCard = {
   tag_mm: string;
   accent_color: string;
   icon_key: string;
-  navigation_screen: string;
+  navigation_screen: string | null;
   navigation_params: Record<string, unknown> | null;
   is_active: boolean;
   is_coming_soon: boolean;

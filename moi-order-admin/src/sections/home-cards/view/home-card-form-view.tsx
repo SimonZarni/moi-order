@@ -60,6 +60,7 @@ function toSlug(value: string): string {
 // ----------------------------------------------------------------------
 
 type FormState = {
+  parent_id: number | null;
   slug: string;
   title_en: string;
   title_mm: string;
@@ -77,6 +78,7 @@ type FormState = {
 
 function defaultForm(card?: HomeCard): FormState {
   return {
+    parent_id:             card?.parent_id         ?? null,
     slug:                  card?.slug              ?? '',
     title_en:              card?.title_en          ?? '',
     title_mm:              card?.title_mm          ?? '',
@@ -86,7 +88,7 @@ function defaultForm(card?: HomeCard): FormState {
     tag_mm:                card?.tag_mm            ?? '',
     accent_color:          card?.accent_color      ?? '#52796f',
     icon_key:              card?.icon_key          ?? 'calendar',
-    navigation_screen:     card?.navigation_screen ?? 'NinetyDayReport',
+    navigation_screen:     card?.navigation_screen ?? '',
     navigation_params_raw: card?.navigation_params ? JSON.stringify(card.navigation_params, null, 2) : '{}',
     is_active:             card?.is_active         ?? true,
     is_coming_soon:        card?.is_coming_soon    ?? false,
@@ -109,11 +111,13 @@ export function HomeCardFormView({ mode, card }: Props) {
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  // ── Dynamic icon & route lists ──────────────────────────────────────────────
+  // ── Dynamic icon, route and parent-card lists ───────────────────────────────
   const [icons, setIcons] = useState<HomeCardIcon[]>([]);
   const [iconsLoading, setIconsLoading] = useState(true);
   const [routes, setRoutes] = useState<HomeCardRoute[]>([]);
   const [routesLoading, setRoutesLoading] = useState(true);
+  const [parentOptions, setParentOptions] = useState<HomeCard[]>([]);
+  const [parentOptionsLoading, setParentOptionsLoading] = useState(true);
 
   useEffect(() => {
     homeCardIconsApi.list()
@@ -122,7 +126,14 @@ export function HomeCardFormView({ mode, card }: Props) {
     homeCardRoutesApi.list()
       .then(setRoutes)
       .finally(() => setRoutesLoading(false));
-  }, []);
+    homeCardsApi.list({ per_page: 100 })
+      .then(({ data }) =>
+        setParentOptions(
+          data.filter((c) => c.parent_id === null && !c.deleted_at && c.id !== card?.id),
+        )
+      )
+      .finally(() => setParentOptionsLoading(false));
+  }, [card?.id]);
 
   // ── Create Icon dialog ──────────────────────────────────────────────────────
   const [createIconOpen, setCreateIconOpen] = useState(false);
@@ -247,6 +258,7 @@ export function HomeCardFormView({ mode, card }: Props) {
       }
     }
     return {
+      parent_id:         form.parent_id,
       slug:              form.slug,
       title_en:          form.title_en,
       title_mm:          form.title_mm,
@@ -256,7 +268,7 @@ export function HomeCardFormView({ mode, card }: Props) {
       tag_mm:            form.tag_mm,
       accent_color:      form.accent_color,
       icon_key:          form.icon_key,
-      navigation_screen: form.navigation_screen,
+      navigation_screen: form.navigation_screen || null,
       navigation_params: navigationParams,
       is_active:         form.is_active,
       is_coming_soon:    form.is_coming_soon,
@@ -334,6 +346,32 @@ export function HomeCardFormView({ mode, card }: Props) {
             <CardHeader title="Content" subheader="Bilingual title, subtitle and tag" />
             <CardContent>
               <Grid container spacing={2.5}>
+                <Grid size={{ xs: 12 }}>
+                  <FormControl fullWidth error={!!fieldErrors.parent_id}>
+                    <InputLabel>Parent Card</InputLabel>
+                    <Select
+                      label="Parent Card"
+                      value={parentOptionsLoading ? '' : (form.parent_id ?? '')}
+                      disabled={parentOptionsLoading}
+                      onChange={(e) =>
+                        update('parent_id', e.target.value === '' ? null : Number(e.target.value))
+                      }
+                    >
+                      <MenuItem value="">
+                        <em>None (root card)</em>
+                      </MenuItem>
+                      {parentOptions.map((rc) => (
+                        <MenuItem key={rc.id} value={rc.id}>
+                          {rc.title_en}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    <FormHelperText>
+                      {fieldErrors.parent_id ?? 'Optional. Set to nest this card under a group card.'}
+                    </FormHelperText>
+                  </FormControl>
+                </Grid>
+
                 <Grid size={{ xs: 12 }}>
                   <TextField
                     fullWidth required label="Slug"
@@ -479,7 +517,7 @@ export function HomeCardFormView({ mode, card }: Props) {
             <CardContent>
               <Grid container spacing={2.5}>
                 <Grid size={{ xs: 12 }}>
-                  <FormControl fullWidth required error={!!fieldErrors.navigation_screen}>
+                  <FormControl fullWidth error={!!fieldErrors.navigation_screen}>
                     <InputLabel>Tap Destination</InputLabel>
                     <Select
                       label="Tap Destination"
@@ -493,6 +531,10 @@ export function HomeCardFormView({ mode, card }: Props) {
                         }
                       }}
                     >
+                      <MenuItem value="">
+                        <em>None (group card — no direct navigation)</em>
+                      </MenuItem>
+                      <Divider />
                       {routes.filter((r) => r.type === 'internal').map((route) => (
                         <MenuItem key={route.key} value={route.key}>
                           {route.label_en}
@@ -591,8 +633,12 @@ export function HomeCardFormView({ mode, card }: Props) {
               </Box>
               <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 1.5, textAlign: 'center' }}>
                 Icon: {form.icon_key}
-                {selectedRoute ? ` · Goes to: ${selectedRoute.label_en}` : ` · Goes to: ${form.navigation_screen}`}
-                {selectedRoute?.type === 'external_url' && ' (ext)'}
+                {form.parent_id && ` · Child of: ${parentOptions.find((p) => p.id === form.parent_id)?.title_en ?? '…'}`}
+                {form.navigation_screen
+                  ? selectedRoute
+                    ? ` · Goes to: ${selectedRoute.label_en}${selectedRoute.type === 'external_url' ? ' (ext)' : ''}`
+                    : ` · Goes to: ${form.navigation_screen}`
+                  : ' · No navigation (group)'}
               </Typography>
             </CardContent>
           </Card>

@@ -41,9 +41,18 @@ class UpdateHomeCardRequest extends FormRequest
     {
         $validator->after(function (Validator $v): void {
             $parentId = $this->integer('parent_id');
+
+            // A card that already has children cannot itself become a child.
+            $card = $this->route('homeCard');
+            if ($parentId && $card?->children()->exists()) {
+                $v->errors()->add('parent_id', 'Cannot assign a parent to a card that already has child cards.');
+                return;
+            }
+
             if (!$parentId) {
                 return;
             }
+
             $parentHasParent = \App\Models\HomeCard::where('id', $parentId)
                 ->whereNotNull('parent_id')
                 ->exists();

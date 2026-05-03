@@ -22,6 +22,7 @@ class HomeCardIconSeeder extends Seeder
             ['key' => 'passport', 'label' => 'Passport'],
             ['key' => 'food',     'label' => 'Food'],
             ['key' => 'ticket',   'label' => 'Ticket'],
+            ['key' => 'company',  'label' => 'Company'],
         ];
 
         foreach ($icons as $icon) {

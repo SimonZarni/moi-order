@@ -9,6 +9,7 @@ type Meta = { current_page: number; last_page: number; per_page: number; total: 
 type ListParams = { page?: number; per_page?: number };
 
 export type HomeCardPayload = {
+  parent_id: number | null;
   slug: string;
   title_en: string;
   title_mm: string;
@@ -18,7 +19,7 @@ export type HomeCardPayload = {
   tag_mm: string;
   accent_color: string;
   icon_key: string;
-  navigation_screen: string;
+  navigation_screen: string | null;
   navigation_params: Record<string, unknown> | null;
   is_active: boolean;
   is_coming_soon: boolean;

@@ -13,6 +13,7 @@ class AdminHomeCardResource extends JsonResource
     {
         return [
             'id'                => $this->id,
+            'parent_id'         => $this->parent_id,
             'slug'              => $this->slug,
             'position'          => $this->position,
             'title_en'          => $this->title_en,
