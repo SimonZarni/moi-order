@@ -14,6 +14,7 @@ import { ProfileSkeleton } from '@/features/profile/components/ProfileSkeleton';
 import { DocumentShortcuts } from '@/features/profile/components/DocumentShortcuts';
 import { useProfileScreen } from '@/features/profile/hooks/useProfileScreen';
 import { useLinkedAccounts } from '@/features/profile/hooks/useLinkedAccounts';
+import { useUploadStats } from '@/features/documents/hooks/useUploadStats';
 import { formatDate } from '@/shared/utils/formatDate';
 import { formatPhoneNumber } from '@/shared/utils/formatPhoneNumber';
 import { getProfileStrings } from '@/shared/constants/profileStrings';
@@ -40,7 +41,7 @@ export function ProfileScreen(): React.JSX.Element {
     handleTogglePasswordSection,
     handleCurrentPasswordChange, handleNewPasswordChange, handleConfirmPasswordChange,
     handleChangePassword,
-    handleGoToOrders, handleGoToPrivacyPolicy, handleGoToTerms, handleGoToPdpa, handleLogout,
+    handleGoToOrders, handleGoToMoiVerified, handleGoToPrivacyPolicy, handleGoToTerms, handleGoToPdpa, handleLogout,
     handleDeleteAccount, isDeletingAccount,
     isUploadingPicture, isRemovingPicture, handleAvatarPress,
   } = useProfileScreen();
@@ -53,6 +54,7 @@ export function ProfileScreen(): React.JSX.Element {
     dismissLinkError,
   } = useLinkedAccounts();
 
+  const { stats } = useUploadStats();
   const t = getProfileStrings(locale);
   const hasPhoneNumber = (user?.phone_number ?? '').trim() !== '';
   const appleUnavailable = Platform.OS !== 'ios';
@@ -154,7 +156,23 @@ export function ProfileScreen(): React.JSX.Element {
           )}
 
           {/* § Document shortcuts */}
-          <DocumentShortcuts />
+          <DocumentShortcuts stats={stats} />
+
+          {/* § Moi Verified */}
+          <Pressable
+            style={styles.card}
+            onPress={handleGoToMoiVerified}
+            accessibilityLabel="Become Moi Verified"
+            accessibilityRole="button"
+          >
+            <View style={styles.row}>
+              <View style={[styles.iconBadge, styles.iconBadgeTeal]}>
+                <Ionicons name="shield-checkmark-outline" size={16} color={colours.tertiary} />
+              </View>
+              <Text style={styles.rowLabel}>Become Moi Verified 😊</Text>
+              <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
+            </View>
+          </Pressable>
 
           {/* § Personal Info */}
           <View style={styles.sectionRow}>

@@ -62,6 +62,7 @@ export interface UseProfileScreenResult {
   handleSetLocale: (locale: Locale) => void;
   // Handlers — nav
   handleGoToOrders: () => void;
+  handleGoToMoiVerified: () => void;
   handleGoToPrivacyPolicy: () => void;
   handleGoToTerms: () => void;
   handleGoToPdpa: () => void;
@@ -194,6 +195,10 @@ export function useProfileScreen(): UseProfileScreenResult {
     navigation.navigate('Orders');
   }, [navigation]);
 
+  const handleGoToMoiVerified = useCallback((): void => {
+    navigation.navigate('MoiVerified');
+  }, [navigation]);
+
   const handleGoToPrivacyPolicy = useCallback((): void => {
     navigation.navigate('PrivacyPolicy');
   }, [navigation]);
@@ -285,6 +290,7 @@ export function useProfileScreen(): UseProfileScreenResult {
     locale,
     handleSetLocale,
     handleGoToOrders,
+    handleGoToMoiVerified,
     handleGoToPrivacyPolicy,
     handleGoToTerms,
     handleGoToPdpa,

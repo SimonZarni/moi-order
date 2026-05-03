@@ -43,4 +43,8 @@ export const styles = StyleSheet.create({
     lineHeight: 14,
     marginTop: 1,
   },
+  itemHighlighted: {
+    borderBottomWidth: 3,
+    borderBottomColor: colours.success,
+  },
 });

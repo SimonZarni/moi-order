@@ -5,8 +5,13 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { RootStackParamList } from '@/types/navigation';
+import { UploadStats } from '@/types/models';
 import { colours } from '@/shared/theme/colours';
 import { styles } from './DocumentShortcuts.styles';
+
+interface Props {
+  stats: UploadStats | undefined;
+}
 
 interface ShortcutItem {
   label: string;
@@ -15,6 +20,7 @@ interface ShortcutItem {
   iconBg: string;
   iconColor: string;
   route: keyof Pick<RootStackParamList, 'PassportVault' | 'NinetyDayVault' | 'MyDocuments'>;
+  sectionKey: keyof UploadStats['sections'];
 }
 
 const SHORTCUTS: ShortcutItem[] = [
@@ -25,6 +31,7 @@ const SHORTCUTS: ShortcutItem[] = [
     iconBg:     `${colours.primary}22`,
     iconColor:  colours.primary,
     route:      'PassportVault',
+    sectionKey: 'passport',
   },
   {
     label:      '90-Day',
@@ -33,6 +40,7 @@ const SHORTCUTS: ShortcutItem[] = [
     iconBg:     `${colours.secondary}22`,
     iconColor:  colours.tertiary,
     route:      'NinetyDayVault',
+    sectionKey: 'ninety_day_report',
   },
   {
     label:      'My Docs',
@@ -41,29 +49,34 @@ const SHORTCUTS: ShortcutItem[] = [
     iconBg:     `${colours.tertiary}22`,
     iconColor:  colours.tertiary,
     route:      'MyDocuments',
+    sectionKey: 'other',
   },
 ];
 
-export function DocumentShortcuts(): React.JSX.Element {
+export function DocumentShortcuts({ stats }: Props): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   return (
     <View style={styles.row}>
-      {SHORTCUTS.map((item) => (
-        <Pressable
-          key={item.route}
-          style={styles.item}
-          onPress={() => navigation.navigate(item.route)}
-          accessibilityLabel={item.label}
-          accessibilityRole="button"
-        >
-          <View style={[styles.iconWrap, { backgroundColor: item.iconBg }]}>
-            <Ionicons name={item.icon} size={22} color={item.iconColor} />
-          </View>
-          <Text style={styles.label}>{item.label}</Text>
-          <Text style={styles.sublabel}>{item.sublabel}</Text>
-        </Pressable>
-      ))}
+      {SHORTCUTS.map((item) => {
+        const sectionStats = stats?.sections[item.sectionKey];
+        const hasUploads   = (sectionStats?.total_count ?? 0) > 0;
+        return (
+          <Pressable
+            key={item.route}
+            style={[styles.item, hasUploads && styles.itemHighlighted]}
+            onPress={() => navigation.navigate(item.route)}
+            accessibilityLabel={item.label}
+            accessibilityRole="button"
+          >
+            <View style={[styles.iconWrap, { backgroundColor: item.iconBg }]}>
+              <Ionicons name={item.icon} size={22} color={item.iconColor} />
+            </View>
+            <Text style={styles.label}>{item.label}</Text>
+            <Text style={styles.sublabel}>{item.sublabel}</Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }

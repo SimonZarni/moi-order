@@ -58,4 +58,7 @@ export const QUERY_KEYS = {
   HOME_CARDS: {
     LIST: ['home-cards', 'list'] as const,
   },
+  VERIFICATION: {
+    STATUS: ['verification', 'status'] as const,
+  },
 } as const;

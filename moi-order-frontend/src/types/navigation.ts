@@ -104,6 +104,9 @@ export type RootStackParamList = {
   NinetyDayVault: undefined;
   MyDocuments: undefined;
 
+  // ── Profile extras ────────────────────────────────────────────────────────
+  MoiVerified: undefined;
+
   // ── Food ordering ─────────────────────────────────────────────────────────
   Food: undefined;
   RestaurantDetail: { restaurantId: number };

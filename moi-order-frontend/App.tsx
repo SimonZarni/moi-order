@@ -74,6 +74,7 @@ import { NotificationsScreen } from '@/features/notifications/screens/Notificati
 import { PassportVaultScreen } from '@/features/documents/screens/PassportVaultScreen';
 import { NinetyDayVaultScreen } from '@/features/documents/screens/NinetyDayVaultScreen';
 import { MyDocumentsScreen } from '@/features/documents/screens/MyDocumentsScreen';
+import { MoiVerifiedScreen } from '@/features/profile/screens/MoiVerifiedScreen';
 import { FoodScreen } from '@/features/food/screens/FoodScreen';
 import { RestaurantDetailScreen } from '@/features/food/screens/RestaurantDetailScreen';
 import { RestaurantMapScreen } from '@/features/food/screens/RestaurantMapScreen';
@@ -157,6 +158,7 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="PassportVault"                 component={PassportVaultScreen} />
       <Stack.Screen name="NinetyDayVault"                component={NinetyDayVaultScreen} />
       <Stack.Screen name="MyDocuments"                   component={MyDocumentsScreen} />
+      <Stack.Screen name="MoiVerified"                   component={MoiVerifiedScreen} />
       <Stack.Screen name="Food"                          component={FoodScreen} />
       <Stack.Screen name="RestaurantDetail"              component={RestaurantDetailScreen} />
       <Stack.Screen name="RestaurantMap"                 component={RestaurantMapScreen} options={{ animation: 'slide_from_bottom' }} />

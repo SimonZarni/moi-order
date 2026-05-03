@@ -64,12 +64,21 @@ class DocumentService
         // Increment only after a successful upload so failed attempts don't count.
         $this->limiter->increment($user, $type);
 
-        return ['document' => $document, 'quota' => $this->limiter->getStats($user)];
+        return ['document' => $document, 'quota' => $this->getUploadStats($user)];
     }
 
     public function getUploadStats(User $user): array
     {
-        return $this->limiter->getStats($user);
+        $stats = $this->limiter->getStats($user);
+
+        foreach (DocumentType::cases() as $type) {
+            $stats['sections'][$type->value]['total_count'] = Document::query()
+                ->forUser($user->id)
+                ->ofType($type)
+                ->count();
+        }
+
+        return $stats;
     }
 
     /** @return Collection<int, Document> */

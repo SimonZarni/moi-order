@@ -65,6 +65,7 @@ export interface User {
 export interface UploadSectionStats {
   today_used: number;
   daily_limit: number | null;  // null = unlimited (privileged)
+  total_count: number;
 }
 
 export interface UploadStats {
@@ -78,6 +79,15 @@ export interface UploadStats {
     ninety_day_report: UploadSectionStats;
     other:             UploadSectionStats;
   };
+}
+
+export interface VerificationStatus {
+  connected_channel: boolean;
+  passport_uploaded: boolean;
+  ninety_day_uploaded: boolean;
+  my_docs_uploaded: boolean;
+  successful_payment: boolean;
+  is_verified: boolean;
 }
 
 // ── Services ───────────────────────────────────────────────────────────────

@@ -77,8 +77,14 @@ export function useDocumentUpload(type: DocumentType): UseDocumentUploadResult {
   const doUpload = useCallback(async (uri: string, mimeType: string): Promise<void> => {
     try {
       setIsUploading(true);
-      await uploadDocument(uri, mimeType, type);
+      const result = await uploadDocument(uri, mimeType, type);
       invalidate();
+      if (!result.document.is_valid_type) {
+        Alert.alert(
+          'Document Not Accepted',
+          result.document.validation_message ?? 'This does not appear to be a valid document for this section.',
+        );
+      }
     } catch (error: unknown) {
       const apiError = error as ApiError;
       if (apiError.status === 429) {
