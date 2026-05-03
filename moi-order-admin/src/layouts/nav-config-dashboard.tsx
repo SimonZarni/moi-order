@@ -1,8 +1,10 @@
-import { SvgColor } from 'src/components/svg-color';
+import type { IconifyName } from 'src/components/iconify';
+
+import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-const icon = (name: string) => <SvgColor src={`/assets/icons/navbar/${name}.svg`} />;
+const icon = (name: IconifyName) => <Iconify icon={name} />;
 
 export type NavItem = {
   title: string;
@@ -17,122 +19,122 @@ export const navData: NavItem[] = [
   {
     title: 'Overview',
     path: '/',
-    icon: icon('ic-analytics'),
-  },
-  {
-    title: 'Places',
-    path: '/places',
-    icon: icon('ic-blog'),
-  },
-  {
-    title: 'Attractions',
-    path: '/attractions',
-    icon: icon('ic-cart'),
-  },
-  {
-    title: 'Bookings',
-    path: '/bookings',
-    icon: icon('ic-cart'),
-  },
-  {
-    title: '90-Day Report',
-    path: '/bookings/report',
-    icon: icon('ic-analytics'),
+    icon: icon('solar:home-angle-bold-duotone'),
   },
   {
     title: 'Users',
     path: '/users',
-    icon: icon('ic-user'),
+    icon: icon('solar:eye-bold'),
   },
   {
-    title: 'Payments',
-    path: '/payments',
-    icon: icon('ic-analytics'),
-    permission: 'payments.view',
-  },
-  {
-    title: 'Food & Restaurants',
-    path: '/restaurants',
-    icon: icon('ic-cart'),
+    title: 'Merchants',
+    path: '/merchants',
+    icon: icon('solar:file-bold'),
     children: [
       {
-        title: 'Restaurants',
-        path: '/restaurants',
-        icon: icon('ic-cart'),
-        permission: 'restaurants.manage',
+        title: 'KYC Applications',
+        path: '/merchants',
+        icon: icon('solar:file-bold'),
       },
       {
-        title: 'Food Orders',
-        path: '/food-orders',
-        icon: icon('ic-analytics'),
+        title: 'Create Merchant',
+        path: '/merchants/new',
+        icon: icon('mingcute:add-line'),
       },
     ],
   },
   {
+    title: '90-Day Report',
+    path: '/bookings/report',
+    icon: icon('solar:restart-bold'),
+  },
+  {
+    title: 'Bookings',
+    path: '/bookings',
+    icon: icon('solar:clock-circle-outline'),
+  },
+  {
     title: 'Other Services',
     path: '/services',
-    icon: icon('ic-lock'),
+    icon: icon('solar:settings-bold-duotone'),
     children: [
       {
         title: 'Manage Services',
         path: '/services',
-        icon: icon('ic-lock'),
+        icon: icon('solar:settings-bold-duotone'),
       },
       {
         title: 'Submissions',
         path: '/services/submissions',
-        icon: icon('ic-disabled'),
+        icon: icon('eva:done-all-fill'),
         permission: 'submissions.view',
       },
     ],
   },
   {
-    title: 'Home Cards',
-    path: '/home-cards',
-    icon: icon('ic-blog'),
-    permission: 'home_cards.manage',
+    title: 'Food & Restaurants',
+    path: '/restaurants',
+    icon: icon('solar:cart-3-bold'),
+    children: [
+      {
+        title: 'Restaurants',
+        path: '/restaurants',
+        icon: icon('solar:gallery-bold'),
+        permission: 'restaurants.manage',
+      },
+      {
+        title: 'Food Orders',
+        path: '/food-orders',
+        icon: icon('solar:cart-3-bold'),
+      },
+    ],
   },
   {
-    title: 'Roles & Permissions',
-    path: '/roles',
-    icon: icon('ic-lock'),
-    permission: 'admins.manage',
+    title: 'Places',
+    path: '/places',
+    icon: icon('solar:gallery-bold'),
+  },
+  {
+    title: 'Attractions',
+    path: '/attractions',
+    icon: icon('solar:play-bold'),
+  },
+  {
+    title: 'Payments',
+    path: '/payments',
+    icon: icon('eva:trending-up-fill'),
+    permission: 'payments.view',
+  },
+  {
+    title: 'Home Cards',
+    path: '/home-cards',
+    icon: icon('solar:share-bold'),
+    permission: 'home_cards.manage',
   },
   {
     title: 'Push Notifications',
     path: '/push-notifications',
-    icon: icon('ic-disabled'),
+    icon: icon('solar:bell-bing-bold-duotone'),
   },
   {
     title: 'Reviews',
     path: '/reviews',
-    icon: icon('ic-disabled'),
+    icon: icon('solar:check-circle-bold'),
   },
   {
     title: 'Content',
     path: '/content',
-    icon: icon('ic-blog'),
+    icon: icon('solar:pen-bold'),
   },
   {
     title: 'Support',
     path: '/support',
-    icon: icon('ic-disabled'),
+    icon: icon('solar:chat-round-dots-bold'),
   },
   {
-    title: 'Merchants',
-    path: '/merchants',
-    icon: icon('ic-user'),
-    children: [
-      {
-        title: 'KYC Applications',
-        path: '/merchants',
-        icon: icon('ic-user'),
-      },
-      {
-        title: 'Create Merchant',
-        path: '/merchants/new',
-        icon: icon('ic-user'),
-      },
-    ],
+    title: 'Roles & Permissions',
+    path: '/roles',
+    icon: icon('solar:shield-keyhole-bold-duotone'),
+    permission: 'admins.manage',
   },
 ];
