@@ -55,12 +55,24 @@ class ClaudeOcrService implements DocumentOcrInterface
             $response = Http::withHeaders([
                 'x-api-key'         => $this->apiKey,
                 'anthropic-version' => self::ANTHROPIC_VERSION,
+                // Prompt caching: instruction text is identical per document type,
+                // so it is cached after the first request. Image is unique and not cached.
+                // Cache reads cost 10% of normal input price → ~18% cheaper per OCR call.
+                'anthropic-beta'    => 'prompt-caching-2024-07-31',
             ])->timeout(30)->post(self::ANTHROPIC_API_URL, [
                 'model'      => $this->model,
                 'max_tokens' => 1024,
                 'messages'   => [[
                     'role'    => 'user',
                     'content' => [
+                        // Instruction text first with cache_control — cached across all
+                        // requests for this document type (5-minute TTL, auto-renewed).
+                        [
+                            'type'          => 'text',
+                            'text'          => $prompt,
+                            'cache_control' => ['type' => 'ephemeral'],
+                        ],
+                        // Image after the cache boundary — unique per upload, never cached.
                         [
                             'type'   => 'image',
                             'source' => [
@@ -69,7 +81,6 @@ class ClaudeOcrService implements DocumentOcrInterface
                                 'data'       => $base64,
                             ],
                         ],
-                        ['type' => 'text', 'text' => $prompt],
                     ],
                 ]],
             ]);
@@ -157,18 +168,57 @@ Use null for fields that cannot be clearly read. All dates as YYYY-MM-DD.
 PROMPT,
 
             DocumentType::Other => <<<'PROMPT'
-You are a document information extraction system. Analyse this image and extract information from this official or legal document.
+You are a document information extraction system for Myanmar and Southeast Asian nationals living in Thailand. Analyse this image and identify the document type, then extract the relevant fields.
 
-Respond ONLY with a JSON object — no markdown, no explanation. Use this exact structure:
+Recognised document types and their subtypes:
 
-{"is_valid_document_type":true,"validation_message":null,"subtype":"work_permit","extracted_data":{"document_name":"Work Permit","full_name":"JOHN DOE","issue_date":"2025-01-01","expiry_date":"2026-01-01","notes":"Department of Employment, Permit No. 12345"},"expiry_date":"2026-01-01","extension_date":null}
+1. CI PINK CARD (Thai Confirmation of Identity / บัตรประจำตัวบุคคลไม่มีสัญชาติไทย)
+   subtype: "ci_pink_card"
+   extract: full_name, ci_number, nationality, date_of_birth, issue_date, expiry_date, issuing_office
 
-For the subtype field use a short slug: work_permit, id_card, driving_license, visa, health_insurance, bank_statement, lease_agreement, marriage_certificate, or a descriptive slug for other types.
+2. NON-IMMIGRANT LA VISA (Thai Non-Immigrant L-A / Labour visa sticker in passport)
+   subtype: "non_la_visa"
+   extract: full_name, visa_type ("Non-Immigrant L-A"), entries, issue_date, expiry_date, issuing_embassy, passport_number
 
-If the image is not an official/legal document:
+3. THAI DRIVING LICENSE (ใบอนุญาตขับขี่)
+   subtype: "driving_license"
+   extract: full_name, license_number, license_class, date_of_birth, issue_date, expiry_date, issuing_office
+
+4. INTERNATIONAL DRIVING PERMIT
+   subtype: "international_driving_permit"
+   extract: full_name, permit_number, date_of_birth, issue_date, expiry_date, issuing_country
+
+5. STUDENT ID CARD
+   subtype: "student_id"
+   extract: full_name, student_id, institution_name, faculty, issue_date, expiry_date
+
+6. WORK PERMIT (ใบอนุญาตทำงาน / Thailand Work Permit)
+   subtype: "work_permit"
+   extract: full_name, permit_number, employer_name, occupation, issue_date, expiry_date, issuing_office
+
+7. THAI NATIONAL ID CARD (บัตรประชาชน)
+   subtype: "thai_national_id"
+   extract: full_name, id_number, date_of_birth, issue_date, expiry_date
+
+8. SOCIAL SECURITY CARD / HEALTH INSURANCE CARD
+   subtype: "social_security_card" or "health_insurance_card"
+   extract: full_name, card_number, issue_date, expiry_date, coverage_notes
+
+9. MARRIAGE / BIRTH CERTIFICATE
+   subtype: "marriage_certificate" or "birth_certificate"
+   extract: full_name, document_number, issue_date, issuing_office, notes
+
+10. ANY OTHER OFFICIAL DOCUMENT not listed above
+    subtype: descriptive slug (e.g. "residence_certificate", "tax_id_card", "bank_book")
+    extract: document_name, full_name, document_number, issue_date, expiry_date, issuing_office, notes
+
+Respond ONLY with a JSON object — no markdown, no explanation:
+{"is_valid_document_type":true,"validation_message":null,"subtype":"ci_pink_card","extracted_data":{"full_name":"JOHN DOE","ci_number":"1234567890123","nationality":"Myanmar","date_of_birth":"1990-01-15","issue_date":"2023-01-01","expiry_date":"2026-01-01","issuing_office":"Chiang Mai"},"expiry_date":"2026-01-01","extension_date":null}
+
+If the image is not any kind of official, legal, or government-issued document:
 {"is_valid_document_type":false,"validation_message":"This does not appear to be an official document. Please upload a legal or official document.","subtype":null,"extracted_data":{},"expiry_date":null,"extension_date":null}
 
-Use null for fields that cannot be clearly read. All dates as YYYY-MM-DD.
+Use null for any field that cannot be clearly read. All dates must be YYYY-MM-DD format.
 PROMPT,
         };
     }
