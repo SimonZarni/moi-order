@@ -10,6 +10,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('push_subscriptions')) {
+            return;
+        }
+
         Schema::create('push_subscriptions', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
