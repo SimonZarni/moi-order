@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { FlatList } from 'react-native';
 import { Image } from 'expo-image';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -7,27 +7,18 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { usePlaces } from '@/features/places/hooks/usePlaces';
 import { usePlacesSearch } from '@/features/places/hooks/usePlacesSearch';
-import { useTickets } from '@/features/tickets/hooks/useTickets';
 import { fetchPlaceDetail } from '@/shared/api/places';
-import { fetchTicket } from '@/shared/api/tickets';
 import { useDebounce } from '@/shared/hooks/useDebounce';
 import { CACHE_TTL } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
-import { Category, Place, Ticket, ApiError } from '@/types/models';
+import { Category, Place, ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
+import { useState } from 'react';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-export type PlacesTab = 'places' | 'tickets';
-
 export interface UsePlacesScreenResult {
-  // List refs for scroll-to-top on focus
   placesListRef: React.RefObject<FlatList<Place>>;
-  ticketsListRef: React.RefObject<FlatList<Ticket>>;
-  // Tab
-  activeTab: PlacesTab;
-  handleTabChange: (tab: PlacesTab) => void;
-  // Places data
   filteredPlaces: Place[];
   categories: Category[];
   isPlacesLoading: boolean;
@@ -42,18 +33,6 @@ export interface UsePlacesScreenResult {
   handlePlacesEndReached: () => void;
   handlePlacesRefresh: () => void;
   handlePlacePress: (placeId: number) => void;
-  // Tickets data
-  filteredTickets: Ticket[];
-  ticketsQuery: string;
-  isTicketsLoading: boolean;
-  isTicketsError: boolean;
-  isTicketsRefreshing: boolean;
-  isTicketsFetchingNextPage: boolean;
-  handleTicketsQueryChange: (text: string) => void;
-  handleTicketsEndReached: () => void;
-  handleTicketsRefresh: () => void;
-  handleTicketPress: (ticketId: number) => void;
-  // Common
   handleBack: () => void;
 }
 
@@ -62,22 +41,16 @@ export function usePlacesScreen(): UsePlacesScreenResult {
   const queryClient = useQueryClient();
 
   const placesListRef = useRef<FlatList<Place>>(null);
-  const ticketsListRef = useRef<FlatList<Ticket>>(null);
 
-  const [activeTab, setActiveTab] = useState<PlacesTab>('places');
   const [query, setQuery] = useState('');
-  const [ticketsQuery, setTicketsQuery] = useState('');
   const debouncedQuery = useDebounce(query, SEARCH_DEBOUNCE_MS);
-  const debouncedTicketsQuery = useDebounce(ticketsQuery, SEARCH_DEBOUNCE_MS);
 
   useFocusEffect(
     useCallback(() => {
       placesListRef.current?.scrollToOffset({ offset: 0, animated: false });
-      ticketsListRef.current?.scrollToOffset({ offset: 0, animated: false });
 
       return () => {
         setQuery('');
-        setTicketsQuery('');
       };
     }, [])
   );
@@ -101,50 +74,14 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     handleCategorySelect,
   } = usePlacesSearch(places);
 
-  const {
-    tickets,
-    isLoading: isTicketsLoading,
-    isError: isTicketsError,
-    isRefreshing: isTicketsRefreshing,
-    hasNextPage: ticketsHasNextPage,
-    isFetchingNextPage: isTicketsFetchingNextPage,
-    fetchNextPage: fetchTicketsNextPage,
-    refetch: refetchTickets,
-  } = useTickets();
-
-  const filteredTickets = useMemo((): Ticket[] => {
-    if (debouncedTicketsQuery === '') return tickets;
-    const q = debouncedTicketsQuery.toLowerCase();
-    return tickets.filter(
-      t =>
-        t.name.toLowerCase().includes(q) ||
-        t.city.toLowerCase().includes(q) ||
-        t.province.toLowerCase().includes(q),
-    );
-  }, [tickets, debouncedTicketsQuery]);
-
   useEffect(() => {
     filteredPlaces.forEach(p => {
       if (p.cover_image !== null) Image.prefetch(p.cover_image);
     });
   }, [filteredPlaces]);
 
-  useEffect(() => {
-    tickets.forEach(t => {
-      if (t.cover_image_url !== null) Image.prefetch(t.cover_image_url);
-    });
-  }, [tickets]);
-
-  const handleTabChange = useCallback((tab: PlacesTab): void => {
-    setActiveTab(tab);
-  }, []);
-
   const handleQueryChange = useCallback((text: string): void => {
     setQuery(text);
-  }, []);
-
-  const handleTicketsQueryChange = useCallback((text: string): void => {
-    setTicketsQuery(text);
   }, []);
 
   const handlePlacesEndReached = useCallback((): void => {
@@ -156,16 +93,6 @@ export function usePlacesScreen(): UsePlacesScreenResult {
   const handlePlacesRefresh = useCallback((): void => {
     refetchPlaces();
   }, [refetchPlaces]);
-
-  const handleTicketsEndReached = useCallback((): void => {
-    if (ticketsHasNextPage && !isTicketsFetchingNextPage) {
-      fetchTicketsNextPage();
-    }
-  }, [ticketsHasNextPage, isTicketsFetchingNextPage, fetchTicketsNextPage]);
-
-  const handleTicketsRefresh = useCallback((): void => {
-    refetchTickets();
-  }, [refetchTickets]);
 
   const handlePlacePress = useCallback(
     (placeId: number): void => {
@@ -179,27 +106,12 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     [navigation, queryClient],
   );
 
-  const handleTicketPress = useCallback(
-    (ticketId: number): void => {
-      queryClient.prefetchQuery({
-        queryKey: QUERY_KEYS.TICKETS.DETAIL(ticketId),
-        queryFn:  () => fetchTicket(ticketId),
-        staleTime: CACHE_TTL.USER_DATA,
-      });
-      navigation.navigate('TicketDetail', { ticketId });
-    },
-    [navigation, queryClient],
-  );
-
   const handleBack = useCallback((): void => {
     navigation.goBack();
   }, [navigation]);
 
   return {
     placesListRef,
-    ticketsListRef,
-    activeTab,
-    handleTabChange,
     filteredPlaces,
     categories,
     isPlacesLoading,
@@ -214,16 +126,6 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     handlePlacesEndReached,
     handlePlacesRefresh,
     handlePlacePress,
-    filteredTickets,
-    ticketsQuery,
-    isTicketsLoading,
-    isTicketsError,
-    isTicketsRefreshing,
-    isTicketsFetchingNextPage,
-    handleTicketsQueryChange,
-    handleTicketsEndReached,
-    handleTicketsRefresh,
-    handleTicketPress,
     handleBack,
   };
 }

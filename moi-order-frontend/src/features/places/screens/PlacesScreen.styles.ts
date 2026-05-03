@@ -2,7 +2,6 @@ import { StyleSheet } from 'react-native';
 
 import { colours } from '@/shared/theme/colours';
 import { radius } from '@/shared/theme/radius';
-import { shadows } from '@/shared/theme/shadows';
 import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 import { TAB_BAR_CLEARANCE } from '@/shared/components/FloatingTabBar/FloatingTabBar.styles';
@@ -22,51 +21,10 @@ export const styles = StyleSheet.create({
     marginTop: -spacing.xl,
   },
 
-  // ── Sticky section (tab row, never scrolls) ──────────────────────────────
-  stickyTabBar: {
-    backgroundColor: colours.backgroundLight,
-    paddingTop: spacing.xs,
-    paddingBottom: spacing.xs,
-  },
-
-  // ── Tabs ──────────────────────────────────────────────────────────────────
-  tabRow: {
-    flexDirection: 'row',
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.sm,
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    borderRadius: radius.full,
-    padding: 3,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: spacing.sm,
-    alignItems: 'center',
-    borderRadius: radius.full,
-  },
-  tabActive: {
-    backgroundColor: colours.card,
-    ...shadows.medium,
-  },
-  tabText: {
-    fontSize: typography.xs,
-    fontWeight: '700',
-    color: colours.textMuted,
-    letterSpacing: 0.5,
-    lineHeight: 20,
-  },
-  tabTextActive: {
-    color: colours.textOnLight,
-  },
-
   // ── List ──────────────────────────────────────────────────────────────────
   list: {
     paddingBottom: TAB_BAR_CLEARANCE,
     backgroundColor: colours.backgroundLight,
-  },
-
-  ticketCardsContainer: {
-    paddingHorizontal: spacing.lg,
   },
 
   // ── State views ───────────────────────────────────────────────────────────
