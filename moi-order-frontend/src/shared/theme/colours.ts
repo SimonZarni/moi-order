@@ -16,7 +16,7 @@ export const colours = {
   dark:   '#1a2a29', // Deep Onyx
 
   // Page backgrounds
-  backgroundDark:      '#285350', // Dark teal (auth / profile / header)
+  backgroundDark:      '#1f3f3d', // Dark teal (auth / profile / header)
   backgroundDarkEnd:   '#1e3d3a', // Dark teal gradient end
   backgroundLight:     '#f8fafc', // Off-white (home / content areas)
 
