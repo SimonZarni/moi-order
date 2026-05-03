@@ -112,9 +112,14 @@ export const navData: NavItem[] = [
     permission: 'home_cards.manage',
   },
   {
+    title: 'Notifications',
+    path: '/notifications',
+    icon: icon('solar:bell-bing-bold-duotone'),
+  },
+  {
     title: 'Push Notifications',
     path: '/push-notifications',
-    icon: icon('solar:bell-bing-bold-duotone'),
+    icon: icon('solar:settings-bold-duotone'),
   },
   {
     title: 'Reviews',

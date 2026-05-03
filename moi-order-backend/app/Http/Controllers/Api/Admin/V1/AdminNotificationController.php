@@ -21,7 +21,7 @@ class AdminNotificationController extends Controller
         private readonly AdminNotificationService $notifications,
     ) {}
 
-    /** GET /api/admin/v1/notifications — last 20, max 7 days old */
+    /** GET /api/admin/v1/notifications — bell dropdown: last 20, max 7 days */
     public function index(Request $request): JsonResponse
     {
         $result = $this->notifications->listForAdmin($request->user());
@@ -29,6 +29,36 @@ class AdminNotificationController extends Controller
         return response()->json([
             'data' => AdminNotificationResource::collection($result['notifications']),
             'meta' => ['unread_count' => $result['unread_count']],
+        ]);
+    }
+
+    /** GET /api/admin/v1/notifications/all — full paginated list with optional type filter */
+    public function all(Request $request): JsonResponse
+    {
+        $request->validate([
+            'type'     => ['nullable', 'string', 'in:new_submission,new_ticket_order,new_payment'],
+            'page'     => ['nullable', 'integer', 'min:1'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+        ]);
+
+        $result = $this->notifications->paginateForAdmin(
+            admin:   $request->user(),
+            page:    (int) $request->query('page', '1'),
+            perPage: (int) $request->query('per_page', '20'),
+            type:    $request->query('type'),
+        );
+
+        $paginator = $result['notifications'];
+
+        return response()->json([
+            'data' => AdminNotificationResource::collection($paginator->items()),
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page'    => $paginator->lastPage(),
+                'per_page'     => $paginator->perPage(),
+                'total'        => $paginator->total(),
+                'unread_count' => $result['unread_count'],
+            ],
         ]);
     }
 

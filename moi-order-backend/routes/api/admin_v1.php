@@ -43,7 +43,8 @@ Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admi
 
 // ── Notifications (admin bell) ────────────────────────────────────────────────
 Route::prefix('notifications')->name('admin.notifications.')->group(function (): void {
-    Route::get('/', [AdminNotificationController::class, 'index'])->name('index');
+    Route::get('/',    [AdminNotificationController::class, 'index'])->name('index');
+    Route::get('/all', [AdminNotificationController::class, 'all'])->name('all');
     Route::put('/read-all', [AdminNotificationController::class, 'markAllRead'])->name('read-all');
     Route::patch('/{id}/read', [AdminNotificationController::class, 'markOneRead'])->name('read');
     Route::delete('/{id}', [AdminNotificationController::class, 'destroy'])->name('destroy');

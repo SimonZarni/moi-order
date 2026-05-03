@@ -285,6 +285,14 @@ export type AdminNotification = {
   time_ago: string;
 };
 
+export type AdminNotificationMeta = {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+  unread_count: number;
+};
+
 // ----------------------------------------------------------------------
 // Content (Ads & Notifications) — no backend API yet; kept for UI
 

@@ -53,6 +53,7 @@ export const MerchantsPage = lazy(() => import('src/pages/merchants'));
 export const KycDetailPage = lazy(() => import('src/pages/kyc-detail'));
 export const MerchantCreatePage = lazy(() => import('src/pages/merchant-create'));
 export const PushNotificationsPage = lazy(() => import('src/pages/push-notifications'));
+export const NotificationsPage = lazy(() => import('src/pages/notifications'));
 
 const renderFallback = () => (
   <Box sx={{ display: 'flex', flex: '1 1 auto', alignItems: 'center', justifyContent: 'center' }}>
@@ -143,6 +144,7 @@ export const routesSection: RouteObject[] = [
 
       // Push Notifications — open to all admins
       { path: 'push-notifications', element: <PushNotificationsPage /> },
+      { path: 'notifications', element: <NotificationsPage /> },
 
       { path: 'account/profile', element: <ProfilePage /> },
       { path: 'account/settings', element: <SettingsPage /> },
