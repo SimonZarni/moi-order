@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Admin\V1;
 
+use App\Contracts\FileStorageInterface;
 use App\Enums\DocumentType;
 use App\Events\UserNotificationReceived;
 use App\Http\Controllers\Controller;
@@ -18,17 +19,22 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 /**
- * Principle: SRP — admin CRUD over a user's documents only.
- * Security: only is_admin_created records may be deleted; user-uploaded files are read-only.
+ * Principle: SRP — admin CRUD over a user's documents.
+ * Security:
+ *   - destroy(): admin-created records only; user-uploaded files are user-owned.
+ *   - update(): admin may edit metadata on ANY document (fix OCR errors).
+ *   - file uploads go through FileStorageInterface — never direct Storage calls.
  */
 class AdminUserDocumentController extends Controller
 {
+    public function __construct(private readonly FileStorageInterface $storage) {}
+
     /** GET /api/admin/v1/users/{user}/documents */
     public function index(User $user): AnonymousResourceCollection
     {
-        $documents = $user->documents()->latest()->get();
-
-        return AdminUserDocumentResource::collection($documents);
+        return AdminUserDocumentResource::collection(
+            $user->documents()->latest()->get()
+        );
     }
 
     /** POST /api/admin/v1/users/{user}/documents */
@@ -36,44 +42,52 @@ class AdminUserDocumentController extends Controller
     {
         $validated = $request->validate([
             'type'               => ['required', 'string', Rule::enum(DocumentType::class)],
-            'subtype'            => ['nullable', 'string', 'max:100'],
+            'subtype'            => ['required', 'string', 'max:100'],
             'expiry_date'        => ['nullable', 'date'],
             'extension_date'     => ['nullable', 'date'],
             'is_valid_type'      => ['nullable', 'boolean'],
             'validation_message' => ['nullable', 'string', 'max:500'],
+            'extracted_data'     => ['nullable', 'array'],
+            'extracted_data.*'   => ['nullable', 'string', 'max:500'],
+            'image'              => ['nullable', 'image', 'max:10240'],
         ]);
 
-        $document = DB::transaction(function () use ($validated, $user): Document {
+        $filePath = null;
+        if ($request->hasFile('image')) {
+            $filePath = $this->storage->store(
+                $request->file('image'),
+                'documents/' . $user->id,
+                ['image/jpeg', 'image/png', 'image/webp', 'image/heic'],
+            );
+        }
+
+        $document = DB::transaction(function () use ($validated, $user, $filePath): Document {
             return $user->documents()->create([
                 'type'               => $validated['type'],
-                'subtype'            => $validated['subtype'] ?? null,
+                'subtype'            => $validated['subtype'],
                 'expiry_date'        => $validated['expiry_date'] ?? null,
                 'extension_date'     => $validated['extension_date'] ?? null,
                 'is_valid_type'      => $validated['is_valid_type'] ?? true,
                 'validation_message' => $validated['validation_message'] ?? null,
+                'extracted_data'     => $validated['extracted_data'] ?? null,
+                'file_path'          => $filePath,
                 'is_admin_created'   => true,
-                'file_path'          => null,
             ]);
         });
 
         DB::afterCommit(function () use ($user, $document): void {
-            $typeLabel = $document->type->label();
-            $user->notify(new AdminDocumentActionNotification('added', $typeLabel));
+            $user->notify(new AdminDocumentActionNotification('added', $document->type->label()));
             event(new UserNotificationReceived($user));
         });
 
         return response()->json(['data' => new AdminUserDocumentResource($document)], 201);
     }
 
-    /** PATCH /api/admin/v1/users/{user}/documents/{document} */
+    /** PATCH /api/admin/v1/users/{user}/documents/{document} — edit any doc's metadata */
     public function update(Request $request, User $user, Document $document): JsonResponse
     {
         if ($document->user_id !== $user->id) {
             abort(404);
-        }
-
-        if (! $document->is_admin_created) {
-            abort(403, 'Cannot edit user-uploaded documents.');
         }
 
         $validated = $request->validate([
@@ -83,16 +97,46 @@ class AdminUserDocumentController extends Controller
             'extension_date'     => ['nullable', 'date'],
             'is_valid_type'      => ['nullable', 'boolean'],
             'validation_message' => ['nullable', 'string', 'max:500'],
+            'extracted_data'     => ['nullable', 'array'],
+            'extracted_data.*'   => ['nullable', 'string', 'max:500'],
+            'image'              => ['nullable', 'image', 'max:10240'],
         ]);
 
-        DB::transaction(function () use ($validated, $document): void {
-            $document->update($validated);
+        $filePath = $document->file_path;
+        if ($request->hasFile('image')) {
+            $filePath = $this->storage->store(
+                $request->file('image'),
+                'documents/' . $user->id,
+                ['image/jpeg', 'image/png', 'image/webp', 'image/heic'],
+            );
+        }
+
+        DB::transaction(function () use ($validated, $document, $filePath): void {
+            $updates = array_filter([
+                'type'               => $validated['type']               ?? null,
+                'subtype'            => $validated['subtype']            ?? null,
+                'expiry_date'        => $validated['expiry_date']        ?? null,
+                'extension_date'     => $validated['extension_date']     ?? null,
+                'is_valid_type'      => $validated['is_valid_type']      ?? null,
+                'validation_message' => $validated['validation_message'] ?? null,
+                'file_path'          => $filePath,
+            ], fn ($v) => $v !== null);
+
+            if (array_key_exists('extracted_data', $validated)) {
+                // Merge so existing OCR keys not included in the patch are preserved.
+                $updates['extracted_data'] = array_merge(
+                    $document->extracted_data ?? [],
+                    $validated['extracted_data'] ?? [],
+                );
+            }
+
+            $document->update($updates);
         });
 
         return response()->json(['data' => new AdminUserDocumentResource($document->fresh())]);
     }
 
-    /** DELETE /api/admin/v1/users/{user}/documents/{document} */
+    /** DELETE /api/admin/v1/users/{user}/documents/{document} — admin-created records only */
     public function destroy(User $user, Document $document): JsonResponse
     {
         if ($document->user_id !== $user->id) {

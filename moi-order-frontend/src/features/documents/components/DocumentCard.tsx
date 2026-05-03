@@ -94,14 +94,23 @@ export function DocumentCard({ document: doc, onDelete, isDeleting }: Props): Re
 
   return (
     <View style={styles.card}>
-      <ImageViewing
-        images={[{ uri: doc.file_url }]}
-        imageIndex={0}
-        visible={viewerOpen}
-        onRequestClose={() => setViewerOpen(false)}
-        swipeToCloseEnabled
-        doubleTapToZoomEnabled
-      />
+      {doc.file_url !== null && (
+        <ImageViewing
+          images={[{ uri: doc.file_url }]}
+          imageIndex={0}
+          visible={viewerOpen}
+          onRequestClose={() => setViewerOpen(false)}
+          swipeToCloseEnabled
+          doubleTapToZoomEnabled
+        />
+      )}
+
+      {doc.is_admin_created && (
+        <View style={styles.adminBanner}>
+          <Ionicons name="shield-checkmark-outline" size={13} color="#1d4ed8" />
+          <Text style={styles.adminBannerText}>Added by Admin</Text>
+        </View>
+      )}
 
       {!doc.is_valid_type && (
         <View style={styles.warningBanner}>
@@ -118,12 +127,18 @@ export function DocumentCard({ document: doc, onDelete, isDeleting }: Props): Re
       )}
 
       <View style={styles.cardBody}>
-        <Pressable onPress={() => setViewerOpen(true)} accessibilityLabel="View document image" accessibilityRole="button">
-          <Image source={{ uri: doc.file_url }} style={styles.thumbnail} contentFit="cover" transition={200} />
-          <View style={styles.thumbnailOverlay}>
-            <Ionicons name="expand-outline" size={14} color="#fff" />
+        {doc.file_url !== null ? (
+          <Pressable onPress={() => setViewerOpen(true)} accessibilityLabel="View document image" accessibilityRole="button">
+            <Image source={{ uri: doc.file_url }} style={styles.thumbnail} contentFit="cover" transition={200} />
+            <View style={styles.thumbnailOverlay}>
+              <Ionicons name="expand-outline" size={14} color="#fff" />
+            </View>
+          </Pressable>
+        ) : (
+          <View style={styles.thumbnailPlaceholder}>
+            <Ionicons name="document-outline" size={24} color={colours.textMuted} />
           </View>
-        </Pressable>
+        )}
 
         <View style={styles.cardInfo}>
           <View style={styles.cardHeader}>

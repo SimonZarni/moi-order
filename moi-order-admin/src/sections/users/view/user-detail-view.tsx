@@ -56,23 +56,50 @@ const DOCUMENT_TYPES = [
 
 const DOC_CATEGORIES: { value: string; label: string }[] = DOCUMENT_TYPES;
 
+// ── Extracted data field config per type ────────────────────────────────────
+
+const EXTRACTED_FIELDS: Record<string, { key: string; label: string }[]> = {
+  passport: [
+    { key: 'full_name',       label: 'Full name' },
+    { key: 'passport_number', label: 'Passport number' },
+    { key: 'date_of_birth',   label: 'Date of birth (YYYY-MM-DD)' },
+    { key: 'issue_date',      label: 'Issue date (YYYY-MM-DD)' },
+    { key: 'country_code',    label: 'Country code' },
+  ],
+  ninety_day_report: [
+    { key: 'full_name',             label: 'Full name' },
+    { key: 'previous_report_date',  label: 'Report date (YYYY-MM-DD)' },
+    { key: 'next_report_date',      label: 'Next due date (YYYY-MM-DD)' },
+  ],
+  other: [
+    { key: 'full_name', label: 'Full name' },
+  ],
+};
+
 // ── Add / Edit document dialog ───────────────────────────────────────────────
 
 interface DocDialogProps {
   open: boolean;
-  initial?: Partial<CreateDocumentPayload & { type: string }>;
-  title: string;
+  initial?: UserDocument;
+  dialogTitle: string;
+  isNew: boolean;
   onClose: () => void;
   onSubmit: (payload: CreateDocumentPayload) => void;
   loading: boolean;
 }
 
-function DocDialog({ open, initial, title, onClose, onSubmit, loading }: DocDialogProps) {
-  const [type, setType]         = useState(initial?.type ?? 'passport');
-  const [subtype, setSubtype]   = useState(initial?.subtype ?? '');
-  const [expiry, setExpiry]     = useState(initial?.expiry_date ?? '');
+function DocDialog({ open, initial, dialogTitle, isNew, onClose, onSubmit, loading }: DocDialogProps) {
+  const [type, setType]           = useState(initial?.type ?? 'passport');
+  const [subtype, setSubtype]     = useState(initial?.subtype ?? '');
+  const [expiry, setExpiry]       = useState(initial?.expiry_date ?? '');
   const [extension, setExtension] = useState(initial?.extension_date ?? '');
-  const [note, setNote]         = useState(initial?.validation_message ?? '');
+  const [note, setNote]           = useState(initial?.validation_message ?? '');
+  const [file, setFile]           = useState<File | null>(null);
+  const [extracted, setExtracted] = useState<Record<string, string>>(
+    Object.fromEntries(
+      Object.entries(initial?.extracted_data ?? {}).map(([k, v]) => [k, v ?? ''])
+    )
+  );
 
   useEffect(() => {
     if (open) {
@@ -81,58 +108,136 @@ function DocDialog({ open, initial, title, onClose, onSubmit, loading }: DocDial
       setExpiry(initial?.expiry_date ?? '');
       setExtension(initial?.extension_date ?? '');
       setNote(initial?.validation_message ?? '');
+      setFile(null);
+      setExtracted(
+        Object.fromEntries(
+          Object.entries(initial?.extracted_data ?? {}).map(([k, v]) => [k, v ?? ''])
+        )
+      );
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  const fields = EXTRACTED_FIELDS[type] ?? EXTRACTED_FIELDS.other;
+
   const handleSubmit = () => {
+    const extractedData: Record<string, string> = {};
+    fields.forEach(({ key }) => { if (extracted[key]) extractedData[key] = extracted[key]; });
+    // Also preserve any existing keys not in the field config (from OCR)
+    Object.entries(extracted).forEach(([k, v]) => {
+      if (v && !extractedData[k]) extractedData[k] = v;
+    });
     onSubmit({
       type,
-      subtype:            subtype    || null,
+      subtype,
       expiry_date:        expiry     || null,
       extension_date:     extension  || null,
       validation_message: note       || null,
       is_valid_type:      true,
+      extracted_data:     extractedData,
+      image:              file,
     });
   };
 
+  const canSave = subtype.trim().length > 0;
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{title}</DialogTitle>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '16px !important' }}>
-        <FormControl fullWidth size="small">
-          <InputLabel>Type</InputLabel>
-          <Select value={type} label="Type" onChange={(e: SelectChangeEvent) => setType(e.target.value)}>
-            {DOCUMENT_TYPES.map((t) => (
-              <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+
+        {/* Type — only editable on new records */}
+        {isNew && (
+          <FormControl fullWidth size="small">
+            <InputLabel>Type</InputLabel>
+            <Select value={type} label="Type" onChange={(e: SelectChangeEvent) => setType(e.target.value)}>
+              {DOCUMENT_TYPES.map((t) => (
+                <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+
+        {/* Title — required */}
         <TextField
-          label="Subtype (optional)"
+          label="Title *"
           size="small"
           value={subtype}
           onChange={(e) => setSubtype(e.target.value)}
-          placeholder="e.g. Tourist visa, TM30"
+          placeholder="e.g. Bio Page, Visa Stamp, TM30"
+          helperText="This label appears on the document card"
+          required
         />
+
+        {/* File upload */}
+        <Box>
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+            {isNew ? 'Upload image (optional)' : 'Replace image (optional)'}
+          </Typography>
+          <Button
+            variant="outlined"
+            size="small"
+            component="label"
+            startIcon={<Iconify icon="solar:share-bold" width={16} />}
+          >
+            {file ? file.name : 'Choose file'}
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+          </Button>
+          {file && (
+            <Box
+              component="img"
+              src={URL.createObjectURL(file)}
+              alt="preview"
+              sx={{ mt: 1, maxHeight: 120, borderRadius: 1, display: 'block', objectFit: 'contain' }}
+            />
+          )}
+        </Box>
+
+        <Divider />
+
+        {/* Dates */}
+        <Stack direction="row" spacing={1}>
+          <TextField
+            label="Expiry date"
+            type="date"
+            size="small"
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            value={expiry}
+            onChange={(e) => setExpiry(e.target.value)}
+          />
+          <TextField
+            label="Extension / next report"
+            type="date"
+            size="small"
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            value={extension}
+            onChange={(e) => setExtension(e.target.value)}
+          />
+        </Stack>
+
+        {/* Extracted data fields */}
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+          Document data (editable — correct OCR mistakes here)
+        </Typography>
+        {fields.map(({ key, label }) => (
+          <TextField
+            key={key}
+            label={label}
+            size="small"
+            value={extracted[key] ?? ''}
+            onChange={(e) => setExtracted((prev) => ({ ...prev, [key]: e.target.value }))}
+          />
+        ))}
+
         <TextField
-          label="Expiry date"
-          type="date"
-          size="small"
-          InputLabelProps={{ shrink: true }}
-          value={expiry}
-          onChange={(e) => setExpiry(e.target.value)}
-        />
-        <TextField
-          label="Extension / next report date (optional)"
-          type="date"
-          size="small"
-          InputLabelProps={{ shrink: true }}
-          value={extension}
-          onChange={(e) => setExtension(e.target.value)}
-        />
-        <TextField
-          label="Note (optional)"
+          label="Admin note (optional)"
           size="small"
           multiline
           rows={2}
@@ -142,7 +247,7 @@ function DocDialog({ open, initial, title, onClose, onSubmit, loading }: DocDial
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSubmit} variant="contained" disabled={loading}>
+        <Button onClick={handleSubmit} variant="contained" disabled={loading || !canSave}>
           {loading ? 'Saving…' : 'Save'}
         </Button>
       </DialogActions>
@@ -268,18 +373,16 @@ function DocSection({ label, docs, canManage, onDelete, onEdit, onPreview }: Doc
                   </Typography>
                 </Box>
 
-                {/* Actions (admin-created only for edit/delete) */}
+                {/* Actions — edit all docs, delete admin-created only */}
                 {canManage && (
                   <Stack direction="row" spacing={0.5} sx={{ flexShrink: 0 }}>
+                    <IconButton size="small" onClick={() => onEdit(doc)} title="Edit">
+                      <Iconify icon="solar:pen-bold" width={16} />
+                    </IconButton>
                     {doc.is_admin_created && (
-                      <>
-                        <IconButton size="small" onClick={() => onEdit(doc)} title="Edit">
-                          <Iconify icon="solar:pen-bold" width={16} />
-                        </IconButton>
-                        <IconButton size="small" color="error" onClick={() => onDelete(doc)} title="Delete">
-                          <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                        </IconButton>
-                      </>
+                      <IconButton size="small" color="error" onClick={() => onDelete(doc)} title="Delete">
+                        <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                      </IconButton>
                     )}
                   </Stack>
                 )}
@@ -681,7 +784,8 @@ export function UserDetailView() {
       {/* Add doc dialog */}
       <DocDialog
         open={addDocOpen}
-        title="Add Document Record"
+        dialogTitle="Add Document Record"
+        isNew
         onClose={() => setAddDocOpen(false)}
         onSubmit={handleAddDoc}
         loading={addDocLoading}
@@ -691,14 +795,9 @@ export function UserDetailView() {
       {editDoc && (
         <DocDialog
           open
-          title="Edit Document Record"
-          initial={{
-            type:               editDoc.type,
-            subtype:            editDoc.subtype,
-            expiry_date:        editDoc.expiry_date,
-            extension_date:     editDoc.extension_date,
-            validation_message: editDoc.validation_message,
-          }}
+          dialogTitle="Edit Document Record"
+          isNew={false}
+          initial={editDoc}
           onClose={() => setEditDoc(null)}
           onSubmit={handleEditDoc}
           loading={editDocLoading}

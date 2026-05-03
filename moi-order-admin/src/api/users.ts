@@ -80,12 +80,31 @@ export type UserDetailData = UserData & {
 
 export type CreateDocumentPayload = {
   type: string;
-  subtype?: string | null;
+  subtype: string;
   expiry_date?: string | null;
   extension_date?: string | null;
   is_valid_type?: boolean;
   validation_message?: string | null;
+  extracted_data?: Record<string, string>;
+  image?: File | null;
 };
+
+function buildDocFormData(payload: CreateDocumentPayload): FormData {
+  const fd = new FormData();
+  fd.append('type', payload.type);
+  fd.append('subtype', payload.subtype);
+  if (payload.expiry_date)        fd.append('expiry_date',        payload.expiry_date);
+  if (payload.extension_date)     fd.append('extension_date',     payload.extension_date);
+  if (payload.validation_message) fd.append('validation_message', payload.validation_message);
+  fd.append('is_valid_type', String(payload.is_valid_type ?? true));
+  if (payload.extracted_data) {
+    Object.entries(payload.extracted_data).forEach(([k, v]) => {
+      if (v) fd.append(`extracted_data[${k}]`, v);
+    });
+  }
+  if (payload.image) fd.append('image', payload.image);
+  return fd;
+}
 
 type Meta = { current_page: number; last_page: number; per_page: number; total: number };
 
@@ -112,10 +131,19 @@ export const usersApi = {
   documents: {
     list: (userId: number | string) =>
       apiClient.get<{ data: UserDocument[] }>(`/users/${userId}/documents`).then((r) => r.data.data),
-    create: (userId: number | string, payload: CreateDocumentPayload) =>
-      apiClient.post<{ data: UserDocument }>(`/users/${userId}/documents`, payload).then((r) => r.data.data),
-    update: (userId: number | string, documentId: number | string, payload: CreateDocumentPayload) =>
-      apiClient.patch<{ data: UserDocument }>(`/users/${userId}/documents/${documentId}`, payload).then((r) => r.data.data),
+    create: (userId: number | string, payload: CreateDocumentPayload) => {
+      const fd = buildDocFormData(payload);
+      return apiClient.post<{ data: UserDocument }>(`/users/${userId}/documents`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).then((r) => r.data.data);
+    },
+    update: (userId: number | string, documentId: number | string, payload: CreateDocumentPayload) => {
+      const fd = buildDocFormData(payload);
+      fd.append('_method', 'PATCH');
+      return apiClient.post<{ data: UserDocument }>(`/users/${userId}/documents/${documentId}`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).then((r) => r.data.data);
+    },
     delete: (userId: number | string, documentId: number | string) =>
       apiClient.delete(`/users/${userId}/documents/${documentId}`),
   },

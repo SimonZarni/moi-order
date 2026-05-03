@@ -225,12 +225,13 @@ export interface Document {
   id: number;
   type: import('./enums').DocumentType;
   subtype: string | null;
-  file_url: string;
+  file_url: string | null;
   extracted_data: Record<string, string | null>;
   expiry_date: string | null;    // YYYY-MM-DD
   extension_date: string | null; // YYYY-MM-DD — next report date for 90-day slips
   is_valid_type: boolean;
   validation_message: string | null;
+  is_admin_created: boolean;
   created_at: string;
   updated_at: string;
 }

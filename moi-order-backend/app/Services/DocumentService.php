@@ -71,7 +71,9 @@ class DocumentService
             ->findOrFail($documentId);
 
         DB::transaction(function () use ($document): void {
-            $this->storage->delete($document->file_path);
+            if ($document->file_path) {
+                $this->storage->delete($document->file_path);
+            }
             $document->delete();
         });
     }

@@ -26,6 +26,7 @@ class DocumentResource extends JsonResource
             'extension_date'     => $this->extension_date?->format('Y-m-d'),
             'is_valid_type'      => $this->is_valid_type,
             'validation_message' => $this->validation_message,
+            'is_admin_created'   => $this->is_admin_created,
             'created_at'         => $this->created_at->toISOString(),
             'updated_at'         => $this->updated_at->toISOString(),
         ];
