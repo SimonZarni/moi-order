@@ -8,6 +8,8 @@ use App\Contracts\DocumentOcrInterface;
 use App\Contracts\FileStorageInterface;
 use App\Contracts\PaymentGatewayInterface;
 use App\Contracts\PushNotificationInterface;
+use App\Contracts\WebPushInterface;
+use App\Services\WebPushService;
 use App\Services\ClaudeOcrService;
 use App\Services\DocumentService;
 use App\Services\ExpoPushNotificationService;
@@ -131,6 +133,9 @@ class AppServiceProvider extends ServiceProvider
 
         // DIP: bind Expo push adapter. To switch to FCM direct, swap ExpoPushNotificationService.
         $this->app->bind(PushNotificationInterface::class, ExpoPushNotificationService::class);
+
+        // DIP: bind VAPID browser push adapter. To switch provider, swap WebPushService here.
+        $this->app->bind(WebPushInterface::class, WebPushService::class);
 
         // DIP: bind Stripe adapter to the payment gateway contract.
         // To switch provider: swap StripePaymentService for an OmisePaymentService here.

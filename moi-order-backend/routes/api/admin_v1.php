@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\Admin\V1\AdminTicketController;
 use App\Http\Controllers\Api\Admin\V1\AdminTicketOrderController;
 use App\Http\Controllers\Api\Admin\V1\AdminTicketVariantController;
 use App\Http\Controllers\Api\Admin\V1\AdminUserController;
+use App\Http\Controllers\Api\Admin\V1\AdminPushSubscriptionController;
 use App\Http\Controllers\Api\Admin\V1\AdminUserDocumentController;
 use Illuminate\Support\Facades\Route;
 
@@ -49,6 +50,12 @@ Route::prefix('notifications')->name('admin.notifications.')->group(function ():
     Route::patch('/{id}/read', [AdminNotificationController::class, 'markOneRead'])->name('read');
     Route::delete('/{id}', [AdminNotificationController::class, 'destroy'])->name('destroy');
     Route::delete('/', [AdminNotificationController::class, 'destroyAll'])->name('destroy-all');
+});
+
+// ── Browser Push Subscriptions (admin web-push opt-in) ───────────────────────
+Route::prefix('push-subscriptions')->name('admin.push-subscriptions.')->group(function (): void {
+    Route::post('/',   [AdminPushSubscriptionController::class, 'store'])->name('store');
+    Route::delete('/', [AdminPushSubscriptionController::class, 'destroy'])->name('destroy');
 });
 
 // ── Custom Notifications (push broadcasts to users) ───────────────────────────

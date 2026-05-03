@@ -1,9 +1,10 @@
 import type { AppUser } from 'src/types';
 
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { useState, useEffect, useContext, useCallback, createContext } from 'react';
 
 import { authApi } from 'src/api/auth';
 import { TOKEN_KEY } from 'src/api/client';
+import { registerPushSubscription, unregisterPushSubscription } from 'src/lib/web-push';
 
 // ----------------------------------------------------------------------
 
@@ -37,7 +38,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     authApi
       .me()
-      .then(setAdmin)
+      .then((user) => {
+        setAdmin(user);
+        registerPushSubscription(); // restore subscription on page reload
+      })
       .catch(() => {})
       .finally(() => setIsLoading(false));
   }, []);
@@ -46,9 +50,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { user, token } = await authApi.login({ email, password });
     localStorage.setItem(TOKEN_KEY, token);
     setAdmin(user);
+    registerPushSubscription(); // fire-and-forget — never blocks login
   }, []);
 
   const logout = useCallback(async () => {
+    await unregisterPushSubscription(); // DELETE from backend before token is cleared
     await authApi.logout().catch(() => {});
     localStorage.removeItem(TOKEN_KEY);
     setAdmin(null);
