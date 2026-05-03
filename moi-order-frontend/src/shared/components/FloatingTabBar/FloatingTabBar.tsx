@@ -15,7 +15,7 @@ import { useFloatingTabBarPill } from './useFloatingTabBarPill';
 import { styles, TAB_BAR_BOTTOM_OFFSET } from './FloatingTabBar.styles';
 
 // Non-tab screens that sit above Home in the root stack but keep Home tab highlighted.
-const HOME_CHILD_ROUTES: (keyof RootStackParamList)[] = ['NinetyDayReport', 'OtherServices', 'EmbassyServices'];
+const HOME_CHILD_ROUTES: (keyof RootStackParamList)[] = ['NinetyDayReport', 'OtherServices', 'EmbassyServices', 'Places'];
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 

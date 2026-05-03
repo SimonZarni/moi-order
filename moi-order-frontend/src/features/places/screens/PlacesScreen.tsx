@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocale } from '@/shared/hooks/useLocale';
 
 import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
+import { StandaloneFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { PlaceCard } from '@/features/places/components/PlaceCard';
@@ -107,145 +108,163 @@ export function PlacesScreen(): React.JSX.Element {
 
   if (activeTab === 'places' && isPlacesLoading) {
     return (
-      <SafeAreaView style={styles.root} edges={['top']}>
-        <StickyBackButton onPress={handleBack} label="Back" />
-        {hero}
-        {stickySection}
-        <ScrollView showsVerticalScrollIndicator={false} scrollEnabled={false} contentContainerStyle={styles.list}>
-          {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-            <PlaceCardSkeleton key={i} />
-          ))}
-        </ScrollView>
-      </SafeAreaView>
+      <>
+        <SafeAreaView style={styles.root} edges={['top']}>
+          <StickyBackButton onPress={handleBack} label="Back" />
+          {hero}
+          {stickySection}
+          <ScrollView showsVerticalScrollIndicator={false} scrollEnabled={false} contentContainerStyle={styles.list}>
+            {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+              <PlaceCardSkeleton key={i} />
+            ))}
+          </ScrollView>
+        </SafeAreaView>
+        <StandaloneFloatingTabBar />
+      </>
     );
   }
 
   if (activeTab === 'tickets' && isTicketsLoading) {
     return (
-      <SafeAreaView style={styles.root} edges={['top']}>
-        <StickyBackButton onPress={handleBack} label="Back" />
-        {hero}
-        {stickySection}
-        <ScrollView showsVerticalScrollIndicator={false} scrollEnabled={false} contentContainerStyle={styles.list}>
-          <View style={styles.ticketCardsContainer}>
-            {Array.from({ length: TICKET_SKELETON_COUNT }).map((_, i) => (
-              <TicketCardSkeleton key={i} />
-            ))}
-          </View>
-        </ScrollView>
-      </SafeAreaView>
+      <>
+        <SafeAreaView style={styles.root} edges={['top']}>
+          <StickyBackButton onPress={handleBack} label="Back" />
+          {hero}
+          {stickySection}
+          <ScrollView showsVerticalScrollIndicator={false} scrollEnabled={false} contentContainerStyle={styles.list}>
+            <View style={styles.ticketCardsContainer}>
+              {Array.from({ length: TICKET_SKELETON_COUNT }).map((_, i) => (
+                <TicketCardSkeleton key={i} />
+              ))}
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+        <StandaloneFloatingTabBar />
+      </>
     );
   }
 
   if (activeTab === 'places' && isPlacesError) {
     return (
-      <SafeAreaView style={styles.root} edges={['top']}>
-        <StickyBackButton onPress={handleBack} label="Back" />
-        {hero}
-        {stickySection}
-        <View style={styles.stateBox}>
-          <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
-          <Text style={styles.stateTitle}>Could not load places</Text>
-          <Text style={styles.stateSubtitle}>Pull down to retry</Text>
-        </View>
-      </SafeAreaView>
+      <>
+        <SafeAreaView style={styles.root} edges={['top']}>
+          <StickyBackButton onPress={handleBack} label="Back" />
+          {hero}
+          {stickySection}
+          <View style={styles.stateBox}>
+            <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
+            <Text style={styles.stateTitle}>Could not load places</Text>
+            <Text style={styles.stateSubtitle}>Pull down to retry</Text>
+          </View>
+        </SafeAreaView>
+        <StandaloneFloatingTabBar />
+      </>
     );
   }
 
   if (activeTab === 'tickets' && isTicketsError) {
     return (
-      <SafeAreaView style={styles.root} edges={['top']}>
-        <StickyBackButton onPress={handleBack} label="Back" />
-        {hero}
-        {stickySection}
-        <View style={styles.stateBox}>
-          <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
-          <Text style={styles.stateTitle}>Could not load tickets</Text>
-          <Text style={styles.stateSubtitle}>Pull down to retry</Text>
-        </View>
-      </SafeAreaView>
+      <>
+        <SafeAreaView style={styles.root} edges={['top']}>
+          <StickyBackButton onPress={handleBack} label="Back" />
+          {hero}
+          {stickySection}
+          <View style={styles.stateBox}>
+            <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
+            <Text style={styles.stateTitle}>Could not load tickets</Text>
+            <Text style={styles.stateSubtitle}>Pull down to retry</Text>
+          </View>
+        </SafeAreaView>
+        <StandaloneFloatingTabBar />
+      </>
     );
   }
 
   if (activeTab === 'places') {
     return (
+      <>
+        <SafeAreaView style={styles.root} edges={['top']}>
+          <StickyBackButton onPress={handleBack} label="Back" />
+          {hero}
+          {stickySection}
+          <FlatList
+            ref={placesListRef}
+            data={filteredPlaces}
+            keyExtractor={(item: Place) => String(item.id)}
+            renderItem={({ item }) => <PlaceCard place={item} onPress={handlePlacePress} />}
+            ListEmptyComponent={
+              <View style={styles.stateBox}>
+                <Ionicons name="search" size={36} color={colours.textMuted} style={styles.stateIcon} />
+                <Text style={styles.stateTitle}>No places found</Text>
+                <Text style={styles.stateSubtitle}>Try a different search or category</Text>
+              </View>
+            }
+            onEndReached={handlePlacesEndReached}
+            onEndReachedThreshold={0.4}
+            onRefresh={handlePlacesRefresh}
+            refreshing={isPlacesRefreshing}
+            contentContainerStyle={styles.list}
+            ListFooterComponent={
+              isPlacesFetchingNextPage
+                ? <ActivityIndicator style={styles.listFooter} color={styles.spinner.color} />
+                : null
+            }
+            initialNumToRender={8}
+            maxToRenderPerBatch={8}
+            windowSize={5}
+            removeClippedSubviews={true}
+            accessibilityRole="list"
+            showsVerticalScrollIndicator={false}
+          />
+        </SafeAreaView>
+        <StandaloneFloatingTabBar />
+      </>
+    );
+  }
+
+  return (
+    <>
       <SafeAreaView style={styles.root} edges={['top']}>
         <StickyBackButton onPress={handleBack} label="Back" />
         {hero}
         {stickySection}
         <FlatList
-          ref={placesListRef}
-          data={filteredPlaces}
-          keyExtractor={(item: Place) => String(item.id)}
-          renderItem={({ item }) => <PlaceCard place={item} onPress={handlePlacePress} />}
+          ref={ticketsListRef}
+          data={filteredTickets}
+          keyExtractor={(item: Ticket) => String(item.id)}
+          renderItem={({ item }) => (
+            <View style={styles.ticketCardsContainer}>
+              <TicketCard item={item} onPress={handleTicketPress} />
+            </View>
+          )}
           ListEmptyComponent={
             <View style={styles.stateBox}>
-              <Ionicons name="search" size={36} color={colours.textMuted} style={styles.stateIcon} />
-              <Text style={styles.stateTitle}>No places found</Text>
-              <Text style={styles.stateSubtitle}>Try a different search or category</Text>
+              <Ionicons name="pricetag-outline" size={36} color={colours.textMuted} style={styles.stateIcon} />
+              <Text style={styles.stateTitle}>No tickets found</Text>
+              <Text style={styles.stateSubtitle}>
+                {ticketsQuery.length > 0 ? 'Try a different search term' : 'Check back later for attractions'}
+              </Text>
             </View>
           }
-          onEndReached={handlePlacesEndReached}
+          onEndReached={handleTicketsEndReached}
           onEndReachedThreshold={0.4}
-          onRefresh={handlePlacesRefresh}
-          refreshing={isPlacesRefreshing}
+          onRefresh={handleTicketsRefresh}
+          refreshing={isTicketsRefreshing}
           contentContainerStyle={styles.list}
           ListFooterComponent={
-            isPlacesFetchingNextPage
+            isTicketsFetchingNextPage
               ? <ActivityIndicator style={styles.listFooter} color={styles.spinner.color} />
               : null
           }
-          initialNumToRender={8}
-          maxToRenderPerBatch={8}
+          initialNumToRender={6}
+          maxToRenderPerBatch={6}
           windowSize={5}
           removeClippedSubviews={true}
           accessibilityRole="list"
           showsVerticalScrollIndicator={false}
         />
       </SafeAreaView>
-    );
-  }
-
-  return (
-    <SafeAreaView style={styles.root} edges={['top']}>
-      <StickyBackButton onPress={handleBack} label="Back" />
-      {hero}
-      {stickySection}
-      <FlatList
-        ref={ticketsListRef}
-        data={filteredTickets}
-        keyExtractor={(item: Ticket) => String(item.id)}
-        renderItem={({ item }) => (
-          <View style={styles.ticketCardsContainer}>
-            <TicketCard item={item} onPress={handleTicketPress} />
-          </View>
-        )}
-        ListEmptyComponent={
-          <View style={styles.stateBox}>
-            <Ionicons name="pricetag-outline" size={36} color={colours.textMuted} style={styles.stateIcon} />
-            <Text style={styles.stateTitle}>No tickets found</Text>
-            <Text style={styles.stateSubtitle}>
-              {ticketsQuery.length > 0 ? 'Try a different search term' : 'Check back later for attractions'}
-            </Text>
-          </View>
-        }
-        onEndReached={handleTicketsEndReached}
-        onEndReachedThreshold={0.4}
-        onRefresh={handleTicketsRefresh}
-        refreshing={isTicketsRefreshing}
-        contentContainerStyle={styles.list}
-        ListFooterComponent={
-          isTicketsFetchingNextPage
-            ? <ActivityIndicator style={styles.listFooter} color={styles.spinner.color} />
-            : null
-        }
-        initialNumToRender={6}
-        maxToRenderPerBatch={6}
-        windowSize={5}
-        removeClippedSubviews={true}
-        accessibilityRole="list"
-        showsVerticalScrollIndicator={false}
-      />
-    </SafeAreaView>
+      <StandaloneFloatingTabBar />
+    </>
   );
 }

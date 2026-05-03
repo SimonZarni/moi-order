@@ -192,7 +192,7 @@ export function usePlacesScreen(): UsePlacesScreenResult {
   );
 
   const handleBack = useCallback((): void => {
-    navigation.navigate('Home');
+    navigation.goBack();
   }, [navigation]);
 
   return {

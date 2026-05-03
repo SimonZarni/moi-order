@@ -141,6 +141,7 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="EmbassyVisaRecommendationForm" component={EmbassyVisaRecommendationFormScreen} />
       <Stack.Screen name="TestServiceForm"               component={TestServiceFormScreen} />
       <Stack.Screen name="GenericServiceForm"            component={GenericServiceFormScreen} />
+      <Stack.Screen name="Places"                          component={PlacesScreen} />
       <Stack.Screen name="PlaceDetail"                   component={PlaceDetailScreen} />
       <Stack.Screen name="Tickets"                       component={TicketsScreen} />
       <Stack.Screen name="TicketDetail"                  component={TicketDetailScreen} />
