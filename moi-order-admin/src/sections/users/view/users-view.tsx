@@ -34,6 +34,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import { useRouter } from 'src/routes/hooks';
 
+import { usePresenceOnlineUsers } from 'src/hooks/usePresenceOnlineUsers';
+
 import { fDate, fDateTime } from 'src/utils/format-time';
 
 import { useAuth } from 'src/context/auth-context';
@@ -117,6 +119,7 @@ export function UsersView() {
   const router    = useRouter();
   const canManage = hasPermission('users.manage');
   const canDelete = hasPermission('users.delete');
+  const { onlineIds, ready: presenceReady } = usePresenceOnlineUsers();
   const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState<UserData[]>([]);
   const [total, setTotal] = useState(0);
@@ -268,6 +271,8 @@ export function UsersView() {
                       const accountStatus = getAccountStatus(row);
                       const isDeleted    = Boolean(row.deleted_at);
                       const isRestricted = row.status !== 'active';
+                      // Once Pusher presence is ready, use real-time data; fall back to API value.
+                      const isOnline = presenceReady ? onlineIds.has(row.id) : row.is_online;
 
                       return (
                         <TableRow
@@ -282,7 +287,7 @@ export function UsersView() {
                                 <Avatar src={row.profile_picture_url ?? undefined} alt={row.name}>
                                   {row.name.charAt(0).toUpperCase()}
                                 </Avatar>
-                                {row.is_online && (
+                                {isOnline && (
                                   <Box
                                     sx={{
                                       position: 'absolute', bottom: 0, right: 0,
