@@ -68,6 +68,23 @@ class AdminUserDetailResource extends JsonResource
                     'restaurant_name' => $order->restaurant?->name,
                 ]),
             ),
+            'service_submissions' => $this->when(
+                $this->relationLoaded('serviceSubmissions'),
+                fn () => $this->serviceSubmissions->map(fn ($sub) => [
+                    'id'           => $sub->id,
+                    'status'       => $sub->status->value,
+                    'status_label' => $sub->status->label(),
+                    'service_name' => $sub->serviceType?->service?->name_en
+                        ?? $sub->serviceType?->service?->name_mm
+                        ?? $sub->serviceType?->name_en
+                        ?? $sub->serviceType?->name_mm
+                        ?? '—',
+                    'type_name'    => $sub->serviceType?->name_en
+                        ?? $sub->serviceType?->name_mm
+                        ?? null,
+                    'created_at'   => $sub->created_at->toISOString(),
+                ]),
+            ),
         ];
     }
 }

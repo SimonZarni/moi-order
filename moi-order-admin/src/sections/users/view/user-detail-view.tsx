@@ -40,7 +40,7 @@ import { fDate, fToNow } from 'src/utils/format-time';
 
 import { useAuth } from 'src/context/auth-context';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { usersApi, type UserDocument, type UserDetailData, type CreateDocumentPayload } from 'src/api/users';
+import { usersApi, type UserDocument, type UserDetailData, type CreateDocumentPayload, type ServiceSubmissionSummary } from 'src/api/users';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
@@ -476,6 +476,7 @@ export function UserDetailView() {
         <Tab label="Connected Accounts" />
         <Tab label={`Ticket Orders (${user.recent_ticket_orders.length})`} />
         <Tab label={`Food Orders (${user.recent_food_orders.length})`} />
+        <Tab label={`Services (${user.service_submissions.length})`} />
         <Tab label={`Documents (${user.documents.length})`} />
       </Tabs>
 
@@ -586,8 +587,60 @@ export function UserDetailView() {
         </Card>
       )}
 
-      {/* Tab 3: Documents — 3 categories */}
+      {/* Tab 3: Service submissions */}
       {activeTab === 3 && (
+        <Card>
+          <CardHeader title="Service Submissions" />
+          <Scrollbar>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>#</TableCell>
+                    <TableCell>Service</TableCell>
+                    <TableCell>Type</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Submitted</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {user.service_submissions.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} align="center" sx={{ py: 4, color: 'text.secondary' }}>No service submissions</TableCell>
+                    </TableRow>
+                  ) : (
+                    user.service_submissions.map((sub: ServiceSubmissionSummary) => (
+                      <TableRow key={sub.id} hover>
+                        <TableCell>
+                          <Typography variant="body2" fontWeight={600} color="primary.main">#{sub.id}</Typography>
+                        </TableCell>
+                        <TableCell>{sub.service_name}</TableCell>
+                        <TableCell>
+                          <Typography variant="caption" color="text.secondary">{sub.type_name ?? '—'}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Label color={
+                            sub.status === 'completed'       ? 'success' :
+                            sub.status === 'payment_failed'  ? 'error'   :
+                            sub.status === 'cancelled'       ? 'error'   :
+                            sub.status === 'processing'      ? 'warning' : 'default'
+                          }>
+                            {sub.status_label}
+                          </Label>
+                        </TableCell>
+                        <TableCell>{fDate(sub.created_at)}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Scrollbar>
+        </Card>
+      )}
+
+      {/* Tab 4: Documents — 3 categories */}
+      {activeTab === 4 && (
         <Card>
           <CardHeader
             title="Documents"

@@ -19,8 +19,8 @@ class DocumentResource extends JsonResource
             'id'                 => $this->id,
             'type'               => $this->type->value,
             'subtype'            => $this->subtype,
-            // Signed 60-min URL — documents are PII; permanent CDN links are inappropriate.
-            'file_url'           => $storage->url($this->file_path, 60),
+            // Signed 60-min URL — null for admin-created records that have no file.
+            'file_url'           => $this->file_path ? $storage->url($this->file_path, 60) : null,
             'extracted_data'     => $this->extracted_data ?? [],
             'expiry_date'        => $this->expiry_date?->format('Y-m-d'),
             'extension_date'     => $this->extension_date?->format('Y-m-d'),

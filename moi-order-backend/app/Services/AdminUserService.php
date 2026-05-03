@@ -51,6 +51,7 @@ class AdminUserService
             'documents',
             'ticketOrders.ticket',
             'foodOrders.restaurant',
+            'serviceSubmissions.serviceType.service',
         ]);
     }
 

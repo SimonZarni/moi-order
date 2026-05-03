@@ -62,10 +62,20 @@ export type FoodOrderSummary = {
   restaurant_name: string | null;
 };
 
+export type ServiceSubmissionSummary = {
+  id: number;
+  status: string;
+  status_label: string;
+  service_name: string;
+  type_name: string | null;
+  created_at: string;
+};
+
 export type UserDetailData = UserData & {
   documents: UserDocument[];
   recent_ticket_orders: TicketOrderSummary[];
   recent_food_orders: FoodOrderSummary[];
+  service_submissions: ServiceSubmissionSummary[];
 };
 
 export type CreateDocumentPayload = {
