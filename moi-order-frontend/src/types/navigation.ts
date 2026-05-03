@@ -4,7 +4,7 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 export type TabParamList = {
   Home: undefined;
   Map: undefined;
-  Orders: undefined;
+  Orders: { tab?: 'services' | 'tickets' } | undefined;
   Profile: undefined;
 };
 

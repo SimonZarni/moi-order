@@ -87,7 +87,16 @@ export function usePaymentScreen(): UsePaymentScreenResult {
     } else {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TICKET_ORDERS.LIST });
     }
-    navigation.reset({ index: 0, routes: [{ name: 'MainTabs', params: { screen: 'Orders' } }] });
+    navigation.reset({
+      index: 0,
+      routes: [{
+        name: 'MainTabs',
+        params: {
+          screen: 'Orders',
+          params: params.kind === 'ticket_order' ? { tab: 'tickets' } : undefined,
+        },
+      }],
+    });
   }, [navigation, queryClient, params.kind]);
 
   const handleRefreshQr = useCallback((): void => {

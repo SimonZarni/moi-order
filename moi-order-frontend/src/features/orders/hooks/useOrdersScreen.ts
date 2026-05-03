@@ -9,9 +9,9 @@ import { fetchTicketOrder } from '@/shared/api/ticketOrders';
 import { CACHE_TTL } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { ServiceSubmission, TicketOrder } from '@/types/models';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@/types/navigation';
+import { RootStackParamList, TabParamList } from '@/types/navigation';
 
 export type OrdersTab = 'services' | 'tickets';
 
@@ -36,9 +36,10 @@ export interface UseOrdersScreenResult {
 export function useOrdersScreen(): UseOrdersScreenResult {
   const { isLoggedIn } = useAuthStore();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const route = useRoute<RouteProp<TabParamList, 'Orders'>>();
   const queryClient = useQueryClient();
 
-  const [activeTab, setActiveTab] = useState<OrdersTab>('services');
+  const [activeTab, setActiveTab] = useState<OrdersTab>(route.params?.tab ?? 'services');
 
   const {
     submissions, isLoading: isLoadingSubmissions, isError: isErrorSubmissions,
