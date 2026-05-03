@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useMoiVerifiedScreen } from '@/features/profile/hooks/useMoiVerifiedScreen';
+import { VerifiedBadgeIcon } from '@/shared/components/VerifiedBadgeIcon';
 import { colours } from '@/shared/theme/colours';
 import { styles } from './MoiVerifiedScreen.styles';
 
@@ -38,7 +39,7 @@ export function MoiVerifiedScreen(): React.JSX.Element {
           <Text style={styles.headerTitle}>Become Moi Verified</Text>
           <Text style={styles.headerSubtitle}>Unlock your full account potential</Text>
         </View>
-        <Ionicons name="checkmark-circle" size={28} color="#1D9BF0" />
+        <VerifiedBadgeIcon size={34} />
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>

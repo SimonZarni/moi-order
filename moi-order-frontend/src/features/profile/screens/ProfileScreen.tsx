@@ -15,6 +15,7 @@ import { DocumentShortcuts } from '@/features/profile/components/DocumentShortcu
 import { useProfileScreen } from '@/features/profile/hooks/useProfileScreen';
 import { useLinkedAccounts } from '@/features/profile/hooks/useLinkedAccounts';
 import { useUploadStats } from '@/features/documents/hooks/useUploadStats';
+import { VerifiedBadgeIcon } from '@/shared/components/VerifiedBadgeIcon';
 import { formatDate } from '@/shared/utils/formatDate';
 import { formatPhoneNumber } from '@/shared/utils/formatPhoneNumber';
 import { getProfileStrings } from '@/shared/constants/profileStrings';
@@ -170,7 +171,7 @@ export function ProfileScreen(): React.JSX.Element {
                 <Ionicons name="shield-checkmark-outline" size={16} color={colours.tertiary} />
               </View>
               <Text style={styles.rowLabel}>Become Moi Verified</Text>
-              <Ionicons name="checkmark-circle" size={16} color="#1D9BF0" />
+              <VerifiedBadgeIcon size={20} />
               <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </View>
           </Pressable>
