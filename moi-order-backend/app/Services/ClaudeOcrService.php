@@ -23,8 +23,8 @@ use Illuminate\Support\Facades\Log;
  *   never cached. This layout cuts input token costs by ~80–90% per OCR call once
  *   the cache is warm.
  *
- *   Minimum cached tokens: claude-haiku-4-5 = 2048, claude-sonnet-4-6 = 1024.
- *   The system prompt below is intentionally comprehensive to stay well above 2048.
+ *   Minimum cached tokens: claude-haiku-4-5 = 4096, claude-sonnet-4-6 = 1024.
+ *   The system prompt below is intentionally comprehensive to stay well above 4096.
  */
 class ClaudeOcrService implements DocumentOcrInterface
 {
@@ -186,7 +186,7 @@ class ClaudeOcrService implements DocumentOcrInterface
 
     // ---------------------------------------------------------------------------
     // SYSTEM PROMPT — cached once, shared across ALL document types.
-    // Must stay above 2048 tokens (claude-haiku-4-5 minimum) to activate caching.
+    // Must stay above 4096 tokens (claude-haiku-4-5 minimum) to activate caching.
     // The user message specifies which document type to focus on.
     // ---------------------------------------------------------------------------
     private const SYSTEM_PROMPT = <<<'SYSTEM'
@@ -201,6 +201,23 @@ GENERAL RULES
 - Ignore watermarks, stamps, and handwritten annotations unless they are part of the official document fields.
 - If a field appears in both English and the local language, prefer the English rendering.
 - Be conservative: if you cannot confidently read a field, return null rather than guessing.
+- Never hallucinate document numbers, dates, or names. If a value is unclear, return null.
+- A photograph of a physical document is acceptable — extract fields exactly as printed.
+- Laminated, worn, or partially obscured documents should still be processed; return null only for fields that are genuinely unreadable.
+- If the image is completely unreadable (solid colour, corrupted, or obviously not a document at all), return is_valid_document_type: false with an appropriate validation_message.
+
+IMAGE QUALITY GUIDANCE
+Poor image quality does not automatically make a document invalid. Apply these rules:
+- Blurry but partially readable: extract what you can; use null for fields you cannot read.
+- Partially cropped: extract visible fields; use null for fields that are cut off.
+- Low contrast or faded ink: attempt to read even faint text; return null only if truly indecipherable.
+- Glare or reflection on part of the image: extract fields from the unaffected areas normally.
+- Rotated or skewed image: mentally correct the orientation and extract as normal.
+- Black-and-white scan or photocopy: fully valid; extract all fields normally.
+- Multiple documents visible in one image: focus on the document matching the requested category.
+- Holographic overlays and security foils: these are not data fields — ignore them.
+- A missing or obscured holder photo does not make the document invalid.
+- Camera screenshots and screen photos of documents are acceptable inputs.
 
 OUTPUT SHAPE (always this exact structure):
 {
@@ -211,6 +228,15 @@ OUTPUT SHAPE (always this exact structure):
   "expiry_date": "YYYY-MM-DD" | null,
   "extension_date": "YYYY-MM-DD" | null
 }
+
+FIELD DEFAULTS AND NULL HANDLING
+- Never omit a key from extracted_data. Every documented field must be present; use null if not visible.
+- Date fields: YYYY-MM-DD strictly. Thai Buddhist Era dates must be converted: subtract 543 from the Thai year to get the Gregorian year. Example: Thai year 2568 = Gregorian 2025. Thai year 2567 = Gregorian 2024. Check whether the printed year is greater than 2500 to detect Buddhist Era.
+- Name fields: return exactly as printed, preserving capitalisation from the source document.
+- Document number fields: include all alphanumeric characters and hyphens exactly as printed; strip spaces.
+- Nationality: return the English demonym (e.g. "Myanmar", "Thai", "Cambodian", "Lao", "Vietnamese", "Chinese", "Indian", "Bangladeshi", "Filipino", "Indonesian", "Malaysian").
+- Money and numeric fields: return as a plain string, not a number type.
+- Boolean fields: return true or false (JSON boolean), not strings.
 
 ══════════════════════════════════════════════════════════════
 DOCUMENT CATEGORY 1 — PASSPORT
@@ -238,9 +264,21 @@ Subtype A — bio_page
   "extension_date": null
 }
 Field notes:
-  "type" — the document-type code from the MRZ first field (1–2 characters: "P" standard, "PR" restricted, "PV" visa, "PE" emergency, "PD" diplomatic).
-  "country_code" — 3-letter ISO 3166-1 alpha-3 code from the MRZ (e.g. "MMR", "THA", "GBR", "USA", "SGP").
-  "passport_number" — alphanumeric, as printed in the MRZ or the document number field.
+  "type" — the document-type code from the MRZ first field (1–2 characters: "P" standard, "PR" restricted, "PV" visa, "PE" emergency, "PD" diplomatic, "LP" laissez-passer).
+  "country_code" — 3-letter ISO 3166-1 alpha-3 code from the MRZ (e.g. "MMR" Myanmar, "THA" Thailand, "GBR" United Kingdom, "USA" United States, "SGP" Singapore, "KHM" Cambodia, "LAO" Laos, "VNM" Vietnam, "CHN" China, "IND" India, "BGD" Bangladesh, "NPL" Nepal, "LKA" Sri Lanka, "PHL" Philippines, "IDN" Indonesia, "MYS" Malaysia, "UNO" UN laissez-passer).
+  "passport_number" — alphanumeric, as printed in the MRZ or the document number field. Strip spaces but preserve hyphens.
+  "full_name" — prefer the MRZ line 2 name field. Replace MRZ filler characters (<<) with a single space. Strip leading and trailing filler characters (<).
+  "date_of_birth" — from MRZ or printed field. MRZ format is YYMMDD. Century rule: YY >= 30 → 19xx; YY < 30 → 20xx.
+  "expiry_date" — from MRZ or printed expiry field. Same century rule as date_of_birth.
+  MRZ disagreement: if MRZ and printed field disagree, prefer the MRZ value.
+
+Passport edge cases:
+- Emergency passports ("PE"): same schema as bio_page; validity is typically 1 year.
+- Diplomatic passports ("PD"): extract normally; note type as "PD".
+- Old Myanmar passports (green cover): same fields apply even though the layout differs from newer ePassports.
+- Myanmar passports may say "UNION OF MYANMAR" or "REPUBLIC OF THE UNION OF MYANMAR" — both are valid.
+- Laissez-passer (UN travel document): type = "LP", country_code = "UNO". Extract name, number, DOB, expiry as normal.
+- Some older passports have a single-line MRZ (OCR-A format rather than two-line TD3) — extract the data as best you can.
 
 Subtype B — visa_page
 {
@@ -257,6 +295,14 @@ Subtype B — visa_page
   "expiry_date": "2025-07-01",
   "extension_date": null
 }
+Visa field notes:
+  "visa_type" — the full type string as printed (e.g. "Tourist Visa", "Non-Immigrant B", "Non-Immigrant L-A", "Transit Visa", "METV", "Retirement Visa", "Education Visa").
+  "country" — the country that issued the visa.
+  "entries" — "Single", "Double", or "Multiple" as printed on the visa sticker.
+  "issue_date" — the date the visa was issued (not the date of entry).
+  "expiry_date" — the date by which the holder must enter, or the final permitted day of stay.
+  Entry/exit stamps only (no visa sticker): subtype is still "visa_page"; set visa_type to null.
+  Multiple visas on one page: return the most recently issued visa.
 
 If NOT a passport document:
 {
@@ -275,6 +321,9 @@ A valid 90-day slip is a Thai Immigration Department form TM47 or its printed/st
   - Heading: "Notification of Staying" or "แบบ ตม. 47" or similar Thai immigration text.
   - Contains a "next notification date" (วันที่ต้องแจ้งอยู่ครั้งต่อไป) and holder personal details.
   - May be a physical slip, a counter receipt, or an online acknowledgement printout.
+  - May be printed in Thai language only — this is still a valid TM47.
+  - The online TM47 acknowledgement from the Thai immigration e-Report website is valid and has the same fields.
+  - Some slips are stamped directly into the passport booklet; if the stamp contains a next-report date, it is valid.
 
 Subtype — ninety_day_slip
 {
@@ -290,6 +339,8 @@ Subtype — ninety_day_slip
   "extension_date": "2025-04-01"
 }
 Note: "extension_date" holds the next_report_date — this is the actionable deadline for the holder.
+Date conversion: Thai Immigration prints dates in Buddhist Era. Subtract 543 to get the Gregorian year. Example: วันที่ 01/07/2568 → 2025-07-01. The year field may be 4-digit Thai year (> 2500) or 4-digit Gregorian year (< 2100); check the range to determine which convention was used.
+If only the next_report_date is legible and previous_report_date is not visible, return null for previous_report_date.
 
 If NOT a 90-day notification slip:
 {
@@ -306,55 +357,109 @@ DOCUMENT CATEGORY 3 — OTHER OFFICIAL DOCUMENTS
 ══════════════════════════════════════════════════════════════
 Identify the document from the list of recognised subtypes below. If it matches one, use that subtype slug and extract the listed fields. If it is an official/government document not on the list, use a descriptive snake_case slug and extract whatever fields are present. If it is NOT any kind of official, legal, or government-issued document, return is_valid_document_type: false.
 
+SUBTYPE IDENTIFICATION RULES
+- Read the document title, header, or any official label first.
+- If the document is bilingual (Thai + English), the English title takes priority for subtype identification.
+- If you cannot identify the type from the title, look for issuing authority logos, seals, or department stamps.
+- A laminated plastic card issued by a Thai government authority with a holder photo is almost certainly an identity card — check the issuing ministry name to narrow the subtype.
+- Documents with "กรมการจัดหางาน" (Dept. of Employment) are work-related (work_permit or certificate_of_employment).
+- Documents with "กรมการปกครอง" (Dept. of Provincial Administration) are national ID or household registration.
+- Documents with "ตรวจคนเข้าเมือง" (Immigration Bureau) are immigration-related (tm30_receipt, tm6, residence_certificate).
+- Documents with "กรมขนส่งทางบก" (Land Transport Dept.) are driving_license or international_driving_permit.
+- Documents with "สำนักงานประกันสังคม" (Social Security Office) are social_security_card.
+
 RECOGNISED SUBTYPES AND FIELDS:
 
 1. ci_pink_card — Thai Confirmation of Identity (บัตรประจำตัวบุคคลไม่มีสัญชาติไทย / CI Pink Card)
    Fields: full_name, ci_number, nationality, date_of_birth, issue_date, expiry_date, issuing_office
+   Notes: The CI number is 13 digits. Issued by the Thai Interior Ministry to stateless persons and ethnic minorities. The card is pink or light-red in colour.
 
 2. non_la_visa — Thai Non-Immigrant L-A Labour Visa (visa sticker inside passport)
    Fields: full_name, visa_type ("Non-Immigrant L-A"), entries, issue_date, expiry_date, issuing_embassy, passport_number
+   Notes: Issued specifically for Myanmar workers under the MOU labour agreement. The visa sticker will say "NON-IMMIGRANT L-A" or "NON-IMMI. L-A".
 
 3. driving_license — Thai Driving Licence (ใบอนุญาตขับขี่)
    Fields: full_name, license_number, license_class, date_of_birth, issue_date, expiry_date, issuing_office
+   Notes: license_class values: "รย.1" (motorcycle ≤125cc), "รย.2" (motorcycle >125cc), "รย.3" (car), "รย.4" (taxi), "ท.1" (truck), "ป.1" (bus). Return the class code exactly as printed. Driving licences are valid for 2 years (new) or 5 years (renewal).
 
 4. international_driving_permit — International Driving Permit (IDP)
    Fields: full_name, permit_number, date_of_birth, issue_date, expiry_date, issuing_country
+   Notes: A grey booklet with the UN emblem and the title "International Driving Permit". Valid for 1 year from issue date.
 
 5. student_id — Student ID Card
    Fields: full_name, student_id, institution_name, faculty, issue_date, expiry_date
+   Notes: May be issued by any accredited school, college, or university. The institution name is usually prominent on the front.
 
 6. work_permit — Thai Work Permit (ใบอนุญาตทำงาน)
    Fields: full_name, permit_number, employer_name, occupation, issue_date, expiry_date, issuing_office
+   Notes: Blue booklet format. Permit number prefix indicates the issuing province. Employer name is the Thai company or individual employer. Occupation is the job title printed on the permit.
 
 7. thai_national_id — Thai National ID Card (บัตรประชาชน)
    Fields: full_name, id_number, date_of_birth, issue_date, expiry_date
+   Notes: White plastic card with the Thai government emblem. The ID number is 13 digits. Return null for expiry_date if the card reads "ตลอดชีพ" (lifetime validity).
 
 8. social_security_card — Thai Social Security Card / SSO membership card
    Fields: full_name, card_number, issue_date, expiry_date, coverage_notes
+   Notes: Issued by the Social Security Office (สำนักงานประกันสังคม). coverage_notes may mention the assigned hospital or benefit type.
 
 9. health_insurance_card — Private or government health insurance card
    Fields: full_name, card_number, insurer_name, issue_date, expiry_date, coverage_notes
+   Notes: May be from a private insurer (BUPA, AXA, Cigna, Allianz) or the government 30-Baht Universal Coverage scheme (บัตรทอง). coverage_notes should capture the plan name or benefit tier if visible.
 
 10. marriage_certificate — Marriage certificate (any country)
     Fields: full_name, spouse_name, document_number, marriage_date, issue_date, issuing_office
+    Notes: Thai marriage certificates are issued by the district office (สำนักงานเขต / ที่ว่าการอำเภอ). marriage_date is when the couple wed; issue_date is when the certificate was printed. These may differ if the certificate was issued long after the marriage.
 
 11. birth_certificate — Birth certificate (any country)
     Fields: full_name, document_number, date_of_birth, place_of_birth, issue_date, issuing_office
+    Notes: Thai birth certificate is "สูติบัตร". Myanmar equivalent is the "Birth Certificate" or "ကိုယ်ရေးမှတ်တမ်း". place_of_birth should be the hospital or city name if printed.
 
 12. residence_certificate — Certificate of residence / address certificate
     Fields: full_name, address, document_number, issue_date, issuing_office
+    Notes: Issued by a local Thai authority (district office or police station) to confirm the holder's address. Typically valid for 30–90 days from issue date.
 
 13. tax_id_card — Tax Identification card (Thailand or home country)
     Fields: full_name, tax_id, issue_date, expiry_date, issuing_authority
+    Notes: Thai individual TIN is 13 digits (same format as national ID). Corporate TIN is also 13 digits. Issued by the Revenue Department (กรมสรรพากร).
 
 14. border_pass — Border pass / border crossing card
     Fields: full_name, document_number, nationality, issue_date, expiry_date, issuing_office, permitted_areas
+    Notes: Issued at official border crossing points. permitted_areas lists specific Thai provinces the holder is permitted to enter. Common for Myanmar-Thailand cross-border day workers and seasonal labourers.
 
 15. tor_ror_13 — TOR ROR 13 (ท.ร.13) — Thai household registration extract for non-citizens
     Fields: full_name, id_number, address, date_of_birth, issue_date, issuing_office
+    Notes: Printed on yellow paper. Issued by the district office (อำเภอ) to register non-citizen residents. The non-citizen equivalent of the Thai tabien baan (ทะเบียนบ้าน).
 
-16. Any other official government or legal document not listed above:
-    Use a descriptive snake_case subtype slug (e.g. "bank_reference_letter", "embassy_letter", "military_id").
+16. tm6_departure_card — Thai TM6 Arrival/Departure card
+    Fields: full_name, nationality, passport_number, flight_number, arrival_date, departure_date, visa_type, purpose_of_visit
+    Notes: White card filled in on arrival at a Thai port of entry. The bottom stub is the departure record retained in the passport. arrival_date and departure_date may be on separate stubs of the same card.
+
+17. tm30_receipt — Thai TM30 receipt (landlord/host notification)
+    Fields: full_name, nationality, address, report_date, issuing_office
+    Notes: Landlords and hosts must notify the local immigration office of a foreign guest's address within 24 hours of arrival. This receipt confirms that notification. Often a small thermal-printed slip with an official stamp.
+
+18. certificate_of_employment — Employment certificate or letter
+    Fields: full_name, employer_name, position, start_date, issue_date, issuing_officer
+    Notes: A formal letter or certificate from an employer confirming the holder's employment status and position. Not a government form but still an official document for immigration and visa purposes.
+
+19. bank_statement_page — Bank statement page
+    Fields: full_name, bank_name, account_number_masked, statement_period, issuing_branch
+    Notes: A single printed page from a bank statement. account_number_masked must show only the last 4 digits (e.g. "****1234"). statement_period is the date range printed on the statement (e.g. "2025-01-01 to 2025-01-31").
+
+20. diploma_or_transcript — Academic diploma, degree certificate, or official transcript
+    Fields: full_name, institution_name, qualification, field_of_study, graduation_date, issue_date
+    Notes: Issued by a school or university. qualification examples: "Bachelor of Science", "High School Diploma", "ปริญญาตรี", "Master of Arts". field_of_study is the major or programme name.
+
+21. police_clearance_certificate — Police clearance / criminal record certificate
+    Fields: full_name, document_number, date_of_birth, nationality, issue_date, expiry_date, issuing_authority, result
+    Notes: result field should be "No criminal record" or the equivalent translated phrase, or describe any record if one is noted. Thai version: "หนังสือรับรองความประพฤติ" issued by the Royal Thai Police. Myanmar version issued by Myanmar Police Force.
+
+22. un_refugee_card — UNHCR Refugee Card or Asylum Seeker Certificate
+    Fields: full_name, card_number, date_of_birth, nationality, issue_date, expiry_date, issuing_office
+    Notes: Issued by the United Nations High Commissioner for Refugees (UNHCR). A yellow or blue laminated card. The card number is the UNHCR case number.
+
+23. Any other official government or legal document not listed above:
+    Use a descriptive snake_case subtype slug (e.g. "bank_reference_letter", "embassy_letter", "military_id", "refugee_certificate", "power_of_attorney").
     Fields: document_name, full_name, document_number, issue_date, expiry_date, issuing_office, notes
 
 EXAMPLE RESPONSE for ci_pink_card:
@@ -372,6 +477,40 @@ EXAMPLE RESPONSE for ci_pink_card:
     "issuing_office": "Chiang Mai Immigration"
   },
   "expiry_date": "2026-01-01",
+  "extension_date": null
+}
+
+EXAMPLE RESPONSE for work_permit:
+{
+  "is_valid_document_type": true,
+  "validation_message": null,
+  "subtype": "work_permit",
+  "extracted_data": {
+    "full_name": "MA MA",
+    "permit_number": "CM-2567-123456",
+    "employer_name": "Northern Thai Restaurant Co., Ltd.",
+    "occupation": "Cook",
+    "issue_date": "2024-03-01",
+    "expiry_date": "2025-03-01",
+    "issuing_office": "Chiang Mai Labour Office"
+  },
+  "expiry_date": "2025-03-01",
+  "extension_date": null
+}
+
+EXAMPLE RESPONSE for tm30_receipt:
+{
+  "is_valid_document_type": true,
+  "validation_message": null,
+  "subtype": "tm30_receipt",
+  "extracted_data": {
+    "full_name": "JOHN DOE",
+    "nationality": "Myanmar",
+    "address": "123 Moo 5, Tambon Nong Hoi, Amphoe Mueang, Chiang Mai 50000",
+    "report_date": "2025-06-15",
+    "issuing_office": "Chiang Mai Immigration"
+  },
+  "expiry_date": null,
   "extension_date": null
 }
 
