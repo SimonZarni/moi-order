@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Admin;
 
+use App\Contracts\FileStorageInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -21,7 +22,7 @@ class AdminUserResource extends JsonResource
             'email'             => $this->email,
             'phone_number'      => $this->phone_number,
             'profile_picture_url' => $this->profile_picture_path
-                ? \Illuminate\Support\Facades\Storage::url($this->profile_picture_path)
+                ? resolve(FileStorageInterface::class)->publicUrl($this->profile_picture_path)
                 : null,
             'is_admin'          => $this->is_admin,
             'is_merchant'       => $this->is_merchant,

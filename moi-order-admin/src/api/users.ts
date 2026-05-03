@@ -34,10 +34,13 @@ export type UserDocument = {
   type: string;
   type_label: string;
   subtype: string | null;
+  file_url: string | null;
+  extracted_data: Record<string, string | null>;
   expiry_date: string | null;
   extension_date: string | null;
   is_valid_type: boolean;
   validation_message: string | null;
+  is_admin_created: boolean;
   created_at: string;
 };
 
@@ -101,6 +104,8 @@ export const usersApi = {
       apiClient.get<{ data: UserDocument[] }>(`/users/${userId}/documents`).then((r) => r.data.data),
     create: (userId: number | string, payload: CreateDocumentPayload) =>
       apiClient.post<{ data: UserDocument }>(`/users/${userId}/documents`, payload).then((r) => r.data.data),
+    update: (userId: number | string, documentId: number | string, payload: CreateDocumentPayload) =>
+      apiClient.patch<{ data: UserDocument }>(`/users/${userId}/documents/${documentId}`, payload).then((r) => r.data.data),
     delete: (userId: number | string, documentId: number | string) =>
       apiClient.delete(`/users/${userId}/documents/${documentId}`),
   },

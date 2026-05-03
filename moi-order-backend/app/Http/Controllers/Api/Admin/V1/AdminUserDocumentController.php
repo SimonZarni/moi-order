@@ -19,7 +19,7 @@ use Illuminate\Validation\Rule;
 
 /**
  * Principle: SRP — admin CRUD over a user's documents only.
- * Security: document file_path is encrypted; never returned to client.
+ * Security: only is_admin_created records may be deleted; user-uploaded files are read-only.
  */
 class AdminUserDocumentController extends Controller
 {
@@ -51,7 +51,8 @@ class AdminUserDocumentController extends Controller
                 'extension_date'     => $validated['extension_date'] ?? null,
                 'is_valid_type'      => $validated['is_valid_type'] ?? true,
                 'validation_message' => $validated['validation_message'] ?? null,
-                'file_path'          => '',
+                'is_admin_created'   => true,
+                'file_path'          => null,
             ]);
         });
 
@@ -64,11 +65,42 @@ class AdminUserDocumentController extends Controller
         return response()->json(['data' => new AdminUserDocumentResource($document)], 201);
     }
 
+    /** PATCH /api/admin/v1/users/{user}/documents/{document} */
+    public function update(Request $request, User $user, Document $document): JsonResponse
+    {
+        if ($document->user_id !== $user->id) {
+            abort(404);
+        }
+
+        if (! $document->is_admin_created) {
+            abort(403, 'Cannot edit user-uploaded documents.');
+        }
+
+        $validated = $request->validate([
+            'type'               => ['sometimes', 'string', Rule::enum(DocumentType::class)],
+            'subtype'            => ['nullable', 'string', 'max:100'],
+            'expiry_date'        => ['nullable', 'date'],
+            'extension_date'     => ['nullable', 'date'],
+            'is_valid_type'      => ['nullable', 'boolean'],
+            'validation_message' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        DB::transaction(function () use ($validated, $document): void {
+            $document->update($validated);
+        });
+
+        return response()->json(['data' => new AdminUserDocumentResource($document->fresh())]);
+    }
+
     /** DELETE /api/admin/v1/users/{user}/documents/{document} */
     public function destroy(User $user, Document $document): JsonResponse
     {
         if ($document->user_id !== $user->id) {
             abort(404);
+        }
+
+        if (! $document->is_admin_created) {
+            abort(403, 'Cannot delete user-uploaded documents.');
         }
 
         $typeLabel = $document->type->label();

@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Admin;
 
+use App\Contracts\FileStorageInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
+// AdminUserDocumentResource is in the same namespace — no use needed
 
 /**
  * Principle: SRP — full admin user detail response including orders and documents.
@@ -22,7 +23,7 @@ class AdminUserDetailResource extends JsonResource
             'email'              => $this->email,
             'phone_number'       => $this->phone_number,
             'profile_picture_url' => $this->profile_picture_path
-                ? Storage::url($this->profile_picture_path)
+                ? resolve(FileStorageInterface::class)->publicUrl($this->profile_picture_path)
                 : null,
             'is_admin'           => $this->is_admin,
             'is_merchant'        => $this->is_merchant,
@@ -43,17 +44,7 @@ class AdminUserDetailResource extends JsonResource
             ],
             'documents'          => $this->when(
                 $this->relationLoaded('documents'),
-                fn () => $this->documents->map(fn ($doc) => [
-                    'id'                 => $doc->id,
-                    'type'               => $doc->type->value,
-                    'type_label'         => $doc->type->label(),
-                    'subtype'            => $doc->subtype,
-                    'expiry_date'        => $doc->expiry_date?->format('Y-m-d'),
-                    'extension_date'     => $doc->extension_date?->format('Y-m-d'),
-                    'is_valid_type'      => $doc->is_valid_type,
-                    'validation_message' => $doc->validation_message,
-                    'created_at'         => $doc->created_at->toISOString(),
-                ]),
+                fn () => AdminUserDocumentResource::collection($this->documents),
             ),
             'recent_ticket_orders' => $this->when(
                 $this->relationLoaded('ticketOrders'),

@@ -5,9 +5,9 @@ import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import Chip from '@mui/material/Chip';
 import Card from '@mui/material/Card';
+import Tabs from '@mui/material/Tabs';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Alert from '@mui/material/Alert';
@@ -54,34 +54,51 @@ const DOCUMENT_TYPES = [
   { value: 'other',             label: 'Other Document' },
 ];
 
-// ── Add document dialog ─────────────────────────────────────────────��────────
+const DOC_CATEGORIES: { value: string; label: string }[] = DOCUMENT_TYPES;
 
-interface AddDocDialogProps {
+// ── Add / Edit document dialog ───────────────────────────────────────────────
+
+interface DocDialogProps {
   open: boolean;
+  initial?: Partial<CreateDocumentPayload & { type: string }>;
+  title: string;
   onClose: () => void;
   onSubmit: (payload: CreateDocumentPayload) => void;
   loading: boolean;
 }
 
-function AddDocDialog({ open, onClose, onSubmit, loading }: AddDocDialogProps) {
-  const [type, setType]       = useState('passport');
-  const [subtype, setSubtype] = useState('');
-  const [expiry, setExpiry]   = useState('');
-  const [note, setNote]       = useState('');
+function DocDialog({ open, initial, title, onClose, onSubmit, loading }: DocDialogProps) {
+  const [type, setType]         = useState(initial?.type ?? 'passport');
+  const [subtype, setSubtype]   = useState(initial?.subtype ?? '');
+  const [expiry, setExpiry]     = useState(initial?.expiry_date ?? '');
+  const [extension, setExtension] = useState(initial?.extension_date ?? '');
+  const [note, setNote]         = useState(initial?.validation_message ?? '');
+
+  useEffect(() => {
+    if (open) {
+      setType(initial?.type ?? 'passport');
+      setSubtype(initial?.subtype ?? '');
+      setExpiry(initial?.expiry_date ?? '');
+      setExtension(initial?.extension_date ?? '');
+      setNote(initial?.validation_message ?? '');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const handleSubmit = () => {
     onSubmit({
       type,
-      subtype:            subtype || null,
-      expiry_date:        expiry  || null,
-      validation_message: note    || null,
+      subtype:            subtype    || null,
+      expiry_date:        expiry     || null,
+      extension_date:     extension  || null,
+      validation_message: note       || null,
       is_valid_type:      true,
     });
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>Add Document</DialogTitle>
+      <DialogTitle>{title}</DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '16px !important' }}>
         <FormControl fullWidth size="small">
           <InputLabel>Type</InputLabel>
@@ -91,17 +108,187 @@ function AddDocDialog({ open, onClose, onSubmit, loading }: AddDocDialogProps) {
             ))}
           </Select>
         </FormControl>
-        <TextField label="Subtype (optional)" size="small" value={subtype} onChange={(e) => setSubtype(e.target.value)} />
-        <TextField label="Expiry date" type="date" size="small" InputLabelProps={{ shrink: true }} value={expiry} onChange={(e) => setExpiry(e.target.value)} />
-        <TextField label="Note (optional)" size="small" multiline rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
+        <TextField
+          label="Subtype (optional)"
+          size="small"
+          value={subtype}
+          onChange={(e) => setSubtype(e.target.value)}
+          placeholder="e.g. Tourist visa, TM30"
+        />
+        <TextField
+          label="Expiry date"
+          type="date"
+          size="small"
+          InputLabelProps={{ shrink: true }}
+          value={expiry}
+          onChange={(e) => setExpiry(e.target.value)}
+        />
+        <TextField
+          label="Extension / next report date (optional)"
+          type="date"
+          size="small"
+          InputLabelProps={{ shrink: true }}
+          value={extension}
+          onChange={(e) => setExtension(e.target.value)}
+        />
+        <TextField
+          label="Note (optional)"
+          size="small"
+          multiline
+          rows={2}
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+        />
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
         <Button onClick={handleSubmit} variant="contained" disabled={loading}>
-          {loading ? 'Adding…' : 'Add'}
+          {loading ? 'Saving…' : 'Save'}
         </Button>
       </DialogActions>
     </Dialog>
+  );
+}
+
+// ── Photo preview dialog ─────────────────────────────────────────────────────
+
+function PhotoDialog({ url, onClose }: { url: string; onClose: () => void }) {
+  return (
+    <Dialog open onClose={onClose} maxWidth="md">
+      <DialogContent sx={{ p: 1 }}>
+        <Box
+          component="img"
+          src={url}
+          alt="document"
+          sx={{ maxWidth: '100%', maxHeight: '80vh', display: 'block', borderRadius: 1 }}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── OCR data row ─────────────────────────────────────────────────────────────
+
+function OcrRow({ label, value }: { label: string; value: string | null | undefined }) {
+  if (!value) return null;
+  return (
+    <Stack direction="row" spacing={1} sx={{ py: 0.25 }}>
+      <Typography variant="caption" color="text.disabled" sx={{ minWidth: 130 }}>{label}</Typography>
+      <Typography variant="caption" color="text.primary">{value}</Typography>
+    </Stack>
+  );
+}
+
+// ── Document category section ─────────────────────────────────────────────────
+
+interface DocSectionProps {
+  label: string;
+  docs: UserDocument[];
+  canManage: boolean;
+  onDelete: (doc: UserDocument) => void;
+  onEdit: (doc: UserDocument) => void;
+  onPreview: (url: string) => void;
+}
+
+function DocSection({ label, docs, canManage, onDelete, onEdit, onPreview }: DocSectionProps) {
+  return (
+    <Box sx={{ mb: 3 }}>
+      <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5, textTransform: 'uppercase', letterSpacing: 0.5, fontSize: 11 }}>
+        {label}
+      </Typography>
+
+      {docs.length === 0 ? (
+        <Typography variant="body2" color="text.disabled" sx={{ pl: 1 }}>No records</Typography>
+      ) : (
+        <Stack spacing={1.5}>
+          {docs.map((doc) => (
+            <Card key={doc.id} variant="outlined" sx={{ p: 2 }}>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="flex-start">
+                {/* Photo thumbnail (user-uploaded only) */}
+                {doc.file_url && (
+                  <Box
+                    component="img"
+                    src={doc.file_url}
+                    alt={doc.type_label}
+                    onClick={() => onPreview(doc.file_url!)}
+                    sx={{
+                      width: 80, height: 80, objectFit: 'cover', borderRadius: 1,
+                      flexShrink: 0, cursor: 'pointer', border: '1px solid',
+                      borderColor: 'divider',
+                    }}
+                  />
+                )}
+                {!doc.file_url && !doc.is_admin_created && (
+                  <Box
+                    sx={{
+                      width: 80, height: 80, borderRadius: 1, flexShrink: 0,
+                      bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      border: '1px dashed', borderColor: 'divider',
+                    }}
+                  >
+                    <Iconify icon="solar:eye-bold" width={24} sx={{ color: 'text.disabled' }} />
+                  </Box>
+                )}
+
+                {/* Info */}
+                <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
+                    <Label color={doc.is_valid_type ? 'success' : 'warning'}>{doc.type_label}</Label>
+                    {doc.subtype && (
+                      <Typography variant="caption" color="text.secondary">{doc.subtype}</Typography>
+                    )}
+                    {doc.is_admin_created && (
+                      <Chip size="small" label="Admin record" variant="outlined" color="primary" sx={{ height: 18, fontSize: 10 }} />
+                    )}
+                  </Stack>
+
+                  {/* Dates */}
+                  <Stack spacing={0} sx={{ mb: 0.5 }}>
+                    <OcrRow label="Expiry date"     value={doc.expiry_date    ? fDate(doc.expiry_date)    : null} />
+                    <OcrRow label="Extension / next" value={doc.extension_date ? fDate(doc.extension_date) : null} />
+                  </Stack>
+
+                  {/* OCR extracted data */}
+                  {Object.keys(doc.extracted_data).length > 0 && (
+                    <Box sx={{ mt: 0.5 }}>
+                      {Object.entries(doc.extracted_data).map(([k, v]) =>
+                        v ? <OcrRow key={k} label={k.replace(/_/g, ' ')} value={v} /> : null
+                      )}
+                    </Box>
+                  )}
+
+                  {doc.validation_message && (
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block', fontStyle: 'italic' }}>
+                      {doc.validation_message}
+                    </Typography>
+                  )}
+
+                  <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: 'block' }}>
+                    Added {fDate(doc.created_at)}
+                  </Typography>
+                </Box>
+
+                {/* Actions (admin-created only for edit/delete) */}
+                {canManage && (
+                  <Stack direction="row" spacing={0.5} sx={{ flexShrink: 0 }}>
+                    {doc.is_admin_created && (
+                      <>
+                        <IconButton size="small" onClick={() => onEdit(doc)} title="Edit">
+                          <Iconify icon="solar:pen-bold" width={16} />
+                        </IconButton>
+                        <IconButton size="small" color="error" onClick={() => onDelete(doc)} title="Delete">
+                          <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                        </IconButton>
+                      </>
+                    )}
+                  </Stack>
+                )}
+              </Stack>
+            </Card>
+          ))}
+        </Stack>
+      )}
+    </Box>
   );
 }
 
@@ -139,8 +326,14 @@ export function UserDetailView() {
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState('');
   const [activeTab, setActiveTab] = useState(0);
-  const [addDocOpen, setAddDocOpen]   = useState(false);
+
+  const [addDocOpen, setAddDocOpen]     = useState(false);
   const [addDocLoading, setAddDocLoading] = useState(false);
+
+  const [editDoc, setEditDoc]       = useState<UserDocument | null>(null);
+  const [editDocLoading, setEditDocLoading] = useState(false);
+
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const fetchUser = useCallback(() => {
     if (!id) return;
@@ -170,13 +363,33 @@ export function UserDetailView() {
     [id],
   );
 
-  const handleDeleteDoc = useCallback(
-    (docId: number, docLabel: string) => {
-      if (!id) return;
-      if (!window.confirm(`Delete "${docLabel}" document? The user will be notified.`)) return;
+  const handleEditDoc = useCallback(
+    (payload: CreateDocumentPayload) => {
+      if (!id || !editDoc) return;
+      setEditDocLoading(true);
       usersApi.documents
-        .delete(id, docId)
-        .then(() => setUser((prev) => prev ? { ...prev, documents: prev.documents.filter((d: UserDocument) => d.id !== docId) } : prev))
+        .update(id, editDoc.id, payload)
+        .then((updated) => {
+          setUser((prev) =>
+            prev ? { ...prev, documents: prev.documents.map((d) => d.id === updated.id ? updated : d) } : prev
+          );
+          setEditDoc(null);
+        })
+        .catch(() => {})
+        .finally(() => setEditDocLoading(false));
+    },
+    [id, editDoc],
+  );
+
+  const handleDeleteDoc = useCallback(
+    (doc: UserDocument) => {
+      if (!id) return;
+      if (!window.confirm(`Delete "${doc.type_label}" record? The user will be notified.`)) return;
+      usersApi.documents
+        .delete(id, doc.id)
+        .then(() =>
+          setUser((prev) => prev ? { ...prev, documents: prev.documents.filter((d) => d.id !== doc.id) } : prev)
+        )
         .catch(() => {});
     },
     [id],
@@ -373,12 +586,12 @@ export function UserDetailView() {
         </Card>
       )}
 
-      {/* Tab 3: Documents */}
+      {/* Tab 3: Documents — 3 categories */}
       {activeTab === 3 && (
         <Card>
           <CardHeader
             title="Documents"
-            subheader="Passport, 90-Day Reports, and other docs. Users are notified when you add or remove."
+            subheader="User-uploaded files (read-only) and admin-created records. Users are notified on add or delete."
             action={
               canManage && (
                 <Button
@@ -387,72 +600,60 @@ export function UserDetailView() {
                   startIcon={<Iconify icon="mingcute:add-line" />}
                   onClick={() => setAddDocOpen(true)}
                 >
-                  Add Document
+                  Add Record
                 </Button>
               )
             }
           />
-          <Scrollbar>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Subtype</TableCell>
-                    <TableCell>Expiry</TableCell>
-                    <TableCell>Note</TableCell>
-                    <TableCell>Added</TableCell>
-                    {canManage && <TableCell align="right">Actions</TableCell>}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {user.documents.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={canManage ? 6 : 5} align="center" sx={{ py: 4, color: 'text.secondary' }}>
-                        No documents
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    user.documents.map((doc: UserDocument) => (
-                      <TableRow key={doc.id} hover>
-                        <TableCell>
-                          <Label color={doc.is_valid_type ? 'success' : 'warning'}>{doc.type_label}</Label>
-                        </TableCell>
-                        <TableCell>{doc.subtype ?? '—'}</TableCell>
-                        <TableCell>{doc.expiry_date ? fDate(doc.expiry_date) : '—'}</TableCell>
-                        <TableCell>
-                          <Typography variant="caption" color="text.secondary">
-                            {doc.validation_message ?? '—'}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>{fDate(doc.created_at)}</TableCell>
-                        {canManage && (
-                          <TableCell align="right">
-                            <IconButton
-                              size="small"
-                              color="error"
-                              onClick={() => handleDeleteDoc(doc.id, doc.type_label)}
-                            >
-                              <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                            </IconButton>
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Scrollbar>
+          <Divider />
+          <Box sx={{ p: 3 }}>
+            {DOC_CATEGORIES.map((cat) => {
+              const catDocs = user.documents.filter((d) => d.type === cat.value);
+              return (
+                <DocSection
+                  key={cat.value}
+                  label={cat.label}
+                  docs={catDocs}
+                  canManage={canManage}
+                  onDelete={handleDeleteDoc}
+                  onEdit={(doc) => setEditDoc(doc)}
+                  onPreview={(url) => setPreviewUrl(url)}
+                />
+              );
+            })}
+          </Box>
         </Card>
       )}
 
-      <AddDocDialog
+      {/* Add doc dialog */}
+      <DocDialog
         open={addDocOpen}
+        title="Add Document Record"
         onClose={() => setAddDocOpen(false)}
         onSubmit={handleAddDoc}
         loading={addDocLoading}
       />
+
+      {/* Edit doc dialog */}
+      {editDoc && (
+        <DocDialog
+          open
+          title="Edit Document Record"
+          initial={{
+            type:               editDoc.type,
+            subtype:            editDoc.subtype,
+            expiry_date:        editDoc.expiry_date,
+            extension_date:     editDoc.extension_date,
+            validation_message: editDoc.validation_message,
+          }}
+          onClose={() => setEditDoc(null)}
+          onSubmit={handleEditDoc}
+          loading={editDocLoading}
+        />
+      )}
+
+      {/* Photo preview */}
+      {previewUrl && <PhotoDialog url={previewUrl} onClose={() => setPreviewUrl(null)} />}
     </DashboardContent>
   );
 }

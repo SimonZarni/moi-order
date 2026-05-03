@@ -24,15 +24,17 @@ class Document extends Model
         'extension_date',
         'is_valid_type',
         'validation_message',
+        'is_admin_created',
     ];
 
     protected $casts = [
-        'type'           => DocumentType::class,
-        'file_path'      => 'encrypted',
-        'extracted_data' => 'encrypted:array',
-        'expiry_date'    => 'date:Y-m-d',
-        'extension_date' => 'date:Y-m-d',
-        'is_valid_type'  => 'boolean',
+        'type'             => DocumentType::class,
+        'file_path'        => 'encrypted',
+        'extracted_data'   => 'encrypted:array',
+        'expiry_date'      => 'date:Y-m-d',
+        'extension_date'   => 'date:Y-m-d',
+        'is_valid_type'    => 'boolean',
+        'is_admin_created' => 'boolean',
     ];
 
     protected $hidden = ['file_path'];

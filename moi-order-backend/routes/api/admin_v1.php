@@ -157,6 +157,8 @@ Route::prefix('users')->name('admin.users.')->group(function (): void {
     Route::get('/{user}/documents',                    [AdminUserDocumentController::class, 'index'])->name('documents.index');
     Route::post('/{user}/documents',                   [AdminUserDocumentController::class, 'store'])->name('documents.store')
         ->middleware('check.permission:users.manage');
+    Route::patch('/{user}/documents/{document}',       [AdminUserDocumentController::class, 'update'])->name('documents.update')
+        ->middleware('check.permission:users.manage');
     Route::delete('/{user}/documents/{document}',      [AdminUserDocumentController::class, 'destroy'])->name('documents.destroy')
         ->middleware('check.permission:users.manage');
 });
