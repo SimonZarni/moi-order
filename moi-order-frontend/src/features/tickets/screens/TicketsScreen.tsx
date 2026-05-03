@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, FlatList, ScrollView, View, Text } from 'react-native';
+import { ActivityIndicator, FlatList, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
@@ -15,6 +15,8 @@ import { useTicketsScreen } from '@/features/tickets/hooks/useTicketsScreen';
 import { Ticket } from '@/types/models';
 import { styles } from './TicketsScreen.styles';
 
+const HERO_MIN_HEIGHT = 152;
+
 export function TicketsScreen(): React.JSX.Element {
   const {
     tickets, isLoading, isError, isRefreshing, isFetchingNextPage,
@@ -25,12 +27,17 @@ export function TicketsScreen(): React.JSX.Element {
     <>
       <HeroHeader
         accentColor={editorialPalette.gold}
-        eyebrow="Explore"
-        title="Tickets"
+        titleNode={
+          <Text>
+            <Text style={[styles.heroTitleAccent, { color: editorialPalette.gold }]}>Buy </Text>
+            <Text style={styles.heroTitleMain}>Tickets</Text>
+          </Text>
+        }
         subtitle="Book attractions & experiences"
         onBack={handleBack}
         backLabel="Back"
         hideBack
+        minHeight={HERO_MIN_HEIGHT}
       />
       <View style={styles.bodyGap} />
     </>

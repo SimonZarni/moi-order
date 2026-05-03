@@ -21,6 +21,21 @@ export const styles = StyleSheet.create({
     marginTop: -spacing.xl,
   },
 
+  // ── Hero title (single-line two-tone) ────────────────────────────────────
+  heroTitleAccent: {
+    fontSize: 26,
+    fontWeight: '400',
+    letterSpacing: 0.2,
+    lineHeight: 38,
+  },
+  heroTitleMain: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: colours.textOnDark,
+    letterSpacing: -0.8,
+    lineHeight: 38,
+  },
+
   // ── List ──────────────────────────────────────────────────────────────────
   list: {
     paddingBottom: TAB_BAR_CLEARANCE,

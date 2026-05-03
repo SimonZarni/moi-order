@@ -16,6 +16,8 @@ interface HeroHeaderProps {
   title?: string;
   // Composition slot — replaces eyebrow+title when provided (e.g. inline single-line title)
   titleNode?: React.ReactNode;
+  // Override the container's minHeight when content is shorter than the default 180px
+  minHeight?: number;
 }
 
 export function HeroHeader({
@@ -27,9 +29,10 @@ export function HeroHeader({
   onBack,
   backLabel,
   hideBack = false,
+  minHeight,
 }: HeroHeaderProps): React.JSX.Element {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, minHeight != null && { minHeight }]}>
       <View style={[styles.orbLarge, { backgroundColor: accentColor }]} />
       <View style={styles.orbSmall} />
 

@@ -17,6 +17,7 @@ import { Place } from '@/types/models';
 import { styles } from './PlacesScreen.styles';
 
 const SKELETON_COUNT = 5;
+const HERO_MIN_HEIGHT = 152;
 
 export function PlacesScreen(): React.JSX.Element {
   const {
@@ -35,9 +36,14 @@ export function PlacesScreen(): React.JSX.Element {
         onBack={handleBack}
         backLabel="Back"
         hideBack
-        eyebrow="Explore"
-        title="Places"
+        titleNode={
+          <Text>
+            <Text style={[styles.heroTitleAccent, { color: editorialPalette.gold }]}>Explore </Text>
+            <Text style={styles.heroTitleMain}>Places</Text>
+          </Text>
+        }
         subtitle="Attractions & landmarks"
+        minHeight={HERO_MIN_HEIGHT}
       />
       <PlacesSearchBar
         query={query}

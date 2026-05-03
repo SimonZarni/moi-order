@@ -7,8 +7,23 @@ import { typography } from '@/shared/theme/typography';
 import { TAB_BAR_CLEARANCE } from '@/shared/components/FloatingTabBar/FloatingTabBar.styles';
 
 export const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colours.backgroundDark },
+  root:     { flex: 1, backgroundColor: colours.backgroundDark },
   flatList: { backgroundColor: colours.backgroundLight },
+
+  // ── Hero title (single-line two-tone) ────────────────────────────────────
+  heroTitleAccent: {
+    fontSize: 26,
+    fontWeight: '400',
+    letterSpacing: 0.2,
+    lineHeight: 38,
+  },
+  heroTitleMain: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: colours.textOnDark,
+    letterSpacing: -0.8,
+    lineHeight: 38,
+  },
 
   bodyGap: {
     height: spacing.xl,
