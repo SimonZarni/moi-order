@@ -2,9 +2,13 @@
  * Principle: SRP — pure formatting utilities, no side effects.
  */
 
-// new Date("YYYY-MM-DD") parses as UTC midnight and shifts in UTC- zones.
-// Construct a local-midnight date from parts to avoid the offset.
+// For datetime strings (contain 'T'), parse as UTC — the browser converts to local time.
+// For date-only strings ("YYYY-MM-DD"), construct local midnight directly to avoid
+// UTC-midnight shift in UTC- timezones (e.g. "2026-05-04" → May 3 in UTC-5).
 function localDateFromISO(iso: string): Date {
+  if (iso.includes('T')) {
+    return new Date(iso);
+  }
   const parts = iso.split('-');
   const year  = parseInt(parts[0] ?? '0', 10);
   const month = parseInt(parts[1] ?? '1', 10);
