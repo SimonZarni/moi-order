@@ -54,10 +54,11 @@ class AdminUserDocumentController extends Controller
 
         $filePath = null;
         if ($request->hasFile('image')) {
+            // image/heif = iPhone HEIC variant; image/heic = explicit HEIC
             $filePath = $this->storage->store(
                 $request->file('image'),
                 'documents/' . $user->id,
-                ['image/jpeg', 'image/png', 'image/webp', 'image/heic'],
+                ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'],
             );
         }
 
@@ -76,8 +77,14 @@ class AdminUserDocumentController extends Controller
         });
 
         DB::afterCommit(function () use ($user, $document): void {
-            $user->notify(new AdminDocumentActionNotification('added', $document->type->label()));
-            event(new UserNotificationReceived($user));
+            try {
+                $user->notify(new AdminDocumentActionNotification('added', $document->type->label()));
+                event(new UserNotificationReceived($user));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('AdminUserDocumentController: notify failed on store', [
+                    'user_id' => $user->id, 'error' => $e->getMessage(),
+                ]);
+            }
         });
 
         return response()->json(['data' => new AdminUserDocumentResource($document)], 201);
@@ -107,7 +114,7 @@ class AdminUserDocumentController extends Controller
             $filePath = $this->storage->store(
                 $request->file('image'),
                 'documents/' . $user->id,
-                ['image/jpeg', 'image/png', 'image/webp', 'image/heic'],
+                ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'],
             );
         }
 
@@ -157,8 +164,14 @@ class AdminUserDocumentController extends Controller
         DB::transaction(fn () => $document->delete());
 
         DB::afterCommit(function () use ($user, $typeLabel): void {
-            $user->notify(new AdminDocumentActionNotification('removed', $typeLabel));
-            event(new UserNotificationReceived($user));
+            try {
+                $user->notify(new AdminDocumentActionNotification('removed', $typeLabel));
+                event(new UserNotificationReceived($user));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('AdminUserDocumentController: notify failed on destroy', [
+                    'user_id' => $user->id, 'error' => $e->getMessage(),
+                ]);
+            }
         });
 
         return response()->json(null, 204);
