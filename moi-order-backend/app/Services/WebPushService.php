@@ -7,14 +7,16 @@ namespace App\Services;
 use App\Contracts\WebPushInterface;
 use App\Models\PushSubscription;
 use App\Models\User;
-use Minishlink\WebPush\Notification;
+use Illuminate\Support\Facades\Log;
 use Minishlink\WebPush\Subscription;
 use Minishlink\WebPush\WebPush;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Principle: SRP — wraps minishlink/web-push; owns VAPID config and delivery.
  * Principle: DIP — consumers depend on WebPushInterface, never on this class directly.
+ *
+ * v10 API: sendOneNotification(SubscriptionInterface, ?string $payload, array $options, array $auth).
+ * Notification::create() and the separate Notification builder were removed in v10.
  *
  * Expired subscription cleanup: the VAPID push server returns 410 Gone when
  * a subscription is no longer valid (user cleared browser data, revoked permission).
@@ -34,7 +36,6 @@ class WebPushService implements WebPushInterface
             ],
         ]);
 
-        // Do not throw on partial failures — handle per-result below.
         $this->webPush->setAutomaticPadding(false);
     }
 
@@ -64,16 +65,15 @@ class WebPushService implements WebPushInterface
                 ],
             ]);
 
-            $notification = Notification::create()->withPayload($payload);
-
             try {
-                $report = $this->webPush->sendOneNotification($notification, $subscription);
+                // v10 API: pass subscription and payload directly — no Notification builder.
+                $report = $this->webPush->sendOneNotification($subscription, $payload);
 
-                if (!$report->isSuccess()) {
+                if (! $report->isSuccess()) {
                     $statusCode = $report->getResponse()?->getStatusCode();
 
-                    // 410 Gone = subscription expired/revoked — remove it
                     if ($statusCode === 410) {
+                        // 410 Gone = subscription expired/revoked — remove it.
                         $expiredIds[] = $sub->id;
                     } else {
                         Log::warning('[WebPush] Push failed', [
@@ -91,7 +91,7 @@ class WebPushService implements WebPushInterface
             }
         }
 
-        if (!empty($expiredIds)) {
+        if (! empty($expiredIds)) {
             PushSubscription::whereIn('id', $expiredIds)->delete();
         }
     }
