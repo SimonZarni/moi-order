@@ -3,29 +3,44 @@ import { Alert } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 
-import { uploadDocument, deleteDocument, type UploadQuota } from '@/shared/api/documents';
+import { uploadDocument, deleteDocument } from '@/shared/api/documents';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { DocumentType } from '@/types/enums';
-import { Document, ApiError } from '@/types/models';
-
-const DAILY_WARN_AT   = 10;
-const MONTHLY_WARN_AT = 23;
+import { Document, ApiError, UploadStats } from '@/types/models';
+import { formatResetDate } from '@/shared/utils/formatDate';
+import { useUploadStats } from './useUploadStats';
 
 export interface UseDocumentUploadResult {
-  isUploading: boolean;
-  isDeleting: boolean;
-  handleUploadPress: () => void;
-  handleDelete: (doc: Document) => void;
+  isUploading:           boolean;
+  isDeleting:            boolean;
+  handleUploadPress:     () => void;
+  handleDelete:          (doc: Document) => void;
+  showLimitModal:        boolean;
+  monthlyRemaining:      number;
+  handleLimitModalUpload: () => void;
+  handleLimitModalCancel: () => void;
 }
 
 export function useDocumentUpload(type: DocumentType): UseDocumentUploadResult {
-  const queryClient = useQueryClient();
+  const queryClient   = useQueryClient();
+  const { stats }     = useUploadStats();
   const [isUploading, setIsUploading] = useState(false);
-  const [isDeleting, setIsDeleting]   = useState(false);
+  const [isDeleting,  setIsDeleting]  = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
 
   const invalidate = useCallback((): void => {
     void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DOCUMENTS.LIST(type) });
+    void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DOCUMENTS.UPLOAD_STATS });
   }, [queryClient, type]);
+
+  const launchPicker = useCallback(async (): Promise<void> => {
+    Alert.alert('Add Document', 'How would you like to add this document?', [
+      { text: 'Take Photo',          onPress: () => { void launchCamera(); } },
+      { text: 'Choose from Library', onPress: () => { void launchLibrary(); } },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const launchCamera = useCallback(async (): Promise<void> => {
     const perm = await ImagePicker.requestCameraPermissionsAsync();
@@ -40,7 +55,8 @@ export function useDocumentUpload(type: DocumentType): UseDocumentUploadResult {
     });
     if (result.canceled || !result.assets[0]) return;
     await doUpload(result.assets[0].uri, result.assets[0].mimeType ?? 'image/jpeg');
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const launchLibrary = useCallback(async (): Promise<void> => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -55,48 +71,64 @@ export function useDocumentUpload(type: DocumentType): UseDocumentUploadResult {
     });
     if (result.canceled || !result.assets[0]) return;
     await doUpload(result.assets[0].uri, result.assets[0].mimeType ?? 'image/jpeg');
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const showQuotaWarning = useCallback((quota: UploadQuota): void => {
-    const lines: string[] = [];
-    if (quota.daily_used >= DAILY_WARN_AT) {
-      const n = quota.daily_remaining;
-      lines.push(`${n} upload${n === 1 ? '' : 's'} remaining today`);
-    }
-    if (quota.monthly_used >= MONTHLY_WARN_AT) {
-      const n = quota.monthly_remaining;
-      lines.push(`${n} upload${n === 1 ? '' : 's'} remaining this month`);
-    }
-    if (lines.length > 0) {
-      Alert.alert('Upload Limit', lines.join('\n'));
-    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const doUpload = useCallback(async (uri: string, mimeType: string): Promise<void> => {
     try {
       setIsUploading(true);
-      const { quota } = await uploadDocument(uri, mimeType, type);
+      await uploadDocument(uri, mimeType, type);
       invalidate();
-      showQuotaWarning(quota);
     } catch (error: unknown) {
       const apiError = error as ApiError;
       if (apiError.status === 429) {
-        Alert.alert('Upload limit reached', 'Please try again later.');
+        Alert.alert('Upload Limit Reached', 'You have reached your monthly upload limit.');
       } else {
         Alert.alert('Upload failed', apiError.message ?? 'Could not upload document. Please try again.');
       }
     } finally {
       setIsUploading(false);
     }
-  }, [type, invalidate, showQuotaWarning]);
+  }, [type, invalidate]);
 
   const handleUploadPress = useCallback((): void => {
-    Alert.alert('Add Document', 'How would you like to add this document?', [
-      { text: 'Take Photo',           onPress: () => { void launchCamera(); } },
-      { text: 'Choose from Library',  onPress: () => { void launchLibrary(); } },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
-  }, [launchCamera, launchLibrary]);
+    if (!stats || stats.is_privileged) {
+      void launchPicker();
+      return;
+    }
+
+    // Hard block: monthly limit reached
+    if (stats.monthly_remaining !== null && stats.monthly_remaining <= 0) {
+      const resetDate = stats.reset_date ? formatResetDate(stats.reset_date) : 'next month';
+      Alert.alert(
+        'Monthly Limit Reached',
+        `You have used all ${stats.monthly_limit} uploads this month.\nResets on ${resetDate}.`,
+      );
+      return;
+    }
+
+    // Soft warning: today's section limit hit — show modal with remaining monthly count
+    const sectionStats = stats.sections[type as keyof typeof stats.sections];
+    if (
+      sectionStats &&
+      sectionStats.daily_limit !== null &&
+      sectionStats.today_used >= sectionStats.daily_limit
+    ) {
+      setShowLimitModal(true);
+      return;
+    }
+
+    void launchPicker();
+  }, [stats, type, launchPicker]);
+
+  const handleLimitModalUpload = useCallback((): void => {
+    setShowLimitModal(false);
+    void launchPicker();
+  }, [launchPicker]);
+
+  const handleLimitModalCancel = useCallback((): void => {
+    setShowLimitModal(false);
+  }, []);
 
   const handleDelete = useCallback((doc: Document): void => {
     Alert.alert('Remove Document', 'Delete this document? This cannot be undone.', [
@@ -120,5 +152,16 @@ export function useDocumentUpload(type: DocumentType): UseDocumentUploadResult {
     ]);
   }, [invalidate]);
 
-  return { isUploading, isDeleting, handleUploadPress, handleDelete };
+  const monthlyRemaining = stats?.monthly_remaining ?? 0;
+
+  return {
+    isUploading,
+    isDeleting,
+    handleUploadPress,
+    handleDelete,
+    showLimitModal,
+    monthlyRemaining,
+    handleLimitModalUpload,
+    handleLimitModalCancel,
+  };
 }

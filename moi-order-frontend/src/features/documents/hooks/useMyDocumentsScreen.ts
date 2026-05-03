@@ -5,19 +5,22 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchDocuments } from '@/shared/api/documents';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { DOCUMENT_TYPE } from '@/types/enums';
-import { Document } from '@/types/models';
+import { Document, UploadStats } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 import { useDocumentUpload, UseDocumentUploadResult } from './useDocumentUpload';
+import { useUploadStats } from './useUploadStats';
 
 export interface UseMyDocumentsScreenResult extends UseDocumentUploadResult {
-  documents: Document[];
-  isLoading: boolean;
+  documents:  Document[];
+  isLoading:  boolean;
+  stats:      UploadStats | undefined;
   handleBack: () => void;
 }
 
 export function useMyDocumentsScreen(): UseMyDocumentsScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const upload     = useDocumentUpload(DOCUMENT_TYPE.Other);
+  const { stats }  = useUploadStats();
 
   const { data: documents = [], isLoading } = useQuery({
     queryKey: QUERY_KEYS.DOCUMENTS.LIST(DOCUMENT_TYPE.Other),
@@ -27,5 +30,5 @@ export function useMyDocumentsScreen(): UseMyDocumentsScreenResult {
 
   const handleBack = (): void => { navigation.goBack(); };
 
-  return { documents, isLoading, handleBack, ...upload };
+  return { documents, isLoading, stats, handleBack, ...upload };
 }

@@ -160,6 +160,8 @@ Route::prefix('users')->name('admin.users.')->group(function (): void {
         ->middleware('check.permission:users.manage');
     Route::patch('/{user}/activate', [AdminUserController::class, 'activate'])->name('activate')
         ->middleware('check.permission:users.manage');
+    Route::patch('/{user}/role', [AdminUserController::class, 'updateRole'])->name('update-role')
+        ->middleware('check.permission:users.manage');
 
     // User document sub-routes
     Route::get('/{user}/documents',                    [AdminUserDocumentController::class, 'index'])->name('documents.index');

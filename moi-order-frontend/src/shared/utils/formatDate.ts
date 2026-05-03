@@ -33,6 +33,15 @@ export function formatDateDMY(iso: string): string {
   return `${dd}-${mm}-${yyyy}`;
 }
 
+/** Returns "1 June 2026" — used in upload limit reset messages. */
+export function formatResetDate(iso: string): string {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(localDateFromISO(iso));
+}
+
 export function formatDateTime(iso: string): string {
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',

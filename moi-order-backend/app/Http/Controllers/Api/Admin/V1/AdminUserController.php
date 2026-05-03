@@ -6,7 +6,9 @@ namespace App\Http\Controllers\Api\Admin\V1;
 
 use App\DTOs\AdminCreateUserDTO;
 use App\DTOs\AdminUpdateUserDTO;
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\AdminUpdateUserRoleRequest;
 use App\Http\Requests\Admin\AdminStoreUserRequest;
 use App\Http\Requests\Admin\AdminSuspendUserRequest;
 use App\Http\Requests\Admin\AdminUpdateUserRequest;
@@ -110,5 +112,13 @@ class AdminUserController extends Controller
         $updated = $this->service->activate($user);
 
         return response()->json(['data' => new AdminUserResource($updated)]);
+    }
+
+    /** PATCH /api/admin/v1/users/{user}/role */
+    public function updateRole(AdminUpdateUserRoleRequest $request, User $user): JsonResponse
+    {
+        $user->grantRole(UserRole::from($request->string('role')->toString()));
+
+        return response()->json(['data' => new AdminUserResource($user->fresh())]);
     }
 }

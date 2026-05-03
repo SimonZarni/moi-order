@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\DeviceTokenController;
 use App\Http\Controllers\Api\V1\DocumentController;
+use App\Http\Controllers\Api\V1\UploadStatsController;
 use App\Http\Controllers\Api\V1\DynamicSubmissionController;
 use App\Http\Controllers\Api\V1\FavoritePlaceController;
 use App\Http\Controllers\Api\V1\FoodOrderController;
@@ -38,9 +39,10 @@ Route::delete('/profile/link/apple',  [ProfileController::class, 'unlinkApple'])
 Route::delete('/profile/link/line',   [ProfileController::class, 'unlinkLine']);
 
 // Documents (passport, 90-day report, other — OCR via Claude vision)
-Route::get('/documents',       [DocumentController::class, 'index']);
-Route::post('/documents',      [DocumentController::class, 'store']);
-Route::delete('/documents/{id}', [DocumentController::class, 'destroy']);
+Route::get('/documents',              [DocumentController::class, 'index']);
+Route::post('/documents',             [DocumentController::class, 'store']);
+Route::delete('/documents/{id}',      [DocumentController::class, 'destroy']);
+Route::get('/documents/upload-stats', UploadStatsController::class);
 
 // Submissions
 Route::get('/submissions',                 [SubmissionController::class,       'index']);

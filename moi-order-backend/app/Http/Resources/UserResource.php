@@ -29,6 +29,8 @@ class UserResource extends JsonResource
             'has_apple'         => $this->apple_id !== null,
             'has_line'          => $this->line_id !== null,
             'date_of_birth'     => $this->date_of_birth?->format('Y-m-d'),
+            'role'              => $this->user_role?->value ?? 'regular',
+            'is_privileged'     => $this->isPrivileged(),
             'email_verified_at' => $this->email_verified_at?->toISOString(),
             'created_at'        => $this->created_at->toISOString(),
         ];

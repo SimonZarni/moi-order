@@ -156,3 +156,11 @@ export const FIELD_TYPE = {
 
 export type FieldType = (typeof FIELD_TYPE)[keyof typeof FIELD_TYPE];
 
+// Mirrors App\Enums\UserRole
+export const USER_ROLE = {
+  Regular:    'regular',
+  Privileged: 'privileged',
+} as const;
+
+export type UserRole = (typeof USER_ROLE)[keyof typeof USER_ROLE];
+

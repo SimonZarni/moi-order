@@ -4,13 +4,21 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DocumentCard } from '@/features/documents/components/DocumentCard';
+import { UploadLimitBadge } from '@/features/documents/components/UploadLimitBadge';
+import { UploadLimitModal } from '@/features/documents/components/UploadLimitModal';
 import { useNinetyDayVaultScreen } from '@/features/documents/hooks/useNinetyDayVaultScreen';
+import { DOCUMENT_TYPE } from '@/types/enums';
 import { colours } from '@/shared/theme/colours';
 import { styles } from './DocumentVaultScreen.styles';
 
 export function NinetyDayVaultScreen(): React.JSX.Element {
-  const { documents, isLoading, isUploading, isDeleting, handleBack, handleUploadPress, handleDelete } =
-    useNinetyDayVaultScreen();
+  const {
+    documents, isLoading, stats,
+    isUploading, isDeleting,
+    handleBack, handleUploadPress, handleDelete,
+    showLimitModal, monthlyRemaining,
+    handleLimitModalUpload, handleLimitModalCancel,
+  } = useNinetyDayVaultScreen();
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -35,6 +43,8 @@ export function NinetyDayVaultScreen(): React.JSX.Element {
               Upload your Thai 90-day notification slip (TM47). The next report date will be extracted automatically.
             </Text>
           </View>
+
+          <UploadLimitBadge stats={stats} sectionType={DOCUMENT_TYPE.NinetyDayReport} />
 
           <Pressable
             style={[styles.uploadBtn, (isUploading || isDeleting) && styles.uploadBtnDisabled]}
@@ -68,6 +78,13 @@ export function NinetyDayVaultScreen(): React.JSX.Element {
           )}
         </ScrollView>
       </View>
+
+      <UploadLimitModal
+        visible={showLimitModal}
+        monthlyRemaining={monthlyRemaining}
+        onUpload={handleLimitModalUpload}
+        onCancel={handleLimitModalCancel}
+      />
     </SafeAreaView>
   );
 }

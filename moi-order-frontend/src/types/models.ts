@@ -56,8 +56,28 @@ export interface User {
   has_apple: boolean;
   has_line: boolean;
   date_of_birth: string | null;  // ISO date "YYYY-MM-DD"
+  role: string;
+  is_privileged: boolean;
   email_verified_at: string | null;
   created_at: string;
+}
+
+export interface UploadSectionStats {
+  today_used: number;
+  daily_limit: number | null;  // null = unlimited (privileged)
+}
+
+export interface UploadStats {
+  is_privileged: boolean;
+  monthly_used: number;
+  monthly_limit: number | null;
+  monthly_remaining: number | null;
+  reset_date: string | null;  // "YYYY-MM-DD"
+  sections: {
+    passport:          UploadSectionStats;
+    ninety_day_report: UploadSectionStats;
+    other:             UploadSectionStats;
+  };
 }
 
 // ── Services ───────────────────────────────────────────────────────────────

@@ -35,7 +35,7 @@ class DocumentService
      */
     public function upload(User $user, UploadedFile $file, DocumentType $type): array
     {
-        if (! $this->limiter->isAllowed($user->id)) {
+        if (! $this->limiter->isAllowed($user)) {
             throw new DomainException('document.upload_limit_exceeded', 429);
         }
 
@@ -62,9 +62,14 @@ class DocumentService
         });
 
         // Increment only after a successful upload so failed attempts don't count.
-        $this->limiter->increment($user->id);
+        $this->limiter->increment($user, $type);
 
-        return ['document' => $document, 'quota' => $this->limiter->getQuota($user->id)];
+        return ['document' => $document, 'quota' => $this->limiter->getStats($user)];
+    }
+
+    public function getUploadStats(User $user): array
+    {
+        return $this->limiter->getStats($user);
     }
 
     /** @return Collection<int, Document> */

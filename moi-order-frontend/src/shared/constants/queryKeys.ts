@@ -43,7 +43,8 @@ export const QUERY_KEYS = {
     LIST: () => ['tags', 'list'] as const,
   },
   DOCUMENTS: {
-    LIST: (type: string) => ['documents', 'list', type] as const,
+    LIST:         (type: string) => ['documents', 'list', type] as const,
+    UPLOAD_STATS: ['documents', 'upload-stats'] as const,
   },
   RESTAURANTS: {
     LIST:   (search?: string) => ['restaurants', 'list', search ?? ''] as const,

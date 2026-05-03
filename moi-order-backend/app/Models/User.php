@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\UserRole;
 use App\Enums\UserStatusEnum;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
@@ -49,6 +50,7 @@ class User extends Authenticatable
         'line_id',
         'profile_picture_path',
         'last_active_at',
+        'user_role',
     ];
 
     /**
@@ -76,6 +78,7 @@ class User extends Authenticatable
             'is_admin'          => 'boolean',
             'is_merchant'       => 'boolean',
             'status'            => UserStatusEnum::class,
+            'user_role'         => UserRole::class,
             'suspended_until'   => 'datetime',
             'last_active_at'    => 'datetime',
         ];
@@ -84,6 +87,16 @@ class User extends Authenticatable
     // ─── Domain methods ───────────────────────────────────────────────────────
 
     /** Principle: Tell-Don't-Ask — consumers ask the model, not the raw flag. */
+    public function isPrivileged(): bool
+    {
+        return $this->user_role === UserRole::Privileged;
+    }
+
+    public function grantRole(UserRole $role): void
+    {
+        $this->update(['user_role' => $role->value]);
+    }
+
     public function isAdmin(): bool
     {
         return $this->is_admin === true;
