@@ -3,10 +3,13 @@ import { Alert } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 
-import { uploadDocument, deleteDocument } from '@/shared/api/documents';
+import { uploadDocument, deleteDocument, type UploadQuota } from '@/shared/api/documents';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { DocumentType } from '@/types/enums';
 import { Document, ApiError } from '@/types/models';
+
+const DAILY_WARN_AT   = 10;
+const MONTHLY_WARN_AT = 23;
 
 export interface UseDocumentUploadResult {
   isUploading: boolean;
@@ -54,18 +57,38 @@ export function useDocumentUpload(type: DocumentType): UseDocumentUploadResult {
     await doUpload(result.assets[0].uri, result.assets[0].mimeType ?? 'image/jpeg');
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const showQuotaWarning = useCallback((quota: UploadQuota): void => {
+    const lines: string[] = [];
+    if (quota.daily_used >= DAILY_WARN_AT) {
+      const n = quota.daily_remaining;
+      lines.push(`${n} upload${n === 1 ? '' : 's'} remaining today`);
+    }
+    if (quota.monthly_used >= MONTHLY_WARN_AT) {
+      const n = quota.monthly_remaining;
+      lines.push(`${n} upload${n === 1 ? '' : 's'} remaining this month`);
+    }
+    if (lines.length > 0) {
+      Alert.alert('Upload Limit', lines.join('\n'));
+    }
+  }, []);
+
   const doUpload = useCallback(async (uri: string, mimeType: string): Promise<void> => {
     try {
       setIsUploading(true);
-      await uploadDocument(uri, mimeType, type);
+      const { quota } = await uploadDocument(uri, mimeType, type);
       invalidate();
+      showQuotaWarning(quota);
     } catch (error: unknown) {
       const apiError = error as ApiError;
-      Alert.alert('Upload failed', apiError.message ?? 'Could not upload document. Please try again.');
+      if (apiError.status === 429) {
+        Alert.alert('Upload limit reached', 'Please try again later.');
+      } else {
+        Alert.alert('Upload failed', apiError.message ?? 'Could not upload document. Please try again.');
+      }
     } finally {
       setIsUploading(false);
     }
-  }, [type, invalidate]);
+  }, [type, invalidate, showQuotaWarning]);
 
   const handleUploadPress = useCallback((): void => {
     Alert.alert('Add Document', 'How would you like to add this document?', [

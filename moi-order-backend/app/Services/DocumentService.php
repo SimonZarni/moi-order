@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Contracts\DocumentOcrInterface;
 use App\Contracts\FileStorageInterface;
 use App\Enums\DocumentType;
+use App\Exceptions\DomainException;
 use App\Models\Document;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -22,18 +23,25 @@ class DocumentService
     public function __construct(
         private readonly DocumentOcrInterface $ocr,
         private readonly FileStorageInterface $storage,
+        private readonly DocumentUploadLimiterService $limiter,
     ) {}
 
     /**
      * OCR happens before storage so a failed analysis produces no orphaned files.
+     * Rate limit is checked before OCR to avoid wasting Claude API credits.
      *
-     * @return Document (with is_valid_type potentially false — caller decides how to surface)
+     * @return array{ document: Document, quota: array }
+     * @throws DomainException 429 when daily or monthly quota is exhausted
      */
-    public function upload(User $user, UploadedFile $file, DocumentType $type): Document
+    public function upload(User $user, UploadedFile $file, DocumentType $type): array
     {
+        if (! $this->limiter->isAllowed($user->id)) {
+            throw new DomainException('document.upload_limit_exceeded', 429);
+        }
+
         $result = $this->ocr->analyze($file, $type);
 
-        return DB::transaction(function () use ($user, $file, $type, $result): Document {
+        $document = DB::transaction(function () use ($user, $file, $type, $result): Document {
             $path = $this->storage->store(
                 $file,
                 "documents/{$user->id}",
@@ -52,6 +60,11 @@ class DocumentService
                 'validation_message' => $result->validationMessage,
             ]);
         });
+
+        // Increment only after a successful upload so failed attempts don't count.
+        $this->limiter->increment($user->id);
+
+        return ['document' => $document, 'quota' => $this->limiter->getQuota($user->id)];
     }
 
     /** @return Collection<int, Document> */

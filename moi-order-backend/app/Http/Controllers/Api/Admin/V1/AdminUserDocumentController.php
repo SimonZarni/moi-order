@@ -77,11 +77,13 @@ class AdminUserDocumentController extends Controller
         });
 
         DB::afterCommit(function () use ($user, $document): void {
+            // notify() is safe: 'database' channel writes to DB, ExpoPushChannel has its own catch.
+            $user->notify(new AdminDocumentActionNotification('added', $document->type->label()));
+            // Pusher broadcast is best-effort — failure must not 500 the HTTP response.
             try {
-                $user->notify(new AdminDocumentActionNotification('added', $document->type->label()));
                 event(new UserNotificationReceived($user));
             } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::warning('AdminUserDocumentController: notify failed on store', [
+                \Illuminate\Support\Facades\Log::warning('AdminUserDocumentController: Pusher failed on store', [
                     'user_id' => $user->id, 'error' => $e->getMessage(),
                 ]);
             }
@@ -155,8 +157,9 @@ class AdminUserDocumentController extends Controller
             abort(404);
         }
 
-        if (! $document->is_admin_created) {
-            abort(403, 'Cannot delete user-uploaded documents.');
+        // Deletable if admin created it, OR if the OCR flagged it as wrong document type.
+        if (! $document->is_admin_created && $document->is_valid_type) {
+            abort(403, 'Cannot delete valid user-uploaded documents.');
         }
 
         $typeLabel = $document->type->label();
@@ -164,11 +167,11 @@ class AdminUserDocumentController extends Controller
         DB::transaction(fn () => $document->delete());
 
         DB::afterCommit(function () use ($user, $typeLabel): void {
+            $user->notify(new AdminDocumentActionNotification('removed', $typeLabel));
             try {
-                $user->notify(new AdminDocumentActionNotification('removed', $typeLabel));
                 event(new UserNotificationReceived($user));
             } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::warning('AdminUserDocumentController: notify failed on destroy', [
+                \Illuminate\Support\Facades\Log::warning('AdminUserDocumentController: Pusher failed on destroy', [
                     'user_id' => $user->id, 'error' => $e->getMessage(),
                 ]);
             }

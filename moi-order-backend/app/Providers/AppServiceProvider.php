@@ -92,11 +92,14 @@ class AppServiceProvider extends ServiceProvider
         // DIP: bind Claude vision adapter for document OCR.
         $this->app->bind(DocumentOcrInterface::class, ClaudeOcrService::class);
 
+        $this->app->bind(\App\Services\DocumentUploadLimiterService::class);
+
         $this->app->bind(
             DocumentService::class,
             fn ($app) => new DocumentService(
                 $app->make(DocumentOcrInterface::class),
                 $app->make(FileStorageInterface::class),
+                $app->make(\App\Services\DocumentUploadLimiterService::class),
             )
         );
 

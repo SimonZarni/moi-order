@@ -31,10 +31,13 @@ class DocumentController extends Controller
 
     public function store(UploadDocumentRequest $request): JsonResponse
     {
-        $type     = DocumentType::from($request->string('type')->toString());
-        $document = $this->service->upload($request->user(), $request->file('image'), $type);
+        $type   = DocumentType::from($request->string('type')->toString());
+        $result = $this->service->upload($request->user(), $request->file('image'), $type);
 
-        return response()->json(['data' => new DocumentResource($document)], 201);
+        return response()->json([
+            'data'  => new DocumentResource($result['document']),
+            'quota' => $result['quota'],
+        ], 201);
     }
 
     public function destroy(Request $request, int $id): JsonResponse

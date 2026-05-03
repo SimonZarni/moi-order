@@ -373,13 +373,13 @@ function DocSection({ label, docs, canManage, onDelete, onEdit, onPreview }: Doc
                   </Typography>
                 </Box>
 
-                {/* Actions — edit all docs, delete admin-created only */}
+                {/* Actions — edit all docs; delete admin-created or invalid-type docs */}
                 {canManage && (
                   <Stack direction="row" spacing={0.5} sx={{ flexShrink: 0 }}>
                     <IconButton size="small" onClick={() => onEdit(doc)} title="Edit">
                       <Iconify icon="solar:pen-bold" width={16} />
                     </IconButton>
-                    {doc.is_admin_created && (
+                    {(doc.is_admin_created || !doc.is_valid_type) && (
                       <IconButton size="small" color="error" onClick={() => onDelete(doc)} title="Delete">
                         <Iconify icon="solar:trash-bin-trash-bold" width={16} />
                       </IconButton>
@@ -580,7 +580,19 @@ export function UserDetailView() {
         <Tab label={`Ticket Orders (${user.recent_ticket_orders.length})`} />
         <Tab label={`Food Orders (${user.recent_food_orders.length})`} />
         <Tab label={`Services (${user.service_submissions.length})`} />
-        <Tab label={`Documents (${user.documents.length})`} />
+        <Tab label={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+            {`Documents (${user.documents.length})`}
+            {user.documents.filter((d) => !d.is_valid_type).length > 0 && (
+              <Chip
+                size="small"
+                label={user.documents.filter((d) => !d.is_valid_type).length}
+                color="warning"
+                sx={{ height: 16, fontSize: 10, fontWeight: 700, minWidth: 20, px: 0.5 }}
+              />
+            )}
+          </Box>
+        } />
       </Tabs>
 
       {/* Tab 0: Connected accounts */}
