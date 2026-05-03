@@ -97,7 +97,7 @@ function buildDocFormData(payload: CreateDocumentPayload): FormData {
   if (payload.extension_date) fd.append('extension_date', payload.extension_date);
   // Always append so the backend can save or clear the note (empty string → null on backend)
   fd.append('validation_message', payload.validation_message ?? '');
-  fd.append('is_valid_type', String(payload.is_valid_type ?? true));
+  fd.append('is_valid_type', (payload.is_valid_type ?? true) ? '1' : '0');
   if (payload.extracted_data) {
     Object.entries(payload.extracted_data).forEach(([k, v]) => {
       if (v) fd.append(`extracted_data[${k}]`, v);
