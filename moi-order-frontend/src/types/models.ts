@@ -345,6 +345,7 @@ export interface OrderChatMessage {
 
 export interface HomeCard {
   id: number;
+  parent_id: number | null;
   slug: string;
   position: number;
   title_en: string;
@@ -357,12 +358,13 @@ export interface HomeCard {
   icon_key: string;
   icon_type: import('./enums').HomeCardIconType;
   icon_url: string | null;
-  navigation_screen: string;
+  navigation_screen: string | null;
   route_type: import('./enums').HomeCardRouteType;
   route_url: string | null;
   navigation_params: Record<string, unknown> | null;
   is_active: boolean;
   is_coming_soon: boolean;
+  children?: HomeCard[];
 }
 
 // ── API wrappers ───────────────────────────────────────────────────────────

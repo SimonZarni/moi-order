@@ -107,6 +107,7 @@ export const HOME_CARD_ICON_KEY = {
   Passport: 'passport',
   Food:     'food',
   Ticket:   'ticket',
+  Company:  'company',
 } as const;
 
 // Builtin nav screen keys — kept for the switch-case in homeCardNavigation.ts

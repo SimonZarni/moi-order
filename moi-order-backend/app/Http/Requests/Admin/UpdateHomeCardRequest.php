@@ -6,6 +6,7 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class UpdateHomeCardRequest extends FormRequest
 {
@@ -19,6 +20,7 @@ class UpdateHomeCardRequest extends FormRequest
         $cardId = $this->route('homeCard')?->id;
 
         return [
+            'parent_id'         => ['nullable', 'integer', Rule::exists('home_cards', 'id')],
             'slug'              => ['sometimes', 'string', 'max:100', 'regex:/^[a-z0-9-]+$/', Rule::unique('home_cards', 'slug')->ignore($cardId)],
             'title_en'          => ['sometimes', 'string', 'max:100'],
             'title_mm'          => ['sometimes', 'string', 'max:200'],
@@ -28,16 +30,33 @@ class UpdateHomeCardRequest extends FormRequest
             'tag_mm'            => ['sometimes', 'string', 'max:100'],
             'accent_color'      => ['sometimes', 'string', 'max:20', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'icon_key'          => ['sometimes', 'string', Rule::exists('home_card_icons', 'key')],
-            'navigation_screen' => ['sometimes', 'string', Rule::exists('home_card_routes', 'key')],
+            'navigation_screen' => ['nullable', 'string', Rule::exists('home_card_routes', 'key')],
             'navigation_params' => ['nullable', 'array'],
             'is_active'         => ['sometimes', 'boolean'],
             'is_coming_soon'    => ['sometimes', 'boolean'],
         ];
     }
 
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $v): void {
+            $parentId = $this->integer('parent_id');
+            if (!$parentId) {
+                return;
+            }
+            $parentHasParent = \App\Models\HomeCard::where('id', $parentId)
+                ->whereNotNull('parent_id')
+                ->exists();
+            if ($parentHasParent) {
+                $v->errors()->add('parent_id', 'The selected parent card is itself a child card. Nesting is limited to one level.');
+            }
+        });
+    }
+
     public function attributes(): array
     {
         return [
+            'parent_id'         => 'parent card',
             'slug'              => 'slug',
             'title_en'          => 'English title',
             'title_mm'          => 'Myanmar title',

@@ -28,12 +28,13 @@ class HomeCardService
     {
         // TTL matches signed URL expiry (30 min) with a 5-min safety margin
         return Cache::remember(CacheKeys::HOME_CARDS_VISIBLE, now()->addMinutes(25), function (): Collection {
-            return HomeCard::visible()->with(['icon', 'route'])->get()
+            return HomeCard::visible()
+                ->with(['icon', 'route', 'children.icon', 'children.route'])
+                ->get()
                 ->each(function (HomeCard $card): void {
-                    /** @var HomeCardIcon|null $icon */
-                    $icon = $card->icon;
-                    if ($icon && $icon->type === HomeCardIconType::Custom && $icon->image_path) {
-                        $icon->image_url = $this->storage->publicUrl($icon->image_path);
+                    $this->resolveIconUrl($card);
+                    foreach ($card->children as $child) {
+                        $this->resolveIconUrl($child);
                     }
                 });
         });
@@ -49,6 +50,7 @@ class HomeCardService
         $position = HomeCard::max('position') + 1;
 
         $card = HomeCard::create([
+            'parent_id'         => $dto->parentId,
             'slug'              => $dto->slug,
             'position'          => $position,
             'title_en'          => $dto->titleEn,
@@ -73,6 +75,7 @@ class HomeCardService
     public function update(HomeCard $card, HomeCardDTO $dto): HomeCard
     {
         $card->update([
+            'parent_id'         => $dto->parentId,
             'slug'              => $dto->slug,
             'title_en'          => $dto->titleEn,
             'title_mm'          => $dto->titleMm,
@@ -121,5 +124,14 @@ class HomeCardService
         });
 
         Cache::forget(CacheKeys::HOME_CARDS_VISIBLE);
+    }
+
+    private function resolveIconUrl(HomeCard $card): void
+    {
+        /** @var HomeCardIcon|null $icon */
+        $icon = $card->icon;
+        if ($icon && $icon->type === HomeCardIconType::Custom && $icon->image_path) {
+            $icon->image_url = $this->storage->publicUrl($icon->image_path);
+        }
     }
 }

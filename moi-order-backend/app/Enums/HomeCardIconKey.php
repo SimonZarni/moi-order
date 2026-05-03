@@ -15,4 +15,5 @@ enum HomeCardIconKey: string
     case Passport  = 'passport';
     case Food      = 'food';
     case Ticket    = 'ticket';
+    case Company   = 'company';
 }

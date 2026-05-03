@@ -17,11 +17,13 @@ type AirportParams = { serviceTypeId: number | null; price: number | null };
  */
 export function navigateToCardScreen(
   navigation: Nav,
-  screen: string,
+  screen: string | null,
   routeType: string,
   routeUrl: string | null,
   airportParams: AirportParams
 ): void {
+  if (screen === null) return;
+
   if (routeType === HOME_CARD_ROUTE_TYPE.ExternalUrl) {
     if (routeUrl) {
       Linking.openURL(routeUrl).catch(() => {

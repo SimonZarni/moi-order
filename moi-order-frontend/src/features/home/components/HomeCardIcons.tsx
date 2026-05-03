@@ -1,5 +1,9 @@
 import React from 'react';
-import Svg, { Circle, Path, Rect, Line } from 'react-native-svg';
+import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import { Image } from 'expo-image';
+
+import { HOME_CARD_ICON_TYPE } from '@/types/enums';
+import { styles } from './HomeCardGrid.styles';
 
 // ── 90-Day Report — sage green calendar ───────────────────────────────────────
 export function CalendarIcon(): React.JSX.Element {
@@ -181,4 +185,61 @@ export function FlashIcon(): React.JSX.Element {
       <Path d="M23 3 L10 22 L15 22 L22 8 Z" fill="#9dc5be" />
     </Svg>
   );
+}
+
+// ── Company Services — navy building ─────────────────────────────────────────
+export function CompanyIcon(): React.JSX.Element {
+  return (
+    <Svg width={40} height={40} viewBox="0 0 40 40">
+      {/* Building body */}
+      <Rect x="6" y="13" width="28" height="25" rx="2" fill="#1e3d6b" />
+      {/* Roof band */}
+      <Rect x="4" y="10" width="32" height="6" rx="2" fill="#2a5190" />
+      {/* Windows row 1 */}
+      <Rect x="10" y="19" width="5" height="5" rx="1" fill="rgba(255,255,255,0.65)" />
+      <Rect x="18" y="19" width="5" height="5" rx="1" fill="rgba(255,255,255,0.65)" />
+      <Rect x="26" y="19" width="5" height="5" rx="1" fill="rgba(255,255,255,0.65)" />
+      {/* Windows row 2 */}
+      <Rect x="10" y="27" width="5" height="5" rx="1" fill="rgba(255,255,255,0.40)" />
+      <Rect x="26" y="27" width="5" height="5" rx="1" fill="rgba(255,255,255,0.40)" />
+      {/* Door */}
+      <Rect x="17" y="28" width="7" height="10" rx="1" fill="rgba(255,255,255,0.25)" />
+      <Circle cx="22.5" cy="33" r="1" fill="rgba(255,255,255,0.65)" />
+      {/* Flag pole */}
+      <Rect x="19.5" y="3" width="1.5" height="9" rx="0.75" fill="#89a8d0" />
+      {/* Flag */}
+      <Path d="M21 3 L29 5.5 L21 8 Z" fill="#4a7fa5" />
+    </Svg>
+  );
+}
+
+// ── Shared icon map + CardIcon used by both HomeCardGrid and HomeCardGroup ────
+
+type IconComponent = () => React.JSX.Element;
+
+export const BUILTIN_ICON_MAP: Record<string, IconComponent> = {
+  calendar: CalendarIcon,
+  location: LocationIcon,
+  flash:    FlashIcon,
+  embassy:  EmbassyIcon,
+  airport:  AirportIcon,
+  bus:      BusIcon,
+  passport: PassportIcon,
+  food:     FoodIcon,
+  ticket:   TicketIcon,
+  company:  CompanyIcon,
+};
+
+export interface CardIconProps {
+  iconKey: string;
+  iconType: string;
+  iconUrl: string | null;
+}
+
+export function CardIcon({ iconKey, iconType, iconUrl }: CardIconProps): React.JSX.Element | null {
+  if (iconType === HOME_CARD_ICON_TYPE.Custom && iconUrl) {
+    return <Image source={{ uri: iconUrl }} style={styles.customIconImage} contentFit="contain" />;
+  }
+  const Icon = BUILTIN_ICON_MAP[iconKey];
+  return Icon ? <Icon /> : null;
 }

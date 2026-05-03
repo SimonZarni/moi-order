@@ -15,6 +15,7 @@ class HomeCardResource extends JsonResource
     {
         return [
             'id'                => $this->id,
+            'parent_id'         => $this->parent_id,
             'slug'              => $this->slug,
             'position'          => $this->position,
             'title_en'          => $this->title_en,
@@ -33,6 +34,7 @@ class HomeCardResource extends JsonResource
             'navigation_params' => $this->navigation_params,
             'is_active'         => $this->is_active,
             'is_coming_soon'    => $this->is_coming_soon,
+            'children'          => HomeCardResource::collection($this->whenLoaded('children')),
         ];
     }
 }

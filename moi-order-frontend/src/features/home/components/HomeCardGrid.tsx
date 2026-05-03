@@ -1,57 +1,16 @@
 import React, { useCallback } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { HomeCard } from '@/types/models';
-import { HOME_CARD_ICON_TYPE } from '@/types/enums';
 import { RootStackParamList } from '@/types/navigation';
 import { navigateToCardScreen } from '@/features/home/utils/homeCardNavigation';
 import { SkeletonBox } from '@/shared/components/SkeletonBox/SkeletonBox';
 import { useLocale } from '@/shared/hooks/useLocale';
-import {
-  AirportIcon,
-  BusIcon,
-  CalendarIcon,
-  EmbassyIcon,
-  FlashIcon,
-  FoodIcon,
-  LocationIcon,
-  PassportIcon,
-  TicketIcon,
-} from './HomeCardIcons';
+import { CardIcon } from './HomeCardIcons';
+import { HomeCardGroup } from './HomeCardGroup';
 import { styles } from './HomeCardGrid.styles';
-
-// ── Icon map ─────────────────────────────────────────────────────────────────
-
-type IconComponent = () => React.JSX.Element;
-
-const BUILTIN_ICON_MAP: Record<string, IconComponent> = {
-  calendar: CalendarIcon,
-  location: LocationIcon,
-  flash:    FlashIcon,
-  embassy:  EmbassyIcon,
-  airport:  AirportIcon,
-  bus:      BusIcon,
-  passport: PassportIcon,
-  food:     FoodIcon,
-  ticket:   TicketIcon,
-};
-
-interface CardIconProps {
-  iconKey: string;
-  iconType: string;
-  iconUrl: string | null;
-}
-
-function CardIcon({ iconKey, iconType, iconUrl }: CardIconProps): React.JSX.Element | null {
-  if (iconType === HOME_CARD_ICON_TYPE.Custom && iconUrl) {
-    return <Image source={{ uri: iconUrl }} style={styles.customIconImage} contentFit="contain" />;
-  }
-  const Icon = BUILTIN_ICON_MAP[iconKey];
-  return Icon ? <Icon /> : null;
-}
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -73,7 +32,7 @@ export function HomeCardGrid({
 
   const handlePress = useCallback(
     (card: HomeCard) => {
-      if (card.is_coming_soon) return;
+      if (card.is_coming_soon || card.navigation_screen === null) return;
       navigateToCardScreen(navigation, card.navigation_screen, card.route_type, card.route_url, {
         serviceTypeId: airportServiceTypeId,
         price:         airportPrice,
@@ -82,54 +41,79 @@ export function HomeCardGrid({
     [navigation, airportServiceTypeId, airportPrice]
   );
 
-  // Pair cards into rows of 2
-  const rows: HomeCard[][] = [];
-  for (let i = 0; i < cards.length; i += 2) {
-    rows.push(cards.slice(i, i + 2));
+  const items: React.JSX.Element[] = [];
+  let i = 0;
+
+  while (i < cards.length) {
+    const card: HomeCard | undefined = cards[i];
+    if (card === undefined) break;
+
+    if ((card.children?.length ?? 0) > 0) {
+      // Full-width group card — renders its own children as mini tiles
+      items.push(
+        <HomeCardGroup
+          key={card.id}
+          card={card}
+          airportServiceTypeId={airportServiceTypeId}
+          airportPrice={airportPrice}
+        />
+      );
+      i++;
+    } else {
+      // Pair consecutive single cards into a 2-column row
+      const candidate: HomeCard | undefined = cards[i + 1];
+      const pairedCard: HomeCard | null =
+        candidate !== undefined && (candidate.children?.length ?? 0) === 0 ? candidate : null;
+
+      items.push(
+        <View key={`row-${i}`} style={styles.gridRow}>
+          <SingleCard card={card} locale={locale} onPress={handlePress} />
+          {pairedCard !== null
+            ? <SingleCard card={pairedCard} locale={locale} onPress={handlePress} />
+            : <View style={{ flex: 1 }} />
+          }
+        </View>
+      );
+
+      i += pairedCard !== null ? 2 : 1;
+    }
   }
 
+  return <>{items}</>;
+}
+
+// ── SingleCard ────────────────────────────────────────────────────────────────
+
+interface SingleCardProps {
+  card: HomeCard;
+  locale: string;
+  onPress: (card: HomeCard) => void;
+}
+
+function SingleCard({ card, locale, onPress }: SingleCardProps): React.JSX.Element {
+  const title    = locale === 'mm' ? card.title_mm    : card.title_en;
+  const tag      = locale === 'mm' ? card.tag_mm      : card.tag_en;
+  const subtitle = locale === 'mm' ? (card.subtitle_mm ?? card.subtitle_en) : card.subtitle_en;
+
   return (
-    <>
-      {rows.map((row, rowIndex) => (
-        <View key={rowIndex} style={styles.gridRow}>
-          {row.map((card) => (
-            <Pressable
-              key={card.id}
-              style={[
-                styles.card,
-                { borderTopColor: card.accent_color },
-                card.is_coming_soon && styles.cardDimmed,
-              ]}
-              onPress={() => handlePress(card)}
-              accessibilityLabel={locale === 'mm' ? card.title_mm : card.title_en}
-              accessibilityRole="button"
-            >
-              <Text style={[styles.cardTag, { color: card.accent_color }]}>
-                {locale === 'mm' ? card.tag_mm : card.tag_en}
-              </Text>
-              <Text style={styles.cardTitle}>
-                {locale === 'mm' ? card.title_mm : card.title_en}
-              </Text>
-              {(locale === 'mm' ? (card.subtitle_mm ?? card.subtitle_en) : card.subtitle_en) ? (
-                <Text style={styles.cardSubtitle}>
-                  {locale === 'mm' ? (card.subtitle_mm ?? card.subtitle_en) : card.subtitle_en}
-                </Text>
-              ) : null}
-              {card.is_coming_soon && (
-                <View style={styles.soonPill}>
-                  <Text style={styles.soonText}>SOON</Text>
-                </View>
-              )}
-              <View style={styles.cardIcon}>
-                <CardIcon iconKey={card.icon_key} iconType={card.icon_type} iconUrl={card.icon_url} />
-              </View>
-            </Pressable>
-          ))}
-          {/* Pad odd row so the last card doesn't stretch full width */}
-          {row.length === 1 && <View style={{ flex: 1 }} />}
+    <Pressable
+      style={[styles.card, { borderTopColor: card.accent_color }, card.is_coming_soon && styles.cardDimmed]}
+      onPress={() => onPress(card)}
+      accessibilityLabel={title}
+      accessibilityRole="button"
+    >
+      <Text style={[styles.cardTag, { color: card.accent_color }]}>{tag}</Text>
+      <Text style={styles.cardTitle}>{title}</Text>
+      {subtitle ? <Text style={styles.cardSubtitle}>{subtitle}</Text> : null}
+      {card.is_coming_soon && (
+        <View style={styles.soonPill}>
+          <Text style={styles.soonText}>SOON</Text>
         </View>
-      ))}
-    </>
+      )}
+      <View style={styles.cardIcon}>
+        <CardIcon iconKey={card.icon_key} iconType={card.icon_type} iconUrl={card.icon_url} />
+      </View>
+    </Pressable>
   );
 }
 
@@ -146,10 +130,20 @@ function HomeSkeletonCard(): React.JSX.Element {
   );
 }
 
+function HomeSkeletonGroupCard(): React.JSX.Element {
+  return (
+    <View style={[styles.skeletonCardWrap, { marginBottom: 12 }]}>
+      <SkeletonBox height={192} baseColor={SKEL_BASE} shimmerColor={SKEL_SHINE} />
+    </View>
+  );
+}
+
 export function HomeCardGridSkeleton(): React.JSX.Element {
   return (
     <>
-      {[0, 1, 2, 3].map((i) => (
+      <HomeSkeletonGroupCard />
+      <HomeSkeletonGroupCard />
+      {[0, 1].map((i) => (
         <View key={i} style={styles.gridRow}>
           <HomeSkeletonCard />
           <HomeSkeletonCard />

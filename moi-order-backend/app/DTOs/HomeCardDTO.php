@@ -19,10 +19,11 @@ readonly class HomeCardDTO
         public string  $tagMm,
         public string  $accentColor,
         public string  $iconKey,
-        public string  $navigationScreen,
+        public ?string $navigationScreen,
         public ?array  $navigationParams,
         public bool    $isActive,
         public bool    $isComingSoon,
+        public ?int    $parentId,
     ) {}
 
     public static function fromStoreRequest(StoreHomeCardRequest $request): self
@@ -37,10 +38,11 @@ readonly class HomeCardDTO
             tagMm:            $request->string('tag_mm')->toString(),
             accentColor:      $request->string('accent_color')->toString(),
             iconKey:          $request->string('icon_key')->toString(),
-            navigationScreen: $request->string('navigation_screen')->toString(),
+            navigationScreen: $request->input('navigation_screen'),
             navigationParams: $request->input('navigation_params'),
             isActive:         $request->boolean('is_active'),
             isComingSoon:     $request->boolean('is_coming_soon'),
+            parentId:         $request->integer('parent_id') ?: null,
         );
     }
 
@@ -56,10 +58,11 @@ readonly class HomeCardDTO
             tagMm:            $request->string('tag_mm')->toString(),
             accentColor:      $request->string('accent_color')->toString(),
             iconKey:          $request->string('icon_key')->toString(),
-            navigationScreen: $request->string('navigation_screen')->toString(),
+            navigationScreen: $request->input('navigation_screen'),
             navigationParams: $request->input('navigation_params'),
             isActive:         $request->boolean('is_active'),
             isComingSoon:     $request->boolean('is_coming_soon'),
+            parentId:         $request->integer('parent_id') ?: null,
         );
     }
 }
