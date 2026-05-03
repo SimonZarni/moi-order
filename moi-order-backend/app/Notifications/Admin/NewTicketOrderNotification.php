@@ -31,6 +31,8 @@ class NewTicketOrderNotification extends Notification
             'notification_type' => 'new_ticket_order',
             'title'             => 'New Ticket Booking',
             'body'              => "{$userName} booked {$ticketName}",
+            'user_name'         => $userName,
+            'object_name'       => $ticketName,
             'ticket_order_id'   => $this->order->id,
         ];
     }

@@ -33,12 +33,15 @@ class NotifyAdminsOfServicePayment
             ?? $submission->serviceType->name
             ?? 'a service';
 
-        $body = ($submission->user->name ?? 'A user') . " paid for {$serviceName}";
+        $userName = $submission->user->name ?? 'A user';
+        $body     = "{$userName} paid for {$serviceName}";
 
-        DB::afterCommit(function () use ($submission, $body): void {
-            User::where('is_admin', true)->each(function (User $admin) use ($submission, $body): void {
+        DB::afterCommit(function () use ($submission, $body, $userName, $serviceName): void {
+            User::where('is_admin', true)->each(function (User $admin) use ($submission, $body, $userName, $serviceName): void {
                 $admin->notify(new NewPaymentNotification($body, [
                     'submission_id' => $submission->id,
+                    'user_name'     => $userName,
+                    'object_name'   => $serviceName,
                 ]));
                 event(new UserNotificationReceived($admin));
             });

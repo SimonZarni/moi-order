@@ -66,6 +66,30 @@ function notifLink(notif: AdminNotification): string | null {
   return null;
 }
 
+// Renders body with "UserName" bold+quoted and object italic.
+// Falls back to plain text for old notifications without structured data.
+function FormattedBody({ notif }: { notif: AdminNotification }) {
+  const { user_name, object_name, body } = notif.data;
+
+  if (!user_name || !object_name) {
+    return <Typography variant="caption" color="text.secondary">{body}</Typography>;
+  }
+
+  // Split the body on the user name and object name to extract the verb phrase.
+  const verbPhrase = body
+    .replace(user_name, '')
+    .replace(object_name, '')
+    .trim();
+
+  return (
+    <Typography variant="caption" color="text.secondary" component="span">
+      <Box component="span" sx={{ fontWeight: 700 }}>&ldquo;{user_name}&rdquo;</Box>
+      {' '}{verbPhrase}{' '}
+      <Box component="span" sx={{ fontStyle: 'italic' }}>{object_name}</Box>
+    </Typography>
+  );
+}
+
 // ── Main view ────────────────────────────────────────────────────────────────
 
 export function NotificationsView() {
@@ -259,9 +283,7 @@ export function NotificationsView() {
                               >
                                 {notif.title}
                               </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {notif.body}
-                              </Typography>
+                              <FormattedBody notif={notif} />
                             </Box>
                           </Stack>
                         </TableCell>

@@ -37,6 +37,8 @@ class NewSubmissionNotification extends Notification
             'notification_type' => 'new_submission',
             'title'             => 'New Service Submission',
             'body'              => "{$userName} submitted {$serviceName}",
+            'user_name'         => $userName,
+            'object_name'       => $serviceName,
             'submission_id'     => $this->submission->id,
         ];
     }

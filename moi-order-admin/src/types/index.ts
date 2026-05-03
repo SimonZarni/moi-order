@@ -270,6 +270,8 @@ export type AdminNotificationData = {
   notification_type: AdminNotificationType;
   title: string;
   body: string;
+  user_name?: string;
+  object_name?: string;
   submission_id?: string;
   ticket_order_id?: string;
 };

@@ -25,12 +25,15 @@ class NotifyAdminsOfTicketPayment
         $order = $event->ticketOrder->loadMissing(['user', 'ticket']);
 
         $ticketName = $order->ticket->name ?? 'a ticket';
-        $body       = ($order->user->name ?? 'A user') . " paid for {$ticketName}";
+        $userName   = $order->user->name  ?? 'A user';
+        $body       = "{$userName} paid for {$ticketName}";
 
-        DB::afterCommit(function () use ($order, $body): void {
-            User::where('is_admin', true)->each(function (User $admin) use ($order, $body): void {
+        DB::afterCommit(function () use ($order, $body, $userName, $ticketName): void {
+            User::where('is_admin', true)->each(function (User $admin) use ($order, $body, $userName, $ticketName): void {
                 $admin->notify(new NewPaymentNotification($body, [
                     'ticket_order_id' => $order->id,
+                    'user_name'       => $userName,
+                    'object_name'     => $ticketName,
                 ]));
                 event(new UserNotificationReceived($admin));
             });
