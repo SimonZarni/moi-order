@@ -65,7 +65,7 @@ export function navigateToCardScreen(
       navigation.navigate('Search');
       break;
     case HOME_CARD_NAV_SCREEN.PlacesMap:
-      navigation.navigate('PlacesMap');
+      navigation.navigate('MainTabs', { screen: 'Map' });
       break;
     default:
       // Internal route key unknown to this app version — safe no-op

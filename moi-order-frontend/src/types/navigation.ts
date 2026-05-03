@@ -3,7 +3,7 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 // Tab navigator screens — persistent, pre-rendered, instant switching.
 export type TabParamList = {
   Home: undefined;
-  Places: undefined;
+  Map: undefined;
   Orders: undefined;
   Profile: undefined;
 };
@@ -83,9 +83,6 @@ export type RootStackParamList = {
   // ── Existing public screens ─────────────────────────────────────────────
   Places: undefined;
   PlaceDetail: { placeId: number };
-
-  // ── Map ──────────────────────────────────────────────────────────────────
-  PlacesMap: undefined;
 
   // ── Global search ─────────────────────────────────────────────────────────
   Search: undefined;

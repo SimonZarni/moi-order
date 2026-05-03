@@ -147,7 +147,6 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="TicketDateSelection"           component={TicketDateSelectionScreen} />
       <Stack.Screen name="TicketOrderDetail"             component={TicketOrderDetailScreen} />
       <Stack.Screen name="Notifications"                 component={NotificationsScreen} />
-      <Stack.Screen name="PlacesMap"                     component={PlacesMapScreen} options={{ animation: 'slide_from_bottom' }} />
       <Stack.Screen name="Search"                        component={SearchScreen} options={{ animation: 'fade' }} />
       <Stack.Screen name="PrivacyPolicy"                 component={PrivacyPolicyScreen} />
       <Stack.Screen name="TermsAndConditions"            component={TermsAndConditionsScreen} />
@@ -178,7 +177,7 @@ function MainTabs(): React.JSX.Element {
       initialRouteName="Home"
     >
       <Tab.Screen name="Home"    component={HomeScreen} />
-      <Tab.Screen name="Places"  component={PlacesScreen} />
+      <Tab.Screen name="Map"     component={PlacesMapScreen} />
       <Tab.Screen name="Orders"  component={OrdersScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>

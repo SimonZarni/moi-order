@@ -28,14 +28,14 @@ interface TabItem {
 
 const TAB_LABELS: Record<string, { en: string; mm: string }> = {
   Home:    { en: 'Home',    mm: 'ပင်မ'       },
-  Places:  { en: 'Places',  mm: 'နေရာများ'   },
+  Map:     { en: 'Map',     mm: 'မြေပုံ'     },
   Orders:  { en: 'Orders',  mm: 'အော်ဒါများ' },
   Profile: { en: 'Profile', mm: 'ပရိုဖိုင်'  },
 };
 
 const TABS: TabItem[] = [
   { route: 'Home',    icon: 'home',     label: 'Home'    },
-  { route: 'Places',  icon: 'location', label: 'Places'  },
+  { route: 'Map',     icon: 'map',      label: 'Map'     },
   { route: 'Orders',  icon: 'list',     label: 'Orders'  },
   { route: 'Profile', icon: 'person',   label: 'Profile' },
 ];

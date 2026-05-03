@@ -115,15 +115,8 @@ export const styles = StyleSheet.create({
     color: colours.tertiary,
   },
 
-  // ── Search row ────────────────────────────────────────────────────────────
-  searchRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-    marginTop: spacing.md,
-  },
+  // ── Search bar ────────────────────────────────────────────────────────────
   searchBox: {
-    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.12)",
@@ -134,6 +127,7 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.18)",
+    marginTop: spacing.md,
   },
   searchIcon: { fontSize: 14 },
   searchPlaceholder: {
@@ -141,15 +135,6 @@ export const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.55)",
     flex: 1,
   },
-  mapBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.full,
-    backgroundColor: colours.tertiary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  mapBtnIcon: { fontSize: 20 },
 
   // ── Body ──────────────────────────────────────────────────────────────────
   body: {

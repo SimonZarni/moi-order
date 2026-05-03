@@ -21,7 +21,6 @@ export function HomeScreen(): React.JSX.Element {
     handleRefresh,
     handleNavigateToNotifications,
     handleNavigateToSearch,
-    handleNavigateToMap,
   } = useHomeScreen();
 
   const { locale } = useLocale();
@@ -58,17 +57,11 @@ export function HomeScreen(): React.JSX.Element {
             </Text>
           </View>
 
-          <View style={styles.searchRow}>
-            <Pressable style={styles.searchBox} onPress={handleNavigateToSearch}
-              accessibilityRole="button" accessibilityLabel="Search places, tickets, services">
-              <Text style={styles.searchIcon}>🔍</Text>
-              <Text style={styles.searchPlaceholder}>Search places, tickets, services…</Text>
-            </Pressable>
-            <Pressable style={styles.mapBtn} onPress={handleNavigateToMap}
-              accessibilityRole="button" accessibilityLabel="Open map">
-              <Text style={styles.mapBtnIcon}>📍</Text>
-            </Pressable>
-          </View>
+          <Pressable style={styles.searchBox} onPress={handleNavigateToSearch}
+            accessibilityRole="button" accessibilityLabel="Search places, tickets, services">
+            <Text style={styles.searchIcon}>🔍</Text>
+            <Text style={styles.searchPlaceholder}>Search places, tickets, services…</Text>
+          </Pressable>
         </View>
 
         {/* ── Body ── */}
