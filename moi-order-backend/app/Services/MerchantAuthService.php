@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\DTOs\MerchantLoginDTO;
+use App\Models\KycApplication;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Hash;
@@ -35,8 +36,12 @@ class MerchantAuthService
             ]);
         }
 
-        // Check merchant role AFTER password verification — prevents timing-based enumeration.
-        if (! $user->isMerchant()) {
+        // Check merchant access AFTER password verification — prevents timing-based enumeration.
+        // Approved merchants (is_merchant=true) and active KYC applicants both have access.
+        // Pure non-merchant users (no KYC application) are rejected.
+        $hasMerchantAccess = $user->isMerchant()
+            || KycApplication::forUser($user->id)->exists();
+        if (! $hasMerchantAccess) {
             throw new AuthorizationException('Merchant access required.');
         }
 

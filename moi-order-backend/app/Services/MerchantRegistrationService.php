@@ -36,6 +36,17 @@ class MerchantRegistrationService
                 'is_merchant' => false,
             ]);
 
+            // Create a draft KYC application immediately so that:
+            // (a) login can verify this is a merchant-registered account, and
+            // (b) the KYC wizard can always find or use this record.
+            KycApplication::create([
+                'user_id'          => $user->id,
+                'business_name'    => '',
+                'business_type'    => '',
+                'business_address' => '',
+                'status'           => KycApplicationStatus::Draft,
+            ]);
+
             $token = $user->createToken(
                 'merchant-self-reg',
                 ['merchant'],
