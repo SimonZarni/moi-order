@@ -229,8 +229,8 @@ export function SubmissionDetailView() {
             {serviceName} · {userName}
           </Typography>
         </Box>
-        <Label color={STATUS_COLORS[status] ?? 'warning'} sx={{ fontSize: 14, px: 2, py: 1 }}>
-          {status}
+        <Label color={STATUS_COLORS[submission.status as SubmissionStatus] ?? 'warning'} sx={{ fontSize: 14, px: 2, py: 1 }}>
+          {submission.status}
         </Label>
       </Box>
 
