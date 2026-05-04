@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Keyboard, Linking } from 'react-native';
 import * as Location from 'expo-location';
 import { useMapStore } from '@/shared/store/mapStore';
+
 import { usePlacesList, usePlaceDetailForMap, useTagsList } from './usePlacesMapData';
 import {
   geocodeQueryApi,
@@ -54,9 +55,11 @@ export interface UsePlacesMapScreenResult {
   activeTab:        string | null;
   activeCategory:   number | null;
   activeTags:       number[];
-  isFABOpen:        boolean;
-  showTagFilter:    boolean;
-  isFullscreen:     boolean;
+  isFABOpen:                   boolean;
+  showTagFilter:               boolean;
+  isFullscreen:                boolean;
+  isBottomSheetFullyExpanded:  boolean;
+  handleBottomSheetSnapChange: (index: number) => void;
   drivingRoute:     DirectionsResult | null;
   walkingRoute:     DirectionsResult | null;
   isLoadingRoutes:  boolean;
@@ -103,8 +106,10 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const [activeTags, setActiveTags]         = useState<number[]>([]);
   const [isFABOpen, setIsFABOpen]           = useState(false);
   const [showTagFilter, setShowTagFilter]   = useState(false);
-  const [isFullscreen, setIsFullscreen]     = useState(false);
-  const setMapFullscreen = useMapStore((s) => s.setFullscreen);
+  const [isFullscreen, setIsFullscreen]               = useState(false);
+  const [isBottomSheetFullyExpanded, setSheetExpanded] = useState(false);
+  const setMapFullscreen      = useMapStore((s) => s.setFullscreen);
+  const setMapBottomSheetOpen = useMapStore((s) => s.setBottomSheetOpen);
   const [longPressCoords, setLongPressCoords]     = useState<[number, number] | null>(null);
   const [showLocationOptions, setShowLocationOptions] = useState(false);
   const [longPressMarker, setLongPressMarker]     = useState<[number, number] | null>(null);
@@ -193,12 +198,15 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     [searchResults, searchQuery],
   );
 
-  // ── Fullscreen sync ───────────────────────────────────────────────────────
+  // ── Fullscreen + bottom sheet sync ────────────────────────────────────────
   useEffect(() => { setMapFullscreen(isFullscreen); }, [isFullscreen, setMapFullscreen]);
-  useEffect(() => { if (selectedPlace !== null) setIsFullscreen(false); }, [selectedPlace]);
+  useEffect(() => {
+    setMapBottomSheetOpen(selectedPlace !== null);
+    if (selectedPlace !== null) { setIsFullscreen(false); setSheetExpanded(false); }
+  }, [selectedPlace, setMapBottomSheetOpen]);
   useEffect(() => { if (searchQuery.length > 0) setIsFullscreen(false); }, [searchQuery]);
   // Reset store on unmount so the nav bar comes back when leaving the map.
-  useEffect(() => () => { setMapFullscreen(false); }, [setMapFullscreen]);
+  useEffect(() => () => { setMapFullscreen(false); setMapBottomSheetOpen(false); }, [setMapFullscreen, setMapBottomSheetOpen]);
 
   // ── Geocoding ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -234,6 +242,10 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
 
   const handleShowTagFilter    = useCallback(() => setShowTagFilter(true), []);
   const handleDismissTagFilter = useCallback(() => setShowTagFilter(false), []);
+  // index 2 = 78% snap = fully expanded
+  const handleBottomSheetSnapChange = useCallback((index: number) => {
+    setSheetExpanded(index === 2);
+  }, []);
   const handleApplyTags        = useCallback((tagIds: number[]) => {
     setActiveTags(tagIds);
     setShowTagFilter(false);
@@ -389,7 +401,8 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     cameraRef, userLocation,
     searchQuery, placeSuggestions, geoSuggestions, isGeoLoading,
     categories, allTags: fetchedTags, activeTab, activeCategory, activeTags,
-    isFABOpen, showTagFilter, isFullscreen,
+    isFABOpen, showTagFilter, isFullscreen, isBottomSheetFullyExpanded,
+    handleBottomSheetSnapChange,
     drivingRoute, walkingRoute, isLoadingRoutes,
     longPressCoords, showLocationOptions, longPressMarker,
     handleTabPress, handleMarkerPress, handleMapPress, handleMapLongPress,

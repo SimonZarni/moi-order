@@ -44,7 +44,8 @@ export function PlacesMapScreen(): React.JSX.Element {
     cameraRef, userLocation,
     searchQuery, placeSuggestions, geoSuggestions, isGeoLoading,
     categories, allTags, activeTab, activeCategory, activeTags,
-    isFABOpen, showTagFilter, isFullscreen,
+    isFABOpen, showTagFilter, isFullscreen, isBottomSheetFullyExpanded,
+    handleBottomSheetSnapChange,
     drivingRoute, walkingRoute, isLoadingRoutes,
     longPressMarker, showLocationOptions,
     handleTabPress, handleMarkerPress, handleMapPress, handleMapLongPress,
@@ -59,10 +60,13 @@ export function PlacesMapScreen(): React.JSX.Element {
   const topControlsAnim  = useRef(new Animated.Value(0)).current;
   const buttonsRightAnim = useRef(new Animated.Value(0)).current;
 
+  const topControlsHidden = isFullscreen || isBottomSheetFullyExpanded;
+
   useEffect(() => {
     Animated.parallel([
       Animated.timing(topControlsAnim, {
-        toValue: isFullscreen ? -400 : 0,
+        // -220 hides controls just behind the green status bar, not way above
+        toValue: topControlsHidden ? -220 : 0,
         duration: 280,
         useNativeDriver: true,
       }),
@@ -72,7 +76,7 @@ export function PlacesMapScreen(): React.JSX.Element {
         useNativeDriver: true,
       }),
     ]).start();
-  }, [isFullscreen, topControlsAnim, buttonsRightAnim]);
+  }, [topControlsHidden, isFullscreen, topControlsAnim, buttonsRightAnim]);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -80,7 +84,7 @@ export function PlacesMapScreen(): React.JSX.Element {
           {/* Top controls — slide up when fullscreen */}
           <Animated.View
             style={[styles.topControls, { transform: [{ translateY: topControlsAnim }] }]}
-            pointerEvents={isFullscreen ? 'none' : 'box-none'}
+            pointerEvents={topControlsHidden ? 'none' : 'box-none'}
           >
             <Pressable style={styles.backBtn} onPress={() => navigation.goBack()}
               accessibilityRole="button" accessibilityLabel="Go back">
@@ -205,6 +209,7 @@ export function PlacesMapScreen(): React.JSX.Element {
               onDismiss={handleDismiss}
               onGetDirections={handleGetDirections}
               onNavigate={handleNavigate}
+              onSnapChange={handleBottomSheetSnapChange}
             />
           )}
 

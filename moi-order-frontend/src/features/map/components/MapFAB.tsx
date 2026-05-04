@@ -222,11 +222,11 @@ export function MapFAB({
           ))}
         </View>
 
-        {/* FAB button — always on top; slides right when fullscreen */}
-        <Animated.View style={fabContainerStyle}>
+        {/* FAB button — position lives on Animated.View so translateX works correctly */}
+        <Animated.View style={[styles.fab, isFABOpen && styles.fabOpen, fabContainerStyle]}>
           <Pressable
             onPress={onToggleFAB}
-            style={[styles.fab, isFABOpen && styles.fabOpen]}
+            style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
             accessibilityRole="button"
             accessibilityLabel={isFABOpen ? 'Close category filter' : 'Browse by category'}
           >

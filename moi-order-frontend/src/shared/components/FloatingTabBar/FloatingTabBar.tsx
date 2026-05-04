@@ -111,21 +111,23 @@ function TabBarView({ activeRoute, activeIndex, onTabPress, bottom, locale }: Ta
  * Uses state.index from tab navigator for exact active-tab tracking (no useRoute lag).
  */
 export function FloatingTabBar({ state, navigation, insets }: BottomTabBarProps): React.JSX.Element {
-  const isLoggedIn    = useAuthStore((s) => s.isLoggedIn);
-  const isFullscreen  = useMapStore((s) => s.isFullscreen);
-  const { locale }    = useLocale();
-  const slideAnim     = useRef(new Animated.Value(0)).current;
+  const isLoggedIn        = useAuthStore((s) => s.isLoggedIn);
+  const isFullscreen      = useMapStore((s) => s.isFullscreen);
+  const isBottomSheetOpen = useMapStore((s) => s.isBottomSheetOpen);
+  const { locale }        = useLocale();
+  const slideAnim         = useRef(new Animated.Value(0)).current;
 
   const activeRoute = (state.routes[state.index]?.name ?? 'Home') as keyof TabParamList;
   const bottom = TAB_BAR_BOTTOM_OFFSET + insets.bottom;
+  const shouldHide = isFullscreen || isBottomSheetOpen;
 
   useEffect(() => {
     Animated.timing(slideAnim, {
-      toValue: isFullscreen ? 150 : 0,
+      toValue: shouldHide ? 150 : 0,
       duration: 280,
       useNativeDriver: true,
     }).start();
-  }, [isFullscreen, slideAnim]);
+  }, [shouldHide, slideAnim]);
 
   function handlePress(tab: TabItem): void {
     if (tab.disabled) return;

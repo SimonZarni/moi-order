@@ -19,9 +19,10 @@ interface Props {
   walkingRoute:    DirectionsResult | null;
   isLoadingRoutes: boolean;
   hasUserLocation: boolean;
-  onDismiss:       () => void;
-  onGetDirections: () => void;
-  onNavigate:      () => void;
+  onDismiss:        () => void;
+  onGetDirections:  () => void;
+  onNavigate:       () => void;
+  onSnapChange?:    (index: number) => void;
 }
 
 const SNAP_POINTS = ['13%', '46%', '78%'];
@@ -30,7 +31,7 @@ const START_INDEX = 1;
 export function PlaceBottomSheet({
   place, detail, isLoading,
   drivingRoute, walkingRoute, isLoadingRoutes,
-  hasUserLocation, onDismiss, onGetDirections, onNavigate,
+  hasUserLocation, onDismiss, onGetDirections, onNavigate, onSnapChange,
 }: Props): React.JSX.Element {
   const sheetRef  = useRef<BottomSheet>(null);
   const [snapIdx, setSnapIdx] = useState(START_INDEX);
@@ -44,7 +45,10 @@ export function PlaceBottomSheet({
     return () => clearTimeout(t);
   }, [place.id]);
 
-  const handleChange  = useCallback((index: number) => setSnapIdx(index), []);
+  const handleChange  = useCallback((index: number) => {
+    setSnapIdx(index);
+    onSnapChange?.(index);
+  }, [onSnapChange]);
   const handleDismiss = useCallback(() => { sheetRef.current?.close(); onDismiss(); }, [onDismiss]);
   const handleCall    = useCallback(() => {
     if (detail?.contact_phone) Linking.openURL(`tel:${detail.contact_phone}`);
@@ -186,7 +190,7 @@ export function PlaceBottomSheet({
                 ) : (
                   <Pressable onPress={onNavigate} style={styles.navigateBtn}
                     accessibilityRole="button" accessibilityLabel="Start navigation">
-                    <Text style={styles.navigateBtnText}>▶ Start Navigation</Text>
+                    <Text style={styles.navigateBtnText}>▶ Navigate on Map</Text>
                   </Pressable>
                 )}
               </View>

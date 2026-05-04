@@ -1,5 +1,5 @@
-import React from 'react';
-import { ActivityIndicator, FlatList, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import React, { useRef, useEffect, useState } from 'react';
+import { ActivityIndicator, Animated, FlatList, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -32,6 +32,27 @@ export function PlacesScreen(): React.JSX.Element {
     handleFavoritePress, handleModeToggle,
     handleBack,
   } = usePlacesScreen();
+
+  // Category modal animation — backdrop fades instantly, card slides up
+  const [catModalVisible, setCatModalVisible] = useState(false);
+  const catBackdropAnim = useRef(new Animated.Value(0)).current;
+  const catCardAnim     = useRef(new Animated.Value(300)).current;
+
+  useEffect(() => {
+    if (isCategoryModalOpen) {
+      setCatModalVisible(true);
+      Animated.parallel([
+        Animated.timing(catBackdropAnim, { toValue: 1, duration: 80, useNativeDriver: true }),
+        Animated.spring(catCardAnim, { toValue: 0, damping: 22, stiffness: 220, useNativeDriver: true }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(catBackdropAnim, { toValue: 0, duration: 160, useNativeDriver: true }),
+        Animated.timing(catCardAnim, { toValue: 300, duration: 180, useNativeDriver: true }),
+      ]).start(() => setCatModalVisible(false));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCategoryModalOpen]);
 
   const hero = (
     <>
@@ -117,14 +138,17 @@ export function PlacesScreen(): React.JSX.Element {
 
       <View style={styles.bodyGap} />
 
-      {/* Category picker modal */}
+      {/* Category picker modal — backdrop fades instantly, card slides up */}
       <Modal
-        visible={isCategoryModalOpen}
+        visible={catModalVisible}
         transparent
-        animationType="slide"
+        animationType="none"
         onRequestClose={handleCategoryModalClose}
       >
-        <Pressable style={styles.modalOverlay} onPress={handleCategoryModalClose} accessibilityRole="none">
+        <Animated.View style={[styles.modalOverlay, { opacity: catBackdropAnim }]} pointerEvents="box-none">
+          <Pressable style={{ flex: 1 }} onPress={handleCategoryModalClose} accessibilityRole="none" />
+        </Animated.View>
+        <Animated.View style={[styles.catCardContainer, { transform: [{ translateY: catCardAnim }] }]}>
           <View style={styles.modalSheet} onStartShouldSetResponder={() => true}>
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>Category</Text>
@@ -167,7 +191,7 @@ export function PlacesScreen(): React.JSX.Element {
               })}
             </ScrollView>
           </View>
-        </Pressable>
+        </Animated.View>
       </Modal>
     </>
   );
