@@ -68,7 +68,11 @@ export function SubmissionDetailView() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  const [countdownLabel, setCountdownLabel] = useState('');
+  const [secondsLeft, setSecondsLeft] = useState(0);
+  const [regenerating, setRegenerating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const firedRef = useRef(false);
 
   useEffect(() => {
     if (!id) return;
@@ -83,6 +87,49 @@ export function SubmissionDetailView() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [id]);
+
+  const handleRegenerateQr = async () => {
+    if (!submission?.payment?.id) return;
+    setRegenerating(true);
+    try {
+      await paymentsApi.regenerate(submission.payment.id);
+      if (id) {
+        const data = await submissionsApi.get(id);
+        setSubmission(data);
+        const opts = WRITABLE_STATUSES[data.status as SubmissionStatus];
+        setStatus(opts?.[0]?.value ?? (data.status as SubmissionStatus));
+      }
+    } catch {}
+    finally { setRegenerating(false); }
+  };
+
+  // Live countdown — resets when the embedded payment's expires_at changes.
+  useEffect(() => {
+    const expiresAt = submission?.payment?.expires_at;
+    if (!expiresAt || submission?.payment?.status !== 'pending') {
+      setCountdownLabel('');
+      return;
+    }
+
+    firedRef.current = false;
+
+    const tick = () => {
+      const secs = Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
+      setSecondsLeft(secs);
+      const mm = Math.floor(secs / 60);
+      const ss = secs % 60;
+      setCountdownLabel(`${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`);
+      if (secs === 0 && !firedRef.current) {
+        firedRef.current = true;
+        handleRegenerateQr();
+      }
+    };
+
+    tick();
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [submission?.payment?.expires_at, submission?.payment?.status]);
 
   const handleSaveStatus = () => {
     if (!id) return;
@@ -380,19 +427,69 @@ export function SubmissionDetailView() {
                     )}
                   </Stack>
 
-                  {submission.payment.status === 'pending' && submission.payment.qr_image_url && (
-                    <Box sx={{ textAlign: 'center', mt: 2 }}>
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                        PromptPay QR Code
-                      </Typography>
-                      <Box
-                        component="img"
-                        src={submission.payment.qr_image_url}
-                        alt="Payment QR"
-                        sx={{ width: 180, height: 180, objectFit: 'contain', border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
-                      />
-                    </Box>
-                  )}
+                  {submission.payment.status === 'pending' && submission.payment.qr_image_url && (() => {
+                    const isExpired = submission.payment.expires_at !== null &&
+                      new Date(submission.payment.expires_at) < new Date();
+                    return (
+                      <Box sx={{ textAlign: 'center', mt: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 1 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            PromptPay QR Code
+                          </Typography>
+                          {isExpired && (
+                            <Button
+                              size="small"
+                              variant="contained"
+                              color="warning"
+                              disabled={regenerating}
+                              onClick={handleRegenerateQr}
+                              startIcon={
+                                regenerating
+                                  ? <CircularProgress size={12} color="inherit" />
+                                  : <Iconify icon="solar:restart-bold" width={14} />
+                              }
+                            >
+                              {regenerating ? 'Generating…' : 'Regenerate QR'}
+                            </Button>
+                          )}
+                        </Box>
+                        <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                          <Box
+                            component="img"
+                            src={submission.payment.qr_image_url}
+                            alt="Payment QR"
+                            sx={{
+                              width: 180, height: 180, objectFit: 'contain',
+                              border: '1px solid', borderColor: 'divider', borderRadius: 1,
+                              opacity: isExpired ? 0.25 : 1,
+                              filter: isExpired ? 'grayscale(1)' : 'none',
+                              transition: 'opacity 0.2s, filter 0.2s',
+                            }}
+                          />
+                          {isExpired && (
+                            <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Label color="error" sx={{ fontSize: 12, px: 1.5, py: 0.5 }}>Expired</Label>
+                            </Box>
+                          )}
+                        </Box>
+                        {!isExpired && countdownLabel !== '' && (
+                          <Typography
+                            variant="caption"
+                            display="block"
+                            fontWeight={600}
+                            sx={{ mt: 0.5, color: secondsLeft <= 60 ? 'error.main' : secondsLeft <= 120 ? 'warning.main' : 'text.secondary' }}
+                          >
+                            Expires in: {countdownLabel}
+                          </Typography>
+                        )}
+                        {isExpired && (
+                          <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+                            QR code expired. Generating a new one…
+                          </Typography>
+                        )}
+                      </Box>
+                    );
+                  })()}
 
                   {canManagePayments && submission.payment.status === 'pending' && (
                     <Stack spacing={1} sx={{ mt: 2 }}>
