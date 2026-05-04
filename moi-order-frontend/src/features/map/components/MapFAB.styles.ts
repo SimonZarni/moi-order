@@ -8,7 +8,7 @@ export const ITEM_SIZE  = 58;
 export const RADIUS     = Math.round(SCREEN_W * 0.65);
 export const STEP_DEG   = 22;
 export const FAB_BOTTOM = 142;
-export const FAB_RIGHT  = 26;
+export const FAB_RIGHT  = 24;
 // arcArea is a square whose bottom-right corner sits at the FAB centre.
 export const ARC_AREA   = RADIUS + Math.ceil(ITEM_SIZE / 2) + 14;
 // FAB centre coordinates inside arcArea (bottom-right corner of area).

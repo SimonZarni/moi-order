@@ -116,7 +116,8 @@ export function MapSearchBar({
           contentContainerStyle={styles.tabsRow} keyboardShouldPersistTaps="handled"
           decelerationRate="fast">
           <Pressable
-            onPress={() => { setLocalTab(t => t === TAB_NEARBY ? null : TAB_NEARBY); onTabPress(TAB_NEARBY); }}
+            onPressIn={() => setLocalTab(t => t === TAB_NEARBY ? null : TAB_NEARBY)}
+            onPress={() => onTabPress(TAB_NEARBY)}
             style={[styles.tab, localTab === TAB_NEARBY && styles.tabActive]}
             accessibilityRole="button" accessibilityLabel="Show nearby places">
             <Text style={[styles.tabText, localTab === TAB_NEARBY && styles.tabTextActive]}>
@@ -124,7 +125,8 @@ export function MapSearchBar({
             </Text>
           </Pressable>
           <Pressable
-            onPress={() => { setLocalTab(t => t === TAB_ALL ? null : TAB_ALL); onTabPress(TAB_ALL); }}
+            onPressIn={() => setLocalTab(t => t === TAB_ALL ? null : TAB_ALL)}
+            onPress={() => onTabPress(TAB_ALL)}
             style={[styles.tab, localTab === TAB_ALL && styles.tabActive]}
             accessibilityRole="button" accessibilityLabel="Show all places">
             <Text style={[styles.tabText, localTab === TAB_ALL && styles.tabTextActive]}>

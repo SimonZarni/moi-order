@@ -129,14 +129,16 @@ interface Props {
   isFABOpen:        boolean;
   onToggleFAB:      () => void;
   onSelectCategory: (id: number | null) => void;
+  isFullscreen?:    boolean;
 }
 
 export function MapFAB({
-  categories, activeCategory, isFABOpen, onToggleFAB, onSelectCategory,
+  categories, activeCategory, isFABOpen, onToggleFAB, onSelectCategory, isFullscreen = false,
 }: Props): React.JSX.Element {
   const scrollOffset = useSharedValue(0);
   const savedOffset  = useSharedValue(0);
   const fabRotate    = useSharedValue(0);
+  const fabSlideX    = useSharedValue(0);
 
   const N         = categories.length;
   const maxOffset = Math.max(0, (N - 4) * STEP_DEG);
@@ -149,8 +151,17 @@ export function MapFAB({
     }
   }, [isFABOpen, fabRotate, scrollOffset]);
 
+  // Slide FAB button off-screen right when fullscreen.
+  useEffect(() => {
+    fabSlideX.value = withTiming(isFullscreen ? 140 : 0, { duration: 280 });
+  }, [isFullscreen, fabSlideX]);
+
   const fabIconStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${interpolate(fabRotate.value, [0, 1], [0, 45])}deg` }],
+  }));
+
+  const fabContainerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: fabSlideX.value }],
   }));
 
   // Pan gesture on the full-screen overlay scrolls the arc categories.
@@ -211,15 +222,17 @@ export function MapFAB({
           ))}
         </View>
 
-        {/* FAB button — always on top */}
-        <Pressable
-          onPress={onToggleFAB}
-          style={[styles.fab, isFABOpen && styles.fabOpen]}
-          accessibilityRole="button"
-          accessibilityLabel={isFABOpen ? 'Close category filter' : 'Browse by category'}
-        >
-          <Animated.Text style={[styles.fabIcon, fabIconStyle]}>+</Animated.Text>
-        </Pressable>
+        {/* FAB button — always on top; slides right when fullscreen */}
+        <Animated.View style={fabContainerStyle}>
+          <Pressable
+            onPress={onToggleFAB}
+            style={[styles.fab, isFABOpen && styles.fabOpen]}
+            accessibilityRole="button"
+            accessibilityLabel={isFABOpen ? 'Close category filter' : 'Browse by category'}
+          >
+            <Animated.Text style={[styles.fabIcon, fabIconStyle]}>+</Animated.Text>
+          </Pressable>
+        </Animated.View>
       </View>
     </GestureDetector>
   );

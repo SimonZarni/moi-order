@@ -56,14 +56,23 @@ export function PlacesMapScreen(): React.JSX.Element {
     handleShowTagFilter, handleApplyTags, handleDismissTagFilter,
   } = usePlacesMapScreen();
 
-  const topControlsAnim = useRef(new Animated.Value(0)).current;
+  const topControlsAnim  = useRef(new Animated.Value(0)).current;
+  const buttonsRightAnim = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
-    Animated.timing(topControlsAnim, {
-      toValue: isFullscreen ? -180 : 0,
-      duration: 280,
-      useNativeDriver: true,
-    }).start();
-  }, [isFullscreen, topControlsAnim]);
+    Animated.parallel([
+      Animated.timing(topControlsAnim, {
+        toValue: isFullscreen ? -400 : 0,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+      Animated.timing(buttonsRightAnim, {
+        toValue: isFullscreen ? 140 : 0,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [isFullscreen, topControlsAnim, buttonsRightAnim]);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -171,7 +180,9 @@ export function PlacesMapScreen(): React.JSX.Element {
             </View>
           )}
 
-          <MyLocationButton onPress={handleMyLocation} />
+          <Animated.View style={{ transform: [{ translateX: buttonsRightAnim }] }} pointerEvents={isFullscreen ? 'none' : 'box-none'}>
+            <MyLocationButton onPress={handleMyLocation} />
+          </Animated.View>
 
           <MapFAB
             isFABOpen={isFABOpen}
@@ -179,6 +190,7 @@ export function PlacesMapScreen(): React.JSX.Element {
             activeCategory={activeCategory}
             onToggleFAB={handleToggleFAB}
             onSelectCategory={handleSelectCategory}
+            isFullscreen={isFullscreen}
           />
 
           {selectedPlace && (
