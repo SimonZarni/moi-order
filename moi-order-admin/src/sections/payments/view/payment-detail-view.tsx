@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
+import { useRef, useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -71,7 +71,7 @@ export function PaymentDetailView() {
     const expiresAt = payment?.expires_at;
     if (!expiresAt || payment?.status !== 'pending') {
       setCountdownLabel('');
-      return;
+      return undefined;
     }
 
     firedRef.current = false;
@@ -90,8 +90,8 @@ export function PaymentDetailView() {
     };
 
     tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
     // handleRegenerateQr is stable (no deps that change); eslint-disable for clarity
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payment?.expires_at, payment?.status]);

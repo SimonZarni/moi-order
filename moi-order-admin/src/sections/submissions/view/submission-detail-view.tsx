@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -99,8 +99,9 @@ export function SubmissionDetailView() {
         const opts = WRITABLE_STATUSES[data.status as SubmissionStatus];
         setStatus(opts?.[0]?.value ?? (data.status as SubmissionStatus));
       }
-    } catch {}
-    finally { setRegenerating(false); }
+    } catch (_e) {
+      // ignore — regeneration errors are silent; user can retry manually
+    } finally { setRegenerating(false); }
   };
 
   // Live countdown — resets when the embedded payment's expires_at changes.
@@ -108,7 +109,7 @@ export function SubmissionDetailView() {
     const expiresAt = submission?.payment?.expires_at;
     if (!expiresAt || submission?.payment?.status !== 'pending') {
       setCountdownLabel('');
-      return;
+      return undefined;
     }
 
     firedRef.current = false;
