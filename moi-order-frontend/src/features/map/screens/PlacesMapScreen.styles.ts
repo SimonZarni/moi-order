@@ -5,7 +5,7 @@ import { colours } from '@/shared/theme/colours';
 export const styles = StyleSheet.create({
   flex:      { flex: 1 },
   safe:      { flex: 1, backgroundColor: colours.backgroundDark },
-  container: { flex: 1 },
+  container: { flex: 1, overflow: 'hidden' },
   map:       { flex: 1 },
 
   topControls: {

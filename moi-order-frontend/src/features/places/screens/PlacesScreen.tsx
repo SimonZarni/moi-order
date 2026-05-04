@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { ActivityIndicator, Animated, FlatList, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Animated, Dimensions, FlatList, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -34,9 +34,10 @@ export function PlacesScreen(): React.JSX.Element {
   } = usePlacesScreen();
 
   // Category modal animation — backdrop fades instantly, card slides up
+  const SCREEN_H = Dimensions.get('window').height;
   const [catModalVisible, setCatModalVisible] = useState(false);
   const catBackdropAnim = useRef(new Animated.Value(0)).current;
-  const catCardAnim     = useRef(new Animated.Value(300)).current;
+  const catCardAnim     = useRef(new Animated.Value(SCREEN_H)).current;
 
   useEffect(() => {
     if (isCategoryModalOpen) {
@@ -46,9 +47,12 @@ export function PlacesScreen(): React.JSX.Element {
         Animated.spring(catCardAnim, { toValue: 0, damping: 22, stiffness: 220, useNativeDriver: true }),
       ]).start();
     } else {
+      // Stop any running animation to prevent glitch, then slide fully off screen.
+      catCardAnim.stopAnimation();
+      catBackdropAnim.stopAnimation();
       Animated.parallel([
-        Animated.timing(catBackdropAnim, { toValue: 0, duration: 160, useNativeDriver: true }),
-        Animated.timing(catCardAnim, { toValue: 300, duration: 180, useNativeDriver: true }),
+        Animated.timing(catBackdropAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
+        Animated.timing(catCardAnim, { toValue: SCREEN_H, duration: 220, useNativeDriver: true }),
       ]).start(() => setCatModalVisible(false));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

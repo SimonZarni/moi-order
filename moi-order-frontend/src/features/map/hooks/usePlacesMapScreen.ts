@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Keyboard, Linking } from 'react-native';
 import * as Location from 'expo-location';
+import { useFocusEffect } from '@react-navigation/native';
 import { useMapStore } from '@/shared/store/mapStore';
 
 import { usePlacesList, usePlaceDetailForMap, useTagsList } from './usePlacesMapData';
@@ -196,6 +197,16 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const placeSuggestions = useMemo(() =>
     searchQuery.trim().length > 1 ? searchResults.slice(0, 3) : [],
     [searchResults, searchQuery],
+  );
+
+  // ── Reset nav bar whenever the map screen loses focus (back button, tab switch) ──
+  useFocusEffect(
+    useCallback(() => () => {
+      setMapFullscreen(false);
+      setMapBottomSheetOpen(false);
+      setIsFullscreen(false);
+      setSheetExpanded(false);
+    }, [setMapFullscreen, setMapBottomSheetOpen]),
   );
 
   // ── Fullscreen + bottom sheet sync ────────────────────────────────────────

@@ -66,7 +66,7 @@ export function PlacesMapScreen(): React.JSX.Element {
     Animated.parallel([
       Animated.timing(topControlsAnim, {
         // -220 hides controls just behind the green status bar, not way above
-        toValue: topControlsHidden ? -220 : 0,
+        toValue: topControlsHidden ? -210 : 0,
         duration: 280,
         useNativeDriver: true,
       }),
