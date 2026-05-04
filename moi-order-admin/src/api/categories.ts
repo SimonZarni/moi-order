@@ -2,6 +2,8 @@ import type { PlaceCategory } from 'src/types';
 
 import apiClient from './client';
 
+export type { PlaceCategory as CategoryData };
+
 type Meta = { current_page: number; last_page: number; per_page: number; total: number };
 type ListParams = { page?: number; per_page?: number };
 
