@@ -8,6 +8,10 @@ export const styles = StyleSheet.create({
   container: { flex: 1 },
   map:       { flex: 1 },
 
+  topControls: {
+    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+    zIndex: 20,
+  },
   backBtn: {
     position: 'absolute', top: 16, left: 16, zIndex: 20,
     backgroundColor: MAP_COLORS.surface, borderRadius: 20,

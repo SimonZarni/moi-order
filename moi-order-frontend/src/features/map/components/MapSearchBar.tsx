@@ -1,6 +1,7 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { styles } from './MapSearchBar.styles';
 import type { Place } from '@/types/models';
@@ -33,6 +34,10 @@ export function MapSearchBar({
 }: Props): React.JSX.Element {
   const inputRef    = useRef<TextInput>(null);
   const focusScale  = useSharedValue(0);
+
+  // Local tab state for instant visual feedback — syncs from parent after data loads.
+  const [localTab, setLocalTab] = useState<string | null>(activeTab);
+  useEffect(() => { setLocalTab(activeTab); }, [activeTab]);
 
   const hasQuery     = value.trim().length > 1;
   const hasPlaces    = placeSuggestions.length > 0;
@@ -90,7 +95,11 @@ export function MapSearchBar({
           accessibilityRole="button"
           accessibilityLabel={filterActive ? `${activeTagCount} tag filters active` : 'Filter by tags'}
         >
-          <Text style={styles.filterIcon}>{filterActive ? '🎚' : '⚙️'}</Text>
+          <Ionicons
+            name="funnel-outline"
+            size={19}
+            color={filterActive ? '#ffffff' : '#224e4a'}
+          />
           {activeTagCount > 0 && (
             <View style={[styles.filterBadge, filterActive && styles.filterBadgeActive]}>
               <Text style={[styles.filterBadgeText, filterActive && styles.filterBadgeTextActive]}>
@@ -106,17 +115,19 @@ export function MapSearchBar({
         <ScrollView horizontal showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.tabsRow} keyboardShouldPersistTaps="handled"
           decelerationRate="fast">
-          <Pressable onPress={() => onTabPress(TAB_NEARBY)}
-            style={[styles.tab, activeTab === TAB_NEARBY && styles.tabActive]}
+          <Pressable
+            onPress={() => { setLocalTab(t => t === TAB_NEARBY ? null : TAB_NEARBY); onTabPress(TAB_NEARBY); }}
+            style={[styles.tab, localTab === TAB_NEARBY && styles.tabActive]}
             accessibilityRole="button" accessibilityLabel="Show nearby places">
-            <Text style={[styles.tabText, activeTab === TAB_NEARBY && styles.tabTextActive]}>
+            <Text style={[styles.tabText, localTab === TAB_NEARBY && styles.tabTextActive]}>
               📍 Nearby
             </Text>
           </Pressable>
-          <Pressable onPress={() => onTabPress(TAB_ALL)}
-            style={[styles.tab, activeTab === TAB_ALL && styles.tabActive]}
+          <Pressable
+            onPress={() => { setLocalTab(t => t === TAB_ALL ? null : TAB_ALL); onTabPress(TAB_ALL); }}
+            style={[styles.tab, localTab === TAB_ALL && styles.tabActive]}
             accessibilityRole="button" accessibilityLabel="Show all places">
-            <Text style={[styles.tabText, activeTab === TAB_ALL && styles.tabTextActive]}>
+            <Text style={[styles.tabText, localTab === TAB_ALL && styles.tabTextActive]}>
               🌐 All
             </Text>
           </Pressable>

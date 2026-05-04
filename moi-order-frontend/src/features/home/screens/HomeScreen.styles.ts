@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.backgroundDark,
     paddingHorizontal: spacing.xl + spacing.sm,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.xl, // ← increase this (was spacing.md)
+    paddingBottom: spacing.xxl + 8,
     overflow: "hidden",
     minHeight: 180,
   },

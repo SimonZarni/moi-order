@@ -5,7 +5,7 @@ import { radius } from '@/shared/theme/radius';
 import { typography } from '@/shared/theme/typography';
 
 export const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colours.backgroundLight },
+  root: { flex: 1, backgroundColor: colours.backgroundDark },
 
   header: {
     flexDirection: 'row', alignItems: 'center',

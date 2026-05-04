@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Keyboard, Linking } from 'react-native';
 import * as Location from 'expo-location';
+import { useMapStore } from '@/shared/store/mapStore';
 import { usePlacesList, usePlaceDetailForMap, useTagsList } from './usePlacesMapData';
 import {
   geocodeQueryApi,
@@ -55,6 +56,7 @@ export interface UsePlacesMapScreenResult {
   activeTags:       number[];
   isFABOpen:        boolean;
   showTagFilter:    boolean;
+  isFullscreen:     boolean;
   drivingRoute:     DirectionsResult | null;
   walkingRoute:     DirectionsResult | null;
   isLoadingRoutes:  boolean;
@@ -101,6 +103,8 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const [activeTags, setActiveTags]         = useState<number[]>([]);
   const [isFABOpen, setIsFABOpen]           = useState(false);
   const [showTagFilter, setShowTagFilter]   = useState(false);
+  const [isFullscreen, setIsFullscreen]     = useState(false);
+  const setMapFullscreen = useMapStore((s) => s.setFullscreen);
   const [longPressCoords, setLongPressCoords]     = useState<[number, number] | null>(null);
   const [showLocationOptions, setShowLocationOptions] = useState(false);
   const [longPressMarker, setLongPressMarker]     = useState<[number, number] | null>(null);
@@ -189,6 +193,13 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     [searchResults, searchQuery],
   );
 
+  // ── Fullscreen sync ───────────────────────────────────────────────────────
+  useEffect(() => { setMapFullscreen(isFullscreen); }, [isFullscreen, setMapFullscreen]);
+  useEffect(() => { if (selectedPlace !== null) setIsFullscreen(false); }, [selectedPlace]);
+  useEffect(() => { if (searchQuery.length > 0) setIsFullscreen(false); }, [searchQuery]);
+  // Reset store on unmount so the nav bar comes back when leaving the map.
+  useEffect(() => () => { setMapFullscreen(false); }, [setMapFullscreen]);
+
   // ── Geocoding ─────────────────────────────────────────────────────────────
   useEffect(() => {
     if (searchQuery.trim().length < 2) { setGeoSuggestions([]); return; }
@@ -258,7 +269,10 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const handleMapPress = useCallback(() => {
     Keyboard.dismiss();
     setIsFABOpen(false);
-  }, []);
+    if (selectedPlace === null && searchQuery.length === 0) {
+      setIsFullscreen(prev => !prev);
+    }
+  }, [selectedPlace, searchQuery]);
 
   const handleMapLongPress = useCallback((coords: [number, number]) => {
     Keyboard.dismiss();
@@ -375,7 +389,7 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     cameraRef, userLocation,
     searchQuery, placeSuggestions, geoSuggestions, isGeoLoading,
     categories, allTags: fetchedTags, activeTab, activeCategory, activeTags,
-    isFABOpen, showTagFilter,
+    isFABOpen, showTagFilter, isFullscreen,
     drivingRoute, walkingRoute, isLoadingRoutes,
     longPressCoords, showLocationOptions, longPressMarker,
     handleTabPress, handleMarkerPress, handleMapPress, handleMapLongPress,

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Animated, LayoutChangeEvent, Pressable, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
 import { useAuthStore } from '@/shared/store/authStore';
+import { useMapStore } from '@/shared/store/mapStore';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { Locale } from '@/shared/store/localeStore';
 import { RootStackParamList, TabParamList } from '@/types/navigation';
@@ -110,11 +111,21 @@ function TabBarView({ activeRoute, activeIndex, onTabPress, bottom, locale }: Ta
  * Uses state.index from tab navigator for exact active-tab tracking (no useRoute lag).
  */
 export function FloatingTabBar({ state, navigation, insets }: BottomTabBarProps): React.JSX.Element {
-  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
-  const { locale } = useLocale();
+  const isLoggedIn    = useAuthStore((s) => s.isLoggedIn);
+  const isFullscreen  = useMapStore((s) => s.isFullscreen);
+  const { locale }    = useLocale();
+  const slideAnim     = useRef(new Animated.Value(0)).current;
 
   const activeRoute = (state.routes[state.index]?.name ?? 'Home') as keyof TabParamList;
   const bottom = TAB_BAR_BOTTOM_OFFSET + insets.bottom;
+
+  useEffect(() => {
+    Animated.timing(slideAnim, {
+      toValue: isFullscreen ? 150 : 0,
+      duration: 280,
+      useNativeDriver: true,
+    }).start();
+  }, [isFullscreen, slideAnim]);
 
   function handlePress(tab: TabItem): void {
     if (tab.disabled) return;
@@ -127,13 +138,15 @@ export function FloatingTabBar({ state, navigation, insets }: BottomTabBarProps)
   }
 
   return (
-    <TabBarView
-      activeRoute={activeRoute}
-      activeIndex={state.index}
-      onTabPress={handlePress}
-      bottom={bottom}
-      locale={locale}
-    />
+    <Animated.View style={{ transform: [{ translateY: slideAnim }] }}>
+      <TabBarView
+        activeRoute={activeRoute}
+        activeIndex={state.index}
+        onTabPress={handlePress}
+        bottom={bottom}
+        locale={locale}
+      />
+    </Animated.View>
   );
 }
 

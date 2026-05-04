@@ -1,5 +1,5 @@
-import React from 'react';
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { ActivityIndicator, Animated, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapboxGL from '@rnmapbox/maps';
 import { useNavigation } from '@react-navigation/native';
@@ -44,7 +44,7 @@ export function PlacesMapScreen(): React.JSX.Element {
     cameraRef, userLocation,
     searchQuery, placeSuggestions, geoSuggestions, isGeoLoading,
     categories, allTags, activeTab, activeCategory, activeTags,
-    isFABOpen, showTagFilter,
+    isFABOpen, showTagFilter, isFullscreen,
     drivingRoute, walkingRoute, isLoadingRoutes,
     longPressMarker, showLocationOptions,
     handleTabPress, handleMarkerPress, handleMapPress, handleMapLongPress,
@@ -56,14 +56,42 @@ export function PlacesMapScreen(): React.JSX.Element {
     handleShowTagFilter, handleApplyTags, handleDismissTagFilter,
   } = usePlacesMapScreen();
 
+  const topControlsAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(topControlsAnim, {
+      toValue: isFullscreen ? -180 : 0,
+      duration: 280,
+      useNativeDriver: true,
+    }).start();
+  }, [isFullscreen, topControlsAnim]);
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
         <View style={styles.container}>
-          {/* Back button */}
-          <Pressable style={styles.backBtn} onPress={() => navigation.goBack()}
-            accessibilityRole="button" accessibilityLabel="Go back">
-            <Text style={styles.backText}>← Back</Text>
-          </Pressable>
+          {/* Top controls — slide up when fullscreen */}
+          <Animated.View
+            style={[styles.topControls, { transform: [{ translateY: topControlsAnim }] }]}
+            pointerEvents={isFullscreen ? 'none' : 'box-none'}
+          >
+            <Pressable style={styles.backBtn} onPress={() => navigation.goBack()}
+              accessibilityRole="button" accessibilityLabel="Go back">
+              <Text style={styles.backText}>← Back</Text>
+            </Pressable>
+            <MapSearchBar
+              value={searchQuery}
+              onChangeText={handleSearchChange}
+              onClear={handleClearSearch}
+              onSelectPlace={handleSelectPlace}
+              onSelectGeocoding={handleSelectGeocoding}
+              placeSuggestions={placeSuggestions}
+              geoSuggestions={geoSuggestions}
+              isGeoLoading={isGeoLoading}
+              activeTab={activeTab}
+              onTabPress={handleTabPress}
+              activeTagCount={activeTags.length}
+              onFilterPress={handleShowTagFilter}
+            />
+          </Animated.View>
           <MapboxGL.MapView
             style={styles.map}
             styleURL={MAPBOX_STYLE}
@@ -121,21 +149,6 @@ export function PlacesMapScreen(): React.JSX.Element {
                 onPress={handleMarkerPress} />
             ))}
           </MapboxGL.MapView>
-
-          <MapSearchBar
-            value={searchQuery}
-            onChangeText={handleSearchChange}
-            onClear={handleClearSearch}
-            onSelectPlace={handleSelectPlace}
-            onSelectGeocoding={handleSelectGeocoding}
-            placeSuggestions={placeSuggestions}
-            geoSuggestions={geoSuggestions}
-            isGeoLoading={isGeoLoading}
-            activeTab={activeTab}
-            onTabPress={handleTabPress}
-            activeTagCount={activeTags.length}
-            onFilterPress={handleShowTagFilter}
-          />
 
           {userLocation && !userLocation.isGPS && (
             <View style={styles.locationBanner}>
