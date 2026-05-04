@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { fetchMe } from '@/shared/api/auth';
-import { updateProfile, changePassword, deleteAccount, updateSimulatedDate } from '@/shared/api/profile';
+import { updateProfile, changePassword, deleteAccount, updateSimulatedDate, triggerNinetyDayReminder, TriggerReminderResult } from '@/shared/api/profile';
 import { CACHE_TTL } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { useAuthStore } from '@/shared/store/authStore';
@@ -17,6 +17,7 @@ export interface UseProfileDataResult {
   changePasswordMutation: ReturnType<typeof useMutation<void, ApiError, { currentPassword: string; newPassword: string; confirmPassword: string }>>;
   deleteAccountMutation: ReturnType<typeof useMutation<void, ApiError, void>>;
   simulatedDateMutation: ReturnType<typeof useMutation<User, ApiError, { date: string | null }>>;
+  triggerReminderMutation: ReturnType<typeof useMutation<TriggerReminderResult, ApiError, void>>;
 }
 
 export function useProfileData(): UseProfileDataResult {
@@ -54,6 +55,10 @@ export function useProfileData(): UseProfileDataResult {
     },
   });
 
+  const triggerReminderMutation = useMutation<TriggerReminderResult, ApiError, void>({
+    mutationFn: () => triggerNinetyDayReminder(),
+  });
+
   return {
     user:         query.data ?? null,
     isLoading:    query.isPending,
@@ -64,5 +69,6 @@ export function useProfileData(): UseProfileDataResult {
     changePasswordMutation,
     deleteAccountMutation,
     simulatedDateMutation,
+    triggerReminderMutation,
   };
 }

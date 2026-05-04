@@ -6,6 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
 import { useProfileData } from '@/features/profile/hooks/useProfileData';
+import { TriggerReminderResult } from '@/shared/api/profile';
 import { useProfileForm } from '@/features/profile/hooks/useProfileForm';
 import { useChangePasswordForm } from '@/features/profile/hooks/useChangePasswordForm';
 import { useProfilePicture } from '@/features/profile/hooks/useProfilePicture';
@@ -23,12 +24,17 @@ export interface UseProfileScreenResult {
   isLoading: boolean;
   isRefreshing: boolean;
   // Simulated date (privileged accounts only)
+  realThaiDate: string;
   simulatedDate: string | null;
   isUpdatingSimulatedDate: boolean;
   showSimulatedDatePicker: boolean;
   handleSimulatedDateFieldPress: () => void;
   handleSimulatedDatePickerChange: (event: DateTimePickerEvent, date?: Date) => void;
   handleClearSimulatedDate: () => void;
+  // Test trigger (privileged accounts only)
+  isTriggeringReminder: boolean;
+  lastTriggerResult: TriggerReminderResult | null;
+  handleTriggerReminder: () => void;
   // Profile form
   name: string;
   email: string;
@@ -90,13 +96,14 @@ export function useProfileScreen(): UseProfileScreenResult {
   const pushToken   = useNotificationStore((s) => s.pushToken);
   const { locale, setLocale } = useLocale();
 
-  const { user, isLoading, isRefreshing, refetch, updateMutation, changePasswordMutation, deleteAccountMutation, simulatedDateMutation } = useProfileData();
+  const { user, isLoading, isRefreshing, refetch, updateMutation, changePasswordMutation, deleteAccountMutation, simulatedDateMutation, triggerReminderMutation } = useProfileData();
   const profileForm        = useProfileForm(user);
   const changePasswordForm = useChangePasswordForm();
   const pictureMethods     = useProfilePicture(user);
 
   const [showDatePicker, setShowDatePicker]               = useState(false);
   const [showSimulatedDatePicker, setShowSimulatedDatePicker] = useState(false);
+  const [lastTriggerResult, setLastTriggerResult]             = useState<TriggerReminderResult | null>(null);
   const [isPasswordSectionOpen, setPasswordSection]       = useState(false);
   const [isEditingProfile, setIsEditingProfile]           = useState(false);
   const isPlaceholderEmail   = user?.email.endsWith('@users.moiorder.local') ?? false;
@@ -223,6 +230,14 @@ export function useProfileScreen(): UseProfileScreenResult {
     simulatedDateMutation.mutate({ date: null });
   }, [simulatedDateMutation]);
 
+  const handleTriggerReminder = useCallback((): void => {
+    setLastTriggerResult(null);
+    triggerReminderMutation.mutate(undefined, {
+      onSuccess: (result) => setLastTriggerResult(result),
+      onError:   () => setLastTriggerResult(null),
+    });
+  }, [triggerReminderMutation]);
+
   // ── Navigation ──────────────────────────────────────────────────────────
 
   const handleGoToOrders = useCallback((): void => {
@@ -286,16 +301,22 @@ export function useProfileScreen(): UseProfileScreenResult {
     );
   }, [clearAuth, deleteAccountMutation]);
 
+  const realThaiDate = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' });
+
   return {
     user,
     isLoading,
     isRefreshing,
+    realThaiDate,
     simulatedDate:              user?.simulated_date ?? null,
     isUpdatingSimulatedDate:    simulatedDateMutation.isPending,
     showSimulatedDatePicker,
     handleSimulatedDateFieldPress,
     handleSimulatedDatePickerChange,
     handleClearSimulatedDate,
+    isTriggeringReminder:  triggerReminderMutation.isPending,
+    lastTriggerResult,
+    handleTriggerReminder,
     name:            profileForm.name,
     email:           profileForm.email,
     phoneNumber:     profileForm.phoneNumber,

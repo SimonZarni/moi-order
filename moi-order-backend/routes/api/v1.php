@@ -38,7 +38,8 @@ Route::post('/profile/link/line',     [ProfileController::class, 'linkLine']);
 Route::delete('/profile/link/google', [ProfileController::class, 'unlinkGoogle']);
 Route::delete('/profile/link/apple',  [ProfileController::class, 'unlinkApple']);
 Route::delete('/profile/link/line',   [ProfileController::class, 'unlinkLine']);
-Route::patch('/profile/simulated-date', [ProfileController::class, 'updateSimulatedDate']);
+Route::patch('/profile/simulated-date',  [ProfileController::class, 'updateSimulatedDate']);
+Route::post('/profile/trigger-reminder', [ProfileController::class, 'triggerReminder']);
 
 // Documents (passport, 90-day report, other — OCR via Claude vision)
 Route::get('/documents',              [DocumentController::class, 'index']);

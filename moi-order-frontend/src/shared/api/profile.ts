@@ -55,3 +55,15 @@ export async function updateSimulatedDate(date: string | null): Promise<User> {
   const response = await apiClient.patch<ApiResponse<User>>('/api/v1/profile/simulated-date', { date });
   return response.data.data;
 }
+
+export interface TriggerReminderResult {
+  has_document: boolean;
+  sent: boolean;
+  days_remaining: number | null;
+  effective_date: string | null;
+}
+
+export async function triggerNinetyDayReminder(): Promise<TriggerReminderResult> {
+  const response = await apiClient.post<ApiResponse<TriggerReminderResult>>('/api/v1/profile/trigger-reminder');
+  return response.data.data;
+}

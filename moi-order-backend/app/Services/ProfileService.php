@@ -7,7 +7,10 @@ namespace App\Services;
 use App\Contracts\FileStorageInterface;
 use App\DTOs\ChangePasswordDTO;
 use App\DTOs\UpdateProfileDTO;
+use App\Enums\DocumentType;
+use App\Models\Document;
 use App\Models\User;
+use App\Notifications\NinetyDayReportReminderNotification;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -93,6 +96,44 @@ class ProfileService
         $user->update([$field => null]);
 
         return $user->fresh();
+    }
+
+    /**
+     * Finds the user's most recent valid 90-day document and force-sends the
+     * reminder notification using effectiveDate() — bypasses the scheduler's
+     * shouldNotify() gate so privileged users can test push delivery on demand.
+     *
+     * Returns an array for the controller to shape into a response:
+     *   has_document  bool          — whether a 90-day doc was found
+     *   sent          bool          — whether the notification was dispatched
+     *   days_remaining int|null     — days until extension_date (negative = overdue)
+     *   effective_date string|null  — the date used for the calculation
+     */
+    public function triggerNinetyDayReminder(User $user): array
+    {
+        $document = Document::query()
+            ->where('user_id', $user->id)
+            ->where('type', DocumentType::NinetyDayReport->value)
+            ->where('is_valid_type', true)
+            ->whereNotNull('extension_date')
+            ->orderByDesc('extension_date')
+            ->first();
+
+        if ($document === null) {
+            return ['has_document' => false, 'sent' => false, 'days_remaining' => null, 'effective_date' => null];
+        }
+
+        $effectiveDate = $user->effectiveDate();
+        $daysRemaining = (int) $effectiveDate->diffInDays($document->extension_date, false);
+
+        $user->notify(new NinetyDayReportReminderNotification($daysRemaining));
+
+        return [
+            'has_document'   => true,
+            'sent'           => true,
+            'days_remaining' => $daysRemaining,
+            'effective_date' => $effectiveDate->format('Y-m-d'),
+        ];
     }
 
     public function updateSimulatedDate(User $user, ?string $date): User

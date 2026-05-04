@@ -585,6 +585,49 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: colours.textMuted,
   },
+  simulatedDateActive: {
+    color: colours.secondary,
+  },
+  triggerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.sm,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: `${colours.tertiary}55`,
+    backgroundColor: `${colours.tertiary}10`,
+  },
+  triggerBtnDisabled: {
+    opacity: 0.5,
+  },
+  triggerBtnText: {
+    fontSize: typography.xs,
+    fontWeight: '700',
+    color: colours.tertiary,
+  },
+  triggerResult: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+    padding: spacing.xs + 2,
+    borderRadius: radius.md,
+  },
+  triggerResultSuccess: {
+    backgroundColor: `${colours.success}14`,
+  },
+  triggerResultWarn: {
+    backgroundColor: `${colours.warning}14`,
+  },
+  triggerResultText: {
+    flex: 1,
+    fontSize: typography.xs,
+    color: colours.textMuted,
+    lineHeight: 18,
+  },
 
   // ── Sign out ───────────────────────────────────────────────────────────────
   signOutBtn: {

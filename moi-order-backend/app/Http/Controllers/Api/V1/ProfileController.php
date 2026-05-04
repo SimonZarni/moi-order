@@ -12,6 +12,7 @@ use App\DTOs\UpdateProfileDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\DeleteAccountRequest;
+use App\Http\Requests\TriggerReminderRequest;
 use App\Http\Requests\UpdateSimulatedDateRequest;
 use App\Http\Requests\LinkAppleRequest;
 use App\Http\Requests\LinkGoogleRequest;
@@ -135,6 +136,14 @@ class ProfileController extends Controller
         $user = $this->profileService->unlinkProvider($request->user(), 'apple');
 
         return response()->json(['data' => new UserResource($user)]);
+    }
+
+    /** POST /api/v1/profile/trigger-reminder — privileged accounts only */
+    public function triggerReminder(TriggerReminderRequest $request): JsonResponse
+    {
+        $result = $this->profileService->triggerNinetyDayReminder($request->user());
+
+        return response()->json(['data' => $result]);
     }
 
     /** PATCH /api/v1/profile/simulated-date — privileged accounts only */

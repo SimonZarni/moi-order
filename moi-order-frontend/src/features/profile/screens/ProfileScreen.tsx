@@ -48,8 +48,9 @@ export function ProfileScreen(): React.JSX.Element {
     handleGoToOrders, handleGoToMoiVerified, handleGoToPrivacyPolicy, handleGoToTerms, handleGoToPdpa, handleLogout,
     handleDeleteAccount, isDeletingAccount,
     isUploadingPicture, isRemovingPicture, handleAvatarPress,
-    simulatedDate, isUpdatingSimulatedDate, showSimulatedDatePicker,
+    realThaiDate, simulatedDate, isUpdatingSimulatedDate, showSimulatedDatePicker,
     handleSimulatedDateFieldPress, handleSimulatedDatePickerChange, handleClearSimulatedDate,
+    isTriggeringReminder, lastTriggerResult, handleTriggerReminder,
   } = useProfileScreen();
   const {
     isLinkingGoogle, isLinkingApple, isLinkingLine,
@@ -584,24 +585,42 @@ export function ProfileScreen(): React.JSX.Element {
                 <View style={styles.sectionLine} />
               </View>
               <View style={styles.card}>
+                {/* Real date row */}
                 <View style={styles.infoRow}>
-                  <View style={[styles.iconBadge, styles.iconBadgeAmber]}>
-                    <Ionicons name="calendar-outline" size={16} color={colours.secondary} />
+                  <View style={[styles.iconBadge, styles.iconBadgeSlate]}>
+                    <Ionicons name="globe-outline" size={16} color={colours.medium} />
                   </View>
                   <View style={styles.simulatedDateInfo}>
-                    <Text style={styles.simulatedDateLabel}>Simulated Date</Text>
-                    <Text style={[styles.simulatedDateValue, simulatedDate === null && styles.infoPlaceholder]}>
-                      {simulatedDate !== null ? formatDate(simulatedDate) : 'Real date (Thai time)'}
+                    <Text style={styles.simulatedDateLabel}>Real date (Thai time)</Text>
+                    <Text style={styles.simulatedDateValue}>{formatDate(realThaiDate)}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.rowSeparator} />
+
+                {/* Active / simulated date row */}
+                <View style={styles.infoRow}>
+                  <View style={[styles.iconBadge, simulatedDate !== null ? styles.iconBadgeAmber : styles.iconBadgeSlate]}>
+                    <Ionicons name="calendar-outline" size={16} color={simulatedDate !== null ? colours.secondary : colours.medium} />
+                  </View>
+                  <View style={styles.simulatedDateInfo}>
+                    <Text style={styles.simulatedDateLabel}>
+                      {simulatedDate !== null ? 'Simulated date (active)' : 'System date'}
+                    </Text>
+                    <Text style={[styles.simulatedDateValue, simulatedDate !== null && styles.simulatedDateActive]}>
+                      {simulatedDate !== null ? formatDate(simulatedDate) : formatDate(realThaiDate)}
                     </Text>
                   </View>
                 </View>
+
+                {/* Set / Reset buttons */}
                 <View style={styles.simulatedDateActions}>
                   {simulatedDate !== null && (
                     <Pressable
                       style={styles.clearDateBtn}
                       onPress={handleClearSimulatedDate}
                       disabled={isUpdatingSimulatedDate}
-                      accessibilityLabel="Reset simulated date to real Thai time"
+                      accessibilityLabel="Reset to real Thai date"
                       accessibilityRole="button"
                     >
                       <Text style={styles.clearDateBtnText}>Reset</Text>
@@ -619,6 +638,7 @@ export function ProfileScreen(): React.JSX.Element {
                     </Text>
                   </Pressable>
                 </View>
+
                 {showSimulatedDatePicker && (
                   <DateTimePicker
                     value={simulatedDate !== null ? new Date(`${simulatedDate}T00:00:00`) : new Date()}
@@ -626,6 +646,38 @@ export function ProfileScreen(): React.JSX.Element {
                     display="default"
                     onChange={handleSimulatedDatePickerChange}
                   />
+                )}
+
+                <View style={styles.rowSeparator} />
+
+                {/* Test notification trigger */}
+                <Pressable
+                  style={[styles.triggerBtn, isTriggeringReminder && styles.triggerBtnDisabled]}
+                  onPress={handleTriggerReminder}
+                  disabled={isTriggeringReminder}
+                  accessibilityLabel="Send test 90-day reminder notification"
+                  accessibilityRole="button"
+                >
+                  <Ionicons name="notifications-outline" size={15} color={colours.tertiary} />
+                  <Text style={styles.triggerBtnText}>
+                    {isTriggeringReminder ? 'Sending…' : 'Send Test Notification'}
+                  </Text>
+                </Pressable>
+
+                {/* Result banner */}
+                {lastTriggerResult !== null && (
+                  <View style={[styles.triggerResult, lastTriggerResult.sent ? styles.triggerResultSuccess : styles.triggerResultWarn]}>
+                    <Ionicons
+                      name={lastTriggerResult.sent ? 'checkmark-circle-outline' : 'warning-outline'}
+                      size={14}
+                      color={lastTriggerResult.sent ? colours.success : colours.warning}
+                    />
+                    <Text style={styles.triggerResultText}>
+                      {lastTriggerResult.sent
+                        ? `Sent — ${lastTriggerResult.days_remaining} days remaining on ${lastTriggerResult.effective_date}`
+                        : 'No 90-day document found for this account'}
+                    </Text>
+                  </View>
                 )}
               </View>
             </>
