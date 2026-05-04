@@ -22,6 +22,9 @@ export interface UseOrderDetailScreenResult {
   isRefreshing: boolean;
   isError: boolean;
   canPay: boolean;
+  canCancel: boolean;
+  isCancelling: boolean;
+  handleCancelOrder: () => void;
   canDownload: boolean;
   isDownloading: boolean;
   isSavingResult: boolean;
@@ -40,7 +43,7 @@ export function useOrderDetailScreen(): UseOrderDetailScreenResult {
   const route = useRoute<RouteParams>();
   const { submissionId } = route.params;
 
-  const { submission, isLoading, isRefreshing, isError, refetch } = useOrderDetail(submissionId);
+  const { submission, isLoading, isRefreshing, isError, refetch, cancelMutation } = useOrderDetail(submissionId);
 
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [downloadError, setDownloadError]     = useState<string | null>(null);
@@ -50,6 +53,26 @@ export function useOrderDetailScreen(): UseOrderDetailScreenResult {
     () => submission?.status === SUBMISSION_STATUS.PendingPayment,
     [submission?.status],
   );
+
+  const canCancel = useMemo(
+    () => submission?.status === SUBMISSION_STATUS.PendingPayment,
+    [submission?.status],
+  );
+
+  const handleCancelOrder = useCallback((): void => {
+    Alert.alert(
+      'Cancel Order',
+      'Are you sure you want to cancel this service order? This cannot be undone.',
+      [
+        { text: 'Keep Order', style: 'cancel' },
+        {
+          text: 'Cancel Order',
+          style: 'destructive',
+          onPress: () => cancelMutation.mutate(),
+        },
+      ],
+    );
+  }, [cancelMutation]);
 
   const canDownload = useMemo(
     () => submission?.status === SUBMISSION_STATUS.Completed && submission?.has_result === true,
@@ -131,7 +154,8 @@ export function useOrderDetailScreen(): UseOrderDetailScreenResult {
 
   return {
     submission, isLoading, isRefreshing, isError,
-    canPay, canDownload, isDownloading, isSavingResult,
+    canPay, canCancel, isCancelling: cancelMutation.isPending, handleCancelOrder,
+    canDownload, isDownloading, isSavingResult,
     downloadError, previewImageUrl,
     handleRefresh, handleBack, handlePayNow,
     handleDownloadResult, handleSaveResult, handleClosePreview,

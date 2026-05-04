@@ -50,6 +50,8 @@ Route::get('/documents/upload-stats', UploadStatsController::class);
 // Submissions
 Route::get('/submissions',                 [SubmissionController::class,       'index']);
 Route::get('/submissions/{id}',            [SubmissionController::class,       'show']);
+Route::post('/submissions/{id}/cancel',    [SubmissionController::class,       'cancel']);
+Route::delete('/submissions/{id}',         [SubmissionController::class,       'destroy']);
 Route::post('/submissions/dynamic',        [DynamicSubmissionController::class,'store']);
 Route::get('/submissions/{id}/result',     [SubmissionResultController::class, 'show']);
 

@@ -14,6 +14,7 @@ export const SUBMISSION_STATUS = {
   Processing:     'processing',
   Completed:      'completed',
   PaymentFailed:  'payment_failed',
+  Cancelled:      'cancelled',
 } as const;
 
 export type SubmissionStatus = (typeof SUBMISSION_STATUS)[keyof typeof SUBMISSION_STATUS];

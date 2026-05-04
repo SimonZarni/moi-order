@@ -1,10 +1,10 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query';
 
-import { fetchSubmissions } from '@/shared/api/submissions';
+import { deleteSubmission, fetchSubmissions } from '@/shared/api/submissions';
 import { useAuthStore } from '@/shared/store/authStore';
 import { CACHE_TTL } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
-import { PaginatedResponse, ServiceSubmission } from '@/types/models';
+import { ApiError, PaginatedResponse, ServiceSubmission } from '@/types/models';
 
 export interface UseOrdersResult {
   submissions: ServiceSubmission[];
@@ -15,10 +15,12 @@ export interface UseOrdersResult {
   isFetchingNextPage: boolean;
   fetchNextPage: () => void;
   refetch: () => void;
+  deleteMutation: ReturnType<typeof useMutation<void, ApiError, number>>;
 }
 
 export function useOrders(): UseOrdersResult {
   const { isLoggedIn } = useAuthStore();
+  const queryClient = useQueryClient();
 
   const query = useInfiniteQuery({
     queryKey: QUERY_KEYS.SUBMISSIONS.LIST,
@@ -39,15 +41,34 @@ export function useOrders(): UseOrdersResult {
     }),
   });
 
+  const deleteMutation = useMutation<void, ApiError, number>({
+    mutationFn: (id) => deleteSubmission(id),
+    onSuccess: (_, id) => {
+      queryClient.setQueryData(
+        QUERY_KEYS.SUBMISSIONS.LIST,
+        (old: InfiniteData<PaginatedResponse<ServiceSubmission>> | undefined) => {
+          if (!old) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              data: page.data.filter((s) => s.id !== id),
+            })),
+          };
+        },
+      );
+    },
+  });
+
   return {
     submissions:        query.data?.submissions ?? [],
     isLoading:          query.isLoading,
     isError:            query.isError,
-    // True only during a pull-to-refresh, not during pagination fetches.
     isRefreshing:       query.isRefetching && !query.isFetchingNextPage,
     hasNextPage:        query.hasNextPage ?? false,
     isFetchingNextPage: query.isFetchingNextPage,
     fetchNextPage:      query.fetchNextPage,
     refetch:            query.refetch,
+    deleteMutation,
   };
 }

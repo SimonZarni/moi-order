@@ -63,3 +63,12 @@ export async function fetchSubmissionResultUrl(submissionId: number): Promise<{ 
   );
   return data.data;
 }
+
+export async function cancelSubmission(id: number): Promise<ServiceSubmission> {
+  const { data } = await apiClient.post<ApiResponse<ServiceSubmission>>(`/api/v1/submissions/${id}/cancel`);
+  return data.data;
+}
+
+export async function deleteSubmission(id: number): Promise<void> {
+  await apiClient.delete(`/api/v1/submissions/${id}`);
+}

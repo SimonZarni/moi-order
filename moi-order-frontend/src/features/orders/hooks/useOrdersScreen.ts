@@ -29,6 +29,7 @@ export interface UseOrdersScreenResult {
   handleEndReached: () => void;
   handleRefresh: () => void;
   handleOrderPress: (submissionId: number) => void;
+  handleDeleteSubmission: (id: number) => void;
   handleTicketOrderPress: (ticketOrderId: number) => void;
   handleDeleteTicketOrder: (id: number) => void;
   handleNavigateToLogin: () => void;
@@ -47,7 +48,7 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     submissions, isLoading: isLoadingSubmissions, isError: isErrorSubmissions,
     isRefreshing: isRefreshingSubmissions, hasNextPage: hasNextSubmissions,
     isFetchingNextPage: isFetchingNextSubmissions, fetchNextPage: fetchNextSubmissions,
-    refetch: refetchSubmissions,
+    refetch: refetchSubmissions, deleteMutation: deleteSubmissionMutation,
   }: UseOrdersResult = useOrders();
 
   const {
@@ -97,6 +98,21 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     navigation.navigate('TicketOrderDetail', { ticketOrderId });
   }, [navigation, queryClient]);
 
+  const handleDeleteSubmission = useCallback((id: number): void => {
+    Alert.alert(
+      'Delete Order',
+      'Remove this cancelled order from your history?',
+      [
+        { text: 'Keep', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteSubmissionMutation.mutate(id),
+        },
+      ],
+    );
+  }, [deleteSubmissionMutation]);
+
   const handleDeleteTicketOrder = useCallback((id: number): void => {
     Alert.alert(
       'Delete Order',
@@ -133,6 +149,7 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     handleEndReached,
     handleRefresh,
     handleOrderPress,
+    handleDeleteSubmission,
     handleTicketOrderPress,
     handleDeleteTicketOrder,
     handleNavigateToLogin,

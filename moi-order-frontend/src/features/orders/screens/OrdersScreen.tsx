@@ -15,19 +15,22 @@ import { formatDate } from '@/shared/utils/formatDate';
 import { formatPrice } from '@/shared/utils/formatCurrency';
 import { useOrdersScreen, OrdersTab } from '@/features/orders/hooks/useOrdersScreen';
 import { ServiceSubmission, TicketOrder } from '@/types/models';
-import { TICKET_ORDER_STATUS } from '@/types/enums';
+import { SUBMISSION_STATUS, TICKET_ORDER_STATUS } from '@/types/enums';
 import { styles, STATUS_COLOURS } from './OrdersScreen.styles';
 
 interface OrderCardProps {
   item: ServiceSubmission;
   onPress: (id: number) => void;
+  onDelete: (id: number) => void;
 }
 
-function OrderCard({ item, onPress }: OrderCardProps): React.JSX.Element {
+function OrderCard({ item, onPress, onDelete }: OrderCardProps): React.JSX.Element {
+  const swipeableRef = useRef<Swipeable>(null);
   const { locale } = useLocale();
   const accentColour = STATUS_COLOURS[item.status] ?? STATUS_COLOURS['pending']!;
   const svcName = localeName(item.service_type?.service ?? item.service_type, locale);
-  return (
+
+  const cardContent = (
     <View style={styles.cardWrap}>
       <Pressable
         style={({ pressed }) => [styles.card, { opacity: pressed ? 0.85 : 1 }]}
@@ -53,6 +56,28 @@ function OrderCard({ item, onPress }: OrderCardProps): React.JSX.Element {
         </View>
       </Pressable>
     </View>
+  );
+
+  if (item.status !== SUBMISSION_STATUS.Cancelled) {
+    return cardContent;
+  }
+
+  return (
+    <Swipeable
+      ref={swipeableRef}
+      renderRightActions={() => (
+        <Pressable
+          style={styles.swipeDeleteAction}
+          onPress={() => { swipeableRef.current?.close(); onDelete(item.id); }}
+          accessibilityLabel="Delete cancelled order"
+          accessibilityRole="button"
+        >
+          <Ionicons name="trash" size={22} color="#fff" />
+        </Pressable>
+      )}
+    >
+      {cardContent}
+    </Swipeable>
   );
 }
 
@@ -156,7 +181,7 @@ export function OrdersScreen(): React.JSX.Element {
     activeTab, submissions, ticketOrders,
     isLoading, isError, isLoggedIn, isRefreshing, isFetchingNextPage,
     handleTabChange, handleEndReached, handleRefresh,
-    handleOrderPress, handleTicketOrderPress, handleDeleteTicketOrder,
+    handleOrderPress, handleDeleteSubmission, handleTicketOrderPress, handleDeleteTicketOrder,
     handleNavigateToLogin, handleBack,
   } = useOrdersScreen();
 
@@ -233,7 +258,7 @@ export function OrdersScreen(): React.JSX.Element {
           style={styles.flatList}
           data={submissions}
           keyExtractor={(item: ServiceSubmission) => String(item.id)}
-          renderItem={({ item }) => <OrderCard item={item} onPress={handleOrderPress} />}
+          renderItem={({ item }) => <OrderCard item={item} onPress={handleOrderPress} onDelete={handleDeleteSubmission} />}
           ListEmptyComponent={
             <View style={styles.emptyWrap}>
               <Ionicons name="mail-open-outline" size={48} color={colours.textMuted} style={styles.emptyIcon} />

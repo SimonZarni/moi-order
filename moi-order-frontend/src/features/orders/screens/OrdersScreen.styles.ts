@@ -269,7 +269,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: 72,
-    marginVertical: spacing.xs,
+    marginBottom: spacing.md,
     borderRadius: radius.lg,
     marginRight: spacing.md,
   },

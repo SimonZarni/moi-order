@@ -202,6 +202,23 @@ export const styles = StyleSheet.create({
     lineHeight: 28,
   },
 
+  cancelOrderBtn: {
+    borderWidth: 1.5,
+    borderColor: `${colours.destructive}55`,
+    borderRadius: radius.lg,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.sm,
+  },
+  cancelOrderBtnDisabled: { opacity: 0.5 },
+  cancelOrderBtnText: {
+    fontSize: typography.sm,
+    fontWeight: '700',
+    color: colours.destructive,
+    letterSpacing: 0.4,
+  },
+
   // ── Download button ────────────────────────────────────────────────────────
   downloadBtn: {
     backgroundColor: colours.primary,

@@ -32,7 +32,8 @@ const DOC_ICONS: Record<string, IoniconsName> = {
 export function OrderDetailScreen(): React.JSX.Element {
   const {
     submission, isLoading, isRefreshing, isError,
-    canPay, canDownload, isDownloading, isSavingResult, downloadError,
+    canPay, canCancel, isCancelling, handleCancelOrder,
+    canDownload, isDownloading, isSavingResult, downloadError,
     previewImageUrl,
     handleRefresh, handleBack, handlePayNow,
     handleDownloadResult, handleSaveResult, handleClosePreview,
@@ -166,6 +167,21 @@ export function OrderDetailScreen(): React.JSX.Element {
               accessibilityRole="button"
             >
               <Text style={styles.payNowBtnText}>Pay Now</Text>
+            </Pressable>
+          )}
+
+          {/* ── Cancel Order (pending payment only) ── */}
+          {canCancel && (
+            <Pressable
+              style={[styles.cancelOrderBtn, isCancelling && styles.cancelOrderBtnDisabled]}
+              onPress={handleCancelOrder}
+              disabled={isCancelling}
+              accessibilityLabel="Cancel order"
+              accessibilityRole="button"
+            >
+              <Text style={styles.cancelOrderBtnText}>
+                {isCancelling ? 'Cancelling…' : 'Cancel Order'}
+              </Text>
             </Pressable>
           )}
 
