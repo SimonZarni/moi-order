@@ -18,3 +18,8 @@ export async function toggleFavorite(placeId: number): Promise<FavoriteStatus> {
   );
   return response.data.data;
 }
+
+export async function fetchFavoritePlaceIds(): Promise<number[]> {
+  const response = await apiClient.get<ApiResponse<number[]>>('/api/v1/favorites/places/ids');
+  return response.data.data;
+}

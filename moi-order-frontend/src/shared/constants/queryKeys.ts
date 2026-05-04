@@ -8,6 +8,7 @@ export const QUERY_KEYS = {
   },
   FAVORITES: {
     STATUS: (placeId: number) => ['favorites', 'status', placeId] as const,
+    IDS:    ['favorites', 'ids'] as const,
   },
   SERVICES: {
     LIST: ['services', 'list'] as const,

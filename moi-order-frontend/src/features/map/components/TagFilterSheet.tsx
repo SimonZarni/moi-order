@@ -1,5 +1,5 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
+import { ActivityIndicator, Animated, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { styles } from './TagFilterSheet.styles';
 import type { Tag } from '@/types/models';
 
@@ -16,10 +16,28 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
   const [selected, setSelected] = useState<Set<number>>(new Set(activeTags));
   const allSelected = selected.size === allTags.length && allTags.length > 0;
 
-  // Sync local state when sheet opens
+  // Keep the Modal mounted during the close animation so we can animate out.
+  const [modalVisible, setModalVisible] = useState(visible);
+  const backdropOpacity = useRef(new Animated.Value(0)).current;
+  const cardTranslateY  = useRef(new Animated.Value(400)).current;
+
   useEffect(() => {
-    if (visible) setSelected(new Set(activeTags));
-  }, [visible, activeTags]);
+    if (visible) {
+      setModalVisible(true);
+      setSelected(new Set(activeTags));
+      // Backdrop fades in instantly (80 ms ease); card springs up.
+      Animated.parallel([
+        Animated.timing(backdropOpacity, { toValue: 1, duration: 80, useNativeDriver: true }),
+        Animated.spring(cardTranslateY,  { toValue: 0, damping: 22, stiffness: 220, useNativeDriver: true }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(backdropOpacity, { toValue: 0, duration: 160, useNativeDriver: true }),
+        Animated.timing(cardTranslateY,  { toValue: 400, duration: 180, useNativeDriver: true }),
+      ]).start(() => setModalVisible(false));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
 
   const toggleTag = useCallback((id: number) => {
     setSelected(prev => {
@@ -33,24 +51,24 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
     setSelected(allSelected ? new Set() : new Set(allTags.map(t => t.id)));
   }, [allSelected, allTags]);
 
-  const handleApply = useCallback(() => {
-    onApply([...selected]);
-  }, [selected, onApply]);
-
-  const handleClear = useCallback(() => {
-    setSelected(new Set());
-  }, []);
+  const handleApply = useCallback(() => { onApply([...selected]); }, [selected, onApply]);
+  const handleClear = useCallback(() => { setSelected(new Set()); }, []);
 
   return (
     <Modal
-      visible={visible}
+      visible={modalVisible}
       transparent
-      animationType="slide"
+      animationType="none"
       onRequestClose={onDismiss}
       statusBarTranslucent
     >
-      <Pressable style={styles.backdrop} onPress={onDismiss} accessibilityRole="button" accessibilityLabel="Close filter">
-        {/* Inner Pressable prevents tap-through to the backdrop */}
+      {/* Backdrop fades in independently of the card */}
+      <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]} pointerEvents="box-none">
+        <Pressable style={styles.backdropTap} onPress={onDismiss} accessibilityRole="button" accessibilityLabel="Close filter" />
+      </Animated.View>
+
+      {/* Card slides up from bottom */}
+      <Animated.View style={[styles.cardContainer, { transform: [{ translateY: cardTranslateY }] }]}>
         <Pressable style={styles.sheet} onPress={() => {}} accessibilityRole="none">
           <View style={styles.handle} />
 
@@ -70,13 +88,9 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
             keyboardShouldPersistTaps="handled"
           >
             {isLoading ? (
-              <View style={styles.empty}>
-                <ActivityIndicator size="small" />
-              </View>
+              <View style={styles.empty}><ActivityIndicator size="small" /></View>
             ) : allTags.length === 0 ? (
-              <View style={styles.empty}>
-                <Text style={styles.emptyText}>No tags available</Text>
-              </View>
+              <View style={styles.empty}><Text style={styles.emptyText}>No tags available</Text></View>
             ) : (
               allTags.map(tag => {
                 const isActive = selected.has(tag.id);
@@ -100,30 +114,17 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
           </ScrollView>
 
           <View style={styles.footer}>
-            <Pressable
-              onPress={toggleAll}
-              style={styles.selectAllBtn}
-              accessibilityRole="button"
-              accessibilityLabel={allSelected ? 'Deselect all tags' : 'Select all tags'}
-            >
-              <Text style={styles.selectAllText}>
-                {allSelected ? 'Deselect All' : 'Select All'}
-              </Text>
+            <Pressable onPress={toggleAll} style={styles.selectAllBtn}
+              accessibilityRole="button" accessibilityLabel={allSelected ? 'Deselect all tags' : 'Select all tags'}>
+              <Text style={styles.selectAllText}>{allSelected ? 'Deselect All' : 'Select All'}</Text>
             </Pressable>
-
-            <Pressable
-              onPress={handleApply}
-              style={styles.applyBtn}
-              accessibilityRole="button"
-              accessibilityLabel="Apply filters"
-            >
-              <Text style={styles.applyText}>
-                Apply{selected.size > 0 ? ` (${selected.size})` : ''}
-              </Text>
+            <Pressable onPress={handleApply} style={styles.applyBtn}
+              accessibilityRole="button" accessibilityLabel="Apply filters">
+              <Text style={styles.applyText}>Apply{selected.size > 0 ? ` (${selected.size})` : ''}</Text>
             </Pressable>
           </View>
         </Pressable>
-      </Pressable>
+      </Animated.View>
     </Modal>
   );
 }

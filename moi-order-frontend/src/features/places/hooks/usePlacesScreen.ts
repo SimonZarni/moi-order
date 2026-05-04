@@ -1,25 +1,30 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { FlatList } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, FlatList } from 'react-native';
 import { Image } from 'expo-image';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import * as Location from 'expo-location';
 
 import { usePlaces } from '@/features/places/hooks/usePlaces';
 import { usePlacesSearch } from '@/features/places/hooks/usePlacesSearch';
-import { fetchPlaceDetail } from '@/shared/api/places';
+import { useFavoritePlaceIds } from '@/features/places/hooks/useFavoritePlaceIds';
+import { fetchPlaceDetail, fetchAllPlaces } from '@/shared/api/places';
 import { useDebounce } from '@/shared/hooks/useDebounce';
+import { distanceKm, formatDistance } from '@/shared/utils/geo';
 import { CACHE_TTL } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { Category, Place, ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
-import { useState } from 'react';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
+// Mode cycles: all → nearby → favorites → all
+export type PlacesMode = 'all' | 'nearby' | 'favorites';
+
 export interface UsePlacesScreenResult {
   placesListRef: React.RefObject<FlatList<Place>>;
-  filteredPlaces: Place[];
+  displayedPlaces: Place[];
   categories: Category[];
   isPlacesLoading: boolean;
   isPlacesError: boolean;
@@ -30,6 +35,9 @@ export interface UsePlacesScreenResult {
   selectedCategory: number | null;
   selectedCategoryLabel: string;
   isCategoryModalOpen: boolean;
+  mode: PlacesMode;
+  distanceFor: (place: Place) => string | null;
+  isFavorited: (placeId: number) => boolean;
   handleQueryChange: (text: string) => void;
   handleCategorySelectAndClose: (id: number | null) => void;
   handleCategoryModalOpen: () => void;
@@ -37,6 +45,8 @@ export interface UsePlacesScreenResult {
   handlePlacesEndReached: () => void;
   handlePlacesRefresh: () => void;
   handlePlacePress: (placeId: number) => void;
+  handleFavoritePress: (placeId: number) => void;
+  handleModeToggle: () => void;
   handleBack: () => void;
 }
 
@@ -48,17 +58,23 @@ export function usePlacesScreen(): UsePlacesScreenResult {
 
   const [query, setQuery] = useState('');
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [mode, setMode] = useState<PlacesMode>('all');
+  const [userCoords, setUserCoords] = useState<[number, number] | null>(null);
   const debouncedQuery = useDebounce(query, SEARCH_DEBOUNCE_MS);
 
   useFocusEffect(
     useCallback(() => {
       placesListRef.current?.scrollToOffset({ offset: 0, animated: false });
-
-      return () => {
-        setQuery('');
-      };
+      return () => { setQuery(''); };
     }, [])
   );
+
+  // All places (unfiltered, used for nearby + favorites sorting)
+  const { data: allPlaces = [] } = useQuery({
+    queryKey: QUERY_KEYS.PLACES.ALL(),
+    queryFn:  fetchAllPlaces,
+    staleTime: CACHE_TTL.USER_DATA,
+  });
 
   const {
     places,
@@ -72,12 +88,8 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     refetch: refetchPlaces,
   } = usePlaces(debouncedQuery);
 
-  const {
-    selectedCategory,
-    filteredPlaces,
-    categories,
-    handleCategorySelect,
-  } = usePlacesSearch(places);
+  const { selectedCategory, filteredPlaces, categories, handleCategorySelect } = usePlacesSearch(places);
+  const { favoriteIds, isFavorited, toggleFavoriteMutation } = useFavoritePlaceIds();
 
   useEffect(() => {
     filteredPlaces.forEach(p => {
@@ -90,17 +102,69 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     [categories, selectedCategory],
   );
 
-  const handleQueryChange = useCallback((text: string): void => {
-    setQuery(text);
-  }, []);
+  // ── Nearby sorting ──────────────────────────────────────────────────────
+  const nearbyPlaces = useMemo((): Place[] => {
+    if (mode !== 'nearby' || userCoords === null) return [];
+    const [userLng, userLat] = userCoords;
+    return [...allPlaces]
+      .filter(p => p.latitude != null && p.longitude != null)
+      .sort((a, b) =>
+        distanceKm(userLat, userLng, a.latitude!, a.longitude!) -
+        distanceKm(userLat, userLng, b.latitude!, b.longitude!)
+      );
+  }, [mode, userCoords, allPlaces]);
 
-  const handleCategoryModalOpen = useCallback((): void => {
-    setIsCategoryModalOpen(true);
-  }, []);
+  // ── Favorites sorting ───────────────────────────────────────────────────
+  const favoritesFirstPlaces = useMemo((): Place[] => {
+    if (mode !== 'favorites') return [];
+    return [...filteredPlaces].sort((a, b) => {
+      const aFav = favoriteIds.has(a.id) ? 0 : 1;
+      const bFav = favoriteIds.has(b.id) ? 0 : 1;
+      return aFav - bFav;
+    });
+  }, [mode, filteredPlaces, favoriteIds]);
 
-  const handleCategoryModalClose = useCallback((): void => {
-    setIsCategoryModalOpen(false);
-  }, []);
+  const displayedPlaces = useMemo((): Place[] => {
+    if (mode === 'nearby') return nearbyPlaces;
+    if (mode === 'favorites') return favoritesFirstPlaces;
+    return filteredPlaces;
+  }, [mode, nearbyPlaces, favoritesFirstPlaces, filteredPlaces]);
+
+  const distanceFor = useCallback((place: Place): string | null => {
+    if (mode !== 'nearby' || userCoords === null || place.latitude == null || place.longitude == null) return null;
+    const [userLng, userLat] = userCoords;
+    return formatDistance(distanceKm(userLat, userLng, place.latitude, place.longitude));
+  }, [mode, userCoords]);
+
+  // ── Mode toggle ─────────────────────────────────────────────────────────
+  const handleModeToggle = useCallback(async (): Promise<void> => {
+    if (mode === 'all') {
+      // → nearby: request location
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Location Required', 'Allow location access to see places sorted by distance.');
+        return;
+      }
+      try {
+        const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+        setUserCoords([loc.coords.longitude, loc.coords.latitude]);
+        setMode('nearby');
+      } catch {
+        Alert.alert('Location Error', 'Could not get your location. Please try again.');
+      }
+    } else if (mode === 'nearby') {
+      // → favorites
+      setMode('favorites');
+    } else {
+      // favorites → all
+      setMode('all');
+    }
+  }, [mode]);
+
+  // ── Standard handlers ───────────────────────────────────────────────────
+  const handleQueryChange       = useCallback((text: string): void => { setQuery(text); }, []);
+  const handleCategoryModalOpen  = useCallback((): void => { setIsCategoryModalOpen(true); }, []);
+  const handleCategoryModalClose = useCallback((): void => { setIsCategoryModalOpen(false); }, []);
 
   const handleCategorySelectAndClose = useCallback((id: number | null): void => {
     handleCategorySelect(id);
@@ -108,34 +172,29 @@ export function usePlacesScreen(): UsePlacesScreenResult {
   }, [handleCategorySelect]);
 
   const handlePlacesEndReached = useCallback((): void => {
-    if (placesHasNextPage && !isPlacesFetchingNextPage) {
-      fetchPlacesNextPage();
-    }
-  }, [placesHasNextPage, isPlacesFetchingNextPage, fetchPlacesNextPage]);
+    if (mode === 'all' && placesHasNextPage && !isPlacesFetchingNextPage) fetchPlacesNextPage();
+  }, [mode, placesHasNextPage, isPlacesFetchingNextPage, fetchPlacesNextPage]);
 
-  const handlePlacesRefresh = useCallback((): void => {
-    refetchPlaces();
-  }, [refetchPlaces]);
+  const handlePlacesRefresh = useCallback((): void => { refetchPlaces(); }, [refetchPlaces]);
 
-  const handlePlacePress = useCallback(
-    (placeId: number): void => {
-      queryClient.prefetchQuery({
-        queryKey: QUERY_KEYS.PLACES.DETAIL(placeId),
-        queryFn:  () => fetchPlaceDetail(placeId),
-        staleTime: CACHE_TTL.USER_DATA,
-      });
-      navigation.navigate('PlaceDetail', { placeId });
-    },
-    [navigation, queryClient],
-  );
+  const handlePlacePress = useCallback((placeId: number): void => {
+    queryClient.prefetchQuery({
+      queryKey: QUERY_KEYS.PLACES.DETAIL(placeId),
+      queryFn:  () => fetchPlaceDetail(placeId),
+      staleTime: CACHE_TTL.USER_DATA,
+    });
+    navigation.navigate('PlaceDetail', { placeId });
+  }, [navigation, queryClient]);
 
-  const handleBack = useCallback((): void => {
-    navigation.goBack();
-  }, [navigation]);
+  const handleFavoritePress = useCallback((placeId: number): void => {
+    toggleFavoriteMutation(placeId);
+  }, [toggleFavoriteMutation]);
+
+  const handleBack = useCallback((): void => { navigation.goBack(); }, [navigation]);
 
   return {
     placesListRef,
-    filteredPlaces,
+    displayedPlaces,
     categories,
     isPlacesLoading,
     isPlacesError,
@@ -146,6 +205,9 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     selectedCategory,
     selectedCategoryLabel,
     isCategoryModalOpen,
+    mode,
+    distanceFor,
+    isFavorited,
     handleQueryChange,
     handleCategorySelectAndClose,
     handleCategoryModalOpen,
@@ -153,6 +215,8 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     handlePlacesEndReached,
     handlePlacesRefresh,
     handlePlacePress,
+    handleFavoritePress,
+    handleModeToggle,
     handleBack,
   };
 }

@@ -5,9 +5,18 @@ const { height: SCREEN_H } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
   backdrop: {
-    flex:            1,
+    position:        'absolute',
+    top:             0, left: 0, right: 0, bottom: 0,
     backgroundColor: 'rgba(0,0,0,0.45)',
-    justifyContent:  'flex-end',
+  },
+  backdropTap: {
+    flex: 1,
+  },
+  cardContainer: {
+    position:       'absolute',
+    bottom:         0,
+    left:           0,
+    right:          0,
   },
   sheet: {
     backgroundColor: MAP_COLORS.surface,

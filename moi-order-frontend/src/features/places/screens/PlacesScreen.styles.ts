@@ -88,6 +88,21 @@ export const styles = StyleSheet.create({
     backgroundColor: editorialPalette.gold,
     borderColor: editorialPalette.gold,
   },
+  modeBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    flexShrink: 0,
+  },
+  modeBtnActive: {
+    backgroundColor: editorialPalette.gold,
+    borderColor: editorialPalette.gold,
+  },
   categoryBtnLabel: {
     fontSize: typography.xs,
     fontWeight: '600',

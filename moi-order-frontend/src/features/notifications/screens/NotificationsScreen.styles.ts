@@ -48,7 +48,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.backgroundLight,
     borderTopLeftRadius: radius.sheet,
     borderTopRightRadius: radius.sheet,
-    marginTop: -spacing.xl,
+    marginTop: -spacing.sm,
     overflow: 'hidden',
   },
 

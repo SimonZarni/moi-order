@@ -72,6 +72,7 @@ Route::post('/ticket-orders/{id}/payment/sync',            [TicketOrderPaymentCo
 Route::get('/ticket-orders/{id}/eticket',                  [TicketOrderEticketController::class, 'show']);
 
 // Favorites
+Route::get('/favorites/places/ids',       [FavoritePlaceController::class, 'ids']);
 Route::get('/places/{placeId}/favorite',  [FavoritePlaceController::class, 'show']);
 Route::post('/places/{placeId}/favorite', [FavoritePlaceController::class, 'toggle']);
 

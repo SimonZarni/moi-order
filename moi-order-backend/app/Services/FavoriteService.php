@@ -48,6 +48,12 @@ class FavoriteService
         return true;
     }
 
+    /** Returns all place IDs the user has favorited — lightweight array of integers. */
+    public function getFavoritePlaceIds(int $userId): array
+    {
+        return FavoritePlace::where('user_id', $userId)->pluck('place_id')->all();
+    }
+
     /**
      * Check whether a user has favorited a place.
      */

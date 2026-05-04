@@ -22,12 +22,14 @@ const HERO_MIN_HEIGHT = 140;
 export function PlacesScreen(): React.JSX.Element {
   const {
     placesListRef,
-    filteredPlaces, categories, isPlacesLoading, isPlacesError,
+    displayedPlaces, categories, isPlacesLoading, isPlacesError,
     isPlacesRefreshing, isPlacesFetchingNextPage,
     query, selectedCategory, selectedCategoryLabel, isCategoryModalOpen,
+    mode, distanceFor, isFavorited,
     handleQueryChange, handleCategorySelectAndClose,
     handleCategoryModalOpen, handleCategoryModalClose,
     handlePlacesEndReached, handlePlacesRefresh, handlePlacePress,
+    handleFavoritePress, handleModeToggle,
     handleBack,
   } = usePlacesScreen();
 
@@ -95,6 +97,20 @@ export function PlacesScreen(): React.JSX.Element {
             name="chevron-down"
             size={11}
             color={selectedCategory !== null ? colours.backgroundDark : 'rgba(255,255,255,0.45)'}
+          />
+        </Pressable>
+
+        {/* Mode toggle: all → nearby (📍) → favorites (❤️) */}
+        <Pressable
+          style={[styles.modeBtn, mode !== 'all' && styles.modeBtnActive]}
+          onPress={handleModeToggle}
+          accessibilityRole="button"
+          accessibilityLabel={mode === 'all' ? 'Sort by nearby' : mode === 'nearby' ? 'Show favorites first' : 'Back to all places'}
+        >
+          <Ionicons
+            name={mode === 'favorites' ? 'heart' : 'location'}
+            size={15}
+            color={mode !== 'all' ? colours.backgroundDark : 'rgba(255,255,255,0.75)'}
           />
         </Pressable>
       </View>
@@ -198,9 +214,17 @@ export function PlacesScreen(): React.JSX.Element {
         {hero}
         <FlatList
           ref={placesListRef}
-          data={filteredPlaces}
+          data={displayedPlaces}
           keyExtractor={(item: Place) => String(item.id)}
-          renderItem={({ item }) => <PlaceCard place={item} onPress={handlePlacePress} />}
+          renderItem={({ item }) => (
+            <PlaceCard
+              place={item}
+              onPress={handlePlacePress}
+              distance={distanceFor(item)}
+              isFavorited={isFavorited(item.id)}
+              onFavoritePress={handleFavoritePress}
+            />
+          )}
           ListEmptyComponent={
             <View style={styles.stateBox}>
               <Ionicons name="search" size={36} color={colours.textMuted} style={styles.stateIcon} />

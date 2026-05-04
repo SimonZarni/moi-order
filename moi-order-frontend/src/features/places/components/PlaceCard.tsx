@@ -14,9 +14,11 @@ interface PlaceCardProps {
   place: Place;
   onPress: (placeId: number) => void;
   distance?: string | null;
+  isFavorited?: boolean;
+  onFavoritePress?: (placeId: number) => void;
 }
 
-export function PlaceCard({ place, onPress, distance }: PlaceCardProps): React.JSX.Element {
+export function PlaceCard({ place, onPress, distance, isFavorited = false, onFavoritePress }: PlaceCardProps): React.JSX.Element {
   return (
     <View style={styles.shadowWrap}>
       <Pressable
@@ -62,9 +64,19 @@ export function PlaceCard({ place, onPress, distance }: PlaceCardProps): React.J
             {/* Name + heart */}
             <View style={styles.nameRow}>
               <Text style={styles.name} numberOfLines={1}>{place.name_en}</Text>
-              <View style={styles.heartBtn}>
-                <Ionicons name="heart-outline" size={17} color="rgba(255,255,255,0.75)" />
-              </View>
+              <Pressable
+                style={styles.heartBtn}
+                onPress={() => onFavoritePress?.(place.id)}
+                accessibilityLabel={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                accessibilityRole="button"
+                hitSlop={8}
+              >
+                <Ionicons
+                  name={isFavorited ? 'heart' : 'heart-outline'}
+                  size={17}
+                  color={isFavorited ? '#ff4d6d' : 'rgba(255,255,255,0.75)'}
+                />
+              </Pressable>
             </View>
 
             {/* City · distance · hours */}

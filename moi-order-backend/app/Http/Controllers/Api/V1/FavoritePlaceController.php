@@ -32,6 +32,17 @@ class FavoritePlaceController
     }
 
     /**
+     * GET /api/v1/favorites/places/ids
+     * Returns all place IDs the authenticated user has favorited.
+     */
+    public function ids(Request $request): JsonResponse
+    {
+        $ids = $this->favoriteService->getFavoritePlaceIds($request->user()->id);
+
+        return response()->json(['data' => $ids]);
+    }
+
+    /**
      * POST /api/v1/places/{placeId}/favorite
      * Toggles the favorite state and returns the new state.
      */
