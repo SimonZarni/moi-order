@@ -32,4 +32,14 @@ export const categoriesApi = {
     apiClient
       .patch<{ data: PlaceCategory }>(`/categories/${id}/restore`)
       .then((r) => r.data.data),
+
+  uploadImage: (id: number, file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    return apiClient
+      .post<{ data: PlaceCategory }>(`/categories/${id}/image`, formData)
+      .then((r) => r.data.data);
+  },
+
+  removeImage: (id: number) => apiClient.delete(`/categories/${id}/image`),
 };

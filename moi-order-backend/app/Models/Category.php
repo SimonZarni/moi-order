@@ -22,6 +22,7 @@ class Category extends Model
         'name_en',
         'name_th',
         'slug',
+        'image',
     ];
 
     // ─── Relationships ────────────────────────────────────────────────────────

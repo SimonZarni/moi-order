@@ -218,6 +218,8 @@ Route::prefix('categories')->name('admin.categories.')->group(function (): void 
     Route::delete('/{category}', [AdminCategoryController::class, 'destroy'])->name('destroy');
     Route::patch('/{id}/restore', [AdminCategoryController::class, 'restore'])->name('restore')
         ->whereNumber('id');
+    Route::post('/{category}/image', [AdminCategoryController::class, 'uploadImage'])->name('image.store');
+    Route::delete('/{category}/image', [AdminCategoryController::class, 'removeImage'])->name('image.destroy');
 });
 
 // ── Tickets + Variants + Ticket Orders ───────────────────────────────────────

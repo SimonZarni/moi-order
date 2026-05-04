@@ -55,6 +55,7 @@ export type PlaceCategory = {
   name_en: string;
   name_th: string | null;
   slug: string;
+  image_url: string | null;
   places_count?: number;
   created_at: string;
   deleted_at: string | null;

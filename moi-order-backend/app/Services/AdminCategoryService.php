@@ -4,18 +4,23 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\FileStorageInterface;
 use App\DTOs\AdminStoreCategoryDTO;
 use App\DTOs\AdminUpdateCategoryDTO;
 use App\Models\Category;
 use App\Support\CacheKeys;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 
 /**
  * Principle: SRP — owns admin CRUD for categories only.
+ * Principle: DIP — depends on FileStorageInterface, not Storage::disk() directly.
  */
 class AdminCategoryService
 {
+    public function __construct(private readonly FileStorageInterface $fileStorage) {}
+
     public function index(int $perPage = 20): LengthAwarePaginator
     {
         $page = request()->integer('page', 1);
@@ -59,6 +64,31 @@ class AdminCategoryService
         }
 
         Cache::tags([CacheKeys::TAG_CATEGORIES])->flush();
+
+        return $category->fresh()->loadCount('places');
+    }
+
+    public function uploadImage(Category $category, UploadedFile $file): Category
+    {
+        if ($category->image) {
+            $this->fileStorage->delete($category->image);
+        }
+
+        $path = $this->fileStorage->store($file, 'categories', ['image/jpeg', 'image/png', 'image/webp']);
+        $category->update(['image' => $path]);
+
+        Cache::tags([CacheKeys::TAG_CATEGORIES])->flush();
+
+        return $category->fresh()->loadCount('places');
+    }
+
+    public function removeImage(Category $category): Category
+    {
+        if ($category->image) {
+            $this->fileStorage->delete($category->image);
+            $category->update(['image' => null]);
+            Cache::tags([CacheKeys::TAG_CATEGORIES])->flush();
+        }
 
         return $category->fresh()->loadCount('places');
     }

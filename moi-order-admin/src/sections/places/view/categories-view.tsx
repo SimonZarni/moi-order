@@ -1,12 +1,13 @@
 import type { PlaceCategory } from 'src/types';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import Tooltip from '@mui/material/Tooltip';
@@ -119,6 +120,11 @@ export function CategoriesView() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 
+  const [pendingImage, setPendingImage] = useState<File | null>(null);
+  const [pendingPreview, setPendingPreview] = useState<string | null>(null);
+  const [imageRemoved, setImageRemoved] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
   const [deleteTarget, setDeleteTarget] = useState<PlaceCategory | null>(null);
   const [restoreTarget, setRestoreTarget] = useState<PlaceCategory | null>(null);
   const [actionSubmitting, setActionSubmitting] = useState(false);
@@ -152,12 +158,21 @@ export function CategoriesView() {
 
   const paginated = filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
+  const resetImageState = () => {
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    setPendingImage(null);
+    setPendingPreview(null);
+    setImageRemoved(false);
+    if (imageInputRef.current) imageInputRef.current.value = '';
+  };
+
   const openAdd = () => {
     setEditTarget(null);
     setForm(EMPTY_FORM);
     setFormErrors({});
     setSlugTouched(false);
     setFormError('');
+    resetImageState();
     setDialogOpen(true);
   };
 
@@ -167,11 +182,13 @@ export function CategoriesView() {
     setFormErrors({});
     setSlugTouched(true);
     setFormError('');
+    resetImageState();
     setDialogOpen(true);
   };
 
   const closeDialog = () => {
     if (submitting) return;
+    resetImageState();
     setDialogOpen(false);
   };
 
@@ -189,6 +206,25 @@ export function CategoriesView() {
     setForm((prev) => ({ ...prev, slug: value }));
     setFormErrors((prev) => ({ ...prev, slug: undefined }));
   };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    setPendingImage(file);
+    setPendingPreview(URL.createObjectURL(file));
+    setImageRemoved(false);
+  };
+
+  const handleRemoveImage = () => {
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    setPendingImage(null);
+    setPendingPreview(null);
+    setImageRemoved(true);
+    if (imageInputRef.current) imageInputRef.current.value = '';
+  };
+
+  const currentImageSrc = pendingPreview ?? (imageRemoved ? null : editTarget?.image_url ?? null);
 
   const handleSubmit = async () => {
     setFormError('');
@@ -209,11 +245,23 @@ export function CategoriesView() {
         name_th: form.name_th.trim() || null,
         slug: form.slug.trim(),
       };
+
+      let categoryId: number;
       if (editTarget) {
         await categoriesApi.update(editTarget.id, payload);
+        categoryId = editTarget.id;
       } else {
-        await categoriesApi.create(payload);
+        const created = await categoriesApi.create(payload);
+        categoryId = created.id;
       }
+
+      if (pendingImage) {
+        await categoriesApi.uploadImage(categoryId, pendingImage);
+      } else if (imageRemoved && editTarget?.image_url) {
+        await categoriesApi.removeImage(categoryId);
+      }
+
+      resetImageState();
       setDialogOpen(false);
       await load();
     } catch (err: unknown) {
@@ -307,9 +355,10 @@ export function CategoriesView() {
 
         <Scrollbar>
           <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 760 }}>
+            <Table sx={{ minWidth: 800 }}>
               <TableHead>
                 <TableRow>
+                  <TableCell>Image</TableCell>
                   <TableCell>Name (MY)</TableCell>
                   <TableCell>Name (EN)</TableCell>
                   <TableCell>Name (TH)</TableCell>
@@ -323,14 +372,14 @@ export function CategoriesView() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
+                    <TableCell colSpan={9} align="center" sx={{ py: 6 }}>
                       <CircularProgress size={32} />
                     </TableCell>
                   </TableRow>
                 ) : paginated.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={8}
+                      colSpan={9}
                       align="center"
                       sx={{ py: 6, color: 'text.secondary' }}
                     >
@@ -342,6 +391,16 @@ export function CategoriesView() {
                     const isDeleted = !!row.deleted_at;
                     return (
                       <TableRow key={row.id} hover sx={{ opacity: isDeleted ? 0.55 : 1 }}>
+                        <TableCell>
+                          <Avatar
+                            src={row.image_url ?? undefined}
+                            alt={row.name_en}
+                            variant="rounded"
+                            sx={{ width: 40, height: 40 }}
+                          >
+                            {row.name_en.charAt(0).toUpperCase()}
+                          </Avatar>
+                        </TableCell>
                         <TableCell>
                           <Typography variant="body2" fontWeight={500}>
                             {row.name_my}
@@ -474,6 +533,43 @@ export function CategoriesView() {
               helperText={formErrors.slug ?? 'Auto-generated from English name. Must be unique.'}
               InputProps={{ sx: { fontFamily: 'monospace' } }}
             />
+
+            {/* Image picker */}
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                Category Image
+              </Typography>
+              <Stack direction="row" alignItems="center" spacing={2}>
+                <Avatar
+                  src={currentImageSrc ?? undefined}
+                  variant="rounded"
+                  sx={{ width: 72, height: 72 }}
+                >
+                  <Iconify icon="solar:gallery-bold" width={28} />
+                </Avatar>
+                <Stack spacing={1}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => imageInputRef.current?.click()}
+                  >
+                    {currentImageSrc ? 'Change Image' : 'Upload Image'}
+                  </Button>
+                  {currentImageSrc && (
+                    <Button size="small" color="error" onClick={handleRemoveImage}>
+                      Remove Image
+                    </Button>
+                  )}
+                </Stack>
+              </Stack>
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                style={{ display: 'none' }}
+                onChange={handleImageChange}
+              />
+            </Box>
           </Stack>
         </DialogContent>
         <DialogActions>

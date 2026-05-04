@@ -9,13 +9,13 @@ use App\DTOs\AdminUpdateCategoryDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AdminStoreCategoryRequest;
 use App\Http\Requests\Admin\AdminUpdateCategoryRequest;
+use App\Http\Requests\Admin\AdminUploadCategoryImageRequest;
 use App\Http\Resources\Admin\AdminCategoryResource;
 use App\Models\Category;
 use App\Services\AdminCategoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * Principle: SRP — HTTP layer only. ≤20 lines/action. One service call per action.
@@ -69,5 +69,21 @@ class AdminCategoryController extends Controller
         $restored = $this->service->restore($category);
 
         return response()->json(['data' => new AdminCategoryResource($restored)]);
+    }
+
+    /** POST /api/admin/v1/categories/{category}/image */
+    public function uploadImage(AdminUploadCategoryImageRequest $request, Category $category): JsonResponse
+    {
+        $updated = $this->service->uploadImage($category, $request->file('image'));
+
+        return response()->json(['data' => new AdminCategoryResource($updated)]);
+    }
+
+    /** DELETE /api/admin/v1/categories/{category}/image */
+    public function removeImage(Category $category): JsonResponse
+    {
+        $updated = $this->service->removeImage($category);
+
+        return response()->json(['data' => new AdminCategoryResource($updated)]);
     }
 }
