@@ -6,7 +6,7 @@ import { radius } from '@/shared/theme/radius';
 import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const HERO_HEIGHT = 300;
 // 2-column grid: subtract 2 × horizontal padding (16 each) + 1 gap between columns
 const GALLERY_ITEM_SIZE = (SCREEN_WIDTH - spacing.md * 2 - spacing.sm) / 2;
@@ -147,6 +147,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingTop: spacing.lg,
     paddingBottom: spacing.xxl,
+    minHeight: SCREEN_HEIGHT - HERO_HEIGHT,
   },
 
   // ── Info chips ────────────────────────────────────────────────────────────
@@ -181,11 +182,20 @@ export const styles = StyleSheet.create({
   },
 
   // ── Description ───────────────────────────────────────────────────────────
+  descriptionWrap: {
+    marginBottom: spacing.md,
+  },
   description: {
     fontSize: typography.md,
     color: colours.medium,
     lineHeight: 26,
-    marginBottom: spacing.md,
+  },
+  seeMoreText: {
+    fontSize: typography.sm,
+    fontWeight: '600',
+    color: colours.primary,
+    marginTop: spacing.xs,
+    lineHeight: 20,
   },
 
   // ── Tags ──────────────────────────────────────────────────────────────────

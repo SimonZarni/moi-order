@@ -69,7 +69,7 @@ export function PlacesScreen(): React.JSX.Element {
               accessibilityLabel="Clear search"
               accessibilityRole="button"
             >
-              <Ionicons name="close" size={14} color={colours.medium} />
+              <Ionicons name="close" size={14} color="rgba(255,255,255,0.85)" />
             </Pressable>
           )}
         </View>
@@ -113,37 +113,43 @@ export function PlacesScreen(): React.JSX.Element {
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>Category</Text>
 
-            <Pressable
-              style={[styles.modalOption, selectedCategory === null && styles.modalOptionActive]}
-              onPress={() => handleCategorySelectAndClose(null)}
-              accessibilityLabel="All categories"
-              accessibilityRole="button"
+            <ScrollView
+              style={styles.modalOptions}
+              showsVerticalScrollIndicator={false}
+              bounces={false}
             >
-              <Text style={[styles.modalOptionText, selectedCategory === null && styles.modalOptionTextActive]}>
-                All
-              </Text>
-              {selectedCategory === null && (
-                <Ionicons name="checkmark" size={16} color={editorialPalette.gold} />
-              )}
-            </Pressable>
+              <Pressable
+                style={[styles.modalOption, selectedCategory === null && styles.modalOptionActive]}
+                onPress={() => handleCategorySelectAndClose(null)}
+                accessibilityLabel="All categories"
+                accessibilityRole="button"
+              >
+                <Text style={[styles.modalOptionText, selectedCategory === null && styles.modalOptionTextActive]}>
+                  All
+                </Text>
+                {selectedCategory === null && (
+                  <Ionicons name="checkmark" size={16} color={editorialPalette.gold} />
+                )}
+              </Pressable>
 
-            {categories.map((cat: Category) => {
-              const isActive = selectedCategory === cat.id;
-              return (
-                <Pressable
-                  key={cat.id}
-                  style={[styles.modalOption, isActive && styles.modalOptionActive]}
-                  onPress={() => handleCategorySelectAndClose(cat.id)}
-                  accessibilityLabel={cat.name_en}
-                  accessibilityRole="button"
-                >
-                  <Text style={[styles.modalOptionText, isActive && styles.modalOptionTextActive]}>
-                    {cat.name_en}
-                  </Text>
-                  {isActive && <Ionicons name="checkmark" size={16} color={editorialPalette.gold} />}
-                </Pressable>
-              );
-            })}
+              {categories.map((cat: Category) => {
+                const isActive = selectedCategory === cat.id;
+                return (
+                  <Pressable
+                    key={cat.id}
+                    style={[styles.modalOption, isActive && styles.modalOptionActive]}
+                    onPress={() => handleCategorySelectAndClose(cat.id)}
+                    accessibilityLabel={cat.name_en}
+                    accessibilityRole="button"
+                  >
+                    <Text style={[styles.modalOptionText, isActive && styles.modalOptionTextActive]}>
+                      {cat.name_en}
+                    </Text>
+                    {isActive && <Ionicons name="checkmark" size={16} color={editorialPalette.gold} />}
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
           </View>
         </Pressable>
       </Modal>

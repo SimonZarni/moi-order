@@ -24,6 +24,9 @@ export interface UsePlaceDetailScreenResult {
   isTogglingFavorite: boolean;
   /** Whether the current user is authenticated (gates heart button rendering). */
   isLoggedIn: boolean;
+  isDescriptionExpanded: boolean;
+  isLongDescription: boolean;
+  handleToggleDescription: () => void;
   handleRefresh: () => void;
   handleBack: () => void;
   handleCallPhone: () => void;
@@ -41,16 +44,27 @@ export function usePlaceDetailScreen(placeId: number): UsePlaceDetailScreenResul
   const { place, isLoading, isRefreshing, isError, error, refetch } = usePlaceDetail(placeId);
   const { isFavorited, isToggling, handleToggle } = usePlaceFavorite(placeId);
   const [viewerIndex, setViewerIndex] = useState<number>(-1);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   // images is only present on the detail response — guard against undefined
   const coverImage    = useMemo(() => place?.images?.[0] ?? null, [place?.images]);
   const galleryImages = useMemo(() => place?.images?.slice(1) ?? [], [place?.images]);
+
+  // Description longer than this threshold gets collapsed to 5 lines
+  const isLongDescription = useMemo(
+    () => (place?.long_description?.length ?? 0) > 320,
+    [place?.long_description],
+  );
 
   // All images as { uri } — format expected by react-native-image-viewing
   const viewerImages = useMemo(
     () => (place?.images ?? []).map((img: PlaceImage) => ({ uri: img.url })),
     [place?.images],
   );
+
+  const handleToggleDescription = useCallback((): void => {
+    setIsDescriptionExpanded(prev => !prev);
+  }, []);
 
   const handleImagePress = useCallback((index: number) => {
     setViewerIndex(index);
@@ -103,6 +117,9 @@ export function usePlaceDetailScreen(placeId: number): UsePlaceDetailScreenResul
     isFavorited,
     isTogglingFavorite: isToggling,
     isLoggedIn,
+    isDescriptionExpanded,
+    isLongDescription,
+    handleToggleDescription,
     handleRefresh,
     handleBack,
     handleCallPhone,

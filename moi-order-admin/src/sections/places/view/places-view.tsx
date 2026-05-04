@@ -19,7 +19,6 @@ import Checkbox from '@mui/material/Checkbox';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
@@ -49,85 +48,6 @@ const localeName = (v: PlaceLocale | null): string => {
   if (!v) return '—';
   return v.name_my ?? v.name_en ?? '—';
 };
-
-// ----------------------------------------------------------------------
-
-type ConfirmDialogProps = {
-  open: boolean;
-  title: string;
-  description: string;
-  confirmLabel?: string;
-  confirmColor?: 'error' | 'primary' | 'warning';
-  onClose: () => void;
-  onConfirm: () => void;
-};
-
-function PasswordConfirmDialog({
-  open,
-  title,
-  description,
-  confirmLabel = 'Confirm',
-  confirmColor = 'error',
-  onClose,
-  onConfirm,
-}: ConfirmDialogProps) {
-  const [password, setPassword] = useState('');
-  const [show, setShow] = useState(false);
-
-  const handleConfirm = () => {
-    if (!password.trim()) return;
-    onConfirm();
-    setPassword('');
-  };
-
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{title}</DialogTitle>
-      <DialogContent>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
-          {description}
-        </Typography>
-        <TextField
-          fullWidth
-          label="Enter your password to confirm"
-          type={show ? 'text' : 'password'}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') handleConfirm();
-          }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={() => setShow((v) => !v)} edge="end" size="small">
-                  <Iconify icon={show ? 'solar:eye-bold' : 'solar:eye-closed-bold'} width={18} />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button
-          onClick={() => {
-            onClose();
-            setPassword('');
-          }}
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="contained"
-          color={confirmColor}
-          onClick={handleConfirm}
-          disabled={!password.trim()}
-        >
-          {confirmLabel}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-}
 
 // ----------------------------------------------------------------------
 
@@ -235,9 +155,6 @@ export function PlacesView() {
   );
   const [selected, setSelected] = useState<number[]>([]);
 
-  const [editConfirm, setEditConfirm] = useState<PlaceData | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
-  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
 
   // ── Import state ────────────────────────────────────────────────────────────
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -303,24 +220,15 @@ export function PlacesView() {
   const handleDelete = (id: number) => {
     placesApi
       .remove(id)
-      .then(() => {
-        setDeleteConfirm(null);
-        fetchPlaces();
-      })
-      .catch(() => setDeleteConfirm(null));
+      .then(() => fetchPlaces())
+      .catch(() => {});
   };
 
   const handleBulkDelete = () => {
     Promise.all(selected.map((id) => placesApi.remove(id))).then(() => {
       setSelected([]);
-      setBulkDeleteConfirm(false);
       fetchPlaces();
     });
-  };
-
-  const handleEditConfirmed = (place: PlaceData) => {
-    setEditConfirm(null);
-    router.push(`/places/${place.id}/edit`);
   };
 
   // ── Import handlers ─────────────────────────────────────────────────────────
@@ -451,7 +359,7 @@ export function PlacesView() {
                 color="error"
                 variant="outlined"
                 startIcon={<Iconify icon="solar:trash-bin-trash-bold" width={14} />}
-                onClick={() => setBulkDeleteConfirm(true)}
+                onClick={handleBulkDelete}
               >
                 Delete Selected
               </Button>
@@ -512,7 +420,7 @@ export function PlacesView() {
                               cursor: 'pointer',
                               '&:hover': { color: 'primary.main', textDecoration: 'underline' },
                             } : undefined}
-                            onClick={canUpdate ? () => setEditConfirm(row) : undefined}
+                            onClick={canUpdate ? () => router.push(`/places/${row.id}/edit`) : undefined}
                           >
                             {row.name_my}
                           </Typography>
@@ -545,7 +453,7 @@ export function PlacesView() {
                         </TableCell>
                         <TableCell align="right">
                           {canUpdate && (
-                            <IconButton size="small" onClick={() => setEditConfirm(row)}>
+                            <IconButton size="small" onClick={() => router.push(`/places/${row.id}/edit`)}>
                               <Iconify icon="solar:pen-bold" width={16} />
                             </IconButton>
                           )}
@@ -553,7 +461,7 @@ export function PlacesView() {
                             <IconButton
                               size="small"
                               color="error"
-                              onClick={() => setDeleteConfirm(row.id)}
+                              onClick={() => handleDelete(row.id)}
                             >
                               <Iconify icon="solar:trash-bin-trash-bold" width={16} />
                             </IconButton>
@@ -589,36 +497,6 @@ export function PlacesView() {
           onRowsPerPageChange={(e) => updateParams({ per_page: e.target.value, page: '0' })}
         />
       </Card>
-
-      <PasswordConfirmDialog
-        open={!!editConfirm}
-        title="Confirm to Edit Place"
-        description={`Enter your password to edit "${editConfirm?.name_my}".`}
-        confirmLabel="Continue to Edit"
-        confirmColor="primary"
-        onClose={() => setEditConfirm(null)}
-        onConfirm={() => editConfirm && handleEditConfirmed(editConfirm)}
-      />
-
-      <PasswordConfirmDialog
-        open={!!deleteConfirm}
-        title="Confirm Delete"
-        description="Enter your password to permanently delete this place."
-        confirmLabel="Delete"
-        confirmColor="error"
-        onClose={() => setDeleteConfirm(null)}
-        onConfirm={() => deleteConfirm !== null && handleDelete(deleteConfirm)}
-      />
-
-      <PasswordConfirmDialog
-        open={bulkDeleteConfirm}
-        title={`Delete ${selected.length} Places?`}
-        description="This action cannot be undone. Enter your password to confirm bulk delete."
-        confirmLabel={`Delete ${selected.length} Places`}
-        confirmColor="error"
-        onClose={() => setBulkDeleteConfirm(false)}
-        onConfirm={handleBulkDelete}
-      />
 
       <ImportDialog
         open={importDialogOpen}

@@ -22,8 +22,10 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
     place, coverImage, galleryImages, viewerImages, viewerIndex,
     isLoading, isRefreshing, isError,
     isFavorited, isTogglingFavorite, isLoggedIn,
+    isDescriptionExpanded, isLongDescription,
     handleRefresh, handleBack, handleCallPhone, handleOpenWebsite, handleOpenMaps,
-    handleToggleFavorite, handleImagePress, handleViewAllImages, handleCloseImageViewer,
+    handleToggleFavorite, handleToggleDescription,
+    handleImagePress, handleViewAllImages, handleCloseImageViewer,
   } = usePlaceDetailScreen(placeId);
 
   if (isLoading) return <PlaceDetailSkeleton />;
@@ -127,7 +129,25 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
 
           {/* Description */}
           {place.long_description !== null && (
-            <Text style={styles.description}>{place.long_description}</Text>
+            <View style={styles.descriptionWrap}>
+              <Text
+                style={styles.description}
+                numberOfLines={isDescriptionExpanded || !isLongDescription ? undefined : 5}
+              >
+                {place.long_description}
+              </Text>
+              {isLongDescription && (
+                <Pressable
+                  onPress={handleToggleDescription}
+                  accessibilityRole="button"
+                  accessibilityLabel={isDescriptionExpanded ? 'Show less' : 'Show more'}
+                >
+                  <Text style={styles.seeMoreText}>
+                    {isDescriptionExpanded ? 'See less' : 'See more'}
+                  </Text>
+                </Pressable>
+              )}
+            </View>
           )}
 
           {/* Tags */}

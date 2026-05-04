@@ -1,4 +1,6 @@
-import { StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
+
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 import { colours } from '@/shared/theme/colours';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
@@ -111,6 +113,10 @@ export const styles = StyleSheet.create({
     borderTopRightRadius: radius.sheet,
     paddingTop: spacing.sm,
     paddingBottom: 40,
+    maxHeight: SCREEN_HEIGHT * 0.55,
+  },
+  modalOptions: {
+    flexGrow: 0,
   },
   modalHandle: {
     width: 36,
@@ -162,6 +168,7 @@ export const styles = StyleSheet.create({
 
   // ── List ──────────────────────────────────────────────────────────────────
   list: {
+    flexGrow: 1,
     paddingTop: spacing.sm,
     paddingBottom: TAB_BAR_CLEARANCE,
     backgroundColor: colours.backgroundLight,
