@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   ActivityIndicator,
+  Linking,
   Platform,
   Pressable, RefreshControl,
   ScrollView, Text, TextInput, View,
@@ -15,7 +16,9 @@ import { DocumentShortcuts } from '@/features/profile/components/DocumentShortcu
 import { useProfileScreen } from '@/features/profile/hooks/useProfileScreen';
 import { useLinkedAccounts } from '@/features/profile/hooks/useLinkedAccounts';
 import { useUploadStats } from '@/features/documents/hooks/useUploadStats';
+import { useVerificationStatus } from '@/features/profile/hooks/useVerificationStatus';
 import { VerifiedBadgeIcon } from '@/shared/components/VerifiedBadgeIcon';
+import { LINE_OA_URL } from '@/shared/constants/config';
 import { formatDate } from '@/shared/utils/formatDate';
 import { formatPhoneNumber } from '@/shared/utils/formatPhoneNumber';
 import { getProfileStrings } from '@/shared/constants/profileStrings';
@@ -56,6 +59,7 @@ export function ProfileScreen(): React.JSX.Element {
   } = useLinkedAccounts();
 
   const { stats } = useUploadStats();
+  const { status: verificationStatus } = useVerificationStatus();
   const t = getProfileStrings(locale);
   const hasPhoneNumber = (user?.phone_number ?? '').trim() !== '';
   const appleUnavailable = Platform.OS !== 'ios';
@@ -108,7 +112,10 @@ export function ProfileScreen(): React.JSX.Element {
             </View>
           </View>
 
-          <Text style={styles.heroName}>{user?.name ?? name}</Text>
+          <View style={styles.heroNameRow}>
+            <Text style={styles.heroName}>{user?.name ?? name}</Text>
+            {verificationStatus?.is_verified && <VerifiedBadgeIcon size={26} />}
+          </View>
           <Text style={styles.heroEmail}>{user?.email ?? ''}</Text>
           {user !== null && <Text style={styles.heroSince}>{memberSince}</Text>}
         </View>
@@ -170,7 +177,7 @@ export function ProfileScreen(): React.JSX.Element {
               <View style={[styles.iconBadge, styles.iconBadgeTeal]}>
                 <Ionicons name="shield-checkmark-outline" size={16} color={colours.tertiary} />
               </View>
-              <Text style={styles.rowLabel}>Become Moi Verified</Text>
+              <Text style={[styles.rowLabel, styles.rowLabelBold]}>Become Moi Verified</Text>
               <VerifiedBadgeIcon size={20} />
               <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </View>
@@ -530,6 +537,39 @@ export function ProfileScreen(): React.JSX.Element {
                 <Ionicons name="list" size={16} color={colours.secondary} />
               </View>
               <Text style={styles.rowLabel}>{t.myOrders}</Text>
+              <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
+            </Pressable>
+          </View>
+
+          {/* § Customer Support */}
+          <View style={styles.sectionRow}>
+            <Text style={styles.sectionLabel}>Customer Support</Text>
+            <View style={styles.sectionLine} />
+          </View>
+          <View style={styles.card}>
+            <Pressable
+              style={styles.row}
+              onPress={() => Linking.openURL('https://www.facebook.com/moiorder')}
+              accessibilityLabel="Contact us on Facebook"
+              accessibilityRole="button"
+            >
+              <View style={[styles.iconBadge, styles.iconBadgeFacebook]}>
+                <Ionicons name="logo-facebook" size={16} color="#1877F2" />
+              </View>
+              <Text style={styles.rowLabel}>Facebook</Text>
+              <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
+            </Pressable>
+            <View style={styles.rowSeparator} />
+            <Pressable
+              style={styles.row}
+              onPress={() => Linking.openURL(LINE_OA_URL)}
+              accessibilityLabel="Contact us on LINE"
+              accessibilityRole="button"
+            >
+              <View style={[styles.iconBadge, styles.iconBadgeLine]}>
+                <Ionicons name="chatbubble-ellipses-outline" size={16} color="#06C755" />
+              </View>
+              <Text style={styles.rowLabel}>LINE</Text>
               <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </Pressable>
           </View>

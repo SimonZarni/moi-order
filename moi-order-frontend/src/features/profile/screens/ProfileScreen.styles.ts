@@ -103,13 +103,18 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   // Hero text
+  heroNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: 4,
+  },
   heroName: {
     fontSize: typography.xl + 2,
     fontWeight: '800',
     color: colours.textOnDark,
     letterSpacing: -0.4,
     lineHeight: 36,
-    marginBottom: 4,
   },
   heroEmail: {
     fontSize: typography.sm,
@@ -334,6 +339,11 @@ export const styles = StyleSheet.create({
     fontWeight: '500',
     lineHeight: 28,
   },
+  rowLabelBold: {
+    fontWeight: '700',
+  },
+  iconBadgeFacebook: { backgroundColor: '#1877F214' },
+  iconBadgeLine:     { backgroundColor: '#06C75514' },
   rowDisabled: {
     opacity: 0.45,
   },
