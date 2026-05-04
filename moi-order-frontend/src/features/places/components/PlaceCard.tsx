@@ -1,4 +1,5 @@
 import React from 'react';
+import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, Text, View } from 'react-native';
@@ -19,7 +20,7 @@ export function PlaceCard({ place, onPress, distance }: PlaceCardProps): React.J
   return (
     <View style={styles.shadowWrap}>
       <Pressable
-        style={({ pressed }) => [styles.card, { opacity: pressed ? 0.88 : 1 }]}
+        style={({ pressed }) => [styles.card, { opacity: pressed ? 0.92 : 1 }]}
         onPress={() => onPress(place.id)}
         accessibilityLabel={`View details for ${place.name_en}`}
         accessibilityRole="button"
@@ -35,41 +36,67 @@ export function PlaceCard({ place, onPress, distance }: PlaceCardProps): React.J
           />
         ) : (
           <View style={styles.imageFallback}>
-            <Ionicons name="location" size={36} color={colours.textMuted} />
+            <Ionicons name="location" size={48} color={colours.textMuted} />
           </View>
         )}
 
-        {/* Dark gradient rising from bottom */}
+        {/* Subtle gradient — covers bottom half only */}
         <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.30)', 'rgba(0,0,0,0.82)']}
-          locations={[0, 0.4, 1]}
+          colors={['transparent', 'rgba(0,0,0,0.10)', 'rgba(0,0,0,0.46)']}
+          locations={[0, 0.45, 1]}
           style={styles.gradient}
         />
 
-        {/* Category badge — top left */}
-        <View style={styles.categoryBadge}>
-          <Text style={styles.categoryText}>{place.category.name_en}</Text>
-        </View>
+        {/* Category pill — top right */}
+        {place.category != null && (
+          <View style={styles.categoryPill}>
+            <Text style={styles.categoryText}>{place.category.name_en}</Text>
+          </View>
+        )}
 
-        {/* Place name + meta — bottom */}
-        <View style={styles.bottomContent}>
-          <Text style={styles.name} numberOfLines={1}>{place.name_en}</Text>
-          <View style={styles.metaRow}>
-            <Text style={styles.metaCity}>{place.city}</Text>
-            {place.opening_hours !== null && (
-              <>
-                <View style={styles.metaDot} />
-                <Text style={styles.metaHours} numberOfLines={1}>{place.opening_hours}</Text>
-              </>
-            )}
-            {distance != null && (
-              <>
-                <View style={styles.metaDot} />
-                <Text style={styles.metaDistance}>{distance}</Text>
-              </>
+        {/* Frosted glass info panel */}
+        <BlurView intensity={58} tint="dark" style={styles.glassPanel}>
+          <View style={styles.glassTint} />
+          <View style={styles.glassContent}>
+
+            {/* Name + heart */}
+            <View style={styles.nameRow}>
+              <Text style={styles.name} numberOfLines={1}>{place.name_en}</Text>
+              <View style={styles.heartBtn}>
+                <Ionicons name="heart-outline" size={17} color="rgba(255,255,255,0.75)" />
+              </View>
+            </View>
+
+            {/* City · distance · hours */}
+            <View style={styles.metaRow}>
+              <Ionicons name="location-outline" size={11} color="rgba(255,255,255,0.5)" />
+              <Text style={styles.metaCity}>{place.city}</Text>
+              {distance != null && (
+                <>
+                  <View style={styles.metaDot} />
+                  <Text style={styles.metaDistance}>{distance}</Text>
+                </>
+              )}
+              {place.opening_hours != null && (
+                <>
+                  <View style={styles.metaDot} />
+                  <Text style={styles.metaHours} numberOfLines={1}>{place.opening_hours}</Text>
+                </>
+              )}
+            </View>
+
+            {/* Tag chips */}
+            {place.tags.length > 0 && (
+              <View style={styles.tagsRow}>
+                {place.tags.slice(0, 3).map((tag) => (
+                  <View key={tag.id} style={styles.tagChip}>
+                    <Text style={styles.tagText}>{tag.name_en}</Text>
+                  </View>
+                ))}
+              </View>
             )}
           </View>
-        </View>
+        </BlurView>
       </Pressable>
     </View>
   );
