@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Resources\Admin;
 
 use App\Contracts\FileStorageInterface;
+use App\Enums\SubmissionStatus;
+use App\Enums\TicketOrderStatus;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -14,6 +16,30 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class AdminUserResource extends JsonResource
 {
+    private function computeIsMoiVerified(): bool
+    {
+        $channels = collect([
+            $this->google_id,
+            $this->apple_id,
+            $this->line_id,
+            $this->phone_number,
+        ])->filter()->count();
+
+        if ($channels < 2) {
+            return false;
+        }
+
+        $payments = $this->resource->serviceSubmissions()
+            ->whereIn('status', [SubmissionStatus::Processing->value, SubmissionStatus::Completed->value])
+            ->count();
+
+        $payments += $this->resource->ticketOrders()
+            ->whereIn('status', [TicketOrderStatus::Processing->value, TicketOrderStatus::Completed->value])
+            ->count();
+
+        return $payments >= 3;
+    }
+
     public function toArray(Request $request): array
     {
         return [
@@ -26,6 +52,9 @@ class AdminUserResource extends JsonResource
                 : null,
             'is_admin'          => $this->is_admin,
             'is_merchant'       => $this->is_merchant,
+            'is_privileged'     => $this->resource->isPrivileged(),
+            'user_role'         => $this->user_role->value,
+            'is_moi_verified'   => $this->computeIsMoiVerified(),
             'is_online'         => $this->isOnline(),
             'last_active_at'    => $this->last_active_at?->toISOString(),
             'status'            => $this->status->value,

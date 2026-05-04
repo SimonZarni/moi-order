@@ -115,10 +115,11 @@ function SuspendDialog({ name, open, onClose, onConfirm }: SuspendDialogProps) {
 // ── Main view ────────────────────────────────────────────────────────────────
 
 export function UsersView() {
-  const { hasPermission } = useAuth();
-  const router    = useRouter();
-  const canManage = hasPermission('users.manage');
-  const canDelete = hasPermission('users.delete');
+  const { hasPermission, isSuperAdmin } = useAuth();
+  const router      = useRouter();
+  const canManage   = hasPermission('users.manage');
+  const canDelete   = hasPermission('users.delete');
+  const superAdmin  = isSuperAdmin();
   const { onlineIds, ready: presenceReady } = usePresenceOnlineUsers();
   const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState<UserData[]>([]);
@@ -167,6 +168,13 @@ export function UsersView() {
 
   const handleToggleAdmin = useCallback((id: number) => {
     usersApi.toggleAdmin(id).then((u) => updateRow(id, u)).catch(() => {});
+  }, [updateRow]);
+
+  const handlePromoteRole = useCallback((id: number, current: string) => {
+    const next = current === 'privileged' ? 'regular' : 'privileged';
+    const label = next === 'privileged' ? 'Promote to Privileged' : 'Demote to Regular';
+    if (!window.confirm(`${label} for this user?`)) return;
+    usersApi.promoteRole(id, next).then((u) => updateRow(id, u)).catch(() => {});
   }, [updateRow]);
 
   const handleRestore = useCallback((id: number) => {
@@ -305,14 +313,25 @@ export function UsersView() {
                             </Stack>
                           </TableCell>
                           <TableCell>
-                            <Label color={row.is_admin ? 'primary' : 'default'}>
-                              {row.is_admin ? 'Admin' : 'User'}
-                            </Label>
+                            <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                              {row.is_admin ? (
+                                <Label color="primary">Admin</Label>
+                              ) : (
+                                <Label color={row.is_privileged ? 'warning' : 'default'}>
+                                  {row.is_privileged ? 'Privileged' : 'User'}
+                                </Label>
+                              )}
+                              {row.is_merchant && (
+                                <Label color="info">Merchant</Label>
+                              )}
+                            </Stack>
                           </TableCell>
                           <TableCell>
-                            {row.email_verified_at
-                              ? <Label color="success">Verified</Label>
-                              : <Label color="warning">Unverified</Label>}
+                            {row.is_moi_verified
+                              ? <Label color="success">Moi Verified</Label>
+                              : row.email_verified_at
+                                ? <Label color="default">Email Only</Label>
+                                : <Label color="warning">Unverified</Label>}
                           </TableCell>
                           <TableCell>{fDate(row.created_at)}</TableCell>
                           <TableCell>
@@ -354,6 +373,16 @@ export function UsersView() {
                                   {canManage && (
                                     <IconButton size="small" onClick={() => handleToggleAdmin(row.id)} title={row.is_admin ? 'Remove admin' : 'Make admin'}>
                                       <Iconify icon={row.is_admin ? 'solar:eye-closed-bold' : 'solar:check-circle-bold'} width={16} />
+                                    </IconButton>
+                                  )}
+                                  {superAdmin && !row.is_admin && (
+                                    <IconButton
+                                      size="small"
+                                      color={row.is_privileged ? 'default' : 'warning'}
+                                      onClick={() => handlePromoteRole(row.id, row.user_role)}
+                                      title={row.is_privileged ? 'Demote to regular user' : 'Promote to privileged'}
+                                    >
+                                      <Iconify icon={row.is_privileged ? 'eva:trending-down-fill' : 'eva:trending-up-fill'} width={16} />
                                     </IconButton>
                                   )}
                                   {canDelete && (

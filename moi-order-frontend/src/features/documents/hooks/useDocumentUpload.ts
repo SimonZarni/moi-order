@@ -5,10 +5,26 @@ import * as ImagePicker from 'expo-image-picker';
 
 import { uploadDocument, deleteDocument } from '@/shared/api/documents';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
-import { DocumentType } from '@/types/enums';
+import { DOCUMENT_TYPE, DocumentType } from '@/types/enums';
 import { Document, ApiError, UploadStats } from '@/types/models';
 import { formatResetDate } from '@/shared/utils/formatDate';
+import { type Locale, useLocaleStore } from '@/shared/store/localeStore';
 import { useUploadStats } from './useUploadStats';
+
+const INVALID_TYPE_MESSAGES: Record<DocumentType, Record<Locale, string>> = {
+  [DOCUMENT_TYPE.Passport]: {
+    en: 'This does not appear to be a passport. Please upload your passport bio data page or a visa/stamp page.',
+    mm: 'ဤပုံသည် နိုင်ငံကူးလက်မှတ် မဟုတ်ပါ။ ကျေးဇူးပြုပြီး သင်၏ နိုင်ငံကူးလက်မှတ်ရဲ့ ဓာတ်ပုံ စာမျက်နှာ သို့မဟုတ် ဗီဇာ/တံဆိပ်တုံး စာမျက်နှာကို တင်ပေးပါ။',
+  },
+  [DOCUMENT_TYPE.NinetyDayReport]: {
+    en: 'This does not appear to be a 90-day report slip. Please upload your TM47 notification receipt.',
+    mm: 'ဤပုံသည် ၉၀ ရက် အကြောင်းကြားစာ မဟုတ်ပါ။ ကျေးဇူးပြုပြီး သင်၏ TM47 ထောက်ခံချက်ကို တင်ပေးပါ။',
+  },
+  [DOCUMENT_TYPE.Other]: {
+    en: 'This does not appear to be a valid official document. Please upload a recognised document such as a work permit, ID card, or driving licence.',
+    mm: 'ဤပုံသည် တရားဝင် စာရွက်စာတမ်း မဟုတ်ပါ။ ကျေးဇူးပြုပြီး လုပ်ငန်းခွင် ခွင့်ပြုချက်၊ မှတ်ပုံတင်ကတ် သို့မဟုတ် ယာဉ်မောင်းလိုင်စင် ကဲ့သို့သော တရားဝင် စာရွက်စာတမ်းကို တင်ပေးပါ။',
+  },
+};
 
 export interface UseDocumentUploadResult {
   isUploading:           boolean;
@@ -24,6 +40,7 @@ export interface UseDocumentUploadResult {
 export function useDocumentUpload(type: DocumentType): UseDocumentUploadResult {
   const queryClient   = useQueryClient();
   const { stats }     = useUploadStats();
+  const locale        = useLocaleStore((s) => s.locale);
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting,  setIsDeleting]  = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
@@ -82,7 +99,7 @@ export function useDocumentUpload(type: DocumentType): UseDocumentUploadResult {
       if (!result.document.is_valid_type) {
         Alert.alert(
           'Document Not Accepted',
-          result.document.validation_message ?? 'This does not appear to be a valid document for this section.',
+          INVALID_TYPE_MESSAGES[type][locale],
         );
       }
     } catch (error: unknown) {
@@ -95,7 +112,7 @@ export function useDocumentUpload(type: DocumentType): UseDocumentUploadResult {
     } finally {
       setIsUploading(false);
     }
-  }, [type, invalidate]);
+  }, [type, locale, invalidate]);
 
   // Checks daily section cap then launches picker — shared by handleUploadPress and low-quota continue.
   const proceedWithUpload = useCallback((): void => {

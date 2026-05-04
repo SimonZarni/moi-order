@@ -4,6 +4,8 @@ export type UserStatus = 'active' | 'suspended' | 'banned';
 
 export type ConnectedChannel = { connected: boolean; value?: string | null };
 
+export type UserRole = 'regular' | 'privileged';
+
 export type UserData = {
   id: number;
   name: string;
@@ -12,6 +14,9 @@ export type UserData = {
   profile_picture_url: string | null;
   is_admin: boolean;
   is_merchant: boolean;
+  is_privileged: boolean;
+  user_role: UserRole;
+  is_moi_verified: boolean;
   is_online: boolean;
   last_active_at: string | null;
   status: UserStatus;
@@ -118,6 +123,8 @@ export const usersApi = {
     apiClient.get<{ data: UserDetailData }>(`/users/${id}`).then((r) => r.data.data),
   toggleAdmin: (id: number | string) =>
     apiClient.patch<{ data: UserData }>(`/users/${id}/toggle-admin`).then((r) => r.data.data),
+  promoteRole: (id: number | string, role: UserRole) =>
+    apiClient.patch<{ data: UserData }>(`/users/${id}/role`, { role }).then((r) => r.data.data),
   destroy: (id: number | string) => apiClient.delete(`/users/${id}`),
   restore: (id: number | string) =>
     apiClient.patch<{ data: UserData }>(`/users/${id}/restore`).then((r) => r.data.data),
