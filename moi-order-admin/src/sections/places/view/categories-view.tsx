@@ -495,7 +495,7 @@ export function CategoriesView() {
       <ConfirmDialog
         open={!!deleteTarget}
         title="Delete Category"
-        body={`Delete "${displayName(deleteTarget!)}"? Places using this category will not be affected.`}
+        body={deleteTarget ? `Delete "${displayName(deleteTarget)}"? Places using this category will not be affected.` : ''}
         confirmLabel="Delete"
         confirmColor="error"
         submitting={actionSubmitting}
@@ -506,7 +506,7 @@ export function CategoriesView() {
       <ConfirmDialog
         open={!!restoreTarget}
         title="Restore Category"
-        body={`Restore "${displayName(restoreTarget!)}"?`}
+        body={restoreTarget ? `Restore "${displayName(restoreTarget)}"?` : ''}
         confirmLabel="Restore"
         confirmColor="primary"
         submitting={actionSubmitting}

@@ -489,7 +489,7 @@ export function TagsView() {
       <ConfirmDialog
         open={!!deleteTarget}
         title="Delete Tag"
-        body={`Delete "${displayName(deleteTarget!)}"? Places using this tag will not be affected.`}
+        body={deleteTarget ? `Delete "${displayName(deleteTarget)}"? Places using this tag will not be affected.` : ''}
         confirmLabel="Delete"
         confirmColor="error"
         submitting={actionSubmitting}
@@ -500,7 +500,7 @@ export function TagsView() {
       <ConfirmDialog
         open={!!restoreTarget}
         title="Restore Tag"
-        body={`Restore "${displayName(restoreTarget!)}"?`}
+        body={restoreTarget ? `Restore "${displayName(restoreTarget)}"?` : ''}
         confirmLabel="Restore"
         confirmColor="primary"
         submitting={actionSubmitting}
