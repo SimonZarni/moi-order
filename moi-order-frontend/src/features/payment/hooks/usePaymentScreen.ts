@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { Alert } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -9,6 +9,7 @@ import * as Sharing from 'expo-sharing';
 
 import { usePayment } from './usePayment';
 import { useTicketOrderPayment } from './useTicketOrderPayment';
+import { useQrCountdown } from './useQrCountdown';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { SUBMISSION_STATUS, TICKET_ORDER_STATUS } from '@/types/enums';
 import { ApiError, Payment } from '@/types/models';
@@ -24,6 +25,8 @@ export interface UsePaymentScreenResult {
   isPaid: boolean;
   isPaymentFailed: boolean;
   isQrExpired: boolean;
+  countdownLabel: string;
+  secondsLeft: number;
   handleBack: () => void;
   handleGoToOrders: () => void;
   handleRefreshQr: () => void;
@@ -74,11 +77,6 @@ export function usePaymentScreen(): UsePaymentScreenResult {
   const isCreating = params.kind === 'submission' ? isCreatingSubmission : isCreatingTicket;
   const createError = params.kind === 'submission' ? submissionCreateError : ticketCreateError;
 
-  const isQrExpired = useMemo((): boolean => {
-    if (!payment?.expires_at) return false;
-    return new Date(payment.expires_at) < new Date();
-  }, [payment?.expires_at]);
-
   const handleBack = useCallback((): void => { navigation.goBack(); }, [navigation]);
 
   const handleGoToOrders = useCallback((): void => {
@@ -106,6 +104,11 @@ export function usePaymentScreen(): UsePaymentScreenResult {
       refreshTicketPayment();
     }
   }, [params.kind, refreshSubmissionPayment, refreshTicketPayment]);
+
+  const { isExpired: isQrExpired, countdownLabel, secondsLeft } = useQrCountdown(
+    payment?.expires_at,
+    handleRefreshQr,
+  );
 
   const handleDownloadQr = useCallback(async (): Promise<void> => {
     const url = payment?.qr_image_url;
@@ -140,6 +143,7 @@ export function usePaymentScreen(): UsePaymentScreenResult {
     payment, payableName, isCreating,
     createError: createError ?? null,
     isPaid, isPaymentFailed, isQrExpired,
+    countdownLabel, secondsLeft,
     handleBack, handleGoToOrders, handleRefreshQr, handleDownloadQr,
   };
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
@@ -52,6 +52,9 @@ export function PaymentDetailView() {
   const [loading, setLoading] = useState(true);
   const [regenerating, setRegenerating] = useState(false);
   const [regenerateError, setRegenerateError] = useState<string | null>(null);
+  const [countdownLabel, setCountdownLabel] = useState('');
+  const [secondsLeft, setSecondsLeft] = useState(0);
+  const firedRef = useRef(false);
 
   useEffect(() => {
     if (!id) return;
@@ -62,6 +65,36 @@ export function PaymentDetailView() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [id]);
+
+  // Live countdown — resets when payment (and therefore expires_at) changes.
+  useEffect(() => {
+    const expiresAt = payment?.expires_at;
+    if (!expiresAt || payment?.status !== 'pending') {
+      setCountdownLabel('');
+      return;
+    }
+
+    firedRef.current = false;
+
+    const tick = () => {
+      const secs = Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
+      setSecondsLeft(secs);
+      const mm = Math.floor(secs / 60);
+      const ss = secs % 60;
+      setCountdownLabel(`${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`);
+      if (secs === 0 && !firedRef.current) {
+        firedRef.current = true;
+        // Auto-regenerate — same as pressing the button
+        handleRegenerateQr();
+      }
+    };
+
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+    // handleRegenerateQr is stable (no deps that change); eslint-disable for clarity
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [payment?.expires_at, payment?.status]);
 
   const isQrExpired =
     payment !== null &&
@@ -228,9 +261,19 @@ export function PaymentDetailView() {
                       </Box>
                     )}
                   </Box>
+                  {!isQrExpired && countdownLabel !== '' && (
+                    <Typography
+                      variant="body2"
+                      fontWeight={600}
+                      textAlign="center"
+                      color={secondsLeft <= 60 ? 'error' : secondsLeft <= 120 ? 'warning.main' : 'text.secondary'}
+                    >
+                      Expires in: {countdownLabel}
+                    </Typography>
+                  )}
                   {isQrExpired && (
                     <Typography variant="caption" color="text.secondary" textAlign="center">
-                      QR code expired. Click &quot;Regenerate QR&quot; to create a fresh code.
+                      QR code expired. Generating a new one…
                     </Typography>
                   )}
                   {regenerateError && (

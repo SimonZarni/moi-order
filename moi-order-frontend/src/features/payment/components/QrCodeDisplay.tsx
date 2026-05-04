@@ -9,10 +9,12 @@ import { styles } from './QrCodeDisplay.styles';
 interface QrCodeDisplayProps {
   qrImageUrl: string;
   amountFormatted: string;
+  countdownLabel: string;
+  secondsLeft: number;
   onDownloadQr: () => Promise<void>;
 }
 
-export function QrCodeDisplay({ qrImageUrl, amountFormatted, onDownloadQr }: QrCodeDisplayProps): React.JSX.Element {
+export function QrCodeDisplay({ qrImageUrl, amountFormatted, countdownLabel, secondsLeft, onDownloadQr }: QrCodeDisplayProps): React.JSX.Element {
 
   return (
     <View style={styles.container}>
@@ -38,6 +40,16 @@ export function QrCodeDisplay({ qrImageUrl, amountFormatted, onDownloadQr }: QrC
       <Text style={styles.hint}>
         Open your banking app and scan{'\n'}this QR code to pay via PromptPay
       </Text>
+
+      {countdownLabel !== '' && (
+        <Text style={[
+          styles.countdown,
+          secondsLeft <= 60  && styles.countdownCritical,
+          secondsLeft > 60 && secondsLeft <= 120 && styles.countdownWarning,
+        ]}>
+          Expires in: {countdownLabel}
+        </Text>
+      )}
 
       {qrImageUrl !== '' && (
         <Pressable

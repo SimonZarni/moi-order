@@ -66,4 +66,16 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 0.4,
   },
+  countdown: {
+    fontSize: typography.sm,
+    fontWeight: '600',
+    color: colours.textMuted,
+    letterSpacing: 0.3,
+  },
+  countdownWarning: {
+    color: colours.warning,
+  },
+  countdownCritical: {
+    color: colours.danger,
+  },
 });

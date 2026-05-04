@@ -17,6 +17,8 @@ export function PaymentScreen(): React.JSX.Element {
     isPaymentFailed,
     isPaid,
     isQrExpired,
+    countdownLabel,
+    secondsLeft,
     createError,
     handleBack,
     handleGoToOrders,
@@ -100,6 +102,8 @@ export function PaymentScreen(): React.JSX.Element {
             <QrCodeDisplay
               qrImageUrl={payment.qr_image_url ?? ''}
               amountFormatted={amountFormatted}
+              countdownLabel={countdownLabel}
+              secondsLeft={secondsLeft}
               onDownloadQr={handleDownloadQr}
             />
             <View style={styles.waitingRow}>
