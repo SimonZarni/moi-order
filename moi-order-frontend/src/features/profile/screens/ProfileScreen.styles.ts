@@ -609,24 +609,22 @@ export const styles = StyleSheet.create({
     color: colours.tertiary,
   },
   triggerResult: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.xs,
     marginTop: spacing.xs,
     padding: spacing.xs + 2,
     borderRadius: radius.md,
-  },
-  triggerResultSuccess: {
-    backgroundColor: `${colours.success}14`,
-  },
-  triggerResultWarn: {
-    backgroundColor: `${colours.warning}14`,
+    backgroundColor: `${colours.textMuted}10`,
   },
   triggerResultText: {
     flex: 1,
     fontSize: typography.xs,
     color: colours.textMuted,
     lineHeight: 18,
+  },
+  diagRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.xs,
+    marginTop: spacing.xs,
   },
 
   // ── Sign out ───────────────────────────────────────────────────────────────

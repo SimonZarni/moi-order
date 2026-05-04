@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Notifications\NinetyDayReportReminderNotification;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -119,8 +120,16 @@ class ProfileService
             ->orderByDesc('extension_date')
             ->first();
 
+        $deviceTokenCount = $user->deviceTokens()->count();
+
         if ($document === null) {
-            return ['has_document' => false, 'sent' => false, 'days_remaining' => null, 'effective_date' => null];
+            return [
+                'has_document'       => false,
+                'sent'               => false,
+                'days_remaining'     => null,
+                'effective_date'     => null,
+                'device_token_count' => $deviceTokenCount,
+            ];
         }
 
         $effectiveDate = $user->effectiveDate();
@@ -128,11 +137,20 @@ class ProfileService
 
         $user->notify(new NinetyDayReportReminderNotification($daysRemaining));
 
+        Log::info('TriggerReminder: notification dispatched', [
+            'user_id'            => $user->id,
+            'effective_date'     => $effectiveDate->format('Y-m-d'),
+            'extension_date'     => $document->extension_date->format('Y-m-d'),
+            'days_remaining'     => $daysRemaining,
+            'device_token_count' => $deviceTokenCount,
+        ]);
+
         return [
-            'has_document'   => true,
-            'sent'           => true,
-            'days_remaining' => $daysRemaining,
-            'effective_date' => $effectiveDate->format('Y-m-d'),
+            'has_document'       => true,
+            'sent'               => true,
+            'days_remaining'     => $daysRemaining,
+            'effective_date'     => $effectiveDate->format('Y-m-d'),
+            'device_token_count' => $deviceTokenCount,
         ];
     }
 

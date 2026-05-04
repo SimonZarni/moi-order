@@ -664,19 +664,44 @@ export function ProfileScreen(): React.JSX.Element {
                   </Text>
                 </Pressable>
 
-                {/* Result banner */}
+                {/* Diagnostic result */}
                 {lastTriggerResult !== null && (
-                  <View style={[styles.triggerResult, lastTriggerResult.sent ? styles.triggerResultSuccess : styles.triggerResultWarn]}>
-                    <Ionicons
-                      name={lastTriggerResult.sent ? 'checkmark-circle-outline' : 'warning-outline'}
-                      size={14}
-                      color={lastTriggerResult.sent ? colours.success : colours.warning}
-                    />
-                    <Text style={styles.triggerResultText}>
-                      {lastTriggerResult.sent
-                        ? `Sent — ${lastTriggerResult.days_remaining} days remaining on ${lastTriggerResult.effective_date}`
-                        : 'No 90-day document found for this account'}
-                    </Text>
+                  <View style={styles.triggerResult}>
+                    {/* Document */}
+                    <View style={styles.diagRow}>
+                      <Ionicons
+                        name={lastTriggerResult.has_document ? 'checkmark-circle' : 'close-circle'}
+                        size={14}
+                        color={lastTriggerResult.has_document ? colours.success : colours.danger}
+                      />
+                      <Text style={styles.triggerResultText}>
+                        {lastTriggerResult.has_document
+                          ? `90-day document found — ${lastTriggerResult.days_remaining} days remaining (date used: ${lastTriggerResult.effective_date})`
+                          : 'No valid 90-day document found for this account'}
+                      </Text>
+                    </View>
+                    {/* Device token */}
+                    <View style={styles.diagRow}>
+                      <Ionicons
+                        name={lastTriggerResult.device_token_count > 0 ? 'checkmark-circle' : 'close-circle'}
+                        size={14}
+                        color={lastTriggerResult.device_token_count > 0 ? colours.success : colours.danger}
+                      />
+                      <Text style={styles.triggerResultText}>
+                        {lastTriggerResult.device_token_count > 0
+                          ? `${lastTriggerResult.device_token_count} device token(s) registered — push was attempted`
+                          : 'No device token registered — push cannot be sent (re-open the app or re-login)'}
+                      </Text>
+                    </View>
+                    {/* Notification sent */}
+                    {lastTriggerResult.has_document && lastTriggerResult.device_token_count > 0 && (
+                      <View style={styles.diagRow}>
+                        <Ionicons name="notifications" size={14} color={colours.tertiary} />
+                        <Text style={styles.triggerResultText}>
+                          Notification dispatched to Expo — check your device. If nothing arrives, the push delivery system needs investigating.
+                        </Text>
+                      </View>
+                    )}
                   </View>
                 )}
               </View>

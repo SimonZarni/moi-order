@@ -61,6 +61,7 @@ export interface TriggerReminderResult {
   sent: boolean;
   days_remaining: number | null;
   effective_date: string | null;
+  device_token_count: number;
 }
 
 export async function triggerNinetyDayReminder(): Promise<TriggerReminderResult> {
