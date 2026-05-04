@@ -6,7 +6,7 @@ import {
   Pressable, RefreshControl,
   ScrollView, Text, TextInput, View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -114,7 +114,10 @@ export function ProfileScreen(): React.JSX.Element {
 
           <View style={styles.heroNameRow}>
             <Text style={styles.heroName}>{user?.name ?? name}</Text>
-            {verificationStatus?.is_verified && <VerifiedBadgeIcon size={26} />}
+            {user?.is_privileged
+              ? <FontAwesome5 name="crown" size={22} color="#F59E0B" />
+              : verificationStatus?.is_verified && <VerifiedBadgeIcon size={26} />
+            }
           </View>
           <Text style={styles.heroEmail}>{user?.email ?? ''}</Text>
           {user !== null && <Text style={styles.heroSince}>{memberSince}</Text>}
