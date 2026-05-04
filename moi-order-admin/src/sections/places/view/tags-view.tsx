@@ -28,9 +28,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import { fDate } from 'src/utils/format-time';
 
-import { DashboardContent } from 'src/layouts/dashboard';
-
 import { tagsApi } from 'src/api/tags';
+import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
