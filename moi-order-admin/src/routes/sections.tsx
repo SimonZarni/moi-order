@@ -54,6 +54,8 @@ export const KycDetailPage = lazy(() => import('src/pages/kyc-detail'));
 export const MerchantCreatePage = lazy(() => import('src/pages/merchant-create'));
 export const PushNotificationsPage = lazy(() => import('src/pages/push-notifications'));
 export const NotificationsPage = lazy(() => import('src/pages/notifications'));
+export const CategoriesPage = lazy(() => import('src/pages/categories'));
+export const TagsPage = lazy(() => import('src/pages/tags'));
 
 const renderFallback = () => (
   <Box sx={{ display: 'flex', flex: '1 1 auto', alignItems: 'center', justifyContent: 'center' }}>
@@ -90,6 +92,8 @@ export const routesSection: RouteObject[] = [
       { path: 'places', element: <PlacesPage /> },
       { path: 'places/new', element: guard('places.create', <PlaceCreatePage />) },
       { path: 'places/:id/edit', element: guard('places.update', <PlaceEditPage />) },
+      { path: 'places/categories', element: <CategoriesPage /> },
+      { path: 'places/tags', element: <TagsPage /> },
 
       // Attractions — no backend permission guard
       { path: 'attractions', element: <AttractionsPage /> },

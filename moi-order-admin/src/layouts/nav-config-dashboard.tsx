@@ -93,6 +93,23 @@ export const navData: NavItem[] = [
     title: 'Places',
     path: '/places',
     icon: icon('solar:gallery-bold'),
+    children: [
+      {
+        title: 'All Places',
+        path: '/places',
+        icon: icon('solar:gallery-bold'),
+      },
+      {
+        title: 'Categories',
+        path: '/places/categories',
+        icon: icon('ic:round-filter-list'),
+      },
+      {
+        title: 'Tags',
+        path: '/places/tags',
+        icon: icon('solar:check-circle-bold'),
+      },
+    ],
   },
   {
     title: 'Attractions',
