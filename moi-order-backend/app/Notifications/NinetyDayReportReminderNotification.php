@@ -66,7 +66,7 @@ class NinetyDayReportReminderNotification extends Notification
 
     private function body(): string
     {
-        $cta = 'Submit here at Moi Order application now.';
+        $cta = 'Submit here at Moi Order app now.';
 
         return match(true) {
             $this->daysRemaining === 20 =>
