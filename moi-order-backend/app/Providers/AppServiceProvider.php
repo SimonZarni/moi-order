@@ -6,9 +6,11 @@ namespace App\Providers;
 
 use App\Contracts\DocumentOcrInterface;
 use App\Contracts\FileStorageInterface;
+use App\Contracts\ImageProviderInterface;
 use App\Contracts\PaymentGatewayInterface;
 use App\Contracts\PushNotificationInterface;
 use App\Contracts\WebPushInterface;
+use App\Services\GoogleImageService;
 use App\Services\WebPushService;
 use App\Services\ClaudeOcrService;
 use App\Services\DocumentService;
@@ -85,6 +87,14 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(FileStorageInterface::class)
             )
         );
+
+        // DIP: bind Google Custom Search adapter. Swap provider by rebinding here only.
+        $this->app->bind(ImageProviderInterface::class, function () {
+            return new GoogleImageService(
+                config('services.google.cse_api_key'),
+                config('services.google.cse_id'),
+            );
+        });
 
         // DIP: bind Claude vision adapter for document OCR.
         $this->app->bind(DocumentOcrInterface::class, ClaudeOcrService::class);

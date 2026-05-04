@@ -42,7 +42,9 @@ return [
     ],
 
     'google' => [
-        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_id'         => env('GOOGLE_CLIENT_ID'),
+        'cse_api_key'       => env('GOOGLE_CSE_API_KEY'),
+        'cse_id'            => env('GOOGLE_CSE_ID'),
     ],
 
     'apple' => [

@@ -41,6 +41,7 @@ php artisan config:clear
 php artisan config:cache
 php artisan view:cache
 php artisan migrate --force
+php artisan places:seed-images --count=5 || echo "⚠️  places:seed-images failed (non-fatal, skipping)"
 # php artisan db:seed --class=TicketSeeder --force || echo "⚠️  TicketSeeder failed (non-fatal, skipping)"
 # php artisan db:seed --class=PermissionSeeder --force
 # php artisan db:seed --class=HomeCardSeeder --force || echo "⚠️  HomeCardSeeder failed (non-fatal, skipping)"
