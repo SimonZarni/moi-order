@@ -6,7 +6,9 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\DTOs\CreateTicketOrderDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CancelTicketOrderRequest;
 use App\Http\Requests\CreateTicketOrderRequest;
+use App\Http\Requests\DeleteTicketOrderRequest;
 use App\Http\Resources\TicketOrderResource;
 use App\Models\TicketOrder;
 use App\Services\TicketOrderService;
@@ -58,5 +60,26 @@ class TicketOrderController extends Controller
             ->findOrFail($id);
 
         return response()->json(['data' => new TicketOrderResource($order)]);
+    }
+
+    /** POST /api/v1/ticket-orders/{id}/cancel */
+    public function cancel(CancelTicketOrderRequest $request, int $id): JsonResponse
+    {
+        $order = TicketOrder::with(['ticket', 'items.variant'])
+            ->forUser($request->user()->id)
+            ->findOrFail($id);
+
+        $order = $this->service->cancel($order);
+
+        return response()->json(['data' => new TicketOrderResource($order)]);
+    }
+
+    /** DELETE /api/v1/ticket-orders/{id} */
+    public function destroy(DeleteTicketOrderRequest $request, int $id): JsonResponse
+    {
+        $order = TicketOrder::forUser($request->user()->id)->findOrFail($id);
+        $this->service->deleteCancelled($order);
+
+        return response()->json(null, 204);
     }
 }

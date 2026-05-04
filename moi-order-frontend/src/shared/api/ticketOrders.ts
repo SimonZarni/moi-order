@@ -41,3 +41,12 @@ export async function fetchTicketOrderEticketUrl(ticketOrderId: number): Promise
   const { data } = await apiClient.get<ApiResponse<{ url: string; mime_type: string }>>(`/api/v1/ticket-orders/${ticketOrderId}/eticket`);
   return data.data;
 }
+
+export async function cancelTicketOrder(id: number): Promise<TicketOrder> {
+  const { data } = await apiClient.post<ApiResponse<TicketOrder>>(`/api/v1/ticket-orders/${id}/cancel`);
+  return data.data;
+}
+
+export async function deleteTicketOrder(id: number): Promise<void> {
+  await apiClient.delete(`/api/v1/ticket-orders/${id}`);
+}

@@ -217,6 +217,7 @@ export interface TicketOrder {
   visit_date: string; // "YYYY-MM-DD"
   total?: number;     // whole THB — present when items are loaded
   completed_at: string | null;
+  cancelled_at: string | null;
   created_at: string;
   has_eticket: boolean;
   ticket?: {

@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { Alert } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { useAuthStore } from '@/shared/store/authStore';
@@ -29,6 +30,7 @@ export interface UseOrdersScreenResult {
   handleRefresh: () => void;
   handleOrderPress: (submissionId: number) => void;
   handleTicketOrderPress: (ticketOrderId: number) => void;
+  handleDeleteTicketOrder: (id: number) => void;
   handleNavigateToLogin: () => void;
   handleBack: () => void;
 }
@@ -52,7 +54,7 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     ticketOrders, isLoading: isLoadingTickets, isError: isErrorTickets,
     isRefreshing: isRefreshingTickets, hasNextPage: hasNextTickets,
     isFetchingNextPage: isFetchingNextTickets, fetchNextPage: fetchNextTickets,
-    refetch: refetchTickets,
+    refetch: refetchTickets, deleteMutation,
   }: UseTicketOrdersResult = useTicketOrders();
 
   const isLoading = activeTab === 'services' ? isLoadingSubmissions : isLoadingTickets;
@@ -95,6 +97,21 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     navigation.navigate('TicketOrderDetail', { ticketOrderId });
   }, [navigation, queryClient]);
 
+  const handleDeleteTicketOrder = useCallback((id: number): void => {
+    Alert.alert(
+      'Delete Order',
+      'Remove this cancelled order from your history?',
+      [
+        { text: 'Keep', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteMutation.mutate(id),
+        },
+      ],
+    );
+  }, [deleteMutation]);
+
   const handleNavigateToLogin = useCallback((): void => {
     navigation.navigate('Login');
   }, [navigation]);
@@ -117,6 +134,7 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     handleRefresh,
     handleOrderPress,
     handleTicketOrderPress,
+    handleDeleteTicketOrder,
     handleNavigateToLogin,
     handleBack,
   };

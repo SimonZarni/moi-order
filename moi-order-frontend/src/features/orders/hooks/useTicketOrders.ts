@@ -1,10 +1,10 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query';
 
-import { fetchTicketOrders } from '@/shared/api/ticketOrders';
+import { fetchTicketOrders, deleteTicketOrder } from '@/shared/api/ticketOrders';
 import { useAuthStore } from '@/shared/store/authStore';
 import { CACHE_TTL } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
-import { PaginatedResponse, TicketOrder } from '@/types/models';
+import { PaginatedResponse, TicketOrder, ApiError } from '@/types/models';
 
 export interface UseTicketOrdersResult {
   ticketOrders: TicketOrder[];
@@ -15,10 +15,12 @@ export interface UseTicketOrdersResult {
   isFetchingNextPage: boolean;
   fetchNextPage: () => void;
   refetch: () => void;
+  deleteMutation: ReturnType<typeof useMutation<void, ApiError, number>>;
 }
 
 export function useTicketOrders(): UseTicketOrdersResult {
   const { isLoggedIn } = useAuthStore();
+  const queryClient = useQueryClient();
 
   const query = useInfiniteQuery({
     queryKey: QUERY_KEYS.TICKET_ORDERS.LIST,
@@ -36,6 +38,25 @@ export function useTicketOrders(): UseTicketOrdersResult {
     }),
   });
 
+  const deleteMutation = useMutation<void, ApiError, number>({
+    mutationFn: (id) => deleteTicketOrder(id),
+    onSuccess: (_, id) => {
+      queryClient.setQueryData(
+        QUERY_KEYS.TICKET_ORDERS.LIST,
+        (old: InfiniteData<PaginatedResponse<TicketOrder>> | undefined) => {
+          if (!old) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              data: page.data.filter((o) => o.id !== id),
+            })),
+          };
+        },
+      );
+    },
+  });
+
   return {
     ticketOrders:       query.data?.ticketOrders ?? [],
     isLoading:          query.isLoading,
@@ -45,5 +66,6 @@ export function useTicketOrders(): UseTicketOrdersResult {
     isFetchingNextPage: query.isFetchingNextPage,
     fetchNextPage:      query.fetchNextPage,
     refetch:            query.refetch,
+    deleteMutation,
   };
 }

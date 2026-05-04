@@ -43,6 +43,15 @@ export async function completeFoodOrder(id: number, input: CompleteFoodOrderInpu
   return res.data.data;
 }
 
+export async function cancelFoodOrder(id: number): Promise<FoodOrder> {
+  const res = await apiClient.post<ApiResponse<FoodOrder>>(`/api/v1/food-orders/${id}/cancel`);
+  return res.data.data;
+}
+
+export async function deleteFoodOrder(id: number): Promise<void> {
+  await apiClient.delete(`/api/v1/food-orders/${id}`);
+}
+
 export async function fetchOrderChat(orderId: number): Promise<OrderChatMessage[]> {
   const res = await apiClient.get<{ data: OrderChatMessage[] }>(`/api/v1/food-orders/${orderId}/chat`);
   return res.data.data;

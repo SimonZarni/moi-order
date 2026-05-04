@@ -17,6 +17,9 @@ type RouteParams = RouteProp<RootStackParamList, 'TicketOrderDetail'>;
 
 export interface UseTicketOrderDetailScreenResult {
   order: ReturnType<typeof useTicketOrderDetail>['order'];
+  canCancel: boolean;
+  isCancelling: boolean;
+  handleCancelOrder: () => void;
   isLoading: boolean;
   isRefreshing: boolean;
   isError: boolean;
@@ -39,7 +42,7 @@ export function useTicketOrderDetailScreen(): UseTicketOrderDetailScreenResult {
   const route = useRoute<RouteParams>();
   const { ticketOrderId } = route.params;
 
-  const { order, isLoading, isRefreshing, isError, refetch } = useTicketOrderDetail(ticketOrderId);
+  const { order, isLoading, isRefreshing, isError, refetch, cancelMutation } = useTicketOrderDetail(ticketOrderId);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   const canPayNow = useMemo(
@@ -47,6 +50,26 @@ export function useTicketOrderDetailScreen(): UseTicketOrderDetailScreenResult {
        || order?.status === TICKET_ORDER_STATUS.PaymentFailed,
     [order?.status],
   );
+
+  const canCancel = useMemo(
+    () => order?.status === TICKET_ORDER_STATUS.PendingPayment,
+    [order?.status],
+  );
+
+  const handleCancelOrder = useCallback((): void => {
+    Alert.alert(
+      'Cancel Order',
+      'Are you sure you want to cancel this ticket order? This cannot be undone.',
+      [
+        { text: 'Keep Order', style: 'cancel' },
+        {
+          text: 'Cancel Order',
+          style: 'destructive',
+          onPress: () => cancelMutation.mutate(),
+        },
+      ],
+    );
+  }, [cancelMutation]);
 
   const canDownload = useMemo(
     () => order?.status === TICKET_ORDER_STATUS.Completed && order?.has_eticket === true,
@@ -135,6 +158,7 @@ export function useTicketOrderDetailScreen(): UseTicketOrderDetailScreenResult {
 
   return {
     order, isLoading, isRefreshing, isError,
+    canCancel, isCancelling: cancelMutation.isPending, handleCancelOrder,
     canPayNow, canDownload, isDownloading, isSavingEticket,
     downloadError,
     previewImageUrl,

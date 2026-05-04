@@ -263,4 +263,14 @@ export const styles = StyleSheet.create({
   listFooter: {
     paddingVertical: spacing.lg,
   },
+
+  swipeDeleteAction: {
+    backgroundColor: colours.destructive,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 72,
+    marginVertical: spacing.xs,
+    borderRadius: radius.lg,
+    marginRight: spacing.md,
+  },
 });

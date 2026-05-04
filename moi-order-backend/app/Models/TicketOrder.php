@@ -35,6 +35,7 @@ class TicketOrder extends Model implements PayableInterface
         'idempotency_key',
         'eticket_path',
         'completed_at',
+        'cancelled_at',
     ];
 
     protected function casts(): array
@@ -43,6 +44,7 @@ class TicketOrder extends Model implements PayableInterface
             'visit_date'   => 'date',
             'status'       => TicketOrderStatus::class,
             'completed_at' => 'datetime',
+            'cancelled_at' => 'datetime',
         ];
     }
 
@@ -109,6 +111,19 @@ class TicketOrder extends Model implements PayableInterface
         $fresh = $locked->fresh();
         event(new TicketOrderStatusChanged($fresh));
         event(new TicketOrderPaymentProcessed($fresh));
+    }
+
+    /** Customer cancels their own order while it is still pending payment. */
+    public function cancel(): void
+    {
+        if ($this->status !== TicketOrderStatus::PendingPayment) {
+            throw new \DomainException('ticket_order.not_cancellable');
+        }
+
+        $this->update([
+            'status'       => TicketOrderStatus::Cancelled,
+            'cancelled_at' => now(),
+        ]);
     }
 
     public function markPaymentFailed(): void

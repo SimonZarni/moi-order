@@ -62,6 +62,8 @@ Route::post('/submissions/{id}/payment/sync',  [PaymentController::class, 'sync'
 Route::post('/ticket-orders',                              [TicketOrderController::class,        'store']);
 Route::get('/ticket-orders',                               [TicketOrderController::class,        'index']);
 Route::get('/ticket-orders/{id}',                          [TicketOrderController::class,        'show']);
+Route::post('/ticket-orders/{id}/cancel',                  [TicketOrderController::class,        'cancel']);
+Route::delete('/ticket-orders/{id}',                       [TicketOrderController::class,        'destroy']);
 Route::post('/ticket-orders/{id}/payment',                 [TicketOrderPaymentController::class, 'store']);
 Route::get('/ticket-orders/{id}/payment',                  [TicketOrderPaymentController::class, 'show']);
 Route::post('/ticket-orders/{id}/payment/sync',            [TicketOrderPaymentController::class, 'sync']);
@@ -86,10 +88,12 @@ Route::post('/device-tokens',   [DeviceTokenController::class, 'store']);
 Route::delete('/device-tokens', [DeviceTokenController::class, 'destroy']);
 
 // Food orders
-Route::get('/food-orders',               [FoodOrderController::class, 'index']);
-Route::post('/food-orders',              [FoodOrderController::class, 'store']);
-Route::get('/food-orders/{id}',          [FoodOrderController::class, 'show']);
-Route::post('/food-orders/{id}/complete',[FoodOrderController::class, 'complete']);
+Route::get('/food-orders',                [FoodOrderController::class, 'index']);
+Route::post('/food-orders',               [FoodOrderController::class, 'store']);
+Route::get('/food-orders/{id}',           [FoodOrderController::class, 'show']);
+Route::post('/food-orders/{id}/cancel',   [FoodOrderController::class, 'cancel']);
+Route::delete('/food-orders/{id}',        [FoodOrderController::class, 'destroy']);
+Route::post('/food-orders/{id}/complete', [FoodOrderController::class, 'complete']);
 Route::get('/food-orders/{id}/chat',     [\App\Http\Controllers\Api\V1\OrderChatController::class, 'index']);
 Route::post('/food-orders/{id}/chat',    [\App\Http\Controllers\Api\V1\OrderChatController::class, 'store']);
 

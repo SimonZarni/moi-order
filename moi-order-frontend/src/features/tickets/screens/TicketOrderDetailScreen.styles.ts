@@ -12,6 +12,7 @@ export const TICKET_STATUS_COLOURS: Record<string, string> = {
   processing:      editorialPalette.teal,
   completed:       colours.success,
   payment_failed:  colours.danger,
+  cancelled:       colours.medium,
 };
 
 export const styles = StyleSheet.create({
@@ -104,6 +105,23 @@ export const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', marginTop: spacing.lg,
   },
   payNowBtnText: { fontSize: typography.md, fontWeight: '800', color: colours.white, letterSpacing: 0.4 },
+
+  cancelOrderBtn: {
+    borderWidth: 1.5,
+    borderColor: `${colours.destructive}55`,
+    borderRadius: radius.lg,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.sm,
+  },
+  cancelOrderBtnDisabled: { opacity: 0.5 },
+  cancelOrderBtnText: {
+    fontSize: typography.sm,
+    fontWeight: '700',
+    color: colours.destructive,
+    letterSpacing: 0.4,
+  },
 
   downloadError: {
     fontSize: typography.xs,

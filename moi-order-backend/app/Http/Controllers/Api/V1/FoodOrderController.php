@@ -10,6 +10,8 @@ use App\DTOs\StoreFoodOrderDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\CompleteFoodOrderRequest;
 use App\Http\Requests\Api\StoreFoodOrderRequest;
+use App\Http\Requests\CancelFoodOrderRequest;
+use App\Http\Requests\DeleteFoodOrderRequest;
 use App\Http\Resources\FoodOrderResource;
 use App\Models\FoodOrder;
 use App\Services\FoodOrderService;
@@ -55,6 +57,24 @@ class FoodOrderController extends Controller
         $order = $this->orderService->place(StoreFoodOrderDTO::fromRequest($request));
 
         return response()->json(['data' => new FoodOrderResource($order, $this->storage)], 201);
+    }
+
+    /** POST /api/v1/food-orders/{id}/cancel */
+    public function cancel(CancelFoodOrderRequest $request, int $id): JsonResponse
+    {
+        $order = FoodOrder::forUser($request->user()->id)->findOrFail($id);
+        $order = $this->orderService->cancelByCustomer($order);
+
+        return response()->json(['data' => new FoodOrderResource($order, $this->storage)]);
+    }
+
+    /** DELETE /api/v1/food-orders/{id} */
+    public function destroy(DeleteFoodOrderRequest $request, int $id): JsonResponse
+    {
+        $order = FoodOrder::forUser($request->user()->id)->findOrFail($id);
+        $this->orderService->deleteCancelled($order);
+
+        return response()->json(null, 204);
     }
 
     /** POST /api/v1/food-orders/{id}/complete */

@@ -25,6 +25,7 @@ class TicketOrderResource extends JsonResource
                 fn () => $this->getPayableAmountThb(),
             ),
             'completed_at' => $this->completed_at?->toISOString(),
+            'cancelled_at' => $this->cancelled_at?->toISOString(),
             'created_at'   => $this->created_at->toISOString(),
             'has_eticket'  => $this->eticket_path !== null,
             'ticket'       => $this->when(

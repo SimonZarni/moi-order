@@ -98,6 +98,20 @@ class TicketOrderService
      * Upload the PDF e-ticket and mark the order as completed.
      * Security: MIME whitelist re-checked in FileStorageService (defence in depth).
      */
+    public function cancel(TicketOrder $order): TicketOrder
+    {
+        DB::transaction(function () use ($order): void {
+            $order->cancel();
+        });
+
+        return $order->fresh(['ticket', 'items.variant']);
+    }
+
+    public function deleteCancelled(TicketOrder $order): void
+    {
+        $order->delete();
+    }
+
     public function uploadEticket(TicketOrder $order, UploadedFile $file): TicketOrder
     {
         $path = $this->fileStorage->store($file, 'etickets', ['application/pdf', 'image/jpeg', 'image/png']);

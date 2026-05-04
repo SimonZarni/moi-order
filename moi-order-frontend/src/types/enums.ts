@@ -33,6 +33,7 @@ export const TICKET_ORDER_STATUS = {
   Processing:     'processing',
   Completed:      'completed',
   PaymentFailed:  'payment_failed',
+  Cancelled:      'cancelled',
 } as const;
 
 export type TicketOrderStatus = (typeof TICKET_ORDER_STATUS)[keyof typeof TICKET_ORDER_STATUS];

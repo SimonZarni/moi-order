@@ -18,6 +18,7 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
     canPayNow, canDownload, isDownloading, isSavingEticket, downloadError,
     previewImageUrl,
     handleRefresh, handleBack, handlePayNow, handleDownloadEticket, handleSaveEticket, handleClosePreview,
+    canCancel, isCancelling, handleCancelOrder,
   } = useTicketOrderDetailScreen();
 
   const hero = (
@@ -146,6 +147,21 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
               accessibilityRole="button"
             >
               <Text style={styles.payNowBtnText}>Pay Now</Text>
+            </Pressable>
+          )}
+
+          {/* ── Cancel Order (pending payment only) ── */}
+          {canCancel && (
+            <Pressable
+              style={[styles.cancelOrderBtn, isCancelling && styles.cancelOrderBtnDisabled]}
+              onPress={handleCancelOrder}
+              disabled={isCancelling}
+              accessibilityLabel="Cancel order"
+              accessibilityRole="button"
+            >
+              <Text style={styles.cancelOrderBtnText}>
+                {isCancelling ? 'Cancelling…' : 'Cancel Order'}
+              </Text>
             </Pressable>
           )}
 

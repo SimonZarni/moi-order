@@ -10,6 +10,7 @@ enum TicketOrderStatus: string
     case Processing     = 'processing';
     case Completed      = 'completed';
     case PaymentFailed  = 'payment_failed';
+    case Cancelled      = 'cancelled';
 
     public function label(): string
     {
@@ -18,16 +19,15 @@ enum TicketOrderStatus: string
             self::Processing     => 'Processing',
             self::Completed      => 'Completed',
             self::PaymentFailed  => 'Payment Failed',
+            self::Cancelled      => 'Cancelled',
         };
     }
 
     public function isTerminal(): bool
     {
         return match($this) {
-            self::PendingPayment => false,
-            self::Processing     => false,
-            self::Completed      => true,
-            self::PaymentFailed  => false,
+            self::Completed, self::Cancelled => true,
+            default                          => false,
         };
     }
 }

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
@@ -14,6 +15,7 @@ import { formatDate } from '@/shared/utils/formatDate';
 import { formatPrice } from '@/shared/utils/formatCurrency';
 import { useOrdersScreen, OrdersTab } from '@/features/orders/hooks/useOrdersScreen';
 import { ServiceSubmission, TicketOrder } from '@/types/models';
+import { TICKET_ORDER_STATUS } from '@/types/enums';
 import { styles, STATUS_COLOURS } from './OrdersScreen.styles';
 
 interface OrderCardProps {
@@ -57,11 +59,14 @@ function OrderCard({ item, onPress }: OrderCardProps): React.JSX.Element {
 interface TicketOrderCardProps {
   item: TicketOrder;
   onPress: (id: number) => void;
+  onDelete: (id: number) => void;
 }
 
-function TicketOrderCard({ item, onPress }: TicketOrderCardProps): React.JSX.Element {
+function TicketOrderCard({ item, onPress, onDelete }: TicketOrderCardProps): React.JSX.Element {
+  const swipeableRef = useRef<Swipeable>(null);
   const accentColour = STATUS_COLOURS[item.status] ?? STATUS_COLOURS['pending']!;
-  return (
+
+  const cardContent = (
     <View style={styles.cardWrap}>
       <Pressable
         style={({ pressed }) => [styles.card, { opacity: pressed ? 0.85 : 1 }]}
@@ -89,6 +94,28 @@ function TicketOrderCard({ item, onPress }: TicketOrderCardProps): React.JSX.Ele
         </View>
       </Pressable>
     </View>
+  );
+
+  if (item.status !== TICKET_ORDER_STATUS.Cancelled) {
+    return cardContent;
+  }
+
+  return (
+    <Swipeable
+      ref={swipeableRef}
+      renderRightActions={() => (
+        <Pressable
+          style={styles.swipeDeleteAction}
+          onPress={() => { swipeableRef.current?.close(); onDelete(item.id); }}
+          accessibilityLabel="Delete cancelled order"
+          accessibilityRole="button"
+        >
+          <Ionicons name="trash" size={22} color="#fff" />
+        </Pressable>
+      )}
+    >
+      {cardContent}
+    </Swipeable>
   );
 }
 
@@ -129,7 +156,7 @@ export function OrdersScreen(): React.JSX.Element {
     activeTab, submissions, ticketOrders,
     isLoading, isError, isLoggedIn, isRefreshing, isFetchingNextPage,
     handleTabChange, handleEndReached, handleRefresh,
-    handleOrderPress, handleTicketOrderPress,
+    handleOrderPress, handleTicketOrderPress, handleDeleteTicketOrder,
     handleNavigateToLogin, handleBack,
   } = useOrdersScreen();
 
@@ -245,7 +272,7 @@ export function OrdersScreen(): React.JSX.Element {
         style={styles.flatList}
         data={ticketOrders}
         keyExtractor={(item: TicketOrder) => String(item.id)}
-        renderItem={({ item }) => <TicketOrderCard item={item} onPress={handleTicketOrderPress} />}
+        renderItem={({ item }) => <TicketOrderCard item={item} onPress={handleTicketOrderPress} onDelete={handleDeleteTicketOrder} />}
         ListEmptyComponent={
           <View style={styles.emptyWrap}>
             <Ionicons name="pricetag-outline" size={48} color={colours.textMuted} style={styles.emptyIcon} />
