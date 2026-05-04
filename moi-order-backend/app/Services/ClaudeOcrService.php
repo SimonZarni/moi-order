@@ -197,7 +197,7 @@ GENERAL RULES
 - Use null for any field that cannot be clearly read from the image.
 - All dates must be in YYYY-MM-DD format. If only month/year is visible, use the first day of that month.
 - The "is_valid_document_type" field is true only if the image matches the requested document category.
-- The "validation_message" field is null when valid, and a user-facing error string when invalid.
+- The "validation_message" field is null when valid. When invalid, it must be ONE short sentence only — do NOT describe the image content. Use this format: "This does not appear to be a [document type]. Please upload a [brief description of what is required]." Example: "This does not appear to be a passport. Please upload your passport bio data page or a visa/stamp page."
 - Ignore watermarks, stamps, and handwritten annotations unless they are part of the official document fields.
 - If a field appears in both English and the local language, prefer the English rendering.
 - Be conservative: if you cannot confidently read a field, return null rather than guessing.

@@ -97,6 +97,20 @@ export function useDocumentUpload(type: DocumentType): UseDocumentUploadResult {
     }
   }, [type, invalidate]);
 
+  // Checks daily section cap then launches picker — shared by handleUploadPress and low-quota continue.
+  const proceedWithUpload = useCallback((): void => {
+    const sectionStats = stats?.sections[type as keyof typeof stats.sections];
+    if (
+      sectionStats &&
+      sectionStats.daily_limit !== null &&
+      sectionStats.today_used >= sectionStats.daily_limit
+    ) {
+      setShowLimitModal(true);
+      return;
+    }
+    void launchPicker();
+  }, [stats, type, launchPicker]);
+
   const handleUploadPress = useCallback((): void => {
     if (!stats || stats.is_privileged) {
       void launchPicker();
@@ -113,19 +127,22 @@ export function useDocumentUpload(type: DocumentType): UseDocumentUploadResult {
       return;
     }
 
-    // Soft warning: today's section limit hit — show modal with remaining monthly count
-    const sectionStats = stats.sections[type as keyof typeof stats.sections];
-    if (
-      sectionStats &&
-      sectionStats.daily_limit !== null &&
-      sectionStats.today_used >= sectionStats.daily_limit
-    ) {
-      setShowLimitModal(true);
+    // Soft warning: low monthly quota (≤5 remaining)
+    if (stats.monthly_remaining !== null && stats.monthly_remaining <= 5) {
+      const n = stats.monthly_remaining;
+      Alert.alert(
+        'Low Upload Allowance',
+        `You only have ${n} upload${n === 1 ? '' : 's'} remaining this month. Do you want to continue?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Continue', onPress: proceedWithUpload },
+        ],
+      );
       return;
     }
 
-    void launchPicker();
-  }, [stats, type, launchPicker]);
+    proceedWithUpload();
+  }, [stats, launchPicker, proceedWithUpload]);
 
   const handleLimitModalUpload = useCallback((): void => {
     setShowLimitModal(false);

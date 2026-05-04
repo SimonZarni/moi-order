@@ -43,6 +43,12 @@ export function MyDocumentsScreen(): React.JSX.Element {
               Store any official document here — work permits, ID cards, driving licences, insurance cards, and more.
             </Text>
           </View>
+          <View style={styles.privacyCard}>
+            <Ionicons name="eye-outline" size={16} color={colours.textMuted} />
+            <Text style={styles.privacyText}>
+              Our team may view uploaded documents solely to provide the services you have requested.
+            </Text>
+          </View>
 
           <UploadLimitBadge stats={stats} sectionType={DOCUMENT_TYPE.Other} />
 

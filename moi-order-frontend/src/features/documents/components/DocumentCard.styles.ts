@@ -116,7 +116,7 @@ export const styles = StyleSheet.create({
     marginBottom: 2,
   },
   passportNumber: {
-    fontSize: typography.md,
+    fontSize: typography.sm + 1,
     fontWeight: '800',
     color: colours.textOnLight,
     letterSpacing: 1.2,

@@ -43,6 +43,12 @@ export function PassportVaultScreen(): React.JSX.Element {
               Upload your passport bio data page or visa/stamp pages. Other document types will be flagged.
             </Text>
           </View>
+          <View style={styles.privacyCard}>
+            <Ionicons name="eye-outline" size={16} color={colours.textMuted} />
+            <Text style={styles.privacyText}>
+              Our team may view uploaded documents solely to provide the services you have requested.
+            </Text>
+          </View>
 
           <UploadLimitBadge stats={stats} sectionType={DOCUMENT_TYPE.Passport} />
 

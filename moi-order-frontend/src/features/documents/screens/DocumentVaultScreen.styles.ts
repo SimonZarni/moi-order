@@ -86,6 +86,25 @@ export const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
+  // ── Privacy notice ───────────────────────────────────────────────────────
+  privacyCard: {
+    backgroundColor: `${colours.medium}12`,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: `${colours.medium}28`,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+  },
+  privacyText: {
+    flex: 1,
+    fontSize: typography.xs,
+    color: colours.textMuted,
+    lineHeight: 18,
+  },
+
   // ── Upload button ─────────────────────────────────────────────────────────
   uploadBtn: {
     flexDirection: 'row',

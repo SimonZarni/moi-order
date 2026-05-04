@@ -43,6 +43,12 @@ export function NinetyDayVaultScreen(): React.JSX.Element {
               Upload your Thai 90-day notification slip (TM47). The next report date will be extracted automatically.
             </Text>
           </View>
+          <View style={styles.privacyCard}>
+            <Ionicons name="eye-outline" size={16} color={colours.textMuted} />
+            <Text style={styles.privacyText}>
+              Our team may view uploaded documents solely to provide the services you have requested.
+            </Text>
+          </View>
 
           <UploadLimitBadge stats={stats} sectionType={DOCUMENT_TYPE.NinetyDayReport} />
 
