@@ -68,17 +68,17 @@ class NinetyDayReportReminderNotification extends Notification
     {
         return match(true) {
             $this->daysRemaining === 20 =>
-                'Your 90-day report is due in 20 days. Mark your calendar.',
+                'Your 90-day report is due in 20 days. Tap to submit via Moi Order.',
             $this->daysRemaining === 10 =>
-                'Your 90-day report is due in 10 days. Start preparing.',
+                'Your 90-day report is due in 10 days. Tap to submit via Moi Order.',
             $this->daysRemaining === 8 =>
-                'Your 90-day report is due in 8 days. Time to act.',
+                'Your 90-day report is due in 8 days. Tap to submit via Moi Order.',
             $this->daysRemaining > 0 =>
-                "Your 90-day report is due in {$this->daysRemaining} day" . ($this->daysRemaining === 1 ? '' : 's') . '. Submit at your local immigration office.',
+                "Your 90-day report is due in {$this->daysRemaining} day" . ($this->daysRemaining === 1 ? '' : 's') . '. Tap to submit via Moi Order.',
             $this->daysRemaining === 0 =>
-                'Your 90-day report is due today. Submit at your local immigration office immediately.',
+                'Your 90-day report is due today. Tap now to submit via Moi Order.',
             default => sprintf(
-                'Your 90-day report is %d day%s overdue. Submit at your local immigration office immediately to avoid penalties.',
+                'Your 90-day report is %d day%s overdue. Tap to submit via Moi Order immediately.',
                 abs($this->daysRemaining),
                 abs($this->daysRemaining) === 1 ? '' : 's',
             ),

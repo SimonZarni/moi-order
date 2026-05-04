@@ -45,7 +45,6 @@ if (Constants.appOwnership !== 'expo') {
   // shouldSetBadge: false — badge count is managed by Zustand + Pusher, not OS badge API.
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
-      shouldShowAlert: true,
       shouldShowBanner: true,
       shouldShowList: true,
       shouldPlaySound: true,
@@ -55,7 +54,7 @@ if (Constants.appOwnership !== 'expo') {
 }
 
 interface PushNotificationData {
-  notification_type?: 'submission_status' | 'ticket_order_status' | 'custom_announcement' | string;
+  notification_type?: 'submission_status' | 'ticket_order_status' | 'custom_announcement' | 'ninety_day_reminder' | string;
   submission_id?: number;
   ticket_order_id?: number;
 }
@@ -125,6 +124,8 @@ export function usePushNotifications(): void {
       navigation.navigate('OrderDetail', { submissionId: data.submission_id });
     } else if (data.notification_type === 'ticket_order_status' && data.ticket_order_id !== undefined) {
       navigation.navigate('TicketOrderDetail', { ticketOrderId: data.ticket_order_id });
+    } else if (data.notification_type === 'ninety_day_reminder') {
+      navigation.navigate('NinetyDayReport');
     } else if (data.notification_type === 'custom_announcement') {
       navigation.navigate('Notifications');
     }
