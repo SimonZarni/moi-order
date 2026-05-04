@@ -74,7 +74,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 6,
   },
   authBtn: {
     paddingVertical: 4,
@@ -105,11 +105,11 @@ export const styles = StyleSheet.create({
     marginBottom: 5,
   },
   heroTitle: {
-    fontSize: 26,
+    fontSize: 23,
     fontWeight: "900",
     color: colours.textOnDark,
     letterSpacing: -0.5,
-    lineHeight: 38,
+    lineHeight: 33,
   },
   heroTitleAccent: {
     color: colours.tertiary,
@@ -127,7 +127,7 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.18)",
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
   },
   searchIcon: { fontSize: 14 },
   searchPlaceholder: {
