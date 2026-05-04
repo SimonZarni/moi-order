@@ -130,10 +130,11 @@ interface Props {
   onToggleFAB:      () => void;
   onSelectCategory: (id: number | null) => void;
   isFullscreen?:    boolean;
+  behindCard?:      boolean;
 }
 
 export function MapFAB({
-  categories, activeCategory, isFABOpen, onToggleFAB, onSelectCategory, isFullscreen = false,
+  categories, activeCategory, isFABOpen, onToggleFAB, onSelectCategory, isFullscreen = false, behindCard = false,
 }: Props): React.JSX.Element {
   const scrollOffset = useSharedValue(0);
   const savedOffset  = useSharedValue(0);
@@ -191,9 +192,7 @@ export function MapFAB({
     // the open overlay — including spaces between and around arc items.
     <GestureDetector gesture={panGesture}>
       <View
-        style={styles.root}
-        // When open: intercept all touches so pan works everywhere.
-        // When closed: pass touches through so the map remains interactive.
+        style={[styles.root, behindCard && { zIndex: 1 }]}
         pointerEvents={isFABOpen ? 'auto' : 'box-none'}
       >
         {/* Full-screen dim overlay — tap fires onToggleFAB to close; pan is

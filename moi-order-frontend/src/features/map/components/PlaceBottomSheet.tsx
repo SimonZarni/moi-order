@@ -67,6 +67,7 @@ export function PlaceBottomSheet({
       handleIndicatorStyle={styles.handle}
       animateOnMount
       overDragResistanceFactor={6}
+      containerStyle={styles.sheetContainer}
     >
       <View style={styles.peekRow}>
         <View style={styles.peekThumb}>

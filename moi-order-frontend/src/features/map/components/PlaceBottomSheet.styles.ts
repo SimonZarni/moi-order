@@ -2,6 +2,10 @@ import { StyleSheet } from 'react-native';
 import { MAP_COLORS } from '@/shared/theme/mapTheme';
 
 export const styles = StyleSheet.create({
+  sheetContainer: {
+    zIndex: 100,
+    elevation: 100,
+  },
   sheetBg: {
     backgroundColor: MAP_COLORS.surface,
     borderTopLeftRadius: 24, borderTopRightRadius: 24,

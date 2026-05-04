@@ -184,7 +184,11 @@ export function PlacesMapScreen(): React.JSX.Element {
             </View>
           )}
 
-          <Animated.View style={{ transform: [{ translateX: buttonsRightAnim }] }} pointerEvents={isFullscreen ? 'none' : 'box-none'}>
+          {/* zIndex drops below the BottomSheet (100) when card is open */}
+          <Animated.View
+            style={{ transform: [{ translateX: buttonsRightAnim }], zIndex: selectedPlace ? 1 : 20 }}
+            pointerEvents={isFullscreen ? 'none' : 'box-none'}
+          >
             <MyLocationButton onPress={handleMyLocation} />
           </Animated.View>
 
@@ -195,6 +199,7 @@ export function PlacesMapScreen(): React.JSX.Element {
             onToggleFAB={handleToggleFAB}
             onSelectCategory={handleSelectCategory}
             isFullscreen={isFullscreen}
+            behindCard={!!selectedPlace}
           />
 
           {selectedPlace && (
