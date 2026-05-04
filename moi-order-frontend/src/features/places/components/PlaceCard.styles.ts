@@ -13,7 +13,8 @@ export const styles = StyleSheet.create({
   shadowWrap: {
     marginHorizontal: spacing.lg,
     marginBottom: spacing.md + 2,
-    borderRadius: CARD_RADIUS,
+    borderBottomLeftRadius: CARD_RADIUS,
+    borderBottomRightRadius: CARD_RADIUS,
     backgroundColor: colours.backgroundDark,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
@@ -24,8 +25,9 @@ export const styles = StyleSheet.create({
 
   // Inner Pressable clips image + glass to rounded corners
   card: {
-    height: 280,
-    borderRadius: CARD_RADIUS,
+    height: 220,
+    borderBottomLeftRadius: CARD_RADIUS,
+    borderBottomRightRadius: CARD_RADIUS,
     overflow: 'hidden',
     backgroundColor: colours.backgroundDark,
     justifyContent: 'flex-end',
@@ -71,16 +73,15 @@ export const styles = StyleSheet.create({
   },
 
   // ── Frosted glass panel ───────────────────────────────────────────────────
+  // No top radius — panel bleeds edge-to-edge so it reads as part of the photo
   glassPanel: {
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
     overflow: 'hidden',
   },
 
-  // Dark tint layered on top of the blur for depth
+  // Very light tint; gradient carries the readability now
   glassTint: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(12,24,22,0.40)',
+    backgroundColor: 'rgba(12,24,22,0.12)',
   },
 
   glassContent: {

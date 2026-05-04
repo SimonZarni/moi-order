@@ -4,21 +4,30 @@ import { colours } from '@/shared/theme/colours';
 import { radius } from '@/shared/theme/radius';
 import { spacing } from '@/shared/theme/spacing';
 
+// Must match PlaceCard.styles.ts CARD_RADIUS
+const CARD_RADIUS = radius.xl + 4;
+
 export const styles = StyleSheet.create({
-  // Mirrors PlaceCard.styles.ts shadowWrap exactly so skeleton occupies identical space
+  // Mirrors PlaceCard.styles.ts shadowWrap: flat top corners, rounded bottom only
   shadowWrap: {
     marginHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-    borderRadius: radius.xl,
+    marginBottom: spacing.md + 2,
+    borderBottomLeftRadius: CARD_RADIUS,
+    borderBottomRightRadius: CARD_RADIUS,
     backgroundColor: colours.backgroundDark,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.22,
-    shadowRadius: 14,
-    elevation: 7,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.28,
+    shadowRadius: 18,
+    elevation: 9,
+  },
+  // Clips shimmer to the card shape — overflow:hidden lives here, not on shadowWrap
+  cardClip: {
+    borderBottomLeftRadius: CARD_RADIUS,
+    borderBottomRightRadius: CARD_RADIUS,
     overflow: 'hidden',
   },
-  // Bottom meta strip — category badge + text lines overlaid at bottom like the real card
+  // Category pill + name + city lines anchored to the bottom, mirroring the glass panel
   metaStrip: {
     position: 'absolute',
     bottom: spacing.md,

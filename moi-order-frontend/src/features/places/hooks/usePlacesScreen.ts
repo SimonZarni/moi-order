@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { FlatList } from 'react-native';
 import { Image } from 'expo-image';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -28,8 +28,12 @@ export interface UsePlacesScreenResult {
   error: ApiError | null;
   query: string;
   selectedCategory: number | null;
+  selectedCategoryLabel: string;
+  isCategoryModalOpen: boolean;
   handleQueryChange: (text: string) => void;
-  handleCategorySelect: (id: number | null) => void;
+  handleCategorySelectAndClose: (id: number | null) => void;
+  handleCategoryModalOpen: () => void;
+  handleCategoryModalClose: () => void;
   handlePlacesEndReached: () => void;
   handlePlacesRefresh: () => void;
   handlePlacePress: (placeId: number) => void;
@@ -43,6 +47,7 @@ export function usePlacesScreen(): UsePlacesScreenResult {
   const placesListRef = useRef<FlatList<Place>>(null);
 
   const [query, setQuery] = useState('');
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const debouncedQuery = useDebounce(query, SEARCH_DEBOUNCE_MS);
 
   useFocusEffect(
@@ -80,9 +85,27 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     });
   }, [filteredPlaces]);
 
+  const selectedCategoryLabel = useMemo(
+    () => categories.find(c => c.id === selectedCategory)?.name_en ?? 'All',
+    [categories, selectedCategory],
+  );
+
   const handleQueryChange = useCallback((text: string): void => {
     setQuery(text);
   }, []);
+
+  const handleCategoryModalOpen = useCallback((): void => {
+    setIsCategoryModalOpen(true);
+  }, []);
+
+  const handleCategoryModalClose = useCallback((): void => {
+    setIsCategoryModalOpen(false);
+  }, []);
+
+  const handleCategorySelectAndClose = useCallback((id: number | null): void => {
+    handleCategorySelect(id);
+    setIsCategoryModalOpen(false);
+  }, [handleCategorySelect]);
 
   const handlePlacesEndReached = useCallback((): void => {
     if (placesHasNextPage && !isPlacesFetchingNextPage) {
@@ -121,8 +144,12 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     error,
     query,
     selectedCategory,
+    selectedCategoryLabel,
+    isCategoryModalOpen,
     handleQueryChange,
-    handleCategorySelect,
+    handleCategorySelectAndClose,
+    handleCategoryModalOpen,
+    handleCategoryModalClose,
     handlePlacesEndReached,
     handlePlacesRefresh,
     handlePlacePress,

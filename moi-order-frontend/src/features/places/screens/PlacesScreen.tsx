@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, FlatList, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -24,7 +24,9 @@ export function PlacesScreen(): React.JSX.Element {
     placesListRef,
     filteredPlaces, categories, isPlacesLoading, isPlacesError,
     isPlacesRefreshing, isPlacesFetchingNextPage,
-    query, selectedCategory, handleQueryChange, handleCategorySelect,
+    query, selectedCategory, selectedCategoryLabel, isCategoryModalOpen,
+    handleQueryChange, handleCategorySelectAndClose,
+    handleCategoryModalOpen, handleCategoryModalClose,
     handlePlacesEndReached, handlePlacesRefresh, handlePlacePress,
     handleBack,
   } = usePlacesScreen();
@@ -45,7 +47,7 @@ export function PlacesScreen(): React.JSX.Element {
         minHeight={HERO_MIN_HEIGHT}
       />
 
-      {/* Search input */}
+      {/* Search + category filter row */}
       <View style={styles.searchRow}>
         <View style={styles.searchInputWrap}>
           <Ionicons name="search" size={15} color={colours.medium} />
@@ -71,47 +73,80 @@ export function PlacesScreen(): React.JSX.Element {
             </Pressable>
           )}
         </View>
+
+        <Pressable
+          style={[styles.categoryBtn, selectedCategory !== null && styles.categoryBtnActive]}
+          onPress={handleCategoryModalOpen}
+          accessibilityLabel={`Filter by category: ${selectedCategoryLabel}`}
+          accessibilityRole="button"
+        >
+          <Ionicons
+            name="filter"
+            size={13}
+            color={selectedCategory !== null ? colours.backgroundDark : 'rgba(255,255,255,0.65)'}
+          />
+          <Text
+            style={[styles.categoryBtnLabel, selectedCategory !== null && styles.categoryBtnLabelActive]}
+            numberOfLines={1}
+          >
+            {selectedCategoryLabel}
+          </Text>
+          <Ionicons
+            name="chevron-down"
+            size={11}
+            color={selectedCategory !== null ? colours.backgroundDark : 'rgba(255,255,255,0.45)'}
+          />
+        </Pressable>
       </View>
 
-      {/* Horizontal category chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.chipsRow}
-        contentContainerStyle={styles.chipsContent}
-      >
-        <Pressable
-          style={[styles.chip, selectedCategory === null && styles.chipActive]}
-          onPress={() => handleCategorySelect(null)}
-          accessibilityLabel="All categories"
-          accessibilityRole="button"
-          accessibilityState={{ selected: selectedCategory === null }}
-        >
-          <Text style={[styles.chipLabel, selectedCategory === null && styles.chipLabelActive]}>
-            All
-          </Text>
-        </Pressable>
-
-        {categories.map((cat: Category) => {
-          const isActive = selectedCategory === cat.id;
-          return (
-            <Pressable
-              key={cat.id}
-              style={[styles.chip, isActive && styles.chipActive]}
-              onPress={() => handleCategorySelect(cat.id)}
-              accessibilityLabel={cat.name_en}
-              accessibilityRole="button"
-              accessibilityState={{ selected: isActive }}
-            >
-              <Text style={[styles.chipLabel, isActive && styles.chipLabelActive]}>
-                {cat.name_en}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-
       <View style={styles.bodyGap} />
+
+      {/* Category picker modal */}
+      <Modal
+        visible={isCategoryModalOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={handleCategoryModalClose}
+      >
+        <Pressable style={styles.modalOverlay} onPress={handleCategoryModalClose} accessibilityRole="none">
+          <View style={styles.modalSheet} onStartShouldSetResponder={() => true}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>Category</Text>
+
+            <Pressable
+              style={[styles.modalOption, selectedCategory === null && styles.modalOptionActive]}
+              onPress={() => handleCategorySelectAndClose(null)}
+              accessibilityLabel="All categories"
+              accessibilityRole="button"
+            >
+              <Text style={[styles.modalOptionText, selectedCategory === null && styles.modalOptionTextActive]}>
+                All
+              </Text>
+              {selectedCategory === null && (
+                <Ionicons name="checkmark" size={16} color={editorialPalette.gold} />
+              )}
+            </Pressable>
+
+            {categories.map((cat: Category) => {
+              const isActive = selectedCategory === cat.id;
+              return (
+                <Pressable
+                  key={cat.id}
+                  style={[styles.modalOption, isActive && styles.modalOptionActive]}
+                  onPress={() => handleCategorySelectAndClose(cat.id)}
+                  accessibilityLabel={cat.name_en}
+                  accessibilityRole="button"
+                >
+                  <Text style={[styles.modalOptionText, isActive && styles.modalOptionTextActive]}>
+                    {cat.name_en}
+                  </Text>
+                  {isActive && <Ionicons name="checkmark" size={16} color={editorialPalette.gold} />}
+                </Pressable>
+              );
+            })}
+          </View>
+        </Pressable>
+      </Modal>
     </>
   );
 

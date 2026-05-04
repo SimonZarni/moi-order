@@ -1,40 +1,36 @@
 import { Dimensions, StyleSheet } from 'react-native';
 
-// Two gallery images + one gap fit exactly within the section's horizontal margins.
-const SCREEN_WIDTH = Dimensions.get('window').width;
-const GALLERY_IMAGE_WIDTH = (SCREEN_WIDTH - 32 - 8) / 2; // 32 = 2×spacing.md, 8 = spacing.sm gap
-
 import { colours } from '@/shared/theme/colours';
+import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { radius } from '@/shared/theme/radius';
-import { shadows } from '@/shared/theme/shadows';
 import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const HERO_HEIGHT = 300;
+// 2-column grid: subtract 2 × horizontal padding (16 each) + 1 gap between columns
+const GALLERY_ITEM_SIZE = (SCREEN_WIDTH - spacing.md * 2 - spacing.sm) / 2;
+
 export const styles = StyleSheet.create({
+
   // ── Scaffold ──────────────────────────────────────────────────────────────
   container: {
     flex: 1,
-    backgroundColor: colours.backgroundDark,
-  },
-  scroll: {
-    backgroundColor: colours.backgroundLight,
-  },
-  scrollContent: {
-    paddingBottom: spacing.xxl,
+    backgroundColor: colours.dark,
   },
   centered: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colours.backgroundLight,
+    paddingHorizontal: spacing.md,
   },
-  spinner: {
-    color: colours.tertiary,
-  } as unknown as { color: string },
   errorText: {
     fontSize: typography.md,
     color: colours.danger,
     marginBottom: spacing.md,
+    textAlign: 'center',
+    lineHeight: 22,
   },
   backBtn: {
     paddingHorizontal: spacing.lg,
@@ -49,249 +45,228 @@ export const styles = StyleSheet.create({
   },
 
   // ── Hero ──────────────────────────────────────────────────────────────────
-  heroContainer: {
-    position: 'relative',
-    minHeight: 60,
+  hero: {
+    height: HERO_HEIGHT,
+    backgroundColor: colours.dark,
+    overflow: 'hidden',
   },
-  heroBackWrap: {
+  heroImageWrap: {
     position: 'absolute',
-    top: spacing.sm,
-    left: spacing.md,
-    zIndex: 10,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   heroImage: {
     width: '100%',
-    height: 300,
+    height: '100%',
   },
-  // Floating back button overlaid on hero image (top-left)
-  heroBackBtn: {
+  heroGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+
+  // Back + heart row floating above everything
+  heroControls: {
     position: 'absolute',
     top: spacing.sm,
     left: spacing.md,
+    right: spacing.md,
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.38)',
-    borderRadius: radius.full,
-    paddingVertical: spacing.xs + 2,
-    paddingHorizontal: spacing.sm + 2,
-    minHeight: 36,
     zIndex: 10,
   },
-  heroBackArrow: {
-    fontSize: 22,
-    color: colours.tertiary,
-    lineHeight: 26,
-    fontWeight: '300',
-  },
-  heroBackLabel: {
-    fontSize: typography.sm,
-    fontWeight: '600',
-    color: colours.tertiary,
-    letterSpacing: 0.2,
-  },
-  // Floating heart button overlaid on hero image (top-right) — mirrors back button
-  heroFavBtn: {
-    position: 'absolute',
-    top: spacing.sm,
-    right: spacing.md,
-    width: 36,
-    height: 36,
+  heroBtn: {
+    width: 38,
+    height: 38,
     borderRadius: radius.full,
-    backgroundColor: 'rgba(0,0,0,0.38)',
+    backgroundColor: 'rgba(0,0,0,0.32)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 10,
-  },
-  heroFavIcon: {
-    fontSize: 18,
-    color: colours.white,
-    lineHeight: 22,
-  },
-  // Active (favorited) state: bright coral-red to pop against the dark overlay
-  heroFavIconActive: {
-    color: colours.destructive,
   },
 
-  // ── Section 1 — Identity card (pulls up over hero) ───────────────────────
-  identityCard: {
-    marginHorizontal: spacing.md,
-    marginTop: -(spacing.xl), // -32: overlaps bottom of hero
-    backgroundColor: colours.card,
-    borderRadius: radius.xl,
-    padding: spacing.md,
-    ...shadows.heavy,
+  // Category pill + names anchored to the bottom of the hero
+  heroIdentity: {
+    position: 'absolute',
+    bottom: spacing.lg,
+    left: spacing.md,
+    right: spacing.md,
+    zIndex: 10,
   },
-  categoryBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: colours.primary,
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    marginBottom: spacing.sm,
-  },
-  categoryText: {
-    color: colours.white,
-    fontSize: typography.xs,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-  },
-  name: {
-    fontSize: typography.xl,
-    fontWeight: '800',
-    color: colours.textOnLight,
-    letterSpacing: -0.3,
-    lineHeight: 34,
-  },
-  nameSub: {
-    fontSize: typography.md,
-    color: colours.tertiary,
-    fontWeight: '500',
-    marginTop: 2,
-  },
-  cityRow: {
+  heroCategoryPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: spacing.sm,
+    alignSelf: 'flex-start',
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: `${editorialPalette.gold}55`,
+    backgroundColor: 'rgba(0,0,0,0.38)',
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: 4,
+    marginBottom: spacing.sm,
+    gap: 5,
   },
-  cityDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: colours.tertiary,
-    marginRight: spacing.xs,
+  heroCategoryDot: {
+    width: 5,
+    height: 5,
+    borderRadius: radius.full,
+    backgroundColor: editorialPalette.gold,
   },
-  city: {
+  heroCategoryText: {
+    fontSize: typography.xxs,
+    fontWeight: '700',
+    color: editorialPalette.gold,
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+    lineHeight: 13,
+  },
+  heroName: {
+    fontSize: typography.xxl,
+    fontWeight: '900',
+    color: colours.white,
+    letterSpacing: -0.4,
+    lineHeight: 42,
+  },
+  heroNameSub: {
+    fontSize: typography.sm,
+    color: 'rgba(255,255,255,0.55)',
+    fontWeight: '500',
+    marginTop: 2,
+    lineHeight: 20,
+  },
+
+  // ── Body ──────────────────────────────────────────────────────────────────
+  body: {
+    backgroundColor: colours.white,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xxl,
+  },
+
+  // ── Info chips ────────────────────────────────────────────────────────────
+  infoChipsRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    flexWrap: 'wrap',
+    marginBottom: spacing.md,
+  },
+  infoChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs + 2,
+  },
+  infoChipText: {
     fontSize: typography.sm,
     color: colours.medium,
     fontWeight: '500',
+    lineHeight: 18,
   },
 
-  // ── Shared card shell ─────────────────────────────────────────────────────
-  sectionCard: {
-    marginHorizontal: spacing.md,
-    marginTop: spacing.sm,
-    backgroundColor: colours.card,
-    borderRadius: radius.xl,
-    padding: spacing.md,
-    ...shadows.light,
-  },
-  // Uppercase spaced label used at the top of every section card
-  sectionLabel: {
-    fontSize: typography.xs,
-    fontWeight: '700',
-    color: colours.primary,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    marginBottom: spacing.sm,
+  // ── Divider ───────────────────────────────────────────────────────────────
+  divider: {
+    height: 1,
+    backgroundColor: colours.divider,
+    marginVertical: spacing.md,
   },
 
-  // ── Section 2 — Details (info rows) ──────────────────────────────────────
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.xs + 2,
-    borderBottomWidth: 1,
-    borderBottomColor: colours.infoBg,
-  },
-  infoIcon: {
-    width: 28,
+  // ── Description ───────────────────────────────────────────────────────────
+  description: {
     fontSize: typography.md,
-    textAlign: 'center',
-    marginRight: spacing.sm,
-  },
-  infoText: {
-    flex: 1,
-    fontSize: typography.sm,
-    color: colours.textOnLight,
-    lineHeight: 20,
-  },
-  infoLink: {
-    color: colours.primary,
-    fontWeight: '500',
+    color: colours.medium,
+    lineHeight: 26,
+    marginBottom: spacing.md,
   },
 
-  // ── Section 3 — Tags ──────────────────────────────────────────────────────
-  tagRow: {
+  // ── Tags ──────────────────────────────────────────────────────────────────
+  tagsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.xs,
+    marginBottom: spacing.md,
   },
   tag: {
-    backgroundColor: colours.infoBg,
     borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colours.infoBorder,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs + 2,
-    borderWidth: 1,
-    borderColor: 'rgba(34,78,74,0.18)',
+    backgroundColor: colours.infoBg,
   },
   tagText: {
     fontSize: typography.xs,
     color: colours.tertiary,
     fontWeight: '600',
+    lineHeight: 16,
+  },
+
+  // ── Action buttons ────────────────────────────────────────────────────────
+  actionsRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  actionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: colours.dark,
+    borderRadius: radius.xl,
+    paddingVertical: spacing.sm + 4,
+    minHeight: 44,
+  },
+  actionBtnText: {
+    fontSize: typography.sm,
+    fontWeight: '700',
+    color: colours.white,
     lineHeight: 18,
   },
 
-  // ── Section 4 — About (left accent bar) ──────────────────────────────────
-  // Absolutely positioned inside sectionCard; gives the card its signature left stripe
-  aboutAccent: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 4,
-    backgroundColor: colours.primary,
-    borderTopLeftRadius: radius.xl,
-    borderBottomLeftRadius: radius.xl,
-  },
-  longDescription: {
-    fontSize: typography.md,
-    color: colours.medium,
-    lineHeight: 26,
-  },
-
-  // ── Section 5 — Gallery ───────────────────────────────────────────────────
-  gallerySection: {
-    marginHorizontal: spacing.md,
-    marginTop: spacing.sm,
-  },
-  // Row: "Gallery" label left + "View all" button right
+  // ── Gallery ───────────────────────────────────────────────────────────────
   galleryHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: spacing.sm,
   },
-  // Same visual as sectionLabel but no marginBottom (handled by galleryHeader)
   galleryLabel: {
     fontSize: typography.xs,
     fontWeight: '700',
-    color: colours.primary,
+    color: colours.medium,
     letterSpacing: 1.2,
     textTransform: 'uppercase',
   },
-  viewAllBtn: {
-    paddingVertical: 2,
-    paddingHorizontal: spacing.xs,
-  },
   viewAllText: {
     fontSize: typography.sm,
-    fontWeight: '600',
     color: colours.primary,
+    fontWeight: '600',
   },
-  galleryList: {
-    paddingRight: spacing.md,
+  galleryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
   },
-  galleryImageWrap: {
-    marginRight: spacing.sm,
+  galleryItem: {
+    width: GALLERY_ITEM_SIZE,
+    height: GALLERY_ITEM_SIZE,
     borderRadius: radius.lg,
     overflow: 'hidden',
+    backgroundColor: colours.infoBg,
   },
-  // Width computed so exactly 2 images are visible without scrolling
-  galleryImage: {
-    width: GALLERY_IMAGE_WIDTH,
-    height: 130,
-    resizeMode: 'cover',
+  galleryItemImage: {
+    width: '100%',
+    height: '100%',
   },
 });

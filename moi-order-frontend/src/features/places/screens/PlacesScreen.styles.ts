@@ -28,16 +28,21 @@ export const styles = StyleSheet.create({
     lineHeight: 38,
   },
 
-  // ── Search row ────────────────────────────────────────────────────────────
+  // ── Search + category row ─────────────────────────────────────────────────
   // marginTop: -spacing.xl cancels HeroHeader's paddingBottom (32)
+  // paddingBottom >= spacing.xl (32) so bodyGap's marginTop:-32 doesn't clip content
   searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
     backgroundColor: colours.backgroundDark,
     paddingHorizontal: spacing.xl + spacing.sm,
     marginTop: -spacing.xl,
     paddingTop: spacing.xs,
-    paddingBottom: spacing.sm,
+    paddingBottom: spacing.xl + spacing.sm,
   },
   searchInputWrap: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colours.inputBg,
@@ -64,41 +69,85 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // ── Category chips ────────────────────────────────────────────────────────
-  chipsRow: {
-    backgroundColor: colours.backgroundDark,
-  },
-  chipsContent: {
-    paddingHorizontal: spacing.xl + spacing.sm,
-    paddingTop: spacing.sm,
-    // Extra paddingBottom so bodyGap's marginTop:-32 doesn't obscure last chip row
-    paddingBottom: spacing.xl + spacing.sm,
-    gap: spacing.sm,
+  // ── Category dropdown button ──────────────────────────────────────────────
+  categoryBtn: {
     flexDirection: 'row',
-  },
-  chip: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs + 2,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.22)',
+    alignItems: 'center',
+    gap: 4,
     backgroundColor: 'rgba(255,255,255,0.07)',
-    minHeight: 32,
-    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.sm + 2,
+    minHeight: 44,
+    flexShrink: 0,
   },
-  chipActive: {
+  categoryBtnActive: {
     backgroundColor: editorialPalette.gold,
     borderColor: editorialPalette.gold,
   },
-  chipLabel: {
+  categoryBtnLabel: {
     fontSize: typography.xs,
     fontWeight: '600',
     color: 'rgba(255,255,255,0.75)',
     letterSpacing: 0.3,
     lineHeight: 16,
+    maxWidth: 80,
   },
-  chipLabelActive: {
+  categoryBtnLabelActive: {
     color: colours.backgroundDark,
+    fontWeight: '700',
+  },
+
+  // ── Category modal ────────────────────────────────────────────────────────
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    backgroundColor: '#0d1c1a',
+    borderTopLeftRadius: radius.sheet,
+    borderTopRightRadius: radius.sheet,
+    paddingTop: spacing.sm,
+    paddingBottom: 40,
+  },
+  modalHandle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignSelf: 'center',
+    marginBottom: spacing.md,
+  },
+  modalTitle: {
+    fontSize: typography.xs,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.4)',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing.xs,
+    lineHeight: 16,
+  },
+  modalOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+  },
+  modalOptionActive: {
+    backgroundColor: 'rgba(255,255,255,0.04)',
+  },
+  modalOptionText: {
+    fontSize: typography.md,
+    fontWeight: '500',
+    color: colours.textOnDark,
+    lineHeight: 24,
+  },
+  modalOptionTextActive: {
+    color: editorialPalette.gold,
     fontWeight: '700',
   },
 

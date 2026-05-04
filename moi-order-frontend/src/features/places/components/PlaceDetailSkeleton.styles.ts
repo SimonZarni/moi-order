@@ -1,41 +1,52 @@
 import { StyleSheet } from 'react-native';
 
 import { colours } from '@/shared/theme/colours';
-import { radius } from '@/shared/theme/radius';
-import { shadows } from '@/shared/theme/shadows';
 import { spacing } from '@/shared/theme/spacing';
 
 export const styles = StyleSheet.create({
+  // Dark background matches hero so the safe-area top blends with the shimmer
   container: {
     flex: 1,
-    backgroundColor: colours.backgroundLight,
+    backgroundColor: colours.dark,
   },
-  scroll: {
+
+  // ── Body — mirrors PlaceDetailScreen.styles.ts body ──────────────────────
+  body: {
+    backgroundColor: colours.white,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.lg,
     paddingBottom: spacing.xxl,
   },
-
-  // ── Identity card — mirrors PlaceDetailScreen.styles identityCard ─────────
-  identityCard: {
-    marginHorizontal: spacing.md,
-    marginTop: -spacing.xl, // overlaps hero bottom, same as real screen
-    backgroundColor: colours.card,
-    borderRadius: radius.xl,
-    padding: spacing.md,
+  infoChipsRow: {
+    flexDirection: 'row',
     gap: spacing.sm,
-    ...shadows.heavy,
+    marginBottom: spacing.md,
   },
-
-  // ── Section card — mirrors sectionCard ───────────────────────────────────
-  sectionCard: {
-    marginHorizontal: spacing.md,
-    marginTop: spacing.sm,
-    backgroundColor: colours.card,
-    borderRadius: radius.xl,
-    padding: spacing.md,
+  divider: {
+    height: 1,
+    backgroundColor: colours.divider,
+    marginVertical: spacing.md,
+  },
+  descRows: {
     gap: spacing.sm,
-    ...shadows.light,
+    marginBottom: spacing.md,
   },
-  sectionRows: {
+  tagsRow: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+    marginBottom: spacing.md,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  galleryHeader: {
+    marginBottom: spacing.sm,
+  },
+  galleryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.sm,
   },
 });

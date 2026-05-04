@@ -42,8 +42,8 @@ export function PlaceCard({ place, onPress, distance }: PlaceCardProps): React.J
 
         {/* Subtle gradient — covers bottom half only */}
         <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.10)', 'rgba(0,0,0,0.46)']}
-          locations={[0, 0.45, 1]}
+          colors={['transparent', 'rgba(0,0,0,0.08)', 'rgba(0,0,0,0.72)']}
+          locations={[0, 0.42, 1]}
           style={styles.gradient}
         />
 
@@ -55,7 +55,7 @@ export function PlaceCard({ place, onPress, distance }: PlaceCardProps): React.J
         )}
 
         {/* Frosted glass info panel */}
-        <BlurView intensity={58} tint="dark" style={styles.glassPanel}>
+        <BlurView intensity={20} tint="dark" style={styles.glassPanel}>
           <View style={styles.glassTint} />
           <View style={styles.glassContent}>
 
