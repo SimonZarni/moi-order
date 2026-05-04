@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { fetchMe } from '@/shared/api/auth';
-import { updateProfile, changePassword, deleteAccount } from '@/shared/api/profile';
+import { updateProfile, changePassword, deleteAccount, updateSimulatedDate } from '@/shared/api/profile';
 import { CACHE_TTL } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { useAuthStore } from '@/shared/store/authStore';
@@ -16,6 +16,7 @@ export interface UseProfileDataResult {
   updateMutation: ReturnType<typeof useMutation<User, ApiError, { name: string; email: string; phoneNumber: string | null; dateOfBirth: string | null }>>;
   changePasswordMutation: ReturnType<typeof useMutation<void, ApiError, { currentPassword: string; newPassword: string; confirmPassword: string }>>;
   deleteAccountMutation: ReturnType<typeof useMutation<void, ApiError, void>>;
+  simulatedDateMutation: ReturnType<typeof useMutation<User, ApiError, { date: string | null }>>;
 }
 
 export function useProfileData(): UseProfileDataResult {
@@ -45,6 +46,14 @@ export function useProfileData(): UseProfileDataResult {
     mutationFn: () => deleteAccount(),
   });
 
+  const simulatedDateMutation = useMutation<User, ApiError, { date: string | null }>({
+    mutationFn: ({ date }) => updateSimulatedDate(date),
+    onSuccess: (updatedUser) => {
+      queryClient.setQueryData(QUERY_KEYS.PROFILE.ME, updatedUser);
+      updateUser(updatedUser);
+    },
+  });
+
   return {
     user:         query.data ?? null,
     isLoading:    query.isPending,
@@ -54,5 +63,6 @@ export function useProfileData(): UseProfileDataResult {
     updateMutation,
     changePasswordMutation,
     deleteAccountMutation,
+    simulatedDateMutation,
   };
 }

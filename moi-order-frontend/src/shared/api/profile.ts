@@ -50,3 +50,8 @@ export async function changePassword(
 export async function deleteAccount(): Promise<void> {
   await apiClient.delete('/api/v1/profile');
 }
+
+export async function updateSimulatedDate(date: string | null): Promise<User> {
+  const response = await apiClient.patch<ApiResponse<User>>('/api/v1/profile/simulated-date', { date });
+  return response.data.data;
+}

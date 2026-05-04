@@ -22,6 +22,13 @@ export interface UseProfileScreenResult {
   user: User | null;
   isLoading: boolean;
   isRefreshing: boolean;
+  // Simulated date (privileged accounts only)
+  simulatedDate: string | null;
+  isUpdatingSimulatedDate: boolean;
+  showSimulatedDatePicker: boolean;
+  handleSimulatedDateFieldPress: () => void;
+  handleSimulatedDatePickerChange: (event: DateTimePickerEvent, date?: Date) => void;
+  handleClearSimulatedDate: () => void;
   // Profile form
   name: string;
   email: string;
@@ -83,14 +90,15 @@ export function useProfileScreen(): UseProfileScreenResult {
   const pushToken   = useNotificationStore((s) => s.pushToken);
   const { locale, setLocale } = useLocale();
 
-  const { user, isLoading, isRefreshing, refetch, updateMutation, changePasswordMutation, deleteAccountMutation } = useProfileData();
+  const { user, isLoading, isRefreshing, refetch, updateMutation, changePasswordMutation, deleteAccountMutation, simulatedDateMutation } = useProfileData();
   const profileForm        = useProfileForm(user);
   const changePasswordForm = useChangePasswordForm();
   const pictureMethods     = useProfilePicture(user);
 
-  const [showDatePicker, setShowDatePicker]         = useState(false);
-  const [isPasswordSectionOpen, setPasswordSection] = useState(false);
-  const [isEditingProfile, setIsEditingProfile]     = useState(false);
+  const [showDatePicker, setShowDatePicker]               = useState(false);
+  const [showSimulatedDatePicker, setShowSimulatedDatePicker] = useState(false);
+  const [isPasswordSectionOpen, setPasswordSection]       = useState(false);
+  const [isEditingProfile, setIsEditingProfile]           = useState(false);
   const isPlaceholderEmail   = user?.email.endsWith('@users.moiorder.local') ?? false;
   // OTP users have phone_{number}@users.moiorder.local — they have phone as login method so no warning needed.
   // Social users (line_, google_, apple_ prefix) do need to add a real email.
@@ -189,6 +197,32 @@ export function useProfileScreen(): UseProfileScreenResult {
     );
   }, [changePasswordForm, changePasswordMutation]);
 
+  // ── Simulated date (privileged only) ────────────────────────────────────
+
+  const handleSimulatedDateFieldPress = useCallback((): void => {
+    setShowSimulatedDatePicker(true);
+  }, []);
+
+  const handleSimulatedDatePickerChange = useCallback((event: DateTimePickerEvent, date?: Date): void => {
+    if (Platform.OS === 'android') setShowSimulatedDatePicker(false);
+    if (event.type === 'dismissed') { setShowSimulatedDatePicker(false); return; }
+    if (event.type === 'set' && date) {
+      const dateStr = [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, '0'),
+        String(date.getDate()).padStart(2, '0'),
+      ].join('-');
+      simulatedDateMutation.mutate(
+        { date: dateStr },
+        { onSettled: () => setShowSimulatedDatePicker(false) },
+      );
+    }
+  }, [simulatedDateMutation]);
+
+  const handleClearSimulatedDate = useCallback((): void => {
+    simulatedDateMutation.mutate({ date: null });
+  }, [simulatedDateMutation]);
+
   // ── Navigation ──────────────────────────────────────────────────────────
 
   const handleGoToOrders = useCallback((): void => {
@@ -256,6 +290,12 @@ export function useProfileScreen(): UseProfileScreenResult {
     user,
     isLoading,
     isRefreshing,
+    simulatedDate:              user?.simulated_date ?? null,
+    isUpdatingSimulatedDate:    simulatedDateMutation.isPending,
+    showSimulatedDatePicker,
+    handleSimulatedDateFieldPress,
+    handleSimulatedDatePickerChange,
+    handleClearSimulatedDate,
     name:            profileForm.name,
     email:           profileForm.email,
     phoneNumber:     profileForm.phoneNumber,

@@ -12,6 +12,7 @@ use App\DTOs\UpdateProfileDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\DeleteAccountRequest;
+use App\Http\Requests\UpdateSimulatedDateRequest;
 use App\Http\Requests\LinkAppleRequest;
 use App\Http\Requests\LinkGoogleRequest;
 use App\Http\Requests\LinkLineRequest;
@@ -132,6 +133,17 @@ class ProfileController extends Controller
     public function unlinkApple(Request $request): JsonResponse
     {
         $user = $this->profileService->unlinkProvider($request->user(), 'apple');
+
+        return response()->json(['data' => new UserResource($user)]);
+    }
+
+    /** PATCH /api/v1/profile/simulated-date — privileged accounts only */
+    public function updateSimulatedDate(UpdateSimulatedDateRequest $request): JsonResponse
+    {
+        $user = $this->profileService->updateSimulatedDate(
+            $request->user(),
+            $request->input('date'),
+        );
 
         return response()->json(['data' => new UserResource($user)]);
     }

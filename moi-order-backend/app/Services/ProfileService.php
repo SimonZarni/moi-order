@@ -95,6 +95,13 @@ class ProfileService
         return $user->fresh();
     }
 
+    public function updateSimulatedDate(User $user, ?string $date): User
+    {
+        $user->update(['simulated_date' => $date]);
+
+        return $user->fresh();
+    }
+
     public function deleteAccount(User $user): void
     {
         DB::transaction(function () use ($user): void {

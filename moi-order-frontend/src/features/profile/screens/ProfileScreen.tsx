@@ -48,6 +48,8 @@ export function ProfileScreen(): React.JSX.Element {
     handleGoToOrders, handleGoToMoiVerified, handleGoToPrivacyPolicy, handleGoToTerms, handleGoToPdpa, handleLogout,
     handleDeleteAccount, isDeletingAccount,
     isUploadingPicture, isRemovingPicture, handleAvatarPress,
+    simulatedDate, isUpdatingSimulatedDate, showSimulatedDatePicker,
+    handleSimulatedDateFieldPress, handleSimulatedDatePickerChange, handleClearSimulatedDate,
   } = useProfileScreen();
   const {
     isLinkingGoogle, isLinkingApple, isLinkingLine,
@@ -573,6 +575,61 @@ export function ProfileScreen(): React.JSX.Element {
               </View>
             )}
           </View>
+
+          {/* § Test Controls — privileged accounts only */}
+          {user?.is_privileged && (
+            <>
+              <View style={styles.sectionRow}>
+                <Text style={styles.sectionLabel}>Test Controls</Text>
+                <View style={styles.sectionLine} />
+              </View>
+              <View style={styles.card}>
+                <View style={styles.infoRow}>
+                  <View style={[styles.iconBadge, styles.iconBadgeAmber]}>
+                    <Ionicons name="calendar-outline" size={16} color={colours.secondary} />
+                  </View>
+                  <View style={styles.simulatedDateInfo}>
+                    <Text style={styles.simulatedDateLabel}>Simulated Date</Text>
+                    <Text style={[styles.simulatedDateValue, simulatedDate === null && styles.infoPlaceholder]}>
+                      {simulatedDate !== null ? formatDate(simulatedDate) : 'Real date (Thai time)'}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.simulatedDateActions}>
+                  {simulatedDate !== null && (
+                    <Pressable
+                      style={styles.clearDateBtn}
+                      onPress={handleClearSimulatedDate}
+                      disabled={isUpdatingSimulatedDate}
+                      accessibilityLabel="Reset simulated date to real Thai time"
+                      accessibilityRole="button"
+                    >
+                      <Text style={styles.clearDateBtnText}>Reset</Text>
+                    </Pressable>
+                  )}
+                  <Pressable
+                    style={styles.setDateBtn}
+                    onPress={handleSimulatedDateFieldPress}
+                    disabled={isUpdatingSimulatedDate}
+                    accessibilityLabel="Set simulated date for testing"
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.setDateBtnText}>
+                      {isUpdatingSimulatedDate ? 'Saving…' : 'Set Date'}
+                    </Text>
+                  </Pressable>
+                </View>
+                {showSimulatedDatePicker && (
+                  <DateTimePicker
+                    value={simulatedDate !== null ? new Date(`${simulatedDate}T00:00:00`) : new Date()}
+                    mode="date"
+                    display="default"
+                    onChange={handleSimulatedDatePickerChange}
+                  />
+                )}
+              </View>
+            </>
+          )}
 
           {/* § Language */}
           <View style={styles.sectionRow}>

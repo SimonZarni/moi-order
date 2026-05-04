@@ -9,7 +9,6 @@ use App\Models\Document;
 use App\Models\User;
 use App\Notifications\NinetyDayReportReminderNotification;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -34,29 +33,32 @@ class SendNinetyDayReportReminders extends Command
 
     public function handle(): int
     {
-        $today = Carbon::today();
-
-        // For each user, use only their most recent valid 90-day report.
+        // Most-recent valid 90-day report per user.
         $documents = Document::query()
             ->where('type', DocumentType::NinetyDayReport->value)
             ->where('is_valid_type', true)
             ->whereNotNull('extension_date')
             ->orderByDesc('extension_date')
             ->get()
-            ->unique('user_id'); // keep most recent per user
+            ->unique('user_id');
+
+        // Pre-load users to avoid N+1; privileged users may have a simulated date.
+        $userIds = $documents->pluck('user_id')->filter()->unique()->values();
+        $users   = User::whereIn('id', $userIds)->get()->keyBy('id');
 
         $sent = 0;
 
         foreach ($documents as $document) {
-            $daysRemaining = (int) $today->diffInDays($document->extension_date, false);
-
-            if (!$this->shouldNotify($daysRemaining)) {
+            /** @var User|null $user */
+            $user = $users->get($document->user_id);
+            if ($user === null) {
                 continue;
             }
 
-            /** @var User|null $user */
-            $user = User::find($document->user_id);
-            if ($user === null) {
+            // Privileged users may override "today" for testing; everyone else uses Thai time.
+            $daysRemaining = (int) $user->effectiveDate()->diffInDays($document->extension_date, false);
+
+            if (!$this->shouldNotify($daysRemaining)) {
                 continue;
             }
 
@@ -65,9 +67,9 @@ class SendNinetyDayReportReminders extends Command
                 $sent++;
             } catch (\Throwable $e) {
                 Log::error('SendNinetyDayReportReminders: notification failed', [
-                    'user_id'       => $document->user_id,
+                    'user_id'        => $document->user_id,
                     'days_remaining' => $daysRemaining,
-                    'error'         => $e->getMessage(),
+                    'error'          => $e->getMessage(),
                 ]);
             }
         }

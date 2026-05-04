@@ -51,6 +51,7 @@ class User extends Authenticatable
         'profile_picture_path',
         'last_active_at',
         'user_role',
+        'simulated_date',
     ];
 
     /**
@@ -81,6 +82,7 @@ class User extends Authenticatable
             'user_role'         => UserRole::class,
             'suspended_until'   => 'datetime',
             'last_active_at'    => 'datetime',
+            'simulated_date'    => 'date:Y-m-d',
         ];
     }
 
@@ -90,6 +92,20 @@ class User extends Authenticatable
     public function isPrivileged(): bool
     {
         return $this->user_role === UserRole::Privileged;
+    }
+
+    /**
+     * The date to use for 90-day notification calculations.
+     * Privileged users may override with a simulated date for testing;
+     * all other users — and privileged users with no override — get Thai time today.
+     */
+    public function effectiveDate(): Carbon
+    {
+        if ($this->isPrivileged() && $this->simulated_date !== null) {
+            return $this->simulated_date;
+        }
+
+        return Carbon::today();
     }
 
     public function grantRole(UserRole $role): void

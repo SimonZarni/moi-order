@@ -58,6 +58,7 @@ export interface User {
   date_of_birth: string | null;  // ISO date "YYYY-MM-DD"
   role: string;
   is_privileged: boolean;
+  simulated_date: string | null;  // ISO date "YYYY-MM-DD" — privileged accounts only
   email_verified_at: string | null;
   created_at: string;
 }

@@ -537,6 +537,55 @@ export const styles = StyleSheet.create({
     color: colours.primary,
   },
 
+  // ── Simulated date (Test Controls) ────────────────────────────────────────
+  simulatedDateInfo: {
+    flex: 1,
+    marginLeft: spacing.xs,
+  },
+  simulatedDateLabel: {
+    fontSize: typography.xs,
+    color: colours.textMuted,
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  simulatedDateValue: {
+    fontSize: typography.sm,
+    color: colours.textOnDark,
+    fontWeight: '600',
+  },
+  simulatedDateActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: spacing.xs,
+    marginTop: spacing.sm,
+  },
+  setDateBtn: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.lg,
+    backgroundColor: `${colours.secondary}22`,
+    borderWidth: 1,
+    borderColor: `${colours.secondary}55`,
+  },
+  setDateBtnText: {
+    fontSize: typography.xs,
+    fontWeight: '700',
+    color: colours.secondary,
+  },
+  clearDateBtn: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.lg,
+    backgroundColor: `${colours.textMuted}14`,
+    borderWidth: 1,
+    borderColor: `${colours.textMuted}44`,
+  },
+  clearDateBtnText: {
+    fontSize: typography.xs,
+    fontWeight: '600',
+    color: colours.textMuted,
+  },
+
   // ── Sign out ───────────────────────────────────────────────────────────────
   signOutBtn: {
     marginTop: spacing.sm,
