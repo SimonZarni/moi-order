@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react';
 import { Alert, Platform } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
+
+import { VerificationStatus } from '@/types/models';
 import * as AppleAuthentication from 'expo-apple-authentication';
 
 import { GoogleSignin, statusCodes } from '@/shared/utils/googleSignin';
@@ -44,6 +46,14 @@ export function useLinkedAccounts(): UseLinkedAccountsResult {
   const syncUser = useCallback((user: User): void => {
     queryClient.setQueryData(QUERY_KEYS.AUTH.ME, user);
     useAuthStore.getState().updateUser(user);
+  }, [queryClient]);
+
+  // Returns true when unlinking this channel would drop the user below 2 connected channels
+  // and they currently hold Moi Verified status.
+  const wouldLoseVerification = useCallback((): boolean => {
+    const verificationStatus = queryClient.getQueryData<VerificationStatus>(QUERY_KEYS.VERIFICATION.STATUS);
+    if (!verificationStatus?.is_verified) return false;
+    return verificationStatus.connected_channels <= 2;
   }, [queryClient]);
 
   const dismissLinkError = useCallback((): void => {
@@ -144,74 +154,68 @@ export function useLinkedAccounts(): UseLinkedAccountsResult {
 
   // ── Unlink handlers ─────────────────────────────────────────────────────────
 
-  const handleUnlinkGoogle = useCallback((): void => {
-    Alert.alert('Unlink Google', 'Remove your Google account from this profile?', [
+  const buildUnlinkAlert = useCallback((
+    channel: string,
+    doUnlink: () => Promise<void>,
+  ): void => {
+    const loseVerification = wouldLoseVerification();
+    const message = loseVerification
+      ? `Are you sure you want to disconnect ${channel}? Your Moi Verified status will be removed. You can get it back once you reconnect to at least 2 sign-in channels and complete at least 3 payments.`
+      : `Remove your ${channel} account from this profile?`;
+
+    Alert.alert(`Disconnect ${channel}`, message, [
       { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Unlink',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            setLinkError('');
-            setIsUnlinkingGoogle(true);
-            const user = await unlinkGoogleAccount();
-            syncUser(user);
-          } catch (error: unknown) {
-            const apiError = error as ApiError;
-            setLinkError(apiError.message ?? 'Failed to unlink Google account.');
-          } finally {
-            setIsUnlinkingGoogle(false);
-          }
-        },
-      },
+      { text: 'Disconnect', style: 'destructive', onPress: doUnlink },
     ]);
-  }, [syncUser]);
+  }, [wouldLoseVerification]);
+
+  const handleUnlinkGoogle = useCallback((): void => {
+    buildUnlinkAlert('Google', async () => {
+      try {
+        setLinkError('');
+        setIsUnlinkingGoogle(true);
+        const user = await unlinkGoogleAccount();
+        syncUser(user);
+      } catch (error: unknown) {
+        const apiError = error as ApiError;
+        setLinkError(apiError.message ?? 'Failed to unlink Google account.');
+      } finally {
+        setIsUnlinkingGoogle(false);
+      }
+    });
+  }, [buildUnlinkAlert, syncUser]);
 
   const handleUnlinkApple = useCallback((): void => {
-    Alert.alert('Unlink Apple', 'Remove your Apple account from this profile?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Unlink',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            setLinkError('');
-            setIsUnlinkingApple(true);
-            const user = await unlinkAppleAccount();
-            syncUser(user);
-          } catch (error: unknown) {
-            const apiError = error as ApiError;
-            setLinkError(apiError.message ?? 'Failed to unlink Apple account.');
-          } finally {
-            setIsUnlinkingApple(false);
-          }
-        },
-      },
-    ]);
-  }, [syncUser]);
+    buildUnlinkAlert('Apple', async () => {
+      try {
+        setLinkError('');
+        setIsUnlinkingApple(true);
+        const user = await unlinkAppleAccount();
+        syncUser(user);
+      } catch (error: unknown) {
+        const apiError = error as ApiError;
+        setLinkError(apiError.message ?? 'Failed to unlink Apple account.');
+      } finally {
+        setIsUnlinkingApple(false);
+      }
+    });
+  }, [buildUnlinkAlert, syncUser]);
 
   const handleUnlinkLine = useCallback((): void => {
-    Alert.alert('Unlink LINE', 'Remove your LINE account from this profile?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Unlink',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            setLinkError('');
-            setIsUnlinkingLine(true);
-            const user = await unlinkLineAccount();
-            syncUser(user);
-          } catch (error: unknown) {
-            const apiError = error as ApiError;
-            setLinkError(apiError.message ?? 'Failed to unlink LINE account.');
-          } finally {
-            setIsUnlinkingLine(false);
-          }
-        },
-      },
-    ]);
-  }, [syncUser]);
+    buildUnlinkAlert('LINE', async () => {
+      try {
+        setLinkError('');
+        setIsUnlinkingLine(true);
+        const user = await unlinkLineAccount();
+        syncUser(user);
+      } catch (error: unknown) {
+        const apiError = error as ApiError;
+        setLinkError(apiError.message ?? 'Failed to unlink LINE account.');
+      } finally {
+        setIsUnlinkingLine(false);
+      }
+    });
+  }, [buildUnlinkAlert, syncUser]);
 
   return {
     isLinkingGoogle,

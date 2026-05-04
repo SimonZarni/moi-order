@@ -494,6 +494,86 @@ export function ProfileScreen(): React.JSX.Element {
             </View>
           </View>
 
+          {/* § Security */}
+          <View style={styles.sectionRow}>
+            <Text style={styles.sectionLabel}>{t.security}</Text>
+            <View style={styles.sectionLine} />
+          </View>
+          <View style={styles.card}>
+            <Pressable
+              style={[styles.row, !hasPassword && styles.rowDisabled]}
+              onPress={hasPassword ? handleTogglePasswordSection : undefined}
+              disabled={!hasPassword}
+              accessibilityLabel={hasPassword ? 'Change password' : 'Change password (not available — no password set)'}
+              accessibilityRole="button"
+            >
+              <View style={[styles.iconBadge, styles.iconBadgeSlate]}>
+                <Ionicons name="lock-closed-outline" size={16} color={hasPassword ? colours.medium : colours.textMuted} />
+              </View>
+              <Text style={[styles.rowLabel, !hasPassword && styles.rowLabelDisabled]}>{t.changePassword}</Text>
+              <Ionicons
+                name={hasPassword ? (isPasswordSectionOpen ? 'chevron-up' : 'chevron-forward') : 'lock-closed'}
+                size={hasPassword ? 18 : 14}
+                color={colours.textMuted}
+              />
+            </Pressable>
+
+            {isPasswordSectionOpen && (
+              <View style={styles.passwordForm}>
+                <TextInput
+                  style={[styles.passwordInput, passwordErrors.currentPassword !== null && styles.passwordInputError]}
+                  value={currentPassword}
+                  onChangeText={handleCurrentPasswordChange}
+                  placeholder={t.currentPassword}
+                  placeholderTextColor={colours.textMuted}
+                  secureTextEntry
+                  accessibilityLabel="Current password"
+                />
+                {passwordErrors.currentPassword !== null && (
+                  <Text style={styles.passwordErrorText}>{passwordErrors.currentPassword}</Text>
+                )}
+
+                <TextInput
+                  style={[styles.passwordInput, passwordErrors.newPassword !== null && styles.passwordInputError]}
+                  value={newPassword}
+                  onChangeText={handleNewPasswordChange}
+                  placeholder={t.newPassword}
+                  placeholderTextColor={colours.textMuted}
+                  secureTextEntry
+                  accessibilityLabel="New password"
+                />
+                {passwordErrors.newPassword !== null && (
+                  <Text style={styles.passwordErrorText}>{passwordErrors.newPassword}</Text>
+                )}
+
+                <TextInput
+                  style={[styles.passwordInput, passwordErrors.confirmPassword !== null && styles.passwordInputError]}
+                  value={confirmPassword}
+                  onChangeText={handleConfirmPasswordChange}
+                  placeholder={t.confirmNewPassword}
+                  placeholderTextColor={colours.textMuted}
+                  secureTextEntry
+                  accessibilityLabel="Confirm new password"
+                />
+                {passwordErrors.confirmPassword !== null && (
+                  <Text style={styles.passwordErrorText}>{passwordErrors.confirmPassword}</Text>
+                )}
+
+                <Pressable
+                  style={styles.updatePasswordBtn}
+                  onPress={handleChangePassword}
+                  disabled={isChangingPassword}
+                  accessibilityLabel="Update password"
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.updatePasswordBtnText}>
+                    {isChangingPassword ? 'Updating…' : t.updatePassword}
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+          </View>
+
           {/* § Language */}
           <View style={styles.sectionRow}>
             <Text style={styles.sectionLabel}>{t.language}</Text>
@@ -575,86 +655,6 @@ export function ProfileScreen(): React.JSX.Element {
               <Text style={styles.rowLabel}>LINE</Text>
               <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </Pressable>
-          </View>
-
-          {/* § Security */}
-          <View style={styles.sectionRow}>
-            <Text style={styles.sectionLabel}>{t.security}</Text>
-            <View style={styles.sectionLine} />
-          </View>
-          <View style={styles.card}>
-            <Pressable
-              style={[styles.row, !hasPassword && styles.rowDisabled]}
-              onPress={hasPassword ? handleTogglePasswordSection : undefined}
-              disabled={!hasPassword}
-              accessibilityLabel={hasPassword ? 'Change password' : 'Change password (not available — no password set)'}
-              accessibilityRole="button"
-            >
-              <View style={[styles.iconBadge, styles.iconBadgeSlate]}>
-                <Ionicons name="lock-closed-outline" size={16} color={hasPassword ? colours.medium : colours.textMuted} />
-              </View>
-              <Text style={[styles.rowLabel, !hasPassword && styles.rowLabelDisabled]}>{t.changePassword}</Text>
-              <Ionicons
-                name={hasPassword ? (isPasswordSectionOpen ? 'chevron-up' : 'chevron-forward') : 'lock-closed'}
-                size={hasPassword ? 18 : 14}
-                color={colours.textMuted}
-              />
-            </Pressable>
-
-            {isPasswordSectionOpen && (
-              <View style={styles.passwordForm}>
-                <TextInput
-                  style={[styles.passwordInput, passwordErrors.currentPassword !== null && styles.passwordInputError]}
-                  value={currentPassword}
-                  onChangeText={handleCurrentPasswordChange}
-                  placeholder={t.currentPassword}
-                  placeholderTextColor={colours.textMuted}
-                  secureTextEntry
-                  accessibilityLabel="Current password"
-                />
-                {passwordErrors.currentPassword !== null && (
-                  <Text style={styles.passwordErrorText}>{passwordErrors.currentPassword}</Text>
-                )}
-
-                <TextInput
-                  style={[styles.passwordInput, passwordErrors.newPassword !== null && styles.passwordInputError]}
-                  value={newPassword}
-                  onChangeText={handleNewPasswordChange}
-                  placeholder={t.newPassword}
-                  placeholderTextColor={colours.textMuted}
-                  secureTextEntry
-                  accessibilityLabel="New password"
-                />
-                {passwordErrors.newPassword !== null && (
-                  <Text style={styles.passwordErrorText}>{passwordErrors.newPassword}</Text>
-                )}
-
-                <TextInput
-                  style={[styles.passwordInput, passwordErrors.confirmPassword !== null && styles.passwordInputError]}
-                  value={confirmPassword}
-                  onChangeText={handleConfirmPasswordChange}
-                  placeholder={t.confirmNewPassword}
-                  placeholderTextColor={colours.textMuted}
-                  secureTextEntry
-                  accessibilityLabel="Confirm new password"
-                />
-                {passwordErrors.confirmPassword !== null && (
-                  <Text style={styles.passwordErrorText}>{passwordErrors.confirmPassword}</Text>
-                )}
-
-                <Pressable
-                  style={styles.updatePasswordBtn}
-                  onPress={handleChangePassword}
-                  disabled={isChangingPassword}
-                  accessibilityLabel="Update password"
-                  accessibilityRole="button"
-                >
-                  <Text style={styles.updatePasswordBtnText}>
-                    {isChangingPassword ? 'Updating…' : t.updatePassword}
-                  </Text>
-                </Pressable>
-              </View>
-            )}
           </View>
 
           {/* § Legal */}

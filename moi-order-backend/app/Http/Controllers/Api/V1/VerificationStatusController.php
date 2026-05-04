@@ -4,58 +4,49 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Enums\DocumentType;
 use App\Enums\SubmissionStatus;
-use App\Models\Document;
+use App\Enums\TicketOrderStatus;
 use App\Models\ServiceSubmission;
+use App\Models\TicketOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
 class VerificationStatusController extends Controller
 {
+    private const CHANNELS_REQUIRED  = 2;
+    private const PAYMENTS_REQUIRED  = 3;
+
     public function __invoke(Request $request): JsonResponse
     {
         $user = $request->user();
 
-        $connectedChannel = $user->google_id !== null
-            || $user->apple_id !== null
-            || $user->line_id !== null
-            || ($user->phone_number !== null && $user->phone_number !== '');
+        $connectedChannels = collect([
+            $user->google_id,
+            $user->apple_id,
+            $user->line_id,
+            ($user->phone_number !== null && $user->phone_number !== '') ? '1' : null,
+        ])->filter()->count();
 
-        $passportUploaded = Document::query()
-            ->forUser($user->id)
-            ->ofType(DocumentType::Passport)
-            ->exists();
-
-        $ninetyDayUploaded = Document::query()
-            ->forUser($user->id)
-            ->ofType(DocumentType::NinetyDayReport)
-            ->exists();
-
-        $myDocsUploaded = Document::query()
-            ->forUser($user->id)
-            ->ofType(DocumentType::Other)
-            ->exists();
-
-        $successfulPayment = ServiceSubmission::query()
+        $successfulSubmissions = ServiceSubmission::query()
             ->where('user_id', $user->id)
             ->whereIn('status', [SubmissionStatus::Processing->value, SubmissionStatus::Completed->value])
-            ->exists();
+            ->count();
 
-        $isVerified = $connectedChannel
-            && $passportUploaded
-            && $ninetyDayUploaded
-            && $myDocsUploaded
-            && $successfulPayment;
+        $successfulTicketOrders = TicketOrder::query()
+            ->where('user_id', $user->id)
+            ->whereIn('status', [TicketOrderStatus::Processing->value, TicketOrderStatus::Completed->value])
+            ->count();
+
+        $successfulPayments = $successfulSubmissions + $successfulTicketOrders;
+
+        $isVerified = $connectedChannels >= self::CHANNELS_REQUIRED
+            && $successfulPayments >= self::PAYMENTS_REQUIRED;
 
         return response()->json([
             'data' => [
-                'connected_channel'   => $connectedChannel,
-                'passport_uploaded'   => $passportUploaded,
-                'ninety_day_uploaded' => $ninetyDayUploaded,
-                'my_docs_uploaded'    => $myDocsUploaded,
-                'successful_payment'  => $successfulPayment,
+                'connected_channels'  => $connectedChannels,
+                'successful_payments' => $successfulPayments,
                 'is_verified'         => $isVerified,
             ],
         ]);

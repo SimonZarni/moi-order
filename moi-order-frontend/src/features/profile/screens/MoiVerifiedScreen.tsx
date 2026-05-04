@@ -73,28 +73,13 @@ export function MoiVerifiedScreen(): React.JSX.Element {
           ) : (
             <>
               <RequirementRow
-                label="Connected to at least one sign-in channel"
-                done={status?.connected_channel ?? false}
+                label={`Connected to at least 2 sign-in channels (${status?.connected_channels ?? 0}/2)`}
+                done={(status?.connected_channels ?? 0) >= 2}
               />
               <View style={styles.reqDivider} />
               <RequirementRow
-                label="Uploaded a Passport document"
-                done={status?.passport_uploaded ?? false}
-              />
-              <View style={styles.reqDivider} />
-              <RequirementRow
-                label="Uploaded a 90-Day Report slip"
-                done={status?.ninety_day_uploaded ?? false}
-              />
-              <View style={styles.reqDivider} />
-              <RequirementRow
-                label="Uploaded a document in My Docs"
-                done={status?.my_docs_uploaded ?? false}
-              />
-              <View style={styles.reqDivider} />
-              <RequirementRow
-                label="Completed at least one order or payment"
-                done={status?.successful_payment ?? false}
+                label={`Completed at least 3 payments (${status?.successful_payments ?? 0}/3)`}
+                done={(status?.successful_payments ?? 0) >= 3}
               />
             </>
           )}

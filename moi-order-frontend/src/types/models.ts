@@ -82,11 +82,8 @@ export interface UploadStats {
 }
 
 export interface VerificationStatus {
-  connected_channel: boolean;
-  passport_uploaded: boolean;
-  ninety_day_uploaded: boolean;
-  my_docs_uploaded: boolean;
-  successful_payment: boolean;
+  connected_channels: number;   // need ≥ 2
+  successful_payments: number;  // need ≥ 3
   is_verified: boolean;
 }
 
