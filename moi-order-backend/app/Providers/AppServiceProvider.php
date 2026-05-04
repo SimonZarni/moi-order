@@ -91,8 +91,8 @@ class AppServiceProvider extends ServiceProvider
         // DIP: bind Google Custom Search adapter. Swap provider by rebinding here only.
         $this->app->bind(ImageProviderInterface::class, function () {
             return new GoogleImageService(
-                config('services.google.cse_api_key', ''),
-                config('services.google.cse_id', ''),
+                config('services.google.cse_api_key'),
+                config('services.google.cse_id'),
             );
         });
 
