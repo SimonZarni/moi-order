@@ -23,7 +23,10 @@ export const IOS_APP_STORE_ID = '' as const;
 
 // iOS Client ID (client_type: 1) — from GoogleService-Info.plist CLIENT_ID.
 // Required so the native iOS sign-in sheet uses the correct OAuth client.
-export const GOOGLE_IOS_CLIENT_ID = process.env['EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID'] ?? '';
+// Hardcoded fallback mirrors app.config.js so configure() is always valid even without EAS secrets.
+export const GOOGLE_IOS_CLIENT_ID =
+  process.env['EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID'] ??
+  '661538209777-o33avjo80379ui26kj2clbn4snla6j2g.apps.googleusercontent.com';
 
 export const CACHE_TTL = {
   USER_DATA:       5  * 60 * 1000,
