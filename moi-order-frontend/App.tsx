@@ -17,8 +17,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { enableScreens } from 'react-native-screens';
 
@@ -38,8 +38,8 @@ GoogleSignin.configure({ webClientId: GOOGLE_WEB_CLIENT_ID, iosClientId: GOOGLE_
 void Line.setup({ channelId: LINE_CHANNEL_ID });
 import { useAuthStore } from '@/shared/store/authStore';
 import { useLocaleStore, Locale } from '@/shared/store/localeStore';
-import { colours } from '@/shared/theme/colours';
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
+import { AnimatedSplash } from '@/shared/components/AnimatedSplash';
 
 import { EmailOtpScreen } from '@/features/auth/screens/EmailOtpScreen';
 import { LoginScreen } from '@/features/auth/screens/LoginScreen';
@@ -191,9 +191,20 @@ function MainTabs(): React.JSX.Element {
   );
 }
 
+const SPLASH_MIN_MS = 1500;
+
 export default function App(): React.JSX.Element {
-  const [isInitializing, setIsInitializing] = useState(true);
+  const [initDone, setInitDone]     = useState(false);
+  const [timerDone, setTimerDone]   = useState(false);
+  const [splashGone, setSplashGone] = useState(false);
   const { setUser } = useAuthStore();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Minimum-hold timer — fires after 1.5 s regardless of init speed.
+  useEffect(() => {
+    timerRef.current = setTimeout(() => setTimerDone(true), SPLASH_MIN_MS);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, []);
 
   useEffect(() => {
     async function restoreSession(): Promise<void> {
@@ -217,19 +228,15 @@ export default function App(): React.JSX.Element {
         // Token expired or invalid — clear silently; user browses as guest.
         await SecureStore.deleteItemAsync(TOKEN_KEY).catch(() => {});
       } finally {
-        setIsInitializing(false);
+        setInitDone(true);
       }
     }
     restoreSession();
-  }, []);
+  }, [setUser]);
 
-  if (isInitializing) {
-    return (
-      <View style={{ flex: 1, backgroundColor: colours.backgroundDark, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={colours.tertiary} size="large" />
-      </View>
-    );
-  }
+  // canHide only when BOTH the session restore AND the minimum timer are done.
+  const canHide = initDone && timerDone;
+  const onSplashHidden = useCallback(() => setSplashGone(true), []);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -237,7 +244,11 @@ export default function App(): React.JSX.Element {
         <QueryClientProvider client={queryClient}>
           <NavigationContainer>
             <StatusBar style="light" translucent />
+            {/* App shell is mounted immediately so navigation is ready; splash sits on top. */}
             <AppShell />
+            {!splashGone && (
+              <AnimatedSplash canHide={canHide} onHidden={onSplashHidden} />
+            )}
           </NavigationContainer>
         </QueryClientProvider>
       </SafeAreaProvider>
