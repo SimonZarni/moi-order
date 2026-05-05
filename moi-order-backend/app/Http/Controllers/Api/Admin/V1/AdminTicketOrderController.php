@@ -26,7 +26,7 @@ class AdminTicketOrderController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $query = TicketOrder::with(['ticket', 'user'])
+        $query = TicketOrder::with(['ticket', 'user', 'items'])
             ->orderByDesc('created_at');
 
         if ($request->filled('status')) {
