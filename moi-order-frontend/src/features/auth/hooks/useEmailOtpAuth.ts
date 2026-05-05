@@ -10,6 +10,9 @@ import { RootStackParamList } from '@/types/navigation';
 
 export interface UseEmailOtpAuthOptions {
   purpose: 'login' | 'register';
+  initialEmail?: string;
+  initialName?: string;
+  initialOtpRequestId?: string;
 }
 
 export interface UseEmailOtpAuthResult {
@@ -29,21 +32,28 @@ export interface UseEmailOtpAuthResult {
   handleVerifyOtp: () => Promise<void>;
 }
 
-export function useEmailOtpAuth({ purpose }: UseEmailOtpAuthOptions): UseEmailOtpAuthResult {
+export function useEmailOtpAuth({
+  purpose,
+  initialEmail = '',
+  initialName = '',
+  initialOtpRequestId,
+}: UseEmailOtpAuthOptions): UseEmailOtpAuthResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const queryClient = useQueryClient();
   const { setUser } = useAuthStore();
 
-  const [step, setStep] = useState<'email' | 'code'>('email');
-  const [email, setEmail] = useState('');
+  const [step, setStep] = useState<'email' | 'code'>(initialOtpRequestId ? 'code' : 'email');
+  const [email, setEmail] = useState(initialEmail);
   const [code, setCode] = useState('');
-  const [name, setName] = useState('');
-  const [otpRequestId, setOtpRequestId] = useState<string | null>(null);
+  const [name, setName] = useState(initialName);
+  const [otpRequestId, setOtpRequestId] = useState<string | null>(initialOtpRequestId ?? null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [bannerError, setBannerError] = useState<string | null>(null);
   const [isRequesting, setIsRequesting] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [resendUntil, setResendUntil] = useState<number | null>(null);
+  const [resendUntil, setResendUntil] = useState<number | null>(
+    initialOtpRequestId ? Date.now() + 60_000 : null,
+  );
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {

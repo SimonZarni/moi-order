@@ -12,8 +12,13 @@ export interface UseEmailOtpScreenResult extends Omit<UseEmailOtpAuthResult, 'ba
 
 export function useEmailOtpScreen(): UseEmailOtpScreenResult {
   const route = useRoute<EmailOtpRouteProp>();
-  const { purpose } = route.params;
-  const auth = useEmailOtpAuth({ purpose });
+  const { purpose, prefillEmail, prefillName, prefillOtpRequestId } = route.params;
+  const auth = useEmailOtpAuth({
+    purpose,
+    initialEmail: prefillEmail,
+    initialName: prefillName,
+    initialOtpRequestId: prefillOtpRequestId,
+  });
 
   return { ...auth, purpose, bannerError: auth.bannerError ?? '' };
 }
