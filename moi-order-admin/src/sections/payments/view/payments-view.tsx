@@ -32,8 +32,8 @@ import { useRouter } from 'src/routes/hooks';
 import { fDate } from 'src/utils/format-time';
 import { fNumber, fCurrency } from 'src/utils/format-number';
 
-import { DashboardContent } from 'src/layouts/dashboard';
 import { settingsApi } from 'src/api/settings';
+import { DashboardContent } from 'src/layouts/dashboard';
 import { paymentsApi, type PaymentData, type PaymentStats } from 'src/api/payments';
 
 import { Label } from 'src/components/label';

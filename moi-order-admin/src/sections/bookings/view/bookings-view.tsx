@@ -1,4 +1,5 @@
 import type { SelectChangeEvent } from '@mui/material/Select';
+import type { BookingData, BookingStats } from 'src/api/bookings';
 
 import { useSearchParams } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
@@ -9,8 +10,8 @@ import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 import Select from '@mui/material/Select';
+import Divider from '@mui/material/Divider';
 import MenuItem from '@mui/material/MenuItem';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
@@ -29,10 +30,9 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useRouter } from 'src/routes/hooks';
 
 import { fDate } from 'src/utils/format-time';
-import { fCurrency } from 'src/utils/format-number';
 
+import { bookingsApi } from 'src/api/bookings';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { type BookingData, type BookingStats, bookingsApi } from 'src/api/bookings';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
