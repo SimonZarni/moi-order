@@ -106,6 +106,20 @@ export const styles = StyleSheet.create({
   },
   payNowBtnText: { fontSize: typography.md, fontWeight: '800', color: colours.white, letterSpacing: 0.4 },
 
+  awaitingBox: {
+    marginTop: spacing.sm,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: `${editorialPalette.amber}18`,
+    borderWidth: 1,
+    borderColor: `${editorialPalette.amber}55`,
+  },
+  awaitingText: {
+    fontSize: typography.xs,
+    color: editorialPalette.amber,
+    lineHeight: 20,
+    fontWeight: '500',
+  },
   cancelOrderBtn: {
     borderWidth: 1.5,
     borderColor: `${colours.destructive}55`,

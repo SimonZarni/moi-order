@@ -32,7 +32,7 @@ const DOC_ICONS: Record<string, IoniconsName> = {
 export function OrderDetailScreen(): React.JSX.Element {
   const {
     submission, isLoading, isRefreshing, isError,
-    canPay, canCancel, isCancelling, handleCancelOrder,
+    canPay, awaitingConfirmation, canCancel, isCancelling, handleCancelOrder,
     canDownload, isDownloading, isSavingResult, downloadError,
     previewImageUrl,
     handleRefresh, handleBack, handlePayNow,
@@ -158,7 +158,7 @@ export function OrderDetailScreen(): React.JSX.Element {
             </Text>
           </View>
 
-          {/* ── Pay Now ── */}
+          {/* ── Pay Now (pending + authorized) ── */}
           {canPay && (
             <Pressable
               style={({ pressed }) => [styles.payNowBtn, { opacity: pressed ? 0.8 : 1 }]}
@@ -168,6 +168,15 @@ export function OrderDetailScreen(): React.JSX.Element {
             >
               <Text style={styles.payNowBtnText}>Pay Now</Text>
             </Pressable>
+          )}
+
+          {/* ── Awaiting admin confirmation ── */}
+          {awaitingConfirmation && (
+            <View style={styles.awaitingBox}>
+              <Text style={styles.awaitingText}>
+                🔔 We have notified our admins about your order. Please prepare for payment once it is confirmed.
+              </Text>
+            </View>
           )}
 
           {/* ── Cancel Order (pending payment only) ── */}

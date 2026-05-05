@@ -6,6 +6,7 @@ export type BookingData = {
   id: number;
   status: string;
   status_label: string;
+  payment_authorized: boolean;
   visit_date: string;
   total: number | null;
   completed_at: string | null;
@@ -69,6 +70,10 @@ export const bookingsApi = {
   get: (id: number | string) =>
     apiClient
       .get<{ data: BookingDetailData }>(`/ticket-orders/${id}`)
+      .then((r) => r.data.data),
+  confirmPayment: (id: number | string) =>
+    apiClient
+      .post<{ data: BookingDetailData }>(`/ticket-orders/${id}/confirm-payment`)
       .then((r) => r.data.data),
   uploadEticket: (id: number | string, file: File) => {
     const formData = new FormData();

@@ -5,7 +5,9 @@ import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
@@ -31,6 +33,7 @@ import { fDate } from 'src/utils/format-time';
 import { fNumber, fCurrency } from 'src/utils/format-number';
 
 import { DashboardContent } from 'src/layouts/dashboard';
+import { settingsApi } from 'src/api/settings';
 import { paymentsApi, type PaymentData, type PaymentStats } from 'src/api/payments';
 
 import { Label } from 'src/components/label';
@@ -59,6 +62,8 @@ export function PaymentsView() {
   const [stats, setStats] = useState<PaymentStats | null>(null);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [autoPayment, setAutoPayment] = useState<boolean | null>(null);
+  const [togglingAutoPayment, setTogglingAutoPayment] = useState(false);
   const page         = Number(searchParams.get('page')     ?? '0');
   const rowsPerPage  = Number(searchParams.get('per_page') ?? '10');
   const filterStatus = searchParams.get('status') ?? 'all';
@@ -76,6 +81,16 @@ export function PaymentsView() {
 
   useEffect(() => {
     paymentsApi.stats().then(setStats).catch(() => {});
+    settingsApi.getPaymentSettings().then((s) => setAutoPayment(s.auto_payment_enabled)).catch(() => {});
+  }, []);
+
+  const handleToggleAutoPayment = useCallback(() => {
+    setTogglingAutoPayment(true);
+    settingsApi
+      .toggleAutoPayment()
+      .then((s) => setAutoPayment(s.auto_payment_enabled))
+      .catch(() => {})
+      .finally(() => setTogglingAutoPayment(false));
   }, []);
 
   const fetchPayments = useCallback(() => {
@@ -112,9 +127,21 @@ export function PaymentsView() {
         <Typography variant="h4" sx={{ flexGrow: 1 }}>
           Payments
         </Typography>
-        <Button variant="outlined" startIcon={<Iconify icon="solar:share-bold" />}>
-          Export
-        </Button>
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          {autoPayment !== null && (
+            <Chip
+              label={autoPayment ? '⚡ Auto Payment: ON' : '🔒 Auto Payment: OFF'}
+              color={autoPayment ? 'success' : 'default'}
+              variant="outlined"
+              onClick={handleToggleAutoPayment}
+              disabled={togglingAutoPayment}
+              sx={{ fontWeight: 600, cursor: 'pointer' }}
+            />
+          )}
+          <Button variant="outlined" startIcon={<Iconify icon="solar:share-bold" />}>
+            Export
+          </Button>
+        </Stack>
       </Box>
 
       <Grid container spacing={2} sx={{ mb: 3 }}>

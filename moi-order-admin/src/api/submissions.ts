@@ -14,6 +14,7 @@ export type SubmissionListItem = {
   id: number;
   status: string;
   status_label: string;
+  payment_authorized: boolean;
   price_snapshot: number | null;
   completed_at: string | null;
   created_at: string;
@@ -72,4 +73,8 @@ export const submissionsApi = {
     apiClient
       .get(`/submissions/${id}/result`, { responseType: 'blob' })
       .then((r) => ({ blob: r.data as Blob, contentType: r.headers['content-type'] as string })),
+  confirmPayment: (id: number | string) =>
+    apiClient
+      .post<{ data: SubmissionDetailData }>(`/submissions/${id}/confirm-payment`)
+      .then((r) => r.data.data),
 };

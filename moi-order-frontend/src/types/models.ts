@@ -162,6 +162,7 @@ export interface ServiceSubmission {
   id: number;
   status: string;
   status_label: string;
+  payment_authorized: boolean;
   price_snapshot: number; // whole THB
   completed_at: string | null;
   created_at: string;
@@ -214,6 +215,7 @@ export interface TicketOrder {
   id: number;
   status: string;
   status_label: string;
+  payment_authorized: boolean;
   visit_date: string; // "YYYY-MM-DD"
   total?: number;     // whole THB — present when items are loaded
   completed_at: string | null;

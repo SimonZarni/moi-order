@@ -15,7 +15,7 @@ import { styles, TICKET_STATUS_COLOURS } from './TicketOrderDetailScreen.styles'
 export function TicketOrderDetailScreen(): React.JSX.Element {
   const {
     order, isLoading, isRefreshing, isError,
-    canPayNow, canDownload, isDownloading, isSavingEticket, downloadError,
+    canPayNow, awaitingConfirmation, canDownload, isDownloading, isSavingEticket, downloadError,
     previewImageUrl,
     handleRefresh, handleBack, handlePayNow, handleDownloadEticket, handleSaveEticket, handleClosePreview,
     canCancel, isCancelling, handleCancelOrder,
@@ -138,7 +138,7 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
             )}
           </View>
 
-          {/* ── Pay Now (pending / failed) ── */}
+          {/* ── Pay Now (pending / failed + authorized) ── */}
           {canPayNow && (
             <Pressable
               style={({ pressed }) => [styles.payNowBtn, { opacity: pressed ? 0.8 : 1 }]}
@@ -148,6 +148,15 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
             >
               <Text style={styles.payNowBtnText}>Pay Now</Text>
             </Pressable>
+          )}
+
+          {/* ── Awaiting admin confirmation ── */}
+          {awaitingConfirmation && (
+            <View style={styles.awaitingBox}>
+              <Text style={styles.awaitingText}>
+                🔔 We have notified our admins about your order. Please prepare for payment once it is confirmed.
+              </Text>
+            </View>
           )}
 
           {/* ── Cancel Order (pending payment only) ── */}

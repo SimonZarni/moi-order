@@ -54,9 +54,11 @@ if (Constants.appOwnership !== 'expo') {
 }
 
 interface PushNotificationData {
-  notification_type?: 'submission_status' | 'ticket_order_status' | 'custom_announcement' | 'ninety_day_reminder' | string;
+  notification_type?: 'submission_status' | 'ticket_order_status' | 'custom_announcement' | 'ninety_day_reminder' | 'payment_ready' | string;
   submission_id?: number;
   ticket_order_id?: number;
+  order_type?: 'ticket_order' | 'submission';
+  order_id?: number;
 }
 
 export function usePushNotifications(): void {
@@ -124,6 +126,12 @@ export function usePushNotifications(): void {
       navigation.navigate('OrderDetail', { submissionId: data.submission_id });
     } else if (data.notification_type === 'ticket_order_status' && data.ticket_order_id !== undefined) {
       navigation.navigate('TicketOrderDetail', { ticketOrderId: data.ticket_order_id });
+    } else if (data.notification_type === 'payment_ready') {
+      if (data.order_type === 'ticket_order' && data.order_id !== undefined) {
+        navigation.navigate('TicketOrderDetail', { ticketOrderId: data.order_id });
+      } else if (data.order_type === 'submission' && data.order_id !== undefined) {
+        navigation.navigate('OrderDetail', { submissionId: data.order_id });
+      }
     } else if (data.notification_type === 'ninety_day_reminder') {
       navigation.navigate('NinetyDayReport');
     } else if (data.notification_type === 'custom_announcement') {

@@ -8,6 +8,7 @@ use App\Contracts\FileStorageInterface;
 use App\DTOs\CreateDynamicSubmissionDTO;
 use App\Enums\SubmissionStatus;
 use App\Events\ServiceSubmissionCreated;
+use App\Models\AppSetting;
 use App\Models\ServiceSubmission;
 use App\Models\ServiceType;
 use Illuminate\Support\Facades\DB;
@@ -71,12 +72,13 @@ class DynamicSubmissionService
             }
 
             $submission = ServiceSubmission::create([
-                'user_id'          => $dto->userId,
-                'service_type_id'  => $serviceType->id,
-                'price_snapshot'   => $serviceType->price,
-                'status'           => SubmissionStatus::PendingPayment,
-                'idempotency_key'  => $dto->idempotencyKey,
-                'submission_data'  => $submissionData,
+                'user_id'             => $dto->userId,
+                'service_type_id'     => $serviceType->id,
+                'price_snapshot'      => $serviceType->price,
+                'status'              => SubmissionStatus::PendingPayment,
+                'idempotency_key'     => $dto->idempotencyKey,
+                'submission_data'     => $submissionData,
+                'payment_authorized'  => AppSetting::isAutoPaymentEnabled(),
             ]);
 
             return $submission->load(['serviceType.service']);

@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\Admin\V1\AdminNotificationController;
 use App\Http\Controllers\Api\Admin\V1\AdminCustomNotificationController;
 use App\Http\Controllers\Api\Admin\V1\AdminCategoryController;
 use App\Http\Controllers\Api\Admin\V1\AdminPaymentController;
+use App\Http\Controllers\Api\Admin\V1\AdminPaymentSettingController;
 use App\Http\Controllers\Api\Admin\V1\AdminPlaceController;
 use App\Http\Controllers\Api\Admin\V1\AdminRestaurantController;
 use App\Http\Controllers\Api\Admin\V1\AdminRoleController;
@@ -94,6 +95,8 @@ Route::prefix('submissions')->name('admin.submissions.')->group(function (): voi
     Route::get('/{submission}', [AdminSubmissionController::class, 'show'])->name('show')
         ->middleware('check.permission:submissions.view');
     Route::patch('/{submission}/status', [AdminSubmissionController::class, 'updateStatus'])->name('updateStatus')
+        ->middleware('check.permission:submissions.manage');
+    Route::post('/{submission}/confirm-payment', [AdminSubmissionController::class, 'confirmPayment'])->name('confirmPayment')
         ->middleware('check.permission:submissions.manage');
     Route::post('/{submission}/result', [AdminSubmissionController::class, 'uploadResultFile'])->name('result.store')
         ->middleware('check.permission:submissions.manage');
@@ -239,10 +242,15 @@ Route::prefix('tickets')->name('admin.tickets.')->group(function (): void {
     Route::delete('/{ticket}/images/{image}', [AdminTicketController::class, 'deleteImage'])->name('images.destroy');
 });
 
+Route::get('/payment-settings',  [AdminPaymentSettingController::class, 'show'])->name('admin.payment-settings.show');
+Route::put('/payment-settings',  [AdminPaymentSettingController::class, 'update'])->name('admin.payment-settings.update');
+
 Route::prefix('ticket-orders')->name('admin.ticket-orders.')->group(function (): void {
-    Route::get('/',                       [AdminTicketOrderController::class, 'index'])->name('index');
-    Route::get('/{ticketOrder}',          [AdminTicketOrderController::class, 'show'])->name('show');
-    Route::post('/{ticketOrder}/eticket', [AdminTicketOrderController::class, 'uploadEticket'])->name('eticket.store');
+    Route::get('/stats',                          [AdminTicketOrderController::class, 'stats'])->name('stats');
+    Route::get('/',                               [AdminTicketOrderController::class, 'index'])->name('index');
+    Route::get('/{ticketOrder}',                  [AdminTicketOrderController::class, 'show'])->name('show');
+    Route::post('/{ticketOrder}/confirm-payment', [AdminTicketOrderController::class, 'confirmPayment'])->name('confirmPayment');
+    Route::post('/{ticketOrder}/eticket',         [AdminTicketOrderController::class, 'uploadEticket'])->name('eticket.store');
     Route::get('/{ticketOrder}/eticket',  [AdminTicketOrderController::class, 'downloadEticket'])->name('eticket.download');
 });
 

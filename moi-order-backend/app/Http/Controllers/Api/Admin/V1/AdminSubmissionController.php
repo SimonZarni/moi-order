@@ -11,6 +11,7 @@ use App\Http\Requests\Admin\AdminUpdateSubmissionStatusRequest;
 use App\Http\Requests\Admin\UploadEticketRequest;
 use App\Http\Resources\Admin\AdminSubmissionResource;
 use App\Models\ServiceSubmission;
+use App\Notifications\PaymentReadyNotification;
 use App\Services\AdminSubmissionService;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\JsonResponse;
@@ -57,6 +58,27 @@ class AdminSubmissionController extends Controller
         );
 
         return response()->json(['data' => new AdminSubmissionResource($updated)]);
+    }
+
+    /** POST /api/admin/v1/submissions/{submission}/confirm-payment */
+    public function confirmPayment(ServiceSubmission $submission): JsonResponse
+    {
+        abort_if($submission->payment_authorized, 409, 'Order is already authorized for payment.');
+
+        $submission->update(['payment_authorized' => true]);
+
+        $submission->loadMissing(['user', 'serviceType.service']);
+
+        if ($submission->user) {
+            $name = $submission->serviceType?->service?->name ?? 'Service Order #'.$submission->id;
+            $submission->user->notify(new PaymentReadyNotification(
+                orderType: 'submission',
+                orderId:   $submission->id,
+                orderName: $name,
+            ));
+        }
+
+        return response()->json(['data' => new AdminSubmissionResource($submission)]);
     }
 
     /** POST /api/admin/v1/submissions/{submission}/result */

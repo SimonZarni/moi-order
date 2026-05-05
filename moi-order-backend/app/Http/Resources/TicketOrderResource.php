@@ -17,8 +17,9 @@ class TicketOrderResource extends JsonResource
     {
         return [
             'id'           => $this->id,
-            'status'       => $this->status->value,
-            'status_label' => $this->status->label(),
+            'status'              => $this->status->value,
+            'status_label'        => $this->status->label(),
+            'payment_authorized'  => (bool) $this->payment_authorized,
             'visit_date'   => $this->visit_date->toDateString(),
             'total'        => $this->when(
                 $this->relationLoaded('items'),

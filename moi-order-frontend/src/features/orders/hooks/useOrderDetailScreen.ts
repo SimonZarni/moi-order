@@ -22,6 +22,7 @@ export interface UseOrderDetailScreenResult {
   isRefreshing: boolean;
   isError: boolean;
   canPay: boolean;
+  awaitingConfirmation: boolean;
   canCancel: boolean;
   isCancelling: boolean;
   handleCancelOrder: () => void;
@@ -49,14 +50,21 @@ export function useOrderDetailScreen(): UseOrderDetailScreenResult {
   const [downloadError, setDownloadError]     = useState<string | null>(null);
   const [isSavingResult, setIsSavingResult]   = useState(false);
 
+  const isPending = submission?.status === SUBMISSION_STATUS.PendingPayment;
+
   const canPay = useMemo(
-    () => submission?.status === SUBMISSION_STATUS.PendingPayment,
-    [submission?.status],
+    () => isPending && (submission?.payment_authorized ?? true),
+    [isPending, submission?.payment_authorized],
+  );
+
+  const awaitingConfirmation = useMemo(
+    () => isPending && !(submission?.payment_authorized ?? true),
+    [isPending, submission?.payment_authorized],
   );
 
   const canCancel = useMemo(
-    () => submission?.status === SUBMISSION_STATUS.PendingPayment,
-    [submission?.status],
+    () => isPending,
+    [isPending],
   );
 
   const handleCancelOrder = useCallback((): void => {
@@ -154,7 +162,7 @@ export function useOrderDetailScreen(): UseOrderDetailScreenResult {
 
   return {
     submission, isLoading, isRefreshing, isError,
-    canPay, canCancel, isCancelling: cancelMutation.isPending, handleCancelOrder,
+    canPay, awaitingConfirmation, canCancel, isCancelling: cancelMutation.isPending, handleCancelOrder,
     canDownload, isDownloading, isSavingResult,
     downloadError, previewImageUrl,
     handleRefresh, handleBack, handlePayNow,

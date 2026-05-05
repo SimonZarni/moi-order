@@ -78,6 +78,7 @@ export function BookingDetailView() {
   const [eticketError, setEticketError] = useState('');
   const [confirming, setConfirming] = useState(false);
   const [confirmError, setConfirmError] = useState('');
+  const [confirmingOrder, setConfirmingOrder] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -138,6 +139,16 @@ export function BookingDetailView() {
     });
   };
 
+  const handleConfirmOrder = () => {
+    if (!id) return;
+    setConfirmingOrder(true);
+    bookingsApi
+      .confirmPayment(id)
+      .then((updated) => setBooking((prev) => prev ? { ...prev, ...updated } : prev))
+      .catch(() => {})
+      .finally(() => setConfirmingOrder(false));
+  };
+
   const handleConfirmPayment = () => {
     if (!booking?.payment?.id) return;
     setConfirming(true);
@@ -172,6 +183,7 @@ export function BookingDetailView() {
   const canUpload = booking.status === 'processing' || booking.status === 'completed';
   const statusColor = STATUS_COLORS[booking.status] ?? 'default';
   const paymentIsPending = booking.payment?.status === 'pending';
+  const needsPaymentConfirmation = !booking.payment_authorized && booking.status === 'pending_payment';
 
   return (
     <DashboardContent>
@@ -308,9 +320,23 @@ export function BookingDetailView() {
                     )}
                   </Stack>
                 ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    No payment record yet.
-                  </Typography>
+                  <Stack spacing={1}>
+                    <Typography variant="body2" color="text.secondary">
+                      No payment record yet.
+                    </Typography>
+                    {needsPaymentConfirmation && (
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        disabled={confirmingOrder}
+                        onClick={handleConfirmOrder}
+                        startIcon={confirmingOrder ? <CircularProgress size={14} color="inherit" /> : <Iconify icon="solar:check-circle-bold" width={16} />}
+                      >
+                        {confirmingOrder ? 'Confirming…' : 'Confirm Order for Payment'}
+                      </Button>
+                    )}
+                  </Stack>
                 )}
               </CardContent>
             </Card>

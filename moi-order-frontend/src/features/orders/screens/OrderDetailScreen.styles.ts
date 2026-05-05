@@ -202,6 +202,20 @@ export const styles = StyleSheet.create({
     lineHeight: 28,
   },
 
+  awaitingBox: {
+    marginTop: spacing.sm,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: `${editorialPalette.amber}18`,
+    borderWidth: 1,
+    borderColor: `${editorialPalette.amber}55`,
+  },
+  awaitingText: {
+    fontSize: typography.xs,
+    color: editorialPalette.amber,
+    lineHeight: 20,
+    fontWeight: '500' as const,
+  },
   cancelOrderBtn: {
     borderWidth: 1.5,
     borderColor: `${colours.destructive}55`,

@@ -65,6 +65,7 @@ export function SubmissionDetailView() {
   const [saving, setSaving] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [confirmError, setConfirmError] = useState('');
+  const [confirmingOrder, setConfirmingOrder] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -173,6 +174,16 @@ export function SubmissionDetailView() {
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank');
     }).catch(() => {});
+  };
+
+  const handleConfirmOrder = () => {
+    if (!id) return;
+    setConfirmingOrder(true);
+    submissionsApi
+      .confirmPayment(id)
+      .then((updated) => setSubmission((prev) => prev ? { ...prev, ...updated } : prev))
+      .catch(() => {})
+      .finally(() => setConfirmingOrder(false));
   };
 
   const handleConfirmPayment = () => {
@@ -398,6 +409,28 @@ export function SubmissionDetailView() {
                       </Button>
                     </Stack>
                   )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Confirm Order (when auto-payment is OFF and admin hasn't confirmed yet) */}
+            {!submission.payment_authorized && submission.status === 'pending_payment' && canManage && (
+              <Card>
+                <CardHeader title="Payment Confirmation Required" />
+                <CardContent>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Auto-payment is disabled. The customer cannot pay until you confirm this order.
+                  </Typography>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    disabled={confirmingOrder}
+                    onClick={handleConfirmOrder}
+                    startIcon={confirmingOrder ? <CircularProgress size={14} color="inherit" /> : <Iconify icon="solar:check-circle-bold" width={16} />}
+                  >
+                    {confirmingOrder ? 'Confirming…' : 'Confirm Order for Payment'}
+                  </Button>
                 </CardContent>
               </Card>
             )}

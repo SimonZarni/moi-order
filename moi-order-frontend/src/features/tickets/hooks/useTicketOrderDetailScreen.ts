@@ -24,6 +24,7 @@ export interface UseTicketOrderDetailScreenResult {
   isRefreshing: boolean;
   isError: boolean;
   canPayNow: boolean;
+  awaitingConfirmation: boolean;
   canDownload: boolean;
   isDownloading: boolean;
   isSavingEticket: boolean;
@@ -45,10 +46,17 @@ export function useTicketOrderDetailScreen(): UseTicketOrderDetailScreenResult {
   const { order, isLoading, isRefreshing, isError, refetch, cancelMutation } = useTicketOrderDetail(ticketOrderId);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
+  const isPendingOrFailed = order?.status === TICKET_ORDER_STATUS.PendingPayment
+    || order?.status === TICKET_ORDER_STATUS.PaymentFailed;
+
   const canPayNow = useMemo(
-    () => order?.status === TICKET_ORDER_STATUS.PendingPayment
-       || order?.status === TICKET_ORDER_STATUS.PaymentFailed,
-    [order?.status],
+    () => isPendingOrFailed && (order?.payment_authorized ?? true),
+    [isPendingOrFailed, order?.payment_authorized],
+  );
+
+  const awaitingConfirmation = useMemo(
+    () => isPendingOrFailed && !(order?.payment_authorized ?? true),
+    [isPendingOrFailed, order?.payment_authorized],
   );
 
   const canCancel = useMemo(
@@ -159,7 +167,7 @@ export function useTicketOrderDetailScreen(): UseTicketOrderDetailScreenResult {
   return {
     order, isLoading, isRefreshing, isError,
     canCancel, isCancelling: cancelMutation.isPending, handleCancelOrder,
-    canPayNow, canDownload, isDownloading, isSavingEticket,
+    canPayNow, awaitingConfirmation, canDownload, isDownloading, isSavingEticket,
     downloadError,
     previewImageUrl,
     handleRefresh, handleBack, handlePayNow, handleDownloadEticket, handleSaveEticket, handleClosePreview,

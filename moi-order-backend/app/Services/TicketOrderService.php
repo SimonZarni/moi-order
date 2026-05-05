@@ -8,6 +8,7 @@ use App\Contracts\FileStorageInterface;
 use App\DTOs\CreateTicketOrderDTO;
 use App\Enums\TicketOrderStatus;
 use App\Events\TicketOrderCreated;
+use App\Models\AppSetting;
 use App\Models\Ticket;
 use App\Models\TicketOrder;
 use App\Models\TicketVariant;
@@ -59,11 +60,12 @@ class TicketOrderService
                 }
 
                 $order = TicketOrder::create([
-                    'user_id'         => $user->id,
-                    'ticket_id'       => $dto->ticketId,
-                    'visit_date'      => $dto->visitDate,
-                    'status'          => TicketOrderStatus::PendingPayment,
-                    'idempotency_key' => $dto->idempotencyKey,
+                    'user_id'              => $user->id,
+                    'ticket_id'            => $dto->ticketId,
+                    'visit_date'           => $dto->visitDate,
+                    'status'               => TicketOrderStatus::PendingPayment,
+                    'idempotency_key'      => $dto->idempotencyKey,
+                    'payment_authorized'   => AppSetting::isAutoPaymentEnabled(),
                 ]);
 
                 foreach ($dto->items as $item) {
