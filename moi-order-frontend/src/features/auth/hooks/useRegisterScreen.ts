@@ -1,13 +1,15 @@
 import { useCallback, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useAppleAuth } from '@/features/auth/hooks/useAppleAuth';
 import { useLineAuth } from '@/features/auth/hooks/useLineAuth';
 import { usePhoneOtpAuth } from '@/features/auth/hooks/usePhoneOtpAuth';
 import { useRegisterForm, UseRegisterFormResult } from '@/features/auth/hooks/useRegisterForm';
 import { useGoogleAuth } from '@/features/auth/hooks/useGoogleAuth';
-import { requestEmailOtp } from '@/shared/api/emailOtp';
+import { register } from '@/shared/api/auth';
+import { useAuthStore } from '@/shared/store/authStore';
 import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 
@@ -41,7 +43,9 @@ export interface UseRegisterScreenResult {
 }
 
 export function useRegisterScreen(): UseRegisterScreenResult {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation  = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const queryClient = useQueryClient();
+  const { setUser } = useAuthStore();
   const {
     form,
     handleNameChange,
@@ -58,33 +62,28 @@ export function useRegisterScreen(): UseRegisterScreenResult {
   const [bannerError, setBannerError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { mutate, isPending: isSubmitting } = useMutation({
+    mutationFn: () => register(form.name.trim(), form.email.trim(), form.password, form.passwordConfirmation),
+    onSuccess: ({ user, token }) => {
+      queryClient.clear();
+      setUser(user, token);
+      navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
+    },
+    onError: (error: ApiError) => {
+      if (error.status === 422 && error.errors !== undefined) {
+        applyApiError(error.errors);
+      } else {
+        setBannerError(error.message ?? 'Registration failed. Please try again.');
+      }
+    },
+  });
 
   const handleSubmit = useCallback((): void => {
     setBannerError('');
-    if (!form.name.trim()) { applyApiError({ name: ['Please enter your full name.'] }); return; }
-    if (!form.email.trim()) { applyApiError({ email: ['Please enter your email address.'] }); return; }
-
-    setIsSubmitting(true);
-    requestEmailOtp(form.email.trim(), 'register')
-      .then((response) => {
-        navigation.navigate('EmailOtp', {
-          purpose: 'register',
-          prefillEmail: form.email.trim(),
-          prefillName: form.name.trim(),
-          prefillOtpRequestId: response.otp_request_id,
-        });
-      })
-      .catch((error: unknown) => {
-        const apiError = error as ApiError;
-        if (apiError.status === 422 && apiError.errors !== undefined) {
-          applyApiError(apiError.errors);
-        } else {
-          setBannerError(apiError.message ?? 'Failed to send verification code.');
-        }
-      })
-      .finally(() => setIsSubmitting(false));
-  }, [form.email, form.name, navigation, applyApiError]);
+    if (validate()) {
+      mutate();
+    }
+  }, [validate, mutate]);
 
   const handleTogglePassword = useCallback((): void => {
     setShowPassword((prev) => !prev);
