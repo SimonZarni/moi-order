@@ -27,7 +27,7 @@ export function EmailOtpScreen(): React.JSX.Element {
           <View style={styles.card}>
             <Text style={styles.cardTitle}>{purpose === 'login' ? 'Email Sign In' : 'Create Account'}</Text>
             <Text style={styles.cardSubtitle}>{step === 'email' ? 'Enter your email to receive a verification code.' : `Code sent to ${email}`}</Text>
-            <ErrorBanner message={bannerError} />
+            <ErrorBanner message={bannerError ?? ''} />
             {step === 'email' ? (
               <>
                 {purpose === 'register' && (

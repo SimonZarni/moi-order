@@ -5,8 +5,9 @@ import { RootStackParamList } from '@/types/navigation';
 
 type EmailOtpRouteProp = RouteProp<RootStackParamList, 'EmailOtp'>;
 
-export interface UseEmailOtpScreenResult extends UseEmailOtpAuthResult {
+export interface UseEmailOtpScreenResult extends Omit<UseEmailOtpAuthResult, 'bannerError'> {
   purpose: 'login' | 'register';
+  bannerError: string;
 }
 
 export function useEmailOtpScreen(): UseEmailOtpScreenResult {
@@ -14,5 +15,5 @@ export function useEmailOtpScreen(): UseEmailOtpScreenResult {
   const { purpose } = route.params;
   const auth = useEmailOtpAuth({ purpose });
 
-  return { ...auth, purpose };
+  return { ...auth, purpose, bannerError: auth.bannerError ?? '' };
 }
