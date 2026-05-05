@@ -16,6 +16,7 @@
         "minishlink/web-push": "^10.0",
         "predis/predis": "^3.4",
         "pusher/pusher-php-server": "^7.2",
+        "resend/resend-laravel": "*",
         "stripe/stripe-php": "^20.0"
     },
     "require-dev": {
