@@ -162,7 +162,7 @@ export function BookingsView() {
                         <TableCell>{fDate(row.visit_date)}</TableCell>
                         <TableCell align="right">
                           <Typography variant="body2" fontWeight={600}>
-                            {row.total !== null ? fCurrency(row.total / 100) : '—'}
+                            {row.total !== null ? `${row.total.toLocaleString()} THB` : '—'}
                           </Typography>
                         </TableCell>
                         <TableCell>
