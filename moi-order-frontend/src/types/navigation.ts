@@ -15,6 +15,7 @@ export type RootStackParamList = {
   // ── Auth flow (unauthenticated) ─────────────────────────────────────────
   Login: undefined;
   Register: undefined;
+  EmailOtp: { purpose: 'login' | 'register' };
 
   // ── Tab routes kept here for TypeScript compat with coordinator hooks ───
   // At runtime these are handled by the tab navigator, not the root stack.

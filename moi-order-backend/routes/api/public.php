@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\EmailOtpController;
 use App\Http\Controllers\Api\V1\HomeCardController;
 use App\Http\Controllers\Api\V1\PlaceController;
 use App\Http\Controllers\Api\V1\RestaurantBrowseController;
@@ -22,8 +23,10 @@ Route::middleware('throttle:auth')->group(function (): void {
     Route::post('/auth/google',   [AuthController::class, 'googleAuth']);
     Route::post('/auth/apple',    [AuthController::class, 'appleAuth']);
     Route::post('/auth/line',     [AuthController::class, 'lineAuth']);
-    Route::post('/auth/otp/request', [AuthController::class, 'requestOtp']);
-    Route::post('/auth/otp/verify',  [AuthController::class, 'verifyOtp']);
+    Route::post('/auth/otp/request',       [AuthController::class,      'requestOtp']);
+    Route::post('/auth/otp/verify',        [AuthController::class,      'verifyOtp']);
+    Route::post('/auth/email-otp/request', [EmailOtpController::class,  'requestOtp']);
+    Route::post('/auth/email-otp/verify',  [EmailOtpController::class,  'verifyOtp']);
 });
 
 // Places — public browsing, no auth required
