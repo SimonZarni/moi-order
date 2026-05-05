@@ -6,8 +6,10 @@ import { useState, useEffect, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import TableRow from '@mui/material/TableRow';
@@ -30,7 +32,7 @@ import { fDate } from 'src/utils/format-time';
 import { fCurrency } from 'src/utils/format-number';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { type BookingData, bookingsApi } from 'src/api/bookings';
+import { type BookingData, type BookingStats, bookingsApi } from 'src/api/bookings';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
@@ -57,6 +59,11 @@ export function BookingsView() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [filterStatus, setFilterStatus] = useState(searchParams.get('status') ?? 'all');
   const [filterSearch, setFilterSearch] = useState('');
+  const [stats, setStats] = useState<BookingStats | null>(null);
+
+  useEffect(() => {
+    bookingsApi.stats().then(setStats).catch(() => {});
+  }, []);
 
   const fetchBookings = useCallback(() => {
     setLoading(true);
@@ -83,13 +90,68 @@ export function BookingsView() {
 
   return (
     <DashboardContent>
-      <Box sx={{ mb: 5, display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center' }}>
         <Typography variant="h4" sx={{ flexGrow: 1 }}>
           Bookings
         </Typography>
         <Button variant="outlined" color="primary" startIcon={<Iconify icon="solar:share-bold" />}>
           Export
         </Button>
+      </Box>
+
+      {/* ── Summary cards ── */}
+      <Box sx={{ mb: 3, display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
+        {/* Total */}
+        <Card sx={{ p: 2.5 }}>
+          <Typography variant="subtitle2" color="text.secondary" gutterBottom>Total</Typography>
+          <Typography variant="h4">{stats?.total ?? '—'}</Typography>
+        </Card>
+
+        {/* Pending */}
+        <Card sx={{ p: 2.5 }}>
+          <Typography variant="subtitle2" color="warning.main" gutterBottom>Pending</Typography>
+          <Typography variant="h4">{stats?.pending ?? '—'}</Typography>
+        </Card>
+
+        {/* Processing */}
+        <Card sx={{ p: 2.5 }}>
+          <Typography variant="subtitle2" color="info.main" gutterBottom>Processing</Typography>
+          <Stack direction="row" alignItems="baseline" spacing={0.5}>
+            <Typography variant="h4">{stats?.processing.qty ?? '—'}</Typography>
+            <Typography variant="caption" color="text.secondary">orders</Typography>
+          </Stack>
+          {stats && (
+            <>
+              <Divider sx={{ my: 1 }} />
+              <Typography variant="body2" fontWeight={600} color="info.main">
+                {stats.processing.amount.toLocaleString()} THB
+              </Typography>
+            </>
+          )}
+        </Card>
+
+        {/* Completed */}
+        <Card sx={{ p: 2.5 }}>
+          <Typography variant="subtitle2" color="success.main" gutterBottom>Completed</Typography>
+          <Stack direction="row" alignItems="baseline" spacing={0.5}>
+            <Typography variant="h4">{stats?.completed.qty ?? '—'}</Typography>
+            <Typography variant="caption" color="text.secondary">orders</Typography>
+          </Stack>
+          {stats && (
+            <>
+              <Divider sx={{ my: 1 }} />
+              <Typography variant="body2" fontWeight={600} color="success.main">
+                {stats.completed.amount.toLocaleString()} THB
+              </Typography>
+            </>
+          )}
+        </Card>
+
+        {/* Failed */}
+        <Card sx={{ p: 2.5 }}>
+          <Typography variant="subtitle2" color="error.main" gutterBottom>Failed</Typography>
+          <Typography variant="h4">{stats?.failed ?? '—'}</Typography>
+        </Card>
       </Box>
 
       <Card>

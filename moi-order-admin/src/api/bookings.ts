@@ -49,7 +49,19 @@ type Meta = { current_page: number; last_page: number; per_page: number; total: 
 
 type ListParams = { page?: number; per_page?: number; status?: string; search?: string };
 
+export type BookingStats = {
+  total: number;
+  pending: number;
+  processing: { qty: number; amount: number };
+  completed:  { qty: number; amount: number };
+  failed: number;
+};
+
 export const bookingsApi = {
+  stats: () =>
+    apiClient
+      .get<{ data: BookingStats }>('/ticket-orders/stats')
+      .then((r) => r.data.data),
   list: (params: ListParams) =>
     apiClient
       .get<{ data: BookingData[]; meta: Meta }>('/ticket-orders', { params })
