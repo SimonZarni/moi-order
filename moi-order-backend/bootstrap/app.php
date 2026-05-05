@@ -54,7 +54,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (AuthenticationException $e): JsonResponse {
-            Log::error('Authentication exception', ['message' => $e->getMessage()]);
+            Log::info('Authentication exception', ['message' => $e->getMessage()]);
 
             return response()->json([
                 'message' => 'Unauthenticated.',
