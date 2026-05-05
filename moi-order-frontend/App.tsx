@@ -41,6 +41,7 @@ import { useLocaleStore, Locale } from '@/shared/store/localeStore';
 import { colours } from '@/shared/theme/colours';
 import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 
+import { EmailOtpScreen } from '@/features/auth/screens/EmailOtpScreen';
 import { LoginScreen } from '@/features/auth/screens/LoginScreen';
 import { RegisterScreen } from '@/features/auth/screens/RegisterScreen';
 import { HomeScreen } from '@/features/home/screens/HomeScreen';
@@ -129,6 +130,7 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="MainTabs" component={MainTabs} options={{ animation: 'none' }} />
       <Stack.Screen name="Login"                         component={LoginScreen} />
       <Stack.Screen name="Register"                      component={RegisterScreen} />
+      <Stack.Screen name="EmailOtp"                      component={EmailOtpScreen} />
       <Stack.Screen name="OrderDetail"                   component={OrderDetailScreen} />
       <Stack.Screen name="Payment"                       component={PaymentScreen} />
       <Stack.Screen name="NinetyDayReport"               component={NinetyDayReportScreen} />

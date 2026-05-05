@@ -79,8 +79,8 @@ export function useRegisterScreen(): UseRegisterScreenResult {
 
   const handleSubmit = useCallback((): void => {
     setBannerError('');
-    if (validate()) mutate();
-  }, [validate, mutate]);
+    navigation.navigate('EmailOtp', { purpose: 'register' });
+  }, [navigation]);
 
   const handleTogglePassword = useCallback((): void => {
     setShowPassword((prev) => !prev);
