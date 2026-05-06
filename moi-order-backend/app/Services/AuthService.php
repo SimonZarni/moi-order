@@ -35,8 +35,13 @@ class AuthService
             return 'not_found';
         }
 
-        // Social links take priority over password — if the user linked a social
-        // account, entering their email should trigger that social sign-in directly.
+        // Password takes priority — accounts with a password always get the password
+        // field regardless of social links. Social auto-triggers only for passwordless
+        // accounts (e.g. created via Google/LINE with no password ever set).
+        if ($user->password !== null) {
+            return 'password';
+        }
+
         if ($user->google_id !== null) {
             return 'google';
         }
@@ -47,10 +52,6 @@ class AuthService
 
         if ($user->line_id !== null) {
             return 'line';
-        }
-
-        if ($user->password !== null) {
-            return 'password';
         }
 
         return 'not_found';
