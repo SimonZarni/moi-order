@@ -8,7 +8,11 @@ use App\DTOs\ChangePasswordDTO;
 use App\DTOs\AppleAuthDTO;
 use App\DTOs\GoogleAuthDTO;
 use App\DTOs\LineAuthDTO;
+use App\DTOs\SendEmailOtpDTO;
+use App\DTOs\UpdateEmailDTO;
+use App\DTOs\UpdatePhoneDTO;
 use App\DTOs\UpdateProfileDTO;
+use App\Enums\EmailOtpPurpose;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\DeleteAccountRequest;
@@ -17,12 +21,18 @@ use App\Http\Requests\UpdateSimulatedDateRequest;
 use App\Http\Requests\LinkAppleRequest;
 use App\Http\Requests\LinkGoogleRequest;
 use App\Http\Requests\LinkLineRequest;
+use App\Http\Requests\Profile\RequestEmailOtpRequest;
+use App\Http\Requests\Profile\RequestPhoneOtpRequest;
+use App\Http\Requests\Profile\UpdateEmailRequest;
+use App\Http\Requests\Profile\UpdatePhoneRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Requests\UploadProfilePictureRequest;
 use App\Http\Resources\UserResource;
 use App\Services\AppleAuthService;
+use App\Services\EmailOtpService;
 use App\Services\GoogleAuthService;
 use App\Services\LineAuthService;
+use App\Services\OtpAuthService;
 use App\Services\ProfileService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -34,10 +44,12 @@ use Illuminate\Http\Request;
 class ProfileController extends Controller
 {
     public function __construct(
-        private readonly ProfileService $profileService,
+        private readonly ProfileService    $profileService,
         private readonly GoogleAuthService $googleAuthService,
-        private readonly AppleAuthService $appleAuthService,
-        private readonly LineAuthService $lineAuthService,
+        private readonly AppleAuthService  $appleAuthService,
+        private readonly LineAuthService   $lineAuthService,
+        private readonly OtpAuthService    $otpAuthService,
+        private readonly EmailOtpService   $emailOtpService,
     ) {}
 
     /** PUT /api/v1/profile */
@@ -161,6 +173,52 @@ class ProfileController extends Controller
     public function unlinkLine(Request $request): JsonResponse
     {
         $user = $this->profileService->unlinkProvider($request->user(), 'line');
+
+        return response()->json(['data' => new UserResource($user)]);
+    }
+
+    /** POST /api/v1/profile/phone/request-otp */
+    public function requestPhoneOtp(RequestPhoneOtpRequest $request): JsonResponse
+    {
+        $result = $this->otpAuthService->requestPhoneUpdate(
+            $request->user(),
+            $request->string('phone_number')->toString(),
+        );
+
+        return response()->json(['data' => $result]);
+    }
+
+    /** PUT /api/v1/profile/phone */
+    public function updatePhone(UpdatePhoneRequest $request): JsonResponse
+    {
+        $user = $this->profileService->updatePhone(
+            $request->user(),
+            UpdatePhoneDTO::fromRequest($request),
+        );
+
+        return response()->json(['data' => new UserResource($user)]);
+    }
+
+    /** POST /api/v1/profile/email/request-otp */
+    public function requestEmailOtp(RequestEmailOtpRequest $request): JsonResponse
+    {
+        $dto = new SendEmailOtpDTO(
+            email:   $request->string('email')->lower()->toString(),
+            purpose: EmailOtpPurpose::EmailUpdate,
+        );
+
+        $result = $this->emailOtpService->send($dto);
+
+        return response()->json(['data' => $result]);
+    }
+
+    /** PUT /api/v1/profile/email */
+    public function updateEmail(UpdateEmailRequest $request): JsonResponse
+    {
+        $user = $this->profileService->updateEmail(
+            $request->user(),
+            UpdateEmailDTO::fromRequest($request),
+        );
 
         return response()->json(['data' => new UserResource($user)]);
     }

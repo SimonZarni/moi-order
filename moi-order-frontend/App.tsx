@@ -79,6 +79,8 @@ import { PassportVaultScreen } from '@/features/documents/screens/PassportVaultS
 import { NinetyDayVaultScreen } from '@/features/documents/screens/NinetyDayVaultScreen';
 import { MyDocumentsScreen } from '@/features/documents/screens/MyDocumentsScreen';
 import { MoiVerifiedScreen } from '@/features/profile/screens/MoiVerifiedScreen';
+import { UpdatePhoneScreen } from '@/features/profile/screens/UpdatePhoneScreen';
+import { UpdateEmailScreen } from '@/features/profile/screens/UpdateEmailScreen';
 import { FoodScreen } from '@/features/food/screens/FoodScreen';
 import { RestaurantDetailScreen } from '@/features/food/screens/RestaurantDetailScreen';
 import { RestaurantMapScreen } from '@/features/food/screens/RestaurantMapScreen';
@@ -167,6 +169,8 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="NinetyDayVault"                component={NinetyDayVaultScreen} />
       <Stack.Screen name="MyDocuments"                   component={MyDocumentsScreen} />
       <Stack.Screen name="MoiVerified"                   component={MoiVerifiedScreen} />
+      <Stack.Screen name="UpdatePhone"                   component={UpdatePhoneScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="UpdateEmail"                   component={UpdateEmailScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Food"                          component={FoodScreen} />
       <Stack.Screen name="RestaurantDetail"              component={RestaurantDetailScreen} />
       <Stack.Screen name="RestaurantMap"                 component={RestaurantMapScreen} options={{ animation: 'slide_from_bottom' }} />

@@ -6,8 +6,13 @@ namespace App\Services;
 
 use App\Contracts\FileStorageInterface;
 use App\DTOs\ChangePasswordDTO;
+use App\DTOs\UpdateEmailDTO;
+use App\DTOs\UpdatePhoneDTO;
 use App\DTOs\UpdateProfileDTO;
+use App\DTOs\VerifyEmailOtpDTO;
 use App\Enums\DocumentType;
+use App\Enums\EmailOtpPurpose;
+use App\Exceptions\DomainException;
 use App\Models\Document;
 use App\Models\User;
 use App\Notifications\NinetyDayReportReminderNotification;
@@ -25,6 +30,8 @@ class ProfileService
 {
     public function __construct(
         private readonly FileStorageInterface $fileStorage,
+        private readonly OtpAuthService       $otpAuthService,
+        private readonly EmailOtpService      $emailOtpService,
     ) {}
 
     public function uploadProfilePicture(User $user, UploadedFile $file): User
@@ -77,15 +84,15 @@ class ProfileService
     public function unlinkProvider(User $user, string $provider): User
     {
         $loginMethodCount = array_sum([
-            $user->password !== null      ? 1 : 0,
-            $user->google_id !== null     ? 1 : 0,
-            $user->apple_id !== null      ? 1 : 0,
-            $user->line_id !== null       ? 1 : 0,
-            $user->phone_number !== null  ? 1 : 0,
+            $user->password !== null     ? 1 : 0,
+            $user->google_id !== null    ? 1 : 0,
+            $user->apple_id !== null     ? 1 : 0,
+            $user->line_id !== null      ? 1 : 0,
+            $user->phone_number !== null ? 1 : 0,
         ]);
 
         if ($loginMethodCount <= 1) {
-            throw new \DomainException('account.minimum_login_method');
+            throw new DomainException('account.minimum_login_method', 409);
         }
 
         $field = match ($provider) {
@@ -94,7 +101,53 @@ class ProfileService
             'line'   => 'line_id',
         };
 
-        $user->update([$field => null]);
+        $updates = [$field => null];
+
+        // When removing a social provider that supplied the user's placeholder email,
+        // and the user has no password set, clear the email so it shows as "—" in the
+        // profile and prevents a stale social-domain address from lingering.
+        if ($user->password === null && $this->isSocialPlaceholderEmail($user->email)) {
+            $providerPrefix = match ($provider) {
+                'google' => 'google_',
+                'apple'  => 'apple_',
+                'line'   => 'line_',
+            };
+            if (str_starts_with($user->email, $providerPrefix)) {
+                $updates['email'] = null;
+            }
+        }
+
+        $user->update($updates);
+
+        return $user->fresh();
+    }
+
+    public function updatePhone(User $user, UpdatePhoneDTO $dto): User
+    {
+        $phoneNumber = $this->otpAuthService->verifyPhoneUpdate(
+            $dto->otpRequestId,
+            $dto->phoneNumber,
+            $dto->otp,
+            $user->id,
+        );
+
+        $user->update(['phone_number' => $phoneNumber]);
+
+        return $user->fresh();
+    }
+
+    public function updateEmail(User $user, UpdateEmailDTO $dto): User
+    {
+        $verifyDto = new VerifyEmailOtpDTO(
+            email:   $dto->email,
+            otp:     $dto->otp,
+            purpose: EmailOtpPurpose::EmailUpdate,
+        );
+
+        $verifiedToken = $this->emailOtpService->verify($verifyDto);
+        $this->emailOtpService->consumeVerifiedToken($dto->email, $verifiedToken, EmailOtpPurpose::EmailUpdate);
+
+        $user->update(['email' => $dto->email]);
 
         return $user->fresh();
     }
@@ -180,6 +233,15 @@ class ProfileService
             // retain their user_id FK but the user is no longer queryable.
             $user->delete();
         });
+    }
+
+    private function isSocialPlaceholderEmail(?string $email): bool
+    {
+        if ($email === null) {
+            return false;
+        }
+        return str_ends_with($email, '@users.moiorder.local')
+            || str_ends_with($email, '@deleted.invalid');
     }
 
     private function normalizeThaiPhoneNumber(string $phoneNumber): string

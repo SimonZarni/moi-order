@@ -1,14 +1,15 @@
 export const ERROR_CODES = {
-  ORDER_NOT_CANCELLABLE:    'order.not_cancellable',
-  SLOT_UNAVAILABLE:         'slot.unavailable',
-  SERVICE_INACTIVE:         'service.inactive',
-  ACCOUNT_SUSPENDED:        'account.suspended',
-  ACCOUNT_BANNED:           'account.banned',
-  ACCOUNT_EMAIL_EXISTS:     'account.email_exists',
-  ACCOUNT_NO_PASSWORD:      'account.no_password',
-  EMAIL_NOT_VERIFIED:       'email.not_verified',
-  EMAIL_ALREADY_REGISTERED: 'email.already_registered',
-  OTP_RESEND_TOO_SOON:      'otp.resend_too_soon',
+  ORDER_NOT_CANCELLABLE:         'order.not_cancellable',
+  SLOT_UNAVAILABLE:              'slot.unavailable',
+  SERVICE_INACTIVE:              'service.inactive',
+  ACCOUNT_SUSPENDED:             'account.suspended',
+  ACCOUNT_BANNED:                'account.banned',
+  ACCOUNT_EMAIL_EXISTS:          'account.email_exists',
+  ACCOUNT_NO_PASSWORD:           'account.no_password',
+  ACCOUNT_MINIMUM_LOGIN_METHOD:  'account.minimum_login_method',
+  EMAIL_NOT_VERIFIED:            'email.not_verified',
+  EMAIL_ALREADY_REGISTERED:      'email.already_registered',
+  OTP_RESEND_TOO_SOON:           'otp.resend_too_soon',
 } as const;
 
 export const DOMAIN_ERROR_MESSAGES: Record<string, string> = {
@@ -17,10 +18,11 @@ export const DOMAIN_ERROR_MESSAGES: Record<string, string> = {
   [ERROR_CODES.SERVICE_INACTIVE]:         'This service is currently unavailable.',
   [ERROR_CODES.ACCOUNT_SUSPENDED]:        'Your account has been suspended. Please contact support.',
   [ERROR_CODES.ACCOUNT_BANNED]:           'Your account has been banned. Please contact support.',
-  [ERROR_CODES.ACCOUNT_EMAIL_EXISTS]:     'An account with this email already exists. Sign in with email or password.',
-  [ERROR_CODES.ACCOUNT_NO_PASSWORD]:      'This account uses social sign-in. Use Forgot Password to set a password for email sign-in.',
-  [ERROR_CODES.EMAIL_NOT_VERIFIED]:       'Please verify your email before signing in.',
-  [ERROR_CODES.EMAIL_ALREADY_REGISTERED]: 'This email is already registered. Please sign in instead.',
+  [ERROR_CODES.ACCOUNT_EMAIL_EXISTS]:         'An account with this email already exists. Sign in with email or password.',
+  [ERROR_CODES.ACCOUNT_NO_PASSWORD]:          'This account uses social sign-in. Use Forgot Password to set a password for email sign-in.',
+  [ERROR_CODES.ACCOUNT_MINIMUM_LOGIN_METHOD]: 'Cannot remove this account. You need at least one sign-in method.',
+  [ERROR_CODES.EMAIL_NOT_VERIFIED]:           'Please verify your email before signing in.',
+  [ERROR_CODES.EMAIL_ALREADY_REGISTERED]:     'This email is already registered. Please sign in instead.',
 };
 
 /**

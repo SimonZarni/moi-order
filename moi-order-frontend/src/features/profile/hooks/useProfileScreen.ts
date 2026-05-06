@@ -37,14 +37,14 @@ export interface UseProfileScreenResult {
   handleTriggerReminder: () => void;
   // Profile form
   name: string;
-  email: string;
-  phoneNumber: string;
   dateOfBirth: Date | null;
   profileErrors: ReturnType<typeof useProfileForm>['errors'];
   isDirty: boolean;
   isSavingProfile: boolean;
   showDatePicker: boolean;
   isEditingProfile: boolean;
+  displayEmail: string | null;
+  displayPhone: string | null;
   needsEmailCompletion: boolean;
   isPlaceholderEmail: boolean;
   hasPassword: boolean;
@@ -58,8 +58,6 @@ export interface UseProfileScreenResult {
   // Handlers — profile
   handleToggleEditProfile: () => void;
   handleNameChange: (text: string) => void;
-  handleEmailChange: (text: string) => void;
-  handlePhoneNumberChange: (text: string) => void;
   handleDateFieldPress: () => void;
   handleDatePickerChange: (event: DateTimePickerEvent, date?: Date) => void;
   handleSaveProfile: () => void;
@@ -82,6 +80,8 @@ export interface UseProfileScreenResult {
   handleLogout: () => void;
   handleDeleteAccount: () => void;
   isDeletingAccount: boolean;
+  handleUpdatePhone: () => void;
+  handleUpdateEmail: () => void;
   // Profile picture
   isUploadingPicture: boolean;
   isRemovingPicture: boolean;
@@ -106,11 +106,19 @@ export function useProfileScreen(): UseProfileScreenResult {
   const [lastTriggerResult, setLastTriggerResult]             = useState<TriggerReminderResult | null>(null);
   const [isPasswordSectionOpen, setPasswordSection]       = useState(false);
   const [isEditingProfile, setIsEditingProfile]           = useState(false);
-  const isPlaceholderEmail   = user?.email.endsWith('@users.moiorder.local') ?? false;
+
+  const isPlaceholderEmail = ((): boolean => {
+    const email = user?.email;
+    if (email == null) return true;
+    return email.endsWith('@users.moiorder.local') || email.endsWith('@deleted.invalid');
+  })();
   // OTP users have phone_{number}@users.moiorder.local — they have phone as login method so no warning needed.
   // Social users (line_, google_, apple_ prefix) do need to add a real email.
-  const needsEmailCompletion = isPlaceholderEmail && !(user?.email.startsWith('phone_') ?? false);
+  const needsEmailCompletion = isPlaceholderEmail && !(user?.email?.startsWith('phone_') ?? false);
   const hasPassword          = user?.has_password ?? false;
+  // Show null/placeholder emails as null so the UI can display "—"
+  const displayEmail = isPlaceholderEmail ? null : (user?.email ?? null);
+  const displayPhone = (user?.phone_number ?? '').trim() !== '' ? user!.phone_number : null;
 
   // Guard: navigate to Home when unauthenticated.
   // Guests cannot reach this screen via the tab bar (FloatingTabBar redirects them
@@ -163,9 +171,9 @@ export function useProfileScreen(): UseProfileScreenResult {
 
     updateMutation.mutate(
       {
-        name: profileForm.name.trim(),
-        email: profileForm.email.trim(),
-        phoneNumber: profileForm.phoneNumber.trim() !== '' ? profileForm.phoneNumber.trim() : null,
+        name:        profileForm.name.trim(),
+        email:       user?.email ?? '',
+        phoneNumber: user?.phone_number ?? null,
         dateOfBirth: dobStr,
       },
       {
@@ -173,7 +181,7 @@ export function useProfileScreen(): UseProfileScreenResult {
         onError:   (err) => profileForm.applyApiError(err),
       },
     );
-  }, [profileForm, updateMutation]);
+  }, [profileForm, updateMutation, user]);
 
   // ── Password handlers ───────────────────────────────────────────────────
 
@@ -260,6 +268,14 @@ export function useProfileScreen(): UseProfileScreenResult {
     navigation.navigate('PdpaNotice');
   }, [navigation]);
 
+  const handleUpdatePhone = useCallback((): void => {
+    navigation.navigate('UpdatePhone');
+  }, [navigation]);
+
+  const handleUpdateEmail = useCallback((): void => {
+    navigation.navigate('UpdateEmail');
+  }, [navigation]);
+
   const handleSetLocale = useCallback((l: Locale): void => {
     setLocale(l);
   }, [setLocale]);
@@ -317,15 +333,15 @@ export function useProfileScreen(): UseProfileScreenResult {
     isTriggeringReminder:  triggerReminderMutation.isPending,
     lastTriggerResult,
     handleTriggerReminder,
-    name:            profileForm.name,
-    email:           profileForm.email,
-    phoneNumber:     profileForm.phoneNumber,
-    dateOfBirth:     profileForm.dateOfBirth,
-    profileErrors:   profileForm.errors,
-    isDirty:          profileForm.isDirty,
-    isSavingProfile:  updateMutation.isPending,
+    name:          profileForm.name,
+    dateOfBirth:   profileForm.dateOfBirth,
+    profileErrors: profileForm.errors,
+    isDirty:        profileForm.isDirty,
+    isSavingProfile: updateMutation.isPending,
     showDatePicker,
     isEditingProfile,
+    displayEmail,
+    displayPhone,
     needsEmailCompletion,
     isPlaceholderEmail,
     hasPassword,
@@ -337,8 +353,6 @@ export function useProfileScreen(): UseProfileScreenResult {
     isChangingPassword:     changePasswordMutation.isPending,
     handleToggleEditProfile,
     handleNameChange:    profileForm.handleNameChange,
-    handleEmailChange:   profileForm.handleEmailChange,
-    handlePhoneNumberChange: profileForm.handlePhoneNumberChange,
     handleDateFieldPress,
     handleDatePickerChange,
     handleSaveProfile,
@@ -358,6 +372,8 @@ export function useProfileScreen(): UseProfileScreenResult {
     handleLogout,
     handleDeleteAccount,
     isDeletingAccount:   deleteAccountMutation.isPending,
+    handleUpdatePhone,
+    handleUpdateEmail,
     isUploadingPicture: pictureMethods.isUploadingPicture,
     isRemovingPicture:  pictureMethods.isRemovingPicture,
     handleAvatarPress:  pictureMethods.handleAvatarPress,

@@ -27,6 +27,7 @@ class EmailOtpMail extends Mailable implements ShouldQueue
             subject: match ($this->purpose) {
                 EmailOtpPurpose::Registration  => 'Verify your Moi Order email',
                 EmailOtpPurpose::PasswordReset => 'Reset your Moi Order password',
+                EmailOtpPurpose::EmailUpdate   => 'Verify your new email address',
             },
         );
     }

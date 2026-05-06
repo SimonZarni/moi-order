@@ -68,3 +68,49 @@ export async function triggerNinetyDayReminder(): Promise<TriggerReminderResult>
   const response = await apiClient.post<ApiResponse<TriggerReminderResult>>('/api/v1/profile/trigger-reminder');
   return response.data.data;
 }
+
+export interface PhoneOtpResult {
+  otp_request_id: string;
+  expires_in: number;
+  phone_number: string;
+}
+
+export async function requestPhoneUpdateOtp(phoneNumber: string): Promise<PhoneOtpResult> {
+  const response = await apiClient.post<ApiResponse<PhoneOtpResult>>('/api/v1/profile/phone/request-otp', {
+    phone_number: phoneNumber,
+  });
+  return response.data.data;
+}
+
+export async function updatePhone(
+  otpRequestId: string,
+  phoneNumber: string,
+  otp: string,
+): Promise<User> {
+  const response = await apiClient.put<ApiResponse<User>>('/api/v1/profile/phone', {
+    otp_request_id: otpRequestId,
+    phone_number:   phoneNumber,
+    otp,
+  });
+  return response.data.data;
+}
+
+export interface EmailOtpResult {
+  expires_in: number;
+  resend_after: number;
+}
+
+export async function requestEmailUpdateOtp(email: string): Promise<EmailOtpResult> {
+  const response = await apiClient.post<ApiResponse<EmailOtpResult>>('/api/v1/profile/email/request-otp', {
+    email,
+  });
+  return response.data.data;
+}
+
+export async function updateEmail(email: string, otp: string): Promise<User> {
+  const response = await apiClient.put<ApiResponse<User>>('/api/v1/profile/email', {
+    email,
+    otp,
+  });
+  return response.data.data;
+}

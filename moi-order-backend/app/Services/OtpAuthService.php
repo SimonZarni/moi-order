@@ -96,6 +96,79 @@ class OtpAuthService
         return ['user' => $user, 'token' => $token];
     }
 
+    /**
+     * @return array{otp_request_id: string, expires_in: int, phone_number: string}
+     */
+    public function requestPhoneUpdate(User $user, string $rawPhone): array
+    {
+        $phoneNumber = $this->normalizeThaiPhoneNumber($rawPhone);
+
+        $other = User::where('phone_number', $phoneNumber)
+            ->where('id', '!=', $user->id)
+            ->first();
+
+        if ($other !== null) {
+            throw ValidationException::withMessages([
+                'phone_number' => ['This phone number is already linked to another account.'],
+            ]);
+        }
+
+        $providerToken = $this->thaiBulkSmsOtpService->requestOtp($phoneNumber);
+        $otpRequestId  = (string) Str::uuid();
+
+        Cache::put(self::CACHE_PREFIX . $otpRequestId, [
+            'provider_token' => $providerToken,
+            'phone_number'   => $phoneNumber,
+            'purpose'        => 'phone_update',
+            'user_id'        => $user->id,
+        ], now()->addSeconds(self::EXPIRES_IN_SECONDS));
+
+        return [
+            'otp_request_id' => $otpRequestId,
+            'expires_in'     => self::EXPIRES_IN_SECONDS,
+            'phone_number'   => $phoneNumber,
+        ];
+    }
+
+    /**
+     * Verifies a phone-update OTP and returns the normalised phone number.
+     * Does NOT create a session — the caller is responsible for updating the user record.
+     */
+    public function verifyPhoneUpdate(string $otpRequestId, string $rawPhone, string $pin, int $userId): string
+    {
+        $phoneNumber = $this->normalizeThaiPhoneNumber($rawPhone);
+        $cacheKey    = self::CACHE_PREFIX . $otpRequestId;
+        $payload     = Cache::get($cacheKey);
+
+        if (! is_array($payload)) {
+            throw ValidationException::withMessages([
+                'otp_request_id' => ['OTP request expired. Please request a new code.'],
+            ]);
+        }
+
+        if (
+            ($payload['phone_number'] ?? null) !== $phoneNumber
+            || ($payload['purpose'] ?? null) !== 'phone_update'
+            || ($payload['user_id'] ?? null) !== $userId
+        ) {
+            throw ValidationException::withMessages([
+                'otp_request_id' => ['OTP request does not match. Please request a new code.'],
+            ]);
+        }
+
+        $providerToken = $payload['provider_token'] ?? null;
+        if (! is_string($providerToken) || $providerToken === '') {
+            throw ValidationException::withMessages([
+                'otp_request_id' => ['OTP request expired. Please request a new code.'],
+            ]);
+        }
+
+        $this->thaiBulkSmsOtpService->verifyOtp($providerToken, $pin);
+        Cache::forget($cacheKey);
+
+        return $phoneNumber;
+    }
+
     private function resolveLoginUser(string $phoneNumber): User
     {
         $user = User::where('phone_number', $phoneNumber)->first();

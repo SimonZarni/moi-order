@@ -118,6 +118,8 @@ export type RootStackParamList = {
 
   // ── Profile extras ────────────────────────────────────────────────────────
   MoiVerified: undefined;
+  UpdatePhone: undefined;
+  UpdateEmail: undefined;
 
   // ── Food ordering ─────────────────────────────────────────────────────────
   Food: undefined;

@@ -13,6 +13,7 @@ import {
   unlinkAppleAccount, unlinkGoogleAccount, unlinkLineAccount,
 } from '@/shared/api/auth';
 import { useAuthStore } from '@/shared/store/authStore';
+import { DOMAIN_ERROR_MESSAGES } from '@/shared/constants/errorCodes';
 import { ApiError, User } from '@/types/models';
 
 export interface UseLinkedAccountsResult {
@@ -178,7 +179,9 @@ export function useLinkedAccounts(): UseLinkedAccountsResult {
         syncUser(user);
       } catch (error: unknown) {
         const apiError = error as ApiError;
-        setLinkError(apiError.message ?? 'Failed to unlink Google account.');
+        setLinkError(
+          DOMAIN_ERROR_MESSAGES[apiError.code] ?? apiError.message ?? 'Failed to unlink Google account.',
+        );
       } finally {
         setIsUnlinkingGoogle(false);
       }
@@ -194,7 +197,9 @@ export function useLinkedAccounts(): UseLinkedAccountsResult {
         syncUser(user);
       } catch (error: unknown) {
         const apiError = error as ApiError;
-        setLinkError(apiError.message ?? 'Failed to unlink Apple account.');
+        setLinkError(
+          DOMAIN_ERROR_MESSAGES[apiError.code] ?? apiError.message ?? 'Failed to unlink Apple account.',
+        );
       } finally {
         setIsUnlinkingApple(false);
       }
@@ -210,7 +215,9 @@ export function useLinkedAccounts(): UseLinkedAccountsResult {
         syncUser(user);
       } catch (error: unknown) {
         const apiError = error as ApiError;
-        setLinkError(apiError.message ?? 'Failed to unlink LINE account.');
+        setLinkError(
+          DOMAIN_ERROR_MESSAGES[apiError.code] ?? apiError.message ?? 'Failed to unlink LINE account.',
+        );
       } finally {
         setIsUnlinkingLine(false);
       }

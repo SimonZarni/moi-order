@@ -35,18 +35,20 @@ function getInitials(name: string): string {
 export function ProfileScreen(): React.JSX.Element {
   const {
     user, isLoading, isRefreshing,
-    name, email, phoneNumber, dateOfBirth, profileErrors, isDirty, isSavingProfile, showDatePicker, isEditingProfile,
+    name, dateOfBirth, profileErrors, isDirty, isSavingProfile, showDatePicker, isEditingProfile,
+    displayEmail, displayPhone,
     needsEmailCompletion, isPlaceholderEmail, hasPassword,
     currentPassword, newPassword, confirmPassword, passwordErrors,
     isPasswordSectionOpen, isChangingPassword,
     locale, handleSetLocale,
     handleToggleEditProfile,
-    handleNameChange, handleEmailChange, handlePhoneNumberChange, handleDateFieldPress, handleDatePickerChange, handleSaveProfile, handleRefresh,
+    handleNameChange, handleDateFieldPress, handleDatePickerChange, handleSaveProfile, handleRefresh,
     handleTogglePasswordSection,
     handleCurrentPasswordChange, handleNewPasswordChange, handleConfirmPasswordChange,
     handleChangePassword,
     handleGoToOrders, handleGoToMoiVerified, handleGoToPrivacyPolicy, handleGoToTerms, handleGoToPdpa, handleLogout,
     handleDeleteAccount, isDeletingAccount,
+    handleUpdatePhone, handleUpdateEmail,
     isUploadingPicture, isRemovingPicture, handleAvatarPress,
     realThaiDate, simulatedDate, isUpdatingSimulatedDate, showSimulatedDatePicker,
     handleSimulatedDateFieldPress, handleSimulatedDatePickerChange, handleClearSimulatedDate,
@@ -64,7 +66,7 @@ export function ProfileScreen(): React.JSX.Element {
   const { stats } = useUploadStats();
   const { status: verificationStatus } = useVerificationStatus();
   const t = getProfileStrings(locale);
-  const hasPhoneNumber = (user?.phone_number ?? '').trim() !== '';
+  const hasPhoneNumber = displayPhone !== null;
   const appleUnavailable = Platform.OS !== 'ios';
 
   if (isLoading) {
@@ -122,7 +124,7 @@ export function ProfileScreen(): React.JSX.Element {
               : verificationStatus?.is_verified && <VerifiedBadgeIcon size={26} />
             }
           </View>
-          <Text style={styles.heroEmail}>{user?.email ?? ''}</Text>
+          <Text style={styles.heroEmail}>{displayEmail ?? '—'}</Text>
           {user !== null && <Text style={styles.heroSince}>{memberSince}</Text>}
         </View>
 
@@ -141,16 +143,14 @@ export function ProfileScreen(): React.JSX.Element {
                   </Text>
                 </View>
               </View>
-              {!isEditingProfile && (
-                <Pressable
-                  style={styles.emailPromptButton}
-                  onPress={handleToggleEditProfile}
-                  accessibilityLabel="Add email address"
-                  accessibilityRole="button"
-                >
-                  <Text style={styles.emailPromptButtonText}>Add Email</Text>
-                </Pressable>
-              )}
+              <Pressable
+                style={styles.emailPromptButton}
+                onPress={handleUpdateEmail}
+                accessibilityLabel="Add email address"
+                accessibilityRole="button"
+              >
+                <Text style={styles.emailPromptButtonText}>Add Email</Text>
+              </Pressable>
             </View>
           )}
 
@@ -227,47 +227,6 @@ export function ProfileScreen(): React.JSX.Element {
                   <Text style={styles.errorText}>{profileErrors.name}</Text>
                 )}
 
-                <View style={styles.inputRow}>
-                  <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
-                    <Ionicons name="mail-outline" size={16} color={colours.primary} />
-                  </View>
-                  <TextInput
-                    style={[styles.inputField, profileErrors.email !== null && styles.inputError]}
-                    value={email}
-                    onChangeText={handleEmailChange}
-                    placeholder="you@example.com"
-                    placeholderTextColor={colours.textMuted}
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    keyboardType="email-address"
-                    returnKeyType="next"
-                    accessibilityLabel="Email address"
-                  />
-                </View>
-                {profileErrors.email !== null && (
-                  <Text style={styles.errorText}>{profileErrors.email}</Text>
-                )}
-
-                <View style={styles.inputRow}>
-                  <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
-                    <Ionicons name="call-outline" size={16} color={colours.primary} />
-                  </View>
-                  <TextInput
-                    style={[styles.inputField, profileErrors.phoneNumber !== null && styles.inputError]}
-                    value={phoneNumber}
-                    onChangeText={handlePhoneNumberChange}
-                    placeholder="0812345678"
-                    placeholderTextColor={colours.textMuted}
-                    autoCapitalize="none"
-                    keyboardType="phone-pad"
-                    returnKeyType="next"
-                    accessibilityLabel="Phone number"
-                  />
-                </View>
-                {profileErrors.phoneNumber !== null && (
-                  <Text style={styles.errorText}>{profileErrors.phoneNumber}</Text>
-                )}
-
                 {/* Date of birth input */}
                 <View style={[styles.inputRow, { marginTop: 4 }]}>
                   <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
@@ -323,23 +282,37 @@ export function ProfileScreen(): React.JSX.Element {
                   <Text style={styles.infoValue}>{name || '—'}</Text>
                 </View>
 
-                <View style={styles.infoRow}>
+                {/* Tappable email row → UpdateEmailScreen */}
+                <Pressable
+                  style={styles.infoRow}
+                  onPress={handleUpdateEmail}
+                  accessibilityLabel={displayEmail ? 'Update email address' : 'Add email address'}
+                  accessibilityRole="button"
+                >
                   <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
                     <Ionicons name="mail-outline" size={16} color={colours.primary} />
                   </View>
-                  <Text style={[styles.infoValue, isPlaceholderEmail && styles.infoPlaceholder]}>
-                    {isPlaceholderEmail ? 'Add your real email address' : (email || '—')}
+                  <Text style={[styles.infoValue, displayEmail === null && styles.infoPlaceholder, { flex: 1 }]}>
+                    {displayEmail ?? '—'}
                   </Text>
-                </View>
+                  <Ionicons name="chevron-forward" size={16} color={colours.textMuted} />
+                </Pressable>
 
-                <View style={styles.infoRow}>
+                {/* Tappable phone row → UpdatePhoneScreen */}
+                <Pressable
+                  style={styles.infoRow}
+                  onPress={handleUpdatePhone}
+                  accessibilityLabel={displayPhone ? 'Update phone number' : 'Add phone number'}
+                  accessibilityRole="button"
+                >
                   <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
                     <Ionicons name="call-outline" size={16} color={colours.primary} />
                   </View>
-                  <Text style={[styles.infoValue, phoneNumber === '' && styles.infoPlaceholder]}>
-                    {phoneNumber ? formatPhoneNumber(phoneNumber) : 'Add a Thai phone number for OTP sign-in'}
+                  <Text style={[styles.infoValue, displayPhone === null && styles.infoPlaceholder, { flex: 1 }]}>
+                    {displayPhone ? formatPhoneNumber(displayPhone) : '—'}
                   </Text>
-                </View>
+                  <Ionicons name="chevron-forward" size={16} color={colours.textMuted} />
+                </Pressable>
 
                 {/* Read-only date of birth row */}
                 <View style={styles.infoRow}>
@@ -481,12 +454,12 @@ export function ProfileScreen(): React.JSX.Element {
               <View style={styles.linkCopy}>
                 <Text style={styles.linkTitle}>Phone</Text>
                 <Text style={styles.linkSubtitle}>
-                  {hasPhoneNumber && user?.phone_number ? `Linked: ${formatPhoneNumber(user.phone_number)}` : 'Add a Thai phone number for OTP login'}
+                  {hasPhoneNumber && displayPhone ? `Linked: ${formatPhoneNumber(displayPhone)}` : 'Add a Thai phone number for OTP login'}
                 </Text>
               </View>
               <Pressable
                 style={[styles.linkBtn, hasPhoneNumber ? styles.linkBtnConnected : styles.linkBtnPrimary]}
-                onPress={handleToggleEditProfile}
+                onPress={handleUpdatePhone}
                 accessibilityLabel={hasPhoneNumber ? 'Update phone number' : 'Add phone number'}
                 accessibilityRole="button"
               >
