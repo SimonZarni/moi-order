@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMutation } from '@tanstack/react-query';
 
@@ -11,6 +11,7 @@ import { MESSAGES } from '@/shared/constants/messages';
 
 export interface UseForgotPasswordScreenResult {
   form: UseForgotPasswordFormResult['form'];
+  isEmailLocked: boolean;
   isSending: boolean;
   bannerError: string;
   handleEmailChange: (value: string) => void;
@@ -20,7 +21,11 @@ export interface UseForgotPasswordScreenResult {
 
 export function useForgotPasswordScreen(): UseForgotPasswordScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { form, handleEmailChange, validate, applyApiError } = useForgotPasswordForm();
+  const route      = useRoute<RouteProp<RootStackParamList, 'ForgotPassword'>>();
+  const prefillEmail  = route.params?.prefillEmail ?? '';
+  const isEmailLocked = prefillEmail !== '';
+
+  const { form, handleEmailChange, validate, applyApiError } = useForgotPasswordForm(prefillEmail);
   const [bannerError, setBannerError] = useState('');
 
   const { mutate, isPending: isSending } = useMutation({
@@ -49,5 +54,5 @@ export function useForgotPasswordScreen(): UseForgotPasswordScreenResult {
     navigation.goBack();
   }, [navigation]);
 
-  return { form, isSending, bannerError, handleEmailChange, handleSendOtp, handleBack };
+  return { form, isEmailLocked, isSending, bannerError, handleEmailChange, handleSendOtp, handleBack };
 }

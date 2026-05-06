@@ -16,7 +16,7 @@ export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   EmailRegister: undefined;
-  ForgotPassword: undefined;
+  ForgotPassword: { prefillEmail?: string } | undefined;
   EmailOtp: {
     email: string;
     purpose: 'registration' | 'password_reset';

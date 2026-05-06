@@ -13,10 +13,8 @@ export interface UseForgotPasswordFormResult {
   clearErrors: () => void;
 }
 
-const INITIAL: ForgotPasswordFormState = { email: '', errors: {} };
-
-export function useForgotPasswordForm(): UseForgotPasswordFormResult {
-  const [form, setForm] = useState<ForgotPasswordFormState>(INITIAL);
+export function useForgotPasswordForm(initialEmail = ''): UseForgotPasswordFormResult {
+  const [form, setForm] = useState<ForgotPasswordFormState>({ email: initialEmail, errors: {} });
 
   const handleEmailChange = (value: string): void => {
     setForm((prev) => ({ ...prev, email: value, errors: { ...prev.errors, email: '' } }));

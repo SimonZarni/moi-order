@@ -34,6 +34,19 @@ export const styles = StyleSheet.create({
   title: { fontSize: typography.lg, fontWeight: '700', color: colours.textOnLight, marginBottom: spacing.xs },
   subtitle: { fontSize: typography.sm, color: colours.textMuted, marginBottom: spacing.lg, lineHeight: 20 },
 
+  lockedEmailRow: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    backgroundColor: colours.card,
+    borderWidth: 1, borderColor: colours.textMuted,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md, paddingVertical: spacing.sm + 2,
+    marginBottom: spacing.md,
+    opacity: 0.7,
+  },
+  lockedEmailText: {
+    flex: 1, fontSize: typography.md, color: colours.textMuted,
+  },
+
   submitBtn: {
     backgroundColor: colours.primary, borderRadius: radius.md,
     paddingVertical: spacing.md, alignItems: 'center', marginTop: spacing.sm,

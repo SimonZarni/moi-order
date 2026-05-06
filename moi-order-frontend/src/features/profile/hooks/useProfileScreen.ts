@@ -270,8 +270,12 @@ export function useProfileScreen(): UseProfileScreenResult {
   }, [navigation]);
 
   const handleGoToForgotPassword = useCallback((): void => {
-    navigation.navigate('ForgotPassword');
-  }, [navigation]);
+    if (displayEmail) {
+      navigation.navigate('ForgotPassword', { prefillEmail: displayEmail });
+    } else {
+      navigation.navigate('ForgotPassword');
+    }
+  }, [navigation, displayEmail]);
 
   const handleUpdatePhone = useCallback((): void => {
     navigation.navigate('UpdatePhone');
