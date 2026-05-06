@@ -12,19 +12,19 @@ import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 
 export interface UseGoogleAuthResult {
-  handleGoogleSignIn: () => Promise<void>;
+  handleGoogleSignIn: (loginHint?: string) => Promise<void>;
   isGoogleSigningIn: boolean;
   googleBannerError: string;
 }
 
-export function useGoogleAuth(loginHint?: string): UseGoogleAuthResult {
+export function useGoogleAuth(): UseGoogleAuthResult {
   const navigation  = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const queryClient = useQueryClient();
   const { setUser } = useAuthStore();
   const [isGoogleSigningIn, setIsGoogleSigningIn] = useState(false);
   const [googleBannerError, setGoogleBannerError] = useState('');
 
-  const handleGoogleSignIn = useCallback(async (): Promise<void> => {
+  const handleGoogleSignIn = useCallback(async (loginHint?: string): Promise<void> => {
     try {
       setGoogleBannerError('');
       setIsGoogleSigningIn(true);
@@ -32,11 +32,16 @@ export function useGoogleAuth(loginHint?: string): UseGoogleAuthResult {
       await GoogleSignin.hasPlayServices();
 
       if (loginHint) {
-        // Email was explicitly confirmed as a Google account — try silent first
-        // for a seamless re-auth on the owner's device.
+        // Email was explicitly confirmed as a Google account by check-email — try
+        // silent sign-in first for a seamless re-auth on the owner's device.
         // loginHint is only supported on iOS; on Android just show the picker.
         try {
-          await GoogleSignin.signInSilently();
+          const silentResult = await GoogleSignin.signInSilently();
+          // Ensure the cached session belongs to the expected account.
+          // signInSilently() returns the last signed-in user regardless of loginHint.
+          if (silentResult.data?.user?.email?.toLowerCase() !== loginHint.toLowerCase()) {
+            throw new Error('account_mismatch');
+          }
         } catch {
           await GoogleSignin.signOut();
           if (Platform.OS === 'ios') {
@@ -46,7 +51,7 @@ export function useGoogleAuth(loginHint?: string): UseGoogleAuthResult {
           }
         }
       } else {
-        // No email context (button tapped directly) — always show the full
+        // No confirmed email context (button tapped directly) — always show the full
         // account picker so the user consciously chooses which account to use.
         await GoogleSignin.signOut();
         await GoogleSignin.signIn();
@@ -94,7 +99,7 @@ export function useGoogleAuth(loginHint?: string): UseGoogleAuthResult {
     } finally {
       setIsGoogleSigningIn(false);
     }
-  }, [navigation, queryClient, setUser, loginHint]);
+  }, [navigation, queryClient, setUser]);
 
   return { handleGoogleSignIn, isGoogleSigningIn, googleBannerError };
 }

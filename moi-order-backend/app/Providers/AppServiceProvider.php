@@ -177,9 +177,9 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
-        // 5 requests/minute per IP — used on auth endpoints
+        // 10 requests/minute per IP — used on auth endpoints
         RateLimiter::for('auth', function (Request $request): Limit {
-            return Limit::perMinute(5)->by($request->ip());
+            return Limit::perMinute(10)->by($request->ip());
         });
 
         // 120 requests/minute per authenticated admin — guards against runaway scripts

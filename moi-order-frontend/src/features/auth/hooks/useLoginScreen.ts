@@ -10,7 +10,7 @@ import { usePhoneOtpAuth } from '@/features/auth/hooks/usePhoneOtpAuth';
 import { useGoogleAuth } from '@/features/auth/hooks/useGoogleAuth';
 import { checkEmail as checkEmailApi, login } from '@/shared/api/auth';
 import { useAuthStore } from '@/shared/store/authStore';
-import { getAccountErrorMessage, DOMAIN_ERROR_MESSAGES, ERROR_CODES } from '@/shared/constants/errorCodes';
+import { getAccountErrorMessage, DOMAIN_ERROR_MESSAGES } from '@/shared/constants/errorCodes';
 import { MESSAGES } from '@/shared/constants/messages';
 import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
@@ -53,10 +53,10 @@ export function useLoginScreen(): UseLoginScreenResult {
   const { setUser } = useAuthStore();
   const { form, handleEmailChange, handlePasswordChange, validateEmail, validate, applyApiError } = useLoginForm();
   const phoneOtp = usePhoneOtpAuth({ purpose: 'login' });
-  const { handleGoogleSignIn, isGoogleSigningIn, googleBannerError } = useGoogleAuth(form.email.trim());
+  const { handleGoogleSignIn, isGoogleSigningIn, googleBannerError } = useGoogleAuth();
   const { handleAppleSignIn, isAppleSigningIn, appleBannerError }    = useAppleAuth();
   const { handleLineSignIn, isLineSigningIn, lineBannerError }        = useLineAuth();
-  const [step, setStep]             = useState<'email' | 'password'>('email');
+  const [step, setStep]               = useState<'email' | 'password'>('email');
   const [bannerError, setBannerError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -68,7 +68,12 @@ export function useLoginScreen(): UseLoginScreenResult {
         setBannerError('No account found with this email. Create one?');
         return;
       }
-      if (method === 'google') { void handleGoogleSignIn(); return; }
+      if (method === 'google') {
+        // Pass the confirmed email as loginHint so signInSilently() is attempted
+        // and verified against the correct account — not against a cached session.
+        void handleGoogleSignIn(form.email.trim().toLowerCase());
+        return;
+      }
       if (method === 'apple')  { void handleAppleSignIn();  return; }
       if (method === 'line')   { void handleLineSignIn();   return; }
       setStep('password');
@@ -123,6 +128,11 @@ export function useLoginScreen(): UseLoginScreenResult {
     navigation.navigate('ForgotPassword');
   }, [navigation]);
 
+  // Wrap so the screen can call handleGoogleSignIn() with no args (direct button tap).
+  const handleGoogleSignInDirect = useCallback((): Promise<void> => {
+    return handleGoogleSignIn();
+  }, [handleGoogleSignIn]);
+
   const combinedBannerError = bannerError
     || phoneOtp.otpError
     || googleBannerError
@@ -154,7 +164,7 @@ export function useLoginScreen(): UseLoginScreenResult {
     handleSubmit,
     handleRequestOtp:  phoneOtp.handleRequestOtp,
     handleVerifyOtp:   phoneOtp.handleVerifyOtp,
-    handleGoogleSignIn,
+    handleGoogleSignIn: handleGoogleSignInDirect,
     handleAppleSignIn,
     handleLineSignIn,
     handleGoToRegister,
