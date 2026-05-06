@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, Dimensions, Image, StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+const { width: SCREEN_W } = Dimensions.get('window');
 const LOGO_SIZE = Math.round(SCREEN_W * 0.55);
 
 interface Props {
@@ -90,8 +90,6 @@ export function AnimatedSplash({ canHide, onHidden }: Props): React.JSX.Element 
 const styles = StyleSheet.create({
   root: {
     ...StyleSheet.absoluteFillObject,
-    width:           SCREEN_W,
-    height:          SCREEN_H,
     backgroundColor: '#063B21',
     alignItems:      'center',
     justifyContent:  'center',

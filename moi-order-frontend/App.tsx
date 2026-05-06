@@ -252,12 +252,14 @@ export default function App(): React.JSX.Element {
             <StatusBar style="light" translucent />
             {/* App shell is mounted immediately so navigation is ready; splash sits on top. */}
             <AppShell />
-            {!splashGone && (
-              <AnimatedSplash canHide={canHide} onHidden={onSplashHidden} />
-            )}
           </NavigationContainer>
         </QueryClientProvider>
       </SafeAreaProvider>
+      {/* Outside NavigationContainer so absoluteFillObject covers the full physical
+          screen on Android (including status bar + gesture-nav bar areas). */}
+      {!splashGone && (
+        <AnimatedSplash canHide={canHide} onHidden={onSplashHidden} />
+      )}
     </GestureHandlerRootView>
   );
 }
