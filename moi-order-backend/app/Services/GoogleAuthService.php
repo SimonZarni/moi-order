@@ -8,6 +8,7 @@ use App\DTOs\GoogleAuthDTO;
 use App\Exceptions\DomainException;
 use App\Models\User;
 use Google\Client as GoogleClient;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -29,7 +30,7 @@ class GoogleAuthService
      */
     public function authenticate(GoogleAuthDTO $dto): array
     {
-        $payload = $this->googleClient->verifyIdToken($dto->idToken);
+        $payload = $this->verifyToken($dto->idToken);
 
         if ($payload === false || empty($payload['email_verified'])) {
             throw ValidationException::withMessages([
@@ -58,7 +59,7 @@ class GoogleAuthService
 
     public function linkAccount(User $currentUser, GoogleAuthDTO $dto): User
     {
-        $payload = $this->googleClient->verifyIdToken($dto->idToken);
+        $payload = $this->verifyToken($dto->idToken);
 
         if ($payload === false || empty($payload['email_verified'])) {
             throw ValidationException::withMessages([
@@ -119,5 +120,31 @@ class GoogleAuthService
     private function shouldReplaceEmail(string $email): bool
     {
         return str_ends_with($email, '@users.moiorder.local') || str_ends_with($email, '@deleted.invalid');
+    }
+
+    /**
+     * Try verifying against web client ID first, then iOS client ID.
+     * iOS native sign-in can issue tokens with the iOS client ID as audience.
+     *
+     * @return array<string,mixed>|false
+     */
+    private function verifyToken(string $idToken): array|false
+    {
+        $payload = $this->googleClient->verifyIdToken($idToken);
+
+        if ($payload !== false) {
+            return $payload;
+        }
+
+        $iosClientId = Config::get('services.google.ios_client_id');
+        if (empty($iosClientId)) {
+            return false;
+        }
+
+        $this->googleClient->setClientId($iosClientId);
+        $payload = $this->googleClient->verifyIdToken($idToken);
+        $this->googleClient->setClientId(Config::get('services.google.client_id'));
+
+        return $payload;
     }
 }
