@@ -8,6 +8,7 @@ import { sendEmailOtp } from '@/shared/api/emailAuth';
 import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 import { MESSAGES } from '@/shared/constants/messages';
+import { DOMAIN_ERROR_MESSAGES } from '@/shared/constants/errorCodes';
 
 export interface UseEmailRegisterScreenResult {
   form: UseEmailRegisterFormResult['form'];
@@ -36,6 +37,8 @@ export function useEmailRegisterScreen(): UseEmailRegisterScreenResult {
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {
         applyApiError(error.errors);
+      } else if (error.status === 409) {
+        setBannerError(DOMAIN_ERROR_MESSAGES[error.code] ?? error.message ?? MESSAGES.genericError);
       } else {
         setBannerError(error.message ?? MESSAGES.genericError);
       }

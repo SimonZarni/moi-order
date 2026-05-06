@@ -10,6 +10,7 @@ use App\Enums\EmailOtpPurpose;
 use App\Exceptions\DomainException;
 use App\Mail\EmailOtpMail;
 use App\Models\EmailOtp;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -38,6 +39,10 @@ class EmailOtpService
      */
     public function send(SendEmailOtpDTO $dto): array
     {
+        if ($dto->purpose === EmailOtpPurpose::Registration && User::where('email', $dto->email)->exists()) {
+            throw new DomainException('email.already_registered', 409);
+        }
+
         $recent = EmailOtp::where('email', $dto->email)
             ->where('purpose', $dto->purpose->value)
             ->whereNull('verified_at')
