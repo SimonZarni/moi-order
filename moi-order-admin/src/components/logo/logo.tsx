@@ -4,8 +4,8 @@ import { mergeClasses } from 'minimal-shared/utils';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
-import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import { styled, useTheme } from '@mui/material/styles';
 
 import { RouterLink } from 'src/routes/components';
 
