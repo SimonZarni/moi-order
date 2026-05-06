@@ -30,14 +30,21 @@ export function useGoogleAuth(loginHint?: string): UseGoogleAuthResult {
 
       await GoogleSignin.hasPlayServices();
 
-      // Attempt silent sign-in first — zero UI on the owner's device.
-      // If silent fails (new device / no cached session), fall back to the
-      // interactive picker with loginHint so Google pre-selects the right account.
-      try {
-        await GoogleSignin.signInSilently();
-      } catch {
+      if (loginHint) {
+        // Email was explicitly confirmed as a Google account — try silent first
+        // for a seamless re-auth on the owner's device, fall back to picker with
+        // the email pre-selected so the correct account is highlighted.
+        try {
+          await GoogleSignin.signInSilently();
+        } catch {
+          await GoogleSignin.signOut();
+          await GoogleSignin.signIn({ loginHint });
+        }
+      } else {
+        // No email context (button tapped directly) — always show the full
+        // account picker so the user consciously chooses which account to use.
         await GoogleSignin.signOut();
-        await GoogleSignin.signIn(loginHint ? { loginHint } : undefined);
+        await GoogleSignin.signIn();
       }
 
       const { idToken } = await GoogleSignin.getTokens();
