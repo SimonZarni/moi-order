@@ -77,6 +77,7 @@ export interface UseProfileScreenResult {
   handleGoToPrivacyPolicy: () => void;
   handleGoToTerms: () => void;
   handleGoToPdpa: () => void;
+  handleGoToForgotPassword: () => void;
   handleLogout: () => void;
   handleDeleteAccount: () => void;
   isDeletingAccount: boolean;
@@ -268,6 +269,10 @@ export function useProfileScreen(): UseProfileScreenResult {
     navigation.navigate('PdpaNotice');
   }, [navigation]);
 
+  const handleGoToForgotPassword = useCallback((): void => {
+    navigation.navigate('ForgotPassword');
+  }, [navigation]);
+
   const handleUpdatePhone = useCallback((): void => {
     navigation.navigate('UpdatePhone');
   }, [navigation]);
@@ -369,6 +374,7 @@ export function useProfileScreen(): UseProfileScreenResult {
     handleGoToPrivacyPolicy,
     handleGoToTerms,
     handleGoToPdpa,
+    handleGoToForgotPassword,
     handleLogout,
     handleDeleteAccount,
     isDeletingAccount:   deleteAccountMutation.isPending,

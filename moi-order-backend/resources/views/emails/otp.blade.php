@@ -17,6 +17,8 @@
               <h1 style="margin:8px 0 0;font-size:22px;font-weight:800;color:#ffffff;">
                 @if($purpose === \App\Enums\EmailOtpPurpose::Registration)
                   Verify your email
+                @elseif($purpose === \App\Enums\EmailOtpPurpose::EmailUpdate)
+                  Verify your new email
                 @else
                   Reset your password
                 @endif
@@ -30,6 +32,8 @@
               <p style="margin:0 0 24px;font-size:15px;color:#334155;line-height:1.6;">
                 @if($purpose === \App\Enums\EmailOtpPurpose::Registration)
                   Use the code below to verify your email address and complete your registration.
+                @elseif($purpose === \App\Enums\EmailOtpPurpose::EmailUpdate)
+                  Use the code below to verify ownership of your new email address.
                 @else
                   Use the code below to reset your Moi Order password.
                 @endif

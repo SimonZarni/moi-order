@@ -507,6 +507,17 @@ export const styles = StyleSheet.create({
     lineHeight: 26,
   },
 
+  forgotPasswordRow: {
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  forgotPasswordLink: {
+    fontSize: typography.sm,
+    color: colours.primary,
+    fontWeight: '600',
+  },
+
   // ── Language switcher ─────────────────────────────────────────────────────
   langRow: {
     flexDirection: 'row',

@@ -9,7 +9,7 @@ import { styles } from './UpdateEmailScreen.styles';
 export function UpdateEmailScreen(): React.JSX.Element {
   const {
     email, otp, emailError, otpError, bannerError,
-    otpSent, isSendingOtp, isUpdating,
+    otpSent, expiresIn, isSendingOtp, isUpdating,
     handleEmailChange, handleOtpChange,
     handleRequestOtp, handleUpdateEmail, handleBack,
   } = useUpdateEmailScreen();
@@ -64,6 +64,12 @@ export function UpdateEmailScreen(): React.JSX.Element {
                 {isSendingOtp ? 'Sending…' : otpSent ? 'Resend Code' : 'Send Code'}
               </Text>
             </Pressable>
+
+            {otpSent && expiresIn !== null && (
+              <Text style={styles.expiryText}>
+                Code expires in {Math.floor(expiresIn / 60)} minutes
+              </Text>
+            )}
 
             {otpSent && (
               <View style={styles.otpSection}>

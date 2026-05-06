@@ -49,10 +49,16 @@ export const styles = StyleSheet.create({
 
   sendBtn: {
     backgroundColor: colours.primary, borderRadius: radius.md,
-    paddingVertical: spacing.md, alignItems: 'center', marginBottom: spacing.lg,
+    paddingVertical: spacing.md, alignItems: 'center',
+    marginTop: spacing.md, marginBottom: spacing.lg,
   },
   sendBtnDisabled: { opacity: 0.6 },
   sendBtnText: { color: colours.textOnDark, fontSize: typography.md, fontWeight: '700' },
+
+  expiryText: {
+    fontSize: typography.xs, color: colours.tertiary,
+    marginBottom: spacing.lg, textAlign: 'center',
+  },
 
   otpSection: { marginTop: spacing.sm },
   otpLabel: { fontSize: typography.sm, fontWeight: '600', color: colours.textOnLight, marginBottom: spacing.xs },

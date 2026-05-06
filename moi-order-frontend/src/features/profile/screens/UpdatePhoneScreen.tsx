@@ -9,7 +9,7 @@ import { styles } from './UpdatePhoneScreen.styles';
 export function UpdatePhoneScreen(): React.JSX.Element {
   const {
     phoneNumber, otp, phoneError, otpError, bannerError,
-    otpRequestId, isSendingOtp, isUpdating,
+    otpRequestId, expiresIn, isSendingOtp, isUpdating,
     handlePhoneChange, handleOtpChange,
     handleRequestOtp, handleUpdatePhone, handleBack,
   } = useUpdatePhoneScreen();
@@ -61,6 +61,12 @@ export function UpdatePhoneScreen(): React.JSX.Element {
                 {isSendingOtp ? 'Sending…' : otpRequestId ? 'Resend Code' : 'Send Code'}
               </Text>
             </Pressable>
+
+            {otpRequestId !== null && expiresIn !== null && (
+              <Text style={styles.expiryText}>
+                Code expires in {Math.floor(expiresIn / 60)} minutes
+              </Text>
+            )}
 
             {otpRequestId !== null && (
               <View style={styles.otpSection}>

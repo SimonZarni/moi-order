@@ -46,7 +46,8 @@ export function ProfileScreen(): React.JSX.Element {
     handleTogglePasswordSection,
     handleCurrentPasswordChange, handleNewPasswordChange, handleConfirmPasswordChange,
     handleChangePassword,
-    handleGoToOrders, handleGoToMoiVerified, handleGoToPrivacyPolicy, handleGoToTerms, handleGoToPdpa, handleLogout,
+    handleGoToOrders, handleGoToMoiVerified, handleGoToPrivacyPolicy, handleGoToTerms, handleGoToPdpa,
+    handleGoToForgotPassword, handleLogout,
     handleDeleteAccount, isDeletingAccount,
     handleUpdatePhone, handleUpdateEmail,
     isUploadingPicture, isRemovingPicture, handleAvatarPress,
@@ -547,6 +548,17 @@ export function ProfileScreen(): React.JSX.Element {
                   </Text>
                 </Pressable>
               </View>
+            )}
+
+            {hasPassword && (
+              <Pressable
+                style={styles.forgotPasswordRow}
+                onPress={handleGoToForgotPassword}
+                accessibilityLabel="Forgot password"
+                accessibilityRole="button"
+              >
+                <Text style={styles.forgotPasswordLink}>Forgot password?</Text>
+              </Pressable>
             )}
           </View>
 

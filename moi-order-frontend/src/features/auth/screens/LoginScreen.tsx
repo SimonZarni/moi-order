@@ -106,6 +106,15 @@ export function LoginScreen(): React.JSX.Element {
                     >
                       <Text style={styles.submitText}>{isCheckingEmail ? 'Checking…' : 'Continue'}</Text>
                     </Pressable>
+
+                    <Pressable
+                      style={styles.forgotBtn}
+                      onPress={handleGoToForgotPassword}
+                      accessibilityLabel="Forgot password"
+                      accessibilityRole="button"
+                    >
+                      <Text style={styles.forgotText}>Forgot password?</Text>
+                    </Pressable>
                   </>
                 ) : (
                   <>

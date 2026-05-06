@@ -17,6 +17,7 @@ export interface UseUpdateEmailScreenResult {
   otpError: string | null;
   bannerError: string;
   otpSent: boolean;
+  expiresIn: number | null;
   resendAfter: number | null;
   isSendingOtp: boolean;
   isUpdating: boolean;
@@ -38,6 +39,7 @@ export function useUpdateEmailScreen(): UseUpdateEmailScreenResult {
   const [otpError, setOtpError]       = useState<string | null>(null);
   const [bannerError, setBannerError] = useState('');
   const [otpSent, setOtpSent]         = useState(false);
+  const [expiresIn, setExpiresIn]     = useState<number | null>(null);
   const [resendAfter, setResendAfter] = useState<number | null>(null);
 
   const { mutate: sendOtp, isPending: isSendingOtp } = useMutation({
@@ -45,6 +47,7 @@ export function useUpdateEmailScreen(): UseUpdateEmailScreenResult {
     onSuccess: (result: EmailOtpResult) => {
       setBannerError('');
       setOtpSent(true);
+      setExpiresIn(result.expires_in);
       setResendAfter(result.resend_after);
       setOtp('');
       setOtpError(null);
@@ -81,6 +84,7 @@ export function useUpdateEmailScreen(): UseUpdateEmailScreenResult {
     setEmailError(null);
     setBannerError('');
     setOtpSent(false);
+    setExpiresIn(null);
     setResendAfter(null);
     setOtp('');
     setOtpError(null);
@@ -123,6 +127,7 @@ export function useUpdateEmailScreen(): UseUpdateEmailScreenResult {
     otpError,
     bannerError,
     otpSent,
+    expiresIn,
     resendAfter,
     isSendingOtp,
     isUpdating,
