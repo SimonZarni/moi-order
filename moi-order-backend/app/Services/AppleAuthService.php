@@ -318,11 +318,12 @@ class AppleAuthService
         }
 
         return User::create([
-            'apple_id' => $appleId,
-            'email'    => $email,
-            'name'     => $name,
-            'password' => null,
-        ]);
+            'apple_id'          => $appleId,
+            'email'             => $email,
+            'name'              => $name,
+            'password'          => null,
+            'email_verified_at' => now(),
+        ])->fresh();
     }
 
     private function shouldReplaceEmail(string $email): bool

@@ -112,13 +112,15 @@ class GoogleAuthService
         }
 
         // Step 3: brand-new user — email is verified by Google.
+        // ->fresh() reloads DB defaults (e.g. user_role, status) so UserResource
+        // casts never receive null for non-nullable enum columns.
         return User::create([
             'google_id'         => $googleId,
             'email'             => $email,
             'name'              => $name,
             'password'          => null,
             'email_verified_at' => now(),
-        ]);
+        ])->fresh();
     }
 
     private function shouldReplaceEmail(string $email): bool

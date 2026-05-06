@@ -178,11 +178,12 @@ class LineAuthService
         }
 
         return User::create([
-            'line_id'  => $lineId,
-            'email'    => $email,
-            'name'     => $name,
-            'password' => null,
-        ]);
+            'line_id'           => $lineId,
+            'email'             => $email,
+            'name'              => $name,
+            'password'          => null,
+            'email_verified_at' => now(),
+        ])->fresh();
     }
 
     private function placeholderEmail(string $lineId): string
