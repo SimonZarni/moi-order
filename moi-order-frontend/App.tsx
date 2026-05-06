@@ -81,6 +81,8 @@ import { MyDocumentsScreen } from '@/features/documents/screens/MyDocumentsScree
 import { MoiVerifiedScreen } from '@/features/profile/screens/MoiVerifiedScreen';
 import { UpdatePhoneScreen } from '@/features/profile/screens/UpdatePhoneScreen';
 import { UpdateEmailScreen } from '@/features/profile/screens/UpdateEmailScreen';
+import { EmergencyContactListScreen } from '@/features/emergencyContacts/screens/EmergencyContactListScreen';
+import { EmergencyContactDetailScreen } from '@/features/emergencyContacts/screens/EmergencyContactDetailScreen';
 import { FoodScreen } from '@/features/food/screens/FoodScreen';
 import { RestaurantDetailScreen } from '@/features/food/screens/RestaurantDetailScreen';
 import { RestaurantMapScreen } from '@/features/food/screens/RestaurantMapScreen';
@@ -171,6 +173,8 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="MoiVerified"                   component={MoiVerifiedScreen} />
       <Stack.Screen name="UpdatePhone"                   component={UpdatePhoneScreen} options={{ headerShown: false }} />
       <Stack.Screen name="UpdateEmail"                   component={UpdateEmailScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="EmergencyContactList"          component={EmergencyContactListScreen} />
+      <Stack.Screen name="EmergencyContactDetail"        component={EmergencyContactDetailScreen} />
       <Stack.Screen name="Food"                          component={FoodScreen} />
       <Stack.Screen name="RestaurantDetail"              component={RestaurantDetailScreen} />
       <Stack.Screen name="RestaurantMap"                 component={RestaurantMapScreen} options={{ animation: 'slide_from_bottom' }} />

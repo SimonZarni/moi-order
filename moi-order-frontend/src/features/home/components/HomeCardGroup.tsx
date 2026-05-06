@@ -31,10 +31,14 @@ export function HomeCardGroup({
   const handleTilePress = useCallback(
     (child: HomeCard) => {
       if (child.is_coming_soon || child.navigation_screen === null) return;
-      navigateToCardScreen(navigation, child.navigation_screen, child.route_type, child.route_url, {
-        serviceTypeId: airportServiceTypeId,
-        price:         airportPrice,
-      });
+      navigateToCardScreen(
+        navigation,
+        child.navigation_screen,
+        child.route_type,
+        child.route_url,
+        { serviceTypeId: airportServiceTypeId, price: airportPrice },
+        child.navigation_params,
+      );
     },
     [navigation, airportServiceTypeId, airportPrice]
   );

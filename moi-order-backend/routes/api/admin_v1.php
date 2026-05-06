@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\Admin\V1\AdminCustomNotificationController;
 use App\Http\Controllers\Api\Admin\V1\AdminCategoryController;
 use App\Http\Controllers\Api\Admin\V1\AdminPaymentController;
 use App\Http\Controllers\Api\Admin\V1\AdminPaymentSettingController;
+use App\Http\Controllers\Api\Admin\V1\AdminEmergencyContactController;
 use App\Http\Controllers\Api\Admin\V1\AdminPlaceController;
 use App\Http\Controllers\Api\Admin\V1\AdminRestaurantController;
 use App\Http\Controllers\Api\Admin\V1\AdminRoleController;
@@ -210,6 +211,21 @@ Route::prefix('places')->name('admin.places.')->group(function (): void {
         ->middleware('check.permission:places.update');
     Route::patch('/{place}/images/reorder', [AdminPlaceController::class, 'reorderImages'])->name('images.reorder')
         ->middleware('check.permission:places.update');
+});
+
+// ── Emergency Contacts + Photos ───────────────────────────────────────────────
+Route::prefix('emergency/contacts')->name('admin.emergency.contacts.')->group(function (): void {
+    Route::get('/',   [AdminEmergencyContactController::class, 'index'])->name('index');
+    Route::post('/',  [AdminEmergencyContactController::class, 'store'])->name('store');
+    Route::get('/{contact}',    [AdminEmergencyContactController::class, 'show'])->name('show');
+    Route::put('/{contact}',    [AdminEmergencyContactController::class, 'update'])->name('update');
+    Route::delete('/{contact}', [AdminEmergencyContactController::class, 'destroy'])->name('destroy');
+    Route::patch('/{id}/restore', [AdminEmergencyContactController::class, 'restore'])->name('restore')
+        ->whereNumber('id');
+
+    Route::post('/{contact}/photos',                  [AdminEmergencyContactController::class, 'uploadPhotos'])->name('photos.store');
+    Route::delete('/{contact}/photos/{photo}',        [AdminEmergencyContactController::class, 'deletePhoto'])->name('photos.destroy');
+    Route::patch('/{contact}/photos/reorder',         [AdminEmergencyContactController::class, 'reorderPhotos'])->name('photos.reorder');
 });
 
 // ── Categories ────────────────────────────────────────────────────────────────

@@ -112,19 +112,29 @@ export const HOME_CARD_ICON_KEY = {
   Company:  'company',
 } as const;
 
+// Mirrors App\Enums\EmergencyContactType
+export const EMERGENCY_CONTACT_TYPE = {
+  Hospital:      'hospital',
+  PoliceStation: 'police_station',
+  Rescue:        'rescue',
+} as const;
+
+export type EmergencyContactType = (typeof EMERGENCY_CONTACT_TYPE)[keyof typeof EMERGENCY_CONTACT_TYPE];
+
 // Builtin nav screen keys — kept for the switch-case in homeCardNavigation.ts
 export const HOME_CARD_NAV_SCREEN = {
-  NinetyDayReport:  'NinetyDayReport',
-  Places:           'Places',
-  Tickets:          'Tickets',
-  OtherServices:    'OtherServices',
-  EmbassyServices:  'EmbassyServices',
-  AirportFastTrack: 'AirportFastTrack',
-  Food:             'Food',
-  PassportVault:    'PassportVault',
-  Search:           'Search',
-  PlacesMap:        'PlacesMap',
-  CompanyServices:  'CompanyServices',
+  NinetyDayReport:      'NinetyDayReport',
+  Places:               'Places',
+  Tickets:              'Tickets',
+  OtherServices:        'OtherServices',
+  EmbassyServices:      'EmbassyServices',
+  AirportFastTrack:     'AirportFastTrack',
+  Food:                 'Food',
+  PassportVault:        'PassportVault',
+  Search:               'Search',
+  PlacesMap:            'PlacesMap',
+  CompanyServices:      'CompanyServices',
+  EmergencyContactList: 'EmergencyContactList',
 } as const;
 
 // Mirrors App\Enums\HomeCardIconType

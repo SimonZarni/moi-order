@@ -33,10 +33,14 @@ export function HomeCardGrid({
   const handlePress = useCallback(
     (card: HomeCard) => {
       if (card.is_coming_soon || card.navigation_screen === null) return;
-      navigateToCardScreen(navigation, card.navigation_screen, card.route_type, card.route_url, {
-        serviceTypeId: airportServiceTypeId,
-        price:         airportPrice,
-      });
+      navigateToCardScreen(
+        navigation,
+        card.navigation_screen,
+        card.route_type,
+        card.route_url,
+        { serviceTypeId: airportServiceTypeId, price: airportPrice },
+        card.navigation_params,
+      );
     },
     [navigation, airportServiceTypeId, airportPrice]
   );

@@ -399,6 +399,37 @@ export interface HomeCard {
   children?: HomeCard[];
 }
 
+// ── Emergency Contacts ─────────────────────────────────────────────────────
+
+export interface EmergencyContactPhoto {
+  id: number;
+  url: string;
+  is_cover: boolean;
+  position: number;
+}
+
+export interface EmergencyContact {
+  id: number;
+  type: import('./enums').EmergencyContactType;
+  title_en: string;
+  title_mm: string;
+  title_th: string | null;
+  description_en: string | null;
+  description_mm: string | null;
+  description_th: string | null;
+  phone: string | null;
+  map_url: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  location: string | null;
+  facebook_url: string | null;
+  website_url: string | null;
+  /** Present on list endpoint only (cover photo). */
+  cover_photo?: string | null;
+  /** Present on detail endpoint only. */
+  photos?: EmergencyContactPhoto[];
+}
+
 // ── API wrappers ───────────────────────────────────────────────────────────
 
 export interface ApiResponse<T> {

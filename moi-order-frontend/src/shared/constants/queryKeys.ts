@@ -62,4 +62,8 @@ export const QUERY_KEYS = {
   VERIFICATION: {
     STATUS: ['verification', 'status'] as const,
   },
+  EMERGENCY_CONTACTS: {
+    LIST:   (type: string) => ['emergency-contacts', 'list', type] as const,
+    DETAIL: (id: number)   => ['emergency-contacts', 'detail', id] as const,
+  },
 } as const;

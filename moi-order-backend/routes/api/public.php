@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\Auth\EmailAuthController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\EmergencyContactController;
 use App\Http\Controllers\Api\V1\HomeCardController;
 use App\Http\Controllers\Api\V1\PlaceController;
 use App\Http\Controllers\Api\V1\RestaurantBrowseController;
@@ -55,3 +56,7 @@ Route::get('/restaurants/{id}', [RestaurantBrowseController::class, 'show']);
 
 // Home cards — public, no auth required (shown on home screen before login)
 Route::get('/home-cards', [HomeCardController::class, 'index']);
+
+// Emergency contacts — public browsing, no auth required
+Route::get('/emergency/contacts',          [EmergencyContactController::class, 'index']);
+Route::get('/emergency/contacts/{contact}', [EmergencyContactController::class, 'show']);

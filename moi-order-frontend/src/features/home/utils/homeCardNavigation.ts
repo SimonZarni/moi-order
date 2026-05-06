@@ -2,7 +2,7 @@ import { Linking } from 'react-native';
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import { HOME_CARD_NAV_SCREEN, HOME_CARD_ROUTE_TYPE } from '@/types/enums';
+import { EMERGENCY_CONTACT_TYPE, EmergencyContactType, HOME_CARD_NAV_SCREEN, HOME_CARD_ROUTE_TYPE } from '@/types/enums';
 import { RootStackParamList } from '@/types/navigation';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -20,7 +20,8 @@ export function navigateToCardScreen(
   screen: string | null,
   routeType: string,
   routeUrl: string | null,
-  airportParams: AirportParams
+  airportParams: AirportParams,
+  navigationParams?: Record<string, unknown> | null
 ): void {
   if (screen === null) return;
 
@@ -72,6 +73,14 @@ export function navigateToCardScreen(
     case HOME_CARD_NAV_SCREEN.PlacesMap:
       navigation.navigate('MainTabs', { screen: 'Map' });
       break;
+    case HOME_CARD_NAV_SCREEN.EmergencyContactList: {
+      const typeParam = navigationParams?.type as string | undefined;
+      const validTypes: EmergencyContactType[] = Object.values(EMERGENCY_CONTACT_TYPE);
+      if (typeParam && (validTypes as string[]).includes(typeParam)) {
+        navigation.navigate('EmergencyContactList', { type: typeParam as EmergencyContactType });
+      }
+      break;
+    }
     default:
       // Internal route key unknown to this app version — safe no-op
       break;
