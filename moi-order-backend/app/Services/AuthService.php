@@ -35,10 +35,8 @@ class AuthService
             return 'not_found';
         }
 
-        if ($user->password !== null) {
-            return 'password';
-        }
-
+        // Social links take priority over password — if the user linked a social
+        // account, entering their email should trigger that social sign-in directly.
         if ($user->google_id !== null) {
             return 'google';
         }
@@ -49,6 +47,10 @@ class AuthService
 
         if ($user->line_id !== null) {
             return 'line';
+        }
+
+        if ($user->password !== null) {
+            return 'password';
         }
 
         return 'not_found';
