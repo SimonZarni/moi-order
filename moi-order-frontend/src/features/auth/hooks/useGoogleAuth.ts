@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
@@ -32,13 +33,17 @@ export function useGoogleAuth(loginHint?: string): UseGoogleAuthResult {
 
       if (loginHint) {
         // Email was explicitly confirmed as a Google account — try silent first
-        // for a seamless re-auth on the owner's device, fall back to picker with
-        // the email pre-selected so the correct account is highlighted.
+        // for a seamless re-auth on the owner's device.
+        // loginHint is only supported on iOS; on Android just show the picker.
         try {
           await GoogleSignin.signInSilently();
         } catch {
           await GoogleSignin.signOut();
-          await GoogleSignin.signIn({ loginHint });
+          if (Platform.OS === 'ios') {
+            await GoogleSignin.signIn({ loginHint });
+          } else {
+            await GoogleSignin.signIn();
+          }
         }
       } else {
         // No email context (button tapped directly) — always show the full
