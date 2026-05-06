@@ -43,6 +43,10 @@ import { AnimatedSplash } from '@/shared/components/AnimatedSplash';
 
 import { LoginScreen } from '@/features/auth/screens/LoginScreen';
 import { RegisterScreen } from '@/features/auth/screens/RegisterScreen';
+import { EmailRegisterScreen } from '@/features/auth/screens/EmailRegisterScreen';
+import { EmailOtpScreen } from '@/features/auth/screens/EmailOtpScreen';
+import { SetPasswordScreen } from '@/features/auth/screens/SetPasswordScreen';
+import { ForgotPasswordScreen } from '@/features/auth/screens/ForgotPasswordScreen';
 import { HomeScreen } from '@/features/home/screens/HomeScreen';
 import { NinetyDayReportScreen } from '@/features/ninetyDayReport/screens/NinetyDayReportScreen';
 import { NinetyDayReportFormScreen } from '@/features/ninetyDayReport/screens/NinetyDayReportFormScreen';
@@ -127,8 +131,12 @@ function AppShell(): React.JSX.Element {
       }}
     >
       <Stack.Screen name="MainTabs" component={MainTabs} options={{ animation: 'none' }} />
-      <Stack.Screen name="Login"      component={LoginScreen} />
-      <Stack.Screen name="Register"   component={RegisterScreen} />
+      <Stack.Screen name="Login"          component={LoginScreen} />
+      <Stack.Screen name="Register"       component={RegisterScreen} />
+      <Stack.Screen name="EmailRegister"  component={EmailRegisterScreen} />
+      <Stack.Screen name="EmailOtp"       component={EmailOtpScreen} />
+      <Stack.Screen name="SetPassword"    component={SetPasswordScreen} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
       <Stack.Screen name="Payment"                       component={PaymentScreen} />
       <Stack.Screen name="NinetyDayReport"               component={NinetyDayReportScreen} />

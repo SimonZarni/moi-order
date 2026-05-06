@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\V1\Auth\EmailAuthController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\HomeCardController;
 use App\Http\Controllers\Api\V1\PlaceController;
@@ -24,6 +25,12 @@ Route::middleware('throttle:auth')->group(function (): void {
     Route::post('/auth/line',     [AuthController::class, 'lineAuth']);
     Route::post('/auth/otp/request', [AuthController::class, 'requestOtp']);
     Route::post('/auth/otp/verify',  [AuthController::class, 'verifyOtp']);
+
+    // Email OTP auth — registration + password reset
+    Route::post('/auth/email/send-otp',       [EmailAuthController::class, 'sendOtp']);
+    Route::post('/auth/email/verify-otp',     [EmailAuthController::class, 'verifyOtp']);
+    Route::post('/auth/email/register',       [EmailAuthController::class, 'completeRegistration']);
+    Route::post('/auth/email/reset-password', [EmailAuthController::class, 'resetPassword']);
 });
 
 // Places — public browsing, no auth required

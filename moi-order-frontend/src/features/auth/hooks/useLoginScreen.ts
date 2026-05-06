@@ -39,6 +39,8 @@ export interface UseLoginScreenResult {
   handleAppleSignIn: () => Promise<void>;
   handleLineSignIn: () => Promise<void>;
   handleGoToRegister: () => void;
+  handleGoToEmailRegister: () => void;
+  handleGoToForgotPassword: () => void;
 }
 
 export function useLoginScreen(): UseLoginScreenResult {
@@ -84,6 +86,14 @@ export function useLoginScreen(): UseLoginScreenResult {
     navigation.navigate('Register');
   }, [navigation]);
 
+  const handleGoToEmailRegister = useCallback((): void => {
+    navigation.navigate('EmailRegister');
+  }, [navigation]);
+
+  const handleGoToForgotPassword = useCallback((): void => {
+    navigation.navigate('ForgotPassword');
+  }, [navigation]);
+
   return {
     form,
     isSubmitting,
@@ -109,5 +119,7 @@ export function useLoginScreen(): UseLoginScreenResult {
     handleAppleSignIn,
     handleLineSignIn,
     handleGoToRegister,
+    handleGoToEmailRegister,
+    handleGoToForgotPassword,
   };
 }

@@ -162,6 +162,18 @@ export const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
 
+  // ── Forgot password ───────────────────────────────────────────────────────
+  forgotBtn: {
+    alignSelf: 'flex-end',
+    marginTop: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  forgotText: {
+    fontSize: typography.sm,
+    color: colours.primary,
+    fontWeight: '600',
+  },
+
   // ── Footer ────────────────────────────────────────────────────────────────
   footer: {
     flexDirection: 'row',

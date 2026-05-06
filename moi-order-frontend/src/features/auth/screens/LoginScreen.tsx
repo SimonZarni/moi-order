@@ -46,6 +46,8 @@ export function LoginScreen(): React.JSX.Element {
     handleAppleSignIn,
     handleLineSignIn,
     handleGoToRegister,
+    handleGoToEmailRegister,
+    handleGoToForgotPassword,
   } = useLoginScreen();
 
   return (
@@ -119,6 +121,15 @@ export function LoginScreen(): React.JSX.Element {
                   accessibilityRole="button"
                 >
                   <Text style={styles.submitText}>{isSubmitting ? 'Signing in…' : 'Sign In'}</Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.forgotBtn}
+                  onPress={handleGoToForgotPassword}
+                  accessibilityLabel="Forgot password"
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.forgotText}>Forgot password?</Text>
                 </Pressable>
 
                 <View style={styles.dividerRow}>
@@ -208,11 +219,11 @@ export function LoginScreen(): React.JSX.Element {
             <View style={styles.footer}>
               <Text style={styles.footerText}>Don't have an account?</Text>
               <Pressable
-                onPress={handleGoToRegister}
-                accessibilityLabel="Create account"
+                onPress={handleGoToEmailRegister}
+                accessibilityLabel="Register with email"
                 accessibilityRole="button"
               >
-                <Text style={styles.footerLink}>Create Account</Text>
+                <Text style={styles.footerLink}>Register with Email</Text>
               </Pressable>
             </View>
           </View>

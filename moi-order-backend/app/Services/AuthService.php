@@ -34,6 +34,10 @@ class AuthService
             ]);
         }
 
+        if ($user->email_verified_at === null) {
+            throw new DomainException('email.not_verified', 409);
+        }
+
         if ($user->isRestricted()) {
             $code    = $user->status->value === 'banned' ? 'account.banned' : 'account.suspended';
             $context = $user->suspended_until !== null
