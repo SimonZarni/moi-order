@@ -30,6 +30,8 @@ class TicketOrderPaymentController extends Controller
             ->whereIn('status', [TicketOrderStatus::PendingPayment, TicketOrderStatus::PaymentFailed])
             ->findOrFail($id);
 
+        abort_if(! $order->payment_authorized, 403, 'Order not yet authorized for payment.');
+
         $alreadyExists = $order->payment !== null
             && $order->payment->status->value === 'pending';
 

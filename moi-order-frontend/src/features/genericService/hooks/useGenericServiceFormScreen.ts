@@ -14,6 +14,7 @@ import { MESSAGES } from '@/shared/constants/messages';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { ApiError, FieldSchemaItem } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
+import { navigateAfterSubmission } from '@/shared/utils/navigateAfterOrder';
 
 type RouteParams = RouteProp<RootStackParamList, 'GenericServiceForm'>;
 
@@ -70,8 +71,7 @@ export function useGenericServiceFormScreen(): UseGenericServiceFormScreenResult
       }
       return submitDynamic(payload);
     },
-    onSuccess: (submission) =>
-      navigation.navigate('Payment', { kind: 'submission', submissionId: submission.id }),
+    onSuccess: (submission) => navigateAfterSubmission(navigation, submission),
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {
         const schemaKeys = new Set(schema.map((f) => f.key));

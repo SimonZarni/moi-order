@@ -14,6 +14,7 @@ import { useAuthStore } from '@/shared/store/authStore';
 import { MESSAGES } from '@/shared/constants/messages';
 import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
+import { navigateAfterSubmission } from '@/shared/utils/navigateAfterOrder';
 import { stripAsset } from '@/shared/utils/stripAsset';
 
 type RouteParams = RouteProp<RootStackParamList, 'AirportFastTrackForm'>;
@@ -95,7 +96,7 @@ export function useAirportFastTrackFormScreen(): UseAirportFastTrackFormScreenRe
         airplane_ticket:  form.airplaneTicket!,
       },
     }),
-    onSuccess: (submission) => navigation.navigate('Payment', { kind: 'submission', submissionId: submission.id }),
+    onSuccess: (submission) => navigateAfterSubmission(navigation, submission),
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {
         applyApiError(error.errors);

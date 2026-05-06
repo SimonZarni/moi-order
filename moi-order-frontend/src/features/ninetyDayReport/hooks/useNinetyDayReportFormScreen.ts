@@ -10,6 +10,7 @@ import { submitDynamic } from '@/shared/api/submissions';
 import { useAuthStore } from '@/shared/store/authStore';
 import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
+import { navigateAfterSubmission } from '@/shared/utils/navigateAfterOrder';
 import { MESSAGES } from '@/shared/constants/messages';
 import { stripAsset } from '@/shared/utils/stripAsset';
 
@@ -102,9 +103,7 @@ export function useNinetyDayReportFormScreen(): UseNinetyDayReportFormScreenResu
         old_slip:          form.oldSlip!,
       },
     }),
-    onSuccess: (submission) => {
-      navigation.navigate('Payment', { kind: 'submission', submissionId: submission.id });
-    },
+    onSuccess: (submission) => navigateAfterSubmission(navigation, submission),
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {
         applyApiError(error.errors);

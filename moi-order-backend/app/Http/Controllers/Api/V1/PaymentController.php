@@ -34,6 +34,8 @@ class PaymentController extends Controller
             ->whereIn('status', [SubmissionStatus::PendingPayment, SubmissionStatus::PaymentFailed])
             ->findOrFail($id);
 
+        abort_if(! $submission->payment_authorized, 403, 'Order not yet authorized for payment.');
+
         $alreadyExists = $submission->payment !== null
             && $submission->payment->status->value === 'pending';
 

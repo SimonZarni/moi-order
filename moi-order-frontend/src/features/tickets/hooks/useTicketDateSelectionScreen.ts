@@ -6,6 +6,7 @@ import * as Crypto from 'expo-crypto';
 
 import { createTicketOrder } from '@/shared/api/ticketOrders';
 import { RootStackParamList } from '@/types/navigation';
+import { navigateAfterTicketOrder } from '@/shared/utils/navigateAfterOrder';
 import { ApiError, TicketOrder } from '@/types/models';
 import { VariantSelections } from '../types';
 
@@ -74,7 +75,7 @@ export function useTicketDateSelectionScreen(): UseTicketDateSelectionScreenResu
       })),
     }),
     onSuccess: (order) => {
-      navigation.navigate('Payment', { kind: 'ticket_order', ticketOrderId: order.id });
+      navigateAfterTicketOrder(navigation, order);
     },
   });
 
