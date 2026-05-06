@@ -18,7 +18,8 @@ Route::get('/health', fn () => response()->json(['status' => 'ok', 'version' => 
 
 // Auth — intentionally public, rate-limited by throttle:auth applied per route
 Route::middleware('throttle:auth')->group(function (): void {
-    Route::post('/auth/login',    [AuthController::class, 'login']);
+    Route::post('/auth/check-email', [AuthController::class, 'checkEmail']);
+    Route::post('/auth/login',       [AuthController::class, 'login']);
     Route::post('/auth/register', [AuthController::class, 'register']);
     Route::post('/auth/google',   [AuthController::class, 'googleAuth']);
     Route::post('/auth/apple',    [AuthController::class, 'appleAuth']);

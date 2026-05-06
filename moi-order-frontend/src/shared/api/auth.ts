@@ -7,6 +7,18 @@ export interface OtpRequestResponse {
   phone_number: string;
 }
 
+export interface CheckEmailResponse {
+  method: 'password' | 'google' | 'apple' | 'line' | 'not_found';
+}
+
+export async function checkEmail(email: string): Promise<CheckEmailResponse> {
+  const response = await apiClient.post<ApiResponse<CheckEmailResponse>>(
+    '/api/v1/auth/check-email',
+    { email },
+  );
+  return response.data.data;
+}
+
 export async function login(email: string, password: string): Promise<AuthResponse['data']> {
   const response = await apiClient.post<AuthResponse>('/api/v1/auth/login', { email, password });
   return response.data.data;

@@ -16,7 +16,7 @@ export interface UseGoogleAuthResult {
   googleBannerError: string;
 }
 
-export function useGoogleAuth(): UseGoogleAuthResult {
+export function useGoogleAuth(loginHint?: string): UseGoogleAuthResult {
   const navigation  = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const queryClient = useQueryClient();
   const { setUser } = useAuthStore();
@@ -29,8 +29,17 @@ export function useGoogleAuth(): UseGoogleAuthResult {
       setIsGoogleSigningIn(true);
 
       await GoogleSignin.hasPlayServices();
-      await GoogleSignin.signOut();
-      await GoogleSignin.signIn();
+
+      // Attempt silent sign-in first — zero UI on the owner's device.
+      // If silent fails (new device / no cached session), fall back to the
+      // interactive picker with loginHint so Google pre-selects the right account.
+      try {
+        await GoogleSignin.signInSilently();
+      } catch {
+        await GoogleSignin.signOut();
+        await GoogleSignin.signIn(loginHint ? { loginHint } : undefined);
+      }
+
       const { idToken } = await GoogleSignin.getTokens();
 
       const { user, token } = await googleAuth(idToken);
@@ -38,8 +47,6 @@ export function useGoogleAuth(): UseGoogleAuthResult {
       setUser(user, token);
       navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
     } catch (error: unknown) {
-      // Google SDK errors carry a string `code` but no numeric `status`.
-      // ApiErrors (from our backend) carry both `code` and `status`.
       const asGoogle = error as { code?: string };
       if (asGoogle.code === statusCodes.SIGN_IN_CANCELLED) {
         return;
@@ -54,7 +61,7 @@ export function useGoogleAuth(): UseGoogleAuthResult {
     } finally {
       setIsGoogleSigningIn(false);
     }
-  }, [navigation, setUser]);
+  }, [navigation, queryClient, setUser, loginHint]);
 
   return { handleGoogleSignIn, isGoogleSigningIn, googleBannerError };
 }

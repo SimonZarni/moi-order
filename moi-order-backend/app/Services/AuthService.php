@@ -21,6 +21,40 @@ use Illuminate\Validation\ValidationException;
 class AuthService
 {
     /**
+     * Returns the auth method for a given email so the client can route
+     * the user to the correct sign-in step without exposing a password field
+     * for social-only accounts.
+     *
+     * Priority: password > google > apple > line > not_found
+     */
+    public function checkEmail(string $email): string
+    {
+        $user = User::where('email', $email)->first();
+
+        if ($user === null) {
+            return 'not_found';
+        }
+
+        if ($user->password !== null) {
+            return 'password';
+        }
+
+        if ($user->google_id !== null) {
+            return 'google';
+        }
+
+        if ($user->apple_id !== null) {
+            return 'apple';
+        }
+
+        if ($user->line_id !== null) {
+            return 'line';
+        }
+
+        return 'not_found';
+    }
+
+    /**
      * @return array{user: User, token: string}
      * @throws ValidationException when credentials do not match.
      */
@@ -28,7 +62,18 @@ class AuthService
     {
         $user = User::where('email', $dto->email)->first();
 
-        if ($user === null || $user->password === null || ! Hash::check($dto->password, $user->password)) {
+        if ($user === null) {
+            throw ValidationException::withMessages([
+                'email' => ['The provided credentials are incorrect.'],
+            ]);
+        }
+
+        // Social-only account — password has never been set.
+        if ($user->password === null) {
+            throw new DomainException('account.no_password', 409);
+        }
+
+        if (! Hash::check($dto->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);

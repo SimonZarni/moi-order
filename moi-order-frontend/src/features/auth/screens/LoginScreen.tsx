@@ -23,6 +23,8 @@ export function LoginScreen(): React.JSX.Element {
   const [authMethod, setAuthMethod] = useState<AuthMethod>('email');
   const {
     form,
+    step,
+    isCheckingEmail,
     isSubmitting,
     isGoogleSigningIn,
     isAppleSigningIn,
@@ -39,6 +41,8 @@ export function LoginScreen(): React.JSX.Element {
     handlePhoneNumberChange,
     handleOtpCodeChange,
     handleTogglePassword,
+    handleContinue,
+    handleBackToEmail,
     handleSubmit,
     handleRequestOtp,
     handleVerifyOtp,
@@ -46,9 +50,10 @@ export function LoginScreen(): React.JSX.Element {
     handleAppleSignIn,
     handleLineSignIn,
     handleGoToRegister,
-    handleGoToEmailRegister,
     handleGoToForgotPassword,
   } = useLoginScreen();
+
+  const socialDisabled = isCheckingEmail || isSubmitting || isGoogleSigningIn || isAppleSigningIn || isLineSigningIn;
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -77,60 +82,88 @@ export function LoginScreen(): React.JSX.Element {
 
             {authMethod === 'email' ? (
               <>
-                <FormField
-                  label="Email"
-                  value={form.email}
-                  onChangeText={handleEmailChange}
-                  accessibilityLabel="Email address"
-                  error={form.errors['email']}
-                  placeholder="you@example.com"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  returnKeyType="next"
-                />
-
-                <FormField
-                  label="Password"
-                  value={form.password}
-                  onChangeText={handlePasswordChange}
-                  accessibilityLabel="Password"
-                  error={form.errors['password']}
-                  placeholder="••••••••"
-                  secureTextEntry={!showPassword}
-                  autoComplete="password"
-                  returnKeyType="done"
-                  onSubmitEditing={handleSubmit}
-                  rightElement={
+                {step === 'email' ? (
+                  <>
+                    <FormField
+                      label="Email"
+                      value={form.email}
+                      onChangeText={handleEmailChange}
+                      accessibilityLabel="Email address"
+                      error={form.errors['email']}
+                      placeholder="you@example.com"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoComplete="email"
+                      returnKeyType="done"
+                      onSubmitEditing={handleContinue}
+                    />
                     <Pressable
-                      style={styles.eyeBtn}
-                      onPress={handleTogglePassword}
-                      accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                      style={[styles.submitBtn, isCheckingEmail && styles.submitBtnDisabled]}
+                      onPress={handleContinue}
+                      disabled={isCheckingEmail}
+                      accessibilityLabel="Continue"
                       accessibilityRole="button"
                     >
-                      <Text style={styles.eyeText}>{showPassword ? 'Hide' : 'Show'}</Text>
+                      <Text style={styles.submitText}>{isCheckingEmail ? 'Checking…' : 'Continue'}</Text>
                     </Pressable>
-                  }
-                />
+                  </>
+                ) : (
+                  <>
+                    <View style={styles.emailRow}>
+                      <Text style={styles.emailDisplay}>{form.email}</Text>
+                      <Pressable
+                        style={styles.backBtn}
+                        onPress={handleBackToEmail}
+                        accessibilityLabel="Back to email"
+                        accessibilityRole="button"
+                      >
+                        <Text style={styles.backText}>← back</Text>
+                      </Pressable>
+                    </View>
 
-                <Pressable
-                  style={[styles.submitBtn, isSubmitting && styles.submitBtnDisabled]}
-                  onPress={handleSubmit}
-                  disabled={isSubmitting}
-                  accessibilityLabel="Sign in"
-                  accessibilityRole="button"
-                >
-                  <Text style={styles.submitText}>{isSubmitting ? 'Signing in…' : 'Sign In'}</Text>
-                </Pressable>
+                    <FormField
+                      label="Password"
+                      value={form.password}
+                      onChangeText={handlePasswordChange}
+                      accessibilityLabel="Password"
+                      error={form.errors['password']}
+                      placeholder="••••••••"
+                      secureTextEntry={!showPassword}
+                      autoComplete="password"
+                      returnKeyType="done"
+                      onSubmitEditing={handleSubmit}
+                      rightElement={
+                        <Pressable
+                          style={styles.eyeBtn}
+                          onPress={handleTogglePassword}
+                          accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                          accessibilityRole="button"
+                        >
+                          <Text style={styles.eyeText}>{showPassword ? 'Hide' : 'Show'}</Text>
+                        </Pressable>
+                      }
+                    />
 
-                <Pressable
-                  style={styles.forgotBtn}
-                  onPress={handleGoToForgotPassword}
-                  accessibilityLabel="Forgot password"
-                  accessibilityRole="button"
-                >
-                  <Text style={styles.forgotText}>Forgot password?</Text>
-                </Pressable>
+                    <Pressable
+                      style={[styles.submitBtn, isSubmitting && styles.submitBtnDisabled]}
+                      onPress={handleSubmit}
+                      disabled={isSubmitting}
+                      accessibilityLabel="Sign in"
+                      accessibilityRole="button"
+                    >
+                      <Text style={styles.submitText}>{isSubmitting ? 'Signing in…' : 'Sign In'}</Text>
+                    </Pressable>
+
+                    <Pressable
+                      style={styles.forgotBtn}
+                      onPress={handleGoToForgotPassword}
+                      accessibilityLabel="Forgot password"
+                      accessibilityRole="button"
+                    >
+                      <Text style={styles.forgotText}>Forgot password?</Text>
+                    </Pressable>
+                  </>
+                )}
 
                 <View style={styles.dividerRow}>
                   <View style={styles.dividerLine} />
@@ -141,14 +174,14 @@ export function LoginScreen(): React.JSX.Element {
                 <GoogleSignInButton
                   onPress={handleGoogleSignIn}
                   isLoading={isGoogleSigningIn}
-                  disabled={isSubmitting || isAppleSigningIn || isLineSigningIn}
+                  disabled={socialDisabled}
                 />
 
                 <View style={styles.socialButtonSpacing}>
                   <LineSignInButton
                     onPress={handleLineSignIn}
                     isLoading={isLineSigningIn}
-                    disabled={isSubmitting || isGoogleSigningIn || isAppleSigningIn}
+                    disabled={socialDisabled}
                   />
                 </View>
 
@@ -157,7 +190,7 @@ export function LoginScreen(): React.JSX.Element {
                     <AppleSignInButton
                       onPress={handleAppleSignIn}
                       isLoading={isAppleSigningIn}
-                      disabled={isSubmitting || isGoogleSigningIn || isLineSigningIn}
+                      disabled={socialDisabled}
                     />
                   </View>
                 )}
@@ -219,11 +252,11 @@ export function LoginScreen(): React.JSX.Element {
             <View style={styles.footer}>
               <Text style={styles.footerText}>Don't have an account?</Text>
               <Pressable
-                onPress={handleGoToEmailRegister}
-                accessibilityLabel="Register with email"
+                onPress={handleGoToRegister}
+                accessibilityLabel="Create account"
                 accessibilityRole="button"
               >
-                <Text style={styles.footerLink}>Register with Email</Text>
+                <Text style={styles.footerLink}>Create Account</Text>
               </Pressable>
             </View>
           </View>

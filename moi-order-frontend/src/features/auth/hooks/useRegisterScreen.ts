@@ -1,15 +1,16 @@
 import { useCallback, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 
 import { useAppleAuth } from '@/features/auth/hooks/useAppleAuth';
 import { useLineAuth } from '@/features/auth/hooks/useLineAuth';
 import { usePhoneOtpAuth } from '@/features/auth/hooks/usePhoneOtpAuth';
 import { useRegisterForm, UseRegisterFormResult } from '@/features/auth/hooks/useRegisterForm';
 import { useGoogleAuth } from '@/features/auth/hooks/useGoogleAuth';
-import { register } from '@/shared/api/auth';
-import { useAuthStore } from '@/shared/store/authStore';
+import { sendEmailOtp } from '@/shared/api/emailAuth';
+import { DOMAIN_ERROR_MESSAGES } from '@/shared/constants/errorCodes';
+import { MESSAGES } from '@/shared/constants/messages';
 import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 
@@ -25,14 +26,10 @@ export interface UseRegisterScreenResult {
   phoneNumber: string;
   otpCode: string;
   bannerError: string;
-  showPassword: boolean;
   handleNameChange: (value: string) => void;
   handleEmailChange: (value: string) => void;
-  handlePasswordChange: (value: string) => void;
-  handlePasswordConfirmationChange: (value: string) => void;
   handlePhoneNumberChange: (value: string) => void;
   handleOtpCodeChange: (value: string) => void;
-  handleTogglePassword: () => void;
   handleSubmit: () => void;
   handleRequestOtp: () => Promise<void>;
   handleVerifyOtp: () => Promise<void>;
@@ -43,51 +40,44 @@ export interface UseRegisterScreenResult {
 }
 
 export function useRegisterScreen(): UseRegisterScreenResult {
-  const navigation  = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const queryClient = useQueryClient();
-  const { setUser } = useAuthStore();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const {
     form,
     handleNameChange,
     handleEmailChange,
-    handlePasswordChange,
-    handlePasswordConfirmationChange,
-    validate,
+    validateBasic,
     applyApiError,
   } = useRegisterForm();
   const phoneOtp = usePhoneOtpAuth({ purpose: 'register', getName: () => form.name });
-  const { handleGoogleSignIn, isGoogleSigningIn, googleBannerError } = useGoogleAuth();
-  const { handleAppleSignIn, isAppleSigningIn, appleBannerError } = useAppleAuth();
-  const { handleLineSignIn, isLineSigningIn, lineBannerError } = useLineAuth();
+  const { handleGoogleSignIn, isGoogleSigningIn, googleBannerError } = useGoogleAuth(form.email.trim());
+  const { handleAppleSignIn, isAppleSigningIn, appleBannerError }    = useAppleAuth();
+  const { handleLineSignIn, isLineSigningIn, lineBannerError }        = useLineAuth();
   const [bannerError, setBannerError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
 
   const { mutate, isPending: isSubmitting } = useMutation({
-    mutationFn: () => register(form.name.trim(), form.email.trim(), form.password, form.passwordConfirmation),
-    onSuccess: ({ user, token }) => {
-      queryClient.clear();
-      setUser(user, token);
-      navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
+    mutationFn: () => sendEmailOtp(form.email.trim().toLowerCase(), 'registration'),
+    onSuccess: () => {
+      navigation.navigate('EmailOtp', {
+        email:   form.email.trim().toLowerCase(),
+        purpose: 'registration',
+        name:    form.name.trim(),
+      });
     },
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {
         applyApiError(error.errors);
+      } else if (error.status === 409) {
+        setBannerError(DOMAIN_ERROR_MESSAGES[error.code] ?? error.message ?? MESSAGES.genericError);
       } else {
-        setBannerError(error.message ?? 'Registration failed. Please try again.');
+        setBannerError(error.message ?? MESSAGES.genericError);
       }
     },
   });
 
   const handleSubmit = useCallback((): void => {
     setBannerError('');
-    if (validate()) {
-      mutate();
-    }
-  }, [validate, mutate]);
-
-  const handleTogglePassword = useCallback((): void => {
-    setShowPassword((prev) => !prev);
-  }, []);
+    if (validateBasic()) mutate();
+  }, [validateBasic, mutate]);
 
   const handleGoToLogin = useCallback((): void => {
     navigation.navigate('Login');
@@ -99,23 +89,19 @@ export function useRegisterScreen(): UseRegisterScreenResult {
     isGoogleSigningIn,
     isAppleSigningIn,
     isLineSigningIn,
-    isRequestingOtp: phoneOtp.isRequestingOtp,
-    isVerifyingOtp: phoneOtp.isVerifyingOtp,
-    resendSecondsLeft: phoneOtp.resendSecondsLeft,
-    phoneNumber: phoneOtp.phoneNumber,
-    otpCode: phoneOtp.otpCode,
-    bannerError: bannerError || phoneOtp.otpError || googleBannerError || appleBannerError || lineBannerError,
-    showPassword,
+    isRequestingOtp:    phoneOtp.isRequestingOtp,
+    isVerifyingOtp:     phoneOtp.isVerifyingOtp,
+    resendSecondsLeft:  phoneOtp.resendSecondsLeft,
+    phoneNumber:        phoneOtp.phoneNumber,
+    otpCode:            phoneOtp.otpCode,
+    bannerError:        bannerError || phoneOtp.otpError || googleBannerError || appleBannerError || lineBannerError,
     handleNameChange,
     handleEmailChange,
-    handlePasswordChange,
-    handlePasswordConfirmationChange,
     handlePhoneNumberChange: phoneOtp.handlePhoneNumberChange,
-    handleOtpCodeChange: phoneOtp.handleOtpCodeChange,
-    handleTogglePassword,
+    handleOtpCodeChange:     phoneOtp.handleOtpCodeChange,
     handleSubmit,
-    handleRequestOtp: phoneOtp.handleRequestOtp,
-    handleVerifyOtp: phoneOtp.handleVerifyOtp,
+    handleRequestOtp:  phoneOtp.handleRequestOtp,
+    handleVerifyOtp:   phoneOtp.handleVerifyOtp,
     handleGoogleSignIn,
     handleAppleSignIn,
     handleLineSignIn,

@@ -33,14 +33,10 @@ export function RegisterScreen(): React.JSX.Element {
     phoneNumber,
     otpCode,
     bannerError,
-    showPassword,
     handleNameChange,
     handleEmailChange,
-    handlePasswordChange,
-    handlePasswordConfirmationChange,
     handlePhoneNumberChange,
     handleOtpCodeChange,
-    handleTogglePassword,
     handleSubmit,
     handleRequestOtp,
     handleVerifyOtp,
@@ -49,6 +45,8 @@ export function RegisterScreen(): React.JSX.Element {
     handleLineSignIn,
     handleGoToLogin,
   } = useRegisterScreen();
+
+  const socialDisabled = isSubmitting || isGoogleSigningIn || isAppleSigningIn || isLineSigningIn;
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -98,38 +96,6 @@ export function RegisterScreen(): React.JSX.Element {
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoComplete="email"
-                  returnKeyType="next"
-                />
-
-                <FormField
-                  label="Password"
-                  value={form.password}
-                  onChangeText={handlePasswordChange}
-                  accessibilityLabel="Password"
-                  error={form.errors['password']}
-                  placeholder="At least 8 characters"
-                  secureTextEntry={!showPassword}
-                  returnKeyType="next"
-                  rightElement={
-                    <Pressable
-                      style={styles.eyeBtn}
-                      onPress={handleTogglePassword}
-                      accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
-                      accessibilityRole="button"
-                    >
-                      <Text style={styles.eyeText}>{showPassword ? 'Hide' : 'Show'}</Text>
-                    </Pressable>
-                  }
-                />
-
-                <FormField
-                  label="Confirm Password"
-                  value={form.passwordConfirmation}
-                  onChangeText={handlePasswordConfirmationChange}
-                  accessibilityLabel="Confirm password"
-                  error={form.errors['password_confirmation']}
-                  placeholder="Repeat password"
-                  secureTextEntry={!showPassword}
                   returnKeyType="done"
                   onSubmitEditing={handleSubmit}
                 />
@@ -138,10 +104,10 @@ export function RegisterScreen(): React.JSX.Element {
                   style={[styles.submitBtn, isSubmitting && styles.submitBtnDisabled]}
                   onPress={handleSubmit}
                   disabled={isSubmitting}
-                  accessibilityLabel="Create account"
+                  accessibilityLabel="Send verification code"
                   accessibilityRole="button"
                 >
-                  <Text style={styles.submitText}>{isSubmitting ? 'Creating account…' : 'Create Account'}</Text>
+                  <Text style={styles.submitText}>{isSubmitting ? 'Sending…' : 'Send Code'}</Text>
                 </Pressable>
 
                 <View style={styles.dividerRow}>
@@ -153,14 +119,14 @@ export function RegisterScreen(): React.JSX.Element {
                 <GoogleSignInButton
                   onPress={handleGoogleSignIn}
                   isLoading={isGoogleSigningIn}
-                  disabled={isSubmitting || isAppleSigningIn || isLineSigningIn}
+                  disabled={socialDisabled}
                 />
 
                 <View style={styles.socialButtonSpacing}>
                   <LineSignInButton
                     onPress={handleLineSignIn}
                     isLoading={isLineSigningIn}
-                    disabled={isSubmitting || isGoogleSigningIn || isAppleSigningIn}
+                    disabled={socialDisabled}
                   />
                 </View>
 
@@ -169,7 +135,7 @@ export function RegisterScreen(): React.JSX.Element {
                     <AppleSignInButton
                       onPress={handleAppleSignIn}
                       isLoading={isAppleSigningIn}
-                      disabled={isSubmitting || isGoogleSigningIn || isLineSigningIn}
+                      disabled={socialDisabled}
                     />
                   </View>
                 )}

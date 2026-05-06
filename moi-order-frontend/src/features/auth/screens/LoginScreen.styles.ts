@@ -111,6 +111,28 @@ export const styles = StyleSheet.create({
     color: colours.primary,
   },
 
+  // ── Step 2 — locked email row ─────────────────────────────────────────────
+  emailRow: {
+    flexDirection:  'row',
+    alignItems:     'center',
+    justifyContent: 'space-between',
+    marginBottom:   spacing.md,
+  },
+  emailDisplay: {
+    fontSize:   typography.sm,
+    color:      colours.textOnLight,
+    fontWeight: '600',
+  },
+  backBtn: {
+    paddingVertical:   spacing.xs,
+    paddingHorizontal: spacing.sm,
+  },
+  backText: {
+    fontSize:   typography.sm,
+    color:      colours.primary,
+    fontWeight: '600',
+  },
+
   // ── Password eye toggle (rightElement passed to FormField) ─────────────────
   eyeBtn: {
     padding: spacing.xs,

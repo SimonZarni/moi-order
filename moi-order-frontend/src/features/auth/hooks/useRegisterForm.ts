@@ -8,6 +8,7 @@ export interface UseRegisterFormResult {
   handleEmailChange: (value: string) => void;
   handlePasswordChange: (value: string) => void;
   handlePasswordConfirmationChange: (value: string) => void;
+  validateBasic: () => boolean;
   validate: () => boolean;
   applyApiError: (errors: Record<string, string[]>) => void;
   clearErrors: () => void;
@@ -30,6 +31,14 @@ export function useRegisterForm(): UseRegisterFormResult {
       [field]: value,
       errors: { ...prev.errors, [field]: '' },
     }));
+  };
+
+  const validateBasic = (): boolean => {
+    const errors: Record<string, string> = {};
+    if (form.name.trim().length < 2)  errors['name']  = 'Full name must be at least 2 characters.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) errors['email'] = 'Enter a valid email address.';
+    setForm((prev) => ({ ...prev, errors }));
+    return Object.keys(errors).length === 0;
   };
 
   const validate = (): boolean => {
@@ -60,6 +69,7 @@ export function useRegisterForm(): UseRegisterFormResult {
     handleEmailChange:                clearField('email'),
     handlePasswordChange:             clearField('password'),
     handlePasswordConfirmationChange: clearField('passwordConfirmation'),
+    validateBasic,
     validate,
     applyApiError,
     clearErrors,

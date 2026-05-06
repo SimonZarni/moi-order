@@ -8,14 +8,17 @@ import { useLineAuth } from '@/features/auth/hooks/useLineAuth';
 import { useLoginForm, UseLoginFormResult } from '@/features/auth/hooks/useLoginForm';
 import { usePhoneOtpAuth } from '@/features/auth/hooks/usePhoneOtpAuth';
 import { useGoogleAuth } from '@/features/auth/hooks/useGoogleAuth';
-import { login } from '@/shared/api/auth';
+import { checkEmail as checkEmailApi, login } from '@/shared/api/auth';
 import { useAuthStore } from '@/shared/store/authStore';
-import { getAccountErrorMessage } from '@/shared/constants/errorCodes';
+import { getAccountErrorMessage, DOMAIN_ERROR_MESSAGES, ERROR_CODES } from '@/shared/constants/errorCodes';
+import { MESSAGES } from '@/shared/constants/messages';
 import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 
 export interface UseLoginScreenResult {
   form: UseLoginFormResult['form'];
+  step: 'email' | 'password';
+  isCheckingEmail: boolean;
   isSubmitting: boolean;
   isGoogleSigningIn: boolean;
   isAppleSigningIn: boolean;
@@ -32,6 +35,8 @@ export interface UseLoginScreenResult {
   handlePhoneNumberChange: (value: string) => void;
   handleOtpCodeChange: (value: string) => void;
   handleTogglePassword: () => void;
+  handleContinue: () => void;
+  handleBackToEmail: () => void;
   handleSubmit: () => void;
   handleRequestOtp: () => Promise<void>;
   handleVerifyOtp: () => Promise<void>;
@@ -39,7 +44,6 @@ export interface UseLoginScreenResult {
   handleAppleSignIn: () => Promise<void>;
   handleLineSignIn: () => Promise<void>;
   handleGoToRegister: () => void;
-  handleGoToEmailRegister: () => void;
   handleGoToForgotPassword: () => void;
 }
 
@@ -47,13 +51,34 @@ export function useLoginScreen(): UseLoginScreenResult {
   const navigation  = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const queryClient = useQueryClient();
   const { setUser } = useAuthStore();
-  const { form, handleEmailChange, handlePasswordChange, validate, applyApiError } = useLoginForm();
+  const { form, handleEmailChange, handlePasswordChange, validateEmail, validate, applyApiError } = useLoginForm();
   const phoneOtp = usePhoneOtpAuth({ purpose: 'login' });
-  const { handleGoogleSignIn, isGoogleSigningIn, googleBannerError } = useGoogleAuth();
-  const { handleAppleSignIn, isAppleSigningIn, appleBannerError } = useAppleAuth();
-  const { handleLineSignIn, isLineSigningIn, lineBannerError } = useLineAuth();
+  const { handleGoogleSignIn, isGoogleSigningIn, googleBannerError } = useGoogleAuth(form.email.trim());
+  const { handleAppleSignIn, isAppleSigningIn, appleBannerError }    = useAppleAuth();
+  const { handleLineSignIn, isLineSigningIn, lineBannerError }        = useLineAuth();
+  const [step, setStep]             = useState<'email' | 'password'>('email');
   const [bannerError, setBannerError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  const { mutate: runCheckEmail, isPending: isCheckingEmail } = useMutation({
+    mutationFn: () => checkEmailApi(form.email.trim().toLowerCase()),
+    onSuccess: ({ method }) => {
+      setBannerError('');
+      if (method === 'not_found') {
+        setBannerError('No account found with this email. Create one?');
+        return;
+      }
+      if (method === 'google') { void handleGoogleSignIn(); return; }
+      if (method === 'apple')  { void handleAppleSignIn();  return; }
+      if (method === 'line')   { void handleLineSignIn();   return; }
+      setStep('password');
+    },
+    onError: (error: ApiError) => {
+      setBannerError(
+        DOMAIN_ERROR_MESSAGES[error.code] ?? error.message ?? MESSAGES.genericError,
+      );
+    },
+  });
 
   const { mutate, isPending: isSubmitting } = useMutation({
     mutationFn: () => login(form.email.trim(), form.password),
@@ -71,11 +96,19 @@ export function useLoginScreen(): UseLoginScreenResult {
     },
   });
 
+  const handleContinue = useCallback((): void => {
+    setBannerError('');
+    if (validateEmail()) runCheckEmail();
+  }, [validateEmail, runCheckEmail]);
+
+  const handleBackToEmail = useCallback((): void => {
+    setStep('email');
+    setBannerError('');
+  }, []);
+
   const handleSubmit = useCallback((): void => {
     setBannerError('');
-    if (validate()) {
-      mutate();
-    }
+    if (validate()) mutate();
   }, [validate, mutate]);
 
   const handleTogglePassword = useCallback((): void => {
@@ -86,40 +119,45 @@ export function useLoginScreen(): UseLoginScreenResult {
     navigation.navigate('Register');
   }, [navigation]);
 
-  const handleGoToEmailRegister = useCallback((): void => {
-    navigation.navigate('EmailRegister');
-  }, [navigation]);
-
   const handleGoToForgotPassword = useCallback((): void => {
     navigation.navigate('ForgotPassword');
   }, [navigation]);
 
+  const combinedBannerError = bannerError
+    || phoneOtp.otpError
+    || googleBannerError
+    || appleBannerError
+    || lineBannerError;
+
   return {
     form,
+    step,
+    isCheckingEmail,
     isSubmitting,
     isGoogleSigningIn,
     isAppleSigningIn,
     isLineSigningIn,
-    isRequestingOtp: phoneOtp.isRequestingOtp,
-    isVerifyingOtp: phoneOtp.isVerifyingOtp,
-    resendSecondsLeft: phoneOtp.resendSecondsLeft,
-    phoneNumber: phoneOtp.phoneNumber,
-    otpCode: phoneOtp.otpCode,
-    bannerError: bannerError || phoneOtp.otpError || googleBannerError || appleBannerError || lineBannerError,
+    isRequestingOtp:    phoneOtp.isRequestingOtp,
+    isVerifyingOtp:     phoneOtp.isVerifyingOtp,
+    resendSecondsLeft:  phoneOtp.resendSecondsLeft,
+    phoneNumber:        phoneOtp.phoneNumber,
+    otpCode:            phoneOtp.otpCode,
+    bannerError:        combinedBannerError,
     showPassword,
     handleEmailChange,
     handlePasswordChange,
     handlePhoneNumberChange: phoneOtp.handlePhoneNumberChange,
-    handleOtpCodeChange: phoneOtp.handleOtpCodeChange,
+    handleOtpCodeChange:     phoneOtp.handleOtpCodeChange,
     handleTogglePassword,
+    handleContinue,
+    handleBackToEmail,
     handleSubmit,
-    handleRequestOtp: phoneOtp.handleRequestOtp,
-    handleVerifyOtp: phoneOtp.handleVerifyOtp,
+    handleRequestOtp:  phoneOtp.handleRequestOtp,
+    handleVerifyOtp:   phoneOtp.handleVerifyOtp,
     handleGoogleSignIn,
     handleAppleSignIn,
     handleLineSignIn,
     handleGoToRegister,
-    handleGoToEmailRegister,
     handleGoToForgotPassword,
   };
 }

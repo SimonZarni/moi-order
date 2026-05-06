@@ -93,27 +93,31 @@ class GoogleAuthService
 
     private function findOrCreateUser(string $googleId, string $email, string $name): User
     {
-        // Prefer google_id lookup — immune to email change on the Google account side.
-        $user = User::where('google_id', $googleId)->first();
+        // Step 1: find by google_id including soft-deleted rows.
+        $user = User::withTrashed()->where('google_id', $googleId)->first();
 
         if ($user !== null) {
+            if ($user->trashed()) {
+                $user->restore();
+            }
             return $user;
         }
 
-        // Existing email account — link Google to it so future logins use google_id.
+        // Step 2: email match means an existing account (password or other social).
+        // Never auto-link — require the user to connect Google explicitly from profile.
         $user = User::where('email', $email)->first();
 
         if ($user !== null) {
-            $user->update(['google_id' => $googleId]);
-            return $user;
+            throw new DomainException('account.email_exists', 409);
         }
 
-        // Brand new user via Google — no password needed.
+        // Step 3: brand-new user — email is verified by Google.
         return User::create([
-            'google_id' => $googleId,
-            'email'     => $email,
-            'name'      => $name,
-            'password'  => null,
+            'google_id'         => $googleId,
+            'email'             => $email,
+            'name'              => $name,
+            'password'          => null,
+            'email_verified_at' => now(),
         ]);
     }
 

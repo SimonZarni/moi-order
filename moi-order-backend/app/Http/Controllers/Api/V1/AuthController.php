@@ -13,6 +13,7 @@ use App\DTOs\OtpVerifyDTO;
 use App\DTOs\RegisterDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AppleAuthRequest;
+use App\Http\Requests\CheckEmailRequest;
 use App\Http\Requests\GoogleAuthRequest;
 use App\Http\Requests\LineAuthRequest;
 use App\Http\Requests\LoginRequest;
@@ -41,6 +42,14 @@ class AuthController extends Controller
         private readonly LineAuthService  $lineAuthService,
         private readonly OtpAuthService   $otpAuthService,
     ) {}
+
+    /** POST /api/v1/auth/check-email — intentionally public */
+    public function checkEmail(CheckEmailRequest $request): JsonResponse
+    {
+        $method = $this->authService->checkEmail($request->validated('email'));
+
+        return response()->json(['data' => ['method' => $method]]);
+    }
 
     /** POST /api/v1/auth/login — intentionally public */
     public function login(LoginRequest $request): JsonResponse

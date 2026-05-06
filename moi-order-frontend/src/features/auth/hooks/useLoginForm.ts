@@ -7,6 +7,7 @@ export interface UseLoginFormResult {
   handleEmailChange: (value: string) => void;
   handlePasswordChange: (value: string) => void;
   validate: () => boolean;
+  validateEmail: () => boolean;
   applyApiError: (errors: Record<string, string[]>) => void;
   clearErrors: () => void;
 }
@@ -26,6 +27,17 @@ export function useLoginForm(): UseLoginFormResult {
 
   const handlePasswordChange = (value: string): void => {
     setForm((prev) => ({ ...prev, password: value, errors: { ...prev.errors, password: '' } }));
+  };
+
+  const validateEmail = (): boolean => {
+    const errors: Record<string, string> = { ...form.errors };
+    if (form.email.trim().length === 0) {
+      errors['email'] = 'Email is required.';
+    } else {
+      delete errors['email'];
+    }
+    setForm((prev) => ({ ...prev, errors }));
+    return !errors['email'];
   };
 
   const validate = (): boolean => {
@@ -48,5 +60,5 @@ export function useLoginForm(): UseLoginFormResult {
     setForm((prev) => ({ ...prev, errors: {} }));
   };
 
-  return { form, handleEmailChange, handlePasswordChange, validate, applyApiError, clearErrors };
+  return { form, handleEmailChange, handlePasswordChange, validateEmail, validate, applyApiError, clearErrors };
 }
