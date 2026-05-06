@@ -67,9 +67,30 @@ export function useGoogleAuth(loginHint?: string): UseGoogleAuthResult {
       const asApiError = error as ApiError;
       if (typeof asApiError.status === 'number') {
         setGoogleBannerError(getAccountErrorMessage(asApiError.code, asApiError.context));
-      } else {
-        setGoogleBannerError('Google sign-in failed. Please try again.');
+        return;
       }
+
+      // On Android, signIn() sometimes throws after the sign-in has already
+      // completed and the backend has already created the account. Recover by
+      // checking for an active Google session and retrying the backend call.
+      try {
+        const tokens = await GoogleSignin.getTokens();
+        if (tokens.idToken) {
+          const { user, token } = await googleAuth(tokens.idToken);
+          queryClient.clear();
+          setUser(user, token);
+          navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
+          return;
+        }
+      } catch (recoveryError: unknown) {
+        const recoveryApiError = recoveryError as ApiError;
+        if (typeof recoveryApiError.status === 'number') {
+          setGoogleBannerError(getAccountErrorMessage(recoveryApiError.code, recoveryApiError.context));
+          return;
+        }
+      }
+
+      setGoogleBannerError('Google sign-in failed. Please try again.');
     } finally {
       setIsGoogleSigningIn(false);
     }
