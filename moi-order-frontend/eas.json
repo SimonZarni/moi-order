@@ -8,18 +8,49 @@
       "distribution": "internal",
       "ios": {
         "simulator": false
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.moiorder.com",
+        "EXPO_PUBLIC_PUSHER_KEY": "12880de2bf84dbdcffaa",
+        "EXPO_PUBLIC_PUSHER_CLUSTER": "ap1",
+        "EXPO_PUBLIC_LINE_CHANNEL_ID": "2008805625",
+        "EXPO_PUBLIC_MAPBOX_TOKEN": "pk.eyJ1Ijoia2F1bmdzaXRodTAzIiwiYSI6ImNtbm15YzlrNTB6bTYyd3B6djE0cHA2bzMifQ.OijmUd2WkN_57CAG-z0A-Q",
+        "EXPO_PUBLIC_MAPBOX_STYLE": "mapbox://styles/kaungsithu03/cmoco1c1k000c01sa2wvs4k0y",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "661538209777-o33avjo80379ui26kj2clbn4snla6j2g.apps.googleusercontent.com"
       }
     },
     "preview": {
       "channel": "preview",
+      "distribution": "internal",
+      "ios": {
+        "simulator": false
+      },
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.moiorder.com",
+        "EXPO_PUBLIC_PUSHER_KEY": "12880de2bf84dbdcffaa",
+        "EXPO_PUBLIC_PUSHER_CLUSTER": "ap1",
+        "EXPO_PUBLIC_LINE_CHANNEL_ID": "2008805625",
+        "EXPO_PUBLIC_MAPBOX_TOKEN": "pk.eyJ1Ijoia2F1bmdzaXRodTAzIiwiYSI6ImNtbm15YzlrNTB6bTYyd3B6djE0cHA2bzMifQ.OijmUd2WkN_57CAG-z0A-Q",
+        "EXPO_PUBLIC_MAPBOX_STYLE": "mapbox://styles/kaungsithu03/cmoco1c1k000c01sa2wvs4k0y",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "661538209777-o33avjo80379ui26kj2clbn4snla6j2g.apps.googleusercontent.com"
       }
     },
     "production": {
       "channel": "production",
       "android": {
         "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.moiorder.com",
+        "EXPO_PUBLIC_PUSHER_KEY": "12880de2bf84dbdcffaa",
+        "EXPO_PUBLIC_PUSHER_CLUSTER": "ap1",
+        "EXPO_PUBLIC_LINE_CHANNEL_ID": "2008805625",
+        "EXPO_PUBLIC_MAPBOX_TOKEN": "pk.eyJ1Ijoia2F1bmdzaXRodTAzIiwiYSI6ImNtbm15YzlrNTB6bTYyd3B6djE0cHA2bzMifQ.OijmUd2WkN_57CAG-z0A-Q",
+        "EXPO_PUBLIC_MAPBOX_STYLE": "mapbox://styles/kaungsithu03/cmoco1c1k000c01sa2wvs4k0y",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "661538209777-o33avjo80379ui26kj2clbn4snla6j2g.apps.googleusercontent.com"
       }
     }
   }
