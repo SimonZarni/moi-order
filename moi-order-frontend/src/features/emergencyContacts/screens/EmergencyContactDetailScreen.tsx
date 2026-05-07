@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useEmergencyContactDetailScreen } from '@/features/emergencyContacts/hooks/useEmergencyContactDetailScreen';
-import { StickyBackButton } from '@/shared/components/StickyBackButton/StickyBackButton';
+import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { colours } from '@/shared/theme/colours';
 import { styles } from './EmergencyContactDetailScreen.styles';
 
@@ -18,8 +18,8 @@ export function EmergencyContactDetailScreen(): React.JSX.Element {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        <StickyBackButton onPress={handleBack} label="Back" />
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <HeroHeader accentColor="#c0392b" title="Loading…" onBack={handleBack} backLabel="Back" minHeight={80} />
+        <View style={styles.centered}>
           <ActivityIndicator size="large" color={colours.primary} />
         </View>
       </SafeAreaView>
@@ -29,9 +29,9 @@ export function EmergencyContactDetailScreen(): React.JSX.Element {
   if (isError || !contact) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
-        <StickyBackButton onPress={handleBack} label="Back" />
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: colours.textMuted }}>Unable to load contact. Pull to retry.</Text>
+        <HeroHeader accentColor="#c0392b" title="Error" onBack={handleBack} backLabel="Back" minHeight={80} />
+        <View style={styles.centered}>
+          <Text style={styles.errorText}>Unable to load contact. Please go back and try again.</Text>
         </View>
       </SafeAreaView>
     );
@@ -41,15 +41,17 @@ export function EmergencyContactDetailScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <StickyBackButton onPress={handleBack} label="Back" />
+      <HeroHeader
+        accentColor="#c0392b"
+        title={title}
+        onBack={handleBack}
+        backLabel="Back"
+        minHeight={80}
+      />
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
         {coverPhoto ? (
           <Image source={{ uri: coverPhoto.url }} style={styles.heroImage} resizeMode="cover" />
-        ) : (
-          <View style={styles.heroDark}>
-            <Text style={styles.heroPlaceholderText}>No photo</Text>
-          </View>
-        )}
+        ) : null}
 
         <View style={styles.body}>
           <Text style={styles.title}>{title}</Text>
@@ -57,12 +59,7 @@ export function EmergencyContactDetailScreen(): React.JSX.Element {
 
           <View style={styles.infoSection}>
             {contact.phone ? (
-              <InfoRow
-                icon="call-outline"
-                text={contact.phone}
-                onPress={handleCallPress}
-                isLink
-              />
+              <InfoRow icon="call-outline" text={contact.phone} onPress={handleCallPress} isLink />
             ) : null}
             {contact.location ? (
               <InfoRow icon="location-outline" text={contact.location} />

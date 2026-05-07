@@ -6,25 +6,26 @@ import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 
 export const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colours.backgroundLight },
+  root:   { flex: 1, backgroundColor: colours.backgroundLight },
   scroll: { flex: 1 },
+
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.xl,
+  },
+  errorText: {
+    fontSize: typography.sm,
+    color: colours.textMuted,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
 
   heroImage: {
     width: '100%',
-    height: 240,
+    height: 220,
     backgroundColor: colours.backgroundDark,
-  },
-  heroDark: {
-    width: '100%',
-    height: 240,
-    backgroundColor: colours.backgroundDark,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  heroPlaceholderText: {
-    fontSize: typography.sm,
-    color: colours.textOnDark,
-    opacity: 0.5,
   },
 
   body: {
@@ -62,9 +63,6 @@ export const styles = StyleSheet.create({
     gap: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colours.backgroundLight,
-  },
-  infoRowLast: {
-    borderBottomWidth: 0,
   },
   infoText: {
     flex: 1,
