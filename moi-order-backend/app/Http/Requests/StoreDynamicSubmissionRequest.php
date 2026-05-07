@@ -103,6 +103,12 @@ class StoreDynamicSubmissionRequest extends FormRequest
             return;
         }
 
+        // Hard cap per file to prevent oversized uploads from silently failing at the web server layer.
+        if ($file->getSize() > 10 * 1024 * 1024) {
+            $v->errors()->add("files.{$key}", "The {$labelEn} must be under 10 MB.");
+            return;
+        }
+
         $allowedMimes = $this->resolveMimes($accepts);
 
         if (! in_array($file->getMimeType(), $allowedMimes, strict: true)) {

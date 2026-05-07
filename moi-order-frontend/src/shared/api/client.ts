@@ -51,8 +51,10 @@ apiClient.interceptors.response.use(
     const data = error.response?.data;
 
     const apiError: ApiError = {
-      message: data?.message ?? 'Something went wrong.',
-      code: data?.code ?? 'internal',
+      message: status === 413
+        ? 'Could not upload. The file is too large.'
+        : (data?.message ?? 'Something went wrong.'),
+      code: status === 413 ? 'file_too_large' : (data?.code ?? 'internal'),
       ...(data?.errors   !== undefined && { errors:  data.errors }),
       ...(data?.context  !== undefined && { context: data.context }),
       status,

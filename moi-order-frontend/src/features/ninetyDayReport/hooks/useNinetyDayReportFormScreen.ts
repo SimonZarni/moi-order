@@ -66,13 +66,19 @@ export function useNinetyDayReportFormScreen(): UseNinetyDayReportFormScreenResu
     }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
-      quality:    0.85,
+      quality:    0.7,
       allowsEditing: false,
       base64: false,
     });
     if (result.canceled || result.assets.length === 0) return null;
     const asset = result.assets[0];
-    return asset != null ? stripAsset(asset) : null;
+    if (asset == null) return null;
+    // Guard before the network call — 10 MB matches the server-side cap.
+    if (asset.fileSize != null && asset.fileSize > 10 * 1024 * 1024) {
+      setBannerError('Could not upload. The file is too large. Please select an image under 10 MB.');
+      return null;
+    }
+    return stripAsset(asset);
   }, []);
 
   const handlePickPassportBioPage = useCallback(async (): Promise<void> => {

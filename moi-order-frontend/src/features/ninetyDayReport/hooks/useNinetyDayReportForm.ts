@@ -45,13 +45,18 @@ export function useNinetyDayReportForm(): UseNinetyDayReportFormResult {
   };
 
   const applyApiError = (apiErrors: Record<string, string[]>): void => {
-    // Map snake_case API keys to camelCase form keys.
+    // Map snake_case API keys (with and without "fields."/"files." prefixes) to camelCase form keys.
     const keyMap: Record<string, string> = {
-      full_name:          'fullName',
-      phone:              'phone',
-      passport_bio_page:  'passportBioPage',
-      visa_page:          'visaPage',
-      old_slip:           'oldSlip',
+      'fields.full_name':          'fullName',
+      'fields.phone':              'phone',
+      'files.passport_bio_page':   'passportBioPage',
+      'files.visa_page':           'visaPage',
+      'files.old_slip':            'oldSlip',
+      full_name:                   'fullName',
+      phone:                       'phone',
+      passport_bio_page:           'passportBioPage',
+      visa_page:                   'visaPage',
+      old_slip:                    'oldSlip',
     };
     const flat: Record<string, string> = {};
     for (const [apiKey, messages] of Object.entries(apiErrors)) {
