@@ -33,25 +33,16 @@ export const styles = StyleSheet.create({
     paddingBottom: spacing.xxl,
     alignItems: 'center',
   },
-  appLabel: {
-    fontSize: typography.xs,
+  logo: {
+    width: 88,
+    height: 88,
+    marginBottom: spacing.md,
+  },
+  welcomeText: {
+    fontSize: typography.xl,
     fontWeight: '700',
-    color: colours.tertiary,
-    letterSpacing: 4,
-    textTransform: 'uppercase',
-    marginBottom: spacing.sm,
-  },
-  appName: {
-    fontSize: 40,
-    fontWeight: '900',
     color: colours.textOnDark,
-    letterSpacing: -1,
-  },
-  appTagline: {
-    fontSize: typography.sm,
-    color: colours.medium,
-    marginTop: spacing.xs,
-    letterSpacing: 0.4,
+    letterSpacing: 0.2,
   },
 
   // ── Card ──────────────────────────────────────────────────────────────────

@@ -56,18 +56,10 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     gap: 7,
   },
-  brandDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: colours.tertiary,
-  },
-  brandLabel: {
-    fontSize: typography.xs,
-    fontWeight: "700",
-    color: colours.tertiary,
-    letterSpacing: 3,
-    textTransform: "uppercase",
+  brandLogo: {
+    width: 32,
+    height: 32,
+    resizeMode: 'contain',
   },
 
   heroTopRow: {

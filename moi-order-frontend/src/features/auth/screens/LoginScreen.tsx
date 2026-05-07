@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -68,9 +69,13 @@ export function LoginScreen(): React.JSX.Element {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.hero}>
-            <Text style={styles.appLabel}>Immigration Services</Text>
-            <Text style={styles.appName}>MOI ORDER</Text>
-            <Text style={styles.appTagline}>Fast · Reliable · Trusted</Text>
+            <Image
+              source={require('../../../../assets/splash-icon.png')}
+              style={styles.logo}
+              resizeMode="contain"
+              accessibilityLabel="Moi Order logo"
+            />
+            <Text style={styles.welcomeText}>Welcome</Text>
           </View>
 
           <View style={styles.card}>

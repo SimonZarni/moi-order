@@ -32,19 +32,16 @@ export const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
     alignItems: 'center',
   },
-  appLabel: {
-    fontSize: typography.xs,
-    fontWeight: '700',
-    color: colours.tertiary,
-    letterSpacing: 4,
-    textTransform: 'uppercase',
-    marginBottom: spacing.xs,
+  logo: {
+    width: 88,
+    height: 88,
+    marginBottom: spacing.md,
   },
-  appName: {
-    fontSize: 36,
-    fontWeight: '900',
+  welcomeText: {
+    fontSize: typography.xl,
+    fontWeight: '700',
     color: colours.textOnDark,
-    letterSpacing: -1,
+    letterSpacing: 0.2,
   },
 
   // ── Card ──────────────────────────────────────────────────────────────────

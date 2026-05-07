@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -61,8 +62,13 @@ export function RegisterScreen(): React.JSX.Element {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.hero}>
-            <Text style={styles.appLabel}>Create Your Account</Text>
-            <Text style={styles.appName}>MOI ORDER</Text>
+            <Image
+              source={require('../../../../assets/splash-icon.png')}
+              style={styles.logo}
+              resizeMode="contain"
+              accessibilityLabel="Moi Order logo"
+            />
+            <Text style={styles.welcomeText}>Welcome</Text>
           </View>
 
           <View style={styles.card}>
