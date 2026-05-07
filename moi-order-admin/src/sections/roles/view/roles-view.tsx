@@ -1,4 +1,3 @@
-import type { CreateAdminData } from 'src/api/roles';
 import type { AdminAccount, AdminRole, AdminRoleSlug, Permission } from 'src/types';
 
 import { useMemo, useState, useEffect, useCallback } from 'react';
@@ -33,9 +32,10 @@ import InputAdornment from '@mui/material/InputAdornment';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
+import { useRouter } from 'src/routes/hooks';
+
 import { DashboardContent } from 'src/layouts/dashboard';
 import {
-  createAdminAccount,
   deleteAdminAccount,
   fetchAdminAccounts,
   toggleAdminAccount,
@@ -68,33 +68,25 @@ type AdminDialogProps = {
 function AdminDialog({ open, admin, roles, onClose, onSaved }: AdminDialogProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [roleId, setRoleId] = useState<number | ''>('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (open) {
-      setName(admin?.name ?? '');
-      setEmail(admin?.email ?? '');
-      setPassword('');
-      setRoleId(admin?.role.id ?? '');
+    if (open && admin) {
+      setName(admin.name);
+      setEmail(admin.email);
+      setRoleId(admin.role.id);
       setError('');
     }
   }, [open, admin]);
 
   const handleSave = useCallback(async () => {
-    if (!roleId) return;
+    if (!admin || !roleId) return;
     setSaving(true);
     setError('');
     try {
-      let saved: AdminAccount;
-      if (admin) {
-        saved = await updateAdminAccount(admin.id, { name, email, admin_role_id: roleId as number });
-      } else {
-        const data: CreateAdminData = { name, email, password, admin_role_id: roleId as number };
-        saved = await createAdminAccount(data);
-      }
+      const saved = await updateAdminAccount(admin.id, { name, email, admin_role_id: roleId as number });
       onSaved(saved);
       onClose();
     } catch (err: unknown) {
@@ -102,28 +94,18 @@ function AdminDialog({ open, admin, roles, onClose, onSaved }: AdminDialogProps)
     } finally {
       setSaving(false);
     }
-  }, [admin, name, email, password, roleId, onSaved, onClose]);
+  }, [admin, name, email, roleId, onSaved, onClose]);
 
-  const isValid = name.trim() && email.trim() && roleId !== '' && (admin ? true : password.trim().length >= 8);
+  const isValid = name.trim() && email.trim() && roleId !== '';
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{admin ? 'Edit Admin Account' : 'Add Admin Account'}</DialogTitle>
+      <DialogTitle>Edit Admin Account</DialogTitle>
       <DialogContent>
         <Stack spacing={2.5} sx={{ mt: 1 }}>
           {error && <Typography variant="caption" color="error">{error}</Typography>}
           <TextField fullWidth label="Full Name" value={name} onChange={(e) => setName(e.target.value)} />
           <TextField fullWidth label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          {!admin && (
-            <TextField
-              fullWidth
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              helperText="Minimum 8 characters"
-            />
-          )}
           <FormControl fullWidth>
             <InputLabel>Role</InputLabel>
             <Select value={roleId} label="Role" onChange={(e) => setRoleId(e.target.value as number)}>
@@ -139,7 +121,7 @@ function AdminDialog({ open, admin, roles, onClose, onSaved }: AdminDialogProps)
       <DialogActions>
         <Button onClick={onClose} disabled={saving}>Cancel</Button>
         <Button variant="contained" onClick={handleSave} disabled={!isValid || saving}>
-          {saving ? 'Saving…' : admin ? 'Save' : 'Add Admin'}
+          {saving ? 'Saving…' : 'Save'}
         </Button>
       </DialogActions>
     </Dialog>
@@ -149,6 +131,7 @@ function AdminDialog({ open, admin, roles, onClose, onSaved }: AdminDialogProps)
 // ----------------------------------------------------------------------
 
 export function RolesView() {
+  const router = useRouter();
   const [admins, setAdmins] = useState<AdminAccount[]>([]);
   const [roles, setRoles] = useState<AdminRole[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
@@ -265,7 +248,7 @@ export function RolesView() {
         <Button
           variant="contained"
           startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={() => { setEditAdmin(null); setDialogOpen(true); }}
+          onClick={() => router.push('/account/create-admin')}
         >
           Add Admin
         </Button>
