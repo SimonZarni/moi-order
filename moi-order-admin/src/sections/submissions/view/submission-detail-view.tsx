@@ -413,24 +413,35 @@ export function SubmissionDetailView() {
               </Card>
             )}
 
-            {/* Confirm Order (when auto-payment is OFF and admin hasn't confirmed yet) */}
-            {!submission.payment_authorized && submission.status === 'pending_payment' && canManage && (
+            {/* Order Confirmation (when auto-payment is OFF) */}
+            {submission.status === 'pending_payment' && canManage && (
               <Card>
-                <CardHeader title="Payment Confirmation Required" />
+                <CardHeader title="Order Confirmation Required" />
                 <CardContent>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    Auto-payment is disabled. The customer cannot pay until you confirm this order.
-                  </Typography>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    disabled={confirmingOrder}
-                    onClick={handleConfirmOrder}
-                    startIcon={confirmingOrder ? <CircularProgress size={14} color="inherit" /> : <Iconify icon="solar:check-circle-bold" width={16} />}
-                  >
-                    {confirmingOrder ? 'Confirming…' : 'Confirm Order for Payment'}
-                  </Button>
+                  {submission.payment_authorized ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Iconify icon="solar:check-circle-bold" width={20} color="success.main" />
+                      <Typography variant="body2" color="success.main" fontWeight={600}>
+                        Order Confirmed
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        Auto-payment is disabled. The customer cannot pay until you confirm this order.
+                      </Typography>
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        disabled={confirmingOrder}
+                        onClick={handleConfirmOrder}
+                        startIcon={confirmingOrder ? <CircularProgress size={14} color="inherit" /> : <Iconify icon="solar:check-circle-bold" width={16} />}
+                      >
+                        {confirmingOrder ? 'Confirming…' : 'Confirm Order for Payment'}
+                      </Button>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             )}

@@ -184,6 +184,7 @@ export function BookingDetailView() {
   const statusColor = STATUS_COLORS[booking.status] ?? 'default';
   const paymentIsPending = booking.payment?.status === 'pending';
   const needsPaymentConfirmation = !booking.payment_authorized && booking.status === 'pending_payment';
+  const orderConfirmedAwaitingPayment = booking.payment_authorized && booking.status === 'pending_payment' && !booking.payment;
 
   return (
     <DashboardContent>
@@ -335,6 +336,14 @@ export function BookingDetailView() {
                       >
                         {confirmingOrder ? 'Confirming…' : 'Confirm Order for Payment'}
                       </Button>
+                    )}
+                    {orderConfirmedAwaitingPayment && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Iconify icon="solar:check-circle-bold" width={20} color="success.main" />
+                        <Typography variant="body2" color="success.main" fontWeight={600}>
+                          Order Confirmed
+                        </Typography>
+                      </Box>
                     )}
                   </Stack>
                 )}

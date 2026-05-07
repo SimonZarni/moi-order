@@ -31,7 +31,7 @@ class PaymentReadyNotification extends Notification
             'notification_type' => 'payment_ready',
             'order_type'        => $this->orderType,
             'order_id'          => $this->orderId,
-            'title'             => 'Payment Confirmed',
+            'title'             => 'Order Confirmed',
             'body'              => $this->body(),
         ];
     }
@@ -39,7 +39,7 @@ class PaymentReadyNotification extends Notification
     public function toExpoPush(object $notifiable): ExpoPushMessage
     {
         return new ExpoPushMessage(
-            title: 'Payment Confirmed ✅',
+            title: 'Order Confirmed ✅',
             body:  $this->body(),
             data:  [
                 'notification_type' => 'payment_ready',
