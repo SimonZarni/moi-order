@@ -1,5 +1,4 @@
 import React from 'react';
-import { Image } from 'expo-image';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -8,6 +7,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { formatPrice } from '@/shared/utils/formatCurrency';
 import { useTicketDetailScreen } from '@/features/tickets/hooks/useTicketDetailScreen';
+import { TicketGallery } from '@/features/tickets/components/TicketGallery';
 import { BackButton } from '@/shared/components/BackButton/BackButton';
 import { TicketDetailSkeleton } from '@/features/tickets/components/TicketDetailSkeleton';
 import { TicketVariant } from '@/types/models';
@@ -43,12 +43,18 @@ export function TicketDetailScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.coverWrap}>
-          <Image source={{ uri: ticket.cover_image_url ?? undefined }} style={styles.cover} contentFit="cover" cachePolicy="disk" priority="high" transition={200} />
-          <View style={styles.coverBackWrap}>
-            <BackButton onPress={handleBack} />
-          </View>
-        </View>
+        <TicketGallery
+          images={
+            ticket.images && ticket.images.length > 0
+              ? [...ticket.images].sort((a, b) => a.sort_order - b.sort_order).map(img => img.url)
+              : ticket.cover_image_url != null ? [ticket.cover_image_url] : []
+          }
+          backSlot={
+            <View style={styles.coverBackWrap}>
+              <BackButton onPress={handleBack} />
+            </View>
+          }
+        />
 
         <View style={styles.infoBlock}>
           <Text style={styles.ticketName}>{ticket.name}</Text>

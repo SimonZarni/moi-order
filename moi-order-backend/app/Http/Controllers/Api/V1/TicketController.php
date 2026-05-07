@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\TicketResource;
 use App\Models\Ticket;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 /**
  * Principle: SRP — HTTP layer only. One service call per action. ≤20 lines/action.
@@ -15,9 +16,10 @@ use Illuminate\Http\JsonResponse;
  */
 class TicketController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $tickets = Ticket::active()
+            ->when($request->filled('search'), fn ($q) => $q->where('name', 'like', '%'.$request->input('search').'%'))
             ->orderBy('sort_order')
             ->paginate(20);
 
@@ -36,7 +38,7 @@ class TicketController extends Controller
     {
         abort_if(! $ticket->is_active, 404);
 
-        $ticket->load('activeVariants');
+        $ticket->load(['activeVariants', 'images']);
 
         return response()->json(['data' => new TicketResource($ticket)]);
     }

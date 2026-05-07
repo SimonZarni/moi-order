@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StandaloneFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { TicketCard } from '@/features/tickets/components/TicketCard';
 import { TicketCardSkeleton } from '@/features/tickets/components/TicketCardSkeleton';
+import { TicketsSearchBar } from '@/features/tickets/components/TicketsSearchBar';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { useTicketsScreen } from '@/features/tickets/hooks/useTicketsScreen';
@@ -19,6 +20,7 @@ const HERO_MIN_HEIGHT = 152;
 export function TicketsScreen(): React.JSX.Element {
   const {
     tickets, isLoading, isError, isRefreshing, isFetchingNextPage,
+    searchQuery, handleSearchChange,
     handleEndReached, handleRefresh, handleTicketPress, handleBack,
   } = useTicketsScreen();
 
@@ -37,6 +39,7 @@ export function TicketsScreen(): React.JSX.Element {
         backLabel="Back"
         minHeight={HERO_MIN_HEIGHT}
       />
+      <TicketsSearchBar query={searchQuery} onQueryChange={handleSearchChange} />
       <View style={styles.bodyGap} />
     </>
   );
@@ -88,6 +91,15 @@ export function TicketsScreen(): React.JSX.Element {
         onEndReachedThreshold={0.4}
         onRefresh={handleRefresh}
         refreshing={isRefreshing}
+        ListEmptyComponent={
+          !isLoading ? (
+            <View style={styles.stateBox}>
+              <Ionicons name="search" size={36} color={colours.textMuted} style={styles.stateIcon} />
+              <Text style={styles.stateTitle}>No tickets found</Text>
+              <Text style={styles.stateSubtitle}>Try a different search</Text>
+            </View>
+          ) : null
+        }
         ListFooterComponent={
           isFetchingNextPage
             ? <ActivityIndicator style={styles.listFooter} color={styles.spinner.color} />

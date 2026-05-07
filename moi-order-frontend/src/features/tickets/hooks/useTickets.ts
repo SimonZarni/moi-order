@@ -16,10 +16,10 @@ export interface UseTicketsResult {
   refetch: () => void;
 }
 
-export function useTickets(): UseTicketsResult {
+export function useTickets(search = ''): UseTicketsResult {
   const query = useInfiniteQuery({
-    queryKey: QUERY_KEYS.TICKETS.LIST,
-    queryFn: ({ pageParam }) => fetchTickets(pageParam as number),
+    queryKey: [...QUERY_KEYS.TICKETS.LIST, search],
+    queryFn: ({ pageParam }) => fetchTickets(pageParam as number, search),
     getNextPageParam: (last: PaginatedResponse<Ticket>) =>
       last.meta.current_page < last.meta.last_page
         ? last.meta.current_page + 1

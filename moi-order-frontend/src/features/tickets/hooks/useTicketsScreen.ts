@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,6 +17,8 @@ export interface UseTicketsScreenResult {
   isError: boolean;
   isRefreshing: boolean;
   isFetchingNextPage: boolean;
+  searchQuery: string;
+  handleSearchChange: (text: string) => void;
   handleEndReached: () => void;
   handleRefresh: () => void;
   handleTicketPress: (id: number) => void;
@@ -27,10 +29,18 @@ export function useTicketsScreen(): UseTicketsScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const queryClient = useQueryClient();
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchQuery), 400);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+
   const {
     tickets, isLoading, isError, isRefreshing,
     hasNextPage, isFetchingNextPage, fetchNextPage, refetch,
-  } = useTickets();
+  } = useTickets(debouncedSearch);
 
   useEffect(() => {
     tickets.forEach(t => {
@@ -61,8 +71,13 @@ export function useTicketsScreen(): UseTicketsScreenResult {
     }
   }, [navigation]);
 
+  const handleSearchChange = useCallback((text: string): void => {
+    setSearchQuery(text);
+  }, []);
+
   return {
     tickets, isLoading, isError, isRefreshing, isFetchingNextPage,
+    searchQuery, handleSearchChange,
     handleEndReached, handleRefresh, handleTicketPress, handleBack,
   };
 }

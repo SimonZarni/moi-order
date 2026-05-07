@@ -12,9 +12,7 @@ export const styles = StyleSheet.create({
   scroll: { flex: 1, backgroundColor: colours.backgroundLight },
   scrollContent: { paddingBottom: 180 },
 
-  // ── Cover image ───────────────────────────────────────────────────────────
-  coverWrap: { position: 'relative' },
-  cover: { width: '100%', height: 220, backgroundColor: colours.backgroundDark },
+  // ── Gallery back button overlay ───────────────────────────────────────────
   coverBackWrap: {
     position: 'absolute',
     top: spacing.sm,

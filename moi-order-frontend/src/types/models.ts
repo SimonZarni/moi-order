@@ -184,6 +184,12 @@ export interface TicketVariant {
   sort_order: number;
 }
 
+export interface TicketImage {
+  id: number;
+  url: string;
+  sort_order: number;
+}
+
 export interface Ticket {
   id: number;
   name: string;
@@ -198,6 +204,8 @@ export interface Ticket {
   starting_from_price?: number;
   /** Present on detail endpoint only. */
   variants?: TicketVariant[];
+  /** Present on detail endpoint only — sorted gallery images. */
+  images?: TicketImage[];
 }
 
 export interface TicketOrderItem {
