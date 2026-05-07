@@ -17,11 +17,16 @@ export type PermissionMatrix = {
   permissions: Permission[];
 };
 
+export type SendAdminOtpResult = {
+  expires_in: number;
+  resend_after: number;
+};
+
 export type CreateAdminData = {
   name: string;
   email: string;
   password: string;
-  admin_role_id: number;
+  verified_token: string;
 };
 
 export type UpdateAdminData = {
@@ -54,6 +59,36 @@ export async function updateRolePermissions(roleId: number, permissionKeys: stri
     const json = await res.json();
     throw new Error(json.message ?? 'Failed to save permissions.');
   }
+}
+
+// ── Admin account OTP flow ────────────────────────────────────────────────────
+
+export async function sendAdminOtp(email: string): Promise<SendAdminOtpResult> {
+  const res = await fetch(`${BASE}/admins/send-otp`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ email }),
+  });
+
+  const json = await res.json();
+  if (!res.ok) {
+    throw Object.assign(new Error(json.message ?? 'Failed to send OTP.'), { errors: json.errors, code: json.code });
+  }
+  return json as SendAdminOtpResult;
+}
+
+export async function verifyAdminOtp(email: string, otp: string): Promise<string> {
+  const res = await fetch(`${BASE}/admins/verify-otp`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ email, otp }),
+  });
+
+  const json = await res.json();
+  if (!res.ok) {
+    throw Object.assign(new Error(json.message ?? 'Invalid OTP.'), { errors: json.errors });
+  }
+  return json.verified_token as string;
 }
 
 // ── Admin accounts ────────────────────────────────────────────────────────────

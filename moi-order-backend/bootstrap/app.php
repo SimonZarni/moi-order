@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'check.permission'    => \App\Http\Middleware\CheckPermission::class,
             'merchant.auth'       => \App\Http\Middleware\MerchantAuthenticate::class,
             'user.not_suspended'  => \App\Http\Middleware\CheckUserNotSuspended::class,
+            'ensure.super_admin'  => \App\Http\Middleware\EnsureSuperAdmin::class,
             'abilities'           => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
             'ability'             => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
             'update.last_active'  => \App\Http\Middleware\UpdateLastActive::class,

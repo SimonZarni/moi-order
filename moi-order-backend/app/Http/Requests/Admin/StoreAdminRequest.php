@@ -11,17 +11,17 @@ class StoreAdminRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // check.permission:admins.manage middleware guards the route.
+        return true; // ensure.super_admin middleware guards the route.
     }
 
     /** @return array<string,mixed> */
     public function rules(): array
     {
         return [
-            'name'          => ['required', 'string', 'max:255'],
-            'email'         => ['required', 'string', 'email:rfc,dns', 'max:255', Rule::unique('users', 'email')],
-            'password'      => ['required', 'string', 'min:8', 'max:255'],
-            'admin_role_id' => ['required', 'integer', Rule::exists('admin_roles', 'id')],
+            'name'           => ['required', 'string', 'max:255'],
+            'email'          => ['required', 'string', 'email:rfc,dns', 'max:255', Rule::unique('users', 'email')],
+            'password'       => ['required', 'string', 'min:8', 'max:255'],
+            'verified_token' => ['required', 'string', 'uuid'],
         ];
     }
 
@@ -29,7 +29,7 @@ class StoreAdminRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'admin_role_id.exists' => 'The selected role does not exist.',
+            'verified_token.required' => 'Email verification is required. Please verify the OTP first.',
         ];
     }
 
@@ -37,7 +37,7 @@ class StoreAdminRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'admin_role_id' => 'role',
+            'verified_token' => 'email verification token',
         ];
     }
 }

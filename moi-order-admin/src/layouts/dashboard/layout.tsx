@@ -10,6 +10,8 @@ import { useTheme } from '@mui/material/styles';
 
 import { useAuth } from 'src/context/auth-context';
 
+import { Iconify } from 'src/components/iconify';
+
 import { NavMobile, NavDesktop } from './nav';
 import { layoutClasses } from '../core/classes';
 import { _account } from '../nav-config-account';
@@ -62,9 +64,25 @@ export function DashboardLayout({
   layoutQuery = 'lg',
 }: DashboardLayoutProps) {
   const theme = useTheme();
-  const { hasPermission } = useAuth();
+  const { hasPermission, isSuperAdmin } = useAuth();
 
   const filteredNav = useMemo(() => filterNavData(navData, hasPermission), [hasPermission]);
+
+  const accountMenuItems = useMemo(
+    () =>
+      isSuperAdmin()
+        ? [
+            ...(_account ?? []),
+            {
+              label: 'Create Admin Account',
+              href: '/account/create-admin',
+              icon: <Iconify width={22} icon="mingcute:add-line" />,
+            },
+          ]
+        : _account,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isSuperAdmin]
+  );
 
   const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
 
@@ -100,7 +118,7 @@ export function DashboardLayout({
           <NotificationsPopover />
 
           {/** @slot Account drawer */}
-          <AccountPopover data={_account} />
+          <AccountPopover data={accountMenuItems} />
         </Box>
       ),
     };

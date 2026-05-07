@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Admin\V1;
 
+use App\DTOs\CreateAdminAccountDTO;
 use App\Exceptions\DomainException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\SendAdminOtpRequest;
 use App\Http\Requests\Admin\StoreAdminRequest;
 use App\Http\Requests\Admin\UpdateAdminRequest;
+use App\Http\Requests\Admin\VerifyAdminOtpRequest;
 use App\Http\Resources\Admin\AdminAccountResource;
 use App\Models\User;
 use App\Services\AdminAccountService;
@@ -27,9 +30,26 @@ class AdminAccountController extends Controller
         return AdminAccountResource::collection($admins)->response();
     }
 
+    public function sendOtp(SendAdminOtpRequest $request): JsonResponse
+    {
+        $result = $this->service->sendOtp($request->string('email')->lower()->toString());
+
+        return response()->json(['message' => 'OTP sent.', ...$result]);
+    }
+
+    public function verifyOtp(VerifyAdminOtpRequest $request): JsonResponse
+    {
+        $verifiedToken = $this->service->verifyOtp(
+            $request->string('email')->lower()->toString(),
+            $request->string('otp')->toString(),
+        );
+
+        return response()->json(['verified_token' => $verifiedToken]);
+    }
+
     public function store(StoreAdminRequest $request): JsonResponse
     {
-        $admin = $this->service->create($request->validated());
+        $admin = $this->service->create(CreateAdminAccountDTO::fromRequest($request));
 
         return (new AdminAccountResource($admin->load('adminRole')))->response()->setStatusCode(201);
     }

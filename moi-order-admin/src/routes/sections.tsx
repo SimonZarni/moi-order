@@ -56,6 +56,7 @@ export const PushNotificationsPage = lazy(() => import('src/pages/push-notificat
 export const NotificationsPage = lazy(() => import('src/pages/notifications'));
 export const CategoriesPage = lazy(() => import('src/pages/categories'));
 export const TagsPage = lazy(() => import('src/pages/tags'));
+export const CreateAdminPage = lazy(() => import('src/pages/create-admin'));
 
 const renderFallback = () => (
   <Box sx={{ display: 'flex', flex: '1 1 auto', alignItems: 'center', justifyContent: 'center' }}>
@@ -152,6 +153,7 @@ export const routesSection: RouteObject[] = [
 
       { path: 'account/profile', element: <ProfilePage /> },
       { path: 'account/settings', element: <SettingsPage /> },
+      { path: 'account/create-admin', element: <CreateAdminPage /> },
 
       { path: 'unauthorized', element: <UnauthorizedPage /> },
     ],

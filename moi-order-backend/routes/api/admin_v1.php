@@ -81,12 +81,22 @@ Route::prefix('roles')->name('admin.roles.')->group(function (): void {
 });
 
 // ── Admin Accounts ────────────────────────────────────────────────────────────
-Route::prefix('admins')->name('admin.admins.')->middleware('check.permission:admins.manage')->group(function (): void {
-    Route::get('/', [AdminAccountController::class, 'index'])->name('index');
-    Route::post('/', [AdminAccountController::class, 'store'])->name('store');
-    Route::put('/{id}', [AdminAccountController::class, 'update'])->name('update');
-    Route::patch('/{id}/toggle', [AdminAccountController::class, 'toggle'])->name('toggle');
-    Route::delete('/{id}', [AdminAccountController::class, 'destroy'])->name('destroy');
+Route::prefix('admins')->name('admin.admins.')->group(function (): void {
+    Route::get('/', [AdminAccountController::class, 'index'])->name('index')
+        ->middleware('check.permission:admins.manage');
+    Route::put('/{id}', [AdminAccountController::class, 'update'])->name('update')
+        ->middleware('check.permission:admins.manage');
+    Route::patch('/{id}/toggle', [AdminAccountController::class, 'toggle'])->name('toggle')
+        ->middleware('check.permission:admins.manage');
+    Route::delete('/{id}', [AdminAccountController::class, 'destroy'])->name('destroy')
+        ->middleware('check.permission:admins.manage');
+
+    // Super-admin-only: create account with OTP verification
+    Route::middleware('ensure.super_admin')->group(function (): void {
+        Route::post('/send-otp', [AdminAccountController::class, 'sendOtp'])->name('send-otp');
+        Route::post('/verify-otp', [AdminAccountController::class, 'verifyOtp'])->name('verify-otp');
+        Route::post('/', [AdminAccountController::class, 'store'])->name('store');
+    });
 });
 
 // ── Submissions ───────────────────────────────────────────────────────────────
