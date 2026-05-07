@@ -68,28 +68,30 @@ export function SearchScreen(): React.JSX.Element {
         ))}
       </View>
 
-      {/* Results */}
-      {isLoading && query.length > 0 && (
-        <ActivityIndicator style={styles.loader} color={styles.loaderColor.color} />
-      )}
+      {/* White body — prevents dark root bleeding through below the tab bar */}
+      <View style={styles.body}>
+        {/* Results */}
+        {isLoading && query.length > 0 && (
+          <ActivityIndicator style={styles.loader} color={styles.loaderColor.color} />
+        )}
 
-      {!isLoading && query.trim().length === 0 && (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyIcon}>🔍</Text>
-          <Text style={styles.emptyTitle}>Search everything</Text>
-          <Text style={styles.emptySubtitle}>Find places, tickets, and services</Text>
-        </View>
-      )}
+        {!isLoading && query.trim().length === 0 && (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyIcon}>🔍</Text>
+            <Text style={styles.emptyTitle}>Search everything</Text>
+            <Text style={styles.emptySubtitle}>Find places, tickets, and services</Text>
+          </View>
+        )}
 
-      {!isLoading && query.trim().length > 0 && results.length === 0 && (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyIcon}>😕</Text>
-          <Text style={styles.emptyTitle}>No results</Text>
-          <Text style={styles.emptySubtitle}>Try a different search term</Text>
-        </View>
-      )}
+        {!isLoading && query.trim().length > 0 && results.length === 0 && (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyIcon}>😕</Text>
+            <Text style={styles.emptyTitle}>No results</Text>
+            <Text style={styles.emptySubtitle}>Try a different search term</Text>
+          </View>
+        )}
 
-      <FlatList
+        <FlatList
         data={results}
         keyExtractor={(item: SearchResult) => `${item.type}-${item.id}`}
         renderItem={({ item }) => (
@@ -116,6 +118,7 @@ export function SearchScreen(): React.JSX.Element {
         keyboardShouldPersistTaps="handled"
         accessibilityRole="list"
       />
+      </View>
     </SafeAreaView>
   );
 }

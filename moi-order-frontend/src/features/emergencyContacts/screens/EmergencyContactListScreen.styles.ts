@@ -7,8 +7,8 @@ import { typography } from '@/shared/theme/typography';
 
 export const styles = StyleSheet.create({
   root:  { flex: 1, backgroundColor: colours.backgroundDark },
-  list:  { flex: 1 },
-  contentContainer: { paddingHorizontal: spacing.md, paddingBottom: spacing.xxl + spacing.lg },
+  list:  { flex: 1, backgroundColor: colours.backgroundLight },
+  contentContainer: { paddingHorizontal: spacing.md, paddingBottom: spacing.xxl + spacing.lg, backgroundColor: colours.backgroundLight },
 
   card: {
     backgroundColor: colours.card,

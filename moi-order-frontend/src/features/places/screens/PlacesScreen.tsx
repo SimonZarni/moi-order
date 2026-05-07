@@ -10,13 +10,11 @@ import { StandaloneFloatingTabBar } from '@/shared/components/FloatingTabBar/Flo
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 
 import { PlaceCard } from '@/features/places/components/PlaceCard';
-import { PlaceCardSkeleton } from '@/features/places/components/PlaceCardSkeleton';
 import { usePlacesScreen } from '@/features/places/hooks/usePlacesScreen';
 
 import { Category, Place } from '@/types/models';
 import { styles } from './PlacesScreen.styles';
 
-const SKELETON_COUNT = 4;
 const HERO_MIN_HEIGHT = 140;
 
 export function PlacesScreen(): React.JSX.Element {
@@ -200,26 +198,6 @@ export function PlacesScreen(): React.JSX.Element {
     </>
   );
 
-  if (isPlacesLoading) {
-    return (
-      <>
-        <SafeAreaView style={styles.root} edges={['top']}>
-          {hero}
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            scrollEnabled={false}
-            contentContainerStyle={styles.list}
-          >
-            {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-              <PlaceCardSkeleton key={i} />
-            ))}
-          </ScrollView>
-        </SafeAreaView>
-        <StandaloneFloatingTabBar />
-      </>
-    );
-  }
-
   if (isPlacesError) {
     return (
       <>
@@ -241,6 +219,7 @@ export function PlacesScreen(): React.JSX.Element {
       <SafeAreaView style={styles.root} edges={['top']}>
         {hero}
         <FlatList
+          style={styles.flatList}
           ref={placesListRef}
           data={displayedPlaces}
           keyExtractor={(item: Place) => String(item.id)}
@@ -254,11 +233,17 @@ export function PlacesScreen(): React.JSX.Element {
             />
           )}
           ListEmptyComponent={
-            <View style={styles.stateBox}>
-              <Ionicons name="search" size={36} color={colours.textMuted} style={styles.stateIcon} />
-              <Text style={styles.stateTitle}>No places found</Text>
-              <Text style={styles.stateSubtitle}>Try a different search or category</Text>
-            </View>
+            isPlacesLoading ? (
+              <View style={styles.stateBox}>
+                <ActivityIndicator size="large" color={colours.primary} />
+              </View>
+            ) : (
+              <View style={styles.stateBox}>
+                <Ionicons name="search" size={36} color={colours.textMuted} style={styles.stateIcon} />
+                <Text style={styles.stateTitle}>No places found</Text>
+                <Text style={styles.stateSubtitle}>Try a different search or category</Text>
+              </View>
+            )
           }
           onEndReached={handlePlacesEndReached}
           onEndReachedThreshold={0.4}

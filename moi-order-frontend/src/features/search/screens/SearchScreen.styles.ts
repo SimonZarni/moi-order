@@ -53,6 +53,8 @@ export const styles = StyleSheet.create({
   tabText:       { fontSize: typography.xs, fontWeight: '600', color: colours.primary },
   tabTextActive: { color: colours.white },
 
+  body: { flex: 1, backgroundColor: colours.backgroundLight },
+
   loader:      { marginTop: spacing.xl },
   loaderColor: { color: colours.primary },
 

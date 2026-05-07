@@ -188,6 +188,10 @@ export const styles = StyleSheet.create({
   },
 
   // ── List ──────────────────────────────────────────────────────────────────
+  flatList: {
+    flex: 1,
+    backgroundColor: colours.backgroundLight,
+  },
   list: {
     flexGrow: 1,
     paddingTop: spacing.sm,
