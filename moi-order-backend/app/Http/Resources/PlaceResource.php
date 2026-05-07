@@ -38,7 +38,7 @@ class PlaceResource extends JsonResource
             'contact_phone'     => $this->contact_phone,
             'website'           => $this->website,
             'google_map_url'    => $this->google_map_url,
-            'category'          => new CategoryResource($this->whenLoaded('category')),
+            'categories'        => CategoryResource::collection($this->whenLoaded('categories')),
             'tags'              => $this->whenLoaded('tags', fn () => TagResource::collection($this->tags)),
             'images'            => $this->whenLoaded('images', fn () => PlaceImageResource::collection($this->images)),
             // List endpoint loads the coverImage HasOne (1 row per place).

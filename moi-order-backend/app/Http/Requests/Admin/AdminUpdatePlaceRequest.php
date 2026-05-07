@@ -14,7 +14,8 @@ class AdminUpdatePlaceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_id'       => ['sometimes', 'integer', Rule::exists('categories', 'id')],
+            'category_ids'      => ['sometimes', 'array'],
+            'category_ids.*'    => ['integer', Rule::exists('categories', 'id')],
             'name_my'           => ['sometimes', 'string', 'max:255'],
             'name_en'           => ['sometimes', 'string', 'max:255'],
             'name_th'           => ['sometimes', 'nullable', 'string', 'max:255'],

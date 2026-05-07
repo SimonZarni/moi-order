@@ -33,7 +33,7 @@ export type Place = {
   cover_image: string | null;
   created_at: string;
   deleted_at: string | null;
-  category: PlaceCategory | null;
+  categories: PlaceCategory[];
   tags: PlaceTag[];
   images: PlaceImage[];
 };

@@ -26,7 +26,7 @@ export type PlaceData = {
   name_my: string;
   name_en: string | null;
   name_th: string | null;
-  category: PlaceLocale | null;
+  categories: PlaceLocale[];
   city: string | null;
   address: string;
   short_description: string | null;

@@ -44,9 +44,9 @@ export function PlaceCard({ place, onPress, distance, isFavorited = false, onFav
         accessibilityRole="button"
       >
         {/* Category badge — top left */}
-        {place.category != null && (
+        {place.categories.length > 0 && (
           <View style={styles.categoryPill}>
-            <Text style={styles.categoryText}>{place.category.name_en}</Text>
+            <Text style={styles.categoryText}>{place.categories[0]!.name_en}</Text>
           </View>
         )}
 

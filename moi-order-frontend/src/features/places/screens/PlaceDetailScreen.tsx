@@ -127,7 +127,7 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
           <Animated.View style={[styles.heroIdentity, heroIdentityAnimStyle]}>
             <View style={styles.heroCategoryPill}>
               <View style={styles.heroCategoryDot} />
-              <Text style={styles.heroCategoryText}>{place.category.name_en}</Text>
+              <Text style={styles.heroCategoryText}>{place.categories[0]?.name_en ?? ''}</Text>
             </View>
             <Text style={[styles.heroName, { fontFamily: FONTS.playfairBold }]} numberOfLines={3}>
               {place.name_en}

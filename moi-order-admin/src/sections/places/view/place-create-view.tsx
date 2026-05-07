@@ -1,4 +1,5 @@
 import type { SelectChangeEvent } from '@mui/material/Select';
+import type { Theme } from '@mui/material/styles';
 
 import { useRef, useState, useEffect, useCallback } from 'react';
 
@@ -7,10 +8,12 @@ import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
+import Chip from '@mui/material/Chip';
 import Select from '@mui/material/Select';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import MenuItem from '@mui/material/MenuItem';
+import OutlinedInput from '@mui/material/OutlinedInput';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
@@ -34,7 +37,7 @@ type FormState = {
   name_my: string;
   name_en: string;
   name_th: string;
-  category_id: string;
+  category_ids: number[];
   city: string;
   address: string;
   short_description: string;
@@ -51,7 +54,7 @@ const EMPTY_FORM: FormState = {
   name_my: '',
   name_en: '',
   name_th: '',
-  category_id: '',
+  category_ids: [],
   city: '',
   address: '',
   short_description: '',
@@ -114,7 +117,7 @@ export function PlaceCreateView() {
       const payload: Record<string, unknown> = {
         name_my: form.name_my,
         name_en: form.name_en,
-        category_id: Number(form.category_id),
+        category_ids: form.category_ids,
       };
       if (form.name_th) payload.name_th = form.name_th;
       if (form.city) payload.city = form.city;
@@ -142,7 +145,7 @@ export function PlaceCreateView() {
     }
   };
 
-  const canSubmit = !!form.name_my.trim() && !!form.name_en.trim() && !!form.category_id;
+  const canSubmit = !!form.name_my.trim() && !!form.name_en.trim() && form.category_ids.length > 0;
 
   return (
     <DashboardContent>
@@ -216,14 +219,31 @@ export function PlaceCreateView() {
                   </Grid>
                   <Grid size={{ xs: 12, sm: 6 }}>
                     <FormControl fullWidth required>
-                      <InputLabel>Category *</InputLabel>
+                      <InputLabel>Categories *</InputLabel>
                       <Select
-                        label="Category *"
-                        value={form.category_id}
-                        onChange={(e: SelectChangeEvent) => update('category_id', e.target.value)}
+                        multiple
+                        label="Categories *"
+                        value={form.category_ids}
+                        input={<OutlinedInput label="Categories *" />}
+                        onChange={(e: SelectChangeEvent<number[]>) =>
+                          setForm((prev) => prev && { ...prev, category_ids: e.target.value as number[] })
+                        }
+                        renderValue={(selected) => (
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            {(selected as number[]).map((id) => {
+                              const cat = categories.find((c) => c.id === id);
+                              return <Chip key={id} size="small" label={cat ? (cat.name_my ?? cat.name_en ?? cat.slug) : id} />;
+                            })}
+                          </Box>
+                        )}
+                        MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
                       >
                         {categories.map((cat) => (
-                          <MenuItem key={cat.id} value={String(cat.id)}>
+                          <MenuItem key={cat.id} value={cat.id} sx={(theme: Theme) => ({
+                            fontWeight: form.category_ids.includes(cat.id)
+                              ? theme.typography.fontWeightBold
+                              : theme.typography.fontWeightRegular,
+                          })}>
                             {cat.name_my ?? cat.name_en ?? cat.slug}
                           </MenuItem>
                         ))}

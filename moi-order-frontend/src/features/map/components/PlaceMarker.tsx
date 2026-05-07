@@ -16,7 +16,7 @@ export const PlaceMarker = React.memo(function PlaceMarker(
 ): React.JSX.Element | null {
   if (!place.latitude || !place.longitude) return null;
 
-  const emoji = CATEGORY_EMOJI[(place.category?.name_en ?? '').toLowerCase()] ?? CATEGORY_EMOJI['default'];
+  const emoji = CATEGORY_EMOJI[(place.categories[0]?.name_en ?? '').toLowerCase()] ?? CATEGORY_EMOJI['default'];
 
   return (
     <MapboxGL.PointAnnotation

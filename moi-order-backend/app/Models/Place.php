@@ -6,7 +6,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -21,7 +20,6 @@ class Place extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'category_id',
         'name_my',
         'name_en',
         'name_th',
@@ -47,9 +45,9 @@ class Place extends Model
 
     // ─── Relationships ────────────────────────────────────────────────────────
 
-    public function category(): BelongsTo
+    public function categories(): BelongsToMany
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsToMany(Category::class);
     }
 
     public function tags(): BelongsToMany
@@ -90,6 +88,6 @@ class Place extends Model
 
     public function scopeForCategory(\Illuminate\Database\Eloquent\Builder $query, int $categoryId): \Illuminate\Database\Eloquent\Builder
     {
-        return $query->where('category_id', $categoryId);
+        return $query->whereHas('categories', fn ($q) => $q->where('categories.id', $categoryId));
     }
 }

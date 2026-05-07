@@ -40,9 +40,9 @@ export function PlaceCardGrid({ place, onPress, distance, isFavorited = false, o
         />
 
         {/* Category pill */}
-        {place.category != null && (
+        {place.categories.length > 0 && (
           <View style={styles.categoryPill}>
-            <Text style={styles.categoryText} numberOfLines={1}>{place.category.name_en}</Text>
+            <Text style={styles.categoryText} numberOfLines={1}>{place.categories[0]!.name_en}</Text>
           </View>
         )}
 

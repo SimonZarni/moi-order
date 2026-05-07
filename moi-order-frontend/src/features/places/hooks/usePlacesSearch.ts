@@ -28,9 +28,11 @@ export function usePlacesSearch(places: Place[]): UsePlacesSearchResult {
   const categories = useMemo((): Category[] => {
     const seen = new Set<number>();
     return allPlaces.reduce<Category[]>((acc, place) => {
-      if (place.category && !seen.has(place.category.id)) {
-        seen.add(place.category.id);
-        acc.push(place.category);
+      for (const cat of place.categories) {
+        if (!seen.has(cat.id)) {
+          seen.add(cat.id);
+          acc.push(cat);
+        }
       }
       return acc;
     }, []);
@@ -38,7 +40,7 @@ export function usePlacesSearch(places: Place[]): UsePlacesSearchResult {
 
   const filteredPlaces = useMemo((): Place[] => {
     if (selectedCategory === null) return places;
-    return places.filter((place) => place.category.id === selectedCategory);
+    return places.filter((place) => place.categories.some(c => c.id === selectedCategory));
   }, [places, selectedCategory]);
 
   const handleCategorySelect = useCallback((id: number | null): void => {

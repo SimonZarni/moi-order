@@ -146,9 +146,11 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const categories = useMemo<Category[]>(() => {
     const seen = new Set<number>();
     return places.reduce<Category[]>((acc, p) => {
-      if (p.category && !seen.has(p.category.id)) {
-        seen.add(p.category.id);
-        acc.push(p.category);
+      for (const cat of p.categories) {
+        if (!seen.has(cat.id)) {
+          seen.add(cat.id);
+          acc.push(cat);
+        }
       }
       return acc;
     }, []).sort((a, b) => a.name_en.localeCompare(b.name_en));
@@ -172,7 +174,7 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     return places.filter(p =>
       p.name_en.toLowerCase().includes(q) ||
       p.city?.toLowerCase().includes(q) ||
-      (p.category?.name_en ?? '').toLowerCase().includes(q)
+      (p.categories[0]?.name_en ?? '').toLowerCase().includes(q)
     );
   }, [places, searchQuery]);
 
@@ -186,7 +188,7 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
         : places.filter(p => p.latitude !== null);
 
     if (activeCategory !== null) {
-      base = base.filter(p => p.category?.id === activeCategory);
+      base = base.filter(p => p.categories.some(c => c.id === activeCategory));
     }
     if (activeTags.length > 0) {
       base = base.filter(p => (p.tags ?? []).some(t => activeTags.includes(t.id)));

@@ -157,7 +157,7 @@ export function MapSearchBar({
                   <View style={styles.rowText}>
                     <Text style={styles.rowName} numberOfLines={1}>{place.name_en}</Text>
                     <Text style={styles.rowSub} numberOfLines={1}>
-                      {place.category?.name_en ?? ''}{place.city ? ` · ${place.city}` : ''}
+                      {place.categories[0]?.name_en ?? ''}{place.city ? ` · ${place.city}` : ''}
                     </Text>
                   </View>
                   <View style={styles.appBadge}>

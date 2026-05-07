@@ -115,9 +115,9 @@ export function PlaceBottomSheet({
             <View style={styles.headerRow}>
               <View style={styles.headerLeft}>
                 <Text style={styles.name}>{place.name_en}</Text>
-                {place.category?.name_en ? (
+                {place.categories[0]?.name_en ? (
                   <View style={styles.categoryBadge}>
-                    <Text style={styles.categoryText}>{place.category.name_en}</Text>
+                    <Text style={styles.categoryText}>{place.categories[0].name_en}</Text>
                   </View>
                 ) : null}
               </View>

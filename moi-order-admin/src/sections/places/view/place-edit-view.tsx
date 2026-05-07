@@ -1,3 +1,4 @@
+import type { Theme } from '@mui/material/styles';
 import type { SelectChangeEvent } from '@mui/material/Select';
 
 import { useParams } from 'react-router-dom';
@@ -8,10 +9,12 @@ import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
+import Chip from '@mui/material/Chip';
 import Select from '@mui/material/Select';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import MenuItem from '@mui/material/MenuItem';
+import OutlinedInput from '@mui/material/OutlinedInput';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
@@ -35,7 +38,7 @@ type FormState = {
   name_my: string;
   name_en: string;
   name_th: string;
-  category_id: string;
+  category_ids: number[];
   city: string;
   address: string;
   short_description: string;
@@ -79,7 +82,7 @@ export function PlaceEditView() {
           name_my: place.name_my ?? '',
           name_en: place.name_en ?? '',
           name_th: place.name_th ?? '',
-          category_id: place.category ? String(place.category.id) : '',
+          category_ids: (place.categories ?? []).map((c) => c.id),
           city: place.city ?? '',
           address: place.address ?? '',
           short_description: place.short_description ?? '',
@@ -120,7 +123,7 @@ export function PlaceEditView() {
       latitude: form.latitude ? Number(form.latitude) : null,
       longitude: form.longitude ? Number(form.longitude) : null,
     };
-    if (form.category_id) payload.category_id = Number(form.category_id);
+    payload.category_ids = form.category_ids;
 
     placesApi
       .update(id, payload)
@@ -245,17 +248,31 @@ export function PlaceEditView() {
                   </Grid>
                   <Grid size={{ xs: 12, sm: 6 }}>
                     <FormControl fullWidth>
-                      <InputLabel shrink={form.category_id ? true : undefined}>Category</InputLabel>
+                      <InputLabel>Categories</InputLabel>
                       <Select
-                        label="Category"
-                        value={form.category_id}
-                        onChange={(e: SelectChangeEvent) => update('category_id', e.target.value)}
+                        multiple
+                        label="Categories"
+                        value={form.category_ids}
+                        input={<OutlinedInput label="Categories" />}
+                        onChange={(e: SelectChangeEvent<number[]>) =>
+                          setForm((prev) => prev && { ...prev, category_ids: e.target.value as number[] })
+                        }
+                        renderValue={(selected) => (
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            {(selected as number[]).map((id) => {
+                              const cat = categories.find((c) => c.id === id);
+                              return <Chip key={id} size="small" label={cat ? (cat.name_my ?? cat.name_en ?? cat.slug) : id} />;
+                            })}
+                          </Box>
+                        )}
+                        MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
                       >
-                        <MenuItem value="">
-                          <em>None</em>
-                        </MenuItem>
                         {categories.map((cat) => (
-                          <MenuItem key={cat.id} value={String(cat.id)}>
+                          <MenuItem key={cat.id} value={cat.id} sx={(theme: Theme) => ({
+                            fontWeight: form.category_ids.includes(cat.id)
+                              ? theme.typography.fontWeightBold
+                              : theme.typography.fontWeightRegular,
+                          })}>
                             {cat.name_my ?? cat.name_en ?? cat.slug}
                           </MenuItem>
                         ))}

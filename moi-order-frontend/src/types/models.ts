@@ -38,7 +38,7 @@ export interface Place {
   website: string | null;
   google_map_url: string | null;
   cover_image: string | null;
-  category: Category;
+  categories: Category[];
   /** Present on both list and detail endpoints. */
   tags: Tag[];
   /** Only present on the detail endpoint (/places/:id). List uses cover_image instead. */

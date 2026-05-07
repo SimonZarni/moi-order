@@ -28,11 +28,11 @@ class AdminPlaceService
     public function index(AdminPlaceIndexRequest $request): LengthAwarePaginator
     {
         $query = Place::withTrashed()
-            ->with(['category', 'coverImage'])
+            ->with(['categories', 'coverImage'])
             ->latest();
 
         if ($request->filled('category_id')) {
-            $query->where('category_id', $request->integer('category_id'));
+            $query->whereHas('categories', fn ($q) => $q->where('categories.id', $request->integer('category_id')));
         }
 
         if ($request->filled('city')) {
@@ -53,14 +53,13 @@ class AdminPlaceService
 
     public function show(Place $place): Place
     {
-        return $place->load(['category', 'images', 'tags']);
+        return $place->load(['categories', 'images', 'tags']);
     }
 
     public function store(AdminStorePlaceDTO $dto): Place
     {
         return DB::transaction(function () use ($dto): Place {
             $place = Place::create([
-                'category_id'       => $dto->categoryId,
                 'name_my'           => $dto->nameMy,
                 'name_en'           => $dto->nameEn,
                 'name_th'           => $dto->nameTh,
@@ -76,11 +75,13 @@ class AdminPlaceService
                 'google_map_url'    => $dto->googleMapUrl,
             ]);
 
+            $place->categories()->sync($dto->categoryIds);
+
             if (! empty($dto->tagIds)) {
                 $place->tags()->sync($dto->tagIds);
             }
 
-            return $place->load(['category', 'tags']);
+            return $place->load(['categories', 'tags']);
         });
     }
 
@@ -88,7 +89,6 @@ class AdminPlaceService
     {
         return DB::transaction(function () use ($place, $dto): Place {
             $fields = array_filter([
-                'category_id'       => $dto->categoryId,
                 'name_my'           => $dto->nameMy,
                 'name_en'           => $dto->nameEn,
                 'name_th'           => $dto->nameTh,
@@ -108,11 +108,15 @@ class AdminPlaceService
                 $place->update($fields);
             }
 
+            if ($dto->categoryIds !== null) {
+                $place->categories()->sync($dto->categoryIds);
+            }
+
             if ($dto->tagIds !== null) {
                 $place->tags()->sync($dto->tagIds);
             }
 
-            return $place->fresh()->load(['category', 'images', 'tags']);
+            return $place->fresh()->load(['categories', 'images', 'tags']);
         });
     }
 

@@ -28,7 +28,7 @@ class PlaceController extends Controller
 
         // coverImage: loads 1 row per place (HasOne, lowest sort_order).
         // Previously `images` loaded every image for every place — ~5× the data.
-        $places = Place::with(['category', 'coverImage', 'tags'])
+        $places = Place::with(['categories', 'coverImage', 'tags'])
             ->when($search !== '', function ($q) use ($search): void {
                 $q->where(function ($q) use ($search): void {
                     $q->where('name_en', 'like', "%{$search}%")
@@ -63,7 +63,7 @@ class PlaceController extends Controller
      */
     public function show(Place $place): JsonResponse
     {
-        $place->load(['category', 'images', 'tags']);
+        $place->load(['categories', 'images', 'tags']);
 
         return response()->json([
             'data' => new PlaceResource($place),

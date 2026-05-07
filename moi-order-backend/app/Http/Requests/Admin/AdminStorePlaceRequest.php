@@ -14,7 +14,8 @@ class AdminStorePlaceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_id'       => ['required', 'integer', Rule::exists('categories', 'id')],
+            'category_ids'      => ['required', 'array', 'min:1'],
+            'category_ids.*'    => ['integer', Rule::exists('categories', 'id')],
             'name_my'           => ['required', 'string', 'max:255'],
             'name_en'           => ['required', 'string', 'max:255'],
             'name_th'           => ['sometimes', 'nullable', 'string', 'max:255'],

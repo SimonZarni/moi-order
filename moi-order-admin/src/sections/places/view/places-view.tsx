@@ -49,6 +49,11 @@ const localeName = (v: PlaceLocale | null): string => {
   return v.name_my ?? v.name_en ?? '—';
 };
 
+const categoryNames = (cats: PlaceLocale[]): string => {
+  if (!cats || cats.length === 0) return '—';
+  return cats.map((c) => c.name_my ?? c.name_en ?? '—').join(', ');
+};
+
 // ----------------------------------------------------------------------
 
 type ImportDialogProps = {
@@ -428,7 +433,7 @@ export function PlacesView() {
                             {row.address}
                           </Typography>
                         </TableCell>
-                        <TableCell>{localeName(row.category)}</TableCell>
+                        <TableCell>{categoryNames(row.categories ?? [])}</TableCell>
                         <TableCell>{row.city ?? '—'}</TableCell>
                         <TableCell align="center">
                           <Stack

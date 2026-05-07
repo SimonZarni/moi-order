@@ -14,7 +14,7 @@ class AdminPlaceIndexRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_id' => ['sometimes', 'integer', 'min:1', Rule::exists('categories', 'id')],
+            'category_id' => ['sometimes', 'integer', 'min:1', Rule::exists('categories', 'id')], // still supported for single-category filter
             'city'        => ['sometimes', 'string', 'max:100'],
             'search'      => ['sometimes', 'string', 'max:100'],
             'per_page'    => ['sometimes', 'integer', 'min:1', 'max:100'],

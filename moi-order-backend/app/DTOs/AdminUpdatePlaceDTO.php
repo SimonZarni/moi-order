@@ -9,7 +9,7 @@ use App\Http\Requests\Admin\AdminUpdatePlaceRequest;
 readonly class AdminUpdatePlaceDTO
 {
     public function __construct(
-        public ?int    $categoryId,
+        public ?array  $categoryIds,
         public ?string $nameMy,
         public ?string $nameEn,
         public ?string $nameTh,
@@ -29,7 +29,7 @@ readonly class AdminUpdatePlaceDTO
     public static function fromRequest(AdminUpdatePlaceRequest $request): self
     {
         return new self(
-            categoryId:       $request->has('category_id')  ? $request->integer('category_id')            : null,
+            categoryIds:      $request->has('category_ids') ? $request->input('category_ids', [])          : null,
             nameMy:           $request->has('name_my')      ? $request->string('name_my')->toString()      : null,
             nameEn:           $request->has('name_en')      ? $request->string('name_en')->toString()      : null,
             nameTh:           $request->has('name_th')      ? $request->input('name_th')                   : null,

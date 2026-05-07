@@ -153,7 +153,7 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     const [userLng, userLat] = userCoords;
 
     let pool = selectedCategory !== null
-      ? allPlaces.filter(p => p.category.id === selectedCategory)
+      ? allPlaces.filter(p => p.categories.some(c => c.id === selectedCategory))
       : allPlaces;
 
     if (selectedTagIds.length > 0) {

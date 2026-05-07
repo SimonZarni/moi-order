@@ -35,7 +35,7 @@ class AdminPlaceResource extends JsonResource
             'google_map_url'    => $this->google_map_url,
             'created_at'        => $this->created_at->toISOString(),
             'deleted_at'        => $this->deleted_at?->toISOString(),
-            'category'          => new CategoryResource($this->whenLoaded('category')),
+            'categories'        => CategoryResource::collection($this->whenLoaded('categories')),
             'tags'              => TagResource::collection($this->whenLoaded('tags')),
             'images'            => PlaceImageResource::collection($this->whenLoaded('images')),
             'cover_image'       => $this->whenLoaded('coverImage', function () use ($storage) {

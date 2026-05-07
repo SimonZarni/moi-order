@@ -43,12 +43,12 @@ function toSearchResults(
         p.name_en.toLowerCase().includes(q) ||
         p.name_my.toLowerCase().includes(q) ||
         p.city?.toLowerCase().includes(q) ||
-        p.category?.name_en.toLowerCase().includes(q)
+        p.categories[0]?.name_en.toLowerCase().includes(q)
       )
       .forEach(p => results.push({
         type: 'place', id: p.id,
         title: p.name_en,
-        subtitle: [p.category?.name_en, p.city].filter(Boolean).join(' · '),
+        subtitle: [p.categories[0]?.name_en, p.city].filter(Boolean).join(' · '),
         image: p.cover_image,
       }));
   }

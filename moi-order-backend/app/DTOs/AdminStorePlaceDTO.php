@@ -9,7 +9,7 @@ use App\Http\Requests\Admin\AdminStorePlaceRequest;
 readonly class AdminStorePlaceDTO
 {
     public function __construct(
-        public int     $categoryId,
+        public array   $categoryIds,
         public string  $nameMy,
         public string  $nameEn,
         public ?string $nameTh,
@@ -29,7 +29,7 @@ readonly class AdminStorePlaceDTO
     public static function fromRequest(AdminStorePlaceRequest $request): self
     {
         return new self(
-            categoryId:       $request->integer('category_id'),
+            categoryIds:      $request->input('category_ids', []),
             nameMy:           $request->string('name_my')->toString(),
             nameEn:           $request->string('name_en')->toString(),
             nameTh:           $request->input('name_th'),
