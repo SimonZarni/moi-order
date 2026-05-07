@@ -19,6 +19,8 @@
                   Verify your email
                 @elseif($purpose === \App\Enums\EmailOtpPurpose::EmailUpdate)
                   Verify your new email
+                @elseif($purpose === \App\Enums\EmailOtpPurpose::AdminInvite)
+                  Create your admin account
                 @else
                   Reset your password
                 @endif
@@ -34,6 +36,8 @@
                   Use the code below to verify your email address and complete your registration.
                 @elseif($purpose === \App\Enums\EmailOtpPurpose::EmailUpdate)
                   Use the code below to verify ownership of your new email address.
+                @elseif($purpose === \App\Enums\EmailOtpPurpose::AdminInvite)
+                  Use the code below to verify the email address for the new admin account.
                 @else
                   Use the code below to reset your Moi Order password.
                 @endif
