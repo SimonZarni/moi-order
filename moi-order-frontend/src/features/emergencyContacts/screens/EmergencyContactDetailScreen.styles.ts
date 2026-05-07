@@ -6,7 +6,7 @@ import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 
 export const styles = StyleSheet.create({
-  root:   { flex: 1, backgroundColor: colours.backgroundLight },
+  root:   { flex: 1, backgroundColor: colours.backgroundDark },
   scroll: { flex: 1 },
 
   centered: {
