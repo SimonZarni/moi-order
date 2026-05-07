@@ -14,9 +14,8 @@ import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { sendAdminOtp, verifyAdminOtp, createAdminAccount } from 'src/api/roles';
-
 import { DashboardContent } from 'src/layouts/dashboard';
+import { sendAdminOtp, verifyAdminOtp, createAdminAccount } from 'src/api/roles';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
