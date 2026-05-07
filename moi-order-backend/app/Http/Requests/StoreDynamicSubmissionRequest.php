@@ -103,9 +103,10 @@ class StoreDynamicSubmissionRequest extends FormRequest
             return;
         }
 
-        // Hard cap per file to prevent oversized uploads from silently failing at the web server layer.
-        if ($file->getSize() > 50 * 1024 * 1024) {
-            $v->errors()->add("files.{$key}", "The {$labelEn} must be under 50 MB.");
+        // Hard cap per file — client resizes to ≤2048 px at 0.7 quality before upload,
+        // so 12 MB is a generous safety net that still stays under the 50 M nginx limit × 3 files.
+        if ($file->getSize() > 12 * 1024 * 1024) {
+            $v->errors()->add("files.{$key}", "The {$labelEn} must be under 12 MB.");
             return;
         }
 

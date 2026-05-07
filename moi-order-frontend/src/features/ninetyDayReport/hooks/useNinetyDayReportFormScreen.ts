@@ -3,6 +3,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMutation } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as Crypto from 'expo-crypto';
 
 import { useNinetyDayReportForm, UseNinetyDayReportFormResult } from './useNinetyDayReportForm';
@@ -66,19 +67,31 @@ export function useNinetyDayReportFormScreen(): UseNinetyDayReportFormScreenResu
     }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
-      quality:    0.7,
+      quality:    1,
       allowsEditing: false,
       base64: false,
     });
     if (result.canceled || result.assets.length === 0) return null;
     const asset = result.assets[0];
     if (asset == null) return null;
-    // Guard before the network call — 50 MB matches the server-side cap.
-    if (asset.fileSize != null && asset.fileSize > 50 * 1024 * 1024) {
-      setBannerError('Could not upload. The file is too large. Please select an image under 50 MB.');
-      return null;
+
+    // Scale down to max 2048 px on the longer side, then re-encode at 0.7 quality.
+    // This keeps passport/visa images readable while staying well under the 12 MB per-file cap.
+    const MAX_DIM = 2048;
+    const ctx = ImageManipulator.manipulate(asset.uri);
+    if (asset.width > MAX_DIM || asset.height > MAX_DIM) {
+      ctx.resize(asset.width >= asset.height ? { width: MAX_DIM } : { height: MAX_DIM });
     }
-    return stripAsset(asset);
+    const rendered = await ctx.renderAsync();
+    const compressed = await rendered.saveAsync({ compress: 0.7, format: SaveFormat.JPEG });
+
+    return stripAsset({
+      ...asset,
+      uri:      compressed.uri,
+      width:    compressed.width,
+      height:   compressed.height,
+      mimeType: 'image/jpeg',
+    });
   }, []);
 
   const handlePickPassportBioPage = useCallback(async (): Promise<void> => {
