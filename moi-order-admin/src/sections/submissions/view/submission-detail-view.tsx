@@ -7,17 +7,18 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
-import Select from '@mui/material/Select';
+import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
 import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import InputLabel from '@mui/material/InputLabel';
 import CardHeader from '@mui/material/CardHeader';
-import FormControl from '@mui/material/FormControl';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
 import CircularProgress from '@mui/material/CircularProgress';
+import DialogContentText from '@mui/material/DialogContentText';
 
 import { useRouter } from 'src/routes/hooks';
 
@@ -42,13 +43,7 @@ const STATUS_COLORS: Record<SubmissionStatus, 'warning' | 'success' | 'error'> =
   cancelled: 'error',
 };
 
-const WRITABLE_STATUSES: Partial<Record<SubmissionStatus, { value: SubmissionStatus; label: string }[]>> = {
-  pending_payment: [{ value: 'cancelled', label: 'Cancelled' }],
-  processing: [
-    { value: 'completed', label: 'Completed' },
-    { value: 'cancelled', label: 'Cancelled' },
-  ],
-};
+const CANCELLABLE_STATUSES: SubmissionStatus[] = ['pending_payment', 'processing'];
 
 // ----------------------------------------------------------------------
 
@@ -61,8 +56,8 @@ export function SubmissionDetailView() {
 
   const [submission, setSubmission] = useState<SubmissionDetailData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState<SubmissionStatus>('processing');
   const [saving, setSaving] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [confirmError, setConfirmError] = useState('');
   const [confirmingOrder, setConfirmingOrder] = useState(false);
@@ -80,11 +75,7 @@ export function SubmissionDetailView() {
     setLoading(true);
     submissionsApi
       .get(id)
-      .then((data) => {
-        setSubmission(data);
-        const opts = WRITABLE_STATUSES[data.status as SubmissionStatus];
-        setStatus(opts?.[0]?.value ?? (data.status as SubmissionStatus));
-      })
+      .then((data) => { setSubmission(data); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [id]);
@@ -97,8 +88,6 @@ export function SubmissionDetailView() {
       if (id) {
         const data = await submissionsApi.get(id);
         setSubmission(data);
-        const opts = WRITABLE_STATUSES[data.status as SubmissionStatus];
-        setStatus(opts?.[0]?.value ?? (data.status as SubmissionStatus));
       }
     } catch (_e) {
       // ignore — regeneration errors are silent; user can retry manually
@@ -133,12 +122,17 @@ export function SubmissionDetailView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submission?.payment?.expires_at, submission?.payment?.status]);
 
-  const handleSaveStatus = () => {
+  const handleCancelOrder = () => {
     if (!id) return;
     setSaving(true);
-    submissionsApi.updateStatus(id, status).then(() => {
-      if (submission) setSubmission({ ...submission, status });
-    }).catch(() => {}).finally(() => setSaving(false));
+    submissionsApi
+      .updateStatus(id, 'cancelled')
+      .then(() => {
+        if (submission) setSubmission({ ...submission, status: 'cancelled' });
+        setCancelDialogOpen(false);
+      })
+      .catch(() => {})
+      .finally(() => setSaving(false));
   };
 
   const handleUploadResult = () => {
@@ -193,11 +187,7 @@ export function SubmissionDetailView() {
     paymentsApi
       .confirm(submission.payment.id)
       .then(() => {
-        if (id) submissionsApi.get(id).then((data) => {
-          setSubmission(data);
-          const opts = WRITABLE_STATUSES[data.status as SubmissionStatus];
-          setStatus(opts?.[0]?.value ?? (data.status as SubmissionStatus));
-        }).catch(() => {});
+        if (id) submissionsApi.get(id).then((data) => { setSubmission(data); }).catch(() => {});
       })
       .catch(() => setConfirmError('Could not confirm payment. Try again.'))
       .finally(() => setConfirming(false));
@@ -274,74 +264,22 @@ export function SubmissionDetailView() {
               </CardContent>
             </Card>
 
-            {submission.submission_data && Object.keys(submission.submission_data).length > 0 && (
+            {canManage && CANCELLABLE_STATUSES.includes(submission.status as SubmissionStatus) && (
               <Card>
-                <CardHeader title="Form Data" />
+                <CardHeader title="Cancel Order" />
                 <CardContent>
-                  <Stack spacing={1.5}>
-                    {Object.entries(submission.submission_data).map(([key, value]) => {
-                      const isUrl = typeof value === 'string' && value.startsWith('http');
-                      return (
-                        <Box key={key}>
-                          <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'capitalize', display: 'block', mb: 0.5 }}>
-                            {key.replace(/_/g, ' ')}
-                          </Typography>
-                          {isUrl ? (
-                            <Box
-                              component="a"
-                              href={value}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              sx={{ display: 'inline-block', borderRadius: 1, overflow: 'hidden', border: '1px solid', borderColor: 'divider', '&:hover': { opacity: 0.85 } }}
-                            >
-                              <Box
-                                component="img"
-                                src={value}
-                                alt={key}
-                                sx={{ display: 'block', width: 120, height: 90, objectFit: 'cover' }}
-                                onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-                                  const img = e.currentTarget;
-                                  img.style.display = 'none';
-                                  if (img.parentElement) {
-                                    img.parentElement.innerHTML = `<span style="display:flex;align-items:center;justify-content:center;width:120px;height:90px;font-size:11px;color:#888;padding:4px;word-break:break-all;text-align:center;">View File</span>`;
-                                  }
-                                }}
-                              />
-                            </Box>
-                          ) : (
-                            <Typography variant="body2" fontWeight={500}>{value}</Typography>
-                          )}
-                        </Box>
-                      );
-                    })}
-                  </Stack>
-                </CardContent>
-              </Card>
-            )}
-
-            {canManage && (
-              <Card>
-                <CardHeader title="Update Status" />
-                <CardContent>
-                  {WRITABLE_STATUSES[submission.status as SubmissionStatus] ? (
-                    <>
-                      <FormControl fullWidth size="small">
-                        <InputLabel>Status</InputLabel>
-                        <Select value={status} label="Status" onChange={(e) => setStatus(e.target.value as SubmissionStatus)}>
-                          {(WRITABLE_STATUSES[submission.status as SubmissionStatus] ?? []).map((opt) => (
-                            <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                      <Button fullWidth variant="contained" color="primary" sx={{ mt: 2 }} onClick={handleSaveStatus} disabled={saving}>
-                        Save Status
-                      </Button>
-                    </>
-                  ) : (
-                    <Typography variant="body2" color="text.disabled" sx={{ textAlign: 'center', py: 1 }}>
-                      This submission cannot be updated.
-                    </Typography>
-                  )}
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Cancelling this order will notify the customer and cannot be undone.
+                  </Typography>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="error"
+                    onClick={() => setCancelDialogOpen(true)}
+                    startIcon={<Iconify icon="solar:trash-bin-trash-bold" width={16} />}
+                  >
+                    Cancel Order
+                  </Button>
                 </CardContent>
               </Card>
             )}
@@ -419,12 +357,15 @@ export function SubmissionDetailView() {
                 <CardHeader title="Order Confirmation Required" />
                 <CardContent>
                   {submission.payment_authorized ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Iconify icon="solar:check-circle-bold" width={20} color="success.main" />
-                      <Typography variant="body2" color="success.main" fontWeight={600}>
-                        Order Confirmed
-                      </Typography>
-                    </Box>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      color="success"
+                      disabled
+                      startIcon={<Iconify icon="solar:check-circle-bold" width={16} />}
+                    >
+                      Order Confirmed
+                    </Button>
                   ) : (
                     <>
                       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -558,6 +499,7 @@ export function SubmissionDetailView() {
         </Grid>
 
         <Grid size={{ xs: 12, md: 8 }}>
+          <Stack spacing={3}>
           {(submission.documents ?? []).length > 0 && (
             <Card>
               <CardHeader title={`Documents (${(submission.documents ?? []).length})`} />
@@ -618,18 +560,74 @@ export function SubmissionDetailView() {
             </Card>
           )}
 
-          {(submission.documents ?? []).length === 0 && (
+          {submission.submission_data && Object.keys(submission.submission_data).length > 0 && (
             <Card>
+              <CardHeader title="Form Data" />
               <CardContent>
-                <Box sx={{ py: 4, textAlign: 'center', color: 'text.disabled' }}>
-                  <Iconify icon="solar:eye-bold" width={40} sx={{ mb: 1, opacity: 0.3 }} />
-                  <Typography variant="body2">No documents uploaded for this submission.</Typography>
-                </Box>
+                <Stack spacing={1.5}>
+                  {Object.entries(submission.submission_data).map(([key, value]) => {
+                    const isUrl = typeof value === 'string' && value.startsWith('http');
+                    return (
+                      <Box key={key}>
+                        <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'capitalize', display: 'block', mb: 0.5 }}>
+                          {key.replace(/_/g, ' ')}
+                        </Typography>
+                        {isUrl ? (
+                          <Box
+                            component="a"
+                            href={value}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            sx={{ display: 'inline-block', borderRadius: 1, overflow: 'hidden', border: '1px solid', borderColor: 'divider', '&:hover': { opacity: 0.85 } }}
+                          >
+                            <Box
+                              component="img"
+                              src={value}
+                              alt={key}
+                              sx={{ display: 'block', width: 120, height: 90, objectFit: 'cover' }}
+                              onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                                const img = e.currentTarget;
+                                img.style.display = 'none';
+                                if (img.parentElement) {
+                                  img.parentElement.innerHTML = `<span style="display:flex;align-items:center;justify-content:center;width:120px;height:90px;font-size:11px;color:#888;padding:4px;word-break:break-all;text-align:center;">View File</span>`;
+                                }
+                              }}
+                            />
+                          </Box>
+                        ) : (
+                          <Typography variant="body2" fontWeight={500}>{String(value)}</Typography>
+                        )}
+                      </Box>
+                    );
+                  })}
+                </Stack>
               </CardContent>
             </Card>
           )}
+          </Stack>
         </Grid>
       </Grid>
+
+      <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
+        <DialogTitle>Cancel Order</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to cancel this order? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCancelDialogOpen(false)}>No</Button>
+          <Button
+            color="error"
+            variant="contained"
+            disabled={saving}
+            onClick={handleCancelOrder}
+            startIcon={saving ? <CircularProgress size={14} color="inherit" /> : null}
+          >
+            {saving ? 'Cancelling…' : 'Yes, Cancel Order'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </DashboardContent>
   );
 }
