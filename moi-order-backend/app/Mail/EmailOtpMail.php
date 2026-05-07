@@ -28,6 +28,7 @@ class EmailOtpMail extends Mailable implements ShouldQueue
                 EmailOtpPurpose::Registration  => 'Verify your Moi Order email',
                 EmailOtpPurpose::PasswordReset => 'Reset your Moi Order password',
                 EmailOtpPurpose::EmailUpdate   => 'Verify your new email address',
+                EmailOtpPurpose::AdminInvite   => 'Your Moi Order admin account OTP',
             },
         );
     }
