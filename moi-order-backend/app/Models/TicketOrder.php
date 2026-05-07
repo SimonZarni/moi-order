@@ -36,15 +36,17 @@ class TicketOrder extends Model implements PayableInterface
         'eticket_path',
         'completed_at',
         'cancelled_at',
+        'payment_authorized',
     ];
 
     protected function casts(): array
     {
         return [
-            'visit_date'   => 'date',
-            'status'       => TicketOrderStatus::class,
-            'completed_at' => 'datetime',
-            'cancelled_at' => 'datetime',
+            'visit_date'         => 'date',
+            'status'             => TicketOrderStatus::class,
+            'completed_at'       => 'datetime',
+            'cancelled_at'       => 'datetime',
+            'payment_authorized' => 'boolean',
         ];
     }
 

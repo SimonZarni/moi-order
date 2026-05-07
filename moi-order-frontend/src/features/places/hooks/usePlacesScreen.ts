@@ -14,18 +14,20 @@ import { useDebounce } from '@/shared/hooks/useDebounce';
 import { distanceKm, formatDistance } from '@/shared/utils/geo';
 import { CACHE_TTL } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
-import { Category, Place, ApiError } from '@/types/models';
+import { Category, Place, Tag, ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
 // Mode cycles: all → nearby → favorites → all
 export type PlacesMode = 'all' | 'nearby' | 'favorites';
+export type PlacesLayout = 'feed' | 'grid';
 
 export interface UsePlacesScreenResult {
-  placesListRef: React.RefObject<FlatList<Place>>;
+  placesListRef: React.RefObject<FlatList<Place> | null>;
   displayedPlaces: Place[];
   categories: Category[];
+  allTags: Tag[];
   isPlacesLoading: boolean;
   isPlacesError: boolean;
   isPlacesRefreshing: boolean;
@@ -34,19 +36,28 @@ export interface UsePlacesScreenResult {
   query: string;
   selectedCategory: number | null;
   selectedCategoryLabel: string;
+  selectedTagIds: number[];
+  showPartialMatches: boolean;
   isCategoryModalOpen: boolean;
+  isTagsModalOpen: boolean;
   mode: PlacesMode;
+  layoutMode: PlacesLayout;
   distanceFor: (place: Place) => string | null;
   isFavorited: (placeId: number) => boolean;
   handleQueryChange: (text: string) => void;
   handleCategorySelectAndClose: (id: number | null) => void;
   handleCategoryModalOpen: () => void;
   handleCategoryModalClose: () => void;
+  handleTagsModalOpen: () => void;
+  handleTagsModalClose: () => void;
+  handleTagToggle: (id: number) => void;
+  handleClearAllTags: () => void;
   handlePlacesEndReached: () => void;
   handlePlacesRefresh: () => void;
   handlePlacePress: (placeId: number) => void;
   handleFavoritePress: (placeId: number) => void;
   handleModeToggle: () => void;
+  handleSetLayout: (layout: PlacesLayout) => void;
   handleBack: () => void;
 }
 
@@ -58,8 +69,11 @@ export function usePlacesScreen(): UsePlacesScreenResult {
 
   const [query, setQuery] = useState('');
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isTagsModalOpen, setIsTagsModalOpen] = useState(false);
   const [mode, setMode] = useState<PlacesMode>('all');
+  const [layoutMode, setLayoutMode] = useState<PlacesLayout>('feed');
   const [userCoords, setUserCoords] = useState<[number, number] | null>(null);
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   const debouncedQuery = useDebounce(query, SEARCH_DEBOUNCE_MS);
 
   useFocusEffect(
@@ -69,7 +83,7 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     }, [])
   );
 
-  // All places (unfiltered, used for nearby + favorites sorting)
+  // All places (unfiltered) — used for nearby sort and deriving tag list
   const { data: allPlaces = [] } = useQuery({
     queryKey: QUERY_KEYS.PLACES.ALL(),
     queryFn:  fetchAllPlaces,
@@ -102,33 +116,76 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     [categories, selectedCategory],
   );
 
-  // ── Nearby sorting ──────────────────────────────────────────────────────
+  // Distinct tags from all places — stable list for the filter row
+  const allTags = useMemo((): Tag[] => {
+    const seen = new Set<number>();
+    return allPlaces.reduce<Tag[]>((acc, place) => {
+      place.tags.forEach(tag => {
+        if (!seen.has(tag.id)) {
+          seen.add(tag.id);
+          acc.push(tag);
+        }
+      });
+      return acc;
+    }, []);
+  }, [allPlaces]);
+
+  // Tag filtering: AND logic, fall back to OR when AND yields zero results
+  const { tagFilteredPlaces, showPartialMatches } = useMemo(() => {
+    if (selectedTagIds.length === 0) {
+      return { tagFilteredPlaces: filteredPlaces, showPartialMatches: false };
+    }
+    const andResult = filteredPlaces.filter(p =>
+      selectedTagIds.every(id => p.tags.some(t => t.id === id)),
+    );
+    if (andResult.length > 0) {
+      return { tagFilteredPlaces: andResult, showPartialMatches: false };
+    }
+    const orResult = filteredPlaces.filter(p =>
+      selectedTagIds.some(id => p.tags.some(t => t.id === id)),
+    );
+    return { tagFilteredPlaces: orResult, showPartialMatches: true };
+  }, [filteredPlaces, selectedTagIds]);
+
+  // Nearby: apply category + tag filters to the full allPlaces set for comprehensive sort
   const nearbyPlaces = useMemo((): Place[] => {
     if (mode !== 'nearby' || userCoords === null) return [];
     const [userLng, userLat] = userCoords;
-    return [...allPlaces]
+
+    let pool = selectedCategory !== null
+      ? allPlaces.filter(p => p.category.id === selectedCategory)
+      : allPlaces;
+
+    if (selectedTagIds.length > 0) {
+      const and = pool.filter(p => selectedTagIds.every(id => p.tags.some(t => t.id === id)));
+      pool = and.length > 0
+        ? and
+        : pool.filter(p => selectedTagIds.some(id => p.tags.some(t => t.id === id)));
+    }
+
+    return pool
       .filter(p => p.latitude != null && p.longitude != null)
       .sort((a, b) =>
         distanceKm(userLat, userLng, a.latitude!, a.longitude!) -
-        distanceKm(userLat, userLng, b.latitude!, b.longitude!)
+        distanceKm(userLat, userLng, b.latitude!, b.longitude!),
       );
-  }, [mode, userCoords, allPlaces]);
+  }, [mode, userCoords, allPlaces, selectedCategory, selectedTagIds]);
 
-  // ── Favorites sorting ───────────────────────────────────────────────────
+  // Favorites: sort already-tag-filtered places
   const favoritesFirstPlaces = useMemo((): Place[] => {
     if (mode !== 'favorites') return [];
-    return [...filteredPlaces].sort((a, b) => {
+    return [...tagFilteredPlaces].sort((a, b) => {
       const aFav = favoriteIds.has(a.id) ? 0 : 1;
       const bFav = favoriteIds.has(b.id) ? 0 : 1;
       return aFav - bFav;
     });
-  }, [mode, filteredPlaces, favoriteIds]);
+  }, [mode, tagFilteredPlaces, favoriteIds]);
 
   const displayedPlaces = useMemo((): Place[] => {
     if (mode === 'nearby') return nearbyPlaces;
     if (mode === 'favorites') return favoritesFirstPlaces;
-    return filteredPlaces;
-  }, [mode, nearbyPlaces, favoritesFirstPlaces, filteredPlaces]);
+    return tagFilteredPlaces;
+  }, [mode, nearbyPlaces, favoritesFirstPlaces, tagFilteredPlaces]);
 
   const distanceFor = useCallback((place: Place): string | null => {
     if (mode !== 'nearby' || userCoords === null || place.latitude == null || place.longitude == null) return null;
@@ -139,7 +196,6 @@ export function usePlacesScreen(): UsePlacesScreenResult {
   // ── Mode toggle ─────────────────────────────────────────────────────────
   const handleModeToggle = useCallback(async (): Promise<void> => {
     if (mode === 'all') {
-      // → nearby: request location
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert('Location Required', 'Allow location access to see places sorted by distance.');
@@ -153,23 +209,28 @@ export function usePlacesScreen(): UsePlacesScreenResult {
         Alert.alert('Location Error', 'Could not get your location. Please try again.');
       }
     } else if (mode === 'nearby') {
-      // → favorites
       setMode('favorites');
     } else {
-      // favorites → all
       setMode('all');
     }
   }, [mode]);
 
-  // ── Standard handlers ───────────────────────────────────────────────────
+  // ── Handlers ─────────────────────────────────────────────────────────────
   const handleQueryChange       = useCallback((text: string): void => { setQuery(text); }, []);
   const handleCategoryModalOpen  = useCallback((): void => { setIsCategoryModalOpen(true); }, []);
   const handleCategoryModalClose = useCallback((): void => { setIsCategoryModalOpen(false); }, []);
+  const handleTagsModalOpen      = useCallback((): void => { setIsTagsModalOpen(true); }, []);
+  const handleTagsModalClose     = useCallback((): void => { setIsTagsModalOpen(false); }, []);
+  const handleClearAllTags       = useCallback((): void => { setSelectedTagIds([]); }, []);
 
   const handleCategorySelectAndClose = useCallback((id: number | null): void => {
     handleCategorySelect(id);
     setIsCategoryModalOpen(false);
   }, [handleCategorySelect]);
+
+  const handleTagToggle = useCallback((id: number): void => {
+    setSelectedTagIds(prev => prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id]);
+  }, []);
 
   const handlePlacesEndReached = useCallback((): void => {
     if (mode === 'all' && placesHasNextPage && !isPlacesFetchingNextPage) fetchPlacesNextPage();
@@ -190,12 +251,14 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     toggleFavoriteMutation(placeId);
   }, [toggleFavoriteMutation]);
 
+  const handleSetLayout = useCallback((layout: PlacesLayout): void => { setLayoutMode(layout); }, []);
   const handleBack = useCallback((): void => { navigation.goBack(); }, [navigation]);
 
   return {
     placesListRef,
     displayedPlaces,
     categories,
+    allTags,
     isPlacesLoading,
     isPlacesError,
     isPlacesRefreshing,
@@ -204,19 +267,28 @@ export function usePlacesScreen(): UsePlacesScreenResult {
     query,
     selectedCategory,
     selectedCategoryLabel,
+    selectedTagIds,
+    showPartialMatches,
     isCategoryModalOpen,
+    isTagsModalOpen,
     mode,
+    layoutMode,
     distanceFor,
     isFavorited,
     handleQueryChange,
     handleCategorySelectAndClose,
     handleCategoryModalOpen,
     handleCategoryModalClose,
+    handleTagsModalOpen,
+    handleTagsModalClose,
+    handleTagToggle,
+    handleClearAllTags,
     handlePlacesEndReached,
     handlePlacesRefresh,
     handlePlacePress,
     handleFavoritePress,
     handleModeToggle,
+    handleSetLayout,
     handleBack,
   };
 }

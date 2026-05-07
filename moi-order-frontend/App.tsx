@@ -100,6 +100,8 @@ import { NoticeModal } from '@/shared/components/NoticeModal/NoticeModal';
 import { PlacesMapScreen } from '@/features/map/screens/PlacesMapScreen';
 import { SearchScreen } from '@/features/search/screens/SearchScreen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { useFonts, PlayfairDisplay_700Bold_Italic, PlayfairDisplay_700Bold } from '@expo-google-fonts/playfair-display';
 
 import { RootStackParamList, TabParamList } from '@/types/navigation';
 
@@ -213,6 +215,7 @@ export default function App(): React.JSX.Element {
   const [splashGone, setSplashGone] = useState(false);
   const { setUser } = useAuthStore();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [fontsLoaded] = useFonts({ PlayfairDisplay_700Bold_Italic, PlayfairDisplay_700Bold });
 
   // Minimum-hold timer — fires after 1.5 s regardless of init speed.
   useEffect(() => {
@@ -248,8 +251,8 @@ export default function App(): React.JSX.Element {
     restoreSession();
   }, [setUser]);
 
-  // canHide only when BOTH the session restore AND the minimum timer are done.
-  const canHide = initDone && timerDone;
+  // canHide only when session restore, minimum timer, AND fonts are all ready.
+  const canHide = initDone && timerDone && (fontsLoaded ?? false);
   const onSplashHidden = useCallback(() => setSplashGone(true), []);
 
   return (
@@ -258,8 +261,10 @@ export default function App(): React.JSX.Element {
         <QueryClientProvider client={queryClient}>
           <NavigationContainer>
             <StatusBar style="light" translucent />
-            {/* App shell is mounted immediately so navigation is ready; splash sits on top. */}
-            <AppShell />
+            <BottomSheetModalProvider>
+              {/* App shell is mounted immediately so navigation is ready; splash sits on top. */}
+              <AppShell />
+            </BottomSheetModalProvider>
           </NavigationContainer>
         </QueryClientProvider>
       </SafeAreaProvider>

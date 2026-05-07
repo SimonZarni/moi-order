@@ -39,15 +39,17 @@ class ServiceSubmission extends Model implements PayableInterface
         'completed_at',
         'submission_data',
         'result_path',
+        'payment_authorized',
     ];
 
     protected function casts(): array
     {
         return [
-            'price_snapshot'  => 'integer',
-            'status'          => SubmissionStatus::class,
-            'completed_at'    => 'datetime',
-            'submission_data' => 'array',
+            'price_snapshot'     => 'integer',
+            'status'             => SubmissionStatus::class,
+            'completed_at'       => 'datetime',
+            'submission_data'    => 'array',
+            'payment_authorized' => 'boolean',
         ];
     }
 

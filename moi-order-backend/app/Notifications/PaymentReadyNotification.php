@@ -51,6 +51,6 @@ class PaymentReadyNotification extends Notification
 
     private function body(): string
     {
-        return "Your order \"{$this->orderName}\" has been confirmed. Tap to proceed with payment.";
+        return "Order confirmed. Please proceed with payment to start processing.";
     }
 }

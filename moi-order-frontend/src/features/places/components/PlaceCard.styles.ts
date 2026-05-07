@@ -1,44 +1,49 @@
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 
-import { colours } from '@/shared/theme/colours';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { radius } from '@/shared/theme/radius';
 import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 
-const CARD_RADIUS = radius.xl + 4; // 20
+const CARD_RADIUS = 20;
+const CARD_HEIGHT = 248;
 
 export const styles = StyleSheet.create({
-  // Outer shadow wrapper — no overflow:hidden so elevation renders on Android
+
+  // Outer wrapper: shadow only — no overflow so elevation renders on Android
   shadowWrap: {
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.md + 2,
-    borderBottomLeftRadius: CARD_RADIUS,
-    borderBottomRightRadius: CARD_RADIUS,
-    backgroundColor: colours.backgroundDark,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderRadius: CARD_RADIUS,
+    backgroundColor: '#0f2422',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.28,
-    shadowRadius: 18,
-    elevation: 9,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 7,
   },
 
-  // Inner Pressable clips image + glass to rounded corners
-  card: {
-    height: 220,
-    borderBottomLeftRadius: CARD_RADIUS,
-    borderBottomRightRadius: CARD_RADIUS,
+  // Separate clip view so overflow:hidden only applies to the image/gradient,
+  // not the interactive Pressable — this lets the nested ScrollView scroll freely
+  imageClip: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: CARD_RADIUS,
     overflow: 'hidden',
-    backgroundColor: colours.backgroundDark,
+  },
+
+  // Interactive Pressable — transparent so imageClip shows through; no overflow:hidden
+  card: {
+    height: CARD_HEIGHT,
+    borderRadius: CARD_RADIUS,
+    backgroundColor: 'transparent',
     justifyContent: 'flex-end',
   },
 
   // ── Full-bleed image ──────────────────────────────────────────────────────
   image: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: '#0f2422',
   },
-
   imageFallback: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: '#0f2422',
@@ -46,17 +51,17 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // ── Bottom gradient ───────────────────────────────────────────────────────
+  // ── Gradient overlay — transparent top → dark bottom ──────────────────────
   gradient: {
     ...StyleSheet.absoluteFillObject,
   },
 
-  // ── Category pill — top right ─────────────────────────────────────────────
+  // ── Category badge — top left ─────────────────────────────────────────────
   categoryPill: {
     position: 'absolute',
-    top: spacing.md,
-    right: spacing.md,
-    backgroundColor: 'rgba(0,0,0,0.42)',
+    top: spacing.sm + 2,
+    left: spacing.sm + 2,
+    backgroundColor: 'rgba(0,0,0,0.46)',
     borderRadius: radius.full,
     paddingVertical: 4,
     paddingHorizontal: spacing.sm + 2,
@@ -72,61 +77,56 @@ export const styles = StyleSheet.create({
     lineHeight: 13,
   },
 
-  // ── Frosted glass panel ───────────────────────────────────────────────────
-  // No top radius — panel bleeds edge-to-edge so it reads as part of the photo
-  glassPanel: {
-    overflow: 'hidden',
-  },
-
-  // Very light tint; gradient carries the readability now
-  glassTint: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(12,24,22,0.12)',
-  },
-
-  glassContent: {
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.md,
-  },
-
-  // ── Name row ─────────────────────────────────────────────────────────────
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 5,
-  },
-  name: {
-    flex: 1,
-    fontSize: typography.lg,
-    fontWeight: '800',
-    color: colours.white,
-    letterSpacing: -0.4,
-    lineHeight: 24,
-    marginRight: spacing.sm,
-  },
+  // ── Heart — top right ─────────────────────────────────────────────────────
   heartBtn: {
+    position: 'absolute',
+    top: spacing.sm + 2,
+    right: spacing.sm + 2,
     width: 34,
     height: 34,
     borderRadius: radius.full,
-    backgroundColor: 'rgba(255,255,255,0.12)',
+    backgroundColor: 'rgba(0,0,0,0.35)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  // ── Meta row ─────────────────────────────────────────────────────────────
+  // ── Content overlay — absolute at the bottom ──────────────────────────────
+  content: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
+    paddingTop: spacing.sm,
+  },
+  // When tags are present, push name/meta up to leave room for the tag strip
+  // 16 (bottom gap) + 32 (pill height) + 6 (breathing room) = 54
+  contentWithTags: {
+    paddingBottom: 54,
+  },
+
+  name: {
+    fontSize: typography.lg,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: -0.4,
+    lineHeight: 24,
+    marginBottom: 4,
+  },
+
+  // ── Meta row: city · distance · hours ────────────────────────────────────
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs + 2,
   },
   metaCity: {
     fontSize: typography.xs,
-    color: 'rgba(255,255,255,0.60)',
+    color: 'rgba(255,255,255,0.65)',
     fontWeight: '500',
     lineHeight: 16,
   },
@@ -135,11 +135,12 @@ export const styles = StyleSheet.create({
     height: 3,
     borderRadius: 2,
     backgroundColor: editorialPalette.gold,
-    opacity: 0.7,
+    opacity: 0.8,
+    flexShrink: 0,
   },
   metaHours: {
     fontSize: typography.xs,
-    color: 'rgba(255,255,255,0.42)',
+    color: 'rgba(255,255,255,0.50)',
     flex: 1,
     lineHeight: 16,
   },
@@ -150,25 +151,36 @@ export const styles = StyleSheet.create({
     lineHeight: 16,
   },
 
-  // ── Tag chips ────────────────────────────────────────────────────────────
+  // ── Tag chips — no fixed height, horizontal scroll, Burmese-safe padding ────
+  // ScrollView positioned as a sibling of the Pressable to avoid gesture conflict
+  tagsScroll: {
+    position: 'absolute',
+    bottom: spacing.md,
+    left: spacing.md,
+    right: 0,
+  },
   tagsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
+    gap: 6,
+    paddingRight: 16,
   },
   tagChip: {
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: 3,
-    borderRadius: radius.full,
+    paddingTop: 6,
+    paddingBottom: Platform.OS === 'android' ? 8 : 6,
+    paddingHorizontal: 12,
+    borderRadius: 999,
     borderWidth: 1,
-    borderColor: `${editorialPalette.gold}50`,
-    backgroundColor: `${editorialPalette.gold}18`,
+    borderColor: `${editorialPalette.gold}99`,
+    backgroundColor: `${editorialPalette.gold}40`,
+    overflow: 'visible',
+    alignItems: 'center',
   },
   tagText: {
-    fontSize: typography.xxs,
+    fontSize: 11,
     fontWeight: '600',
     color: editorialPalette.gold,
-    letterSpacing: 0.4,
-    lineHeight: 13,
+    letterSpacing: 0.3,
+    lineHeight: 20,
+    textAlignVertical: 'center',
+    includeFontPadding: false,
   },
 });

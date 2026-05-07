@@ -1,11 +1,22 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import * as Location from 'expo-location';
 
 import { usePlaceDetail } from '@/features/places/hooks/usePlaceDetail';
 import { usePlaceFavorite } from '@/features/places/hooks/usePlaceFavorite';
 import { useAuthStore } from '@/shared/store/authStore';
 import { Place, PlaceImage, ApiError } from '@/types/models';
+
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 export interface UsePlaceDetailScreenResult {
   place: Place | null;
@@ -26,6 +37,8 @@ export interface UsePlaceDetailScreenResult {
   isLoggedIn: boolean;
   isDescriptionExpanded: boolean;
   isLongDescription: boolean;
+  /** Formatted distance string: "X.X km" if location available, "– km" otherwise. */
+  distanceText: string;
   handleToggleDescription: () => void;
   handleRefresh: () => void;
   handleBack: () => void;
@@ -45,14 +58,15 @@ export function usePlaceDetailScreen(placeId: number): UsePlaceDetailScreenResul
   const { isFavorited, isToggling, handleToggle } = usePlaceFavorite(placeId);
   const [viewerIndex, setViewerIndex] = useState<number>(-1);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [distanceText, setDistanceText] = useState<string>('– km');
 
   // images is only present on the detail response — guard against undefined
   const coverImage    = useMemo(() => place?.images?.[0] ?? null, [place?.images]);
   const galleryImages = useMemo(() => place?.images?.slice(1) ?? [], [place?.images]);
 
-  // Description longer than this threshold gets collapsed to 5 lines
+  // long_description drives the read-more threshold (short_description is always fully shown)
   const isLongDescription = useMemo(
-    () => (place?.long_description?.length ?? 0) > 320,
+    () => (place?.long_description?.length ?? 0) > 0,
     [place?.long_description],
   );
 
@@ -61,6 +75,42 @@ export function usePlaceDetailScreen(placeId: number): UsePlaceDetailScreenResul
     () => (place?.images ?? []).map((img: PlaceImage) => ({ uri: img.url })),
     [place?.images],
   );
+
+  // Request location once and calculate distance when place coords are available
+  useEffect(() => {
+    if (place?.latitude == null || place?.longitude == null) {
+      setDistanceText('– km');
+      return;
+    }
+
+    let cancelled = false;
+
+    async function fetchDistance(): Promise<void> {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== Location.PermissionStatus.GRANTED) {
+        if (!cancelled) setDistanceText('– km');
+        return;
+      }
+      try {
+        const loc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        if (cancelled) return;
+        const km = haversineKm(
+          loc.coords.latitude,
+          loc.coords.longitude,
+          place!.latitude!,
+          place!.longitude!,
+        );
+        setDistanceText(`${km.toFixed(1)} km`);
+      } catch {
+        if (!cancelled) setDistanceText('– km');
+      }
+    }
+
+    void fetchDistance();
+    return () => { cancelled = true; };
+  }, [place?.latitude, place?.longitude]);
 
   const handleToggleDescription = useCallback((): void => {
     setIsDescriptionExpanded(prev => !prev);
@@ -119,6 +169,7 @@ export function usePlaceDetailScreen(placeId: number): UsePlaceDetailScreenResul
     isLoggedIn,
     isDescriptionExpanded,
     isLongDescription,
+    distanceText,
     handleToggleDescription,
     handleRefresh,
     handleBack,

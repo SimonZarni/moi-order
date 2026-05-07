@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, Platform } from 'react-native';
+import { Alert, Linking, Platform } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMutation } from '@tanstack/react-query';
@@ -31,6 +31,9 @@ export interface UseOrderDetailScreenResult {
   isSavingResult: boolean;
   downloadError: string | null;
   previewImageUrl: string | null;
+  docPreviewUrl: string | null;
+  handleDocumentPress: (url: string) => void;
+  handleCloseDocPreview: () => void;
   handleRefresh: () => void;
   handleBack: () => void;
   handlePayNow: () => void;
@@ -47,18 +50,19 @@ export function useOrderDetailScreen(): UseOrderDetailScreenResult {
   const { submission, isLoading, isRefreshing, isError, refetch, cancelMutation } = useOrderDetail(submissionId);
 
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const [docPreviewUrl, setDocPreviewUrl]     = useState<string | null>(null);
   const [downloadError, setDownloadError]     = useState<string | null>(null);
   const [isSavingResult, setIsSavingResult]   = useState(false);
 
   const isPending = submission?.status === SUBMISSION_STATUS.PendingPayment;
 
   const canPay = useMemo(
-    () => isPending && (submission?.payment_authorized ?? true),
+    () => isPending && (submission?.payment_authorized ?? false),
     [isPending, submission?.payment_authorized],
   );
 
   const awaitingConfirmation = useMemo(
-    () => isPending && !(submission?.payment_authorized ?? true),
+    () => isPending && !(submission?.payment_authorized ?? false),
     [isPending, submission?.payment_authorized],
   );
 
@@ -154,6 +158,19 @@ export function useOrderDetailScreen(): UseOrderDetailScreenResult {
   const handleBack         = useCallback((): void => { navigation.goBack(); }, [navigation]);
   const handleClosePreview = useCallback((): void => { setPreviewImageUrl(null); }, []);
 
+  const handleDocumentPress = useCallback((url: string): void => {
+    const path = (url.split('?')[0] ?? '').toLowerCase();
+    if (/\.(jpg|jpeg|png|gif|webp|heic|heif)$/.test(path)) {
+      setDocPreviewUrl(url);
+    } else {
+      Linking.openURL(url).catch(() =>
+        Alert.alert('Cannot Open File', 'Unable to open this file on your device.'),
+      );
+    }
+  }, []);
+
+  const handleCloseDocPreview = useCallback((): void => { setDocPreviewUrl(null); }, []);
+
   const handlePayNow = useCallback((): void => {
     navigation.navigate('Payment', { kind: 'submission', submissionId });
   }, [navigation, submissionId]);
@@ -165,6 +182,7 @@ export function useOrderDetailScreen(): UseOrderDetailScreenResult {
     canPay, awaitingConfirmation, canCancel, isCancelling: cancelMutation.isPending, handleCancelOrder,
     canDownload, isDownloading, isSavingResult,
     downloadError, previewImageUrl,
+    docPreviewUrl, handleDocumentPress, handleCloseDocPreview,
     handleRefresh, handleBack, handlePayNow,
     handleDownloadResult, handleSaveResult, handleClosePreview,
   };

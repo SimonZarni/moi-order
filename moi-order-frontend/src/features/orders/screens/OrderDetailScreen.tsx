@@ -2,6 +2,7 @@ import React from 'react';
 import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
+import ImageViewing from 'react-native-image-viewing';
 
 import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -35,6 +36,7 @@ export function OrderDetailScreen(): React.JSX.Element {
     canPay, awaitingConfirmation, canCancel, isCancelling, handleCancelOrder,
     canDownload, isDownloading, isSavingResult, downloadError,
     previewImageUrl,
+    docPreviewUrl, handleDocumentPress, handleCloseDocPreview,
     handleRefresh, handleBack, handlePayNow,
     handleDownloadResult, handleSaveResult, handleClosePreview,
   } = useOrderDetailScreen();
@@ -84,6 +86,7 @@ export function OrderDetailScreen(): React.JSX.Element {
   const accentColour = STATUS_COLOURS[submission.status] ?? STATUS_COLOURS['pending']!;
 
   return (
+    <>
     <SafeAreaView style={styles.root} edges={['top']}>
       {/* ── Image preview modal ── */}
       <Modal
@@ -268,18 +271,30 @@ export function OrderDetailScreen(): React.JSX.Element {
                 </View>
                 <View style={styles.docCard}>
                   {hasOldDocs && oldDocs.map((doc: SubmissionDocument) => (
-                    <View key={doc.id} style={styles.docRow}>
+                    <Pressable
+                      key={doc.id}
+                      style={({ pressed }) => [styles.docRow, pressed && styles.docRowPressed]}
+                      onPress={() => handleDocumentPress(doc.signed_url)}
+                      accessibilityLabel={`View ${doc.label_mm || doc.label}`}
+                      accessibilityRole="button"
+                    >
                       <Ionicons
                         name={DOC_ICONS[doc.document_type] ?? 'document-text-outline'}
                         size={16}
                         color={colours.textMuted}
                       />
                       <Text style={styles.docLabel}>{doc.label_mm || doc.label}</Text>
-                      <Ionicons name="checkmark" size={14} color={colours.success} />
-                    </View>
+                      <Ionicons name="eye-outline" size={16} color={colours.textMuted} />
+                    </Pressable>
                   ))}
                   {hasNewFiles && fileFields.map((f: FieldSchemaItem) => (
-                    <View key={f.key} style={styles.docRow}>
+                    <Pressable
+                      key={f.key}
+                      style={({ pressed }) => [styles.docRow, pressed && styles.docRowPressed]}
+                      onPress={() => handleDocumentPress(String(submission.submission_data?.[f.key] ?? ''))}
+                      accessibilityLabel={`View ${f.label_mm ?? f.label_en}`}
+                      accessibilityRole="button"
+                    >
                       <Ionicons
                         name={DOC_ICONS[f.key] ?? 'document-text-outline'}
                         size={16}
@@ -288,8 +303,8 @@ export function OrderDetailScreen(): React.JSX.Element {
                       <Text style={styles.docLabel}>
                         {f.label_mm ?? f.label_en}
                       </Text>
-                      <Ionicons name="checkmark" size={14} color={colours.success} />
-                    </View>
+                      <Ionicons name="eye-outline" size={16} color={colours.textMuted} />
+                    </Pressable>
                   ))}
                 </View>
               </>
@@ -298,5 +313,15 @@ export function OrderDetailScreen(): React.JSX.Element {
         </View>
       </ScrollView>
     </SafeAreaView>
+
+    <ImageViewing
+      images={docPreviewUrl ? [{ uri: docPreviewUrl }] : []}
+      imageIndex={0}
+      visible={docPreviewUrl !== null}
+      onRequestClose={handleCloseDocPreview}
+      swipeToCloseEnabled
+      doubleTapToZoomEnabled
+    />
+    </>
   );
 }

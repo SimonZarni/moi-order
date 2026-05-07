@@ -7,30 +7,36 @@ export const TAB_BAR_CLEARANCE     = 100;
 export const TAB_BAR_BOTTOM_OFFSET = 14;
 
 export const styles = StyleSheet.create({
+  // Outer shell — shadow host only; no overflow:hidden so elevation/shadow renders
   container: {
     position: 'absolute',
     left: 20,
     right: 20,
-    backgroundColor: colours.white,
     borderRadius: 36,
-    paddingVertical: 6,
-    paddingHorizontal: 6,
-    borderWidth: 1,
-    borderColor: colours.divider,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.14,
+    shadowRadius: 24,
+    elevation: 12,
   },
 
-  // Inner row — layout measurement target + host for absolute pill + flex tabs.
+  // BlurView inner — clips frosted glass to the pill shape
+  blurWrap: {
+    borderRadius: 36,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.45)',
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+  },
+
+  // Inner row — layout measurement + pill host + flex tabs
   tabsRow: {
     flexDirection: 'row',
     alignItems: 'stretch',
   },
 
-  // Animated pill — liquid glass indicator that slides between tabs.
+  // Animated pill — slides between active tabs
   pill: {
     position: 'absolute',
     top: 0,

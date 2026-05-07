@@ -50,12 +50,12 @@ export function useTicketOrderDetailScreen(): UseTicketOrderDetailScreenResult {
     || order?.status === TICKET_ORDER_STATUS.PaymentFailed;
 
   const canPayNow = useMemo(
-    () => isPendingOrFailed && (order?.payment_authorized ?? true),
+    () => isPendingOrFailed && (order?.payment_authorized ?? false),
     [isPendingOrFailed, order?.payment_authorized],
   );
 
   const awaitingConfirmation = useMemo(
-    () => isPendingOrFailed && !(order?.payment_authorized ?? true),
+    () => isPendingOrFailed && !(order?.payment_authorized ?? false),
     [isPendingOrFailed, order?.payment_authorized],
   );
 

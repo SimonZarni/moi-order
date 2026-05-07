@@ -338,6 +338,9 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 4,
     gap: spacing.sm,
   },
+  docRowPressed: {
+    backgroundColor: 'rgba(0,0,0,0.04)',
+  },
   docRowDivider: {
     height: 1,
     marginHorizontal: spacing.md,

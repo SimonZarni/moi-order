@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { Animated, LayoutChangeEvent, Pressable, Text, View } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
@@ -70,37 +71,39 @@ function TabBarView({ activeRoute, activeIndex, onTabPress, bottom, locale }: Ta
 
   return (
     <View style={[styles.container, { bottom }]}>
-      <View style={styles.tabsRow} onLayout={handleLayout} {...panHandlers}>
-        {/* Animated pill slides between tabs with liquid stretch spring */}
-        <Animated.View
-          style={[styles.pill, { left: pillLeft, width: pillWidth }]}
-          pointerEvents="none"
-        />
+      <BlurView intensity={88} tint="systemMaterialLight" style={styles.blurWrap}>
+        <View style={styles.tabsRow} onLayout={handleLayout} {...panHandlers}>
+          {/* Animated pill slides between tabs with liquid stretch spring */}
+          <Animated.View
+            style={[styles.pill, { left: pillLeft, width: pillWidth }]}
+            pointerEvents="none"
+          />
 
-        {TABS.map((tab) => {
-          const isActive = tab.route === activeRoute;
-          return (
-            <Pressable
-              key={tab.route}
-              style={[styles.tab, tab.disabled && styles.tabDisabled]}
-              onPress={() => onTabPress(tab)}
-              accessibilityLabel={TAB_LABELS[tab.route]?.[locale] ?? tab.label}
-              accessibilityRole="button"
-              accessibilityState={{ selected: isActive }}
-            >
-              <Ionicons
-                name={tab.icon}
-                size={20}
-                color={isActive ? colours.primary : colours.textMuted}
-                style={{ opacity: isActive ? 1 : 0.45 }}
-              />
-              <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>
-                {TAB_LABELS[tab.route]?.[locale] ?? tab.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
+          {TABS.map((tab) => {
+            const isActive = tab.route === activeRoute;
+            return (
+              <Pressable
+                key={tab.route}
+                style={[styles.tab, tab.disabled && styles.tabDisabled]}
+                onPress={() => onTabPress(tab)}
+                accessibilityLabel={TAB_LABELS[tab.route]?.[locale] ?? tab.label}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isActive }}
+              >
+                <Ionicons
+                  name={tab.icon}
+                  size={20}
+                  color={isActive ? colours.primary : colours.textMuted}
+                  style={{ opacity: isActive ? 1 : 0.45 }}
+                />
+                <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>
+                  {TAB_LABELS[tab.route]?.[locale] ?? tab.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </BlurView>
     </View>
   );
 }
