@@ -187,6 +187,27 @@ export const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
 
+  // ── Contact Us / LINE ─────────────────────────────────────────────────────
+  lineBtn: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    gap: spacing.sm,
+    backgroundColor: '#06C755',
+    borderRadius: radius.lg,
+    paddingVertical: spacing.md,
+    minHeight: 48,
+    marginTop: spacing.xs,
+  },
+  lineBtnBadge: {
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    borderRadius: radius.sm,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  lineBtnBadgeText: { fontSize: typography.xxs, fontWeight: '800' as const, color: colours.white, letterSpacing: 0.5 },
+  lineBtnText: { fontSize: typography.sm, fontWeight: '700' as const, color: colours.white, letterSpacing: 0.3 },
+
   // ── States ────────────────────────────────────────────────────────────────
   stateBox: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: spacing.xxl, backgroundColor: colours.backgroundLight },
   stateIcon:     { fontSize: 36, marginBottom: spacing.sm, opacity: 0.5 },

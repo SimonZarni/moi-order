@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Image, Modal, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Linking, Modal, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { formatDate } from '@/shared/utils/formatDate';
 import { formatPrice } from '@/shared/utils/formatCurrency';
+import { LINE_OA_URL } from '@/shared/constants/config';
 import { BackButton } from '@/shared/components/BackButton/BackButton';
 import { useTicketOrderDetailScreen } from '@/features/tickets/hooks/useTicketOrderDetailScreen';
 import { TicketOrderItem } from '@/types/models';
@@ -215,6 +216,23 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
               </View>
             </>
           )}
+
+          {/* ── Contact Us ── */}
+          <View style={styles.sectionLabelRow}>
+            <Text style={styles.sectionLabel}>Contact Us</Text>
+            <View style={styles.sectionLine} />
+          </View>
+          <Pressable
+            style={({ pressed }) => [styles.lineBtn, { opacity: pressed ? 0.85 : 1 }]}
+            onPress={() => Linking.openURL(LINE_OA_URL)}
+            accessibilityLabel="Contact us on LINE @moiorder"
+            accessibilityRole="button"
+          >
+            <View style={styles.lineBtnBadge}>
+              <Text style={styles.lineBtnBadgeText}>LINE</Text>
+            </View>
+            <Text style={styles.lineBtnText}>@moiorder</Text>
+          </Pressable>
         </View>
       </ScrollView>
     </SafeAreaView>

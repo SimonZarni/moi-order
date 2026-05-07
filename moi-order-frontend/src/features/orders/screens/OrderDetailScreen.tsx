@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Linking, Modal, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import ImageViewing from 'react-native-image-viewing';
@@ -7,6 +7,7 @@ import ImageViewing from 'react-native-image-viewing';
 import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { LINE_OA_URL } from '@/shared/constants/config';
 import { BackButton } from '@/shared/components/BackButton/BackButton';
 import { useOrderDetailScreen } from '@/features/orders/hooks/useOrderDetailScreen';
 import { formatDate } from '@/shared/utils/formatDate';
@@ -310,6 +311,22 @@ export function OrderDetailScreen(): React.JSX.Element {
               </>
             );
           })()}
+          {/* ── Contact Us ── */}
+          <View style={styles.sectionLabelRow}>
+            <Text style={styles.sectionLabel}>Contact Us</Text>
+            <View style={styles.sectionLine} />
+          </View>
+          <Pressable
+            style={({ pressed }) => [styles.lineBtn, { opacity: pressed ? 0.85 : 1 }]}
+            onPress={() => Linking.openURL(LINE_OA_URL)}
+            accessibilityLabel="Contact us on LINE @moiorder"
+            accessibilityRole="button"
+          >
+            <View style={styles.lineBtnBadge}>
+              <Text style={styles.lineBtnBadgeText}>LINE</Text>
+            </View>
+            <Text style={styles.lineBtnText}>@moiorder</Text>
+          </Pressable>
         </View>
       </ScrollView>
     </SafeAreaView>
