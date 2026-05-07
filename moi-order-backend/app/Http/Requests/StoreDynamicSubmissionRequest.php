@@ -104,8 +104,8 @@ class StoreDynamicSubmissionRequest extends FormRequest
         }
 
         // Hard cap per file to prevent oversized uploads from silently failing at the web server layer.
-        if ($file->getSize() > 10 * 1024 * 1024) {
-            $v->errors()->add("files.{$key}", "The {$labelEn} must be under 10 MB.");
+        if ($file->getSize() > 50 * 1024 * 1024) {
+            $v->errors()->add("files.{$key}", "The {$labelEn} must be under 50 MB.");
             return;
         }
 

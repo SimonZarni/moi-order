@@ -73,9 +73,9 @@ export function useNinetyDayReportFormScreen(): UseNinetyDayReportFormScreenResu
     if (result.canceled || result.assets.length === 0) return null;
     const asset = result.assets[0];
     if (asset == null) return null;
-    // Guard before the network call — 10 MB matches the server-side cap.
-    if (asset.fileSize != null && asset.fileSize > 10 * 1024 * 1024) {
-      setBannerError('Could not upload. The file is too large. Please select an image under 10 MB.');
+    // Guard before the network call — 50 MB matches the server-side cap.
+    if (asset.fileSize != null && asset.fileSize > 50 * 1024 * 1024) {
+      setBannerError('Could not upload. The file is too large. Please select an image under 50 MB.');
       return null;
     }
     return stripAsset(asset);
