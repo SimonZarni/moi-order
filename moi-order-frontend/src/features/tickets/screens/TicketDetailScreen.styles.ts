@@ -64,9 +64,11 @@ export const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: spacing.sm,
   },
-  addressRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: 4 },
+  addressRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.xs, marginBottom: 4 },
   addressText: { fontSize: typography.xs, color: colours.medium },
   mapLink: { fontSize: typography.xs, color: colours.primary, fontWeight: '600' },
+  directionsBtn: { flexDirection: 'row', alignItems: 'center', gap: 3, marginLeft: spacing.xs },
+  directionsBtnText: { fontSize: typography.xs, color: colours.primary, fontWeight: '600' },
 
   // ── Section label ─────────────────────────────────────────────────────────
   sectionLabelRow: {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
@@ -44,11 +44,13 @@ export function TicketDetailScreen(): React.JSX.Element {
     <SafeAreaView style={styles.root} edges={['top']}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <TicketGallery
-          images={
-            ticket.images && ticket.images.length > 0
-              ? [...ticket.images].sort((a, b) => a.sort_order - b.sort_order).map(img => img.url)
-              : ticket.cover_image_url != null ? [ticket.cover_image_url] : []
-          }
+          images={[
+            ...(ticket.cover_image_url != null ? [ticket.cover_image_url] : []),
+            ...[...(ticket.images ?? [])]
+              .sort((a, b) => a.sort_order - b.sort_order)
+              .map(img => img.url)
+              .filter(url => url !== ticket.cover_image_url),
+          ]}
           backSlot={
             <View style={styles.coverBackWrap}>
               <BackButton onPress={handleBack} />
@@ -63,6 +65,17 @@ export function TicketDetailScreen(): React.JSX.Element {
           <View style={styles.addressRow}>
             <Ionicons name="location-outline" size={14} color={colours.textMuted} />
             <Text style={styles.addressText}>{ticket.address}, {ticket.city}</Text>
+            {ticket.google_maps_link.length > 0 && (
+              <Pressable
+                onPress={() => Linking.openURL(ticket.google_maps_link)}
+                accessibilityLabel="Get directions in Google Maps"
+                accessibilityRole="button"
+                style={styles.directionsBtn}
+              >
+                <Ionicons name="navigate-outline" size={12} color={colours.primary} />
+                <Text style={styles.directionsBtnText}>Get Directions</Text>
+              </Pressable>
+            )}
           </View>
         </View>
 
