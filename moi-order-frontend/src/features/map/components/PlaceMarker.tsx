@@ -6,12 +6,13 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
   interpolate,
-  interpolateColor,
   Extrapolation,
 } from 'react-native-reanimated';
 import { CATEGORY_EMOJI } from '@/shared/theme/mapTheme';
 import { styles, BUBBLE_SIZE, BUBBLE_SELECTED } from './PlaceMarker.styles';
 import type { Place } from '@/types/models';
+
+const GREEN = '#10B981';
 
 interface Props {
   place:      Place;
@@ -24,32 +25,42 @@ export const PlaceMarker = React.memo(function PlaceMarker(
 ): React.JSX.Element | null {
   // All hooks before early return
   const progress = useSharedValue(isSelected ? 1 : 0);
-
-  // imgReady: false until the cover image loads — key change on PointAnnotation
-  // forces Mapbox to re-snapshot with the loaded image instead of a white box.
   const [imgReady, setImgReady] = useState(!place.cover_image);
 
   useEffect(() => {
-    progress.value = withSpring(isSelected ? 1 : 0, { damping: 18, stiffness: 260 });
+    progress.value = withSpring(isSelected ? 1 : 0, { damping: 20, stiffness: 280 });
   }, [isSelected, progress]);
 
-  const bubbleAnimStyle = useAnimatedStyle(() => {
+  // Outer ring: transparent when unselected, green bordered ring when selected.
+  // padding creates the gap between ring border and bubble edge.
+  const ringWrapStyle = useAnimatedStyle(() => {
+    'worklet';
+    const bubbleSize  = interpolate(progress.value, [0, 1], [BUBBLE_SIZE, BUBBLE_SELECTED], Extrapolation.CLAMP);
+    const ringPad     = interpolate(progress.value, [0, 1], [0, 4], Extrapolation.CLAMP);
+    const ringBorder  = interpolate(progress.value, [0, 1], [0, 3], Extrapolation.CLAMP);
+    const total       = bubbleSize + ringPad * 2;
+    return {
+      width:        total,
+      height:       total,
+      borderRadius: total / 2,
+      padding:      ringPad,
+      borderWidth:  ringBorder,
+      borderColor:  GREEN,
+    };
+  });
+
+  // Bubble: grows slightly, border stays white (ring wrap provides green)
+  const bubbleStyle = useAnimatedStyle(() => {
     'worklet';
     const size = interpolate(progress.value, [0, 1], [BUBBLE_SIZE, BUBBLE_SELECTED], Extrapolation.CLAMP);
     return {
       width:        size,
       height:       size,
       borderRadius: size / 2,
-      borderWidth:  interpolate(progress.value, [0, 1], [2.5, 3.5], Extrapolation.CLAMP),
-      borderColor:  interpolateColor(progress.value, [0, 1], ['#FFFFFF', '#10B981']),
-      shadowOpacity: interpolate(progress.value, [0, 1], [0.28, 0.55], Extrapolation.CLAMP),
-      shadowRadius:  interpolate(progress.value, [0, 1], [4, 12], Extrapolation.CLAMP),
-      shadowColor:   interpolateColor(progress.value, [0, 1], ['#000000', '#10B981']),
-      elevation:     interpolate(progress.value, [0, 1], [6, 14], Extrapolation.CLAMP),
     };
   });
 
-  const labelAnimStyle = useAnimatedStyle(() => ({
+  const labelStyle = useAnimatedStyle(() => ({
     opacity: progress.value,
   }));
 
@@ -66,31 +77,33 @@ export const PlaceMarker = React.memo(function PlaceMarker(
       onSelected={() => onPress(place)}
       selected={isSelected}
     >
-      {/* Exactly 1 subview — no expo-image (its transition animation injects a
-          second native view during the bitmap snapshot, causing the PointAnnotation
-          "max 1 subview" native error). RN Image + Reanimated views only. */}
+      {/* Exactly 1 subview — Reanimated Animated.View is safe; expo-image is not
+          (its transition injects a 2nd native view during Mapbox's snapshot). */}
       <View
         style={styles.pressable}
         collapsable={false}
         accessibilityRole="button"
         accessibilityLabel={`View ${place.name_en}`}
       >
-        <Animated.View style={[styles.bubbleBase, bubbleAnimStyle]}>
-          {place.cover_image ? (
-            <Image
-              source={{ uri: place.cover_image }}
-              style={styles.coverImage}
-              resizeMode="cover"
-              onLoad={() => setImgReady(true)}
-            />
-          ) : (
-            <View style={styles.imageFallback}>
-              <Text style={styles.fallbackEmoji}>{emoji}</Text>
-            </View>
-          )}
+        {/* Ring wrap: green border ring that grows around the bubble on select */}
+        <Animated.View style={[styles.ringWrap, ringWrapStyle]}>
+          <Animated.View style={[styles.bubbleBase, bubbleStyle]}>
+            {place.cover_image ? (
+              <Image
+                source={{ uri: place.cover_image }}
+                style={styles.coverImage}
+                resizeMode="cover"
+                onLoad={() => setImgReady(true)}
+              />
+            ) : (
+              <View style={styles.imageFallback}>
+                <Text style={styles.fallbackEmoji}>{emoji}</Text>
+              </View>
+            )}
+          </Animated.View>
         </Animated.View>
 
-        <Animated.View style={[styles.labelBubble, labelAnimStyle]} pointerEvents="none">
+        <Animated.View style={[styles.labelBubble, labelStyle]} pointerEvents="none">
           <Text style={styles.labelText} numberOfLines={1}>{place.name_en}</Text>
         </Animated.View>
 

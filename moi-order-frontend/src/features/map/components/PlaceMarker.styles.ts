@@ -2,20 +2,33 @@ import { StyleSheet } from 'react-native';
 import { MAP_COLORS } from '@/shared/theme/mapTheme';
 
 export const BUBBLE_SIZE     = 44;
-export const BUBBLE_SELECTED = 56;
+export const BUBBLE_SELECTED = 52; // subtle increase
 
 export const styles = StyleSheet.create({
   pressable: { alignItems: 'center' },
 
-  // Static parts of the bubble — size/border/color are animated via Reanimated
+  // Outer ring wrapper — border becomes the visible green ring when selected.
+  // Contains the bubble; its padding creates the gap between ring and bubble.
+  ringWrap: {
+    alignItems:      'center',
+    justifyContent:  'center',
+    backgroundColor: 'transparent',
+    // Shadow lives here so it renders outside overflow:hidden bubble
+    shadowColor:     MAP_COLORS.black,
+    shadowOffset:    { width: 0, height: 3 },
+    shadowOpacity:   0.25,
+    shadowRadius:    5,
+    elevation:       8,
+  },
+
+  // Inner bubble — clips the image to a circle.
   bubbleBase: {
     overflow:        'hidden',
-    shadowColor:     MAP_COLORS.black,
-    shadowOffset:    { width: 0, height: 2 },
-    elevation:       6,
     backgroundColor: MAP_COLORS.surfaceAlt,
     alignItems:      'center',
     justifyContent:  'center',
+    borderWidth:     2,
+    borderColor:     MAP_COLORS.white,
   },
 
   coverImage: {

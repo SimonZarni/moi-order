@@ -6,6 +6,8 @@ import Animated, {
   withSpring,
   withTiming,
   runOnJS,
+  Easing,
+  cancelAnimation,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { styles } from './TagFilterSheet.styles';
@@ -20,25 +22,37 @@ interface Props {
   onDismiss:  () => void;
 }
 
+// Smooth ease-out curve — no bounce/jump on open.
+const OPEN_EASING  = Easing.out(Easing.bezier(0.25, 0.46, 0.45, 0.94));
+const CLOSE_EASING = Easing.in(Easing.bezier(0.25, 0.46, 0.45, 0.94));
+
 export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onApply, onDismiss }: Props): React.JSX.Element {
   const [selected, setSelected] = useState<Set<number>>(new Set(activeTags));
   const allSelected = selected.size === allTags.length && allTags.length > 0;
 
-  // Keep Modal mounted during close animation.
   const [modalVisible, setModalVisible] = useState(visible);
 
   const backdropOpacity = useSharedValue(0);
-  const cardTranslateY  = useSharedValue(400);
+  const cardTranslateY  = useSharedValue(500);
 
   useEffect(() => {
     if (visible) {
       setModalVisible(true);
       setSelected(new Set(activeTags));
-      backdropOpacity.value = withTiming(1, { duration: 80 });
-      cardTranslateY.value  = withSpring(0, { damping: 22, stiffness: 220 });
+      cardTranslateY.value = 500; // always start fully off-screen
+      backdropOpacity.value = withTiming(1, { duration: 200 });
+      cardTranslateY.value  = withTiming(0, { duration: 320, easing: OPEN_EASING });
     } else {
-      backdropOpacity.value = withTiming(0, { duration: 160 });
-      cardTranslateY.value  = withTiming(400, { duration: 200 }, () => {
+      // If already dismissed by drag gesture, card is > 200 off-screen.
+      // Skip the re-animation to avoid the glitch of sliding back up then hiding.
+      if (cardTranslateY.value > 200) {
+        backdropOpacity.value = 0;
+        setModalVisible(false);
+        return;
+      }
+      cancelAnimation(cardTranslateY);
+      backdropOpacity.value = withTiming(0, { duration: 200 });
+      cardTranslateY.value  = withTiming(500, { duration: 260, easing: CLOSE_EASING }, () => {
         runOnJS(setModalVisible)(false);
       });
     }
@@ -50,7 +64,8 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
     transform: [{ translateY: cardTranslateY.value }],
   }));
 
-  // Native-thread pan gesture — drag down to dismiss, snap back otherwise.
+  // Drag handle — runs on native thread for smooth 60fps.
+  // Dragging down follows finger; release decides dismiss or snap back.
   const dragGesture = Gesture.Pan()
     .onUpdate((e) => {
       'worklet';
@@ -58,13 +73,16 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
     })
     .onEnd((e) => {
       'worklet';
-      if (e.translationY > 80 || e.velocityY > 500) {
-        backdropOpacity.value = withTiming(0, { duration: 160 });
-        cardTranslateY.value  = withTiming(500, { duration: 200 }, () => {
+      if (e.translationY > 100 || e.velocityY > 600) {
+        // Dismiss: slide fully off-screen then call onDismiss.
+        // onDismiss → visible=false → useEffect skips re-animation (card already > 200).
+        backdropOpacity.value = withTiming(0, { duration: 200 });
+        cardTranslateY.value  = withTiming(500, { duration: 260, easing: CLOSE_EASING }, () => {
           runOnJS(onDismiss)();
         });
       } else {
-        cardTranslateY.value = withSpring(0, { damping: 22, stiffness: 220 });
+        // Snap back — spring feel on the return is intentional.
+        cardTranslateY.value = withSpring(0, { damping: 24, stiffness: 240 });
       }
     });
 
@@ -97,7 +115,6 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
 
       <Animated.View style={[styles.cardContainer, cardStyle]}>
         <Pressable style={styles.sheet} onPress={() => {}} accessibilityRole="none">
-          {/* Drag handle — GestureDetector runs on native thread for smooth 60fps */}
           <GestureDetector gesture={dragGesture}>
             <View style={styles.handleArea}>
               <View style={styles.handle} />
