@@ -6,7 +6,6 @@ import Animated, {
   withSpring,
   withTiming,
   runOnJS,
-  Easing,
   cancelAnimation,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -21,10 +20,6 @@ interface Props {
   onApply:    (tagIds: number[]) => void;
   onDismiss:  () => void;
 }
-
-// Smooth ease-out curve — no bounce/jump on open.
-const OPEN_EASING  = Easing.out(Easing.bezier(0.25, 0.46, 0.45, 0.94));
-const CLOSE_EASING = Easing.in(Easing.bezier(0.25, 0.46, 0.45, 0.94));
 
 export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onApply, onDismiss }: Props): React.JSX.Element {
   const [selected, setSelected] = useState<Set<number>>(new Set(activeTags));
@@ -41,7 +36,7 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
       setSelected(new Set(activeTags));
       cardTranslateY.value = 500; // always start fully off-screen
       backdropOpacity.value = withTiming(1, { duration: 200 });
-      cardTranslateY.value  = withTiming(0, { duration: 320, easing: OPEN_EASING });
+      cardTranslateY.value  = withTiming(0, { duration: 320 });
     } else {
       // If already dismissed by drag gesture, card is > 200 off-screen.
       // Skip the re-animation to avoid the glitch of sliding back up then hiding.
@@ -52,7 +47,7 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
       }
       cancelAnimation(cardTranslateY);
       backdropOpacity.value = withTiming(0, { duration: 200 });
-      cardTranslateY.value  = withTiming(500, { duration: 260, easing: CLOSE_EASING }, () => {
+      cardTranslateY.value  = withTiming(500, { duration: 260 }, () => {
         runOnJS(setModalVisible)(false);
       });
     }
@@ -77,7 +72,7 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
         // Dismiss: slide fully off-screen then call onDismiss.
         // onDismiss → visible=false → useEffect skips re-animation (card already > 200).
         backdropOpacity.value = withTiming(0, { duration: 200 });
-        cardTranslateY.value  = withTiming(500, { duration: 260, easing: CLOSE_EASING }, () => {
+        cardTranslateY.value  = withTiming(500, { duration: 260 }, () => {
           runOnJS(onDismiss)();
         });
       } else {
