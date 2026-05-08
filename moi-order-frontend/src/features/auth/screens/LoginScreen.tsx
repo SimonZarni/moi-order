@@ -75,7 +75,7 @@ export function LoginScreen(): React.JSX.Element {
               resizeMode="contain"
               accessibilityLabel="Moi Order logo"
             />
-            <Text style={styles.welcomeText}>Welcome</Text>
+            <Text style={styles.tagline}>Fast · Reliable · Trusted</Text>
           </View>
 
           <View style={styles.card}>

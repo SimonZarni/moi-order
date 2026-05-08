@@ -33,15 +33,14 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    width: 88,
-    height: 88,
+    width: 264,
+    height: 264,
     marginBottom: spacing.md,
   },
-  welcomeText: {
-    fontSize: typography.xl,
-    fontWeight: '700',
-    color: colours.textOnDark,
-    letterSpacing: 0.2,
+  tagline: {
+    fontSize: typography.sm,
+    color: colours.medium,
+    letterSpacing: 0.4,
   },
 
   // ── Card ──────────────────────────────────────────────────────────────────
