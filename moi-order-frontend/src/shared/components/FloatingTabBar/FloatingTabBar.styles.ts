@@ -30,6 +30,11 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 6,
   },
 
+  // Android fallback — solid background replaces BlurView (no real blur on Android)
+  androidWrap: {
+    backgroundColor: 'rgba(248, 248, 250, 0.98)',
+  },
+
   // Inner row — layout measurement + pill host + flex tabs
   tabsRow: {
     flexDirection: 'row',

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { Animated, LayoutChangeEvent, Pressable, Text, View } from 'react-native';
+import { Animated, LayoutChangeEvent, Platform, Pressable, Text, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -69,41 +69,51 @@ function TabBarView({ activeRoute, activeIndex, onTabPress, bottom, locale }: Ta
     [onContainerLayout],
   );
 
+  const tabsRow = (
+    <View style={styles.tabsRow} onLayout={handleLayout} {...panHandlers}>
+      {/* Animated pill slides between tabs with liquid stretch spring */}
+      <Animated.View
+        style={[styles.pill, { left: pillLeft, width: pillWidth }]}
+        pointerEvents="none"
+      />
+
+      {TABS.map((tab) => {
+        const isActive = tab.route === activeRoute;
+        return (
+          <Pressable
+            key={tab.route}
+            style={[styles.tab, tab.disabled && styles.tabDisabled]}
+            onPress={() => onTabPress(tab)}
+            accessibilityLabel={TAB_LABELS[tab.route]?.[locale] ?? tab.label}
+            accessibilityRole="button"
+            accessibilityState={{ selected: isActive }}
+          >
+            <Ionicons
+              name={tab.icon}
+              size={20}
+              color={isActive ? colours.primary : colours.textMuted}
+              style={{ opacity: isActive ? 1 : 0.45 }}
+            />
+            <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>
+              {TAB_LABELS[tab.route]?.[locale] ?? tab.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+
   return (
     <View style={[styles.container, { bottom }]}>
-      <BlurView intensity={88} tint="systemMaterialLight" style={styles.blurWrap}>
-        <View style={styles.tabsRow} onLayout={handleLayout} {...panHandlers}>
-          {/* Animated pill slides between tabs with liquid stretch spring */}
-          <Animated.View
-            style={[styles.pill, { left: pillLeft, width: pillWidth }]}
-            pointerEvents="none"
-          />
-
-          {TABS.map((tab) => {
-            const isActive = tab.route === activeRoute;
-            return (
-              <Pressable
-                key={tab.route}
-                style={[styles.tab, tab.disabled && styles.tabDisabled]}
-                onPress={() => onTabPress(tab)}
-                accessibilityLabel={TAB_LABELS[tab.route]?.[locale] ?? tab.label}
-                accessibilityRole="button"
-                accessibilityState={{ selected: isActive }}
-              >
-                <Ionicons
-                  name={tab.icon}
-                  size={20}
-                  color={isActive ? colours.primary : colours.textMuted}
-                  style={{ opacity: isActive ? 1 : 0.45 }}
-                />
-                <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>
-                  {TAB_LABELS[tab.route]?.[locale] ?? tab.label}
-                </Text>
-              </Pressable>
-            );
-          })}
+      {Platform.OS === 'android' ? (
+        <View style={[styles.blurWrap, styles.androidWrap]}>
+          {tabsRow}
         </View>
-      </BlurView>
+      ) : (
+        <BlurView intensity={88} tint="systemMaterialLight" style={styles.blurWrap}>
+          {tabsRow}
+        </BlurView>
+      )}
     </View>
   );
 }
@@ -117,12 +127,23 @@ export function FloatingTabBar({ state, navigation, insets }: BottomTabBarProps)
   const isLoggedIn        = useAuthStore((s) => s.isLoggedIn);
   const isFullscreen      = useMapStore((s) => s.isFullscreen);
   const isBottomSheetOpen = useMapStore((s) => s.isBottomSheetOpen);
+  const setFullscreen     = useMapStore((s) => s.setFullscreen);
+  const setBottomSheetOpen = useMapStore((s) => s.setBottomSheetOpen);
   const { locale }        = useLocale();
   const slideAnim         = useRef(new Animated.Value(0)).current;
 
   const activeRoute = (state.routes[state.index]?.name ?? 'Home') as keyof TabParamList;
   const bottom = TAB_BAR_BOTTOM_OFFSET + insets.bottom;
   const shouldHide = isFullscreen || isBottomSheetOpen;
+
+  // Reset map overlay state when leaving the Map tab so the bar is never
+  // permanently hidden after the user switches away without closing the sheet.
+  useEffect(() => {
+    if (activeRoute !== 'Map') {
+      setFullscreen(false);
+      setBottomSheetOpen(false);
+    }
+  }, [activeRoute, setFullscreen, setBottomSheetOpen]);
 
   useEffect(() => {
     Animated.timing(slideAnim, {
