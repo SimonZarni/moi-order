@@ -27,20 +27,21 @@ export const styles = StyleSheet.create({
 
   // ── Hero ──────────────────────────────────────────────────────────────────
   hero: {
-    paddingTop: spacing.xl + spacing.lg,
+    paddingTop: spacing.md,
     paddingHorizontal: spacing.xl,
-    paddingBottom: spacing.xl,
+    paddingBottom: spacing.md,
     alignItems: 'center',
   },
   logo: {
-    width: 264,
-    height: 264,
-    marginBottom: spacing.md,
+    width: 220,
+    height: 220,
+    marginBottom: spacing.xs,
   },
   tagline: {
-    fontSize: typography.sm,
+    fontSize: typography.md,
+    fontWeight: '600',
     color: colours.medium,
-    letterSpacing: 0.4,
+    letterSpacing: 1.2,
   },
 
   // ── Card ──────────────────────────────────────────────────────────────────

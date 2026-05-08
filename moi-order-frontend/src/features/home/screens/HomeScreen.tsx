@@ -1,5 +1,6 @@
 import React from 'react';
-import { Image, Pressable, RefreshControl, Text, View, ScrollView } from 'react-native';
+import { Pressable, RefreshControl, Text, View, ScrollView } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useHomeScreen } from '@/features/home/hooks/useHomeScreen';
@@ -44,6 +45,8 @@ export function HomeScreen(): React.JSX.Element {
             <Image
               source={require('../../../../assets/splash-icon.png')}
               style={styles.brandLogo}
+              contentFit="contain"
+              cachePolicy="memory"
               accessibilityLabel="Moi Order logo"
             />
             <NotificationBell onPress={handleNavigateToNotifications} />
