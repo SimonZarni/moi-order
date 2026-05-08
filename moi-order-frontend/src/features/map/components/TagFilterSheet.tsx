@@ -1,5 +1,13 @@
-import React, { useCallback, useState, useEffect, useRef } from 'react';
-import { ActivityIndicator, Animated, Modal, PanResponder, Pressable, ScrollView, Text, View } from 'react-native';
+import React, { useCallback, useState, useEffect } from 'react';
+import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  runOnJS,
+} from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { styles } from './TagFilterSheet.styles';
 import type { Tag } from '@/types/models';
 
@@ -16,28 +24,49 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
   const [selected, setSelected] = useState<Set<number>>(new Set(activeTags));
   const allSelected = selected.size === allTags.length && allTags.length > 0;
 
-  // Keep the Modal mounted during the close animation so we can animate out.
+  // Keep Modal mounted during close animation.
   const [modalVisible, setModalVisible] = useState(visible);
-  const backdropOpacity = useRef(new Animated.Value(0)).current;
-  const cardTranslateY  = useRef(new Animated.Value(400)).current;
+
+  const backdropOpacity = useSharedValue(0);
+  const cardTranslateY  = useSharedValue(400);
 
   useEffect(() => {
     if (visible) {
       setModalVisible(true);
       setSelected(new Set(activeTags));
-      // Backdrop fades in instantly (80 ms ease); card springs up.
-      Animated.parallel([
-        Animated.timing(backdropOpacity, { toValue: 1, duration: 80, useNativeDriver: false }),
-        Animated.spring(cardTranslateY,  { toValue: 0, damping: 22, stiffness: 220, useNativeDriver: false }),
-      ]).start();
+      backdropOpacity.value = withTiming(1, { duration: 80 });
+      cardTranslateY.value  = withSpring(0, { damping: 22, stiffness: 220 });
     } else {
-      Animated.parallel([
-        Animated.timing(backdropOpacity, { toValue: 0, duration: 160, useNativeDriver: false }),
-        Animated.timing(cardTranslateY,  { toValue: 400, duration: 180, useNativeDriver: false }),
-      ]).start(() => setModalVisible(false));
+      backdropOpacity.value = withTiming(0, { duration: 160 });
+      cardTranslateY.value  = withTiming(400, { duration: 200 }, () => {
+        runOnJS(setModalVisible)(false);
+      });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
+
+  const backdropStyle = useAnimatedStyle(() => ({ opacity: backdropOpacity.value }));
+  const cardStyle     = useAnimatedStyle(() => ({
+    transform: [{ translateY: cardTranslateY.value }],
+  }));
+
+  // Native-thread pan gesture — drag down to dismiss, snap back otherwise.
+  const dragGesture = Gesture.Pan()
+    .onUpdate((e) => {
+      'worklet';
+      if (e.translationY > 0) cardTranslateY.value = e.translationY;
+    })
+    .onEnd((e) => {
+      'worklet';
+      if (e.translationY > 80 || e.velocityY > 500) {
+        backdropOpacity.value = withTiming(0, { duration: 160 });
+        cardTranslateY.value  = withTiming(500, { duration: 200 }, () => {
+          runOnJS(onDismiss)();
+        });
+      } else {
+        cardTranslateY.value = withSpring(0, { damping: 22, stiffness: 220 });
+      }
+    });
 
   const toggleTag = useCallback((id: number) => {
     setSelected(prev => {
@@ -47,38 +76,12 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
     });
   }, []);
 
-  const toggleAll = useCallback(() => {
+  const toggleAll   = useCallback(() => {
     setSelected(allSelected ? new Set() : new Set(allTags.map(t => t.id)));
   }, [allSelected, allTags]);
 
   const handleApply = useCallback(() => { onApply([...selected]); }, [selected, onApply]);
   const handleClear = useCallback(() => { setSelected(new Set()); }, []);
-
-  // Drag handle — drag down to dismiss, drag up does nothing (already at max).
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, { dy }) => Math.abs(dy) > 6,
-      onPanResponderGrant: () => {
-        cardTranslateY.stopAnimation();
-        cardTranslateY.setValue(0);
-      },
-      onPanResponderMove: (_, { dy }) => {
-        if (dy > 0) cardTranslateY.setValue(dy);
-      },
-      onPanResponderRelease: (_, { dy, vy }) => {
-        if (dy > 80 || vy > 0.5) {
-          Animated.timing(cardTranslateY, {
-            toValue: 500, duration: 200, useNativeDriver: false,
-          }).start(onDismiss);
-        } else {
-          Animated.spring(cardTranslateY, {
-            toValue: 0, damping: 22, stiffness: 220, useNativeDriver: false,
-          }).start();
-        }
-      },
-    }),
-  ).current;
 
   return (
     <Modal
@@ -88,17 +91,18 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
       onRequestClose={onDismiss}
       statusBarTranslucent
     >
-      {/* Backdrop fades in independently of the card */}
-      <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]} pointerEvents="box-none">
+      <Animated.View style={[styles.backdrop, backdropStyle]} pointerEvents="box-none">
         <Pressable style={styles.backdropTap} onPress={onDismiss} accessibilityRole="button" accessibilityLabel="Close filter" />
       </Animated.View>
 
-      {/* Card slides up from bottom */}
-      <Animated.View style={[styles.cardContainer, { transform: [{ translateY: cardTranslateY }] }]}>
+      <Animated.View style={[styles.cardContainer, cardStyle]}>
         <Pressable style={styles.sheet} onPress={() => {}} accessibilityRole="none">
-          <View style={styles.handleArea} {...panResponder.panHandlers}>
-            <View style={styles.handle} />
-          </View>
+          {/* Drag handle — GestureDetector runs on native thread for smooth 60fps */}
+          <GestureDetector gesture={dragGesture}>
+            <View style={styles.handleArea}>
+              <View style={styles.handle} />
+            </View>
+          </GestureDetector>
 
           <View style={styles.header}>
             <Text style={styles.title}>Filter by Tags</Text>
