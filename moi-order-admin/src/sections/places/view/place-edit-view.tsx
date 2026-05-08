@@ -27,8 +27,11 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useRouter } from 'src/routes/hooks';
 
 import { placesApi } from 'src/api/places';
+import { tagsApi } from 'src/api/tags';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { categoriesApi, type CategoryData } from 'src/api/categories';
+
+import type { PlaceTag } from 'src/types';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -39,6 +42,7 @@ type FormState = {
   name_en: string;
   name_th: string;
   category_ids: number[];
+  tag_ids: number[];
   city: string;
   address: string;
   short_description: string;
@@ -60,6 +64,7 @@ export function PlaceEditView() {
 
   const [form, setForm] = useState<FormState | null>(null);
   const [categories, setCategories] = useState<CategoryData[]>([]);
+  const [tags, setTags] = useState<PlaceTag[]>([]);
   const [images, setImages] = useState<Array<{ id: number; url: string; sort_order: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -74,15 +79,18 @@ export function PlaceEditView() {
     Promise.all([
       placesApi.get(id),
       categoriesApi.list({ per_page: 100 }),
+      tagsApi.list({ per_page: 200 }),
     ])
-      .then(([place, { data: cats }]) => {
+      .then(([place, { data: cats }, { data: tagList }]) => {
         setCategories(cats);
+        setTags(tagList);
         setImages(place.images ?? []);
         setForm({
           name_my: place.name_my ?? '',
           name_en: place.name_en ?? '',
           name_th: place.name_th ?? '',
           category_ids: (place.categories ?? []).map((c) => c.id),
+          tag_ids: (place.tags ?? []).map((t) => t.id),
           city: place.city ?? '',
           address: place.address ?? '',
           short_description: place.short_description ?? '',
@@ -124,6 +132,7 @@ export function PlaceEditView() {
       longitude: form.longitude ? Number(form.longitude) : null,
     };
     payload.category_ids = form.category_ids;
+    payload.tag_ids = form.tag_ids;
 
     placesApi
       .update(id, payload)
@@ -274,6 +283,39 @@ export function PlaceEditView() {
                               : theme.typography.fontWeightRegular,
                           })}>
                             {cat.name_my ?? cat.name_en ?? cat.slug}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <FormControl fullWidth>
+                      <InputLabel>Tags</InputLabel>
+                      <Select
+                        multiple
+                        label="Tags"
+                        value={form.tag_ids}
+                        input={<OutlinedInput label="Tags" />}
+                        onChange={(e: SelectChangeEvent<number[]>) =>
+                          setForm((prev) => prev && { ...prev, tag_ids: e.target.value as number[] })
+                        }
+                        renderValue={(selected) => (
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            {(selected as number[]).map((id) => {
+                              const tag = tags.find((t) => t.id === id);
+                              return <Chip key={id} size="small" label={tag ? (tag.name_my ?? tag.name_en ?? tag.slug) : id} />;
+                            })}
+                          </Box>
+                        )}
+                        MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
+                      >
+                        {tags.map((tag) => (
+                          <MenuItem key={tag.id} value={tag.id} sx={(theme: Theme) => ({
+                            fontWeight: form.tag_ids.includes(tag.id)
+                              ? theme.typography.fontWeightBold
+                              : theme.typography.fontWeightRegular,
+                          })}>
+                            {tag.name_my ?? tag.name_en ?? tag.slug}
                           </MenuItem>
                         ))}
                       </Select>

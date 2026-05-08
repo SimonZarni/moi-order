@@ -26,8 +26,11 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useRouter } from 'src/routes/hooks';
 
 import { placesApi } from 'src/api/places';
+import { tagsApi } from 'src/api/tags';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { categoriesApi, type CategoryData } from 'src/api/categories';
+
+import type { PlaceTag } from 'src/types';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -38,6 +41,7 @@ type FormState = {
   name_en: string;
   name_th: string;
   category_ids: number[];
+  tag_ids: number[];
   city: string;
   address: string;
   short_description: string;
@@ -55,6 +59,7 @@ const EMPTY_FORM: FormState = {
   name_en: '',
   name_th: '',
   category_ids: [],
+  tag_ids: [],
   city: '',
   address: '',
   short_description: '',
@@ -75,6 +80,7 @@ export function PlaceCreateView() {
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [categories, setCategories] = useState<CategoryData[]>([]);
+  const [tags, setTags] = useState<PlaceTag[]>([]);
   const [pendingImages, setPendingImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [creating, setCreating] = useState(false);
@@ -82,6 +88,7 @@ export function PlaceCreateView() {
 
   useEffect(() => {
     categoriesApi.list({ per_page: 100 }).then(({ data }) => setCategories(data)).catch(() => {});
+    tagsApi.list({ per_page: 200 }).then(({ data }) => setTags(data)).catch(() => {});
   }, []);
 
   useEffect(
@@ -118,6 +125,7 @@ export function PlaceCreateView() {
         name_my: form.name_my,
         name_en: form.name_en,
         category_ids: form.category_ids,
+        tag_ids: form.tag_ids,
       };
       if (form.name_th) payload.name_th = form.name_th;
       if (form.city) payload.city = form.city;
@@ -245,6 +253,39 @@ export function PlaceCreateView() {
                               : theme.typography.fontWeightRegular,
                           })}>
                             {cat.name_my ?? cat.name_en ?? cat.slug}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <FormControl fullWidth>
+                      <InputLabel>Tags</InputLabel>
+                      <Select
+                        multiple
+                        label="Tags"
+                        value={form.tag_ids}
+                        input={<OutlinedInput label="Tags" />}
+                        onChange={(e: SelectChangeEvent<number[]>) =>
+                          setForm((prev) => prev && { ...prev, tag_ids: e.target.value as number[] })
+                        }
+                        renderValue={(selected) => (
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            {(selected as number[]).map((id) => {
+                              const tag = tags.find((t) => t.id === id);
+                              return <Chip key={id} size="small" label={tag ? (tag.name_my ?? tag.name_en ?? tag.slug) : id} />;
+                            })}
+                          </Box>
+                        )}
+                        MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
+                      >
+                        {tags.map((tag) => (
+                          <MenuItem key={tag.id} value={tag.id} sx={(theme: Theme) => ({
+                            fontWeight: form.tag_ids.includes(tag.id)
+                              ? theme.typography.fontWeightBold
+                              : theme.typography.fontWeightRegular,
+                          })}>
+                            {tag.name_my ?? tag.name_en ?? tag.slug}
                           </MenuItem>
                         ))}
                       </Select>
