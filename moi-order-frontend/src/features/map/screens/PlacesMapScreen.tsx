@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from 'react';
-import { ActivityIndicator, Animated, Pressable, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapboxGL from '@rnmapbox/maps';
-import { useNavigation, useIsFocused } from '@react-navigation/native';
+import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { RootStackParamList } from '@/types/navigation';
@@ -38,7 +38,23 @@ const LONG_PRESS_STYLE = {
 
 export function PlacesMapScreen(): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const isFocused = useIsFocused();
+  // useNavigationState updates immediately on tab press (before animation completes),
+  // unlike useIsFocused which only flips after the transition — this lets MapView
+  // mount and start loading tiles during the transition, eliminating the green flash.
+  const isSelected = useNavigationState(
+    state => state.routes[state.index]?.name === 'Map'
+  );
+  const [mapReady, setMapReady] = useState(false);
+
+  useEffect(() => {
+    if (!isSelected) {
+      setMapReady(false);
+      return;
+    }
+    // Safety fallback: hide overlay after 4 s even if onDidFinishLoadingMap never fires.
+    const t = setTimeout(() => setMapReady(true), 4000);
+    return () => clearTimeout(t);
+  }, [isSelected]);
   const {
     displayedPlaces, selectedPlace, selectedDetail,
     isLoadingPlaces, isLoadingTags, isTabSwitching, isLoadingDetail, isError,
@@ -106,10 +122,10 @@ export function PlacesMapScreen(): React.JSX.Element {
               onFilterPress={handleShowTagFilter}
             />
           </Animated.View>
-          {/* Mount the GL surface only while focused — on Android, Mapbox uses a
-              SurfaceView that renders above all React Native views regardless of
-              z-index/elevation, covering the tab bar on other screens. */}
-          {isFocused ? (
+          {/* Mount MapView as soon as the tab is selected (during the transition
+              animation) so tiles start loading early. Unmount immediately on
+              tab-away to destroy the Android SurfaceView and fix z-ordering. */}
+          {isSelected ? (
             <MapboxGL.MapView
               style={styles.map}
               styleURL={MAPBOX_STYLE}
@@ -119,6 +135,7 @@ export function PlacesMapScreen(): React.JSX.Element {
                 const [lng, lat] = geometry.coordinates as [number, number];
                 handleMapLongPress([lng, lat]);
               }}
+              onDidFinishLoadingMap={() => setMapReady(true)}
               attributionEnabled={false}
               logoEnabled={false}
             >
@@ -187,6 +204,12 @@ export function PlacesMapScreen(): React.JSX.Element {
             </MapboxGL.MapView>
           ) : (
             <View style={[styles.map, { backgroundColor: '#0a2e1a' }]} />
+          )}
+
+          {/* Overlay hides the SafeAreaView green background while Mapbox tiles
+              load. Same colour as the placeholder so the transition is seamless. */}
+          {isSelected && !mapReady && (
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: '#0a2e1a', zIndex: 50 }]} />
           )}
 
           {userLocation && !userLocation.isGPS && (
