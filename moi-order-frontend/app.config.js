@@ -48,8 +48,8 @@ module.exports = {
       package: "com.moiorder.app",
       versionCode: 1,
       adaptiveIcon: {
-        foregroundImage: "./assets/adaptive-icon.png",
-        backgroundColor: "#ffffff",
+        foregroundImage: "./assets/icon.png",
+        backgroundColor: "#00000000",
       },
       predictiveBackGestureEnabled: false,
       permissions: [
@@ -65,7 +65,7 @@ module.exports = {
       ],
     },
     web: {
-      favicon: "./assets/favicon.png",
+      favicon: "./assets/icon.png",
     },
     plugins: [
       "expo-apple-authentication",
@@ -74,7 +74,7 @@ module.exports = {
       [
         "expo-notifications",
         {
-          icon: "./assets/notification-icon.png",
+          icon: "./assets/icon.png",
           color: "#1a1a2e",
         },
       ],
