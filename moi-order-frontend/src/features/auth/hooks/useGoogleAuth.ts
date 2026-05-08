@@ -65,6 +65,9 @@ export function useGoogleAuth(): UseGoogleAuthResult {
       setUser(user, token);
       navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
     } catch (error: unknown) {
+      // Log actual error for debugging — check Metro console for details
+      console.error('[GoogleAuth] error:', JSON.stringify(error, null, 2));
+
       const asGoogle = error as { code?: string };
       if (asGoogle.code === statusCodes.SIGN_IN_CANCELLED) {
         return;

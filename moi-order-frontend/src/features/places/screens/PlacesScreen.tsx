@@ -303,6 +303,7 @@ export function PlacesScreen(): React.JSX.Element {
         backgroundStyle={styles.sheetBg}
         handleIndicatorStyle={styles.sheetHandle}
         onDismiss={handleCategoryModalClose}
+        containerStyle={{ zIndex: 9999, elevation: 9999 }}
       >
         <BottomSheetFlatList
           data={categoryListData}
@@ -331,6 +332,7 @@ export function PlacesScreen(): React.JSX.Element {
         backgroundStyle={styles.sheetBg}
         handleIndicatorStyle={styles.sheetHandle}
         onDismiss={handleTagsModalClose}
+        containerStyle={{ zIndex: 9999, elevation: 9999 }}
       >
         <View style={styles.sheetTagsWrapper}>
           <View style={styles.sheetTagsHeader}>

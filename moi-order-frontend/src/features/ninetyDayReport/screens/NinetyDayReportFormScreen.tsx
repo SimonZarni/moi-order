@@ -63,10 +63,10 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
             >
               <ErrorBanner message={bannerError} />
 
-              <Text style={styles.sectionTitle}>Personal Information</Text>
+              <Text style={styles.sectionTitle}>{s.form.personalInfo}</Text>
 
               <FormField
-                label="Full Name"
+                label={s.form.fullName}
                 value={form.fullName}
                 onChangeText={handleFullNameChange}
                 accessibilityLabel="Full name"
@@ -77,7 +77,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
               />
 
               <FormField
-                label="Phone Number"
+                label={s.form.phoneNumber}
                 value={form.phone}
                 onChangeText={handlePhoneChange}
                 accessibilityLabel="Phone number"
@@ -87,7 +87,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
                 returnKeyType="done"
               />
 
-              <Text style={styles.sectionTitle}>Required Documents</Text>
+              <Text style={styles.sectionTitle}>{s.form.requiredDocuments}</Text>
 
               <DocumentPickerField
                 label={s.docs.passportBioPage}

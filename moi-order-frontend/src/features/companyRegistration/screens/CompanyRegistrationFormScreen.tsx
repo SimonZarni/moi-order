@@ -65,10 +65,10 @@ export function CompanyRegistrationFormScreen(): React.JSX.Element {
             >
               <ErrorBanner message={bannerError} />
 
-              <Text style={styles.sectionTitle}>Personal Information</Text>
+              <Text style={styles.sectionTitle}>{s.form.personalInfo}</Text>
 
               <FormField
-                label="Full Name"
+                label={s.form.fullName}
                 value={form.fullName}
                 onChangeText={handleFullNameChange}
                 accessibilityLabel="Full name"
@@ -79,7 +79,7 @@ export function CompanyRegistrationFormScreen(): React.JSX.Element {
               />
 
               <FormField
-                label="Phone Number"
+                label={s.form.phoneNumber}
                 value={form.phone}
                 onChangeText={handlePhoneChange}
                 accessibilityLabel="Phone number"
@@ -89,7 +89,7 @@ export function CompanyRegistrationFormScreen(): React.JSX.Element {
                 returnKeyType="done"
               />
 
-              <Text style={styles.sectionTitle}>Required Documents</Text>
+              <Text style={styles.sectionTitle}>{s.form.requiredDocuments}</Text>
 
               {([
                 { key: 'passportBioPage'   as const, label: s.docs.passportBioPage,     icon: 'document-text' as const, onPick: handlePickPassportBioPage },

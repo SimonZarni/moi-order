@@ -275,6 +275,24 @@ export interface AppStrings {
     submitting:   string;
   };
 
+  // Service form sections (shared across all service forms)
+  form: {
+    personalInfo:      string;
+    requiredDocuments: string;
+    fullName:          string;
+    phoneNumber:       string;
+  };
+
+  // Notifications screen
+  notifs: {
+    title:        string;
+    markAllRead:  string;
+    marking:      string;
+    clearAll:     string;
+    noNotifs:     string;
+    loading:      string;
+  };
+
   // Payment
   payment: {
     title:            string;
@@ -538,6 +556,20 @@ const en: AppStrings = {
     channels:         'Connected to at least 2 sign-in channels',
     payments:         'Completed at least 3 payments',
   },
+  form: {
+    personalInfo:      'Personal Information',
+    requiredDocuments: 'Required Documents',
+    fullName:          'Full Name',
+    phoneNumber:       'Phone Number',
+  },
+  notifs: {
+    title:        'Notifications',
+    markAllRead:  'Mark all read',
+    marking:      'Marking…',
+    clearAll:     'Clear all',
+    noNotifs:     'No notifications',
+    loading:      'Loading…',
+  },
 };
 
 // ─── Burmese ─────────────────────────────────────────────────────────────────
@@ -787,6 +819,20 @@ const mm: AppStrings = {
     channels:         'အနည်းဆုံး ဝင်ရောက်ချန်နယ် ၂ ခု ချိတ်ဆက်ပါ',
     payments:         'အနည်းဆုံး ၃ ကြိမ် ငွေပေးချေပြီးဖြစ်ရမည်',
   },
+  form: {
+    personalInfo:      'ကိုယ်ရေးအချက်အလက်',
+    requiredDocuments: 'လိုအပ်သောစာရွက်စာတမ်းများ',
+    fullName:          'နာမည်အပြည့်အစုံ',
+    phoneNumber:       'ဖုန်းနံပါတ်',
+  },
+  notifs: {
+    title:        'အကြောင်းကြားချက်များ',
+    markAllRead:  'အားလုံး ဖတ်ပြီးဟုသတ်မှတ်ပါ',
+    marking:      'သတ်မှတ်နေသည်…',
+    clearAll:     'အားလုံးဖျက်ပါ',
+    noNotifs:     'အကြောင်းကြားချက်မရှိပါ',
+    loading:      'ဖတ်နေသည်…',
+  },
 };
 
 // ─── Thai ─────────────────────────────────────────────────────────────────────
@@ -1035,6 +1081,20 @@ const th: AppStrings = {
     requirements:     'เงื่อนไข',
     channels:         'เชื่อมต่ออย่างน้อย 2 ช่องทางเข้าสู่ระบบ',
     payments:         'ชำระเงินสำเร็จอย่างน้อย 3 ครั้ง',
+  },
+  form: {
+    personalInfo:      'ข้อมูลส่วนตัว',
+    requiredDocuments: 'เอกสารที่ต้องการ',
+    fullName:          'ชื่อ-นามสกุล',
+    phoneNumber:       'หมายเลขโทรศัพท์',
+  },
+  notifs: {
+    title:        'การแจ้งเตือน',
+    markAllRead:  'ทำเครื่องหมายอ่านทั้งหมด',
+    marking:      'กำลังทำเครื่องหมาย…',
+    clearAll:     'ล้างทั้งหมด',
+    noNotifs:     'ไม่มีการแจ้งเตือน',
+    loading:      'กำลังโหลด…',
   },
 };
 

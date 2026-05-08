@@ -45,6 +45,8 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     color: colours.textOnDark,
     padding: 0,
+    textAlignVertical: 'center',
+    includeFontPadding: false,
   },
   // Typed constant for placeholderTextColor prop — not a real style rule
   placeholder: {
