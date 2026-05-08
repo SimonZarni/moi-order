@@ -52,7 +52,7 @@ apiClient.interceptors.response.use(
 
     const apiError: ApiError = {
       message: status === 413
-        ? 'Could not upload. The file is too large.'
+        ? 'Could not upload. Total upload size is too large (max 50 MB per request).'
         : (data?.message ?? 'Something went wrong.'),
       code: status === 413 ? 'file_too_large' : (data?.code ?? 'internal'),
       ...(data?.errors   !== undefined && { errors:  data.errors }),

@@ -3,7 +3,6 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMutation } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
-import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as Crypto from 'expo-crypto';
 
 import { useNinetyDayReportForm, UseNinetyDayReportFormResult } from './useNinetyDayReportForm';
@@ -13,7 +12,7 @@ import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 import { navigateAfterSubmission } from '@/shared/utils/navigateAfterOrder';
 import { MESSAGES } from '@/shared/constants/messages';
-import { stripAsset } from '@/shared/utils/stripAsset';
+import { pickAndCompressImage } from '@/shared/utils/pickAndCompressImage';
 
 type RouteParams = RouteProp<RootStackParamList, 'NinetyDayReportForm'>;
 
@@ -56,43 +55,10 @@ export function useNinetyDayReportFormScreen(): UseNinetyDayReportFormScreenResu
 
   // ── Image pickers ────────────────────────────────────────────────────────
 
-  const pickImage = useCallback(async (): Promise<ImagePicker.ImagePickerAsset | null> => {
-    const { granted } = await ImagePicker.getMediaLibraryPermissionsAsync();
-    if (!granted) {
-      const request = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!request.granted) {
-        setBannerError('Photo library access is required to upload documents.');
-        return null;
-      }
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality:    1,
-      allowsEditing: false,
-      base64: false,
-    });
-    if (result.canceled || result.assets.length === 0) return null;
-    const asset = result.assets[0];
-    if (asset == null) return null;
-
-    // Scale down to max 2048 px on the longer side, then re-encode at 0.7 quality.
-    // This keeps passport/visa images readable while staying well under the 12 MB per-file cap.
-    const MAX_DIM = 2048;
-    const ctx = ImageManipulator.manipulate(asset.uri);
-    if (asset.width > MAX_DIM || asset.height > MAX_DIM) {
-      ctx.resize(asset.width >= asset.height ? { width: MAX_DIM } : { height: MAX_DIM });
-    }
-    const rendered = await ctx.renderAsync();
-    const compressed = await rendered.saveAsync({ compress: 0.7, format: SaveFormat.JPEG });
-
-    return stripAsset({
-      ...asset,
-      uri:      compressed.uri,
-      width:    compressed.width,
-      height:   compressed.height,
-      mimeType: 'image/jpeg',
-    });
-  }, []);
+  const pickImage = useCallback(
+    (): Promise<ImagePicker.ImagePickerAsset | null> => pickAndCompressImage((msg) => setBannerError(msg)),
+    [],
+  );
 
   const handlePickPassportBioPage = useCallback(async (): Promise<void> => {
     const asset = await pickImage();

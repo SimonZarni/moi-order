@@ -15,7 +15,7 @@ import { MESSAGES } from '@/shared/constants/messages';
 import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 import { navigateAfterSubmission } from '@/shared/utils/navigateAfterOrder';
-import { stripAsset } from '@/shared/utils/stripAsset';
+import { pickAndCompressImage } from '@/shared/utils/pickAndCompressImage';
 
 type RouteParams = RouteProp<RootStackParamList, 'EmbassyResidentialForm'>;
 
@@ -60,25 +60,10 @@ export function useEmbassyResidentialFormScreen(): UseEmbassyResidentialFormScre
 
   // ── Image picker ─────────────────────────────────────────────────────────
 
-  const pickImage = useCallback(async (): Promise<ImagePicker.ImagePickerAsset | null> => {
-    const { granted } = await ImagePicker.getMediaLibraryPermissionsAsync();
-    if (!granted) {
-      const request = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!request.granted) {
-        setBannerError('Photo library access is required to upload documents.');
-        return null;
-      }
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality:    0.85,
-      allowsEditing: false,
-      base64: false,
-    });
-    if (result.canceled || result.assets.length === 0) return null;
-    const asset = result.assets[0];
-    return asset != null ? stripAsset(asset) : null;
-  }, []);
+  const pickImage = useCallback(
+    (): Promise<ImagePicker.ImagePickerAsset | null> => pickAndCompressImage((msg) => setBannerError(msg)),
+    [],
+  );
 
   const handlePickPassportBioPage   = useCallback(async () => { const a = await pickImage(); if (a) handlePassportBioPageChange(a); },   [pickImage, handlePassportBioPageChange]);
   const handlePickVisaPage          = useCallback(async () => { const a = await pickImage(); if (a) handleVisaPageChange(a); },          [pickImage, handleVisaPageChange]);

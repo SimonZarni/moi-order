@@ -9,7 +9,7 @@ import { useGenericServiceForm, UseGenericServiceFormResult } from './useGeneric
 import { fetchServices } from '@/shared/api/services';
 import { submitDynamic } from '@/shared/api/submissions';
 import { useAuthStore } from '@/shared/store/authStore';
-import { stripAsset } from '@/shared/utils/stripAsset';
+import { pickAndCompressImage } from '@/shared/utils/pickAndCompressImage';
 import { MESSAGES } from '@/shared/constants/messages';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { ApiError, FieldSchemaItem } from '@/types/models';
@@ -97,17 +97,8 @@ export function useGenericServiceFormScreen(): UseGenericServiceFormScreenResult
   });
 
   const handlePickFile = useCallback(async (key: string): Promise<void> => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) return;
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.85,
-    });
-
-    if (!result.canceled && result.assets[0] !== undefined) {
-      handleFileChange(key, stripAsset(result.assets[0]));
-    }
+    const asset = await pickAndCompressImage((msg) => setBannerError(msg));
+    if (asset !== null) handleFileChange(key, asset);
   }, [handleFileChange]);
 
   const handleSubmit = useCallback((): void => {
