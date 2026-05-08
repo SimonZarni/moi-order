@@ -49,17 +49,29 @@ export function PlacesMapScreen(): React.JSX.Element {
   const isSelected = useNavigationState(
     state => state.routes[state.index]?.name === 'Map'
   );
-  const [mapReady, setMapReady] = useState(false);
+  // Decoupled from isSelected so the heavy MapboxGL mount doesn't compete
+  // with the navigation transition animation and cause frame drops.
+  const [shouldMountMap, setShouldMountMap] = useState(false);
+  const [mapReady, setMapReady]             = useState(false);
 
   useEffect(() => {
     if (!isSelected) {
+      setShouldMountMap(false); // destroy SurfaceView immediately on tab leave
       setMapReady(false);
       return;
     }
-    // Safety fallback: hide overlay after 800 ms if map events don't fire.
-    const t = setTimeout(() => setMapReady(true), 800);
+    // Static image plays during the ~300 ms tab animation.
+    // MapboxGL mounts after animation completes — no frame-drop competition.
+    const t = setTimeout(() => setShouldMountMap(true), 300);
     return () => clearTimeout(t);
   }, [isSelected]);
+
+  useEffect(() => {
+    if (!shouldMountMap) return;
+    // Fallback: hide overlay 800 ms after MapView mounts if events don't fire.
+    const t = setTimeout(() => setMapReady(true), 800);
+    return () => clearTimeout(t);
+  }, [shouldMountMap]);
   const {
     displayedPlaces, selectedPlace, selectedDetail,
     isLoadingPlaces, isLoadingTags, isTabSwitching, isLoadingDetail, isError,
@@ -141,10 +153,10 @@ export function PlacesMapScreen(): React.JSX.Element {
               onFilterPress={handleShowTagFilter}
             />
           </Animated.View>
-          {/* Mount MapView as soon as the tab is selected (during the transition
-              animation) so tiles start loading early. Unmount immediately on
-              tab-away to destroy the Android SurfaceView and fix z-ordering. */}
-          {isSelected ? (
+          {/* MapboxGL mounts 300 ms after tab selection (post-animation) so the
+              native init doesn't compete with the transition. Unmounts immediately
+              on tab-away to destroy the Android SurfaceView and fix z-ordering. */}
+          {shouldMountMap ? (
             <MapboxGL.MapView
               style={styles.map}
               styleURL={MAPBOX_STYLE}
@@ -235,9 +247,9 @@ export function PlacesMapScreen(): React.JSX.Element {
             )
           )}
 
-          {/* Static map preview covers the screen while live tiles load.
-              Looks identical to the live map — swap is invisible to the user.
-              Falls back to a plain colour if the token is missing. */}
+          {/* Static map preview covers the screen during the transition animation
+              (shouldMountMap=false) AND while live tiles initialise after mount
+              (shouldMountMap=true, mapReady=false). Swap is invisible. */}
           {isSelected && !mapReady && (
             staticMapUrl ? (
               <Image
