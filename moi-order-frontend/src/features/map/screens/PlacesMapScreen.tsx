@@ -42,7 +42,7 @@ export function PlacesMapScreen(): React.JSX.Element {
   const {
     displayedPlaces, selectedPlace, selectedDetail,
     isLoadingPlaces, isLoadingTags, isTabSwitching, isLoadingDetail, isError,
-    cameraRef, userLocation,
+    cameraRef, gpsCoords, userLocation,
     searchQuery, placeSuggestions, geoSuggestions, isGeoLoading,
     categories, allTags, activeTab, activeCategory, activeTags,
     isFABOpen, showTagFilter, isFullscreen, isBottomSheetFullyExpanded,
@@ -129,7 +129,25 @@ export function PlacesMapScreen(): React.JSX.Element {
                 animationMode="flyTo"
                 animationDuration={800}
               />
-              <MapboxGL.UserLocation visible animated />
+              {/* Custom location dot — persists in hook state across MapView remounts,
+                  unlike MapboxGL.UserLocation which re-acquires GPS each time. */}
+              {gpsCoords && (
+                <MapboxGL.ShapeSource
+                  id="user-gps-location"
+                  shape={{ type: 'Feature', geometry: { type: 'Point', coordinates: gpsCoords }, properties: {} }}
+                >
+                  <MapboxGL.CircleLayer
+                    id="user-gps-dot"
+                    style={{
+                      circleRadius: 9,
+                      circleColor: '#4A90E2',
+                      circleOpacity: 0.95,
+                      circleStrokeWidth: 3,
+                      circleStrokeColor: '#FFFFFF',
+                    }}
+                  />
+                </MapboxGL.ShapeSource>
+              )}
 
               {longPressMarker && (
                 <MapboxGL.ShapeSource id="long-press-marker"

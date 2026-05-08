@@ -46,6 +46,7 @@ export interface UsePlacesMapScreenResult {
   isLoadingDetail:  boolean;
   isError:          boolean;
   cameraRef:        React.RefObject<Camera | null>;
+  gpsCoords:        [number, number] | null;
   userLocation:     UserLocation | null;
   searchQuery:      string;
   placeSuggestions: Place[];
@@ -124,17 +125,42 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     usePlaceDetailForMap(selectedPlace?.id ?? null);
   const { tags: fetchedTags, isLoading: isLoadingTags } = useTagsList();
 
-  // ── GPS ───────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') return;
-      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-      const coords: [number, number] = [loc.coords.longitude, loc.coords.latitude];
-      setGpsCoords(coords);
-      setUserLocation({ coords, label: 'Current Location', isGPS: true });
-    })();
-  }, []);
+  // ── GPS — watch while focused, stop on blur to save battery ─────────────
+  useFocusEffect(
+    useCallback(() => {
+      let sub: Location.LocationSubscription | null = null;
+
+      (async () => {
+        // Check without prompting first — only request if never asked.
+        const { status: existing } = await Location.getForegroundPermissionsAsync();
+        let status = existing;
+        if (existing === Location.PermissionStatus.UNDETERMINED) {
+          ({ status } = await Location.requestForegroundPermissionsAsync());
+        }
+        if (status !== Location.PermissionStatus.GRANTED) return;
+
+        // Fast one-shot fix to populate coords immediately.
+        try {
+          const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+          const coords: [number, number] = [loc.coords.longitude, loc.coords.latitude];
+          setGpsCoords(coords);
+          setUserLocation(prev => (!prev || prev.isGPS) ? { coords, label: 'Current Location', isGPS: true } : prev);
+        } catch { /* GPS cold-start failed — watch will fill it in */ }
+
+        // Continuous watch updates gpsCoords while on the map screen.
+        sub = await Location.watchPositionAsync(
+          { accuracy: Location.Accuracy.Balanced, distanceInterval: 10 },
+          (loc) => {
+            const coords: [number, number] = [loc.coords.longitude, loc.coords.latitude];
+            setGpsCoords(coords);
+            setUserLocation(prev => (!prev || prev.isGPS) ? { coords, label: 'Current Location', isGPS: true } : prev);
+          },
+        );
+      })();
+
+      return () => { sub?.remove(); };
+    }, []),
+  );
 
   useEffect(() => {
     if (!gpsCoords) return;
@@ -422,7 +448,7 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   return {
     displayedPlaces, selectedPlace, selectedDetail,
     isLoadingPlaces, isLoadingTags, isTabSwitching, isLoadingDetail, isError,
-    cameraRef, userLocation,
+    cameraRef, gpsCoords, userLocation,
     searchQuery, placeSuggestions, geoSuggestions, isGeoLoading,
     categories, allTags: fetchedTags, activeTab, activeCategory, activeTags,
     isFABOpen, showTagFilter, isFullscreen, isBottomSheetFullyExpanded,
