@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Keyboard, Linking } from 'react-native';
 import * as Location from 'expo-location';
+import * as SecureStore from 'expo-secure-store';
 import { useFocusEffect } from '@react-navigation/native';
 import { useMapStore } from '@/shared/store/mapStore';
+
+const LAST_MAP_LOCATION_KEY = 'last_map_location';
 
 import { usePlacesList, usePlaceDetailForMap, useTagsList } from './usePlacesMapData';
 import {
@@ -124,6 +127,26 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const { place: selectedDetail, isLoading: isLoadingDetail } =
     usePlaceDetailForMap(selectedPlace?.id ?? null);
   const { tags: fetchedTags, isLoading: isLoadingTags } = useTagsList();
+
+  // ── Persist last known coords so the camera has a fallback even when
+  //    location permission is later revoked ─────────────────────────────────
+  useEffect(() => {
+    // Load saved position on mount — seeds camera before permission check.
+    SecureStore.getItemAsync(LAST_MAP_LOCATION_KEY)
+      .then((raw) => {
+        if (!raw) return;
+        const coords = JSON.parse(raw) as [number, number];
+        setGpsCoords((prev) => prev ?? coords);
+        setUserLocation((prev) => prev ?? { coords, label: 'Last Location', isGPS: true });
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!gpsCoords) return;
+    // Persist whenever GPS coords are updated.
+    SecureStore.setItemAsync(LAST_MAP_LOCATION_KEY, JSON.stringify(gpsCoords)).catch(() => {});
+  }, [gpsCoords]);
 
   // ── GPS — watch while focused, stop on blur to save battery ─────────────
   useFocusEffect(
