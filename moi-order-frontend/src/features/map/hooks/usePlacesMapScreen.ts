@@ -140,16 +140,17 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
         if (status !== Location.PermissionStatus.GRANTED) return;
 
         // Fast one-shot fix to populate coords immediately.
+        // Accuracy.Low (network/WiFi) avoids the Google Location Accuracy dialog.
         try {
-          const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+          const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
           const coords: [number, number] = [loc.coords.longitude, loc.coords.latitude];
           setGpsCoords(coords);
           setUserLocation(prev => (!prev || prev.isGPS) ? { coords, label: 'Current Location', isGPS: true } : prev);
-        } catch { /* GPS cold-start failed — watch will fill it in */ }
+        } catch { /* no initial fix — watch will fill it in */ }
 
         // Continuous watch updates gpsCoords while on the map screen.
         sub = await Location.watchPositionAsync(
-          { accuracy: Location.Accuracy.Balanced, distanceInterval: 10 },
+          { accuracy: Location.Accuracy.Low, distanceInterval: 10 },
           (loc) => {
             const coords: [number, number] = [loc.coords.longitude, loc.coords.latitude];
             setGpsCoords(coords);
@@ -431,7 +432,7 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
       Alert.alert('Location unavailable', 'Enable location access in Settings to use this feature.');
       return;
     }
-    const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+    const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
     const newCoords: [number, number] = [loc.coords.longitude, loc.coords.latitude];
     setGpsCoords(newCoords);
     setUserLocation({ coords: newCoords, label: 'Current Location', isGPS: true });
