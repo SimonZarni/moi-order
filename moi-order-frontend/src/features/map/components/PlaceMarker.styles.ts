@@ -2,19 +2,28 @@ import { StyleSheet } from 'react-native';
 import { MAP_COLORS } from '@/shared/theme/mapTheme';
 
 export const BUBBLE_SIZE     = 44;
-export const BUBBLE_SELECTED = 52;
+export const BUBBLE_SELECTED = 54;
 
 export const styles = StyleSheet.create({
   pressable: { alignItems: 'center' },
 
-  // Single bubble — animated size + border colour. overflow:hidden clips image
-  // to circle. No wrapper needed; Android elevation uses borderRadius for shape.
   bubble: {
+    width:           BUBBLE_SIZE,
+    height:          BUBBLE_SIZE,
+    borderRadius:    BUBBLE_SIZE / 2,
+    borderWidth:     2.5,
+    borderColor:     MAP_COLORS.white,
     overflow:        'hidden',
     backgroundColor: MAP_COLORS.surfaceAlt,
     alignItems:      'center',
     justifyContent:  'center',
-    elevation:       6,   // Android circular shadow (works with borderRadius)
+  },
+  bubbleSelected: {
+    width:        BUBBLE_SELECTED,
+    height:       BUBBLE_SELECTED,
+    borderRadius: BUBBLE_SELECTED / 2,
+    borderWidth:  3.5,
+    borderColor:  '#10B981',   // green border IS the ring
   },
 
   coverImage:    { width: '100%', height: '100%' },
