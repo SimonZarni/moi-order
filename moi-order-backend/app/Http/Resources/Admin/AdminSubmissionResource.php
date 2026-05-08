@@ -20,13 +20,14 @@ class AdminSubmissionResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'             => $this->id,
-            'status'         => $this->status->value,
-            'status_label'   => $this->status->label(),
-            'price_snapshot' => $this->price_snapshot,
-            'completed_at'   => $this->completed_at?->toISOString(),
-            'created_at'     => $this->created_at->toISOString(),
-            'has_result'     => $this->result_path !== null,
+            'id'                 => $this->id,
+            'status'             => $this->status->value,
+            'status_label'       => $this->status->label(),
+            'payment_authorized' => (bool) $this->payment_authorized,
+            'price_snapshot'     => $this->price_snapshot,
+            'completed_at'       => $this->completed_at?->toISOString(),
+            'created_at'         => $this->created_at->toISOString(),
+            'has_result'         => $this->result_path !== null,
 
             // Admin always sees the user who submitted
             'user' => $this->when(
