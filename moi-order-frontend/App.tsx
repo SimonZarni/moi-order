@@ -16,6 +16,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
@@ -207,6 +208,9 @@ function MainTabs(): React.JSX.Element {
   );
 }
 
+// Keep the native splash visible until our AnimatedSplash is rendered and covering the screen.
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
 const SPLASH_MIN_MS = 1500;
 
 export default function App(): React.JSX.Element {
@@ -216,6 +220,10 @@ export default function App(): React.JSX.Element {
   const { setUser } = useAuthStore();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [fontsLoaded] = useFonts({ PlayfairDisplay_700Bold_Italic, PlayfairDisplay_700Bold });
+
+  // Hide the native splash immediately on first render — AnimatedSplash is already
+  // covering the screen with the same green background, so the transition is invisible.
+  useEffect(() => { SplashScreen.hideAsync().catch(() => {}); }, []);
 
   // Minimum-hold timer — fires after 1.5 s regardless of init speed.
   useEffect(() => {

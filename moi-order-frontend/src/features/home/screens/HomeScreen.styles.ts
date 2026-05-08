@@ -57,8 +57,8 @@ export const styles = StyleSheet.create({
     gap: 7,
   },
   brandLogo: {
-    width: 120,
-    height: 120,
+    width: 160,
+    height: 48,
   },
 
   heroTopRow: {

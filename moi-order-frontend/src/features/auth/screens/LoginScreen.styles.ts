@@ -34,9 +34,9 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    width: 220,
-    height: 220,
-    marginBottom: spacing.xs,
+    width: 300,
+    height: 91,
+    marginBottom: spacing.lg,
   },
   tagline: {
     fontSize: typography.md,
