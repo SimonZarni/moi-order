@@ -35,11 +35,15 @@ export const styles = StyleSheet.create({
   },
   clearText: { fontSize: 11, color: colours.textOnDark },
 
+  tabsScroll: {
+    backgroundColor: colours.backgroundLight,
+    borderBottomWidth: 1, borderBottomColor: colours.divider,
+    flexGrow: 0,
+  },
   tabsRow: {
     flexDirection: 'row', gap: spacing.xs,
     paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
-    backgroundColor: colours.backgroundLight,
-    borderBottomWidth: 1, borderBottomColor: colours.divider,
+    alignItems: 'center',
   },
   tab: {
     paddingHorizontal: spacing.md, paddingVertical: spacing.xs,

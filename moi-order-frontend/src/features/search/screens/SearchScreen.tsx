@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  ActivityIndicator, FlatList, Pressable,
+  ActivityIndicator, FlatList, Pressable, ScrollView,
   Text, TextInput, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -57,8 +57,13 @@ export function SearchScreen(): React.JSX.Element {
         )}
       </View>
 
-      {/* Tabs */}
-      <View style={styles.tabsRow}>
+      {/* Tabs — horizontal scroll so long MM/TH labels don't overflow */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabsRow}
+        style={styles.tabsScroll}
+      >
         {TABS.map(tab => (
           <Pressable key={tab.key} onPress={() => handleTabChange(tab.key)}
             style={[styles.tab, activeTab === tab.key && styles.tabActive]}
@@ -68,7 +73,7 @@ export function SearchScreen(): React.JSX.Element {
             </Text>
           </Pressable>
         ))}
-      </View>
+      </ScrollView>
 
       <View style={styles.body}>
         {isLoading && query.length > 0 && (

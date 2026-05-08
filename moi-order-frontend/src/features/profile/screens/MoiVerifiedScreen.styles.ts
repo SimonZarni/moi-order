@@ -35,11 +35,15 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.textOnDark,
     letterSpacing: -0.3,
+    lineHeight: 26,
+    includeFontPadding: false,
   },
   headerSubtitle: {
     fontSize: typography.xs,
     color: colours.tertiary,
-    marginTop: 1,
+    marginTop: 2,
+    lineHeight: 18,
+    includeFontPadding: false,
   },
   // ── Body sheet ────────────────────────────────────────────────────────────
   scroll: {
@@ -55,13 +59,13 @@ export const styles = StyleSheet.create({
 
   // ── Section label ─────────────────────────────────────────────────────────
   sectionLabel: {
-    fontSize: typography.xxs,
+    fontSize: typography.xs,
     fontWeight: '700',
     color: colours.textMuted,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
     marginBottom: spacing.sm,
     marginTop: spacing.sm,
+    lineHeight: 20,
+    includeFontPadding: false,
   },
 
   // ── Card ──────────────────────────────────────────────────────────────────
@@ -84,7 +88,8 @@ export const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.sm,
     color: colours.textOnLight,
-    lineHeight: 20,
+    lineHeight: 24,
+    includeFontPadding: false,
   },
 
   // ── Requirements ─────────────────────────────────────────────────────────
@@ -98,7 +103,8 @@ export const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.sm,
     color: colours.textOnLight,
-    lineHeight: 20,
+    lineHeight: 24,
+    includeFontPadding: false,
   },
   reqDivider: {
     height: 1,
@@ -123,5 +129,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.md,
     fontWeight: '700',
     color: colours.success,
+    lineHeight: 24,
+    includeFontPadding: false,
   },
 });

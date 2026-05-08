@@ -117,7 +117,7 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
         <View style={styles.body}>
           {/* ── Summary card ── */}
           <View style={styles.sectionLabelRow}>
-            <Text style={styles.sectionLabel}>Summary</Text>
+            <Text style={styles.sectionLabel}>{s.orders.summary}</Text>
             <View style={styles.sectionLine} />
           </View>
           <View style={[styles.summaryCard, { borderTopColor: accentColour }]}>
@@ -127,14 +127,14 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
             </View>
             <View style={styles.summaryDivider} />
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Status</Text>
+              <Text style={styles.summaryLabel}>{s.orders.status}</Text>
               <Text style={[styles.statusValue, { color: accentColour }]}>{(s.status as Record<string, string>)[order.status] ?? order.status_label}</Text>
             </View>
             {order.total !== undefined && (
               <>
                 <View style={styles.summaryDivider} />
                 <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>Total</Text>
+                  <Text style={styles.summaryLabel}>{s.tickets.total}</Text>
                   <Text style={styles.totalValue}>{formatPrice(order.total)}</Text>
                 </View>
               </>

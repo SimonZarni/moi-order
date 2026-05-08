@@ -161,6 +161,7 @@ export interface AppStrings {
     available7Days:     string;
     chooseDay:          string;
     purchase:           string;
+    total:              string;
   };
 
   // Tab bar
@@ -427,6 +428,7 @@ const en: AppStrings = {
     available7Days:     'Available for the next 7 days',
     chooseDay:          'Choose a day',
     purchase:           'Purchase',
+    total:              'Total',
   },
   profile: {
     personalInfo:       'Personal Info',
@@ -675,6 +677,7 @@ const mm: AppStrings = {
     available7Days:     'နောက် ၇ ရက်အတွင်း ရနိုင်သည်',
     chooseDay:          'နေ့ရက်တစ်ခု ရွေးပါ',
     purchase:           'ဝယ်ယူပါ',
+    total:              'စုစုပေါင်း',
   },
   profile: {
     personalInfo:       'ကိုယ်ရေးအချက်အလက်',
@@ -923,6 +926,7 @@ const th: AppStrings = {
     available7Days:     'พร้อมใช้งานใน 7 วันข้างหน้า',
     chooseDay:          'เลือกวัน',
     purchase:           'ซื้อ',
+    total:              'รวม',
   },
   profile: {
     personalInfo:       'ข้อมูลส่วนตัว',

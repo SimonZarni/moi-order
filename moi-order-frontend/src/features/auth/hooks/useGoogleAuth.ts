@@ -51,9 +51,10 @@ export function useGoogleAuth(): UseGoogleAuthResult {
           }
         }
       } else {
-        // No confirmed email context (button tapped directly) — always show the full
-        // account picker so the user consciously chooses which account to use.
-        await GoogleSignin.signOut();
+        // No confirmed email context — show the full account picker.
+        // signOut() is best-effort: if there is no active session it may throw,
+        // which is fine — we just want to clear any cached selection.
+        try { await GoogleSignin.signOut(); } catch { /* no active session */ }
         await GoogleSignin.signIn();
       }
 
