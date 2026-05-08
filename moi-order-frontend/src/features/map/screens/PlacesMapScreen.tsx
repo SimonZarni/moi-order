@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapboxGL from '@rnmapbox/maps';
 import { useNavigation, useNavigationState } from '@react-navigation/native';
@@ -20,6 +21,10 @@ import { MAP_COLORS } from '@/shared/theme/mapTheme';
 const MAPBOX_TOKEN = process.env['EXPO_PUBLIC_MAPBOX_TOKEN'] ?? '';
 const MAPBOX_STYLE = process.env['EXPO_PUBLIC_MAPBOX_STYLE'] ?? 'mapbox://styles/mapbox/streets-v12';
 const DEFAULT_CENTRE: [number, number] = [102.6331, 17.9757];
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+// Mapbox Static API max is 1280px per side; @2x doubles it for Retina displays.
+const STATIC_W = Math.min(Math.round(SCREEN_W), 1280);
+const STATIC_H = Math.min(Math.round(SCREEN_H), 1280);
 
 MapboxGL.setAccessToken(MAPBOX_TOKEN);
 
@@ -77,6 +82,16 @@ export function PlacesMapScreen(): React.JSX.Element {
   const handleReadMore = useCallback(() => {
     if (selectedPlace) navigation.navigate('PlaceDetail', { placeId: selectedPlace.id });
   }, [selectedPlace, navigation]);
+
+  // Static map preview — shown as overlay while MapboxGL tiles load.
+  // Looks identical to the live map so the swap is invisible to the user.
+  // expo-image caches it so subsequent visits are instant.
+  const staticMapUrl = useMemo(() => {
+    if (!MAPBOX_TOKEN) return null;
+    const styleId = MAPBOX_STYLE.replace('mapbox://styles/', '');
+    const [lon, lat] = gpsCoords ?? DEFAULT_CENTRE;
+    return `https://api.mapbox.com/styles/v1/${styleId}/static/${lon},${lat},12/${STATIC_W}x${STATIC_H}@2x?access_token=${MAPBOX_TOKEN}&attribution=false&logo=false`;
+  }, [gpsCoords]);
 
   const topControlsAnim  = useRef(new Animated.Value(0)).current;
   const buttonsRightAnim = useRef(new Animated.Value(0)).current;
@@ -208,13 +223,32 @@ export function PlacesMapScreen(): React.JSX.Element {
               ))}
             </MapboxGL.MapView>
           ) : (
-            <View style={[styles.map, { backgroundColor: '#0a2e1a' }]} />
+            staticMapUrl ? (
+              <Image
+                source={{ uri: staticMapUrl }}
+                style={styles.map}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+              />
+            ) : (
+              <View style={[styles.map, { backgroundColor: '#0a2e1a' }]} />
+            )
           )}
 
-          {/* Overlay hides the SafeAreaView green background while Mapbox tiles
-              load. Same colour as the placeholder so the transition is seamless. */}
+          {/* Static map preview covers the screen while live tiles load.
+              Looks identical to the live map — swap is invisible to the user.
+              Falls back to a plain colour if the token is missing. */}
           {isSelected && !mapReady && (
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: '#0a2e1a', zIndex: 50 }]} />
+            staticMapUrl ? (
+              <Image
+                source={{ uri: staticMapUrl }}
+                style={[StyleSheet.absoluteFill, { zIndex: 50 }]}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+              />
+            ) : (
+              <View style={[StyleSheet.absoluteFill, { backgroundColor: '#0a2e1a', zIndex: 50 }]} />
+            )
           )}
 
           {userLocation && !userLocation.isGPS && (
