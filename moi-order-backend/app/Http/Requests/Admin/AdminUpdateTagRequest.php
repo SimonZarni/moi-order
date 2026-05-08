@@ -15,7 +15,9 @@ class AdminUpdateTagRequest extends FormRequest
     {
         return [
             'name_my' => ['sometimes', 'required', 'string', 'max:255'],
-            'name_en' => ['sometimes', 'required', 'string', 'max:255'],
+            'name_en' => ['sometimes', 'required', 'string', 'max:255',
+                Rule::unique('tags', 'name_en')->ignore($this->route('tag')?->id),
+            ],
             'name_th' => ['sometimes', 'nullable', 'string', 'max:255'],
             'slug'    => ['sometimes', 'required', 'string', 'max:100',
                 Rule::unique('tags', 'slug')->ignore($this->route('tag')?->id),

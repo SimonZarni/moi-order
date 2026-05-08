@@ -15,7 +15,7 @@ class AdminStoreTagRequest extends FormRequest
     {
         return [
             'name_my' => ['required', 'string', 'max:255'],
-            'name_en' => ['required', 'string', 'max:255'],
+            'name_en' => ['required', 'string', 'max:255', Rule::unique('tags', 'name_en')],
             'name_th' => ['sometimes', 'nullable', 'string', 'max:255'],
             'slug'    => ['required', 'string', 'max:100', Rule::unique('tags', 'slug')],
         ];
