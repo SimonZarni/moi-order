@@ -354,7 +354,7 @@ export function SubmissionDetailView() {
             {/* Order Confirmation (when auto-payment is OFF) */}
             {submission.status === 'pending_payment' && canManage && (
               <Card>
-                <CardHeader title="Order Confirmation Required" />
+                <CardHeader title={submission.payment_authorized ? 'Waiting for Payment' : 'Order Confirmation Required'} />
                 <CardContent>
                   {submission.payment_authorized ? (
                     <Button
