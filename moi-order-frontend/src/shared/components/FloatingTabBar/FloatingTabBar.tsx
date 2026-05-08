@@ -134,7 +134,8 @@ export function FloatingTabBar({ state, navigation, insets }: BottomTabBarProps)
 
   const activeRoute = (state.routes[state.index]?.name ?? 'Home') as keyof TabParamList;
   const bottom = TAB_BAR_BOTTOM_OFFSET + insets.bottom;
-  const shouldHide = isFullscreen || isBottomSheetOpen;
+  // Only hide on the Map tab — ignore lingering store state on all other tabs.
+  const shouldHide = activeRoute === 'Map' && (isFullscreen || isBottomSheetOpen);
 
   // Reset map overlay state when leaving the Map tab so the bar is never
   // permanently hidden after the user switches away without closing the sheet.
