@@ -219,7 +219,7 @@ export default function App(): React.JSX.Element {
   const [splashGone, setSplashGone] = useState(false);
   const { setUser } = useAuthStore();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [fontsLoaded] = useFonts({ PlayfairDisplay_700Bold_Italic, PlayfairDisplay_700Bold });
+  const [fontsLoaded, fontError] = useFonts({ PlayfairDisplay_700Bold_Italic, PlayfairDisplay_700Bold });
 
   // Hide the native splash immediately on first render — AnimatedSplash is already
   // covering the screen with the same green background, so the transition is invisible.
@@ -259,8 +259,10 @@ export default function App(): React.JSX.Element {
     restoreSession();
   }, [setUser]);
 
-  // canHide only when session restore, minimum timer, AND fonts are all ready.
-  const canHide = initDone && timerDone && (fontsLoaded ?? false);
+  // canHide when session restore, timer, and fonts are all settled (success or failure).
+  // Never block on font failure — fonts are cosmetic; a stuck splash is worse than a font fallback.
+  const fontsDone = fontsLoaded || fontError !== null;
+  const canHide = initDone && timerDone && fontsDone;
   const onSplashHidden = useCallback(() => setSplashGone(true), []);
 
   return (
