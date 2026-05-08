@@ -125,7 +125,7 @@ export function PlacesMapScreen(): React.JSX.Element {
               <MapboxGL.Camera
                 ref={cameraRef}
                 zoomLevel={12}
-                centerCoordinate={DEFAULT_CENTRE}
+                centerCoordinate={userLocation?.coords ?? DEFAULT_CENTRE}
                 animationMode="flyTo"
                 animationDuration={800}
               />

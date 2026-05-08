@@ -92,6 +92,8 @@ export interface UsePlacesMapScreenResult {
 
 export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const cameraRef = useRef<Camera>(null);
+  // Guards against Android propagating button-press touches to the native Mapbox onPress.
+  const ignoreNextMapPressRef = useRef(false);
 
   const [gpsCoords, setGpsCoords]           = useState<[number, number] | null>(null);
   const [userLocation, setUserLocation]     = useState<UserLocation | null>(null);
@@ -247,7 +249,11 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     tabSwitchTimer.current = setTimeout(() => setIsTabSwitching(false), 350);
   }, []);
 
-  const handleToggleFAB = useCallback(() => setIsFABOpen(prev => !prev), []);
+  const handleToggleFAB = useCallback(() => {
+    ignoreNextMapPressRef.current = true;
+    setTimeout(() => { ignoreNextMapPressRef.current = false; }, 400);
+    setIsFABOpen(prev => !prev);
+  }, []);
 
   const handleSelectCategory = useCallback((id: number | null) => {
     setActiveCategory(id);
@@ -292,6 +298,9 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   }, []);
 
   const handleMapPress = useCallback(() => {
+    // On Android, tapping a button over the map also fires the native Mapbox onPress.
+    // Ignore the map press for a short window after any overlay button was tapped.
+    if (ignoreNextMapPressRef.current) return;
     Keyboard.dismiss();
     setIsFABOpen(false);
     if (selectedPlace === null && searchQuery.length === 0) {
@@ -379,6 +388,8 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   }, []);
 
   const handleMyLocation = useCallback(async () => {
+    ignoreNextMapPressRef.current = true;
+    setTimeout(() => { ignoreNextMapPressRef.current = false; }, 400);
     const coords = userLocation?.coords ?? gpsCoords;
     if (coords) {
       cameraRef.current?.setCamera({
