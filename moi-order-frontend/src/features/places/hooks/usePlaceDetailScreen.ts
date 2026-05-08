@@ -86,7 +86,14 @@ export function usePlaceDetailScreen(placeId: number): UsePlaceDetailScreenResul
     let cancelled = false;
 
     async function fetchDistance(): Promise<void> {
-      const { status } = await Location.requestForegroundPermissionsAsync();
+      const { status: currentStatus } = await Location.getForegroundPermissionsAsync();
+      let status = currentStatus;
+      // Only show the system dialog the very first time (undetermined).
+      // If the user already denied, respect that decision and never prompt again.
+      if (currentStatus === Location.PermissionStatus.UNDETERMINED) {
+        const result = await Location.requestForegroundPermissionsAsync();
+        status = result.status;
+      }
       if (status !== Location.PermissionStatus.GRANTED) {
         if (!cancelled) setDistanceText('– km');
         return;
