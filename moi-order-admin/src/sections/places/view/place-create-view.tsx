@@ -1,19 +1,19 @@
-import type { SelectChangeEvent } from '@mui/material/Select';
+import type { PlaceTag } from 'src/types';
 import type { Theme } from '@mui/material/styles';
+import type { SelectChangeEvent } from '@mui/material/Select';
 
 import { useRef, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
+import Chip from '@mui/material/Chip';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
-import Chip from '@mui/material/Chip';
 import Select from '@mui/material/Select';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import MenuItem from '@mui/material/MenuItem';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
@@ -21,16 +21,15 @@ import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 import FormControl from '@mui/material/FormControl';
+import OutlinedInput from '@mui/material/OutlinedInput';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { useRouter } from 'src/routes/hooks';
 
-import { placesApi } from 'src/api/places';
 import { tagsApi } from 'src/api/tags';
+import { placesApi } from 'src/api/places';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { categoriesApi, type CategoryData } from 'src/api/categories';
-
-import type { PlaceTag } from 'src/types';
 
 import { Iconify } from 'src/components/iconify';
 
