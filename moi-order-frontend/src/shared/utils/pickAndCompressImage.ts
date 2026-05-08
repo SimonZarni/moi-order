@@ -5,6 +5,8 @@ import { useLocaleStore } from '@/shared/store/localeStore';
 import { getStrings } from '@/shared/i18n';
 import { stripAsset } from './stripAsset';
 
+// NOTE: localeStore → client.ts → (no i18n import now) so no cycle here.
+
 /**
  * Shared image picker + compressor used by all service submission forms.
  *

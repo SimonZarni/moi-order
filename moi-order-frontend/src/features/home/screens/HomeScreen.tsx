@@ -64,9 +64,9 @@ export function HomeScreen(): React.JSX.Element {
           </View>
 
           <Pressable style={styles.searchBox} onPress={handleNavigateToSearch}
-            accessibilityRole="button" accessibilityLabel={s.home.searchPlaceholder}>
+            accessibilityRole="button" accessibilityLabel={s.search.placeholder}>
             <Text style={styles.searchIcon}>🔍</Text>
-            <Text style={styles.searchPlaceholder}>{s.home.searchPlaceholder}</Text>
+            <Text style={styles.searchPlaceholder}>{s.search.placeholder}</Text>
           </Pressable>
         </View>
 

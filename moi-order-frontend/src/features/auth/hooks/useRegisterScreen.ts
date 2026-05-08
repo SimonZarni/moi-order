@@ -49,7 +49,7 @@ export function useRegisterScreen(): UseRegisterScreenResult {
     applyApiError,
   } = useRegisterForm();
   const phoneOtp = usePhoneOtpAuth({ purpose: 'register', getName: () => form.name });
-  const { handleGoogleSignIn, isGoogleSigningIn, googleBannerError } = useGoogleAuth(form.email.trim());
+  const { handleGoogleSignIn, isGoogleSigningIn, googleBannerError } = useGoogleAuth();
   const { handleAppleSignIn, isAppleSigningIn, appleBannerError }    = useAppleAuth();
   const { handleLineSignIn, isLineSigningIn, lineBannerError }        = useLineAuth();
   const [bannerError, setBannerError] = useState('');

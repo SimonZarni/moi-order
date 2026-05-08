@@ -156,9 +156,7 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
           {/* ── Awaiting admin confirmation ── */}
           {awaitingConfirmation && (
             <View style={styles.awaitingBox}>
-              <Text style={styles.awaitingText}>
-                🔔 We have notified our admins about your order. Please prepare for payment once it is confirmed.
-              </Text>
+              <Text style={styles.awaitingText}>{s.orders.awaitingConfirmation}</Text>
             </View>
           )}
 
@@ -202,7 +200,7 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
           {order.items !== undefined && order.items.length > 0 && (
             <>
               <View style={styles.sectionLabelRow}>
-                <Text style={styles.sectionLabel}>Items</Text>
+                <Text style={styles.sectionLabel}>{s.orders.items}</Text>
                 <View style={styles.sectionLine} />
               </View>
               <View style={styles.itemCard}>
@@ -221,7 +219,7 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
 
           {/* ── Contact Us ── */}
           <View style={styles.sectionLabelRow}>
-            <Text style={styles.sectionLabel}>Contact Us</Text>
+            <Text style={styles.sectionLabel}>{s.orders.contactUs}</Text>
             <View style={styles.sectionLine} />
           </View>
           <Pressable

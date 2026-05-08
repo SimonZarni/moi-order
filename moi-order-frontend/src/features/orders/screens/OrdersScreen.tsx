@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocale } from '@/shared/hooks/useLocale';
+import { useStrings } from '@/shared/i18n';
 import { localeName } from '@/shared/utils/localeName';
 
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
@@ -27,6 +28,7 @@ interface OrderCardProps {
 function OrderCard({ item, onPress, onDelete }: OrderCardProps): React.JSX.Element {
   const swipeableRef = useRef<Swipeable>(null);
   const { locale } = useLocale();
+  const s = useStrings();
   const accentColour = STATUS_COLOURS[item.status] ?? STATUS_COLOURS['pending']!;
   const svcName = localeName(item.service_type?.service ?? item.service_type, locale);
 
@@ -45,7 +47,7 @@ function OrderCard({ item, onPress, onDelete }: OrderCardProps): React.JSX.Eleme
               {svcName}
             </Text>
             <View style={[styles.statusPill, { borderColor: `${accentColour}40` }]}>
-              <Text style={[styles.statusText, { color: accentColour }]}>{item.status_label}</Text>
+              <Text style={[styles.statusText, { color: accentColour }]}>{(s.status as Record<string,string>)[item.status] ?? item.status_label}</Text>
             </View>
           </View>
           <View style={styles.cardMetaRow}>
@@ -89,6 +91,7 @@ interface TicketOrderCardProps {
 
 function TicketOrderCard({ item, onPress, onDelete }: TicketOrderCardProps): React.JSX.Element {
   const swipeableRef = useRef<Swipeable>(null);
+  const s = useStrings();
   const accentColour = STATUS_COLOURS[item.status] ?? STATUS_COLOURS['pending']!;
 
   const cardContent = (
@@ -106,7 +109,7 @@ function TicketOrderCard({ item, onPress, onDelete }: TicketOrderCardProps): Rea
               {item.ticket?.name ?? 'Ticket'}
             </Text>
             <View style={[styles.statusPill, { borderColor: `${accentColour}40` }]}>
-              <Text style={[styles.statusText, { color: accentColour }]}>{item.status_label}</Text>
+              <Text style={[styles.statusText, { color: accentColour }]}>{(s.status as Record<string,string>)[item.status] ?? item.status_label}</Text>
             </View>
           </View>
           <View style={styles.cardMetaRow}>
@@ -151,8 +154,8 @@ interface TabBarProps {
 
 function TabBar({ activeTab, onTabChange }: TabBarProps): React.JSX.Element {
   const { locale } = useLocale();
-  const servicesLabel = locale === 'mm' ? '၀န်ဆောင်မှုများ' : 'Services';
-  const ticketsLabel  = locale === 'mm' ? 'လက်မှတ်များ'    : 'Tickets';
+  const servicesLabel = locale === 'mm' ? '၀န်ဆောင်မှုများ' : locale === 'th' ? 'บริการ' : 'Services';
+  const ticketsLabel  = locale === 'mm' ? 'လက်မှတ်များ'    : locale === 'th' ? 'ตั๋ว'  : 'Tickets';
 
   return (
     <View style={styles.tabRow}>
@@ -184,14 +187,15 @@ export function OrdersScreen(): React.JSX.Element {
     handleOrderPress, handleDeleteSubmission, handleTicketOrderPress, handleDeleteTicketOrder,
     handleNavigateToLogin, handleBack,
   } = useOrdersScreen();
+  const s = useStrings();
 
   const hero = (
     <>
       <HeroHeader
         accentColor={editorialPalette.amber}
-        eyebrow="My Activity"
-        title="Orders"
-        subtitle="Your service submissions & tickets"
+        eyebrow={s.orders.eyebrow}
+        title={s.orders.title}
+        subtitle={s.orders.subtitle}
         onBack={handleBack}
         backLabel="Back"
       />
@@ -208,13 +212,11 @@ export function OrdersScreen(): React.JSX.Element {
           {hero}{tabBar}
           <View style={styles.guestWrap}>
             <Ionicons name="list" size={48} color={colours.textMuted} style={styles.guestIcon} />
-            <Text style={styles.guestTitle}>Sign in to view orders</Text>
-            <Text style={styles.guestSubtitle}>
-              Track your service submissions and{'\n'}ticket bookings in one place.
-            </Text>
+            <Text style={styles.guestTitle}>{s.orders.signInToView}</Text>
+            <Text style={styles.guestSubtitle}>{s.orders.signInTrack}</Text>
             <Pressable style={styles.guestBtn} onPress={handleNavigateToLogin}
-              accessibilityLabel="Sign in to view orders" accessibilityRole="button">
-              <Text style={styles.guestBtnText}>Sign In</Text>
+              accessibilityLabel={s.orders.signInToView} accessibilityRole="button">
+              <Text style={styles.guestBtnText}>{s.auth.signIn}</Text>
             </Pressable>
           </View>
         </View>
@@ -241,8 +243,8 @@ export function OrdersScreen(): React.JSX.Element {
           {hero}{tabBar}
           <View style={styles.stateBox}>
             <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
-            <Text style={styles.stateTitle}>Could not load orders</Text>
-            <Text style={styles.stateSubtitle}>Pull down to retry</Text>
+            <Text style={styles.stateTitle}>{s.orders.couldNotLoad}</Text>
+            <Text style={styles.stateSubtitle}>{s.orders.pullToRetry}</Text>
           </View>
         </View>
       </SafeAreaView>
@@ -262,10 +264,8 @@ export function OrdersScreen(): React.JSX.Element {
           ListEmptyComponent={
             <View style={styles.emptyWrap}>
               <Ionicons name="mail-open-outline" size={48} color={colours.textMuted} style={styles.emptyIcon} />
-              <Text style={styles.emptyTitle}>No service orders yet</Text>
-              <Text style={styles.emptySubtitle}>
-                Your service submissions will{'\n'}appear here once you place an order.
-              </Text>
+              <Text style={styles.emptyTitle}>{s.orders.noServiceOrders}</Text>
+              <Text style={styles.emptySubtitle}>{s.orders.noServiceSub}</Text>
             </View>
           }
           ListFooterComponent={
@@ -301,10 +301,8 @@ export function OrdersScreen(): React.JSX.Element {
         ListEmptyComponent={
           <View style={styles.emptyWrap}>
             <Ionicons name="pricetag-outline" size={48} color={colours.textMuted} style={styles.emptyIcon} />
-            <Text style={styles.emptyTitle}>No ticket orders yet</Text>
-            <Text style={styles.emptySubtitle}>
-              Book attractions and tickets{'\n'}to see them here.
-            </Text>
+            <Text style={styles.emptyTitle}>{s.orders.noTicketOrders}</Text>
+            <Text style={styles.emptySubtitle}>{s.orders.noTicketSub}</Text>
           </View>
         }
         ListFooterComponent={

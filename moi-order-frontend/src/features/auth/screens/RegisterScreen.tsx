@@ -215,13 +215,12 @@ export function RegisterScreen(): React.JSX.Element {
             )}
 
             <View style={styles.footer}>
-              <Text style={styles.footerText}>Already have an account?</Text>
               <Pressable
                 onPress={handleGoToLogin}
-                accessibilityLabel="Sign in"
+                accessibilityLabel={s.auth.haveAccountTap}
                 accessibilityRole="button"
               >
-                <Text style={styles.footerLink}>Sign In</Text>
+                <Text style={styles.footerLink}>{s.auth.haveAccountTap}</Text>
               </Pressable>
             </View>
           </View>

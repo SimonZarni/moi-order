@@ -11,8 +11,13 @@ import { Alert } from 'react-native';
 import { TOKEN_KEY } from '@/shared/constants/config';
 import { ERROR_CODES, getAccountErrorMessage } from '@/shared/constants/errorCodes';
 import { ApiError } from '@/types/models';
-import { useLocaleStore } from '@/shared/store/localeStore';
-import { getStrings } from '@/shared/i18n';
+
+// Inline translations — avoids circular: client → i18n → localeStore → client
+const _FILE_TOO_LARGE: Record<string, string> = {
+  en: 'Could not upload. Total upload size is too large (max 50 MB per request).',
+  mm: 'တင်မရပါ။ ဖိုင်အရွယ်အစားသည် အကြီးဆုံး 50 MB ဖြစ်သည်',
+  th: 'ไม่สามารถอัปโหลดได้ ขนาดไฟล์รวมใหญ่เกินไป (สูงสุด 50 MB)',
+};
 
 // In-memory token ref — populated by authStore on login, cleared on logout.
 // Avoids async SecureStore reads inside the synchronous request interceptor.
@@ -54,7 +59,7 @@ apiClient.interceptors.response.use(
 
     const apiError: ApiError = {
       message: status === 413
-        ? getStrings(useLocaleStore.getState().locale).upload.fileTooLarge
+        ? (_FILE_TOO_LARGE[_locale] ?? _FILE_TOO_LARGE['en']!)
         : (data?.message ?? 'Something went wrong.'),
       code: status === 413 ? 'file_too_large' : (data?.code ?? 'internal'),
       ...(data?.errors   !== undefined && { errors:  data.errors }),

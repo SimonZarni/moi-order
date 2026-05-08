@@ -34,14 +34,17 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     fontWeight: '700',
     color: colours.textOnLight,
-    lineHeight: 18,
+    lineHeight: 22,    // extra for Burmese glyphs that extend above baseline
+    textAlign: 'center',
+    includeFontPadding: false,
   },
   sublabel: {
     fontSize: typography.xxs,
     color: colours.textMuted,
     textAlign: 'center',
-    lineHeight: 14,
-    marginTop: 1,
+    lineHeight: 16,
+    marginTop: 2,
+    includeFontPadding: false,
   },
   itemHighlighted: {
     borderBottomWidth: 3,

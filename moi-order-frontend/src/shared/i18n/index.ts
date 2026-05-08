@@ -73,9 +73,26 @@ export interface AppStrings {
     resendOtp:        string;
     resendIn:         string;
     otpSent:          string;
-    goToLogin:        string;
+    goToLogin:          string;
     alreadyHaveAccount: string;
-    noAccount:        string;
+    noAccount:          string;
+    createAccount:      string;
+    tapHere:            string;
+    haveAccountTap:     string;
+    noAccountTap:       string;
+  };
+
+  // Search screen
+  search: {
+    placeholder:  string;
+    all:          string;
+    places:       string;
+    tickets:      string;
+    services:     string;
+    searchAll:    string;
+    searchAllSub: string;
+    noResults:    string;
+    noResultsSub: string;
   };
 
   // Home screen
@@ -118,6 +135,17 @@ export interface AppStrings {
     viewDownloadResult: string;
     couldNotLoad:       string;
     pullToRetry:        string;
+    // Orders list screen
+    eyebrow:            string;
+    subtitle:           string;
+    signInToView:       string;
+    signInTrack:        string;
+    noServiceOrders:    string;
+    noServiceSub:       string;
+    noTicketOrders:     string;
+    noTicketSub:        string;
+    contactUs:          string;
+    items:              string;
   };
 
   // Ticket orders
@@ -323,6 +351,21 @@ const en: AppStrings = {
     goToLogin:          'Already have an account? Sign In',
     alreadyHaveAccount: 'Already have an account?',
     noAccount:          'Don\'t have an account?',
+    createAccount:      'Create Account',
+    tapHere:            'Tap here',
+    haveAccountTap:     'Already have an account? Tap here',
+    noAccountTap:       'Don\'t have an account? Tap here',
+  },
+  search: {
+    placeholder:  'Search places, tickets, services…',
+    all:          'All',
+    places:       '📍 Places',
+    tickets:      '🎟 Tickets',
+    services:     '⚙️ Services',
+    searchAll:    'Search everything',
+    searchAllSub: 'Find places, tickets, and services',
+    noResults:    'No results',
+    noResultsSub: 'Try a different search term',
   },
   home: {
     hello:              'Hello, {name}',
@@ -361,6 +404,16 @@ const en: AppStrings = {
     viewDownloadResult: 'View / Download Result',
     couldNotLoad:       'Could not load order',
     pullToRetry:        'Pull down to retry',
+    eyebrow:            'My Activity',
+    subtitle:           'Your service submissions & tickets',
+    signInToView:       'Sign in to view orders',
+    signInTrack:        'Track your service submissions and ticket bookings in one place.',
+    noServiceOrders:    'No service orders yet',
+    noServiceSub:       'Your service submissions will appear here once you place an order.',
+    noTicketOrders:     'No ticket orders yet',
+    noTicketSub:        'Your ticket bookings will appear here.',
+    contactUs:          'Contact Us',
+    items:              'Items',
   },
   tickets: {
     orderNum:           'Ticket Order #{id}',
@@ -546,6 +599,21 @@ const mm: AppStrings = {
     goToLogin:          'အကောင့်ရှိပြီးသားလား? ဝင်ရောက်ပါ',
     alreadyHaveAccount: 'အကောင့်ရှိပြီးသားဆိုလျှင်',
     noAccount:          'အကောင့်မရှိသေးဘူးလား?',
+    createAccount:      'အကောင့်ဖွင့်ပါ',
+    tapHere:            'နှိပ်ရန်',
+    haveAccountTap:     'အကောင့်ရှိပါသလား? နှိပ်ရန်',
+    noAccountTap:       'အကောင့်ဖွင့်လိုပါသလား? နှိပ်ရန်',
+  },
+  search: {
+    placeholder:  'ရှာဖွေရန်',
+    all:          'အားလုံး',
+    places:       '📍 နေရာများ',
+    tickets:      '🎟 လက်မှတ်များ',
+    services:     '⚙️ ၀န်ဆောင်မှုများ',
+    searchAll:    'ရှာဖွေပါ',
+    searchAllSub: 'နေရာများ၊ လက်မှတ်များ၊ ၀န်ဆောင်မှုများ ရှာနိုင်သည်',
+    noResults:    'ရလဒ်မတွေ့ပါ',
+    noResultsSub: 'အခြားစကားလုံးဖြင့် ထပ်ကြိုးစားပါ',
   },
   home: {
     hello:              'မင်္ဂလာပါ, {name}',
@@ -584,6 +652,16 @@ const mm: AppStrings = {
     viewDownloadResult: 'ရလဒ်ကြည့်ရှုရန် / ဒေါင်းလုဒ်',
     couldNotLoad:       'အော်ဒါ ဖတ်မရနိုင်ပါ',
     pullToRetry:        'ပြန်ကြိုးစားရန် ဆွဲချပါ',
+    eyebrow:            'လုပ်ဆောင်ချက်များ',
+    subtitle:           'သင်၏ ၀န်ဆောင်မှုတင်ခြင်းများနှင့် လက်မှတ်များ',
+    signInToView:       'အော်ဒါများကြည့်ရန် ဝင်ရောက်ပါ',
+    signInTrack:        'သင်၏ ၀န်ဆောင်မှုများနှင့် လက်မှတ်မှာယူမှုများကို တစ်နေရာတည်း ကြည့်ရှုပါ',
+    noServiceOrders:    '၀န်ဆောင်မှုအော်ဒါ မရှိသေးပါ',
+    noServiceSub:       'အော်ဒါတင်သွင်းပြီးနောက် ဤနေရာတွင် ပြသမည်',
+    noTicketOrders:     'လက်မှတ်အော်ဒါ မရှိသေးပါ',
+    noTicketSub:        'လက်မှတ်မှာယူမှုများ ဤနေရာတွင် ပြသမည်',
+    contactUs:          'ဆက်သွယ်ရန်',
+    items:              'ပစ္စည်းများ',
   },
   tickets: {
     orderNum:           'လက်မှတ်အော်ဒါ #{id}',
@@ -769,6 +847,21 @@ const th: AppStrings = {
     goToLogin:          'มีบัญชีอยู่แล้ว? เข้าสู่ระบบ',
     alreadyHaveAccount: 'มีบัญชีอยู่แล้ว?',
     noAccount:          'ยังไม่มีบัญชี?',
+    createAccount:      'สร้างบัญชี',
+    tapHere:            'แตะที่นี่',
+    haveAccountTap:     'มีบัญชีอยู่แล้ว? แตะที่นี่',
+    noAccountTap:       'ยังไม่มีบัญชี? แตะที่นี่',
+  },
+  search: {
+    placeholder:  'ค้นหา...',
+    all:          'ทั้งหมด',
+    places:       '📍 สถานที่',
+    tickets:      '🎟 ตั๋ว',
+    services:     '⚙️ บริการ',
+    searchAll:    'ค้นหาทุกอย่าง',
+    searchAllSub: 'ค้นหาสถานที่ ตั๋ว และบริการ',
+    noResults:    'ไม่พบผลลัพธ์',
+    noResultsSub: 'ลองคำค้นหาอื่น',
   },
   home: {
     hello:              'สวัสดี, {name}',
@@ -807,6 +900,16 @@ const th: AppStrings = {
     viewDownloadResult: 'ดู / ดาวน์โหลดผลลัพธ์',
     couldNotLoad:       'ไม่สามารถโหลดคำสั่งซื้อได้',
     pullToRetry:        'ดึงลงเพื่อลองอีกครั้ง',
+    eyebrow:            'กิจกรรมของฉัน',
+    subtitle:           'คำขอบริการและตั๋วของคุณ',
+    signInToView:       'เข้าสู่ระบบเพื่อดูคำสั่งซื้อ',
+    signInTrack:        'ติดตามการส่งบริการและการจองตั๋วในที่เดียว',
+    noServiceOrders:    'ยังไม่มีคำสั่งบริการ',
+    noServiceSub:       'คำสั่งบริการจะปรากฏที่นี่เมื่อคุณสั่ง',
+    noTicketOrders:     'ยังไม่มีคำสั่งตั๋ว',
+    noTicketSub:        'การจองตั๋วจะปรากฏที่นี่',
+    contactUs:          'ติดต่อเรา',
+    items:              'รายการ',
   },
   tickets: {
     orderNum:           'คำสั่งซื้อตั๋ว #{id}',

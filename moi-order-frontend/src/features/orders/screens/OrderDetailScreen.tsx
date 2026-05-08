@@ -313,7 +313,7 @@ export function OrderDetailScreen(): React.JSX.Element {
           })()}
           {/* ── Contact Us ── */}
           <View style={styles.sectionLabelRow}>
-            <Text style={styles.sectionLabel}>Contact Us</Text>
+            <Text style={styles.sectionLabel}>{s.orders.contactUs}</Text>
             <View style={styles.sectionLine} />
           </View>
           <Pressable

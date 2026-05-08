@@ -266,13 +266,12 @@ export function LoginScreen(): React.JSX.Element {
             )}
 
             <View style={styles.footer}>
-              <Text style={styles.footerText}>Don't have an account?</Text>
               <Pressable
                 onPress={handleGoToRegister}
-                accessibilityLabel="Create account"
+                accessibilityLabel={s.auth.noAccountTap}
                 accessibilityRole="button"
               >
-                <Text style={styles.footerLink}>Create Account</Text>
+                <Text style={styles.footerLink}>{s.auth.noAccountTap}</Text>
               </Pressable>
             </View>
           </View>
