@@ -10,6 +10,7 @@ import { FormField } from '@/shared/components/FormField/FormField';
 import { SuccessState } from '@/shared/components/SuccessState/SuccessState';
 import { useNinetyDayReportFormScreen } from '@/features/ninetyDayReport/hooks/useNinetyDayReportFormScreen';
 import { useLocale } from '@/shared/hooks/useLocale';
+import { useStrings } from '@/shared/i18n';
 import { styles } from './NinetyDayReportFormScreen.styles';
 
 export function NinetyDayReportFormScreen(): React.JSX.Element {
@@ -31,6 +32,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
   } = useNinetyDayReportFormScreen();
 
   const { locale } = useLocale();
+  const s = useStrings();
   const priceFormatted = `฿${price.toLocaleString('th-TH')}`;
 
   return (
@@ -88,7 +90,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
               <Text style={styles.sectionTitle}>Required Documents</Text>
 
               <DocumentPickerField
-                label={locale === 'mm' ? 'ပတ်စပို့ (ရှေ့မျက်နှာ)' : 'Passport Bio Page'}
+                label={s.docs.passportBioPage}
                 icon="document-text"
                 onPress={handlePickPassportBioPage}
                 isUploaded={form.passportBioPage !== null}
@@ -97,7 +99,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
               />
 
               <DocumentPickerField
-                label={locale === 'mm' ? 'ဗီဇာ မျက်နှာ' : 'Visa Page'}
+                label={s.docs.visaPage}
                 icon="id-card"
                 onPress={handlePickVisaPage}
                 isUploaded={form.visaPage !== null}
@@ -106,7 +108,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
               />
 
               <DocumentPickerField
-                label={locale === 'mm' ? 'ရက် ၉၀ စလစ်အဟောင်း' : 'Old 90-Day Report Slip'}
+                label={s.docs.oldSlip}
                 icon="newspaper"
                 onPress={handlePickOldSlip}
                 isUploaded={form.oldSlip !== null}

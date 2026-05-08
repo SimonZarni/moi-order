@@ -17,6 +17,7 @@ import { AuthMethod, AuthMethodTabs } from '@/shared/components/AuthMethodTabs/A
 import { FormField } from '@/shared/components/FormField/FormField';
 import { GoogleSignInButton } from '@/shared/components/GoogleSignInButton/GoogleSignInButton';
 import { LineSignInButton } from '@/shared/components/LineSignInButton/LineSignInButton';
+import { useStrings } from '@/shared/i18n';
 import { useLoginScreen } from '@/features/auth/hooks/useLoginScreen';
 import { styles } from './LoginScreen.styles';
 
@@ -53,6 +54,7 @@ export function LoginScreen(): React.JSX.Element {
     handleGoToRegister,
     handleGoToForgotPassword,
   } = useLoginScreen();
+  const s = useStrings();
 
   const socialDisabled = isCheckingEmail || isSubmitting || isGoogleSigningIn || isAppleSigningIn || isLineSigningIn;
 
@@ -75,12 +77,12 @@ export function LoginScreen(): React.JSX.Element {
               resizeMode="contain"
               accessibilityLabel="Moi Order logo"
             />
-            <Text style={styles.tagline}>Fast · Reliable · Trusted</Text>
+            <Text style={styles.tagline}>{s.auth.tagline}</Text>
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Sign In</Text>
-            <Text style={styles.cardSubtitle}>Welcome back — let's get you in.</Text>
+            <Text style={styles.cardTitle}>{s.auth.signIn}</Text>
+            <Text style={styles.cardSubtitle}>{s.auth.signInSubtitle}</Text>
 
             <AuthMethodTabs value={authMethod} onChange={setAuthMethod} />
             <ErrorBanner message={bannerError} />

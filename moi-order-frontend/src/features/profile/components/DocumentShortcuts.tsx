@@ -7,58 +7,52 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/types/navigation';
 import { UploadStats } from '@/types/models';
 import { colours } from '@/shared/theme/colours';
+import { useStrings } from '@/shared/i18n';
 import { styles } from './DocumentShortcuts.styles';
 
 interface Props {
   stats: UploadStats | undefined;
 }
 
-interface ShortcutItem {
-  label: string;
-  sublabel: string;
-  icon: React.ComponentProps<typeof Ionicons>['name'];
-  iconBg: string;
-  iconColor: string;
-  route: keyof Pick<RootStackParamList, 'PassportVault' | 'NinetyDayVault' | 'MyDocuments'>;
-  sectionKey: keyof UploadStats['sections'];
-}
-
-const SHORTCUTS: ShortcutItem[] = [
-  {
-    label:      'Passport',
-    sublabel:   'Bio & visa pages',
-    icon:       'id-card-outline',
-    iconBg:     `${colours.primary}22`,
-    iconColor:  colours.primary,
-    route:      'PassportVault',
-    sectionKey: 'passport',
-  },
-  {
-    label:      '90-Day',
-    sublabel:   'Report slips',
-    icon:       'document-text-outline',
-    iconBg:     `${colours.secondary}22`,
-    iconColor:  colours.tertiary,
-    route:      'NinetyDayVault',
-    sectionKey: 'ninety_day_report',
-  },
-  {
-    label:      'My Docs',
-    sublabel:   'Permits, IDs & more',
-    icon:       'folder-open-outline',
-    iconBg:     `${colours.tertiary}22`,
-    iconColor:  colours.tertiary,
-    route:      'MyDocuments',
-    sectionKey: 'other',
-  },
-];
+type ShortcutRoute = keyof Pick<RootStackParamList, 'PassportVault' | 'NinetyDayVault' | 'MyDocuments'>;
 
 export function DocumentShortcuts({ stats }: Props): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const s = useStrings();
+
+  const shortcuts: { label: string; sublabel: string; icon: React.ComponentProps<typeof Ionicons>['name']; iconBg: string; iconColor: string; route: ShortcutRoute; sectionKey: keyof UploadStats['sections'] }[] = [
+    {
+      label:      s.shortcuts.passportLabel,
+      sublabel:   s.shortcuts.passportSub,
+      icon:       'id-card-outline',
+      iconBg:     `${colours.primary}22`,
+      iconColor:  colours.primary,
+      route:      'PassportVault',
+      sectionKey: 'passport',
+    },
+    {
+      label:      s.shortcuts.ninetyLabel,
+      sublabel:   s.shortcuts.ninetySub,
+      icon:       'document-text-outline',
+      iconBg:     `${colours.secondary}22`,
+      iconColor:  colours.tertiary,
+      route:      'NinetyDayVault',
+      sectionKey: 'ninety_day_report',
+    },
+    {
+      label:      s.shortcuts.myDocsLabel,
+      sublabel:   s.shortcuts.myDocsSub,
+      icon:       'folder-open-outline',
+      iconBg:     `${colours.tertiary}22`,
+      iconColor:  colours.tertiary,
+      route:      'MyDocuments',
+      sectionKey: 'other',
+    },
+  ];
 
   return (
     <View style={styles.row}>
-      {SHORTCUTS.map((item) => {
+      {shortcuts.map((item) => {
         const sectionStats = stats?.sections[item.sectionKey];
         const hasUploads   = (sectionStats?.total_count ?? 0) > 0;
         return (

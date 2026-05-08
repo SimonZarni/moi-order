@@ -1,44 +1,7 @@
-import { Locale } from '@/shared/store/localeStore';
+import { type Locale } from '@/shared/store/localeStore';
+import { STRINGS } from '@/shared/i18n';
 
-const HOME_STRINGS = {
-  en: {
-    ourServices:          'Our Services',
-    ninetyDayReport:      '90-Day Report',
-    placesAndTickets:     'Places & Tickets',
-    attractionsLandmarks: 'Attractions & Landmarks',
-    otherServices:        'Other Services',
-    companyMore:          'Company & more',
-    embassyServices:      'သံရုံးထောက်ခံစာများ',
-    embassyMore:          'Support letters & more',
-    airportFastTrack:     'Airport Fast Track',
-    airportSubtitle:      'Priority airport service',
-    busTickets:           'ကားလက်မှတ်များ',
-    busSubtitle:          'Routes & schedules',
-    passport:             'Passport / CI',
-    passportSubtitle:     'Document services',
-    foodOrder:            'အစားအသောက်မှာယူရန်',
-    foodOrderSubtitle:    'Food delivery',
-  },
-  mm: {
-    ourServices:          '၀န်ဆောင်မှုများ',
-    ninetyDayReport:      'ရက် ၉၀ တုံး',
-    placesAndTickets:     'နေရာများ & လက်မှတ်',
-    attractionsLandmarks: 'လည်ပတ်စရာများနှင့် ထင်ရှားသောနေရာများ',
-    otherServices:        'အခြား၀န်ဆောင်မှုများ',
-    companyMore:          'ကုမ္ပဏီနှင့် အခြားအချက်အလက်များ',
-    embassyServices:      'သံရုံးထောက်ခံစာများ',
-    embassyMore:          'ထောက်ခံစာများနှင့် အခြားကဏ္ဍများ',
-    airportFastTrack:     'Airport Fast Track',
-    airportSubtitle:      'လေဆိပ် အထူး၀န်ဆောင်မှု',
-    busTickets:           'ကားလက်မှတ်များ',
-    busSubtitle:          'ကားလိုင်းများနှင့် အချိန်ဇယားများ',
-    passport:             'Passport / CI',
-    passportSubtitle:     'Document services',
-    foodOrder:            'အစားအသောက်မှာယူရန်',
-    foodOrderSubtitle:    'အစားအသောက် ပို့ဆောင်ရေး',
-  },
-} as const;
-
+/** @deprecated Use useStrings().home directly */
 export function getHomeStrings(locale: Locale) {
-  return HOME_STRINGS[locale];
+  return STRINGS[locale].home;
 }

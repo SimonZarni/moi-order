@@ -9,6 +9,7 @@ import Animated, {
   cancelAnimation,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { useStrings } from '@/shared/i18n';
 import { styles } from './TagFilterSheet.styles';
 import type { Tag } from '@/types/models';
 
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onApply, onDismiss }: Props): React.JSX.Element {
+  const s = useStrings();
   const [selected, setSelected] = useState<Set<number>>(new Set(activeTags));
   const allSelected = selected.size === allTags.length && allTags.length > 0;
 
@@ -117,11 +119,11 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
           </GestureDetector>
 
           <View style={styles.header}>
-            <Text style={styles.title}>Filter by Tags</Text>
+            <Text style={styles.title}>{s.map.filterByTags}</Text>
             {selected.size > 0 && (
               <Pressable onPress={handleClear} style={styles.clearBtn}
                 accessibilityRole="button" accessibilityLabel="Clear all filters">
-                <Text style={styles.clearText}>Clear</Text>
+                <Text style={styles.clearText}>{s.common.clear}</Text>
               </Pressable>
             )}
           </View>
@@ -134,7 +136,7 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
             {isLoading ? (
               <View style={styles.empty}><ActivityIndicator size="small" /></View>
             ) : allTags.length === 0 ? (
-              <View style={styles.empty}><Text style={styles.emptyText}>No tags available</Text></View>
+              <View style={styles.empty}><Text style={styles.emptyText}>{s.map.noTagsAvailable}</Text></View>
             ) : (
               allTags.map(tag => {
                 const isActive = selected.has(tag.id);
@@ -160,11 +162,11 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
           <View style={styles.footer}>
             <Pressable onPress={toggleAll} style={styles.selectAllBtn}
               accessibilityRole="button" accessibilityLabel={allSelected ? 'Deselect all tags' : 'Select all tags'}>
-              <Text style={styles.selectAllText}>{allSelected ? 'Deselect All' : 'Select All'}</Text>
+              <Text style={styles.selectAllText}>{allSelected ? s.common.deselectAll : s.common.selectAll}</Text>
             </Pressable>
             <Pressable onPress={handleApply} style={styles.applyBtn}
               accessibilityRole="button" accessibilityLabel="Apply filters">
-              <Text style={styles.applyText}>Apply{selected.size > 0 ? ` (${selected.size})` : ''}</Text>
+              <Text style={styles.applyText}>{s.common.apply}{selected.size > 0 ? ` (${selected.size})` : ''}</Text>
             </Pressable>
           </View>
         </Pressable>

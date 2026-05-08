@@ -1,0 +1,953 @@
+/**
+ * Master i18n strings file — English · Burmese · Thai.
+ * Add every UI string here. Never hardcode user-visible text in components.
+ *
+ * Usage:
+ *   const s = useStrings();
+ *   <Text>{s.common.cancel}</Text>
+ *   <Text>{s.status.pending_payment}</Text>
+ */
+
+import { useLocaleStore, type Locale } from '@/shared/store/localeStore';
+
+// ─── Type ────────────────────────────────────────────────────────────────────
+
+export interface AppStrings {
+  // Common UI
+  common: {
+    loading:            string;
+    error:              string;
+    retry:              string;
+    cancel:             string;
+    confirm:            string;
+    save:               string;
+    back:               string;
+    close:              string;
+    submit:             string;
+    continue:           string;
+    search:             string;
+    done:               string;
+    couldNotLoad:       string;
+    pullToRetry:        string;
+    somethingWentWrong: string;
+    payNow:             string;
+    cancelOrder:        string;
+    cancelling:         string;
+    getStarted:         string;
+    viewDownload:       string;
+    saveToGallery:      string;
+    selectAll:          string;
+    deselectAll:        string;
+    apply:              string;
+    clear:              string;
+    noResults:          string;
+  };
+
+  // Order / submission statuses
+  status: {
+    pending_payment:  string;
+    processing:       string;
+    completed:        string;
+    payment_failed:   string;
+    cancelled:        string;
+    pending:          string;
+  };
+
+  // Auth screens
+  auth: {
+    tagline:          string;
+    signIn:           string;
+    signInSubtitle:   string;
+    register:         string;
+    registerSubtitle: string;
+    email:            string;
+    password:         string;
+    phone:            string;
+    fullName:         string;
+    forgotPassword:   string;
+    orSignInWith:     string;
+    checkingEmail:    string;
+    submitting:       string;
+    sendOtp:          string;
+    verifyOtp:        string;
+    resendOtp:        string;
+    resendIn:         string;
+    otpSent:          string;
+    goToLogin:        string;
+    alreadyHaveAccount: string;
+    noAccount:        string;
+  };
+
+  // Home screen
+  home: {
+    hello:              string;
+    welcome:            string;
+    tagline1:           string;
+    tagline2:           string;
+    searchPlaceholder:  string;
+    ourServices:        string;
+    ninetyDayReport:    string;
+    placesAndTickets:   string;
+    attractions:        string;
+    otherServices:      string;
+    companyMore:        string;
+    embassyServices:    string;
+    embassyMore:        string;
+    airportFastTrack:   string;
+    airportSubtitle:    string;
+    busTickets:         string;
+    busSubtitle:        string;
+    passport:           string;
+    passportSubtitle:   string;
+    foodOrder:          string;
+    foodOrderSubtitle:  string;
+  };
+
+  // Orders / submissions
+  orders: {
+    title:              string;
+    orderNum:           string;
+    submitted:          string;
+    ordered:            string;
+    summary:            string;
+    service:            string;
+    status:             string;
+    personalInfo:       string;
+    documents:          string;
+    awaitingConfirmation: string;
+    viewDownloadResult: string;
+    couldNotLoad:       string;
+    pullToRetry:        string;
+  };
+
+  // Ticket orders
+  tickets: {
+    orderNum:           string;
+    ordered:            string;
+    visitDate:          string;
+    items:              string;
+    viewDownloadEticket: string;
+    couldNotLoad:       string;
+    selectDate:         string;
+    whenVisiting:       string;
+    available7Days:     string;
+    chooseDay:          string;
+    purchase:           string;
+  };
+
+  // Tab bar
+  tabs: {
+    home:    string;
+    map:     string;
+    orders:  string;
+    profile: string;
+  };
+
+  // Document shortcut cards (profile)
+  shortcuts: {
+    passportLabel:    string;
+    passportSub:      string;
+    ninetyLabel:      string;
+    ninetySub:        string;
+    myDocsLabel:      string;
+    myDocsSub:        string;
+  };
+
+  // Moi Verified screen
+  verified: {
+    title:            string;
+    subtitle:         string;
+    youAreVerified:   string;
+    whyVerify:        string;
+    prioritySupport:  string;
+    verifiedBadge:    string;
+    fasterProcessing: string;
+    requirements:     string;
+    channels:         string;
+    payments:         string;
+  };
+
+  // Profile
+  profile: {
+    personalInfo:       string;
+    language:           string;
+    activity:           string;
+    security:           string;
+    legal:              string;
+    myOrders:           string;
+    changePassword:     string;
+    privacyPolicy:      string;
+    termsConditions:    string;
+    pdpa:               string;
+    fullNamePlaceholder: string;
+    dobPlaceholder:     string;
+    currentPassword:    string;
+    newPassword:        string;
+    confirmNewPassword: string;
+    updatePassword:     string;
+    saveChanges:        string;
+    customerSupport:    string;
+    contactFacebook:    string;
+    contactLine:        string;
+    signOut:            string;
+    deleteAccount:      string;
+    linkedAccounts:     string;
+    addEmail:           string;
+    addEmailDesc:       string;
+    becomeVerified:     string;
+    addThaiPhone:       string;
+    alreadyConnected:   string;
+    useGoogleLater:     string;
+    useAppleLater:      string;
+    useLineLater:       string;
+    english:            string;
+    burmese:            string;
+    thai:               string;
+  };
+
+  // Document upload labels (form screens)
+  docs: {
+    passportBioPage:    string;
+    visaPage:           string;
+    oldSlip:            string;
+    identityCardFront:  string;
+    identityCardBack:   string;
+    tm30:               string;
+    upperBodyPhoto:     string;
+    airplaneTicket:     string;
+    passportSizePhoto:  string;
+  };
+
+  // Map / places
+  map: {
+    nearby:           string;
+    all:              string;
+    getDirections:    string;
+    navigateOnMap:    string;
+    filterByTags:     string;
+    noTagsAvailable:  string;
+    searchPlaceholder: string;
+    couldNotLoad:     string;
+  };
+
+  // File upload errors
+  upload: {
+    photoLibraryRequired: string;
+    fileTooLarge:         string;
+    uploadFailed:         string;
+  };
+
+  // 90-day report form
+  ninetyDay: {
+    title:        string;
+    fullName:     string;
+    phone:        string;
+    submit:       string;
+    submitting:   string;
+  };
+
+  // Payment
+  payment: {
+    title:            string;
+    amount:           string;
+    status:           string;
+    expires:          string;
+    markAsPaid:       string;
+    confirming:       string;
+    promptpayQr:      string;
+    expired:          string;
+    regenerate:       string;
+    generating:       string;
+    contactUs:        string;
+  };
+}
+
+// ─── English ─────────────────────────────────────────────────────────────────
+
+const en: AppStrings = {
+  common: {
+    loading:            'Loading…',
+    error:              'Error',
+    retry:              'Retry',
+    cancel:             'Cancel',
+    confirm:            'Confirm',
+    save:               'Save',
+    back:               'Back',
+    close:              'Close',
+    submit:             'Submit',
+    continue:           'Continue',
+    search:             'Search',
+    done:               'Done',
+    couldNotLoad:       'Could not load',
+    pullToRetry:        'Pull down to retry',
+    somethingWentWrong: 'Something went wrong. Please try again.',
+    payNow:             'Pay Now',
+    cancelOrder:        'Cancel Order',
+    cancelling:         'Cancelling…',
+    getStarted:         'Get Started',
+    viewDownload:       'View / Download',
+    saveToGallery:      'Save to Gallery',
+    selectAll:          'Select All',
+    deselectAll:        'Deselect All',
+    apply:              'Apply',
+    clear:              'Clear',
+    noResults:          'No results found',
+  },
+  status: {
+    pending_payment:  'Pending Payment',
+    processing:       'Processing',
+    completed:        'Completed',
+    payment_failed:   'Payment Failed',
+    cancelled:        'Cancelled',
+    pending:          'Pending',
+  },
+  auth: {
+    tagline:            'Fast · Reliable · Trusted',
+    signIn:             'Sign In',
+    signInSubtitle:     'Welcome back — let\'s get you in.',
+    register:           'Create Your Account',
+    registerSubtitle:   'Join thousands who trust MOI Order.',
+    email:              'Email',
+    password:           'Password',
+    phone:              'Phone number',
+    fullName:           'Full Name',
+    forgotPassword:     'Forgot password?',
+    orSignInWith:       'Or sign in with',
+    checkingEmail:      'Checking…',
+    submitting:         'Submitting…',
+    sendOtp:            'Send OTP',
+    verifyOtp:          'Verify',
+    resendOtp:          'Resend OTP',
+    resendIn:           'Resend in',
+    otpSent:            'OTP sent',
+    goToLogin:          'Already have an account? Sign In',
+    alreadyHaveAccount: 'Already have an account?',
+    noAccount:          'Don\'t have an account?',
+  },
+  home: {
+    hello:              'Hello, {name}',
+    welcome:            'Welcome',
+    tagline1:           'Your all-in-one',
+    tagline2:           'app',
+    searchPlaceholder:  'Search places, tickets, services…',
+    ourServices:        'Our Services',
+    ninetyDayReport:    '90-Day Report',
+    placesAndTickets:   'Places & Tickets',
+    attractions:        'Attractions & Landmarks',
+    otherServices:      'Other Services',
+    companyMore:        'Company & more',
+    embassyServices:    'Embassy Support Letters',
+    embassyMore:        'Support letters & more',
+    airportFastTrack:   'Airport Fast Track',
+    airportSubtitle:    'Priority airport service',
+    busTickets:         'Bus Tickets',
+    busSubtitle:        'Routes & schedules',
+    passport:           'Passport / CI',
+    passportSubtitle:   'Document services',
+    foodOrder:          'Food Order',
+    foodOrderSubtitle:  'Food delivery',
+  },
+  orders: {
+    title:              'My Orders',
+    orderNum:           'Order #{id}',
+    submitted:          'Submitted',
+    ordered:            'Ordered',
+    summary:            'Summary',
+    service:            'Service',
+    status:             'Status',
+    personalInfo:       'Personal Info',
+    documents:          'Documents',
+    awaitingConfirmation: '🔔 We have notified our admins about your order. Please prepare for payment once it is confirmed.',
+    viewDownloadResult: 'View / Download Result',
+    couldNotLoad:       'Could not load order',
+    pullToRetry:        'Pull down to retry',
+  },
+  tickets: {
+    orderNum:           'Ticket Order #{id}',
+    ordered:            'Ordered',
+    visitDate:          'Visit Date',
+    items:              'Items',
+    viewDownloadEticket: 'View / Download E-Ticket',
+    couldNotLoad:       'Could not load order',
+    selectDate:         'Select Date',
+    whenVisiting:       'When are you visiting?',
+    available7Days:     'Available for the next 7 days',
+    chooseDay:          'Choose a day',
+    purchase:           'Purchase',
+  },
+  profile: {
+    personalInfo:       'Personal Info',
+    language:           'Language',
+    activity:           'Activity',
+    security:           'Security',
+    legal:              'Legal',
+    myOrders:           'My Orders',
+    changePassword:     'Change Password',
+    privacyPolicy:      'Privacy Policy',
+    termsConditions:    'Terms & Conditions',
+    pdpa:               'Personal Data Protection Act',
+    fullNamePlaceholder: 'Full name',
+    dobPlaceholder:     'Date of birth',
+    currentPassword:    'Current password',
+    newPassword:        'New password',
+    confirmNewPassword: 'Confirm new password',
+    updatePassword:     'Update Password',
+    saveChanges:        'Save Changes',
+    customerSupport:    'Customer Support',
+    contactFacebook:    'Contact us on Facebook',
+    contactLine:        'Contact us on LINE',
+    signOut:            'Sign Out',
+    deleteAccount:      'Delete Account',
+    linkedAccounts:     'Linked Accounts',
+    addEmail:           'Add your real email',
+    addEmailDesc:       'You signed in without an email address. Add one so your account can receive updates.',
+    becomeVerified:     'Become Moi Verified',
+    addThaiPhone:       'Add a Thai phone number for OTP login',
+    alreadyConnected:   'Already connected to this account',
+    useGoogleLater:     'Use Google to sign in later',
+    useAppleLater:      'Use Apple to sign in later',
+    useLineLater:       'Use LINE to sign in later',
+    english:            'English',
+    burmese:            'မြန်မာ',
+    thai:               'ภาษาไทย',
+  },
+  docs: {
+    passportBioPage:    'Passport Bio Page',
+    visaPage:           'Visa Page',
+    oldSlip:            'Old 90-Day Report Slip',
+    identityCardFront:  'Identity Card (Front)',
+    identityCardBack:   'Identity Card (Back)',
+    tm30:               'TM30 Document',
+    upperBodyPhoto:     'Upper Body Photo',
+    airplaneTicket:     'Airplane Ticket',
+    passportSizePhoto:  'Passport Size Photo',
+  },
+  map: {
+    nearby:           '📍 Nearby',
+    all:              '🌐 All',
+    getDirections:    '🗺 Get Directions',
+    navigateOnMap:    '▶ Navigate on Map',
+    filterByTags:     'Filter by Tags',
+    noTagsAvailable:  'No tags available',
+    searchPlaceholder: 'Search places, services…',
+    couldNotLoad:     'Could not load map',
+  },
+  upload: {
+    photoLibraryRequired: 'Photo library access is required to upload documents.',
+    fileTooLarge:         'Could not upload. Total upload size is too large (max 50 MB per request).',
+    uploadFailed:         'Upload failed. Please try again.',
+  },
+  ninetyDay: {
+    title:      '90-Day Report',
+    fullName:   'Full Name',
+    phone:      'Phone Number',
+    submit:     'Submit',
+    submitting: 'Submitting…',
+  },
+  payment: {
+    title:          'Payment',
+    amount:         'Amount',
+    status:         'Status',
+    expires:        'Expires',
+    markAsPaid:     'Mark as Paid',
+    confirming:     'Confirming…',
+    promptpayQr:    'PromptPay QR Code',
+    expired:        'Expired',
+    regenerate:     'Regenerate QR',
+    generating:     'Generating…',
+    contactUs:      'Contact Us',
+  },
+  tabs: {
+    home:    'Home',
+    map:     'Map',
+    orders:  'Orders',
+    profile: 'Profile',
+  },
+  shortcuts: {
+    passportLabel: 'Passport',
+    passportSub:   'Bio & visa pages',
+    ninetyLabel:   '90-Day',
+    ninetySub:     'Report slips',
+    myDocsLabel:   'My Docs',
+    myDocsSub:     'Permits, IDs & more',
+  },
+  verified: {
+    title:            'Become Moi Verified',
+    subtitle:         'Unlock your full account potential',
+    youAreVerified:   'You are Moi Verified!',
+    whyVerify:        'Why get verified?',
+    prioritySupport:  'Priority support from our customer team',
+    verifiedBadge:    'Verified badge displayed on your profile',
+    fasterProcessing: 'Faster processing for all service submissions',
+    requirements:     'Requirements',
+    channels:         'Connected to at least 2 sign-in channels',
+    payments:         'Completed at least 3 payments',
+  },
+};
+
+// ─── Burmese ─────────────────────────────────────────────────────────────────
+
+const mm: AppStrings = {
+  common: {
+    loading:            'ဖတ်နေသည်…',
+    error:              'အမှား',
+    retry:              'ထပ်ကြိုးစားပါ',
+    cancel:             'ပယ်ဖျက်ပါ',
+    confirm:            'အတည်ပြုပါ',
+    save:               'သိမ်းဆည်းပါ',
+    back:               'နောက်သို့',
+    close:              'ပိတ်ပါ',
+    submit:             'တင်သွင်းပါ',
+    continue:           'ဆက်လက်ဆောင်ရွက်ပါ',
+    search:             'ရှာဖွေပါ',
+    done:               'ပြီးပါပြီ',
+    couldNotLoad:       'ဖတ်မရနိုင်ပါ',
+    pullToRetry:        'ပြန်ကြိုးစားရန် ဆွဲချပါ',
+    somethingWentWrong: 'တစ်ခုခုမှားယွင်းနေသည်။ ထပ်ကြိုးစားပါ။',
+    payNow:             'ယခု ငွေပေးချေပါ',
+    cancelOrder:        'အော်ဒါပယ်ဖျက်ပါ',
+    cancelling:         'ပယ်ဖျက်နေသည်…',
+    getStarted:         'စတင်ကြပါစို့',
+    viewDownload:       'ကြည့်ရန် / ဒေါင်းလုဒ်',
+    saveToGallery:      'ပြပွဲသို့ သိမ်းဆည်းပါ',
+    selectAll:          'အားလုံးရွေးပါ',
+    deselectAll:        'အားလုံးဖယ်ရှားပါ',
+    apply:              'အသုံးချပါ',
+    clear:              'ရှင်းပါ',
+    noResults:          'ရလဒ်မတွေ့ပါ',
+  },
+  status: {
+    pending_payment:  'ငွေပေးချေရန်',
+    processing:       'ဆောင်ရွက်နေသည်',
+    completed:        'ပြီးဆုံးသည်',
+    payment_failed:   'ငွေပေးချေမှု မအောင်မြင်ပါ',
+    cancelled:        'ပယ်ဖျက်ပြီးသည်',
+    pending:          'စောင့်ဆိုင်းနေသည်',
+  },
+  auth: {
+    tagline:            'မြန်ဆန် · ယုံကြည်စိတ်ချ · တိကျ',
+    signIn:             'ဝင်ရောက်ပါ',
+    signInSubtitle:     'ကြိုဆိုပါသည် — ဝင်ရောက်ကြပါစို့',
+    register:           'အကောင့်ဖွင့်ပါ',
+    registerSubtitle:   'MOI Order ကို ယုံကြည်သောသူများနှင့် ပူးပေါင်းပါ',
+    email:              'အီးမေးလ်',
+    password:           'စကားဝှက်',
+    phone:              'ဖုန်းနံပါတ်',
+    fullName:           'နာမည်အပြည့်အစုံ',
+    forgotPassword:     'စကားဝှက် မေ့နေသလား?',
+    orSignInWith:       'သို့မဟုတ် ဖြင့် ဝင်ရောက်ပါ',
+    checkingEmail:      'စစ်ဆေးနေသည်…',
+    submitting:         'တင်သွင်းနေသည်…',
+    sendOtp:            'OTP ပို့ပါ',
+    verifyOtp:          'အတည်ပြုပါ',
+    resendOtp:          'OTP ပြန်ပို့ပါ',
+    resendIn:           'ပြန်ပို့ရမည့်အချိန်',
+    otpSent:            'OTP ပို့ပြီးပါပြီ',
+    goToLogin:          'အကောင့်ရှိပြီးသားလား? ဝင်ရောက်ပါ',
+    alreadyHaveAccount: 'အကောင့်ရှိပြီးသားဆိုလျှင်',
+    noAccount:          'အကောင့်မရှိသေးဘူးလား?',
+  },
+  home: {
+    hello:              'မင်္ဂလာပါ, {name}',
+    welcome:            'ကြိုဆိုပါသည်',
+    tagline1:           'Your all-in-one',
+    tagline2:           'app',
+    searchPlaceholder:  'နေရာများ၊ လက်မှတ်များ၊ ၀န်ဆောင်မှုများ ရှာဖွေပါ…',
+    ourServices:        '၀န်ဆောင်မှုများ',
+    ninetyDayReport:    'ရက် ၉၀ တုံး',
+    placesAndTickets:   'နေရာများ & လက်မှတ်',
+    attractions:        'လည်ပတ်စရာများနှင့် ထင်ရှားသောနေရာများ',
+    otherServices:      'အခြား၀န်ဆောင်မှုများ',
+    companyMore:        'ကုမ္ပဏီနှင့် အခြားအချက်အလက်များ',
+    embassyServices:    'သံရုံးထောက်ခံစာများ',
+    embassyMore:        'ထောက်ခံစာများနှင့် အခြားကဏ္ဍများ',
+    airportFastTrack:   'Airport Fast Track',
+    airportSubtitle:    'လေဆိပ် အထူး၀န်ဆောင်မှု',
+    busTickets:         'ကားလက်မှတ်များ',
+    busSubtitle:        'ကားလိုင်းများနှင့် အချိန်ဇယားများ',
+    passport:           'Passport / CI',
+    passportSubtitle:   'Document services',
+    foodOrder:          'အစားအသောက်မှာယူရန်',
+    foodOrderSubtitle:  'အစားအသောက် ပို့ဆောင်ရေး',
+  },
+  orders: {
+    title:              'ကျွနိုပ်၏အော်ဒါများ',
+    orderNum:           'အော်ဒါ #{id}',
+    submitted:          'တင်သွင်းခဲ့သည်',
+    ordered:            'မှာယူခဲ့သည်',
+    summary:            'အကျဉ်းချုပ်',
+    service:            '၀န်ဆောင်မှု',
+    status:             'အခြေအနေ',
+    personalInfo:       'ကိုယ်ရေးအချက်အလက်',
+    documents:          'စာရွက်စာတမ်းများ',
+    awaitingConfirmation: '🔔 သင်၏အော်ဒါကို ကျွန်ုပ်တို့အဖွဲ့ထံ အကြောင်းကြားပြီးဖြစ်သည်။ အတည်ပြုပြီးနောက် ငွေပေးချေမှုအတွက် ကြိုတင်ပြင်ဆင်ထားပါ။',
+    viewDownloadResult: 'ရလဒ်ကြည့်ရှုရန် / ဒေါင်းလုဒ်',
+    couldNotLoad:       'အော်ဒါ ဖတ်မရနိုင်ပါ',
+    pullToRetry:        'ပြန်ကြိုးစားရန် ဆွဲချပါ',
+  },
+  tickets: {
+    orderNum:           'လက်မှတ်အော်ဒါ #{id}',
+    ordered:            'မှာယူခဲ့သည်',
+    visitDate:          'သွားရောက်မည့်နေ့',
+    items:              'ပစ္စည်းများ',
+    viewDownloadEticket: 'E-Ticket ကြည့်ရန် / ဒေါင်းလုဒ်',
+    couldNotLoad:       'အော်ဒါ ဖတ်မရနိုင်ပါ',
+    selectDate:         'နေ့ရက်ရွေးပါ',
+    whenVisiting:       'ဘယ်နေ့ သွားမလဲ?',
+    available7Days:     'နောက် ၇ ရက်အတွင်း ရနိုင်သည်',
+    chooseDay:          'နေ့ရက်တစ်ခု ရွေးပါ',
+    purchase:           'ဝယ်ယူပါ',
+  },
+  profile: {
+    personalInfo:       'ကိုယ်ရေးအချက်အလက်',
+    language:           'ဘာသာစကား',
+    activity:           'လုပ်ဆောင်ချက်များ',
+    security:           'လုံခြုံရေး',
+    legal:              'ဥပဒေရေးရာ',
+    myOrders:           'ကျွနိုပ်၏အော်ဒါများ',
+    changePassword:     'စကားဝှက်ပြောင်းရန်',
+    privacyPolicy:      'ကိုယ်ရေးအချက်အလက်မူဝါဒ',
+    termsConditions:    'စည်းကမ်းချက်များ',
+    pdpa:               'ကိုယ်ရေးအချက်အလက် ကာကွယ်ရေးဥပဒေ',
+    fullNamePlaceholder: 'နာမည်အပြည့်အစုံ',
+    dobPlaceholder:     'မွေးသက္ကရာဇ်',
+    currentPassword:    'လက်ရှိစကားဝှက်',
+    newPassword:        'စကားဝှက်အသစ်',
+    confirmNewPassword: 'စကားဝှက်အသစ်ကိုအတည်ပြုပါ',
+    updatePassword:     'စကားဝှက်အသစ်ပြောင်းရန်',
+    saveChanges:        'သိမ်းဆည်းမည်',
+    customerSupport:    'ဖောက်သည်ပံ့ပိုးမှု',
+    contactFacebook:    'Facebook တွင် ဆက်သွယ်ပါ',
+    contactLine:        'LINE တွင် ဆက်သွယ်ပါ',
+    signOut:            'ထွက်ပါ',
+    deleteAccount:      'အကောင့်ဖျက်ပါ',
+    linkedAccounts:     'ချိတ်ဆက်ထားသောအကောင့်များ',
+    addEmail:           'သင်၏ အီးမေးလ်ထည့်ပါ',
+    addEmailDesc:       'အီးမေးလ်မပါဘဲ ဝင်ရောက်ထားသည်။ အကောင့်သတင်းများ လက်ခံရရှိရန် ထည့်ပါ။',
+    becomeVerified:     'Moi Verified ရယူပါ',
+    addThaiPhone:       'OTP ဖြင့် ဝင်ရောက်ရန် ထိုင်းဖုန်းနံပါတ် ထည့်ပါ',
+    alreadyConnected:   'ဤအကောင့်နှင့် ချိတ်ဆက်ပြီးပါပြီ',
+    useGoogleLater:     'Google ဖြင့် ဝင်ရောက်နိုင်သည်',
+    useAppleLater:      'Apple ဖြင့် ဝင်ရောက်နိုင်သည်',
+    useLineLater:       'LINE ဖြင့် ဝင်ရောက်နိုင်သည်',
+    english:            'English',
+    burmese:            'မြန်မာ',
+    thai:               'ภาษาไทย',
+  },
+  docs: {
+    passportBioPage:    'ပတ်စပို့ (ရှေ့မျက်နှာ)',
+    visaPage:           'ဗီဇာ မျက်နှာ',
+    oldSlip:            'ရက် ၉၀ စလစ်အဟောင်း',
+    identityCardFront:  'မှတ်ပုံတင် (အရှေ့)',
+    identityCardBack:   'မှတ်ပုံတင် (အနောက်)',
+    tm30:               'TM30 စာရွက်',
+    upperBodyPhoto:     'ကိုယ်ပိုင်ပုံ (ခါးပေါ်)',
+    airplaneTicket:     'လေယာဉ်လက်မှတ်',
+    passportSizePhoto:  'ပတ်စ်ပို့ ဓာတ်ပုံ',
+  },
+  map: {
+    nearby:           '📍 နီးစပ်ရာ',
+    all:              '🌐 အားလုံး',
+    getDirections:    '🗺 လမ်းညွှန်ရယူပါ',
+    navigateOnMap:    '▶ မြေပုံပေါ်တွင် သွားပါ',
+    filterByTags:     'တဂ်ဖြင့် စစ်ထုတ်ပါ',
+    noTagsAvailable:  'တဂ်များ မရှိပါ',
+    searchPlaceholder: 'နေရာများ၊ ၀န်ဆောင်မှုများ ရှာဖွေပါ…',
+    couldNotLoad:     'မြေပုံ ဖတ်မရနိုင်ပါ',
+  },
+  upload: {
+    photoLibraryRequired: 'စာရွက်စာတမ်းများ တင်ရန် ဓာတ်ပုံ library ခွင့်ပြုချက် လိုအပ်သည်',
+    fileTooLarge:         'တင်မရပါ။ ဖိုင်အရွယ်အစားသည် အကြီးဆုံး 50 MB ဖြစ်သည်',
+    uploadFailed:         'တင်မရပါ။ ထပ်ကြိုးစားပါ။',
+  },
+  ninetyDay: {
+    title:      'ရက် ၉၀ တုံး',
+    fullName:   'နာမည်အပြည့်အစုံ',
+    phone:      'ဖုန်းနံပါတ်',
+    submit:     'တင်သွင်းပါ',
+    submitting: 'တင်သွင်းနေသည်…',
+  },
+  payment: {
+    title:          'ငွေပေးချေမှု',
+    amount:         'ပမာဏ',
+    status:         'အခြေအနေ',
+    expires:        'သက်တမ်းကုန်ဆုံးချိန်',
+    markAsPaid:     'ပေးချေပြီးဟု မှတ်ပါ',
+    confirming:     'အတည်ပြုနေသည်…',
+    promptpayQr:    'PromptPay QR ကုဒ်',
+    expired:        'သက်တမ်းကုန်ပြီ',
+    regenerate:     'QR ပြန်ဖန်တီးပါ',
+    generating:     'ဖန်တီးနေသည်…',
+    contactUs:      'ဆက်သွယ်ရန်',
+  },
+  tabs: {
+    home:    'ပင်မ',
+    map:     'မြေပုံ',
+    orders:  'အော်ဒါများ',
+    profile: 'ပရိုဖိုင်',
+  },
+  shortcuts: {
+    passportLabel: 'ပတ်စပို့',
+    passportSub:   'ဓာတ်ပုံနှင့် ဗီဇာ စာမျက်နှာ',
+    ninetyLabel:   'ရက် ၉၀',
+    ninetySub:     'တုံးဆွဲ စလစ်များ',
+    myDocsLabel:   'စာရွက်စာတမ်း',
+    myDocsSub:     'ခွင့်ပြုချက်၊ မှတ်ပုံတင် နှင့် အခြား',
+  },
+  verified: {
+    title:            'Moi Verified ရယူပါ',
+    subtitle:         'သင်၏ အကောင့်အပြည့်အစုံ ဖွင့်ပါ',
+    youAreVerified:   'သင် Moi Verified ဖြစ်ပြီ!',
+    whyVerify:        'ဘာကြောင့် Verified ရယူရမလဲ?',
+    prioritySupport:  'ဖောက်သည်ဝန်ဆောင်မှုတွင် ဦးစားပေးဆက်ဆံမှု',
+    verifiedBadge:    'Verified ဘတ်ဂ် သင်၏ ပရိုဖိုင်တွင် ပြသမည်',
+    fasterProcessing: '၀န်ဆောင်မှုများ ပိုမိုမြန်ဆန်စွာ ဆောင်ရွက်ပေးမည်',
+    requirements:     'လိုအပ်ချက်များ',
+    channels:         'အနည်းဆုံး ဝင်ရောက်ချန်နယ် ၂ ခု ချိတ်ဆက်ပါ',
+    payments:         'အနည်းဆုံး ၃ ကြိမ် ငွေပေးချေပြီးဖြစ်ရမည်',
+  },
+};
+
+// ─── Thai ─────────────────────────────────────────────────────────────────────
+
+const th: AppStrings = {
+  common: {
+    loading:            'กำลังโหลด…',
+    error:              'ข้อผิดพลาด',
+    retry:              'ลองอีกครั้ง',
+    cancel:             'ยกเลิก',
+    confirm:            'ยืนยัน',
+    save:               'บันทึก',
+    back:               'กลับ',
+    close:              'ปิด',
+    submit:             'ส่ง',
+    continue:           'ดำเนินการต่อ',
+    search:             'ค้นหา',
+    done:               'เสร็จสิ้น',
+    couldNotLoad:       'ไม่สามารถโหลดได้',
+    pullToRetry:        'ดึงลงเพื่อลองอีกครั้ง',
+    somethingWentWrong: 'เกิดข้อผิดพลาด กรุณาลองอีกครั้ง',
+    payNow:             'ชำระเงินเลย',
+    cancelOrder:        'ยกเลิกคำสั่งซื้อ',
+    cancelling:         'กำลังยกเลิก…',
+    getStarted:         'เริ่มต้นใช้งาน',
+    viewDownload:       'ดู / ดาวน์โหลด',
+    saveToGallery:      'บันทึกลงแกลเลอรี',
+    selectAll:          'เลือกทั้งหมด',
+    deselectAll:        'ยกเลิกการเลือกทั้งหมด',
+    apply:              'ใช้งาน',
+    clear:              'ล้าง',
+    noResults:          'ไม่พบผลลัพธ์',
+  },
+  status: {
+    pending_payment:  'รอการชำระเงิน',
+    processing:       'กำลังดำเนินการ',
+    completed:        'เสร็จสมบูรณ์',
+    payment_failed:   'การชำระเงินล้มเหลว',
+    cancelled:        'ยกเลิกแล้ว',
+    pending:          'รอดำเนินการ',
+  },
+  auth: {
+    tagline:            'รวดเร็ว · เชื่อถือได้ · ไว้วางใจได้',
+    signIn:             'เข้าสู่ระบบ',
+    signInSubtitle:     'ยินดีต้อนรับกลับ — มาเข้าสู่ระบบกัน',
+    register:           'สร้างบัญชีของคุณ',
+    registerSubtitle:   'เข้าร่วมกับผู้ใช้หลายพันคนที่ไว้วางใจ MOI Order',
+    email:              'อีเมล',
+    password:           'รหัสผ่าน',
+    phone:              'หมายเลขโทรศัพท์',
+    fullName:           'ชื่อ-นามสกุล',
+    forgotPassword:     'ลืมรหัสผ่าน?',
+    orSignInWith:       'หรือเข้าสู่ระบบด้วย',
+    checkingEmail:      'กำลังตรวจสอบ…',
+    submitting:         'กำลังส่ง…',
+    sendOtp:            'ส่ง OTP',
+    verifyOtp:          'ยืนยัน',
+    resendOtp:          'ส่ง OTP อีกครั้ง',
+    resendIn:           'ส่งอีกครั้งใน',
+    otpSent:            'ส่ง OTP แล้ว',
+    goToLogin:          'มีบัญชีอยู่แล้ว? เข้าสู่ระบบ',
+    alreadyHaveAccount: 'มีบัญชีอยู่แล้ว?',
+    noAccount:          'ยังไม่มีบัญชี?',
+  },
+  home: {
+    hello:              'สวัสดี, {name}',
+    welcome:            'ยินดีต้อนรับ',
+    tagline1:           'Your all-in-one',
+    tagline2:           'app',
+    searchPlaceholder:  'ค้นหาสถานที่ ตั๋ว บริการ…',
+    ourServices:        'บริการของเรา',
+    ninetyDayReport:    'รายงาน 90 วัน',
+    placesAndTickets:   'สถานที่ & ตั๋ว',
+    attractions:        'สถานที่ท่องเที่ยวและแลนด์มาร์ก',
+    otherServices:      'บริการอื่นๆ',
+    companyMore:        'บริษัท & เพิ่มเติม',
+    embassyServices:    'หนังสือรับรองสถานทูต',
+    embassyMore:        'หนังสือสนับสนุน & เพิ่มเติม',
+    airportFastTrack:   'ด่านพิเศษสนามบิน',
+    airportSubtitle:    'บริการพิเศษสนามบิน',
+    busTickets:         'ตั๋วรถบัส',
+    busSubtitle:        'เส้นทาง & ตารางเวลา',
+    passport:           'หนังสือเดินทาง / CI',
+    passportSubtitle:   'บริการเอกสาร',
+    foodOrder:          'สั่งอาหาร',
+    foodOrderSubtitle:  'จัดส่งอาหาร',
+  },
+  orders: {
+    title:              'คำสั่งซื้อของฉัน',
+    orderNum:           'คำสั่งซื้อ #{id}',
+    submitted:          'ส่งแล้ว',
+    ordered:            'สั่งแล้ว',
+    summary:            'สรุป',
+    service:            'บริการ',
+    status:             'สถานะ',
+    personalInfo:       'ข้อมูลส่วนตัว',
+    documents:          'เอกสาร',
+    awaitingConfirmation: '🔔 เราได้แจ้งผู้ดูแลระบบเกี่ยวกับคำสั่งซื้อของคุณแล้ว กรุณาเตรียมชำระเงินเมื่อได้รับการยืนยัน',
+    viewDownloadResult: 'ดู / ดาวน์โหลดผลลัพธ์',
+    couldNotLoad:       'ไม่สามารถโหลดคำสั่งซื้อได้',
+    pullToRetry:        'ดึงลงเพื่อลองอีกครั้ง',
+  },
+  tickets: {
+    orderNum:           'คำสั่งซื้อตั๋ว #{id}',
+    ordered:            'สั่งแล้ว',
+    visitDate:          'วันที่เยี่ยมชม',
+    items:              'รายการ',
+    viewDownloadEticket: 'ดู / ดาวน์โหลด E-Ticket',
+    couldNotLoad:       'ไม่สามารถโหลดคำสั่งซื้อได้',
+    selectDate:         'เลือกวันที่',
+    whenVisiting:       'คุณจะไปเยี่ยมชมวันไหน?',
+    available7Days:     'พร้อมใช้งานใน 7 วันข้างหน้า',
+    chooseDay:          'เลือกวัน',
+    purchase:           'ซื้อ',
+  },
+  profile: {
+    personalInfo:       'ข้อมูลส่วนตัว',
+    language:           'ภาษา',
+    activity:           'กิจกรรม',
+    security:           'ความปลอดภัย',
+    legal:              'กฎหมาย',
+    myOrders:           'คำสั่งซื้อของฉัน',
+    changePassword:     'เปลี่ยนรหัสผ่าน',
+    privacyPolicy:      'นโยบายความเป็นส่วนตัว',
+    termsConditions:    'ข้อกำหนดและเงื่อนไข',
+    pdpa:               'พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล',
+    fullNamePlaceholder: 'ชื่อ-นามสกุล',
+    dobPlaceholder:     'วันเกิด',
+    currentPassword:    'รหัสผ่านปัจจุบัน',
+    newPassword:        'รหัสผ่านใหม่',
+    confirmNewPassword: 'ยืนยันรหัสผ่านใหม่',
+    updatePassword:     'อัปเดตรหัสผ่าน',
+    saveChanges:        'บันทึกการเปลี่ยนแปลง',
+    customerSupport:    'บริการลูกค้า',
+    contactFacebook:    'ติดต่อเราทาง Facebook',
+    contactLine:        'ติดต่อเราทาง LINE',
+    signOut:            'ออกจากระบบ',
+    deleteAccount:      'ลบบัญชี',
+    linkedAccounts:     'บัญชีที่เชื่อมต่อ',
+    addEmail:           'เพิ่มอีเมลของคุณ',
+    addEmailDesc:       'คุณเข้าสู่ระบบโดยไม่มีอีเมล เพิ่มอีเมลเพื่อรับการอัปเดต',
+    becomeVerified:     'กลายเป็น Moi Verified',
+    addThaiPhone:       'เพิ่มเบอร์โทรไทยสำหรับเข้าสู่ระบบด้วย OTP',
+    alreadyConnected:   'เชื่อมต่อกับบัญชีนี้แล้ว',
+    useGoogleLater:     'ใช้ Google เข้าสู่ระบบในภายหลัง',
+    useAppleLater:      'ใช้ Apple เข้าสู่ระบบในภายหลัง',
+    useLineLater:       'ใช้ LINE เข้าสู่ระบบในภายหลัง',
+    english:            'English',
+    burmese:            'မြန်မာ',
+    thai:               'ภาษาไทย',
+  },
+  docs: {
+    passportBioPage:    'หน้าชีวประวัติหนังสือเดินทาง',
+    visaPage:           'หน้าวีซ่า',
+    oldSlip:            'ใบแจ้ง 90 วันเดิม',
+    identityCardFront:  'บัตรประชาชน (ด้านหน้า)',
+    identityCardBack:   'บัตรประชาชน (ด้านหลัง)',
+    tm30:               'เอกสาร TM30',
+    upperBodyPhoto:     'รูปถ่ายครึ่งตัว',
+    airplaneTicket:     'ตั๋วเครื่องบิน',
+    passportSizePhoto:  'รูปถ่ายขนาดพาสปอร์ต',
+  },
+  map: {
+    nearby:           '📍 ใกล้ฉัน',
+    all:              '🌐 ทั้งหมด',
+    getDirections:    '🗺 รับเส้นทาง',
+    navigateOnMap:    '▶ นำทางบนแผนที่',
+    filterByTags:     'กรองตามแท็ก',
+    noTagsAvailable:  'ไม่มีแท็ก',
+    searchPlaceholder: 'ค้นหาสถานที่ บริการ…',
+    couldNotLoad:     'ไม่สามารถโหลดแผนที่ได้',
+  },
+  upload: {
+    photoLibraryRequired: 'ต้องการสิทธิ์เข้าถึงคลังรูปภาพเพื่ออัปโหลดเอกสาร',
+    fileTooLarge:         'ไม่สามารถอัปโหลดได้ ขนาดไฟล์รวมใหญ่เกินไป (สูงสุด 50 MB)',
+    uploadFailed:         'อัปโหลดล้มเหลว กรุณาลองอีกครั้ง',
+  },
+  ninetyDay: {
+    title:      'รายงาน 90 วัน',
+    fullName:   'ชื่อ-นามสกุล',
+    phone:      'หมายเลขโทรศัพท์',
+    submit:     'ส่ง',
+    submitting: 'กำลังส่ง…',
+  },
+  payment: {
+    title:          'การชำระเงิน',
+    amount:         'จำนวนเงิน',
+    status:         'สถานะ',
+    expires:        'หมดอายุ',
+    markAsPaid:     'ทำเครื่องหมายว่าชำระแล้ว',
+    confirming:     'กำลังยืนยัน…',
+    promptpayQr:    'QR Code PromptPay',
+    expired:        'หมดอายุแล้ว',
+    regenerate:     'สร้าง QR ใหม่',
+    generating:     'กำลังสร้าง…',
+    contactUs:      'ติดต่อเรา',
+  },
+  tabs: {
+    home:    'หน้าหลัก',
+    map:     'แผนที่',
+    orders:  'คำสั่งซื้อ',
+    profile: 'โปรไฟล์',
+  },
+  shortcuts: {
+    passportLabel: 'หนังสือเดินทาง',
+    passportSub:   'หน้าชีวประวัติ & หน้าวีซ่า',
+    ninetyLabel:   '90 วัน',
+    ninetySub:     'ใบแจ้ง 90 วัน',
+    myDocsLabel:   'เอกสาร',
+    myDocsSub:     'ใบอนุญาต บัตรประชาชน & อื่นๆ',
+  },
+  verified: {
+    title:            'กลายเป็น Moi Verified',
+    subtitle:         'ปลดล็อกศักยภาพบัญชีของคุณ',
+    youAreVerified:   'คุณเป็น Moi Verified แล้ว!',
+    whyVerify:        'ทำไมต้องได้รับการยืนยัน?',
+    prioritySupport:  'บริการลูกค้าแบบพิเศษ',
+    verifiedBadge:    'แสดงตราสัญลักษณ์ Verified บนโปรไฟล์',
+    fasterProcessing: 'ดำเนินการบริการได้รวดเร็วขึ้น',
+    requirements:     'เงื่อนไข',
+    channels:         'เชื่อมต่ออย่างน้อย 2 ช่องทางเข้าสู่ระบบ',
+    payments:         'ชำระเงินสำเร็จอย่างน้อย 3 ครั้ง',
+  },
+};
+
+// ─── Exports ─────────────────────────────────────────────────────────────────
+
+export const STRINGS: Record<Locale, AppStrings> = { en, mm, th };
+
+/** Hook — returns strings for the current locale. */
+export function useStrings(): AppStrings {
+  const locale = useLocaleStore((s) => s.locale);
+  return STRINGS[locale];
+}
+
+/** Pure function — useful outside components (hooks, utils). */
+export function getStrings(locale: Locale): AppStrings {
+  return STRINGS[locale];
+}
+
+/** Translate a status code to the current locale's label. */
+export function useStatusLabel(status: string): string {
+  const s = useStrings();
+  return (s.status as Record<string, string>)[status] ?? status;
+}

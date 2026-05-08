@@ -11,6 +11,7 @@ import { FormField } from '@/shared/components/FormField/FormField';
 import { SuccessState } from '@/shared/components/SuccessState/SuccessState';
 import { useCompanyRegistrationFormScreen } from '@/features/companyRegistration/hooks/useCompanyRegistrationFormScreen';
 import { useLocale } from '@/shared/hooks/useLocale';
+import { useStrings } from '@/shared/i18n';
 import { styles } from './CompanyRegistrationFormScreen.styles';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
@@ -34,6 +35,7 @@ export function CompanyRegistrationFormScreen(): React.JSX.Element {
   } = useCompanyRegistrationFormScreen();
 
   const { locale } = useLocale();
+  const s = useStrings();
   const priceFormatted = `฿${price.toLocaleString('th-TH')}`;
 
   return (
@@ -90,10 +92,10 @@ export function CompanyRegistrationFormScreen(): React.JSX.Element {
               <Text style={styles.sectionTitle}>Required Documents</Text>
 
               {([
-                { key: 'passportBioPage'   as const, label: locale === 'mm' ? 'ပတ်စပို့ (ရှေ့မျက်နှာ)'  : 'Passport Bio Page',     icon: 'document-text' as const, onPick: handlePickPassportBioPage },
-                { key: 'visaPage'          as const, label: locale === 'mm' ? 'ဗီဇာ မျက်နှာ'            : 'Visa Page',             icon: 'card' as const,          onPick: handlePickVisaPage },
-                { key: 'identityCardFront' as const, label: locale === 'mm' ? 'မှတ်ပုံတင် (အရှေ့)'       : 'Identity Card (Front)', icon: 'card-outline' as const,  onPick: handlePickIdentityCardFront },
-                { key: 'identityCardBack'  as const, label: locale === 'mm' ? 'မှတ်ပုံတင် (အနောက်)'      : 'Identity Card (Back)',  icon: 'card-outline' as const,  onPick: handlePickIdentityCardBack },
+                { key: 'passportBioPage'   as const, label: s.docs.passportBioPage,     icon: 'document-text' as const, onPick: handlePickPassportBioPage },
+                { key: 'visaPage'          as const, label: s.docs.visaPage,             icon: 'card' as const,          onPick: handlePickVisaPage },
+                { key: 'identityCardFront' as const, label: s.docs.identityCardFront, icon: 'card-outline' as const,  onPick: handlePickIdentityCardFront },
+                { key: 'identityCardBack'  as const, label: s.docs.identityCardBack,  icon: 'card-outline' as const,  onPick: handlePickIdentityCardBack },
                 { key: 'tm30'              as const, label: 'TM30',                                         icon: 'document' as const,      onPick: handlePickTm30 },
               ] as { key: 'passportBioPage' | 'visaPage' | 'identityCardFront' | 'identityCardBack' | 'tm30'; label: string; icon: IoniconsName; onPick: () => void }[])
               .map(({ key, label, icon, onPick }) => (

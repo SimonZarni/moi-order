@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { setMemoryLocale } from '@/shared/api/client';
 import { LOCALE_KEY } from '@/shared/constants/config';
 
-export type Locale = 'en' | 'mm';
+export type Locale = 'en' | 'mm' | 'th';
 
 interface LocaleState {
   locale: Locale;

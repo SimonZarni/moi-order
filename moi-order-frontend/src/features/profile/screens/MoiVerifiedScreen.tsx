@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useMoiVerifiedScreen } from '@/features/profile/hooks/useMoiVerifiedScreen';
 import { VerifiedBadgeIcon } from '@/shared/components/VerifiedBadgeIcon';
+import { useStrings } from '@/shared/i18n';
 import { colours } from '@/shared/theme/colours';
 import { styles } from './MoiVerifiedScreen.styles';
 
@@ -28,16 +29,17 @@ function RequirementRow({ label, done }: RequirementRowProps): React.JSX.Element
 
 export function MoiVerifiedScreen(): React.JSX.Element {
   const { status, isLoading, handleBack } = useMoiVerifiedScreen();
+  const s = useStrings();
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={handleBack} accessibilityLabel="Go back" accessibilityRole="button">
+        <Pressable style={styles.backBtn} onPress={handleBack} accessibilityLabel={s.common.back} accessibilityRole="button">
           <Ionicons name="arrow-back" size={20} color={colours.textOnDark} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={styles.headerTitle}>Become Moi Verified</Text>
-          <Text style={styles.headerSubtitle}>Unlock your full account potential</Text>
+          <Text style={styles.headerTitle}>{s.verified.title}</Text>
+          <Text style={styles.headerSubtitle}>{s.verified.subtitle}</Text>
         </View>
         <VerifiedBadgeIcon size={34} />
       </View>
@@ -46,39 +48,39 @@ export function MoiVerifiedScreen(): React.JSX.Element {
         {status?.is_verified && (
           <View style={styles.verifiedBanner}>
             <Ionicons name="checkmark-circle" size={22} color={colours.success} />
-            <Text style={styles.verifiedBannerText}>You are Moi Verified!</Text>
+            <Text style={styles.verifiedBannerText}>{s.verified.youAreVerified}</Text>
           </View>
         )}
 
-        <Text style={styles.sectionLabel}>Why get verified?</Text>
+        <Text style={styles.sectionLabel}>{s.verified.whyVerify}</Text>
         <View style={styles.card}>
           <View style={styles.advantageRow}>
             <Ionicons name="headset-outline" size={20} color={colours.primary} />
-            <Text style={styles.advantageText}>Priority support from our customer team</Text>
+            <Text style={styles.advantageText}>{s.verified.prioritySupport}</Text>
           </View>
           <View style={styles.advantageRow}>
             <Ionicons name="shield-checkmark-outline" size={20} color={colours.primary} />
-            <Text style={styles.advantageText}>Verified badge displayed on your profile</Text>
+            <Text style={styles.advantageText}>{s.verified.verifiedBadge}</Text>
           </View>
           <View style={styles.advantageRow}>
             <Ionicons name="flash-outline" size={20} color={colours.primary} />
-            <Text style={styles.advantageText}>Faster processing for all service submissions</Text>
+            <Text style={styles.advantageText}>{s.verified.fasterProcessing}</Text>
           </View>
         </View>
 
-        <Text style={styles.sectionLabel}>Requirements</Text>
+        <Text style={styles.sectionLabel}>{s.verified.requirements}</Text>
         <View style={styles.card}>
           {isLoading ? (
             <ActivityIndicator color={colours.primary} style={{ paddingVertical: 16 }} />
           ) : (
             <>
               <RequirementRow
-                label={`Connected to at least 2 sign-in channels (${status?.connected_channels ?? 0}/2)`}
+                label={`${s.verified.channels} (${status?.connected_channels ?? 0}/2)`}
                 done={(status?.connected_channels ?? 0) >= 2}
               />
               <View style={styles.reqDivider} />
               <RequirementRow
-                label={`Completed at least 3 payments (${status?.successful_payments ?? 0}/3)`}
+                label={`${s.verified.payments} (${status?.successful_payments ?? 0}/3)`}
                 done={(status?.successful_payments ?? 0) >= 3}
               />
             </>

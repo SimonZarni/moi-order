@@ -17,6 +17,7 @@ import { AuthMethod, AuthMethodTabs } from '@/shared/components/AuthMethodTabs/A
 import { FormField } from '@/shared/components/FormField/FormField';
 import { GoogleSignInButton } from '@/shared/components/GoogleSignInButton/GoogleSignInButton';
 import { LineSignInButton } from '@/shared/components/LineSignInButton/LineSignInButton';
+import { useStrings } from '@/shared/i18n';
 import { useRegisterScreen } from '@/features/auth/hooks/useRegisterScreen';
 import { styles } from './RegisterScreen.styles';
 
@@ -46,6 +47,7 @@ export function RegisterScreen(): React.JSX.Element {
     handleLineSignIn,
     handleGoToLogin,
   } = useRegisterScreen();
+  const s = useStrings();
 
   const socialDisabled = isSubmitting || isGoogleSigningIn || isAppleSigningIn || isLineSigningIn;
 
@@ -68,12 +70,12 @@ export function RegisterScreen(): React.JSX.Element {
               resizeMode="contain"
               accessibilityLabel="Moi Order logo"
             />
-            <Text style={styles.tagline}>Fast · Reliable · Trusted</Text>
+            <Text style={styles.tagline}>{s.auth.tagline}</Text>
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Get Started</Text>
-            <Text style={styles.cardSubtitle}>Join thousands who trust MOI Order.</Text>
+            <Text style={styles.cardTitle}>{s.auth.getStarted}</Text>
+            <Text style={styles.cardSubtitle}>{s.auth.registerSubtitle}</Text>
 
             <AuthMethodTabs value={authMethod} onChange={setAuthMethod} />
             <ErrorBanner message={bannerError} />

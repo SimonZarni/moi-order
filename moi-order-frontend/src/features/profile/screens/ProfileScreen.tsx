@@ -22,6 +22,7 @@ import { LINE_OA_URL } from '@/shared/constants/config';
 import { formatDate } from '@/shared/utils/formatDate';
 import { formatPhoneNumber } from '@/shared/utils/formatPhoneNumber';
 import { getProfileStrings } from '@/shared/constants/profileStrings';
+import { useStrings } from '@/shared/i18n';
 import { colours } from '@/shared/theme/colours';
 import { styles } from './ProfileScreen.styles';
 
@@ -67,6 +68,7 @@ export function ProfileScreen(): React.JSX.Element {
   const { stats } = useUploadStats();
   const { status: verificationStatus } = useVerificationStatus();
   const t = getProfileStrings(locale);
+  const s = useStrings();
   const hasPhoneNumber = displayPhone !== null;
   const appleUnavailable = Platform.OS !== 'ios';
 
@@ -138,10 +140,8 @@ export function ProfileScreen(): React.JSX.Element {
                   <Ionicons name="mail-open-outline" size={16} color={colours.secondary} />
                 </View>
                 <View style={styles.emailPromptCopy}>
-                  <Text style={styles.emailPromptTitle}>Add your real email</Text>
-                  <Text style={styles.emailPromptText}>
-                    You signed in without an email address. Add one so your account can receive updates.
-                  </Text>
+                  <Text style={styles.emailPromptTitle}>{s.profile.addEmail}</Text>
+                  <Text style={styles.emailPromptText}>{s.profile.addEmailDesc}</Text>
                 </View>
               </View>
               <Pressable
@@ -177,14 +177,14 @@ export function ProfileScreen(): React.JSX.Element {
           <Pressable
             style={styles.card}
             onPress={handleGoToMoiVerified}
-            accessibilityLabel="Become Moi Verified"
+            accessibilityLabel={s.profile.becomeVerified}
             accessibilityRole="button"
           >
             <View style={styles.row}>
               <View style={[styles.iconBadge, styles.iconBadgeTeal]}>
                 <Ionicons name="shield-checkmark-outline" size={16} color={colours.tertiary} />
               </View>
-              <Text style={[styles.rowLabel, styles.rowLabelBold]}>Become Moi Verified</Text>
+              <Text style={[styles.rowLabel, styles.rowLabelBold]}>{s.profile.becomeVerified}</Text>
               <VerifiedBadgeIcon size={20} />
               <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </View>
@@ -330,7 +330,7 @@ export function ProfileScreen(): React.JSX.Element {
 
           {/* § Linked Accounts */}
           <View style={styles.sectionRow}>
-            <Text style={styles.sectionLabel}>Linked Accounts</Text>
+            <Text style={styles.sectionLabel}>{s.profile.linkedAccounts}</Text>
             <View style={styles.sectionLine} />
           </View>
           <View style={styles.card}>
@@ -341,7 +341,7 @@ export function ProfileScreen(): React.JSX.Element {
               <View style={styles.linkCopy}>
                 <Text style={styles.linkTitle}>Google</Text>
                 <Text style={styles.linkSubtitle}>
-                  {user?.has_google ? 'Already connected to this account' : 'Use Google to sign in later'}
+                  {user?.has_google ? s.profile.alreadyConnected : s.profile.useGoogleLater}
                 </Text>
               </View>
               <View style={styles.linkActions}>
@@ -379,7 +379,7 @@ export function ProfileScreen(): React.JSX.Element {
                 <Text style={styles.linkSubtitle}>
                   {appleUnavailable
                     ? 'Available on iPhone and iPad only'
-                    : (user?.has_apple ? 'Already connected to this account' : 'Use Apple to sign in later')}
+                    : (user?.has_apple ? s.profile.alreadyConnected : s.profile.useAppleLater)}
                 </Text>
               </View>
               <View style={styles.linkActions}>
@@ -419,7 +419,7 @@ export function ProfileScreen(): React.JSX.Element {
               <View style={styles.linkCopy}>
                 <Text style={styles.linkTitle}>LINE</Text>
                 <Text style={styles.linkSubtitle}>
-                  {user?.has_line ? 'Already connected to this account' : 'Use LINE to sign in later'}
+                  {user?.has_line ? s.profile.alreadyConnected : s.profile.useLineLater}
                 </Text>
               </View>
               <View style={styles.linkActions}>
@@ -455,7 +455,7 @@ export function ProfileScreen(): React.JSX.Element {
               <View style={styles.linkCopy}>
                 <Text style={styles.linkTitle}>Phone</Text>
                 <Text style={styles.linkSubtitle}>
-                  {hasPhoneNumber && displayPhone ? `Linked: ${formatPhoneNumber(displayPhone)}` : 'Add a Thai phone number for OTP login'}
+                  {hasPhoneNumber && displayPhone ? `Linked: ${formatPhoneNumber(displayPhone)}` : s.profile.addThaiPhone}
                 </Text>
               </View>
               <Pressable
@@ -707,7 +707,7 @@ export function ProfileScreen(): React.JSX.Element {
                 accessibilityRole="button"
               >
                 <Text style={[styles.langBtnText, locale === 'en' && styles.langBtnTextActive]}>
-                  English
+                  {s.profile.english}
                 </Text>
               </Pressable>
               <Pressable
@@ -717,7 +717,17 @@ export function ProfileScreen(): React.JSX.Element {
                 accessibilityRole="button"
               >
                 <Text style={[styles.langBtnText, locale === 'mm' && styles.langBtnTextActive]}>
-                  မြန်မာ
+                  {s.profile.burmese}
+                </Text>
+              </Pressable>
+              <Pressable
+                style={[styles.langBtn, locale === 'th' && styles.langBtnActive]}
+                onPress={() => handleSetLocale('th')}
+                accessibilityLabel="Switch to Thai"
+                accessibilityRole="button"
+              >
+                <Text style={[styles.langBtnText, locale === 'th' && styles.langBtnTextActive]}>
+                  {s.profile.thai}
                 </Text>
               </Pressable>
             </View>
@@ -745,33 +755,33 @@ export function ProfileScreen(): React.JSX.Element {
 
           {/* § Customer Support */}
           <View style={styles.sectionRow}>
-            <Text style={styles.sectionLabel}>Customer Support</Text>
+            <Text style={styles.sectionLabel}>{s.profile.customerSupport}</Text>
             <View style={styles.sectionLine} />
           </View>
           <View style={styles.card}>
             <Pressable
               style={styles.row}
               onPress={() => Linking.openURL('https://www.facebook.com/moiorder')}
-              accessibilityLabel="Contact us on Facebook"
+              accessibilityLabel={s.profile.contactFacebook}
               accessibilityRole="button"
             >
               <View style={[styles.iconBadge, styles.iconBadgeFacebook]}>
                 <Ionicons name="logo-facebook" size={16} color="#1877F2" />
               </View>
-              <Text style={styles.rowLabel}>Facebook</Text>
+              <Text style={styles.rowLabel}>{s.profile.contactFacebook}</Text>
               <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </Pressable>
             <View style={styles.rowSeparator} />
             <Pressable
               style={styles.row}
               onPress={() => Linking.openURL(LINE_OA_URL)}
-              accessibilityLabel="Contact us on LINE"
+              accessibilityLabel={s.profile.contactLine}
               accessibilityRole="button"
             >
               <View style={[styles.iconBadge, styles.iconBadgeLine]}>
                 <Ionicons name="chatbubble-ellipses-outline" size={16} color="#06C755" />
               </View>
-              <Text style={styles.rowLabel}>LINE</Text>
+              <Text style={styles.rowLabel}>{s.profile.contactLine}</Text>
               <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </Pressable>
           </View>
@@ -829,7 +839,7 @@ export function ProfileScreen(): React.JSX.Element {
             accessibilityLabel="Sign out"
             accessibilityRole="button"
           >
-            <Text style={styles.signOutText}>Sign Out</Text>
+            <Text style={styles.signOutText}>{s.profile.signOut}</Text>
           </Pressable>
 
           {/* § Delete Account */}
@@ -841,7 +851,7 @@ export function ProfileScreen(): React.JSX.Element {
             accessibilityRole="button"
           >
             <Text style={styles.deleteAccountText}>
-              {isDeletingAccount ? 'Deleting…' : 'Delete Account'}
+              {isDeletingAccount ? s.common.cancelling : s.profile.deleteAccount}
             </Text>
           </Pressable>
 

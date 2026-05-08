@@ -9,6 +9,7 @@ import { NotificationBell } from '@/features/notifications/components/Notificati
 import { colours } from '@/shared/theme/colours';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { getHomeStrings } from '@/shared/constants/homeStrings';
+import { useStrings } from '@/shared/i18n';
 import { styles } from './HomeScreen.styles';
 
 export function HomeScreen(): React.JSX.Element {
@@ -26,6 +27,7 @@ export function HomeScreen(): React.JSX.Element {
 
   const { locale } = useLocale();
   const t = getHomeStrings(locale);
+  const s = useStrings();
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -54,7 +56,7 @@ export function HomeScreen(): React.JSX.Element {
 
           <View style={styles.heroTextBlock}>
             <Text style={styles.heroGreeting}>
-              {user !== null ? `Hello, ${user.name.split(' ')[0]}` : 'Welcome'}
+              {user !== null ? s.home.hello.replace('{name}', user.name.split(' ')[0]!) : s.home.welcome}
             </Text>
             <Text style={styles.heroTitle} numberOfLines={1} adjustsFontSizeToFit>
               Your all-in-one <Text style={styles.heroTitleAccent}>app</Text>
@@ -62,9 +64,9 @@ export function HomeScreen(): React.JSX.Element {
           </View>
 
           <Pressable style={styles.searchBox} onPress={handleNavigateToSearch}
-            accessibilityRole="button" accessibilityLabel="Search places, tickets, services">
+            accessibilityRole="button" accessibilityLabel={s.home.searchPlaceholder}>
             <Text style={styles.searchIcon}>🔍</Text>
-            <Text style={styles.searchPlaceholder}>Search places, tickets, services…</Text>
+            <Text style={styles.searchPlaceholder}>{s.home.searchPlaceholder}</Text>
           </Pressable>
         </View>
 

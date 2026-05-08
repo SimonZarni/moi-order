@@ -1,6 +1,8 @@
 import * as ImagePicker from 'expo-image-picker';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 
+import { useLocaleStore } from '@/shared/store/localeStore';
+import { getStrings } from '@/shared/i18n';
 import { stripAsset } from './stripAsset';
 
 /**
@@ -17,7 +19,8 @@ export async function pickAndCompressImage(
   if (!granted) {
     const request = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!request.granted) {
-      onPermissionDenied('Photo library access is required to upload documents.');
+      const s = getStrings(useLocaleStore.getState().locale);
+      onPermissionDenied(s.upload.photoLibraryRequired);
       return null;
     }
   }

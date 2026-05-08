@@ -11,6 +11,7 @@ import { LINE_OA_URL } from '@/shared/constants/config';
 import { BackButton } from '@/shared/components/BackButton/BackButton';
 import { useTicketOrderDetailScreen } from '@/features/tickets/hooks/useTicketOrderDetailScreen';
 import { TicketOrderItem } from '@/types/models';
+import { useStrings } from '@/shared/i18n';
 import { styles, TICKET_STATUS_COLOURS } from './TicketOrderDetailScreen.styles';
 
 export function TicketOrderDetailScreen(): React.JSX.Element {
@@ -21,6 +22,7 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
     handleRefresh, handleBack, handlePayNow, handleDownloadEticket, handleSaveEticket, handleClosePreview,
     canCancel, isCancelling, handleCancelOrder,
   } = useTicketOrderDetailScreen();
+  const s = useStrings();
 
   const hero = (
     <View style={styles.hero}>
@@ -29,9 +31,9 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
       <BackButton onPress={handleBack} />
       {order !== undefined && (
         <>
-          <Text style={styles.heroEyebrow}>Ticket Order #{order.id}</Text>
+          <Text style={styles.heroEyebrow}>{s.tickets.orderNum.replace('{id}', String(order.id))}</Text>
           <Text style={styles.heroTitle}>{order.ticket?.name ?? 'Ticket'}</Text>
-          <Text style={styles.heroDate}>Ordered {formatDate(order.created_at)}</Text>
+          <Text style={styles.heroDate}>{s.tickets.ordered} {formatDate(order.created_at)}</Text>
         </>
       )}
     </View>
@@ -54,7 +56,7 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
         {hero}
         <View style={styles.stateBox}>
           <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
-          <Text style={styles.stateTitle}>Could not load order</Text>
+          <Text style={styles.stateTitle}>{s.tickets.couldNotLoad}</Text>
           <Text style={styles.stateSubtitle}>Pull down to retry</Text>
         </View>
       </SafeAreaView>
@@ -98,7 +100,7 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
           >
             {isSavingEticket
               ? <ActivityIndicator color="white" />
-              : <Text style={styles.previewSaveBtnText}>Save to Gallery</Text>
+              : <Text style={styles.previewSaveBtnText}>{s.common.saveToGallery}</Text>
             }
           </Pressable>
         </View>
@@ -120,13 +122,13 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
           </View>
           <View style={[styles.summaryCard, { borderTopColor: accentColour }]}>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Visit Date</Text>
+              <Text style={styles.summaryLabel}>{s.tickets.visitDate}</Text>
               <Text style={styles.summaryValue}>{formatDate(order.visit_date)}</Text>
             </View>
             <View style={styles.summaryDivider} />
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Status</Text>
-              <Text style={[styles.statusValue, { color: accentColour }]}>{order.status_label}</Text>
+              <Text style={[styles.statusValue, { color: accentColour }]}>{(s.status as Record<string, string>)[order.status] ?? order.status_label}</Text>
             </View>
             {order.total !== undefined && (
               <>
@@ -147,7 +149,7 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
               accessibilityLabel="Pay now"
               accessibilityRole="button"
             >
-              <Text style={styles.payNowBtnText}>Pay Now</Text>
+              <Text style={styles.payNowBtnText}>{s.common.payNow}</Text>
             </Pressable>
           )}
 
@@ -170,7 +172,7 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
               accessibilityRole="button"
             >
               <Text style={styles.cancelOrderBtnText}>
-                {isCancelling ? 'Cancelling…' : 'Cancel Order'}
+                {isCancelling ? s.common.cancelling : s.common.cancelOrder}
               </Text>
             </Pressable>
           )}
@@ -187,7 +189,7 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
               >
                 {isDownloading
                   ? <ActivityIndicator color="white" />
-                  : <Text style={styles.downloadBtnText}>View / Download E-Ticket</Text>
+                  : <Text style={styles.downloadBtnText}>{s.tickets.viewDownloadEticket}</Text>
                 }
               </Pressable>
               {downloadError !== null && (

@@ -6,6 +6,7 @@ import {
 import { Image } from 'expo-image';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { MAP_COLORS } from '@/shared/theme/mapTheme';
+import { useStrings } from '@/shared/i18n';
 import { formatDistance, formatDuration } from '@/shared/api/mapbox';
 import { styles } from './PlaceBottomSheet.styles';
 import type { Place, Tag } from '@/types/models';
@@ -46,6 +47,7 @@ export function PlaceBottomSheet({
   const isPeeking = snapIdx === 0;
   const coverImage = detail?.cover_image ?? place.cover_image;
   const hasRoutes  = !!(drivingRoute || walkingRoute);
+  const s = useStrings();
 
   // Build gallery image list: all place images sorted, fallback to cover
   const galleryImages: string[] = detail?.images && detail.images.length > 0
@@ -260,13 +262,13 @@ export function PlaceBottomSheet({
                     style={styles.directionsBtn} accessibilityRole="button" accessibilityLabel="Get directions">
                     {isLoadingRoutes
                       ? <ActivityIndicator color={MAP_COLORS.white} size="small" />
-                      : <Text style={styles.directionsBtnText}>🗺 Get Directions</Text>
+                      : <Text style={styles.directionsBtnText}>{s.map.getDirections}</Text>
                     }
                   </Pressable>
                 ) : (
                   <Pressable onPress={onNavigate} style={styles.navigateBtn}
                     accessibilityRole="button" accessibilityLabel="Start navigation">
-                    <Text style={styles.navigateBtnText}>▶ Navigate on Map</Text>
+                    <Text style={styles.navigateBtnText}>{s.map.navigateOnMap}</Text>
                   </Pressable>
                 )}
               </View>

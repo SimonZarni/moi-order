@@ -3,6 +3,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import { useStrings } from '@/shared/i18n';
 import { styles } from './MapSearchBar.styles';
 import type { Place } from '@/types/models';
 import type { GeocodingResult } from '@/shared/api/mapbox';
@@ -38,6 +39,7 @@ export function MapSearchBar({
   // Local tab state for instant visual feedback — syncs from parent after data loads.
   const [localTab, setLocalTab] = useState<string | null>(activeTab);
   useEffect(() => { setLocalTab(activeTab); }, [activeTab]);
+  const s = useStrings();
 
   const hasQuery     = value.trim().length > 1;
   const hasPlaces    = placeSuggestions.length > 0;
@@ -121,7 +123,7 @@ export function MapSearchBar({
             style={[styles.tab, localTab === TAB_NEARBY && styles.tabActive]}
             accessibilityRole="button" accessibilityLabel="Show nearby places">
             <Text style={[styles.tabText, localTab === TAB_NEARBY && styles.tabTextActive]}>
-              📍 Nearby
+              {s.map.nearby}
             </Text>
           </Pressable>
           <Pressable
@@ -130,7 +132,7 @@ export function MapSearchBar({
             style={[styles.tab, localTab === TAB_ALL && styles.tabActive]}
             accessibilityRole="button" accessibilityLabel="Show all places">
             <Text style={[styles.tabText, localTab === TAB_ALL && styles.tabTextActive]}>
-              🌐 All
+              {s.map.all}
             </Text>
           </Pressable>
         </ScrollView>

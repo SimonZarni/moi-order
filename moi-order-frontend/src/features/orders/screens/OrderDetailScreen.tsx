@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LINE_OA_URL } from '@/shared/constants/config';
 import { BackButton } from '@/shared/components/BackButton/BackButton';
+import { useStrings } from '@/shared/i18n';
 import { useOrderDetailScreen } from '@/features/orders/hooks/useOrderDetailScreen';
 import { formatDate } from '@/shared/utils/formatDate';
 import { formatPrice } from '@/shared/utils/formatCurrency';
@@ -42,6 +43,7 @@ export function OrderDetailScreen(): React.JSX.Element {
     handleDownloadResult, handleSaveResult, handleClosePreview,
   } = useOrderDetailScreen();
   const { locale } = useLocale();
+  const s = useStrings();
 
   const hero = (
     <View style={styles.hero}>
@@ -54,7 +56,7 @@ export function OrderDetailScreen(): React.JSX.Element {
           <Text style={styles.heroTitle}>
             {localeName(submission.service_type?.service ?? submission.service_type, locale)}
           </Text>
-          <Text style={styles.heroDate}>Submitted {formatDate(submission.created_at)}</Text>
+          <Text style={styles.heroDate}>{s.orders.submitted} {formatDate(submission.created_at)}</Text>
         </View>
       )}
     </View>
@@ -77,8 +79,8 @@ export function OrderDetailScreen(): React.JSX.Element {
         {hero}
         <View style={styles.stateBox}>
           <Ionicons name="warning" size={36} color={colours.textMuted} style={styles.stateIcon} />
-          <Text style={styles.stateTitle}>Could not load order</Text>
-          <Text style={styles.stateSubtitle}>Pull down to retry</Text>
+          <Text style={styles.stateTitle}>{s.orders.couldNotLoad}</Text>
+          <Text style={styles.stateSubtitle}>{s.orders.pullToRetry}</Text>
         </View>
       </SafeAreaView>
     );
@@ -123,7 +125,7 @@ export function OrderDetailScreen(): React.JSX.Element {
           >
             {isSavingResult
               ? <ActivityIndicator color="white" />
-              : <Text style={styles.previewSaveBtnText}>Save to Gallery</Text>
+              : <Text style={styles.previewSaveBtnText}>{s.common.saveToGallery}</Text>
             }
           </Pressable>
         </View>
@@ -142,19 +144,19 @@ export function OrderDetailScreen(): React.JSX.Element {
         <View style={styles.body}>
           {/* ── Status & price ── */}
           <View style={styles.sectionLabelRow}>
-            <Text style={styles.sectionLabel}>Summary</Text>
+            <Text style={styles.sectionLabel}>{s.orders.summary}</Text>
             <View style={styles.sectionLine} />
           </View>
           <View style={[styles.statusCard, { borderTopColor: accentColour }]}>
             <View style={styles.statusCardLeft}>
-              <Text style={styles.statusCardLabel}>Service</Text>
+              <Text style={styles.statusCardLabel}>{s.orders.service}</Text>
               <Text style={styles.statusCardServiceName}>
                 {localeName(submission.service_type?.service ?? submission.service_type, locale)}
               </Text>
               <View style={styles.statusCardDivider} />
-              <Text style={styles.statusCardLabel}>Status</Text>
+              <Text style={styles.statusCardLabel}>{s.orders.status}</Text>
               <Text style={[styles.statusCardValue, { color: accentColour }]}>
-                {submission.status_label}
+                {(s.status as Record<string, string>)[submission.status] ?? submission.status_label}
               </Text>
             </View>
             <Text style={[styles.statusCardPrice, { color: accentColour }]}>
@@ -170,16 +172,14 @@ export function OrderDetailScreen(): React.JSX.Element {
               accessibilityLabel="Pay now"
               accessibilityRole="button"
             >
-              <Text style={styles.payNowBtnText}>Pay Now</Text>
+              <Text style={styles.payNowBtnText}>{s.common.payNow}</Text>
             </Pressable>
           )}
 
           {/* ── Awaiting admin confirmation ── */}
           {awaitingConfirmation && (
             <View style={styles.awaitingBox}>
-              <Text style={styles.awaitingText}>
-                🔔 We have notified our admins about your order. Please prepare for payment once it is confirmed.
-              </Text>
+              <Text style={styles.awaitingText}>{s.orders.awaitingConfirmation}</Text>
             </View>
           )}
 
@@ -193,7 +193,7 @@ export function OrderDetailScreen(): React.JSX.Element {
               accessibilityRole="button"
             >
               <Text style={styles.cancelOrderBtnText}>
-                {isCancelling ? 'Cancelling…' : 'Cancel Order'}
+                {isCancelling ? s.common.cancelling : s.common.cancelOrder}
               </Text>
             </Pressable>
           )}
@@ -210,7 +210,7 @@ export function OrderDetailScreen(): React.JSX.Element {
               >
                 {isDownloading
                   ? <ActivityIndicator color="white" />
-                  : <Text style={styles.downloadBtnText}>View / Download Result</Text>
+                  : <Text style={styles.downloadBtnText}>{s.orders.viewDownloadResult}</Text>
                 }
               </Pressable>
               {downloadError !== null && (
@@ -225,7 +225,7 @@ export function OrderDetailScreen(): React.JSX.Element {
            submission.service_type.field_schema.some((f: FieldSchemaItem) => f.type !== 'file') && (
             <>
               <View style={styles.sectionLabelRow}>
-                <Text style={styles.sectionLabel}>Personal Info</Text>
+                <Text style={styles.sectionLabel}>{s.orders.personalInfo}</Text>
                 <View style={styles.sectionLine} />
               </View>
               <View style={styles.infoCard}>
@@ -267,7 +267,7 @@ export function OrderDetailScreen(): React.JSX.Element {
             return (
               <>
                 <View style={styles.sectionLabelRow}>
-                  <Text style={styles.sectionLabel}>Documents</Text>
+                  <Text style={styles.sectionLabel}>{s.orders.documents}</Text>
                   <View style={styles.sectionLine} />
                 </View>
                 <View style={styles.docCard}>

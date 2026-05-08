@@ -37,11 +37,15 @@ interface TabItem {
   disabled?: boolean;
 }
 
-const TAB_LABELS: Record<string, { en: string; mm: string }> = {
-  Home:    { en: 'Home',    mm: 'ပင်မ'       },
-  Map:     { en: 'Map',     mm: 'မြေပုံ'     },
-  Orders:  { en: 'Orders',  mm: 'အော်ဒါများ' },
-  Profile: { en: 'Profile', mm: 'ပရိုဖိုင်'  },
+import { getStrings } from '@/shared/i18n';
+
+// TAB_LABELS kept for the 'en'|'mm' accessor pattern at lines below.
+// Thai is handled via getStrings fallthrough.
+const TAB_LABELS: Record<string, { en: string; mm: string; th: string }> = {
+  Home:    { en: 'Home',    mm: 'ပင်မ',        th: 'หน้าหลัก'    },
+  Map:     { en: 'Map',     mm: 'မြေပုံ',      th: 'แผนที่'      },
+  Orders:  { en: 'Orders',  mm: 'အော်ဒါများ',  th: 'คำสั่งซื้อ'  },
+  Profile: { en: 'Profile', mm: 'ပရိုဖိုင်',   th: 'โปรไฟล์'    },
 };
 
 const TABS: TabItem[] = [

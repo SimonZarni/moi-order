@@ -11,6 +11,7 @@ import { FormField } from '@/shared/components/FormField/FormField';
 import { SuccessState } from '@/shared/components/SuccessState/SuccessState';
 import { useEmbassyResidentialFormScreen } from '@/features/embassyResidential/hooks/useEmbassyResidentialFormScreen';
 import { useLocale } from '@/shared/hooks/useLocale';
+import { useStrings } from '@/shared/i18n';
 import { styles } from './EmbassyResidentialFormScreen.styles';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
@@ -34,6 +35,7 @@ export function EmbassyResidentialFormScreen(): React.JSX.Element {
   } = useEmbassyResidentialFormScreen();
 
   const { locale } = useLocale();
+  const s = useStrings();
   const priceFormatted = `฿${price.toLocaleString('th-TH')}`;
 
   return (
@@ -90,10 +92,10 @@ export function EmbassyResidentialFormScreen(): React.JSX.Element {
               <Text style={styles.sectionTitle}>Required Documents</Text>
 
               {([
-                { key: 'passportBioPage'   as const, label: locale === 'mm' ? 'ပတ်စပို့ (ရှေ့မျက်နှာ)'  : 'Passport Bio Page',     icon: 'document-text' as const, onPick: handlePickPassportBioPage },
-                { key: 'visaPage'          as const, label: locale === 'mm' ? 'ဗီဇာ မျက်နှာ'            : 'Visa Page',             icon: 'id-card' as const,       onPick: handlePickVisaPage },
-                { key: 'identityCardFront' as const, label: locale === 'mm' ? 'မှတ်ပုံတင် (အရှေ့)'       : 'Identity Card (Front)', icon: 'id-card' as const,       onPick: handlePickIdentityCardFront },
-                { key: 'identityCardBack'  as const, label: locale === 'mm' ? 'မှတ်ပုံတင် (အနောက်)'      : 'Identity Card (Back)',  icon: 'id-card' as const,       onPick: handlePickIdentityCardBack },
+                { key: 'passportBioPage'   as const, label: s.docs.passportBioPage,     icon: 'document-text' as const, onPick: handlePickPassportBioPage },
+                { key: 'visaPage'          as const, label: s.docs.visaPage,             icon: 'id-card' as const,       onPick: handlePickVisaPage },
+                { key: 'identityCardFront' as const, label: s.docs.identityCardFront, icon: 'id-card' as const,       onPick: handlePickIdentityCardFront },
+                { key: 'identityCardBack'  as const, label: s.docs.identityCardBack,  icon: 'id-card' as const,       onPick: handlePickIdentityCardBack },
                 { key: 'tm30'              as const, label: 'TM30',                                         icon: 'clipboard' as const,     onPick: handlePickTm30,
                   hint: 'Tap to select image or PDF', uploadedHint: 'File selected — tap to change' },
               ] as { key: 'passportBioPage' | 'visaPage' | 'identityCardFront' | 'identityCardBack' | 'tm30'; label: string; icon: IoniconsName; onPick: () => void; hint?: string; uploadedHint?: string }[])
