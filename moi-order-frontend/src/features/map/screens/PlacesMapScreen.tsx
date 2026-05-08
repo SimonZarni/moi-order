@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { ActivityIndicator, Animated, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapboxGL from '@rnmapbox/maps';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { RootStackParamList } from '@/types/navigation';
@@ -38,6 +38,7 @@ const LONG_PRESS_STYLE = {
 
 export function PlacesMapScreen(): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const isFocused = useIsFocused();
   const {
     displayedPlaces, selectedPlace, selectedDetail,
     isLoadingPlaces, isLoadingTags, isTabSwitching, isLoadingDetail, isError,
@@ -105,63 +106,70 @@ export function PlacesMapScreen(): React.JSX.Element {
               onFilterPress={handleShowTagFilter}
             />
           </Animated.View>
-          <MapboxGL.MapView
-            style={styles.map}
-            styleURL={MAPBOX_STYLE}
-            onPress={handleMapPress}
-            onLongPress={(e) => {
-              const geometry = e.geometry as GeoJSON.Point;
-              const [lng, lat] = geometry.coordinates as [number, number];
-              handleMapLongPress([lng, lat]);
-            }}
-            attributionEnabled={false}
-            logoEnabled={false}
-          >
-            <MapboxGL.Camera
-              ref={cameraRef}
-              zoomLevel={12}
-              centerCoordinate={DEFAULT_CENTRE}
-              animationMode="flyTo"
-              animationDuration={800}
-            />
-            <MapboxGL.UserLocation visible animated />
+          {/* Mount the GL surface only while focused — on Android, Mapbox uses a
+              SurfaceView that renders above all React Native views regardless of
+              z-index/elevation, covering the tab bar on other screens. */}
+          {isFocused ? (
+            <MapboxGL.MapView
+              style={styles.map}
+              styleURL={MAPBOX_STYLE}
+              onPress={handleMapPress}
+              onLongPress={(e) => {
+                const geometry = e.geometry as GeoJSON.Point;
+                const [lng, lat] = geometry.coordinates as [number, number];
+                handleMapLongPress([lng, lat]);
+              }}
+              attributionEnabled={false}
+              logoEnabled={false}
+            >
+              <MapboxGL.Camera
+                ref={cameraRef}
+                zoomLevel={12}
+                centerCoordinate={DEFAULT_CENTRE}
+                animationMode="flyTo"
+                animationDuration={800}
+              />
+              <MapboxGL.UserLocation visible animated />
 
-            {longPressMarker && (
-              <MapboxGL.ShapeSource id="long-press-marker"
-                shape={{ type: 'Feature', geometry: { type: 'Point', coordinates: longPressMarker }, properties: {} }}>
-                <MapboxGL.CircleLayer id="long-press-circle" style={LONG_PRESS_STYLE} />
-              </MapboxGL.ShapeSource>
-            )}
-
-            {userLocation && !userLocation.isGPS && (
-              <MapboxGL.ShapeSource id="custom-origin"
-                shape={{ type: 'Feature', geometry: { type: 'Point', coordinates: userLocation.coords }, properties: {} }}>
-                <MapboxGL.CircleLayer id="custom-origin-circle" style={{
-                  circleRadius: 12, circleColor: MAP_COLORS.primary, circleOpacity: 0.85,
-                  circleStrokeWidth: 3, circleStrokeColor: MAP_COLORS.white,
-                }} />
-              </MapboxGL.ShapeSource>
-            )}
-
-            {drivingRoute && (
-              <>
-                <MapboxGL.ShapeSource id="route-casing"
-                  shape={{ type: 'Feature', geometry: drivingRoute.geometry, properties: {} }}>
-                  <MapboxGL.LineLayer id="route-casing-layer" style={ROUTE_CASING} />
+              {longPressMarker && (
+                <MapboxGL.ShapeSource id="long-press-marker"
+                  shape={{ type: 'Feature', geometry: { type: 'Point', coordinates: longPressMarker }, properties: {} }}>
+                  <MapboxGL.CircleLayer id="long-press-circle" style={LONG_PRESS_STYLE} />
                 </MapboxGL.ShapeSource>
-                <MapboxGL.ShapeSource id="route-line"
-                  shape={{ type: 'Feature', geometry: drivingRoute.geometry, properties: {} }}>
-                  <MapboxGL.LineLayer id="route-line-layer" style={ROUTE_LINE} />
-                </MapboxGL.ShapeSource>
-              </>
-            )}
+              )}
 
-            {displayedPlaces.map((place) => (
-              <PlaceMarker key={place.id} place={place}
-                isSelected={selectedPlace?.id === place.id}
-                onPress={handleMarkerPress} />
-            ))}
-          </MapboxGL.MapView>
+              {userLocation && !userLocation.isGPS && (
+                <MapboxGL.ShapeSource id="custom-origin"
+                  shape={{ type: 'Feature', geometry: { type: 'Point', coordinates: userLocation.coords }, properties: {} }}>
+                  <MapboxGL.CircleLayer id="custom-origin-circle" style={{
+                    circleRadius: 12, circleColor: MAP_COLORS.primary, circleOpacity: 0.85,
+                    circleStrokeWidth: 3, circleStrokeColor: MAP_COLORS.white,
+                  }} />
+                </MapboxGL.ShapeSource>
+              )}
+
+              {drivingRoute && (
+                <>
+                  <MapboxGL.ShapeSource id="route-casing"
+                    shape={{ type: 'Feature', geometry: drivingRoute.geometry, properties: {} }}>
+                    <MapboxGL.LineLayer id="route-casing-layer" style={ROUTE_CASING} />
+                  </MapboxGL.ShapeSource>
+                  <MapboxGL.ShapeSource id="route-line"
+                    shape={{ type: 'Feature', geometry: drivingRoute.geometry, properties: {} }}>
+                    <MapboxGL.LineLayer id="route-line-layer" style={ROUTE_LINE} />
+                  </MapboxGL.ShapeSource>
+                </>
+              )}
+
+              {displayedPlaces.map((place) => (
+                <PlaceMarker key={place.id} place={place}
+                  isSelected={selectedPlace?.id === place.id}
+                  onPress={handleMarkerPress} />
+              ))}
+            </MapboxGL.MapView>
+          ) : (
+            <View style={[styles.map, { backgroundColor: '#0a2e1a' }]} />
+          )}
 
           {userLocation && !userLocation.isGPS && (
             <View style={styles.locationBanner}>
