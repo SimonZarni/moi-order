@@ -1,18 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Image, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Image, Text, View } from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  interpolate,
-  Extrapolation,
-} from 'react-native-reanimated';
 import { CATEGORY_EMOJI } from '@/shared/theme/mapTheme';
 import { styles, BUBBLE_SIZE, BUBBLE_SELECTED } from './PlaceMarker.styles';
 import type { Place } from '@/types/models';
 
 const GREEN = '#10B981';
+const WHITE = '#FFFFFF';
 
 interface Props {
   place:      Place;
@@ -24,45 +18,37 @@ export const PlaceMarker = React.memo(function PlaceMarker(
   { place, isSelected, onPress }: Props,
 ): React.JSX.Element | null {
   // All hooks before early return
-  const progress = useSharedValue(isSelected ? 1 : 0);
+  // useNativeDriver: false — layout/color properties cannot use native driver.
+  // RN Animated (JS thread) works correctly inside Mapbox PointAnnotation;
+  // Reanimated worklets (native thread) do not — Mapbox snapshots the view
+  // before native-thread updates propagate.
+  const progress = useRef(new Animated.Value(isSelected ? 1 : 0)).current;
   const [imgReady, setImgReady] = useState(!place.cover_image);
 
   useEffect(() => {
-    progress.value = withSpring(isSelected ? 1 : 0, { damping: 20, stiffness: 280 });
+    Animated.spring(progress, {
+      toValue:          isSelected ? 1 : 0,
+      useNativeDriver:  false,
+      damping:          20,
+      stiffness:        280,
+    }).start();
   }, [isSelected, progress]);
 
-  // Outer ring: transparent when unselected, green bordered ring when selected.
-  // padding creates the gap between ring border and bubble edge.
-  const ringWrapStyle = useAnimatedStyle(() => {
-    'worklet';
-    const bubbleSize  = interpolate(progress.value, [0, 1], [BUBBLE_SIZE, BUBBLE_SELECTED], Extrapolation.CLAMP);
-    const ringPad     = interpolate(progress.value, [0, 1], [0, 4], Extrapolation.CLAMP);
-    const ringBorder  = interpolate(progress.value, [0, 1], [0, 3], Extrapolation.CLAMP);
-    const total       = bubbleSize + ringPad * 2;
-    return {
-      width:        total,
-      height:       total,
-      borderRadius: total / 2,
-      padding:      ringPad,
-      borderWidth:  ringBorder,
-      borderColor:  GREEN,
-    };
-  });
+  // Ring wrap — grows from 0→4px padding + 0→3px green border
+  const ringSize    = progress.interpolate({ inputRange: [0, 1], outputRange: [BUBBLE_SIZE, BUBBLE_SELECTED + 8] });
+  const ringPad     = progress.interpolate({ inputRange: [0, 1], outputRange: [0, 4] });
+  const ringBorder  = progress.interpolate({ inputRange: [0, 1], outputRange: [0, 3] });
+  const ringColor   = progress.interpolate({ inputRange: [0, 1], outputRange: ['rgba(16,185,129,0)', GREEN] });
+  const ringRadius  = (ringSize as any).interpolate
+    ? (ringSize as Animated.AnimatedInterpolation<number>).interpolate({ inputRange: [BUBBLE_SIZE, BUBBLE_SELECTED + 8], outputRange: [BUBBLE_SIZE / 2, (BUBBLE_SELECTED + 8) / 2] })
+    : BUBBLE_SIZE / 2;
 
-  // Bubble: grows slightly, border stays white (ring wrap provides green)
-  const bubbleStyle = useAnimatedStyle(() => {
-    'worklet';
-    const size = interpolate(progress.value, [0, 1], [BUBBLE_SIZE, BUBBLE_SELECTED], Extrapolation.CLAMP);
-    return {
-      width:        size,
-      height:       size,
-      borderRadius: size / 2,
-    };
-  });
+  // Bubble — grows from BUBBLE_SIZE → BUBBLE_SELECTED
+  const bubbleSize  = progress.interpolate({ inputRange: [0, 1], outputRange: [BUBBLE_SIZE, BUBBLE_SELECTED] });
+  const bubbleRadius = progress.interpolate({ inputRange: [0, 1], outputRange: [BUBBLE_SIZE / 2, BUBBLE_SELECTED / 2] });
 
-  const labelStyle = useAnimatedStyle(() => ({
-    opacity: progress.value,
-  }));
+  // Label fades in
+  const labelOpacity = progress;
 
   if (!place.latitude || !place.longitude) return null;
 
@@ -71,23 +57,40 @@ export const PlaceMarker = React.memo(function PlaceMarker(
   return (
     <MapboxGL.PointAnnotation
       id={`marker-${place.id}`}
-      key={`marker-${place.id}-${imgReady ? '1' : '0'}`}
+      key={`marker-${place.id}-${isSelected ? 's' : 'n'}-${imgReady ? '1' : '0'}`}
       coordinate={[place.longitude, place.latitude]}
       anchor={{ x: 0.5, y: 1 }}
       onSelected={() => onPress(place)}
       selected={isSelected}
     >
-      {/* Exactly 1 subview — Reanimated Animated.View is safe; expo-image is not
-          (its transition injects a 2nd native view during Mapbox's snapshot). */}
+      {/* Exactly 1 subview. Using RN Animated (not Reanimated) so updates are
+          visible inside Mapbox PointAnnotation's view hierarchy. */}
       <View
         style={styles.pressable}
         collapsable={false}
         accessibilityRole="button"
         accessibilityLabel={`View ${place.name_en}`}
       >
-        {/* Ring wrap: green border ring that grows around the bubble on select */}
-        <Animated.View style={[styles.ringWrap, ringWrapStyle]}>
-          <Animated.View style={[styles.bubbleBase, bubbleStyle]}>
+        {/* Ring wrap: green border ring appears on select */}
+        <Animated.View style={[
+          styles.ringWrap,
+          {
+            width:        ringSize,
+            height:       ringSize,
+            borderRadius: ringRadius,
+            padding:      ringPad,
+            borderWidth:  ringBorder,
+            borderColor:  ringColor,
+          },
+        ]}>
+          <Animated.View style={[
+            styles.bubbleBase,
+            {
+              width:        bubbleSize,
+              height:       bubbleSize,
+              borderRadius: bubbleRadius,
+            },
+          ]}>
             {place.cover_image ? (
               <Image
                 source={{ uri: place.cover_image }}
@@ -103,7 +106,7 @@ export const PlaceMarker = React.memo(function PlaceMarker(
           </Animated.View>
         </Animated.View>
 
-        <Animated.View style={[styles.labelBubble, labelStyle]} pointerEvents="none">
+        <Animated.View style={[styles.labelBubble, { opacity: labelOpacity }]} pointerEvents="none">
           <Text style={styles.labelText} numberOfLines={1}>{place.name_en}</Text>
         </Animated.View>
 
