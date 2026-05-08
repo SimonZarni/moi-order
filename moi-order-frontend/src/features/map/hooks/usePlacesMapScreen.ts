@@ -139,16 +139,10 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
         }
         if (status !== Location.PermissionStatus.GRANTED) return;
 
-        // Fast one-shot fix to populate coords immediately.
-        // Accuracy.Low (network/WiFi) avoids the Google Location Accuracy dialog.
-        try {
-          const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
-          const coords: [number, number] = [loc.coords.longitude, loc.coords.latitude];
-          setGpsCoords(coords);
-          setUserLocation(prev => (!prev || prev.isGPS) ? { coords, label: 'Current Location', isGPS: true } : prev);
-        } catch { /* no initial fix — watch will fill it in */ }
-
-        // Continuous watch updates gpsCoords while on the map screen.
+        // Single watch — first callback acts as the initial fix.
+        // Removing the separate getCurrentPositionAsync call eliminates the second
+        // LocationSettingsRequest that caused the Google Location Accuracy dialog to
+        // appear twice per Map tab visit.
         sub = await Location.watchPositionAsync(
           { accuracy: Location.Accuracy.Low, distanceInterval: 10 },
           (loc) => {
