@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Image, Text, View } from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
 import { CATEGORY_EMOJI } from '@/shared/theme/mapTheme';
@@ -18,9 +18,15 @@ export const PlaceMarker = React.memo(function PlaceMarker(
 
   const emoji = CATEGORY_EMOJI[(place.categories[0]?.name_en ?? '').toLowerCase()] ?? CATEGORY_EMOJI['default'];
 
+  // Mapbox PointAnnotation snapshots the view at mount — before async Image loads.
+  // Changing the key after onLoad forces a re-snapshot with the actual image.
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [imgReady, setImgReady] = useState(!place.cover_image);
+
   return (
     <MapboxGL.PointAnnotation
       id={`marker-${place.id}`}
+      key={`marker-${place.id}-${imgReady ? '1' : '0'}`}
       coordinate={[place.longitude, place.latitude]}
       anchor={{ x: 0.5, y: 1 }}
       onSelected={() => onPress(place)}
@@ -41,6 +47,7 @@ export const PlaceMarker = React.memo(function PlaceMarker(
               source={{ uri: place.cover_image }}
               style={styles.coverImage}
               resizeMode="cover"
+              onLoad={() => setImgReady(true)}
             />
           ) : (
             <View style={styles.imageFallback}>

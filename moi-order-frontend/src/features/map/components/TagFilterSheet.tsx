@@ -27,13 +27,13 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
       setSelected(new Set(activeTags));
       // Backdrop fades in instantly (80 ms ease); card springs up.
       Animated.parallel([
-        Animated.timing(backdropOpacity, { toValue: 1, duration: 80, useNativeDriver: true }),
-        Animated.spring(cardTranslateY,  { toValue: 0, damping: 22, stiffness: 220, useNativeDriver: true }),
+        Animated.timing(backdropOpacity, { toValue: 1, duration: 80, useNativeDriver: false }),
+        Animated.spring(cardTranslateY,  { toValue: 0, damping: 22, stiffness: 220, useNativeDriver: false }),
       ]).start();
     } else {
       Animated.parallel([
-        Animated.timing(backdropOpacity, { toValue: 0, duration: 160, useNativeDriver: true }),
-        Animated.timing(cardTranslateY,  { toValue: 400, duration: 180, useNativeDriver: true }),
+        Animated.timing(backdropOpacity, { toValue: 0, duration: 160, useNativeDriver: false }),
+        Animated.timing(cardTranslateY,  { toValue: 400, duration: 180, useNativeDriver: false }),
       ]).start(() => setModalVisible(false));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -59,17 +59,21 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: (_, { dy }) => Math.abs(dy) > 6,
+      onPanResponderGrant: () => {
+        cardTranslateY.stopAnimation();
+        cardTranslateY.setValue(0);
+      },
       onPanResponderMove: (_, { dy }) => {
         if (dy > 0) cardTranslateY.setValue(dy);
       },
       onPanResponderRelease: (_, { dy, vy }) => {
         if (dy > 80 || vy > 0.5) {
           Animated.timing(cardTranslateY, {
-            toValue: 500, duration: 200, useNativeDriver: true,
+            toValue: 500, duration: 200, useNativeDriver: false,
           }).start(onDismiss);
         } else {
           Animated.spring(cardTranslateY, {
-            toValue: 0, damping: 22, stiffness: 220, useNativeDriver: true,
+            toValue: 0, damping: 22, stiffness: 220, useNativeDriver: false,
           }).start();
         }
       },
