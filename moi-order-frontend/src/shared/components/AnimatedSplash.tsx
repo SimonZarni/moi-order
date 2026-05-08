@@ -3,7 +3,7 @@ import { Animated, Dimensions, Image, StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const { width: SCREEN_W } = Dimensions.get('window');
-const LOGO_SIZE = Math.round(SCREEN_W * 0.55);
+const LOGO_SIZE = SCREEN_W;
 
 interface Props {
   /** When true the splash fades out and calls onHidden. */
