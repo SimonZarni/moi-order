@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Image } from 'expo-image';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { ActivityIndicator, Animated, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapboxGL from '@rnmapbox/maps';
-import { useNavigation, useNavigationState } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { RootStackParamList } from '@/types/navigation';
@@ -21,10 +20,6 @@ import { MAP_COLORS } from '@/shared/theme/mapTheme';
 const MAPBOX_TOKEN = process.env['EXPO_PUBLIC_MAPBOX_TOKEN'] ?? '';
 const MAPBOX_STYLE = process.env['EXPO_PUBLIC_MAPBOX_STYLE'] ?? 'mapbox://styles/mapbox/streets-v12';
 const DEFAULT_CENTRE: [number, number] = [102.6331, 17.9757];
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
-// Mapbox Static API max is 1280px per side; @2x doubles it for Retina displays.
-const STATIC_W = Math.min(Math.round(SCREEN_W), 1280);
-const STATIC_H = Math.min(Math.round(SCREEN_H), 1280);
 
 MapboxGL.setAccessToken(MAPBOX_TOKEN);
 
@@ -43,35 +38,6 @@ const LONG_PRESS_STYLE = {
 
 export function PlacesMapScreen(): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  // useNavigationState updates immediately on tab press (before animation completes),
-  // unlike useIsFocused which only flips after the transition — this lets MapView
-  // mount and start loading tiles during the transition, eliminating the green flash.
-  const isSelected = useNavigationState(
-    state => state.routes[state.index]?.name === 'Map'
-  );
-  // Decoupled from isSelected so the heavy MapboxGL mount doesn't compete
-  // with the navigation transition animation and cause frame drops.
-  const [shouldMountMap, setShouldMountMap] = useState(false);
-  const [mapReady, setMapReady]             = useState(false);
-
-  useEffect(() => {
-    if (!isSelected) {
-      setShouldMountMap(false); // destroy SurfaceView immediately on tab leave
-      setMapReady(false);
-      return;
-    }
-    // Static image plays during the ~300 ms tab animation.
-    // MapboxGL mounts after animation completes — no frame-drop competition.
-    const t = setTimeout(() => setShouldMountMap(true), 300);
-    return () => clearTimeout(t);
-  }, [isSelected]);
-
-  useEffect(() => {
-    if (!shouldMountMap) return;
-    // Fallback: hide overlay 800 ms after MapView mounts if events don't fire.
-    const t = setTimeout(() => setMapReady(true), 800);
-    return () => clearTimeout(t);
-  }, [shouldMountMap]);
   const {
     displayedPlaces, selectedPlace, selectedDetail,
     isLoadingPlaces, isLoadingTags, isTabSwitching, isLoadingDetail, isError,
@@ -95,16 +61,6 @@ export function PlacesMapScreen(): React.JSX.Element {
     if (selectedPlace) navigation.navigate('PlaceDetail', { placeId: selectedPlace.id });
   }, [selectedPlace, navigation]);
 
-  // Static map preview — shown as overlay while MapboxGL tiles load.
-  // Looks identical to the live map so the swap is invisible to the user.
-  // expo-image caches it so subsequent visits are instant.
-  const staticMapUrl = useMemo(() => {
-    if (!MAPBOX_TOKEN) return null;
-    const styleId = MAPBOX_STYLE.replace('mapbox://styles/', '');
-    const [lon, lat] = gpsCoords ?? DEFAULT_CENTRE;
-    return `https://api.mapbox.com/styles/v1/${styleId}/static/${lon},${lat},12/${STATIC_W}x${STATIC_H}@2x?access_token=${MAPBOX_TOKEN}&attribution=false&logo=false`;
-  }, [gpsCoords]);
-
   const topControlsAnim  = useRef(new Animated.Value(0)).current;
   const buttonsRightAnim = useRef(new Animated.Value(0)).current;
 
@@ -113,7 +69,6 @@ export function PlacesMapScreen(): React.JSX.Element {
   useEffect(() => {
     Animated.parallel([
       Animated.timing(topControlsAnim, {
-        // -220 hides controls just behind the green status bar, not way above
         toValue: topControlsHidden ? -210 : 0,
         duration: 280,
         useNativeDriver: true,
@@ -128,214 +83,184 @@ export function PlacesMapScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-        <View style={styles.container}>
-          {/* Top controls — slide up when fullscreen */}
-          <Animated.View
-            style={[styles.topControls, { transform: [{ translateY: topControlsAnim }] }]}
-            pointerEvents={topControlsHidden ? 'none' : 'box-none'}
-          >
-            <Pressable style={styles.backBtn} onPress={() => navigation.goBack()}
-              accessibilityRole="button" accessibilityLabel="Go back">
-              <Text style={styles.backText}>← Back</Text>
-            </Pressable>
-            <MapSearchBar
-              value={searchQuery}
-              onChangeText={handleSearchChange}
-              onClear={handleClearSearch}
-              onSelectPlace={handleSelectPlace}
-              onSelectGeocoding={handleSelectGeocoding}
-              placeSuggestions={placeSuggestions}
-              geoSuggestions={geoSuggestions}
-              isGeoLoading={isGeoLoading}
-              activeTab={activeTab}
-              onTabPress={handleTabPress}
-              activeTagCount={activeTags.length}
-              onFilterPress={handleShowTagFilter}
-            />
-          </Animated.View>
-          {/* MapboxGL mounts 300 ms after tab selection (post-animation) so the
-              native init doesn't compete with the transition. Unmounts immediately
-              on tab-away to destroy the Android SurfaceView and fix z-ordering. */}
-          {shouldMountMap ? (
-            <MapboxGL.MapView
-              style={styles.map}
-              styleURL={MAPBOX_STYLE}
-              onPress={handleMapPress}
-              onLongPress={(e) => {
-                const geometry = e.geometry as GeoJSON.Point;
-                const [lng, lat] = geometry.coordinates as [number, number];
-                handleMapLongPress([lng, lat]);
-              }}
-              onDidFinishLoadingMap={() => setMapReady(true)}
-              onDidBecomeIdle={() => setMapReady(true)}
-              attributionEnabled={false}
-              logoEnabled={false}
+      <View style={styles.container}>
+
+        {/* Top controls — slide up when fullscreen */}
+        <Animated.View
+          style={[styles.topControls, { transform: [{ translateY: topControlsAnim }] }]}
+          pointerEvents={topControlsHidden ? 'none' : 'box-none'}
+        >
+          <Pressable style={styles.backBtn} onPress={() => navigation.goBack()}
+            accessibilityRole="button" accessibilityLabel="Go back">
+            <Text style={styles.backText}>← Back</Text>
+          </Pressable>
+          <MapSearchBar
+            value={searchQuery}
+            onChangeText={handleSearchChange}
+            onClear={handleClearSearch}
+            onSelectPlace={handleSelectPlace}
+            onSelectGeocoding={handleSelectGeocoding}
+            placeSuggestions={placeSuggestions}
+            geoSuggestions={geoSuggestions}
+            isGeoLoading={isGeoLoading}
+            activeTab={activeTab}
+            onTabPress={handleTabPress}
+            activeTagCount={activeTags.length}
+            onFilterPress={handleShowTagFilter}
+          />
+        </Animated.View>
+
+        {/* MapboxGL.MapView stays always mounted — tab bar is rendered outside
+            NavigationContainer in App.tsx so it sits above the SurfaceView. */}
+        <MapboxGL.MapView
+          style={styles.map}
+          styleURL={MAPBOX_STYLE}
+          onPress={handleMapPress}
+          onLongPress={(e) => {
+            const geometry = e.geometry as GeoJSON.Point;
+            const [lng, lat] = geometry.coordinates as [number, number];
+            handleMapLongPress([lng, lat]);
+          }}
+          attributionEnabled={false}
+          logoEnabled={false}
+        >
+          <MapboxGL.Camera
+            ref={cameraRef}
+            zoomLevel={12}
+            centerCoordinate={userLocation?.coords ?? DEFAULT_CENTRE}
+            animationMode="flyTo"
+            animationDuration={800}
+          />
+
+          {/* Custom location dot backed by hook state — instant on tab revisit. */}
+          {gpsCoords && (
+            <MapboxGL.ShapeSource
+              id="user-gps-location"
+              shape={{ type: 'Feature', geometry: { type: 'Point', coordinates: gpsCoords }, properties: {} }}
             >
-              <MapboxGL.Camera
-                ref={cameraRef}
-                zoomLevel={12}
-                centerCoordinate={userLocation?.coords ?? DEFAULT_CENTRE}
-                animationMode="flyTo"
-                animationDuration={800}
+              <MapboxGL.CircleLayer
+                id="user-gps-dot"
+                style={{
+                  circleRadius: 9,
+                  circleColor: '#4A90E2',
+                  circleOpacity: 0.95,
+                  circleStrokeWidth: 3,
+                  circleStrokeColor: '#FFFFFF',
+                }}
               />
-              {/* Custom location dot — persists in hook state across MapView remounts,
-                  unlike MapboxGL.UserLocation which re-acquires GPS each time. */}
-              {gpsCoords && (
-                <MapboxGL.ShapeSource
-                  id="user-gps-location"
-                  shape={{ type: 'Feature', geometry: { type: 'Point', coordinates: gpsCoords }, properties: {} }}
-                >
-                  <MapboxGL.CircleLayer
-                    id="user-gps-dot"
-                    style={{
-                      circleRadius: 9,
-                      circleColor: '#4A90E2',
-                      circleOpacity: 0.95,
-                      circleStrokeWidth: 3,
-                      circleStrokeColor: '#FFFFFF',
-                    }}
-                  />
-                </MapboxGL.ShapeSource>
-              )}
-
-              {longPressMarker && (
-                <MapboxGL.ShapeSource id="long-press-marker"
-                  shape={{ type: 'Feature', geometry: { type: 'Point', coordinates: longPressMarker }, properties: {} }}>
-                  <MapboxGL.CircleLayer id="long-press-circle" style={LONG_PRESS_STYLE} />
-                </MapboxGL.ShapeSource>
-              )}
-
-              {userLocation && !userLocation.isGPS && (
-                <MapboxGL.ShapeSource id="custom-origin"
-                  shape={{ type: 'Feature', geometry: { type: 'Point', coordinates: userLocation.coords }, properties: {} }}>
-                  <MapboxGL.CircleLayer id="custom-origin-circle" style={{
-                    circleRadius: 12, circleColor: MAP_COLORS.primary, circleOpacity: 0.85,
-                    circleStrokeWidth: 3, circleStrokeColor: MAP_COLORS.white,
-                  }} />
-                </MapboxGL.ShapeSource>
-              )}
-
-              {drivingRoute && (
-                <>
-                  <MapboxGL.ShapeSource id="route-casing"
-                    shape={{ type: 'Feature', geometry: drivingRoute.geometry, properties: {} }}>
-                    <MapboxGL.LineLayer id="route-casing-layer" style={ROUTE_CASING} />
-                  </MapboxGL.ShapeSource>
-                  <MapboxGL.ShapeSource id="route-line"
-                    shape={{ type: 'Feature', geometry: drivingRoute.geometry, properties: {} }}>
-                    <MapboxGL.LineLayer id="route-line-layer" style={ROUTE_LINE} />
-                  </MapboxGL.ShapeSource>
-                </>
-              )}
-
-              {displayedPlaces.map((place) => (
-                <PlaceMarker key={place.id} place={place}
-                  isSelected={selectedPlace?.id === place.id}
-                  onPress={handleMarkerPress} />
-              ))}
-            </MapboxGL.MapView>
-          ) : (
-            staticMapUrl ? (
-              <Image
-                source={{ uri: staticMapUrl }}
-                style={styles.map}
-                contentFit="cover"
-                cachePolicy="memory-disk"
-              />
-            ) : (
-              <View style={[styles.map, { backgroundColor: '#0a2e1a' }]} />
-            )
+            </MapboxGL.ShapeSource>
           )}
 
-          {/* Static map preview covers the screen during the transition animation
-              (shouldMountMap=false) AND while live tiles initialise after mount
-              (shouldMountMap=true, mapReady=false). Swap is invisible. */}
-          {isSelected && !mapReady && (
-            staticMapUrl ? (
-              <Image
-                source={{ uri: staticMapUrl }}
-                style={[StyleSheet.absoluteFill, { zIndex: 50 }]}
-                contentFit="cover"
-                cachePolicy="memory-disk"
-              />
-            ) : (
-              <View style={[StyleSheet.absoluteFill, { backgroundColor: '#0a2e1a', zIndex: 50 }]} />
-            )
+          {longPressMarker && (
+            <MapboxGL.ShapeSource id="long-press-marker"
+              shape={{ type: 'Feature', geometry: { type: 'Point', coordinates: longPressMarker }, properties: {} }}>
+              <MapboxGL.CircleLayer id="long-press-circle" style={LONG_PRESS_STYLE} />
+            </MapboxGL.ShapeSource>
           )}
 
           {userLocation && !userLocation.isGPS && (
-            <View style={styles.locationBanner}>
-              <Text style={styles.locationBannerText}>📌 Origin: {userLocation.label}</Text>
-              <Text style={styles.locationBannerHint}>Hold map to change</Text>
-            </View>
+            <MapboxGL.ShapeSource id="custom-origin"
+              shape={{ type: 'Feature', geometry: { type: 'Point', coordinates: userLocation.coords }, properties: {} }}>
+              <MapboxGL.CircleLayer id="custom-origin-circle" style={{
+                circleRadius: 12, circleColor: MAP_COLORS.primary, circleOpacity: 0.85,
+                circleStrokeWidth: 3, circleStrokeColor: MAP_COLORS.white,
+              }} />
+            </MapboxGL.ShapeSource>
           )}
 
-          {(isLoadingPlaces || isTabSwitching) && (
-            <View style={styles.loadingOverlay}>
-              <ActivityIndicator color={MAP_COLORS.primary} size="small" />
-              <Text style={styles.loadingText}>Loading places…</Text>
-            </View>
+          {drivingRoute && (
+            <>
+              <MapboxGL.ShapeSource id="route-casing"
+                shape={{ type: 'Feature', geometry: drivingRoute.geometry, properties: {} }}>
+                <MapboxGL.LineLayer id="route-casing-layer" style={ROUTE_CASING} />
+              </MapboxGL.ShapeSource>
+              <MapboxGL.ShapeSource id="route-line"
+                shape={{ type: 'Feature', geometry: drivingRoute.geometry, properties: {} }}>
+                <MapboxGL.LineLayer id="route-line-layer" style={ROUTE_LINE} />
+              </MapboxGL.ShapeSource>
+            </>
           )}
 
-          {isError && (
-            <View style={styles.errorBanner}>
-              <Text style={styles.errorText}>⚠ Could not load places. </Text>
-              <Text style={styles.errorRetry} onPress={handleRefetch}>Retry</Text>
-            </View>
-          )}
+          {displayedPlaces.map((place) => (
+            <PlaceMarker key={place.id} place={place}
+              isSelected={selectedPlace?.id === place.id}
+              onPress={handleMarkerPress} />
+          ))}
+        </MapboxGL.MapView>
 
-          {/* zIndex drops below the BottomSheet (100) when card is open */}
-          <Animated.View
-            style={{ transform: [{ translateX: buttonsRightAnim }], zIndex: selectedPlace ? 1 : 20 }}
-            pointerEvents={isFullscreen ? 'none' : 'box-none'}
-          >
-            <MyLocationButton onPress={handleMyLocation} />
-          </Animated.View>
+        {userLocation && !userLocation.isGPS && (
+          <View style={styles.locationBanner}>
+            <Text style={styles.locationBannerText}>📌 Origin: {userLocation.label}</Text>
+            <Text style={styles.locationBannerHint}>Hold map to change</Text>
+          </View>
+        )}
 
-          <MapFAB
-            isFABOpen={isFABOpen}
-            categories={categories}
-            activeCategories={activeCategories}
-            onToggleFAB={handleToggleFAB}
-            onSelectCategory={handleSelectCategory}
-            isFullscreen={isFullscreen}
-            behindCard={!!selectedPlace}
+        {(isLoadingPlaces || isTabSwitching) && (
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator color={MAP_COLORS.primary} size="small" />
+            <Text style={styles.loadingText}>Loading places…</Text>
+          </View>
+        )}
+
+        {isError && (
+          <View style={styles.errorBanner}>
+            <Text style={styles.errorText}>⚠ Could not load places. </Text>
+            <Text style={styles.errorRetry} onPress={handleRefetch}>Retry</Text>
+          </View>
+        )}
+
+        <Animated.View
+          style={{ transform: [{ translateX: buttonsRightAnim }], zIndex: selectedPlace ? 1 : 20 }}
+          pointerEvents={isFullscreen ? 'none' : 'box-none'}
+        >
+          <MyLocationButton onPress={handleMyLocation} />
+        </Animated.View>
+
+        <MapFAB
+          isFABOpen={isFABOpen}
+          categories={categories}
+          activeCategories={activeCategories}
+          onToggleFAB={handleToggleFAB}
+          onSelectCategory={handleSelectCategory}
+          isFullscreen={isFullscreen}
+          behindCard={!!selectedPlace}
+        />
+
+        {selectedPlace && (
+          <PlaceBottomSheet
+            place={selectedPlace}
+            detail={selectedDetail}
+            isLoading={isLoadingDetail}
+            drivingRoute={drivingRoute}
+            walkingRoute={walkingRoute}
+            isLoadingRoutes={isLoadingRoutes}
+            hasUserLocation={!!userLocation}
+            onDismiss={handleDismiss}
+            onGetDirections={handleGetDirections}
+            onNavigate={handleNavigate}
+            onReadMore={handleReadMore}
+            onSnapChange={handleBottomSheetSnapChange}
           />
+        )}
 
-          {selectedPlace && (
-            <PlaceBottomSheet
-              place={selectedPlace}
-              detail={selectedDetail}
-              isLoading={isLoadingDetail}
-              drivingRoute={drivingRoute}
-              walkingRoute={walkingRoute}
-              isLoadingRoutes={isLoadingRoutes}
-              hasUserLocation={!!userLocation}
-              onDismiss={handleDismiss}
-              onGetDirections={handleGetDirections}
-              onNavigate={handleNavigate}
-              onReadMore={handleReadMore}
-              onSnapChange={handleBottomSheetSnapChange}
-            />
-          )}
+        <LocationOptionsSheet
+          visible={showLocationOptions}
+          hasGPS={true}
+          onUseCurrentGPS={handleUseCurrentGPS}
+          onUseMapLocation={handleUseMapLocation}
+          onDismiss={handleDismissLocationOptions}
+        />
 
-          <LocationOptionsSheet
-            visible={showLocationOptions}
-            hasGPS={true}
-            onUseCurrentGPS={handleUseCurrentGPS}
-            onUseMapLocation={handleUseMapLocation}
-            onDismiss={handleDismissLocationOptions}
-          />
+        <TagFilterSheet
+          visible={showTagFilter}
+          allTags={allTags}
+          isLoading={isLoadingTags}
+          activeTags={activeTags}
+          onApply={handleApplyTags}
+          onDismiss={handleDismissTagFilter}
+        />
 
-          <TagFilterSheet
-            visible={showTagFilter}
-            allTags={allTags}
-            isLoading={isLoadingTags}
-            activeTags={activeTags}
-            onApply={handleApplyTags}
-            onDismiss={handleDismissTagFilter}
-          />
-        </View>
+      </View>
     </SafeAreaView>
   );
 }

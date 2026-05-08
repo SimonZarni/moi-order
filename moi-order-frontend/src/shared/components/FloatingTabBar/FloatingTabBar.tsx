@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useRef } from 'react';
-import { Animated, LayoutChangeEvent, Platform, Pressable, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Animated, LayoutChangeEvent, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { useNavigationContainerRef } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -16,8 +15,18 @@ import { RootStackParamList, TabParamList } from '@/types/navigation';
 import { useFloatingTabBarPill } from './useFloatingTabBarPill';
 import { styles, TAB_BAR_BOTTOM_OFFSET } from './FloatingTabBar.styles';
 
-// Non-tab screens that sit above Home in the root stack but keep Home tab highlighted.
-const HOME_CHILD_ROUTES: (keyof RootStackParamList)[] = ['NinetyDayReport', 'OtherServices', 'EmbassyServices', 'CompanyServices', 'Places'];
+// Non-tab screens that keep the Home tab highlighted.
+const HOME_CHILD_ROUTES: (keyof RootStackParamList)[] = [
+  'NinetyDayReport', 'OtherServices', 'EmbassyServices', 'CompanyServices', 'Places',
+];
+
+// All routes where the tab bar is visible.
+const TAB_BAR_ROUTES = new Set<string>([
+  'Home', 'Map', 'Orders', 'Profile',
+  'NinetyDayReport', 'OtherServices', 'EmbassyServices', 'CompanyServices',
+  'Places', 'Tickets', 'EmergencyContactList',
+  'PrivacyPolicy', 'TermsAndConditions', 'PdpaNotice',
+]);
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -36,11 +45,15 @@ const TAB_LABELS: Record<string, { en: string; mm: string }> = {
 };
 
 const TABS: TabItem[] = [
-  { route: 'Home',    icon: 'home',     label: 'Home'    },
-  { route: 'Map',     icon: 'map',      label: 'Map'     },
-  { route: 'Orders',  icon: 'list',     label: 'Orders'  },
-  { route: 'Profile', icon: 'person',   label: 'Profile' },
+  { route: 'Home',    icon: 'home',   label: 'Home'    },
+  { route: 'Map',     icon: 'map',    label: 'Map'     },
+  { route: 'Orders',  icon: 'list',   label: 'Orders'  },
+  { route: 'Profile', icon: 'person', label: 'Profile' },
 ];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Shared tab bar view (used by both FloatingTabBar and RootFloatingTabBar)
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface TabBarViewProps {
   activeRoute: string;
@@ -71,12 +84,10 @@ function TabBarView({ activeRoute, activeIndex, onTabPress, bottom, locale }: Ta
 
   const tabsRow = (
     <View style={styles.tabsRow} onLayout={handleLayout} {...panHandlers}>
-      {/* Animated pill slides between tabs with liquid stretch spring */}
       <Animated.View
         style={[styles.pill, { left: pillLeft, width: pillWidth }]}
         pointerEvents="none"
       />
-
       {TABS.map((tab) => {
         const isActive = tab.route === activeRoute;
         return (
@@ -106,9 +117,7 @@ function TabBarView({ activeRoute, activeIndex, onTabPress, bottom, locale }: Ta
   return (
     <View style={[styles.container, { bottom }]}>
       {Platform.OS === 'android' ? (
-        <View style={[styles.blurWrap, styles.androidWrap]}>
-          {tabsRow}
-        </View>
+        <View style={[styles.blurWrap, styles.androidWrap]}>{tabsRow}</View>
       ) : (
         <BlurView intensity={88} tint="systemMaterialLight" style={styles.blurWrap}>
           {tabsRow}
@@ -118,33 +127,107 @@ function TabBarView({ activeRoute, activeIndex, onTabPress, bottom, locale }: Ta
   );
 }
 
-/**
- * Tab bar adapter — passed as the `tabBar` prop to createBottomTabNavigator.
- * Renders once and never remounts; switching is an instant visibility toggle.
- * Uses state.index from tab navigator for exact active-tab tracking (no useRoute lag).
- */
+// ─────────────────────────────────────────────────────────────────────────────
+// RootFloatingTabBar — rendered outside NavigationContainer in App.tsx so it
+// sits in a separate hardware compositor layer above the Mapbox SurfaceView.
+// MapboxGL.MapView stays always mounted; no unmount/remount cycling.
+// ─────────────────────────────────────────────────────────────────────────────
+
+type NavRef = ReturnType<typeof useNavigationContainerRef>;
+
+export function RootFloatingTabBar({ navigationRef }: { navigationRef: NavRef }): React.JSX.Element {
+  const isLoggedIn         = useAuthStore(s => s.isLoggedIn);
+  const isFullscreen       = useMapStore(s => s.isFullscreen);
+  const isBottomSheetOpen  = useMapStore(s => s.isBottomSheetOpen);
+  const setFullscreen      = useMapStore(s => s.setFullscreen);
+  const setBottomSheetOpen = useMapStore(s => s.setBottomSheetOpen);
+  const { locale }         = useLocale();
+  const insets             = useSafeAreaInsets();
+  const slideAnim          = useRef(new Animated.Value(0)).current;
+
+  const [activeRouteName, setActiveRouteName] = useState<string>('Home');
+  const [isVisible, setIsVisible]             = useState<boolean>(true);
+
+  useEffect(() => {
+    const update = (): void => {
+      const route = navigationRef.getCurrentRoute();
+      if (route?.name) {
+        setActiveRouteName(route.name);
+        setIsVisible(TAB_BAR_ROUTES.has(route.name));
+      }
+    };
+    const unsubscribe = navigationRef.addListener('state', update);
+    return unsubscribe;
+  }, [navigationRef]);
+
+  const effectiveRoute = (HOME_CHILD_ROUTES as string[]).includes(activeRouteName)
+    ? 'Home'
+    : activeRouteName;
+  const activeIndex = Math.max(0, TABS.findIndex(t => t.route === effectiveRoute));
+  const bottom      = TAB_BAR_BOTTOM_OFFSET + insets.bottom;
+  const shouldHide  = !isVisible || (activeRouteName === 'Map' && (isFullscreen || isBottomSheetOpen));
+
+  // Reset map overlay state when leaving the Map tab.
+  useEffect(() => {
+    if (activeRouteName !== 'Map') {
+      setFullscreen(false);
+      setBottomSheetOpen(false);
+    }
+  }, [activeRouteName, setFullscreen, setBottomSheetOpen]);
+
+  useEffect(() => {
+    Animated.timing(slideAnim, {
+      toValue: shouldHide ? 150 : 0,
+      duration: 280,
+      useNativeDriver: true,
+    }).start();
+  }, [shouldHide, slideAnim]);
+
+  const handlePress = useCallback((tab: TabItem): void => {
+    if (!navigationRef.isReady()) return;
+    if (tab.disabled) return;
+    const onTabScreen = ['Home', 'Map', 'Orders', 'Profile'].includes(activeRouteName);
+    if (onTabScreen && tab.route === activeRouteName) return;
+    if (tab.route === 'Profile' && !isLoggedIn) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      navigationRef.navigate('Login' as any);
+      return;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    navigationRef.navigate('MainTabs' as any, { screen: tab.route });
+  }, [activeRouteName, isLoggedIn, navigationRef]);
+
+  return (
+    <Animated.View
+      pointerEvents="box-none"
+      style={[StyleSheet.absoluteFillObject, { transform: [{ translateY: slideAnim }] }]}
+    >
+      <TabBarView
+        activeRoute={effectiveRoute}
+        activeIndex={activeIndex}
+        onTabPress={handlePress}
+        bottom={bottom}
+        locale={locale}
+      />
+    </Animated.View>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FloatingTabBar — legacy tabBar prop variant (kept for API compatibility,
+// not used now that RootFloatingTabBar handles all screens).
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function FloatingTabBar({ state, navigation, insets }: BottomTabBarProps): React.JSX.Element {
   const isLoggedIn        = useAuthStore((s) => s.isLoggedIn);
   const isFullscreen      = useMapStore((s) => s.isFullscreen);
   const isBottomSheetOpen = useMapStore((s) => s.isBottomSheetOpen);
-  const setFullscreen     = useMapStore((s) => s.setFullscreen);
-  const setBottomSheetOpen = useMapStore((s) => s.setBottomSheetOpen);
   const { locale }        = useLocale();
   const slideAnim         = useRef(new Animated.Value(0)).current;
 
   const activeRoute = (state.routes[state.index]?.name ?? 'Home') as keyof TabParamList;
-  const bottom = TAB_BAR_BOTTOM_OFFSET + insets.bottom;
-  // Only hide on the Map tab — ignore lingering store state on all other tabs.
-  const shouldHide = activeRoute === 'Map' && (isFullscreen || isBottomSheetOpen);
-
-  // Reset map overlay state when leaving the Map tab so the bar is never
-  // permanently hidden after the user switches away without closing the sheet.
-  useEffect(() => {
-    if (activeRoute !== 'Map') {
-      setFullscreen(false);
-      setBottomSheetOpen(false);
-    }
-  }, [activeRoute, setFullscreen, setBottomSheetOpen]);
+  const bottom      = TAB_BAR_BOTTOM_OFFSET + insets.bottom;
+  const shouldHide  = activeRoute === 'Map' && (isFullscreen || isBottomSheetOpen);
 
   useEffect(() => {
     Animated.timing(slideAnim, {
@@ -158,7 +241,7 @@ export function FloatingTabBar({ state, navigation, insets }: BottomTabBarProps)
     if (tab.disabled) return;
     if (tab.route === activeRoute) return;
     if (tab.route === 'Profile' && !isLoggedIn) {
-      navigation.getParent<NativeStackNavigationProp<RootStackParamList>>()?.navigate('Login');
+      navigation.getParent()?.navigate('Login' as never);
       return;
     }
     navigation.navigate(tab.route);
@@ -177,45 +260,11 @@ export function FloatingTabBar({ state, navigation, insets }: BottomTabBarProps)
   );
 }
 
-/**
- * Standalone variant for non-tab screens (NinetyDayReport, OtherServices, Tickets, Legal).
- * Navigates via the root stack to MainTabs and switches to the target tab.
- * Keeps Home tab highlighted when inside HOME_CHILD_ROUTES.
- */
-export function StandaloneFloatingTabBar(): React.JSX.Element {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const route = useRoute();
-  const insets = useSafeAreaInsets();
-  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
-  const { locale } = useLocale();
+// ─────────────────────────────────────────────────────────────────────────────
+// StandaloneFloatingTabBar — retired. RootFloatingTabBar handles all screens.
+// Kept as a no-op export so existing imports compile without changes.
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const currentRoute = route.name as keyof RootStackParamList;
-  // Synchronous ref prevents double-tap visual flicker while root-stack navigate processes.
-  const pendingRoute = useRef<string>(currentRoute);
-
-  const effectiveActive: string = HOME_CHILD_ROUTES.includes(currentRoute) ? 'Home' : currentRoute;
-  const activeIndex = Math.max(0, TABS.findIndex((t) => t.route === effectiveActive));
-  const bottom = TAB_BAR_BOTTOM_OFFSET + insets.bottom;
-
-  function handlePress(tab: TabItem): void {
-    if (tab.disabled) return;
-    if (tab.route === pendingRoute.current) return;
-    pendingRoute.current = tab.route;
-    if (tab.route === 'Profile' && !isLoggedIn) {
-      navigation.navigate('Login');
-      return;
-    }
-    // Navigate root stack to MainTabs and specify which tab to show.
-    navigation.navigate('MainTabs', { screen: tab.route });
-  }
-
-  return (
-    <TabBarView
-      activeRoute={effectiveActive}
-      activeIndex={activeIndex}
-      onTabPress={handlePress}
-      bottom={bottom}
-      locale={locale}
-    />
-  );
+export function StandaloneFloatingTabBar(): null {
+  return null;
 }

@@ -13,7 +13,7 @@
  */
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
 import * as SplashScreen from 'expo-splash-screen';
@@ -39,7 +39,7 @@ GoogleSignin.configure({ webClientId: GOOGLE_WEB_CLIENT_ID, iosClientId: GOOGLE_
 void Line.setup({ channelId: LINE_CHANNEL_ID });
 import { useAuthStore } from '@/shared/store/authStore';
 import { useLocaleStore, Locale } from '@/shared/store/localeStore';
-import { FloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
+import { RootFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { AnimatedSplash } from '@/shared/components/AnimatedSplash';
 
 import { LoginScreen } from '@/features/auth/screens/LoginScreen';
@@ -196,7 +196,7 @@ function AppShell(): React.JSX.Element {
 function MainTabs(): React.JSX.Element {
   return (
     <Tab.Navigator
-      tabBar={(props) => <FloatingTabBar {...props} />}
+      tabBar={() => null}
       screenOptions={{ headerShown: false }}
       initialRouteName="Home"
     >
@@ -214,6 +214,7 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 const SPLASH_MIN_MS = 1500;
 
 export default function App(): React.JSX.Element {
+  const navigationRef = useNavigationContainerRef<RootStackParamList>();
   const [initDone, setInitDone]     = useState(false);
   const [timerDone, setTimerDone]   = useState(false);
   const [splashGone, setSplashGone] = useState(false);
@@ -269,7 +270,7 @@ export default function App(): React.JSX.Element {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <NavigationContainer>
+          <NavigationContainer ref={navigationRef}>
             <StatusBar style="light" translucent />
             <BottomSheetModalProvider>
               {/* App shell is mounted immediately so navigation is ready; splash sits on top. */}
@@ -277,6 +278,10 @@ export default function App(): React.JSX.Element {
             </BottomSheetModalProvider>
           </NavigationContainer>
         </QueryClientProvider>
+        {/* Inside SafeAreaProvider (for safe area insets) but outside
+            NavigationContainer — places the tab bar in a separate hardware
+            compositor layer above the Mapbox SurfaceView on Android. */}
+        <RootFloatingTabBar navigationRef={navigationRef} />
       </SafeAreaProvider>
       {/* Outside NavigationContainer so absoluteFillObject covers the full physical
           screen on Android (including status bar + gesture-nav bar areas). */}
