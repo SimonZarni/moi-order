@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator, Linking, Pressable,
-  ScrollView, Text, View,
+  ActivityIndicator, FlatList, Linking, Pressable,
+  ScrollView, Text, View, useWindowDimensions,
 } from 'react-native';
 import { Image } from 'expo-image';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
@@ -22,22 +22,60 @@ interface Props {
   onDismiss:        () => void;
   onGetDirections:  () => void;
   onNavigate:       () => void;
+  onReadMore:       () => void;
   onSnapChange?:    (index: number) => void;
 }
 
 const SNAP_POINTS = ['13%', '46%', '78%'];
 const START_INDEX = 1;
 
+const VIEWABILITY_CONFIG = { itemVisiblePercentThreshold: 50 };
+
 export function PlaceBottomSheet({
   place, detail, isLoading,
   drivingRoute, walkingRoute, isLoadingRoutes,
-  hasUserLocation, onDismiss, onGetDirections, onNavigate, onSnapChange,
+  hasUserLocation, onDismiss, onGetDirections, onNavigate, onReadMore, onSnapChange,
 }: Props): React.JSX.Element {
+  const { width } = useWindowDimensions();
   const sheetRef  = useRef<BottomSheet>(null);
+  const galleryRef = useRef<FlatList>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const activeIndexRef = useRef(0);
+  const [slideIdx, setSlideIdx] = useState(0);
   const [snapIdx, setSnapIdx] = useState(START_INDEX);
   const isPeeking = snapIdx === 0;
   const coverImage = detail?.cover_image ?? place.cover_image;
   const hasRoutes  = !!(drivingRoute || walkingRoute);
+
+  // Build gallery image list: all place images sorted, fallback to cover
+  const galleryImages: string[] = detail?.images && detail.images.length > 0
+    ? [...detail.images].sort((a, b) => a.sort_order - b.sort_order).map(img => img.url)
+    : (coverImage ? [coverImage] : []);
+
+  // Auto-advance slideshow every 3 s
+  const startSlideTimer = useCallback(() => {
+    if (galleryImages.length <= 1) return;
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      const next = (activeIndexRef.current + 1) % galleryImages.length;
+      activeIndexRef.current = next;
+      setSlideIdx(next);
+      galleryRef.current?.scrollToIndex({ index: next, animated: true });
+    }, 3000);
+  }, [galleryImages.length]);
+
+  useEffect(() => {
+    setSlideIdx(0);
+    activeIndexRef.current = 0;
+    startSlideTimer();
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [place.id, startSlideTimer]);
+
+  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: { index: number | null }[] }) => {
+    const idx = viewableItems[0]?.index ?? 0;
+    activeIndexRef.current = idx;
+    setSlideIdx(idx);
+  }).current;
 
   useEffect(() => {
     setSnapIdx(START_INDEX);
@@ -105,8 +143,33 @@ export function PlaceBottomSheet({
           Height 0 + overflow hidden hides it at peek without unmounting. */}
       <View style={{ flex: isPeeking ? 0 : 1, overflow: 'hidden' }}>
         <BottomSheetScrollView contentContainerStyle={styles.scroll}>
-          {coverImage ? (
-            <Image source={{ uri: coverImage }} style={styles.cover} contentFit="cover" transition={300} />
+          {galleryImages.length > 0 ? (
+            <View style={styles.slideWrap}>
+              <FlatList
+                ref={galleryRef}
+                data={galleryImages}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={(_, i) => String(i)}
+                renderItem={({ item }) => (
+                  <Image source={{ uri: item }} style={[styles.slideImage, { width }]} contentFit="cover" />
+                )}
+                getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
+                onViewableItemsChanged={onViewableItemsChanged}
+                viewabilityConfig={VIEWABILITY_CONFIG}
+                onScrollBeginDrag={() => { if (intervalRef.current) clearInterval(intervalRef.current); }}
+                onMomentumScrollEnd={startSlideTimer}
+                scrollEventThrottle={16}
+              />
+              {galleryImages.length > 1 && (
+                <View style={styles.slideDots}>
+                  {galleryImages.map((_, i) => (
+                    <View key={i} style={[styles.slideDot, i === slideIdx && styles.slideDotActive]} />
+                  ))}
+                </View>
+              )}
+            </View>
           ) : (
             <View style={[styles.cover, styles.coverPlaceholder]}>
               <Text style={styles.coverPlaceholderText}>📍</Text>
@@ -122,6 +185,16 @@ export function PlaceBottomSheet({
                     <Text style={styles.categoryText}>{place.categories[0].name_en}</Text>
                   </View>
                 ) : null}
+              </View>
+              <View style={styles.headerRight}>
+                <Pressable
+                  onPress={onReadMore}
+                  style={styles.readMoreTag}
+                  accessibilityRole="button"
+                  accessibilityLabel="Read more about this place"
+                >
+                  <Text style={styles.readMoreText}>Read More →</Text>
+                </Pressable>
               </View>
             </View>
 

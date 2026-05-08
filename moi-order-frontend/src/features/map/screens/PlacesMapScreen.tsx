@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapboxGL from '@rnmapbox/maps';
@@ -73,6 +73,10 @@ export function PlacesMapScreen(): React.JSX.Element {
     handleToggleFAB, handleSelectCategory,
     handleShowTagFilter, handleApplyTags, handleDismissTagFilter,
   } = usePlacesMapScreen();
+
+  const handleReadMore = useCallback(() => {
+    if (selectedPlace) navigation.navigate('PlaceDetail', { placeId: selectedPlace.id });
+  }, [selectedPlace, navigation]);
 
   const topControlsAnim  = useRef(new Animated.Value(0)).current;
   const buttonsRightAnim = useRef(new Animated.Value(0)).current;
@@ -263,6 +267,7 @@ export function PlacesMapScreen(): React.JSX.Element {
               onDismiss={handleDismiss}
               onGetDirections={handleGetDirections}
               onNavigate={handleNavigate}
+              onReadMore={handleReadMore}
               onSnapChange={handleBottomSheetSnapChange}
             />
           )}

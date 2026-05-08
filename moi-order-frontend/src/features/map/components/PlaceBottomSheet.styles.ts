@@ -40,12 +40,39 @@ export const styles = StyleSheet.create({
   },
   dismissText: { fontSize: 13, color: MAP_COLORS.textSecondary, fontWeight: '600' },
   scroll:           { paddingBottom: 48 },
+
+  // ── Photo slideshow ────────────────────────────────────────────────────────
+  slideWrap:  { width: '100%', height: 160, position: 'relative' },
+  slideImage: { height: 160 },
+  slideDots:  {
+    position: 'absolute', bottom: 6, left: 0, right: 0,
+    flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 4,
+  },
+  slideDot: {
+    width: 5, height: 5, borderRadius: 9999,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+  },
+  slideDotActive: {
+    width: 14,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+  },
+
   cover:            { width: '100%', height: 160 },
   coverPlaceholder: { backgroundColor: MAP_COLORS.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
   coverPlaceholderText: { fontSize: 40 },
   content:   { padding: 16 },
   headerRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 8 },
   headerLeft:{ flex: 1 },
+  headerRight: { justifyContent: 'flex-start', paddingTop: 2 },
+  readMoreTag: {
+    backgroundColor: MAP_COLORS.primaryLight,
+    borderRadius: 9999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: MAP_COLORS.primary,
+  },
+  readMoreText: { fontSize: 11, color: MAP_COLORS.primary, fontWeight: '700' },
   name:      { fontSize: 18, fontWeight: '700', color: MAP_COLORS.textPrimary, marginBottom: 4 },
   categoryBadge: {
     alignSelf: 'flex-start', backgroundColor: MAP_COLORS.primaryLight,
