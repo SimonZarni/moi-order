@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -124,17 +124,17 @@ function ArcItem({
 // ── Main FAB ─────────────────────────────────────────────────────────────────
 
 interface Props {
-  categories:       Category[];
-  activeCategory:   number | null;
-  isFABOpen:        boolean;
-  onToggleFAB:      () => void;
-  onSelectCategory: (id: number | null) => void;
-  isFullscreen?:    boolean;
-  behindCard?:      boolean;
+  categories:        Category[];
+  activeCategories:  number[];
+  isFABOpen:         boolean;
+  onToggleFAB:       () => void;
+  onSelectCategory:  (id: number) => void;
+  isFullscreen?:     boolean;
+  behindCard?:       boolean;
 }
 
 export function MapFAB({
-  categories, activeCategory, isFABOpen, onToggleFAB, onSelectCategory, isFullscreen = false, behindCard = false,
+  categories, activeCategories, isFABOpen, onToggleFAB, onSelectCategory, isFullscreen = false, behindCard = false,
 }: Props): React.JSX.Element {
   const scrollOffset = useSharedValue(0);
   const savedOffset  = useSharedValue(0);
@@ -184,8 +184,8 @@ export function MapFAB({
     });
 
   const handleSelect = useCallback((id: number) => {
-    onSelectCategory(activeCategory === id ? null : id);
-  }, [activeCategory, onSelectCategory]);
+    onSelectCategory(id);
+  }, [onSelectCategory]);
 
   return (
     // GestureDetector wraps root so the pan gesture captures drags anywhere on
@@ -214,7 +214,7 @@ export function MapFAB({
               category={cat}
               index={i}
               scrollOffset={scrollOffset}
-              isActive={activeCategory === cat.id}
+              isActive={activeCategories.includes(cat.id)}
               isFABOpen={isFABOpen}
               onPress={() => handleSelect(cat.id)}
             />
@@ -231,8 +231,34 @@ export function MapFAB({
           >
             <Animated.Text style={[styles.fabIcon, fabIconStyle]}>+</Animated.Text>
           </Pressable>
+          {!isFABOpen && activeCategories.length > 0 && (
+            <View style={fabBadgeStyle.badge}>
+              <Text style={fabBadgeStyle.badgeText}>{activeCategories.length}</Text>
+            </View>
+          )}
         </Animated.View>
       </View>
     </GestureDetector>
   );
 }
+
+const fabBadgeStyle = StyleSheet.create({
+  badge: {
+    position:        'absolute',
+    top:             -4,
+    right:           -4,
+    minWidth:        18,
+    height:          18,
+    borderRadius:    9,
+    backgroundColor: '#FF3B30',
+    alignItems:      'center',
+    justifyContent:  'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color:      '#fff',
+    fontSize:   10,
+    fontWeight: '700',
+    lineHeight: 12,
+  },
+});

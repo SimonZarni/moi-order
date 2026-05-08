@@ -30,14 +30,17 @@ export const styles = StyleSheet.create({
     shadowRadius:         20,
     elevation:            20,
   },
+  handleArea: {
+    alignItems:  'center',
+    paddingTop:  12,
+    paddingBottom: 4,
+    paddingHorizontal: 60,
+  },
   handle: {
     width:           40,
     height:          4,
     borderRadius:    2,
     backgroundColor: MAP_COLORS.border,
-    alignSelf:       'center',
-    marginTop:       12,
-    marginBottom:    4,
   },
   header: {
     flexDirection:  'row',

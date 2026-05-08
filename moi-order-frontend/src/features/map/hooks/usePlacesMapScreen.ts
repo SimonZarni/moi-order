@@ -55,7 +55,7 @@ export interface UsePlacesMapScreenResult {
   categories:       Category[];
   allTags:          Tag[];
   activeTab:        string | null;
-  activeCategory:   number | null;
+  activeCategories: number[];
   activeTags:       number[];
   isFABOpen:                   boolean;
   showTagFilter:               boolean;
@@ -85,7 +85,7 @@ export interface UsePlacesMapScreenResult {
   handleUseMapLocation:       () => void;
   handleDismissLocationOptions: () => void;
   handleToggleFAB:            () => void;
-  handleSelectCategory:       (id: number | null) => void;
+  handleSelectCategory:       (id: number) => void;
   handleShowTagFilter:        () => void;
   handleApplyTags:            (tagIds: number[]) => void;
   handleDismissTagFilter:     () => void;
@@ -106,7 +106,7 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const [walkingRoute, setWalkingRoute]     = useState<DirectionsResult | null>(null);
   const [isLoadingRoutes, setIsLoadingRoutes] = useState(false);
   const [activeTab, setActiveTab]           = useState<string | null>(TAB_NEARBY);
-  const [activeCategory, setActiveCategory] = useState<number | null>(null);
+  const [activeCategories, setActiveCategories] = useState<number[]>([]);
   const [activeTags, setActiveTags]         = useState<number[]>([]);
   const [isFABOpen, setIsFABOpen]           = useState(false);
   const [showTagFilter, setShowTagFilter]   = useState(false);
@@ -215,14 +215,14 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
         ? nearbyPlaces
         : places.filter(p => p.latitude !== null);
 
-    if (activeCategory !== null) {
-      base = base.filter(p => p.categories.some(c => c.id === activeCategory));
+    if (activeCategories.length > 0) {
+      base = base.filter(p => p.categories.some(c => activeCategories.includes(c.id)));
     }
     if (activeTags.length > 0) {
       base = base.filter(p => (p.tags ?? []).some(t => activeTags.includes(t.id)));
     }
     return base;
-  }, [activeTab, searchQuery, searchResults, nearbyPlaces, places, activeCategory, activeTags]);
+  }, [activeTab, searchQuery, searchResults, nearbyPlaces, places, activeCategories, activeTags]);
 
   const placeSuggestions = useMemo(() =>
     searchQuery.trim().length > 1 ? searchResults.slice(0, 3) : [],
@@ -281,8 +281,10 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     setIsFABOpen(prev => !prev);
   }, []);
 
-  const handleSelectCategory = useCallback((id: number | null) => {
-    setActiveCategory(id);
+  const handleSelectCategory = useCallback((id: number) => {
+    setActiveCategories(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id],
+    );
   }, []);
 
   const handleShowTagFilter    = useCallback(() => setShowTagFilter(true), []);
@@ -450,7 +452,7 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     isLoadingPlaces, isLoadingTags, isTabSwitching, isLoadingDetail, isError,
     cameraRef, gpsCoords, userLocation,
     searchQuery, placeSuggestions, geoSuggestions, isGeoLoading,
-    categories, allTags: fetchedTags, activeTab, activeCategory, activeTags,
+    categories, allTags: fetchedTags, activeTab, activeCategories, activeTags,
     isFABOpen, showTagFilter, isFullscreen, isBottomSheetFullyExpanded,
     handleBottomSheetSnapChange,
     drivingRoute, walkingRoute, isLoadingRoutes,

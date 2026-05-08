@@ -30,6 +30,10 @@ export const styles = StyleSheet.create({
     shadowRadius:  8,
     elevation:     12,
   },
+  coverImage: {
+    width: '100%',
+    height: '100%',
+  },
   imageFallback: {
     width: '100%', height: '100%',
     alignItems: 'center', justifyContent: 'center',

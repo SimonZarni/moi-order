@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { Image, Text, View } from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
 import { CATEGORY_EMOJI } from '@/shared/theme/mapTheme';
 import { styles } from './PlaceMarker.styles';
@@ -36,9 +36,17 @@ export const PlaceMarker = React.memo(function PlaceMarker(
         accessibilityLabel={`View ${place.name_en}`}
       >
         <View style={[styles.bubble, isSelected && styles.bubbleSelected]}>
-          <View style={styles.imageFallback}>
-            <Text style={styles.fallbackEmoji}>{emoji}</Text>
-          </View>
+          {place.cover_image ? (
+            <Image
+              source={{ uri: place.cover_image }}
+              style={styles.coverImage}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={styles.imageFallback}>
+              <Text style={styles.fallbackEmoji}>{emoji}</Text>
+            </View>
+          )}
         </View>
 
         <View style={[styles.labelBubble, { opacity: isSelected ? 1 : 0 }]}>

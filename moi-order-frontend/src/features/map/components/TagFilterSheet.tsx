@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
-import { ActivityIndicator, Animated, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Animated, Modal, PanResponder, Pressable, ScrollView, Text, View } from 'react-native';
 import { styles } from './TagFilterSheet.styles';
 import type { Tag } from '@/types/models';
 
@@ -54,6 +54,28 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
   const handleApply = useCallback(() => { onApply([...selected]); }, [selected, onApply]);
   const handleClear = useCallback(() => { setSelected(new Set()); }, []);
 
+  // Drag handle — drag down to dismiss, drag up does nothing (already at max).
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, { dy }) => Math.abs(dy) > 6,
+      onPanResponderMove: (_, { dy }) => {
+        if (dy > 0) cardTranslateY.setValue(dy);
+      },
+      onPanResponderRelease: (_, { dy, vy }) => {
+        if (dy > 80 || vy > 0.5) {
+          Animated.timing(cardTranslateY, {
+            toValue: 500, duration: 200, useNativeDriver: true,
+          }).start(onDismiss);
+        } else {
+          Animated.spring(cardTranslateY, {
+            toValue: 0, damping: 22, stiffness: 220, useNativeDriver: true,
+          }).start();
+        }
+      },
+    }),
+  ).current;
+
   return (
     <Modal
       visible={modalVisible}
@@ -70,7 +92,9 @@ export function TagFilterSheet({ visible, allTags, isLoading, activeTags, onAppl
       {/* Card slides up from bottom */}
       <Animated.View style={[styles.cardContainer, { transform: [{ translateY: cardTranslateY }] }]}>
         <Pressable style={styles.sheet} onPress={() => {}} accessibilityRole="none">
-          <View style={styles.handle} />
+          <View style={styles.handleArea} {...panResponder.panHandlers}>
+            <View style={styles.handle} />
+          </View>
 
           <View style={styles.header}>
             <Text style={styles.title}>Filter by Tags</Text>

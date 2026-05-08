@@ -44,7 +44,7 @@ export function PlacesMapScreen(): React.JSX.Element {
     isLoadingPlaces, isLoadingTags, isTabSwitching, isLoadingDetail, isError,
     cameraRef, gpsCoords, userLocation,
     searchQuery, placeSuggestions, geoSuggestions, isGeoLoading,
-    categories, allTags, activeTab, activeCategory, activeTags,
+    categories, allTags, activeTab, activeCategories, activeTags,
     isFABOpen, showTagFilter, isFullscreen, isBottomSheetFullyExpanded,
     handleBottomSheetSnapChange,
     drivingRoute, walkingRoute, isLoadingRoutes,
@@ -221,7 +221,7 @@ export function PlacesMapScreen(): React.JSX.Element {
           <MapFAB
             isFABOpen={isFABOpen}
             categories={categories}
-            activeCategory={activeCategory}
+            activeCategories={activeCategories}
             onToggleFAB={handleToggleFAB}
             onSelectCategory={handleSelectCategory}
             isFullscreen={isFullscreen}

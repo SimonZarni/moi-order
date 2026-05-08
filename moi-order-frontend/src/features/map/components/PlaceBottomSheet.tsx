@@ -101,7 +101,9 @@ export function PlaceBottomSheet({
         </Pressable>
       </View>
 
-      {!isPeeking && (
+      {/* Keep content mounted so dragging back up has no white-flash re-mount cost.
+          Height 0 + overflow hidden hides it at peek without unmounting. */}
+      <View style={{ flex: isPeeking ? 0 : 1, overflow: 'hidden' }}>
         <BottomSheetScrollView contentContainerStyle={styles.scroll}>
           {coverImage ? (
             <Image source={{ uri: coverImage }} style={styles.cover} contentFit="cover" transition={300} />
@@ -213,7 +215,7 @@ export function PlaceBottomSheet({
             </View>
           </View>
         </BottomSheetScrollView>
-      )}
+      </View>
     </BottomSheet>
   );
 }
