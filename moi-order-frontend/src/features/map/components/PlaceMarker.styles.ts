@@ -2,27 +2,39 @@ import { StyleSheet } from 'react-native';
 import { MAP_COLORS } from '@/shared/theme/mapTheme';
 
 export const BUBBLE_SIZE     = 44;
-export const BUBBLE_SELECTED = 52; // subtle increase
+export const BUBBLE_SELECTED = 52;
+
+const GREEN = '#10B981';
 
 export const styles = StyleSheet.create({
   pressable: { alignItems: 'center' },
 
-  // Outer ring wrapper — border becomes the visible green ring when selected.
-  // Contains the bubble; its padding creates the gap between ring and bubble.
+  // ── Ring wrap ──────────────────────────────────────────────────────────────
   ringWrap: {
     alignItems:      'center',
     justifyContent:  'center',
     backgroundColor: 'transparent',
-    // Shadow lives here so it renders outside overflow:hidden bubble
     shadowColor:     MAP_COLORS.black,
     shadowOffset:    { width: 0, height: 3 },
     shadowOpacity:   0.25,
     shadowRadius:    5,
     elevation:       8,
   },
+  ringWrapSelected: {
+    borderWidth:  3,
+    borderColor:  GREEN,
+    borderRadius: (BUBBLE_SELECTED + 8) / 2,
+    padding:      4,
+    shadowColor:  GREEN,
+    shadowOpacity: 0.45,
+    shadowRadius:  8,
+  },
 
-  // Inner bubble — clips the image to a circle.
+  // ── Bubble ────────────────────────────────────────────────────────────────
   bubbleBase: {
+    width:           BUBBLE_SIZE,
+    height:          BUBBLE_SIZE,
+    borderRadius:    BUBBLE_SIZE / 2,
     overflow:        'hidden',
     backgroundColor: MAP_COLORS.surfaceAlt,
     alignItems:      'center',
@@ -30,18 +42,21 @@ export const styles = StyleSheet.create({
     borderWidth:     2,
     borderColor:     MAP_COLORS.white,
   },
-
-  coverImage: {
-    width: '100%',
-    height: '100%',
+  bubbleSelected: {
+    width:        BUBBLE_SELECTED,
+    height:       BUBBLE_SELECTED,
+    borderRadius: BUBBLE_SELECTED / 2,
   },
+
+  coverImage:    { width: '100%', height: '100%' },
   imageFallback: {
     width: '100%', height: '100%',
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: MAP_COLORS.primaryLight,
   },
-  fallbackEmoji:  { fontSize: 20 },
+  fallbackEmoji: { fontSize: 20 },
 
+  // ── Tail ──────────────────────────────────────────────────────────────────
   tail: {
     width: 0, height: 0,
     borderLeftWidth: 6, borderRightWidth: 6, borderTopWidth: 8,
@@ -50,8 +65,9 @@ export const styles = StyleSheet.create({
     borderTopColor: MAP_COLORS.white,
     marginTop: -1,
   },
-  tailSelected: { borderTopColor: MAP_COLORS.primary },
+  tailSelected: { borderTopColor: GREEN },
 
+  // ── Label ─────────────────────────────────────────────────────────────────
   labelBubble: {
     position:          'absolute',
     top:               -30,
