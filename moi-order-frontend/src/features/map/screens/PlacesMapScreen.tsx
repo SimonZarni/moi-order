@@ -51,8 +51,8 @@ export function PlacesMapScreen(): React.JSX.Element {
       setMapReady(false);
       return;
     }
-    // Safety fallback: hide overlay after 4 s even if onDidFinishLoadingMap never fires.
-    const t = setTimeout(() => setMapReady(true), 4000);
+    // Safety fallback: hide overlay after 800 ms if map events don't fire.
+    const t = setTimeout(() => setMapReady(true), 800);
     return () => clearTimeout(t);
   }, [isSelected]);
   const {
@@ -140,6 +140,7 @@ export function PlacesMapScreen(): React.JSX.Element {
                 handleMapLongPress([lng, lat]);
               }}
               onDidFinishLoadingMap={() => setMapReady(true)}
+              onDidBecomeIdle={() => setMapReady(true)}
               attributionEnabled={false}
               logoEnabled={false}
             >

@@ -139,10 +139,16 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
         }
         if (status !== Location.PermissionStatus.GRANTED) return;
 
-        // Single watch — first callback acts as the initial fix.
-        // Removing the separate getCurrentPositionAsync call eliminates the second
-        // LocationSettingsRequest that caused the Google Location Accuracy dialog to
-        // appear twice per Map tab visit.
+        // Seed the camera instantly from the device's cached position — zero network
+        // request, zero dialog, no Vientiane fallback on subsequent visits.
+        const lastKnown = await Location.getLastKnownPositionAsync();
+        if (lastKnown) {
+          const coords: [number, number] = [lastKnown.coords.longitude, lastKnown.coords.latitude];
+          setGpsCoords(coords);
+          setUserLocation(prev => (!prev || prev.isGPS) ? { coords, label: 'Current Location', isGPS: true } : prev);
+        }
+
+        // Continuous watch — single LocationSettingsRequest, updates gpsCoords live.
         sub = await Location.watchPositionAsync(
           { accuracy: Location.Accuracy.Low, distanceInterval: 10 },
           (loc) => {
