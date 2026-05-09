@@ -8,24 +8,12 @@ export const PUSHER_APP_KEY     = process.env['EXPO_PUBLIC_PUSHER_KEY']     ?? '
 export const PUSHER_APP_CLUSTER = process.env['EXPO_PUBLIC_PUSHER_CLUSTER'] ?? 'ap1';
 export const LINE_CHANNEL_ID    = process.env['EXPO_PUBLIC_LINE_CHANNEL_ID'] ?? '';
 
-// Reads an EXPO_PUBLIC_* env var. Returns '' if missing and logs a DEV warning.
-// Never throws — a module-level throw kills the JS bundle before React renders,
-// producing a blank screen with no error boundary to catch it.
-// The JSI crash guard lives in App.tsx at the GoogleSignin.configure() call site.
-function publicEnv(key: string): string {
-  const value = process.env[key] ?? '';
-  if (!value && __DEV__) {
-    console.warn(
-      `[Config] Missing env var: ${key}\n` +
-      'For local dev: copy .env.example to .env and fill in the values.\n' +
-      'For EAS builds: eas secret:create --scope project --name ' + key,
-    );
-  }
-  return value;
-}
-
 // Web Client ID (client_type: 3) — used by GoogleSignin.configure and backend token verification.
-export const GOOGLE_WEB_CLIENT_ID = publicEnv('EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID');
+// Hardcoded fallback ensures configure() always receives a non-empty string on local
+// Gradle builds where Metro cache may not substitute the env var reliably.
+export const GOOGLE_WEB_CLIENT_ID =
+  process.env['EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID'] ??
+  '661538209777-nhtp07mb5guuhrd3128r80m83imtut6p.apps.googleusercontent.com';
 
 // EAS project ID — required by getExpoPushTokenAsync to address the correct project.
 export const EXPO_PROJECT_ID = '299e73b6-58b0-43d0-9a56-c7a212af98e5' as const;
@@ -38,8 +26,11 @@ export const IOS_BUNDLE_ID = 'com.moiorder.app' as const;
 export const IOS_APP_STORE_ID = '' as const;
 
 // iOS Client ID (client_type: 1) — from GoogleService-Info.plist CLIENT_ID.
-// Required so the native iOS sign-in sheet uses the correct OAuth client.
-export const GOOGLE_IOS_CLIENT_ID = publicEnv('EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID');
+// Hardcoded fallback ensures configure() always receives a non-empty string on local
+// Gradle builds where Metro cache may not substitute the env var reliably.
+export const GOOGLE_IOS_CLIENT_ID =
+  process.env['EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID'] ??
+  '661538209777-o33avjo80379ui26kj2clbn4snla6j2g.apps.googleusercontent.com';
 
 export const CACHE_TTL = {
   USER_DATA:       5  * 60 * 1000,
