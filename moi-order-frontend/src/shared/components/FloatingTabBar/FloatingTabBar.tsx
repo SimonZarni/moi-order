@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, LayoutChangeEvent, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { useNavigationContainerRef } from '@react-navigation/native';
+import { NavigationContainerRefWithCurrent } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -137,7 +137,7 @@ function TabBarView({ activeRoute, activeIndex, onTabPress, bottom, locale }: Ta
 // MapboxGL.MapView stays always mounted; no unmount/remount cycling.
 // ─────────────────────────────────────────────────────────────────────────────
 
-type NavRef = ReturnType<typeof useNavigationContainerRef>;
+type NavRef = NavigationContainerRefWithCurrent<RootStackParamList>;
 
 export function RootFloatingTabBar({ navigationRef }: { navigationRef: NavRef }): React.JSX.Element {
   const isLoggedIn         = useAuthStore(s => s.isLoggedIn);

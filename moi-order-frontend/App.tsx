@@ -19,7 +19,7 @@ import * as SecureStore from 'expo-secure-store';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { enableScreens } from 'react-native-screens';
 
@@ -33,15 +33,10 @@ import { Line } from '@/shared/utils/lineLogin';
 
 import { setMemoryToken, setMemoryLocale } from '@/shared/api/client';
 import { fetchMe } from '@/shared/api/auth';
-import { TOKEN_KEY, LOCALE_KEY, CACHE_TTL, GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID, LINE_CHANNEL_ID } from '@/shared/constants/config';
+import { TOKEN_KEY, LOCALE_KEY, CACHE_TTL, GOOGLE_WEB_CLIENT_ID, GOOGLE_IOS_CLIENT_ID, LINE_CHANNEL_ID } from '@/shared/constants/config';
 
+GoogleSignin.configure({ webClientId: GOOGLE_WEB_CLIENT_ID, iosClientId: GOOGLE_IOS_CLIENT_ID });
 void Line.setup({ channelId: LINE_CHANNEL_ID });
-// Configure at module level so it's ready before any sign-in call.
-// v15 uses GoogleSignIn 8.x / AppAuth 1.7 — no __NSMallocBlock__ crash.
-// Both iosClientId AND webClientId are required; iosClientId alone causes
-// the "Unsupported jsi::Value kind" JSI error on some SDK versions.
-GoogleSignin.configure({ iosClientId: GOOGLE_IOS_CLIENT_ID, webClientId: GOOGLE_WEB_CLIENT_ID });
-console.log('[GoogleSignin] configure() called. iosClientId:', GOOGLE_IOS_CLIENT_ID?.slice(0, 20), '| webClientId:', GOOGLE_WEB_CLIENT_ID?.slice(0, 20));
 import { useAuthStore } from '@/shared/store/authStore';
 import { useLocaleStore, Locale } from '@/shared/store/localeStore';
 import { RootFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
@@ -227,11 +222,6 @@ export default function App(): React.JSX.Element {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [fontsLoaded, fontError] = useFonts({ PlayfairDisplay_700Bold_Italic, PlayfairDisplay_700Bold });
 
-  // Hide the native splash immediately on first render — AnimatedSplash is already
-  // covering the screen with the same green background, so the transition is invisible.
-  useEffect(() => { SplashScreen.hideAsync().catch(() => {}); }, []);
-
-
   // Minimum-hold timer — fires after 1.5 s regardless of init speed.
   useEffect(() => {
     timerRef.current = setTimeout(() => setTimerDone(true), SPLASH_MIN_MS);
@@ -271,6 +261,15 @@ export default function App(): React.JSX.Element {
   const fontsDone = fontsLoaded || fontError !== null;
   const canHide = initDone && timerDone && fontsDone;
   const onSplashHidden = useCallback(() => setSplashGone(true), []);
+
+  // iOS: hide native splash immediately — AnimatedSplash covers with same background.
+  // Android: wait until canHide (min 1.5 s) so splashscreen_logo shows long enough.
+  useEffect(() => {
+    if (Platform.OS !== 'android') { SplashScreen.hideAsync().catch(() => {}); }
+  }, []);
+  useEffect(() => {
+    if (Platform.OS === 'android' && canHide) { SplashScreen.hideAsync().catch(() => {}); }
+  }, [canHide]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
