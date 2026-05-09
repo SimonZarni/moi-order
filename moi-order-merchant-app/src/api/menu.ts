@@ -48,7 +48,11 @@ export async function updateMenuItem(
   id: number,
   data: FormData,
 ): Promise<MenuItem> {
-  const response = await apiClient.put<{ data: MenuItem }>(
+  // PHP only populates $_FILES for POST requests, not PUT/PATCH.
+  // Use method spoofing: POST with _method=PUT so Laravel routes to the PUT
+  // handler while PHP's multipart parser still populates $_FILES.
+  data.append('_method', 'PUT');
+  const response = await apiClient.post<{ data: MenuItem }>(
     `/menu/items/${id}`,
     data,
     { headers: { 'Content-Type': 'multipart/form-data' } },
