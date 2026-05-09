@@ -245,37 +245,11 @@ function ItemFormContent({
         </Text>
       )}
 
-      {(form.photo !== null || existingPhotoUrl !== null) ? (
-        <View style={styles.photoPreviewWrap}>
-          <Image
-            source={{ uri: form.photo !== null ? form.photo.uri : existingPhotoUrl! }}
-            style={styles.photoPreview}
-            resizeMode="cover"
-            accessibilityLabel="Item photo preview"
-          />
-          {form.photo !== null && (
-            <View style={styles.photoNewBadge}>
-              <Text style={styles.photoNewBadgeText}>New</Text>
-            </View>
-          )}
-          <View style={[styles.photoActions, { marginTop: spacing.xs }]}>
-            <Pressable style={styles.photoChangeBtn} onPress={onPickPhoto}
-              accessibilityRole="button" accessibilityLabel="Change photo">
-              <Ionicons name="image-outline" size={16} color={colours.primary} />
-              <Text style={styles.photoChangeBtnText}>Change Photo</Text>
-            </Pressable>
-          </View>
-        </View>
-      ) : (
-        <Pressable
-          style={[styles.cancelButton, { borderColor: colours.primary, marginBottom: spacing.sm }]}
-          onPress={onPickPhoto} accessibilityRole="button" accessibilityLabel="Add photo">
-          <Ionicons name="image-outline" size={16} color={colours.primary} />
-          <Text style={[styles.cancelText, { color: colours.primary, marginLeft: 6 }]}>
-            Add Photo (optional)
-          </Text>
-        </Pressable>
-      )}
+      <PhotoPreview
+        newPhoto={form.photo}
+        existingUrl={existingPhotoUrl ?? null}
+        onPickPhoto={onPickPhoto}
+      />
 
       <View style={styles.sectionDivider} />
       <View style={styles.sectionHeader}>
@@ -382,5 +356,64 @@ function ItemFormContent({
         </Pressable>
       </View>
     </>
+  );
+}
+
+interface PhotoPreviewProps {
+  newPhoto: AddItemForm['photo'];
+  existingUrl: string | null;
+  onPickPhoto: () => void;
+}
+
+function PhotoPreview({ newPhoto, existingUrl, onPickPhoto }: PhotoPreviewProps): React.JSX.Element {
+  const [loadError, setLoadError] = useState(false);
+  const uri = newPhoto !== null ? newPhoto.uri : existingUrl;
+  const isNew = newPhoto !== null;
+
+  if (uri === null) {
+    return (
+      <Pressable
+        style={[styles.cancelButton, { borderColor: colours.primary, marginBottom: spacing.sm }]}
+        onPress={onPickPhoto} accessibilityRole="button" accessibilityLabel="Add photo">
+        <Ionicons name="image-outline" size={16} color={colours.primary} />
+        <Text style={[styles.cancelText, { color: colours.primary, marginLeft: 6 }]}>
+          Add Photo (optional)
+        </Text>
+      </Pressable>
+    );
+  }
+
+  return (
+    <View style={styles.photoPreviewWrap}>
+      {loadError ? (
+        <Pressable style={[styles.photoPreview, styles.photoErrorState]} onPress={onPickPhoto}
+          accessibilityRole="button" accessibilityLabel="Photo unavailable, tap to upload new">
+          <Ionicons name="image-outline" size={32} color={colours.medium} />
+          <Text style={styles.photoErrorText}>Tap to upload photo</Text>
+        </Pressable>
+      ) : (
+        <Image
+          source={{ uri }}
+          style={styles.photoPreview}
+          resizeMode="cover"
+          accessibilityLabel="Item photo preview"
+          onError={() => setLoadError(true)}
+        />
+      )}
+      {isNew && !loadError && (
+        <View style={styles.photoNewBadge}>
+          <Text style={styles.photoNewBadgeText}>New</Text>
+        </View>
+      )}
+      {!loadError && (
+        <View style={[styles.photoActions, { marginTop: spacing.xs }]}>
+          <Pressable style={styles.photoChangeBtn} onPress={onPickPhoto}
+            accessibilityRole="button" accessibilityLabel="Change photo">
+            <Ionicons name="image-outline" size={16} color={colours.primary} />
+            <Text style={styles.photoChangeBtnText}>Change Photo</Text>
+          </Pressable>
+        </View>
+      )}
+    </View>
   );
 }

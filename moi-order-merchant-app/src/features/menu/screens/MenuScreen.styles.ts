@@ -244,6 +244,19 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
     marginBottom: spacing.sm,
   },
+  photoErrorState: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colours.surfaceMuted,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    borderStyle: 'dashed',
+    gap: 6,
+  },
+  photoErrorText: {
+    fontSize: typography.xs,
+    color: colours.medium,
+  },
   photoChangeBtn: {
     flex: 1,
     flexDirection: 'row',
