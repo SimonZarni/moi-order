@@ -30,11 +30,8 @@ export function EmbassyServicesScreen(): React.JSX.Element {
       >
         <HeroHeader
           accentColor={editorialPalette.rose}
-          titleNode={
-            <Text style={[styles.heroTitle, locale === 'mm' && { fontSize: 22, lineHeight: 34, includeFontPadding: false }]}>
-              သံရုံးထောက်ခံစာများ
-            </Text>
-          }
+          eyebrow={s.services.embassyEyebrow}
+          title={s.services.embassyTitle}
           subtitle={s.services.embassySubtitle}
           onBack={handleBack}
           backLabel={s.services.backHome}

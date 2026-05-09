@@ -305,6 +305,8 @@ export interface AppStrings {
     // Back labels
     backHome:           string;
     // Embassy Services page
+    embassyEyebrow:     string;
+    embassyTitle:       string;
     embassySubtitle:    string;
   };
 
@@ -603,6 +605,8 @@ const en: AppStrings = {
     otherTitle:         'Other Services',
     otherSubtitle:      'Additional immigration and registration services.',
     backHome:           'Home',
+    embassyEyebrow:     'Embassy Services',
+    embassyTitle:       'Embassy Services',
     embassySubtitle:    'Embassy support letters and documentation services.',
   },
   notifs: {
@@ -884,6 +888,8 @@ const mm: AppStrings = {
     otherTitle:         'အခြား၀န်ဆောင်မှုများ',
     otherSubtitle:      'ကိုယ်ရောက်နေထိုင်မှုနှင့် မှတ်ပုံတင်ဆိုင်ရာ ၀န်ဆောင်မှုများ',
     backHome:           'ပင်မ',
+    embassyEyebrow:     'သံရုံးဝန်ဆောင်မှုများ',
+    embassyTitle:       'သံရုံးထောက်ခံစာများ',
     embassySubtitle:    'သံရုံး ထောက်ခံစာများနှင့် စာရွက်စာတမ်း ဝန်ဆောင်မှုများ',
   },
   notifs: {
@@ -1165,6 +1171,8 @@ const th: AppStrings = {
     otherTitle:         'บริการอื่นๆ',
     otherSubtitle:      'บริการตรวจคนเข้าเมืองและการจดทะเบียนเพิ่มเติม',
     backHome:           'หน้าหลัก',
+    embassyEyebrow:     'บริการสถานทูต',
+    embassyTitle:       'บริการสถานทูต',
     embassySubtitle:    'บริการหนังสือรับรองสถานทูตและเอกสาร',
   },
   notifs: {
