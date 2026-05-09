@@ -49,8 +49,10 @@ export function MenuScreen(): React.JSX.Element {
     if (result.canceled || result.assets.length === 0) return;
     const asset = result.assets[0];
     if (!asset) return;
-    const ext = asset.uri.split('.').pop() ?? 'jpg';
-    onPick({ uri: asset.uri, name: `item.${ext}`, type: `image/${ext}` });
+    const mimeType = asset.mimeType ?? 'image/jpeg';
+    const ext = mimeType.split('/')[1] ?? 'jpg';
+    const fileName = asset.fileName ?? `item.${ext}`;
+    onPick({ uri: asset.uri, name: fileName, type: mimeType });
   }, []);
 
   const handlePickAddPhoto = useCallback(() => handlePickPhoto(handleAddItemPhotoChange), [handlePickPhoto, handleAddItemPhotoChange]);

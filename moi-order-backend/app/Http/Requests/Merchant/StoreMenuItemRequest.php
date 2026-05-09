@@ -25,7 +25,7 @@ class StoreMenuItemRequest extends FormRequest
             'original_price_cents'   => ['nullable', 'integer', 'min:0'],
             'status'                 => ['sometimes', Rule::enum(MenuItemStatus::class)],
             'sort_order'             => ['integer', 'min:0', 'max:9999'],
-            'photo'                  => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp', 'max:3072'],
+            'photo'                  => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp,heic,heif', 'max:5120'],
             'option_groups'                           => ['sometimes', 'array'],
             'option_groups.*.name'                    => ['required', 'string', 'max:100'],
             'option_groups.*.is_required'             => ['boolean'],
@@ -53,7 +53,8 @@ class StoreMenuItemRequest extends FormRequest
             'name.required'        => 'Item name is required.',
             'price_cents.required' => 'Price is required.',
             'price_cents.min'      => 'Price must be 0 or greater.',
-            'photo.max'            => 'Item photo must be under 3 MB.',
+            'photo.max'            => 'Item photo must be under 5 MB.',
+            'photo.mimes'          => 'Photo must be a JPEG, PNG, WebP, or HEIC image.',
         ];
     }
 

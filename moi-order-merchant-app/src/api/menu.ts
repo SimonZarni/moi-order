@@ -48,7 +48,7 @@ export async function updateMenuItem(
   id: number,
   data: FormData,
 ): Promise<MenuItem> {
-  const response = await apiClient.post<{ data: MenuItem }>(
+  const response = await apiClient.put<{ data: MenuItem }>(
     `/menu/items/${id}`,
     data,
     { headers: { 'Content-Type': 'multipart/form-data' } },
