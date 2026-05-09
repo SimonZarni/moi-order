@@ -23,7 +23,7 @@ return [
         'trim',
         explode(',', (string) env(
             'CORS_ALLOWED_ORIGINS',
-            'https://moi-order-merchant.vercel.app,http://localhost:8081,http://localhost:19006,http://localhost:3000,http://localhost:5173'
+            'https://moi-order-merchant.vercel.app,http://localhost:8081,http://localhost:8082,http://localhost:19006,http://localhost:3000,http://localhost:5173'
         )),
     )),
 
