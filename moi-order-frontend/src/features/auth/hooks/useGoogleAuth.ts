@@ -17,6 +17,26 @@ export interface UseGoogleAuthResult {
   googleBannerError: string;
 }
 
+/**
+ * Extract idToken from a GoogleSignin.signIn() result.
+ * The SDK shape changed across versions:
+ *   v11- : result is GoogleUser with result.idToken
+ *   v12+ : result is { type, data } with result.data?.idToken
+ * We try both shapes to stay compatible.
+ */
+function extractIdToken(signInResult: unknown): string | null {
+  if (!signInResult || typeof signInResult !== 'object') return null;
+  const r = signInResult as Record<string, unknown>;
+  // v12+ shape
+  if (r['data'] && typeof r['data'] === 'object') {
+    const token = (r['data'] as Record<string, unknown>)['idToken'];
+    if (typeof token === 'string') return token;
+  }
+  // v11- shape
+  if (typeof r['idToken'] === 'string') return r['idToken'];
+  return null;
+}
+
 export function useGoogleAuth(): UseGoogleAuthResult {
   const navigation  = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const queryClient = useQueryClient();
@@ -31,76 +51,55 @@ export function useGoogleAuth(): UseGoogleAuthResult {
 
       await GoogleSignin.hasPlayServices();
 
+      let idToken: string | null = null;
+
       if (loginHint) {
-        // Email was explicitly confirmed as a Google account by check-email — try
-        // silent sign-in first for a seamless re-auth on the owner's device.
-        // loginHint is only supported on iOS; on Android just show the picker.
+        // Confirmed Google account — try silent first, fall back to interactive.
         try {
           const silentResult = await GoogleSignin.signInSilently();
-          // Ensure the cached session belongs to the expected account.
-          // signInSilently() returns the last signed-in user regardless of loginHint.
           if (silentResult.data?.user?.email?.toLowerCase() !== loginHint.toLowerCase()) {
             throw new Error('account_mismatch');
           }
+          idToken = extractIdToken(silentResult)
+            ?? (await GoogleSignin.getTokens()).idToken;
         } catch {
           await GoogleSignin.signOut();
-          if (Platform.OS === 'ios') {
-            await GoogleSignin.signIn({ loginHint });
-          } else {
-            await GoogleSignin.signIn();
-          }
+          const result = Platform.OS === 'ios'
+            ? await GoogleSignin.signIn({ loginHint })
+            : await GoogleSignin.signIn();
+          // Prefer token from signIn() result — avoids a race where getTokens()
+          // runs before the native session is fully committed.
+          idToken = extractIdToken(result)
+            ?? (await GoogleSignin.getTokens()).idToken;
         }
       } else {
-        // No confirmed email context — show the full account picker.
-        // signOut() is best-effort: if there is no active session it may throw,
-        // which is fine — we just want to clear any cached selection.
-        try { await GoogleSignin.signOut(); } catch { /* no active session */ }
-        await GoogleSignin.signIn();
+        // Register / direct sign-in: show the full account picker.
+        // Do NOT signOut() here — it causes a race that prevents getTokens()
+        // from finding the session. The picker shows naturally without it.
+        const result = await GoogleSignin.signIn();
+        idToken = extractIdToken(result)
+          ?? (await GoogleSignin.getTokens()).idToken;
       }
 
-      const { idToken } = await GoogleSignin.getTokens();
+      if (!idToken) throw new Error('no_id_token');
 
       const { user, token } = await googleAuth(idToken);
       queryClient.clear();
       setUser(user, token);
       navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
     } catch (error: unknown) {
-      // Error objects have non-enumerable props — JSON.stringify gives {}.
-      // Use String() for the full error representation + extract known fields.
       console.error('[GoogleAuth]', String(error),
         'code:', (error as { code?: string })?.code,
         'msg:', error instanceof Error ? error.message : 'none',
       );
 
       const asGoogle = error as { code?: string };
-      if (asGoogle.code === statusCodes.SIGN_IN_CANCELLED) {
-        return;
-      }
+      if (asGoogle.code === statusCodes.SIGN_IN_CANCELLED) return;
 
       const asApiError = error as ApiError;
       if (typeof asApiError.status === 'number') {
         setGoogleBannerError(getAccountErrorMessage(asApiError.code, asApiError.context));
         return;
-      }
-
-      // On Android, signIn() sometimes throws after the sign-in has already
-      // completed and the backend has already created the account. Recover by
-      // checking for an active Google session and retrying the backend call.
-      try {
-        const tokens = await GoogleSignin.getTokens();
-        if (tokens.idToken) {
-          const { user, token } = await googleAuth(tokens.idToken);
-          queryClient.clear();
-          setUser(user, token);
-          navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
-          return;
-        }
-      } catch (recoveryError: unknown) {
-        const recoveryApiError = recoveryError as ApiError;
-        if (typeof recoveryApiError.status === 'number') {
-          setGoogleBannerError(getAccountErrorMessage(recoveryApiError.code, recoveryApiError.context));
-          return;
-        }
       }
 
       setGoogleBannerError('Google sign-in failed. Please try again.');
