@@ -9,12 +9,14 @@ import { ServiceTypeCard } from '@/features/ninetyDayReport/components/ServiceTy
 import { ServiceTypeCardSkeleton } from '@/features/ninetyDayReport/components/ServiceTypeCardSkeleton';
 import { useNinetyDayReportScreen } from '@/features/ninetyDayReport/hooks/useNinetyDayReportScreen';
 import { useStrings } from '@/shared/i18n';
+import { useLocale } from '@/shared/hooks/useLocale';
 import { styles } from './NinetyDayReportScreen.styles';
 
 export function NinetyDayReportScreen(): React.JSX.Element {
   const { types, isLoading, isRefreshing, isError, handleRefresh, handleSelectType, handleBack } =
     useNinetyDayReportScreen();
   const s = useStrings();
+  const { locale } = useLocale();
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -35,7 +37,7 @@ export function NinetyDayReportScreen(): React.JSX.Element {
         />
 
         <View style={styles.body}>
-          <Text style={styles.sectionLabel}>{s.services.selectType}</Text>
+          <Text style={[styles.sectionLabel, locale === 'mm' && { fontSize: 10, lineHeight: 18, includeFontPadding: false }]}>{s.services.selectType}</Text>
 
           {isLoading && (
             <>

@@ -40,7 +40,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
       <View style={styles.header}>
         <BackButton onPress={handleBack} />
         <Text style={styles.headerTypeName}>{serviceTypeName} · {serviceTypeNameEn}</Text>
-        <Text style={styles.headerTitle}>{s.services.ninetyDayTitle}</Text>
+        <Text style={[styles.headerTitle, locale === 'mm' && { fontSize: 20, lineHeight: 30 }]}>{s.services.ninetyDayTitle}</Text>
         <View style={styles.headerPriceBadge}>
           <Text style={styles.headerPrice}>{priceFormatted}</Text>
         </View>
@@ -63,7 +63,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
             >
               <ErrorBanner message={bannerError} />
 
-              <Text style={styles.sectionTitle}>{s.form.personalInfo}</Text>
+              <Text style={[styles.sectionTitle, locale === 'mm' && { fontSize: 10, lineHeight: 18, includeFontPadding: false }]}>{s.form.personalInfo}</Text>
 
               <FormField
                 label={s.form.fullName}

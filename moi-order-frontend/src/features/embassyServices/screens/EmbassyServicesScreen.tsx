@@ -10,12 +10,14 @@ import { EmbassyServiceCardSkeleton } from '@/features/embassyServices/component
 import { useEmbassyServicesScreen } from '@/features/embassyServices/hooks/useEmbassyServicesScreen';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { localeName } from '@/shared/utils/localeName';
+import { useStrings } from '@/shared/i18n';
 import { styles } from './EmbassyServicesScreen.styles';
 
 export function EmbassyServicesScreen(): React.JSX.Element {
   const { services, isLoading, isRefreshing, isError, handleRefresh, handleSelectService, handleBack } =
     useEmbassyServicesScreen();
   const { locale } = useLocale();
+  const s = useStrings();
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -28,14 +30,18 @@ export function EmbassyServicesScreen(): React.JSX.Element {
       >
         <HeroHeader
           accentColor={editorialPalette.rose}
-          titleNode={<Text style={styles.heroTitle}>သံရုံးထောက်ခံစာများ</Text>}
-          subtitle="Embassy support letters and documentation services."
+          titleNode={
+            <Text style={[styles.heroTitle, locale === 'mm' && { fontSize: 22, lineHeight: 34, includeFontPadding: false }]}>
+              သံရုံးထောက်ခံစာများ
+            </Text>
+          }
+          subtitle={s.services.embassySubtitle}
           onBack={handleBack}
-          backLabel="Home"
+          backLabel={s.services.backHome}
         />
 
         <View style={styles.body}>
-          <Text style={styles.sectionLabel}>Available Services</Text>
+          <Text style={styles.sectionLabel}>{s.services.availableServices}</Text>
 
           {isLoading && (
             <>
@@ -48,13 +54,13 @@ export function EmbassyServicesScreen(): React.JSX.Element {
 
           {isError && (
             <View style={styles.centered}>
-              <Text style={styles.errorText}>Unable to load services. Please try again.</Text>
+              <Text style={styles.errorText}>{s.services.unableToLoad}</Text>
             </View>
           )}
 
           {!isLoading && !isError && services.length === 0 && (
             <View style={styles.centered}>
-              <Text style={styles.emptyText}>No embassy services available at the moment.</Text>
+              <Text style={styles.emptyText}>{s.services.noServices}</Text>
             </View>
           )}
 
