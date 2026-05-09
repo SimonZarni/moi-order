@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { View, Text, Pressable, ScrollView, ActivityIndicator, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './Step2Documents.styles';
 import { colours } from '../../../shared/theme/colours';
@@ -38,25 +39,32 @@ export function Step2Documents({
   onUpload,
   onSubmit,
 }: Step2DocumentsProps): React.JSX.Element {
-  const buildFileRef = useCallback((asset: ImagePickerAsset): UploadFileRef => {
-    const mimeType = asset.mimeType ?? 'image/jpeg';
-    const ext = mimeType.split('/')[1] ?? 'jpg';
-    const name = asset.fileName ?? `document.${ext}`;
-    return { uri: asset.uri, name, type: mimeType };
-  }, []);
-
   const handlePickImage = useCallback(
     (docType: KycDocType) => async () => {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: 'images',
-        allowsEditing: true,
-        quality: 0.8,
+        allowsEditing: false,
+        quality: 1, // pick at full quality, we compress below
       });
       if (!result.canceled && result.assets[0]) {
-        onUpload(docType, buildFileRef(result.assets[0]));
+        const asset = result.assets[0];
+        // Convert to JPEG — prevents HEIC/HEIF rejection by the backend.
+        // Also caps at 2048px and re-encodes at 0.8 quality to keep size small.
+        const MAX_DIM = 2048;
+        const ctx = ImageManipulator.manipulate(asset.uri);
+        if (asset.width > MAX_DIM || asset.height > MAX_DIM) {
+          ctx.resize(asset.width >= asset.height ? { width: MAX_DIM } : { height: MAX_DIM });
+        }
+        const rendered = await ctx.renderAsync();
+        const compressed = await rendered.saveAsync({ compress: 0.8, format: SaveFormat.JPEG });
+        onUpload(docType, {
+          uri:  compressed.uri,
+          name: `document_${docType}.jpg`,
+          type: 'image/jpeg',
+        });
       }
     },
-    [onUpload, buildFileRef],
+    [onUpload],
   );
 
   const allUploaded = DOC_CARDS.every((c) => uploadedTypes.has(c.type));

@@ -5,7 +5,19 @@ import { AppNavigator } from './src/navigation/AppNavigator';
 import { CACHE_TTL } from './src/shared/constants/config';
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { staleTime: CACHE_TTL.DEFAULT } },
+  defaultOptions: {
+    queries: {
+      staleTime: CACHE_TTL.DEFAULT,
+      // Don't refetch when user switches tabs/windows — reduces unnecessary
+      // network calls and eliminates the "flash of loading" on tab switch.
+      refetchOnWindowFocus: false,
+      // Don't refetch when the app comes back from background on mobile.
+      refetchOnReconnect: false,
+      // React Query's default retry (3) means a slow server costs 3× the
+      // latency. Keep fail-fast at 1 globally; individual queries can override.
+      retry: 1,
+    },
+  },
 });
 
 export default function App() {

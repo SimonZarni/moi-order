@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, ScrollView, SectionList, ActivityIndicator, Pressable } from 'react-native';
+import { View, Text, ScrollView, SectionList, Pressable } from 'react-native';
+import { Skeleton } from '../../../shared/components/Skeleton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useOrdersScreen, type StatusFilter } from '../hooks/useOrdersScreen';
@@ -82,8 +83,17 @@ export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.El
       </View>
 
       {isLoading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={colours.primary} />
+        <View style={{ padding: 16, gap: 12 }}>
+          {[1, 2, 3, 4, 5].map((i) => (
+            <View key={i} style={{ backgroundColor: '#fff', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#F3F4F6', gap: 8 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <Skeleton height={14} width={120} borderRadius={6} />
+                <Skeleton height={14} width={60} borderRadius={12} />
+              </View>
+              <Skeleton height={12} width="80%" borderRadius={4} />
+              <Skeleton height={12} width="50%" borderRadius={4} />
+            </View>
+          ))}
         </View>
       ) : (
         <SectionList<FoodOrder, Section>

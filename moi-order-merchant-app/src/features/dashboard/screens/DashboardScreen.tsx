@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, ScrollView, ActivityIndicator, Pressable } from 'react-native';
+import { View, Text, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useDashboardScreen } from '../hooks/useDashboardScreen';
 import { OrderCard } from '../../orders/components/OrderCard';
+import { Skeleton, SkeletonCard } from '../../../shared/components/Skeleton';
 import { styles } from './DashboardScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
@@ -17,10 +18,21 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
 
   if (isLoading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colours.primary} />
-        <Text style={styles.loadingText}>Loading dashboard…</Text>
-      </View>
+      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+          <View style={styles.header}>
+            <Skeleton height={28} width={160} borderRadius={6} />
+            <Skeleton height={14} width={120} borderRadius={4} style={{ marginTop: 6 }} />
+          </View>
+          <View style={styles.statsGrid}>
+            <SkeletonCard style={{ flex: 1, minWidth: 148 }} />
+            <SkeletonCard style={{ flex: 1, minWidth: 148 }} />
+            <SkeletonCard style={{ flex: 1, minWidth: 148 }} />
+          </View>
+          <SkeletonCard />
+          <SkeletonCard />
+        </ScrollView>
+      </SafeAreaView>
     );
   }
 

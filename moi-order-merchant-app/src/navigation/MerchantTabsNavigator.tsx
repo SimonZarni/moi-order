@@ -178,7 +178,9 @@ function WebMerchantLayout(): React.JSX.Element {
         onLogout={logout}
       />
       <View style={webStyles.content}>
-        {renderContent()}
+        <View style={webStyles.contentInner}>
+          {renderContent()}
+        </View>
       </View>
     </View>
   );
@@ -202,5 +204,12 @@ const webStyles = StyleSheet.create({
   content: {
     flex: 1,
     marginLeft: WEB_SIDEBAR_WIDTH,
+    backgroundColor: colours.backgroundLight,
+  },
+  // Constrains content to readable width on very wide monitors
+  contentInner: {
+    flex: 1,
+    maxWidth: 1280,
+    alignSelf: 'stretch' as const,
   },
 });
