@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\MenuItemStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MenuItem extends Model
@@ -19,6 +20,7 @@ class MenuItem extends Model
         'name',
         'description',
         'price_cents',
+        'original_price_cents',
         'photo_path',
         'status',
         'sort_order',
@@ -29,9 +31,10 @@ class MenuItem extends Model
     protected function casts(): array
     {
         return [
-            'price_cents' => 'integer',
-            'sort_order'  => 'integer',
-            'status'      => MenuItemStatus::class,
+            'price_cents'          => 'integer',
+            'original_price_cents' => 'integer',
+            'sort_order'           => 'integer',
+            'status'               => MenuItemStatus::class,
         ];
     }
 
@@ -59,5 +62,10 @@ class MenuItem extends Model
     public function restaurant(): BelongsTo
     {
         return $this->belongsTo(Restaurant::class);
+    }
+
+    public function optionGroups(): HasMany
+    {
+        return $this->hasMany(MenuItemOptionGroup::class)->orderBy('sort_order');
     }
 }

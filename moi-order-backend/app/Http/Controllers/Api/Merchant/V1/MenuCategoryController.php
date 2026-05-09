@@ -22,7 +22,7 @@ class MenuCategoryController extends Controller
     /** GET /api/merchant/v1/menu/categories */
     public function index(Request $request): JsonResponse
     {
-        $restaurant = $request->user()->restaurant()->with(['menuCategories.menuItems'])->first();
+        $restaurant = $request->user()->restaurant()->with(['menuCategories.menuItems.optionGroups.options'])->first();
 
         if ($restaurant === null) {
             return response()->json(['data' => []]);

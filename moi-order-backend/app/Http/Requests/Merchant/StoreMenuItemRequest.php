@@ -19,20 +19,30 @@ class StoreMenuItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'        => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:1000'],
-            'price_cents' => ['required', 'integer', 'min:0'],
-            'status'      => ['sometimes', Rule::enum(MenuItemStatus::class)],
-            'sort_order'  => ['integer', 'min:0', 'max:9999'],
-            'photo'       => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:3072'],
+            'name'                   => ['required', 'string', 'max:255'],
+            'description'            => ['nullable', 'string', 'max:1000'],
+            'price_cents'            => ['required', 'integer', 'min:0'],
+            'original_price_cents'   => ['nullable', 'integer', 'min:0'],
+            'status'                 => ['sometimes', Rule::enum(MenuItemStatus::class)],
+            'sort_order'             => ['integer', 'min:0', 'max:9999'],
+            'photo'                  => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp', 'max:3072'],
+            'option_groups'                           => ['sometimes', 'array'],
+            'option_groups.*.name'                    => ['required', 'string', 'max:100'],
+            'option_groups.*.is_required'             => ['boolean'],
+            'option_groups.*.max_selections'          => ['integer', 'min:1', 'max:10'],
+            'option_groups.*.options'                 => ['required', 'array', 'min:1'],
+            'option_groups.*.options.*.name'                    => ['required', 'string', 'max:100'],
+            'option_groups.*.options.*.additional_price_cents'  => ['integer', 'min:0'],
         ];
     }
 
     public function prepareForValidation(): void
     {
         $this->merge([
-            'price_cents' => (int) $this->input('price_cents', 0),
-            'sort_order'  => (int) $this->input('sort_order', 0),
+            'price_cents'          => (int) $this->input('price_cents', 0),
+            'original_price_cents' => $this->input('original_price_cents') !== null
+                ? (int) $this->input('original_price_cents') : null,
+            'sort_order'           => (int) $this->input('sort_order', 0),
         ]);
     }
 

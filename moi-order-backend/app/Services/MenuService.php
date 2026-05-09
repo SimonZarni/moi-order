@@ -9,6 +9,7 @@ use App\Enums\MenuItemStatus;
 use App\Exceptions\DomainException;
 use App\Models\MenuCategory;
 use App\Models\MenuItem;
+use App\Models\MenuItemOptionGroup;
 use App\Models\Restaurant;
 use Illuminate\Support\Facades\DB;
 
@@ -65,16 +66,23 @@ class MenuService
                 $photoPath = $this->storage->store($data['photo'], 'menu/photos');
             }
 
-            return MenuItem::create([
-                'menu_category_id' => $category->id,
-                'restaurant_id'    => $restaurant->id,
-                'name'             => $data['name'],
-                'description'      => $data['description'] ?? null,
-                'price_cents'      => (int) $data['price_cents'],
-                'photo_path'       => $photoPath,
-                'status'           => MenuItemStatus::Available,
-                'sort_order'       => $data['sort_order'] ?? 0,
+            $item = MenuItem::create([
+                'menu_category_id'     => $category->id,
+                'restaurant_id'        => $restaurant->id,
+                'name'                 => $data['name'],
+                'description'          => $data['description'] ?? null,
+                'price_cents'          => (int) $data['price_cents'],
+                'original_price_cents' => isset($data['original_price_cents']) ? (int) $data['original_price_cents'] : null,
+                'photo_path'           => $photoPath,
+                'status'               => MenuItemStatus::Available,
+                'sort_order'           => $data['sort_order'] ?? 0,
             ]);
+
+            if (! empty($data['option_groups'])) {
+                $this->syncOptionGroups($item, $data['option_groups']);
+            }
+
+            return $item->load('optionGroups.options');
         });
     }
 
@@ -87,6 +95,10 @@ class MenuService
             if (isset($data['name']))             $updates['name']             = $data['name'];
             if (isset($data['description']))      $updates['description']      = $data['description'];
             if (isset($data['price_cents']))      $updates['price_cents']      = (int) $data['price_cents'];
+            if (array_key_exists('original_price_cents', $data)) {
+                $updates['original_price_cents'] = $data['original_price_cents'] !== null
+                    ? (int) $data['original_price_cents'] : null;
+            }
             if (isset($data['menu_category_id'])) $updates['menu_category_id'] = $data['menu_category_id'];
             if (isset($data['status']))           $updates['status']           = MenuItemStatus::from($data['status']);
             if (isset($data['sort_order']))       $updates['sort_order']       = $data['sort_order'];
@@ -100,7 +112,11 @@ class MenuService
 
             $item->update($updates);
 
-            return $item->fresh();
+            if (array_key_exists('option_groups', $data)) {
+                $this->syncOptionGroups($item, $data['option_groups'] ?? []);
+            }
+
+            return $item->load('optionGroups.options');
         });
     }
 
@@ -112,5 +128,36 @@ class MenuService
             }
             $item->delete();
         });
+    }
+
+    /**
+     * Replace all option groups for a menu item.
+     * Principle: CQS — mutates option groups, returns void.
+     *
+     * @param array<int, array<string, mixed>> $groups
+     */
+    private function syncOptionGroups(MenuItem $item, array $groups): void
+    {
+        $item->optionGroups()->delete();
+
+        foreach ($groups as $i => $groupData) {
+            $group = MenuItemOptionGroup::create([
+                'menu_item_id'   => $item->id,
+                'name'           => $groupData['name'],
+                'is_required'    => (bool) ($groupData['is_required'] ?? false),
+                'min_selections' => (int) ($groupData['min_selections'] ?? 0),
+                'max_selections' => (int) ($groupData['max_selections'] ?? 1),
+                'sort_order'     => $i,
+            ]);
+
+            foreach ($groupData['options'] ?? [] as $j => $optData) {
+                $group->options()->create([
+                    'name'                    => $optData['name'],
+                    'additional_price_cents'  => (int) ($optData['additional_price_cents'] ?? 0),
+                    'is_available'            => true,
+                    'sort_order'              => $j,
+                ]);
+            }
+        }
     }
 }

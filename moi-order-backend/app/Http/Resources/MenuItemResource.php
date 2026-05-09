@@ -24,15 +24,31 @@ class MenuItemResource extends JsonResource
         }
 
         return [
-            'id'               => $this->id,
-            'menu_category_id' => $this->menu_category_id,
-            'restaurant_id'    => $this->restaurant_id,
-            'name'             => $this->name,
-            'description'      => $this->description,
-            'price_cents'      => $this->price_cents,
-            'photo_url'        => $photoUrl,
-            'status'           => $this->status->value,
-            'sort_order'       => $this->sort_order,
+            'id'                   => $this->id,
+            'menu_category_id'     => $this->menu_category_id,
+            'restaurant_id'        => $this->restaurant_id,
+            'name'                 => $this->name,
+            'description'          => $this->description,
+            'price_cents'          => $this->price_cents,
+            'original_price_cents' => $this->original_price_cents,
+            'photo_url'            => $photoUrl,
+            'status'               => $this->status->value,
+            'sort_order'           => $this->sort_order,
+            'option_groups'        => $this->whenLoaded('optionGroups', fn () =>
+                $this->optionGroups->map(fn ($g) => [
+                    'id'             => $g->id,
+                    'name'           => $g->name,
+                    'is_required'    => $g->is_required,
+                    'min_selections' => $g->min_selections,
+                    'max_selections' => $g->max_selections,
+                    'options'        => $g->options->map(fn ($o) => [
+                        'id'                    => $o->id,
+                        'name'                  => $o->name,
+                        'additional_price_cents' => $o->additional_price_cents,
+                        'is_available'           => $o->is_available,
+                    ]),
+                ])
+            ),
         ];
     }
 }

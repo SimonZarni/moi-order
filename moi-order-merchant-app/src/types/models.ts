@@ -70,13 +70,31 @@ export interface FoodOrder {
   user: FoodOrderUser;
 }
 
+export interface MenuItemOption {
+  id: number;
+  name: string;
+  additional_price_cents: number;
+  is_available: boolean;
+}
+
+export interface MenuItemOptionGroup {
+  id: number;
+  name: string;
+  is_required: boolean;
+  min_selections: number;
+  max_selections: number;
+  options: MenuItemOption[];
+}
+
 export interface MenuItem {
   id: number;
   name: string;
   description: string | null;
   price_cents: number;
+  original_price_cents: number | null;
   status: MenuItemStatus;
   photo_url: string | null;
+  option_groups: MenuItemOptionGroup[];
 }
 
 export interface MenuCategory {
