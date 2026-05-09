@@ -36,7 +36,12 @@ import { setMemoryToken, setMemoryLocale } from '@/shared/api/client';
 import { fetchMe } from '@/shared/api/auth';
 import { TOKEN_KEY, LOCALE_KEY, CACHE_TTL, GOOGLE_WEB_CLIENT_ID, GOOGLE_IOS_CLIENT_ID, LINE_CHANNEL_ID } from '@/shared/constants/config';
 
-GoogleSignin.configure({ webClientId: GOOGLE_WEB_CLIENT_ID, iosClientId: GOOGLE_IOS_CLIENT_ID });
+// Guard both IDs before configure() — passing an empty string to the native module
+// causes a JSI crash on iOS. EAS Secrets always provide these in real builds;
+// local dev uses .env. If missing, Google Sign-In is silently disabled for this session.
+if (GOOGLE_WEB_CLIENT_ID && GOOGLE_IOS_CLIENT_ID) {
+  GoogleSignin.configure({ webClientId: GOOGLE_WEB_CLIENT_ID, iosClientId: GOOGLE_IOS_CLIENT_ID });
+}
 void Line.setup({ channelId: LINE_CHANNEL_ID });
 import { useAuthStore } from '@/shared/store/authStore';
 import { useLocaleStore, Locale } from '@/shared/store/localeStore';
