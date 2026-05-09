@@ -74,7 +74,7 @@ export function RegisterScreen(): React.JSX.Element {
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>{s.auth.getStarted}</Text>
+            <Text style={styles.cardTitle}>{s.common.getStarted}</Text>
             <Text style={styles.cardSubtitle}>{s.auth.registerSubtitle}</Text>
 
             <AuthMethodTabs value={authMethod} onChange={setAuthMethod} />
