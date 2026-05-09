@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useCallback } from 'react';
+import { Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useMenuScreen } from '../hooks/useMenuScreen';
@@ -50,10 +51,27 @@ export function MenuScreen(): React.JSX.Element {
     if (result.canceled || result.assets.length === 0) return;
     const asset = result.assets[0];
     if (!asset) return;
-    const mimeType = asset.mimeType ?? 'image/jpeg';
-    const ext = mimeType.split('/')[1] ?? 'jpg';
-    const fileName = asset.fileName ?? `item.${ext}`;
-    onPick({ uri: asset.uri, name: fileName, type: mimeType });
+
+    let mimeType = asset.mimeType ?? 'image/jpeg';
+    let uri = asset.uri;
+    let fileName = asset.fileName ?? `item.${mimeType.split('/')[1] ?? 'jpg'}`;
+
+    // Chrome/Firefox cannot render or upload HEIC — convert to JPEG on web
+    if (Platform.OS === 'web' && (mimeType === 'image/heic' || mimeType === 'image/heif')) {
+      try {
+        const heic2any = (await import('heic2any')).default;
+        const srcBlob = await fetch(uri).then((r) => r.blob());
+        const result2 = await heic2any({ blob: srcBlob, toType: 'image/jpeg', quality: 0.85 });
+        const jpegBlob = Array.isArray(result2) ? result2[0] : result2;
+        uri = URL.createObjectURL(jpegBlob);
+        mimeType = 'image/jpeg';
+        fileName = fileName.replace(/\.(heic|heif)$/i, '.jpg');
+      } catch {
+        // Safari can render HEIC natively — safe to proceed as-is if conversion fails
+      }
+    }
+
+    onPick({ uri, name: fileName, type: mimeType });
   }, []);
 
   const handlePickAddPhoto = useCallback(() => handlePickPhoto(handleAddItemPhotoChange), [handlePickPhoto, handleAddItemPhotoChange]);

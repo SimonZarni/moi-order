@@ -224,7 +224,16 @@ export function useMenuScreen(): UseMenuScreenResult {
   const { mutate: mutateUpdateItem, isPending: isEditingItem } = useMutation({
     mutationFn: async ({ id, form }: { id: number; form: AddItemForm }) =>
       updateMenuItem(id, await buildItemFormData(form)),
-    onSuccess: () => {
+    onSuccess: (updatedItem) => {
+      // Patch the cache immediately so re-opening the edit modal sees the new photo_url
+      // without waiting for the background refetch to complete.
+      queryClient.setQueryData<MenuCategory[]>(QUERY_KEYS.MENU_CATEGORIES, (old) => {
+        if (!old) return old;
+        return old.map((cat) => ({
+          ...cat,
+          items: cat.items.map((item) => (item.id === updatedItem.id ? updatedItem : item)),
+        }));
+      });
       void invalidateMenu();
       setEditItemId(null);
       setEditItemForm(EMPTY_FORM);
