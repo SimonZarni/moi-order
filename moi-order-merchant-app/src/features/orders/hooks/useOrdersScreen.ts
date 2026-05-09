@@ -65,7 +65,6 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     queryFn: () => getOrders(dateFilter !== null ? { date: dateFilter } : undefined),
     staleTime: CACHE_TTL.ORDERS,
     gcTime: GC_TIME.DEFAULT,
-    refetchInterval: CACHE_TTL.ORDERS,
     retry: QUERY_RETRY,
   });
 

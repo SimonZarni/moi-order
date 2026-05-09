@@ -3,8 +3,9 @@ import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMe } from '../api/auth';
+import { getMenuCategories } from '../api/menu';
 import { QUERY_KEYS } from '../shared/constants/queryKeys';
 import { CACHE_TTL } from '../shared/constants/config';
 import { colours } from '../shared/theme/colours';
@@ -18,6 +19,7 @@ const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 export function AppNavigator(): React.JSX.Element {
   const { token, user, isLoading, initFromStorage, setUser } = useAuthStore();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     initFromStorage();
@@ -34,6 +36,17 @@ export function AppNavigator(): React.JSX.Element {
     staleTime: CACHE_TTL.USER,
     retry: false,
   });
+
+  // Prefetch tab data in parallel as soon as the user is confirmed a merchant.
+  // By the time they tap any tab, the data is already in cache — zero wait.
+  useEffect(() => {
+    if (!user?.is_merchant) return;
+    void queryClient.prefetchQuery({
+      queryKey: QUERY_KEYS.MENU_CATEGORIES,
+      queryFn: getMenuCategories,
+      staleTime: CACHE_TTL.MENU,
+    });
+  }, [user?.is_merchant, queryClient]);
 
   if (isLoading || (!!token && !user && isMeLoading)) {
     return (

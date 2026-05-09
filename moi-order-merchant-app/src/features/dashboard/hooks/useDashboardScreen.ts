@@ -25,7 +25,6 @@ export function useDashboardScreen(): UseDashboardScreenResult {
     queryFn: getAnalytics,
     staleTime: CACHE_TTL.ANALYTICS,
     gcTime: GC_TIME.DEFAULT,
-    refetchInterval: CACHE_TTL.ANALYTICS,
     retry: QUERY_RETRY,
   });
 
@@ -39,7 +38,6 @@ export function useDashboardScreen(): UseDashboardScreenResult {
     queryFn: () => getOrders(),
     staleTime: CACHE_TTL.ORDERS,
     gcTime: GC_TIME.DEFAULT,
-    refetchInterval: CACHE_TTL.ORDERS,
     retry: QUERY_RETRY,
   });
 

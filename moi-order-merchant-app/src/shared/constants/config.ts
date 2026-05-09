@@ -1,10 +1,10 @@
 export const CACHE_TTL = {
-  DEFAULT: 30_000,
-  ORDERS: 30_000,       // 30s — active list refreshes every 30s
-  ANALYTICS: 60_000,    // 60s — analytics refreshes every minute
-  MENU: 120_000,        // 2 min — menu changes infrequently
-  USER: 300_000,        // 5 min
-  RESTAURANT: 300_000,  // 5 min
+  DEFAULT:    30_000,         // 30s
+  ORDERS:     60_000,         // 1 min — was 30s (removed refetchInterval; pull-to-refresh handles updates)
+  ANALYTICS:  120_000,        // 2 min — was 60s (removed refetchInterval)
+  MENU:       10 * 60_000,    // 10 min — menu rarely changes; prefetched at login
+  USER:       300_000,        // 5 min
+  RESTAURANT: 300_000,        // 5 min
 } as const;
 
 export const GC_TIME = {

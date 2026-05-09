@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import {
   getMenuCategories,
   createCategory,
@@ -52,6 +52,7 @@ export function useMenuScreen(): UseMenuScreenResult {
     queryKey: QUERY_KEYS.MENU_CATEGORIES,
     queryFn: getMenuCategories,
     staleTime: CACHE_TTL.MENU,
+    placeholderData: keepPreviousData, // show stale data instantly while refetching
   });
 
   const categories = useMemo(() => data ?? [], [data]);
