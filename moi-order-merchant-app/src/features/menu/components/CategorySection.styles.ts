@@ -64,4 +64,38 @@ export const styles = StyleSheet.create({
     color: colours.primary,
     fontWeight: '600',
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionButton: {
+    padding: spacing.sm,
+    minHeight: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  renameRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  renameInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colours.primary,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    fontSize: typography.md,
+    color: colours.textOnLight,
+    backgroundColor: colours.backgroundLight,
+    minHeight: 36,
+  },
+  renameAction: {
+    padding: spacing.sm,
+    minHeight: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

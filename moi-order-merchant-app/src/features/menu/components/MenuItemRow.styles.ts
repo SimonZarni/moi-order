@@ -60,6 +60,12 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.xs,
   },
+  editButton: {
+    padding: 6,
+    minHeight: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   statusBadge: {
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,

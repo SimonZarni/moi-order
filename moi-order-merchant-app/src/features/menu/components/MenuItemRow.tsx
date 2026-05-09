@@ -23,9 +23,10 @@ interface MenuItemRowProps {
   item: MenuItem;
   onToggleStatus: (id: number, status: MenuItemStatus) => void;
   onDelete: (id: number) => void;
+  onEdit: (item: MenuItem) => void;
 }
 
-export function MenuItemRow({ item, onToggleStatus, onDelete }: MenuItemRowProps): React.JSX.Element {
+export function MenuItemRow({ item, onToggleStatus, onDelete, onEdit }: MenuItemRowProps): React.JSX.Element {
   const [expanded, setExpanded] = useState(false);
   const statusColour = STATUS_COLOURS[item.status];
   const hasModifiers = item.option_groups.length > 0;
@@ -34,6 +35,8 @@ export function MenuItemRow({ item, onToggleStatus, onDelete }: MenuItemRowProps
   const handleRowPress = useCallback(() => {
     if (hasModifiers) setExpanded((prev) => !prev);
   }, [hasModifiers]);
+
+  const handleEditPress = useCallback(() => onEdit(item), [item, onEdit]);
 
   const handleStatusPress = useCallback(() => {
     Alert.alert(
@@ -50,7 +53,6 @@ export function MenuItemRow({ item, onToggleStatus, onDelete }: MenuItemRowProps
 
   return (
     <View style={styles.wrapper}>
-      {/* Main row */}
       <Pressable
         style={styles.row}
         onPress={handleRowPress}
@@ -74,6 +76,14 @@ export function MenuItemRow({ item, onToggleStatus, onDelete }: MenuItemRowProps
         </View>
         <View style={styles.actions}>
           <Pressable
+            style={styles.editButton}
+            onPress={handleEditPress}
+            accessibilityLabel={`Edit ${item.name}`}
+            accessibilityRole="button"
+          >
+            <Ionicons name="pencil-outline" size={15} color={colours.primary} />
+          </Pressable>
+          <Pressable
             style={[styles.statusBadge, { backgroundColor: statusColour + '22' }]}
             onPress={handleStatusPress}
             accessibilityLabel={`Manage ${item.name}, status: ${STATUS_LABELS[item.status]}`}
@@ -93,7 +103,6 @@ export function MenuItemRow({ item, onToggleStatus, onDelete }: MenuItemRowProps
         </View>
       </Pressable>
 
-      {/* Accordion — modifier groups */}
       {expanded && hasModifiers && (
         <View style={styles.accordion}>
           {item.option_groups.map((group) => (
@@ -108,9 +117,7 @@ export function MenuItemRow({ item, onToggleStatus, onDelete }: MenuItemRowProps
                 <View key={opt.id} style={styles.optionRow}>
                   <Text style={styles.optionName}>{opt.name}</Text>
                   <Text style={styles.optionPrice}>
-                    {opt.additional_price_cents === 0
-                      ? 'Free'
-                      : `+${formatPrice(opt.additional_price_cents)}`}
+                    {opt.additional_price_cents === 0 ? 'Free' : `+${formatPrice(opt.additional_price_cents)}`}
                   </Text>
                 </View>
               ))}

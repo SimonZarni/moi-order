@@ -12,7 +12,8 @@ import { CategorySection } from '../components/CategorySection';
 import { styles } from './MenuScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
-import type { MenuCategory } from '../../../types/models';
+import type { MenuCategory, MenuItem } from '../../../types/models';
+import type { AddItemForm } from '../hooks/useMenuScreen';
 
 export function MenuScreen(): React.JSX.Element {
   const {
@@ -26,6 +27,13 @@ export function MenuScreen(): React.JSX.Element {
     handleAddOptionGroup, handleRemoveOptionGroup,
     handleOptionGroupChange, handleAddOption, handleRemoveOption, handleOptionChange,
     handleAddItemSubmit,
+    editItemId, editItemForm, isEditingItem,
+    handleOpenEditItem, handleCloseEditItem,
+    handleEditItemFieldChange, handleEditItemPhotoChange,
+    handleEditAddOptionGroup, handleEditRemoveOptionGroup,
+    handleEditOptionGroupChange, handleEditAddOption, handleEditRemoveOption, handleEditOptionChange,
+    handleEditItemSubmit,
+    handleRenameCategory,
   } = useMenuScreen();
 
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -36,25 +44,21 @@ export function MenuScreen(): React.JSX.Element {
     setNewCategoryName('');
   }, [newCategoryName, handleAddCategory]);
 
-  const handlePickPhoto = useCallback(async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images',
-      quality: 0.8,
-    });
+  const handlePickPhoto = useCallback(async (onPick: (photo: AddItemForm['photo']) => void) => {
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'images', quality: 0.8 });
     if (result.canceled || result.assets.length === 0) return;
     const asset = result.assets[0];
     if (!asset) return;
     const ext = asset.uri.split('.').pop() ?? 'jpg';
-    handleAddItemPhotoChange({ uri: asset.uri, name: `item.${ext}`, type: `image/${ext}` });
-  }, [handleAddItemPhotoChange]);
+    onPick({ uri: asset.uri, name: `item.${ext}`, type: `image/${ext}` });
+  }, []);
+
+  const handlePickAddPhoto = useCallback(() => handlePickPhoto(handleAddItemPhotoChange), [handlePickPhoto, handleAddItemPhotoChange]);
+  const handlePickEditPhoto = useCallback(() => handlePickPhoto(handleEditItemPhotoChange), [handlePickPhoto, handleEditItemPhotoChange]);
 
   if (isLoading) {
     return <View style={styles.centered}><ActivityIndicator size="large" color={colours.primary} /></View>;
   }
-
-  const discountAmount = addItemForm.original_price.trim() && addItemForm.price.trim()
-    ? Math.max(0, parseFloat(addItemForm.original_price) - parseFloat(addItemForm.price))
-    : 0;
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
@@ -65,9 +69,11 @@ export function MenuScreen(): React.JSX.Element {
           <CategorySection
             category={item}
             onDeleteCategory={handleDeleteCategory}
+            onRenameCategory={handleRenameCategory}
             onToggleItemStatus={handleToggleItemStatus}
             onDeleteItem={handleDeleteItem}
             onAddItem={handleOpenAddItem}
+            onEditItem={handleOpenEditItem}
           />
         )}
         contentContainerStyle={styles.list}
@@ -104,165 +110,231 @@ export function MenuScreen(): React.JSX.Element {
       {/* Add menu item modal */}
       <Modal visible={addItemCategoryId !== null} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <ScrollView
-            style={styles.modalScrollView}
-            contentContainerStyle={styles.modalCard}
-            keyboardShouldPersistTaps="handled"
-          >
-            <Text style={styles.modalTitle}>New Menu Item</Text>
+          <ScrollView style={styles.modalScrollView} contentContainerStyle={styles.modalCard} keyboardShouldPersistTaps="handled">
+            <ItemFormContent
+              title="New Menu Item"
+              form={addItemForm}
+              isSaving={isAddingItem}
+              onFieldChange={handleAddItemFieldChange}
+              onPickPhoto={handlePickAddPhoto}
+              onAddOptionGroup={handleAddOptionGroup}
+              onRemoveOptionGroup={handleRemoveOptionGroup}
+              onOptionGroupChange={handleOptionGroupChange}
+              onAddOption={handleAddOption}
+              onRemoveOption={handleRemoveOption}
+              onOptionChange={handleOptionChange}
+              onCancel={handleCloseAddItem}
+              onSubmit={handleAddItemSubmit}
+              submitLabel="Add Item"
+            />
+          </ScrollView>
+        </View>
+      </Modal>
 
-            {/* Basic fields */}
-            <TextInput style={styles.modalInput} placeholder="Item name *"
-              placeholderTextColor={colours.medium} value={addItemForm.name}
-              onChangeText={(v) => handleAddItemFieldChange('name', v)} accessibilityLabel="Item name" />
-
-            <TextInput style={[styles.modalInput, { minHeight: 60, textAlignVertical: 'top' }]}
-              placeholder="Description (optional)" placeholderTextColor={colours.medium}
-              value={addItemForm.description}
-              onChangeText={(v) => handleAddItemFieldChange('description', v)}
-              multiline accessibilityLabel="Item description" />
-
-            {/* Pricing row */}
-            <View style={styles.priceRow}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.priceLabel}>Price *</Text>
-                <TextInput style={styles.modalInput} placeholder="100.00"
-                  placeholderTextColor={colours.medium} value={addItemForm.price}
-                  onChangeText={(v) => handleAddItemFieldChange('price', v)}
-                  keyboardType="decimal-pad" accessibilityLabel="Item price" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.priceLabel}>Original Price (before discount)</Text>
-                <TextInput style={styles.modalInput} placeholder="Optional"
-                  placeholderTextColor={colours.medium} value={addItemForm.original_price}
-                  onChangeText={(v) => handleAddItemFieldChange('original_price', v)}
-                  keyboardType="decimal-pad" accessibilityLabel="Original price before discount" />
-              </View>
-            </View>
-            {discountAmount > 0 && (
-              <Text style={styles.discountBadge}>
-                ✓ Discount: {formatPrice(Math.round(discountAmount * 100))} off
-              </Text>
-            )}
-
-            {/* Photo */}
-            <Pressable
-              style={[styles.cancelButton, { borderColor: colours.primary, marginBottom: 8 }]}
-              onPress={handlePickPhoto} accessibilityRole="button" accessibilityLabel="Pick photo">
-              <Ionicons name="image-outline" size={16} color={colours.primary} />
-              <Text style={[styles.cancelText, { color: colours.primary, marginLeft: 6 }]}>
-                {addItemForm.photo !== null ? 'Change Photo' : 'Add Photo (optional)'}
-              </Text>
-            </Pressable>
-
-            {/* Option Groups */}
-            <View style={styles.sectionDivider} />
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Options / Modifiers</Text>
-              <Pressable style={styles.addSmallBtn} onPress={handleAddOptionGroup}
-                accessibilityRole="button" accessibilityLabel="Add option group">
-                <Ionicons name="add-circle-outline" size={16} color={colours.primary} />
-                <Text style={styles.addSmallBtnText}>Add Group</Text>
-              </Pressable>
-            </View>
-            <Text style={styles.sectionHint}>
-              e.g. Group: "Protein" → Options: Pork (+15 ฿), Beef (+20 ฿)
-            </Text>
-
-            {addItemForm.option_groups.map((group, gi) => (
-              <View key={gi} style={styles.optionGroupCard}>
-                <View style={styles.optionGroupHeader}>
-                  <TextInput
-                    style={[styles.modalInput, { flex: 1, marginBottom: 0 }]}
-                    placeholder="Group name (e.g. Protein)"
-                    placeholderTextColor={colours.medium}
-                    value={group.name}
-                    onChangeText={(v) => handleOptionGroupChange(gi, 'name', v)}
-                    accessibilityLabel={`Option group ${gi + 1} name`}
-                  />
-                  <Pressable onPress={() => handleRemoveOptionGroup(gi)}
-                    style={{ padding: 8 }} accessibilityRole="button" accessibilityLabel="Remove group">
-                    <Ionicons name="trash-outline" size={16} color={colours.error} />
-                  </Pressable>
-                </View>
-
-                <View style={styles.optionGroupMeta}>
-                  <View style={styles.toggleRowSmall}>
-                    <Text style={styles.toggleLabelSmall}>Required</Text>
-                    <Switch
-                      value={group.is_required}
-                      onValueChange={(v) => handleOptionGroupChange(gi, 'is_required', v)}
-                      trackColor={{ false: colours.divider, true: colours.primary + '66' }}
-                      thumbColor={group.is_required ? colours.primary : colours.medium}
-                      accessibilityLabel={`Group ${gi + 1} required`}
-                    />
-                  </View>
-                  <View style={styles.toggleRowSmall}>
-                    <Text style={styles.toggleLabelSmall}>Max choose</Text>
-                    <TextInput
-                      style={styles.smallNumInput}
-                      value={String(group.max_selections)}
-                      onChangeText={(v) => handleOptionGroupChange(gi, 'max_selections', parseInt(v, 10) || 1)}
-                      keyboardType="number-pad"
-                      accessibilityLabel={`Max selections for group ${gi + 1}`}
-                    />
-                  </View>
-                </View>
-
-                {group.options.map((opt, oi) => (
-                  <View key={oi} style={styles.optionRow}>
-                    <TextInput
-                      style={[styles.modalInput, { flex: 2, marginBottom: 0 }]}
-                      placeholder="Option name"
-                      placeholderTextColor={colours.medium}
-                      value={opt.name}
-                      onChangeText={(v) => handleOptionChange(gi, oi, 'name', v)}
-                      accessibilityLabel={`Option ${oi + 1} name`}
-                    />
-                    <TextInput
-                      style={[styles.modalInput, { flex: 1, marginBottom: 0, marginLeft: 6 }]}
-                      placeholder="+0"
-                      placeholderTextColor={colours.medium}
-                      value={opt.additional_price_cents === 0 ? '' : String(opt.additional_price_cents / 100)}
-                      onChangeText={(v) => handleOptionChange(gi, oi, 'additional_price_cents', Math.round(parseFloat(v || '0') * 100))}
-                      keyboardType="decimal-pad"
-                      accessibilityLabel={`Option ${oi + 1} additional price`}
-                    />
-                    <Pressable onPress={() => handleRemoveOption(gi, oi)}
-                      style={{ padding: 8 }} accessibilityRole="button" accessibilityLabel="Remove option">
-                      <Ionicons name="close-circle-outline" size={16} color={colours.error} />
-                    </Pressable>
-                  </View>
-                ))}
-
-                <Pressable style={styles.addOptionBtn} onPress={() => handleAddOption(gi)}
-                  accessibilityRole="button" accessibilityLabel="Add option">
-                  <Ionicons name="add-outline" size={14} color={colours.primary} />
-                  <Text style={styles.addOptionBtnText}>Add Option</Text>
-                </Pressable>
-              </View>
-            ))}
-
-            <View style={styles.modalActions}>
-              <Pressable style={styles.cancelButton} onPress={handleCloseAddItem}
-                accessibilityLabel="Cancel" accessibilityRole="button">
-                <Text style={styles.cancelText}>Cancel</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.confirmButton, (isAddingItem || !addItemForm.name.trim() || !addItemForm.price.trim()) && { opacity: 0.5 }]}
-                onPress={handleAddItemSubmit}
-                disabled={isAddingItem || !addItemForm.name.trim() || !addItemForm.price.trim()}
-                accessibilityLabel="Add item" accessibilityRole="button"
-              >
-                {isAddingItem
-                  ? <ActivityIndicator size="small" color={colours.white} />
-                  : <Text style={styles.confirmText}>Add Item</Text>
-                }
-              </Pressable>
-            </View>
+      {/* Edit menu item modal */}
+      <Modal visible={editItemId !== null} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <ScrollView style={styles.modalScrollView} contentContainerStyle={styles.modalCard} keyboardShouldPersistTaps="handled">
+            <ItemFormContent
+              title="Edit Menu Item"
+              form={editItemForm}
+              isSaving={isEditingItem}
+              onFieldChange={handleEditItemFieldChange}
+              onPickPhoto={handlePickEditPhoto}
+              onAddOptionGroup={handleEditAddOptionGroup}
+              onRemoveOptionGroup={handleEditRemoveOptionGroup}
+              onOptionGroupChange={handleEditOptionGroupChange}
+              onAddOption={handleEditAddOption}
+              onRemoveOption={handleEditRemoveOption}
+              onOptionChange={handleEditOptionChange}
+              onCancel={handleCloseEditItem}
+              onSubmit={handleEditItemSubmit}
+              submitLabel="Save Changes"
+            />
           </ScrollView>
         </View>
       </Modal>
     </SafeAreaView>
+  );
+}
+
+interface ItemFormContentProps {
+  title: string;
+  form: AddItemForm;
+  isSaving: boolean;
+  onFieldChange: (field: 'name' | 'description' | 'price' | 'original_price', value: string) => void;
+  onPickPhoto: () => void;
+  onAddOptionGroup: () => void;
+  onRemoveOptionGroup: (index: number) => void;
+  onOptionGroupChange: (gi: number, field: 'name' | 'is_required' | 'max_selections', value: string | boolean | number) => void;
+  onAddOption: (gi: number) => void;
+  onRemoveOption: (gi: number, oi: number) => void;
+  onOptionChange: (gi: number, oi: number, field: 'name' | 'additional_price_cents', value: string | number) => void;
+  onCancel: () => void;
+  onSubmit: () => void;
+  submitLabel: string;
+}
+
+function ItemFormContent({
+  title, form, isSaving,
+  onFieldChange, onPickPhoto,
+  onAddOptionGroup, onRemoveOptionGroup, onOptionGroupChange,
+  onAddOption, onRemoveOption, onOptionChange,
+  onCancel, onSubmit, submitLabel,
+}: ItemFormContentProps): React.JSX.Element {
+  const discountAmount = form.original_price.trim() && form.price.trim()
+    ? Math.max(0, parseFloat(form.original_price) - parseFloat(form.price))
+    : 0;
+
+  return (
+    <>
+      <Text style={styles.modalTitle}>{title}</Text>
+
+      <TextInput style={styles.modalInput} placeholder="Item name *"
+        placeholderTextColor={colours.medium} value={form.name}
+        onChangeText={(v) => onFieldChange('name', v)} accessibilityLabel="Item name" />
+
+      <TextInput style={[styles.modalInput, { minHeight: 60, textAlignVertical: 'top' }]}
+        placeholder="Description (optional)" placeholderTextColor={colours.medium}
+        value={form.description}
+        onChangeText={(v) => onFieldChange('description', v)}
+        multiline accessibilityLabel="Item description" />
+
+      <View style={styles.priceRow}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.priceLabel}>Price *</Text>
+          <TextInput style={styles.modalInput} placeholder="100.00"
+            placeholderTextColor={colours.medium} value={form.price}
+            onChangeText={(v) => onFieldChange('price', v)}
+            keyboardType="decimal-pad" accessibilityLabel="Item price" />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.priceLabel}>Original Price (before discount)</Text>
+          <TextInput style={styles.modalInput} placeholder="Optional"
+            placeholderTextColor={colours.medium} value={form.original_price}
+            onChangeText={(v) => onFieldChange('original_price', v)}
+            keyboardType="decimal-pad" accessibilityLabel="Original price before discount" />
+        </View>
+      </View>
+      {discountAmount > 0 && (
+        <Text style={styles.discountBadge}>
+          ✓ Discount: {formatPrice(Math.round(discountAmount * 100))} off
+        </Text>
+      )}
+
+      <Pressable
+        style={[styles.cancelButton, { borderColor: colours.primary, marginBottom: 8 }]}
+        onPress={onPickPhoto} accessibilityRole="button" accessibilityLabel="Pick photo">
+        <Ionicons name="image-outline" size={16} color={colours.primary} />
+        <Text style={[styles.cancelText, { color: colours.primary, marginLeft: 6 }]}>
+          {form.photo !== null ? 'Change Photo' : 'Add Photo (optional)'}
+        </Text>
+      </Pressable>
+
+      <View style={styles.sectionDivider} />
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Options / Modifiers</Text>
+        <Pressable style={styles.addSmallBtn} onPress={onAddOptionGroup}
+          accessibilityRole="button" accessibilityLabel="Add option group">
+          <Ionicons name="add-circle-outline" size={16} color={colours.primary} />
+          <Text style={styles.addSmallBtnText}>Add Group</Text>
+        </Pressable>
+      </View>
+      <Text style={styles.sectionHint}>
+        e.g. Group: "Protein" → Options: Pork (+15 ฿), Beef (+20 ฿)
+      </Text>
+
+      {form.option_groups.map((group, gi) => (
+        <View key={gi} style={styles.optionGroupCard}>
+          <View style={styles.optionGroupHeader}>
+            <TextInput
+              style={[styles.modalInput, { flex: 1, marginBottom: 0 }]}
+              placeholder="Group name (e.g. Protein)"
+              placeholderTextColor={colours.medium}
+              value={group.name}
+              onChangeText={(v) => onOptionGroupChange(gi, 'name', v)}
+              accessibilityLabel={`Option group ${gi + 1} name`}
+            />
+            <Pressable onPress={() => onRemoveOptionGroup(gi)}
+              style={{ padding: 8 }} accessibilityRole="button" accessibilityLabel="Remove group">
+              <Ionicons name="trash-outline" size={16} color={colours.error} />
+            </Pressable>
+          </View>
+
+          <View style={styles.optionGroupMeta}>
+            <View style={styles.toggleRowSmall}>
+              <Text style={styles.toggleLabelSmall}>Required</Text>
+              <Switch
+                value={group.is_required}
+                onValueChange={(v) => onOptionGroupChange(gi, 'is_required', v)}
+                trackColor={{ false: colours.divider, true: colours.primary + '66' }}
+                thumbColor={group.is_required ? colours.primary : colours.medium}
+                accessibilityLabel={`Group ${gi + 1} required`}
+              />
+            </View>
+            <View style={styles.toggleRowSmall}>
+              <Text style={styles.toggleLabelSmall}>Max choose</Text>
+              <TextInput
+                style={styles.smallNumInput}
+                value={String(group.max_selections)}
+                onChangeText={(v) => onOptionGroupChange(gi, 'max_selections', parseInt(v, 10) || 1)}
+                keyboardType="number-pad"
+                accessibilityLabel={`Max selections for group ${gi + 1}`}
+              />
+            </View>
+          </View>
+
+          {group.options.map((opt, oi) => (
+            <View key={oi} style={styles.optionRow}>
+              <TextInput
+                style={[styles.modalInput, { flex: 2, marginBottom: 0 }]}
+                placeholder="Option name"
+                placeholderTextColor={colours.medium}
+                value={opt.name}
+                onChangeText={(v) => onOptionChange(gi, oi, 'name', v)}
+                accessibilityLabel={`Option ${oi + 1} name`}
+              />
+              <TextInput
+                style={[styles.modalInput, { flex: 1, marginBottom: 0, marginLeft: 6 }]}
+                placeholder="+0"
+                placeholderTextColor={colours.medium}
+                value={opt.additional_price_cents === 0 ? '' : String(opt.additional_price_cents / 100)}
+                onChangeText={(v) => onOptionChange(gi, oi, 'additional_price_cents', Math.round(parseFloat(v || '0') * 100))}
+                keyboardType="decimal-pad"
+                accessibilityLabel={`Option ${oi + 1} additional price`}
+              />
+              <Pressable onPress={() => onRemoveOption(gi, oi)}
+                style={{ padding: 8 }} accessibilityRole="button" accessibilityLabel="Remove option">
+                <Ionicons name="close-circle-outline" size={16} color={colours.error} />
+              </Pressable>
+            </View>
+          ))}
+
+          <Pressable style={styles.addOptionBtn} onPress={() => onAddOption(gi)}
+            accessibilityRole="button" accessibilityLabel="Add option">
+            <Ionicons name="add-outline" size={14} color={colours.primary} />
+            <Text style={styles.addOptionBtnText}>Add Option</Text>
+          </Pressable>
+        </View>
+      ))}
+
+      <View style={styles.modalActions}>
+        <Pressable style={styles.cancelButton} onPress={onCancel}
+          accessibilityLabel="Cancel" accessibilityRole="button">
+          <Text style={styles.cancelText}>Cancel</Text>
+        </Pressable>
+        <Pressable
+          style={[styles.confirmButton, (isSaving || !form.name.trim() || !form.price.trim()) && { opacity: 0.5 }]}
+          onPress={onSubmit}
+          disabled={isSaving || !form.name.trim() || !form.price.trim()}
+          accessibilityLabel={submitLabel} accessibilityRole="button"
+        >
+          {isSaving
+            ? <ActivityIndicator size="small" color={colours.white} />
+            : <Text style={styles.confirmText}>{submitLabel}</Text>
+          }
+        </Pressable>
+      </View>
+    </>
   );
 }
