@@ -60,10 +60,31 @@ class AdminAccountService
 
     /**
      * @param array{name?:string,email?:string,admin_role_id?:int} $data
+     *
+     * Security rules enforced here (not in middleware) because only the service
+     * has enough context to evaluate both the caller and the target together:
+     *
+     * 1. Self-update blocked — an admin cannot change their own role.
+     *    Prevents self-promotion regardless of what permissions they hold.
+     *
+     * 2. Super-admin role assignment restricted — only a super_admin can promote
+     *    another account to super_admin. Prevents privilege escalation via
+     *    admins.manage permission.
      */
-    public function update(User $user, array $data): void
+    public function update(User $caller, User $target, array $data): void
     {
-        $user->update(array_filter(
+        if ($caller->id === $target->id) {
+            throw new DomainException('admins.cannot_update_own_account', 403);
+        }
+
+        if (isset($data['admin_role_id'])) {
+            $role = AdminRole::find($data['admin_role_id']);
+            if ($role?->slug === 'super_admin' && ! $caller->isSuperAdmin()) {
+                throw new DomainException('admins.cannot_assign_super_admin_role', 403);
+            }
+        }
+
+        $target->update(array_filter(
             $data,
             static fn (mixed $v): bool => $v !== null,
         ));

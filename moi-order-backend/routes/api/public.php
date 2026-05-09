@@ -17,6 +17,15 @@ use Illuminate\Support\Facades\Route;
 // intentionally public
 Route::get('/health', fn () => response()->json(['status' => 'ok', 'version' => 'v1']));
 
+// Named 'login' route required by Laravel's auth middleware when a request without
+// Accept: application/json hits a protected endpoint — without this, the framework
+// tries to redirect to route('login') which throws a RouteNotFoundException → 500.
+// This API-only app never redirects; returning 401 JSON is the correct behaviour.
+Route::get('/login', fn () => response()->json([
+    'message' => 'Unauthenticated.',
+    'code'    => 'unauthenticated',
+], 401))->name('login');
+
 // Auth — intentionally public, rate-limited by throttle:auth applied per route
 Route::middleware('throttle:auth')->group(function (): void {
     Route::post('/auth/check-email', [AuthController::class, 'checkEmail']);

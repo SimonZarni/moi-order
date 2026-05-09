@@ -71,25 +71,22 @@ return Application::configure(basePath: dirname(__DIR__))
             ], 401);
         });
 
-        // Laravel's prepareException() converts AuthorizationException → HttpException(403)
-        // and ModelNotFoundException → HttpException(404) before render callbacks fire.
-        // The AuthorizationException callback type-hint would never match at that point.
-        // This HttpException callback intercepts the converted exceptions with correct shapes.
-        $exceptions->render(function (HttpException $e): ?JsonResponse {
+        // Catches ALL HttpException subclasses (including 405 MethodNotAllowed and
+        // 429 ThrottleRequests) with a clean {message,code} shape.
+        // Previously, unhandled status codes returned null here and fell through to
+        // Laravel's built-in renderer which dumps the full stack trace when APP_DEBUG=true.
+        $exceptions->render(function (HttpException $e): JsonResponse {
             return match ($e->getStatusCode()) {
+                401 => response()->json(['message' => 'Unauthenticated.', 'code' => 'unauthenticated'], 401),
                 403 => response()->json(['message' => 'Unauthorized.', 'code' => 'unauthorized'], 403),
                 404 => response()->json(['message' => 'Not found.', 'code' => 'not_found'], 404),
-                default => null, // fall through to Throwable handler
+                405 => response()->json(['message' => 'Method not allowed.', 'code' => 'method_not_allowed'], 405),
+                429 => response()->json(['message' => 'Too many requests. Please try again later.', 'code' => 'too_many_requests'], 429),
+                default => response()->json(['message' => 'An error occurred.', 'code' => 'http_error'], $e->getStatusCode()),
             };
         });
 
-        $exceptions->render(function (\Throwable $e): ?JsonResponse {
-            // HttpExceptions not handled above (e.g. 405, 429) fall through to
-            // Laravel's built-in renderHttpException() which returns the correct status.
-            if ($e instanceof HttpException) {
-                return null;
-            }
-
+        $exceptions->render(function (\Throwable $e): JsonResponse {
             Log::error('Unhandled exception', [
                 'class'   => get_class($e),
                 'message' => $e->getMessage(),

@@ -56,11 +56,11 @@ class AdminAccountController extends Controller
 
     public function update(UpdateAdminRequest $request, int $id): JsonResponse
     {
-        $user = User::where('is_admin', true)->findOrFail($id);
+        $target = User::where('is_admin', true)->findOrFail($id);
 
-        $this->service->update($user, $request->validated());
+        $this->service->update($request->user(), $target, $request->validated());
 
-        return (new AdminAccountResource($user->fresh('adminRole')))->response();
+        return (new AdminAccountResource($target->fresh('adminRole')))->response();
     }
 
     public function toggle(int $id): JsonResponse
