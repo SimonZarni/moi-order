@@ -101,7 +101,7 @@ export function MenuItemRow({ item, onToggleStatus, onDelete }: MenuItemRowProps
               <View style={styles.groupHeader}>
                 <Text style={styles.groupName}>{group.name}</Text>
                 <Text style={styles.groupMeta}>
-                  {group.is_required ? 'Required' : 'Optional'} · max {group.max_selections}
+                  {group.is_required ? 'Required' : 'Optional'} · Choose {group.max_selections === 1 ? '1' : `up to ${group.max_selections}`}
                 </Text>
               </View>
               {group.options.map((opt) => (
