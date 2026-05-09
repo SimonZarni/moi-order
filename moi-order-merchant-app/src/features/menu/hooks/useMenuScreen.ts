@@ -64,6 +64,7 @@ interface UseMenuScreenResult {
   // Edit item
   editItemId: number | null;
   editItemForm: AddItemForm;
+  editItemExistingPhotoUrl: string | null;
   isEditingItem: boolean;
   handleOpenEditItem: (item: MenuItem) => void;
   handleCloseEditItem: () => void;
@@ -169,6 +170,7 @@ export function useMenuScreen(): UseMenuScreenResult {
   const [addItemForm, setAddItemForm] = useState<AddItemForm>(EMPTY_FORM);
   const [editItemId, setEditItemId] = useState<number | null>(null);
   const [editItemForm, setEditItemForm] = useState<AddItemForm>(EMPTY_FORM);
+  const [editItemExistingPhotoUrl, setEditItemExistingPhotoUrl] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: QUERY_KEYS.MENU_CATEGORIES,
@@ -226,6 +228,7 @@ export function useMenuScreen(): UseMenuScreenResult {
       void invalidateMenu();
       setEditItemId(null);
       setEditItemForm(EMPTY_FORM);
+      setEditItemExistingPhotoUrl(null);
     },
   });
 
@@ -280,9 +283,13 @@ export function useMenuScreen(): UseMenuScreenResult {
         options: g.options.map((o) => ({ name: o.name, additional_price_cents: o.additional_price_cents })),
       })),
     });
+    setEditItemExistingPhotoUrl(item.photo_url);
     setEditItemId(item.id);
   }, []);
-  const handleCloseEditItem = useCallback(() => setEditItemId(null), []);
+  const handleCloseEditItem = useCallback(() => {
+    setEditItemId(null);
+    setEditItemExistingPhotoUrl(null);
+  }, []);
   const handleEditItemFieldChange = useCallback(
     (field: 'name' | 'description' | 'price' | 'original_price', value: string) =>
       setEditItemForm((prev) => ({ ...prev, [field]: value })),
@@ -315,7 +322,7 @@ export function useMenuScreen(): UseMenuScreenResult {
     handleAddOptionGroup, handleRemoveOptionGroup, handleOptionGroupChange,
     handleAddOption, handleRemoveOption, handleOptionChange,
     handleAddItemSubmit,
-    editItemId, editItemForm, isEditingItem,
+    editItemId, editItemForm, editItemExistingPhotoUrl, isEditingItem,
     handleOpenEditItem, handleCloseEditItem,
     handleEditItemFieldChange, handleEditItemPhotoChange,
     handleEditAddOptionGroup, handleEditRemoveOptionGroup, handleEditOptionGroupChange,

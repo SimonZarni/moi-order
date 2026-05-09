@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   View, Text, FlatList, Pressable, ActivityIndicator, Modal,
-  TextInput, ScrollView, Switch,
+  TextInput, ScrollView, Switch, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useCallback } from 'react';
@@ -11,6 +11,7 @@ import { useMenuScreen } from '../hooks/useMenuScreen';
 import { CategorySection } from '../components/CategorySection';
 import { styles } from './MenuScreen.styles';
 import { colours } from '../../../shared/theme/colours';
+import { spacing } from '../../../shared/theme/spacing';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
 import type { MenuCategory, MenuItem } from '../../../types/models';
 import type { AddItemForm } from '../hooks/useMenuScreen';
@@ -27,7 +28,7 @@ export function MenuScreen(): React.JSX.Element {
     handleAddOptionGroup, handleRemoveOptionGroup,
     handleOptionGroupChange, handleAddOption, handleRemoveOption, handleOptionChange,
     handleAddItemSubmit,
-    editItemId, editItemForm, isEditingItem,
+    editItemId, editItemForm, editItemExistingPhotoUrl, isEditingItem,
     handleOpenEditItem, handleCloseEditItem,
     handleEditItemFieldChange, handleEditItemPhotoChange,
     handleEditAddOptionGroup, handleEditRemoveOptionGroup,
@@ -140,6 +141,7 @@ export function MenuScreen(): React.JSX.Element {
             <ItemFormContent
               title="Edit Menu Item"
               form={editItemForm}
+              existingPhotoUrl={editItemExistingPhotoUrl}
               isSaving={isEditingItem}
               onFieldChange={handleEditItemFieldChange}
               onPickPhoto={handlePickEditPhoto}
@@ -163,6 +165,7 @@ export function MenuScreen(): React.JSX.Element {
 interface ItemFormContentProps {
   title: string;
   form: AddItemForm;
+  existingPhotoUrl?: string | null;
   isSaving: boolean;
   onFieldChange: (field: 'name' | 'description' | 'price' | 'original_price', value: string) => void;
   onPickPhoto: () => void;
@@ -178,7 +181,7 @@ interface ItemFormContentProps {
 }
 
 function ItemFormContent({
-  title, form, isSaving,
+  title, form, existingPhotoUrl = null, isSaving,
   onFieldChange, onPickPhoto,
   onAddOptionGroup, onRemoveOptionGroup, onOptionGroupChange,
   onAddOption, onRemoveOption, onOptionChange,
@@ -224,14 +227,37 @@ function ItemFormContent({
         </Text>
       )}
 
-      <Pressable
-        style={[styles.cancelButton, { borderColor: colours.primary, marginBottom: 8 }]}
-        onPress={onPickPhoto} accessibilityRole="button" accessibilityLabel="Pick photo">
-        <Ionicons name="image-outline" size={16} color={colours.primary} />
-        <Text style={[styles.cancelText, { color: colours.primary, marginLeft: 6 }]}>
-          {form.photo !== null ? 'Change Photo' : 'Add Photo (optional)'}
-        </Text>
-      </Pressable>
+      {(form.photo !== null || existingPhotoUrl !== null) ? (
+        <View style={styles.photoPreviewWrap}>
+          <Image
+            source={{ uri: form.photo !== null ? form.photo.uri : existingPhotoUrl! }}
+            style={styles.photoPreview}
+            resizeMode="cover"
+            accessibilityLabel="Item photo preview"
+          />
+          {form.photo !== null && (
+            <View style={styles.photoNewBadge}>
+              <Text style={styles.photoNewBadgeText}>New</Text>
+            </View>
+          )}
+          <View style={[styles.photoActions, { marginTop: spacing.xs }]}>
+            <Pressable style={styles.photoChangeBtn} onPress={onPickPhoto}
+              accessibilityRole="button" accessibilityLabel="Change photo">
+              <Ionicons name="image-outline" size={16} color={colours.primary} />
+              <Text style={styles.photoChangeBtnText}>Change Photo</Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : (
+        <Pressable
+          style={[styles.cancelButton, { borderColor: colours.primary, marginBottom: spacing.sm }]}
+          onPress={onPickPhoto} accessibilityRole="button" accessibilityLabel="Add photo">
+          <Ionicons name="image-outline" size={16} color={colours.primary} />
+          <Text style={[styles.cancelText, { color: colours.primary, marginLeft: 6 }]}>
+            Add Photo (optional)
+          </Text>
+        </Pressable>
+      )}
 
       <View style={styles.sectionDivider} />
       <View style={styles.sectionHeader}>
