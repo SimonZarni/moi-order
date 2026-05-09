@@ -31,7 +31,7 @@ export function CompanyServicesScreen(): React.JSX.Element {
           accentColor={editorialPalette.gold}
           eyebrow={s.services.companyEyebrow}
           title={s.services.companyTitle}
-          titleStyle={locale === 'mm' ? { fontSize: 20, lineHeight: 36, includeFontPadding: false } : undefined}
+          titleStyle={locale === 'mm' ? { fontSize: 20, lineHeight: 40, includeFontPadding: false } : undefined}
           subtitle={s.services.companySubtitle}
           onBack={handleBack}
           backLabel={s.services.backHome}
