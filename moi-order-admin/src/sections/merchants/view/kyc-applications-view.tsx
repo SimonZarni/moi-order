@@ -5,11 +5,11 @@ import Chip from '@mui/material/Chip';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
 import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -22,7 +22,7 @@ import { useRouter } from 'src/routes/hooks';
 import { fDate } from 'src/utils/format-time';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { type KycApplication, type KycApplicationStatus, merchantsApi } from 'src/api/merchants';
+import { merchantsApi, type KycApplication, type KycApplicationStatus } from 'src/api/merchants';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
