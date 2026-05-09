@@ -40,7 +40,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
       <View style={styles.header}>
         <BackButton onPress={handleBack} />
         <Text style={styles.headerTypeName}>{serviceTypeName} · {serviceTypeNameEn}</Text>
-        <Text style={styles.headerTitle}>90-Day Report</Text>
+        <Text style={styles.headerTitle}>{s.services.ninetyDayTitle}</Text>
         <View style={styles.headerPriceBadge}>
           <Text style={styles.headerPrice}>{priceFormatted}</Text>
         </View>
@@ -50,7 +50,7 @@ export function NinetyDayReportFormScreen(): React.JSX.Element {
         {isSuccess ? (
           <SuccessState
             title="Submitted!"
-            subtitle={`Your 90-day report has been submitted.\nWe'll process it and notify you shortly.`}
+            subtitle={s.services.ninetyDaySubmitted}
             buttonLabel="Back to Services"
             onButtonPress={handleBack}
           />

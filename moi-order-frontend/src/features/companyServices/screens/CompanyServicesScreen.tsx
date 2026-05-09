@@ -9,12 +9,14 @@ import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { useCompanyServicesScreen } from '@/features/companyServices/hooks/useCompanyServicesScreen';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { localeName } from '@/shared/utils/localeName';
+import { useStrings } from '@/shared/i18n';
 import { styles } from './CompanyServicesScreen.styles';
 
 export function CompanyServicesScreen(): React.JSX.Element {
   const { services, isLoading, isRefreshing, isError, handleRefresh, handleSelectService, handleBack } =
     useCompanyServicesScreen();
   const { locale } = useLocale();
+  const s = useStrings();
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -27,15 +29,15 @@ export function CompanyServicesScreen(): React.JSX.Element {
       >
         <HeroHeader
           accentColor={editorialPalette.gold}
-          eyebrow="Business & Company"
-          title="Company Services"
-          subtitle="Company registration and business documentation."
+          eyebrow={s.services.companyEyebrow}
+          title={s.services.companyTitle}
+          subtitle={s.services.companySubtitle}
           onBack={handleBack}
-          backLabel="Home"
+          backLabel={s.services.backHome}
         />
 
         <View style={styles.body}>
-          <Text style={styles.sectionLabel}>Available Services</Text>
+          <Text style={styles.sectionLabel}>{s.services.availableServices}</Text>
 
           {isLoading && (
             <View style={styles.centered}>
@@ -45,13 +47,13 @@ export function CompanyServicesScreen(): React.JSX.Element {
 
           {isError && (
             <View style={styles.centered}>
-              <Text style={styles.errorText}>Unable to load services. Please try again.</Text>
+              <Text style={styles.errorText}>{s.services.unableToLoad}</Text>
             </View>
           )}
 
           {!isLoading && !isError && services.length === 0 && (
             <View style={styles.centered}>
-              <Text style={styles.emptyText}>No services available at the moment.</Text>
+              <Text style={styles.emptyText}>{s.services.noServices}</Text>
             </View>
           )}
 

@@ -8,11 +8,13 @@ import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { ServiceTypeCard } from '@/features/ninetyDayReport/components/ServiceTypeCard';
 import { ServiceTypeCardSkeleton } from '@/features/ninetyDayReport/components/ServiceTypeCardSkeleton';
 import { useNinetyDayReportScreen } from '@/features/ninetyDayReport/hooks/useNinetyDayReportScreen';
+import { useStrings } from '@/shared/i18n';
 import { styles } from './NinetyDayReportScreen.styles';
 
 export function NinetyDayReportScreen(): React.JSX.Element {
   const { types, isLoading, isRefreshing, isError, handleRefresh, handleSelectType, handleBack } =
     useNinetyDayReportScreen();
+  const s = useStrings();
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -25,15 +27,15 @@ export function NinetyDayReportScreen(): React.JSX.Element {
       >
         <HeroHeader
           accentColor={editorialPalette.sage}
-          eyebrow="รายงานตัว 90 วัน"
-          title="90-Day Report"
-          subtitle="Select the report type that matches your visa category."
+          eyebrow={s.services.ninetyDayEyebrow}
+          title={s.services.ninetyDayTitle}
+          subtitle={s.services.ninetyDaySubtitle}
           onBack={handleBack}
-          backLabel="Home"
+          backLabel={s.services.backHome}
         />
 
         <View style={styles.body}>
-          <Text style={styles.sectionLabel}>Select Type</Text>
+          <Text style={styles.sectionLabel}>{s.services.selectType}</Text>
 
           {isLoading && (
             <>
@@ -46,13 +48,13 @@ export function NinetyDayReportScreen(): React.JSX.Element {
 
           {isError && (
             <View style={styles.centered}>
-              <Text style={styles.errorText}>Unable to load services. Please try again.</Text>
+              <Text style={styles.errorText}>{s.services.unableToLoad}</Text>
             </View>
           )}
 
           {!isLoading && !isError && types.length === 0 && (
             <View style={styles.centered}>
-              <Text style={styles.emptyText}>No service types available at the moment.</Text>
+              <Text style={styles.emptyText}>{s.services.noServices}</Text>
             </View>
           )}
 

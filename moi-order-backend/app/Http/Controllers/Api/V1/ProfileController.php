@@ -63,6 +63,15 @@ class ProfileController extends Controller
         return response()->json(['data' => new UserResource($user)]);
     }
 
+    /** PATCH /api/v1/profile/locale — store user's UI language preference */
+    public function updateLocale(Request $request): JsonResponse
+    {
+        $locale = $request->input('locale');
+        abort_if(! in_array($locale, ['en', 'mm', 'th'], true), 422, 'Invalid locale.');
+        $request->user()->update(['locale' => $locale]);
+        return response()->json(null, 204);
+    }
+
     /** PUT /api/v1/profile/password */
     public function changePassword(ChangePasswordRequest $request): JsonResponse
     {

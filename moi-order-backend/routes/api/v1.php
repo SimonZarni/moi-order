@@ -28,6 +28,7 @@ Route::get('/auth/me',      [AuthController::class, 'me']);
 
 // Profile
 Route::put('/profile',             [ProfileController::class, 'update']);
+Route::patch('/profile/locale',    [ProfileController::class, 'updateLocale']);
 Route::put('/profile/password',    [ProfileController::class, 'changePassword']);
 Route::post('/profile/picture',    [ProfileController::class, 'uploadPicture']);
 Route::delete('/profile/picture',  [ProfileController::class, 'removePicture']);

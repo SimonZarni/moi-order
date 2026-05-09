@@ -283,6 +283,29 @@ export interface AppStrings {
     phoneNumber:       string;
   };
 
+  // Service listing pages
+  services: {
+    availableServices:  string;
+    selectType:         string;
+    noServices:         string;
+    unableToLoad:       string;
+    // 90-Day Report page
+    ninetyDayEyebrow:   string;
+    ninetyDayTitle:     string;
+    ninetyDaySubtitle:  string;
+    ninetyDaySubmitted: string;
+    // Company Services page
+    companyEyebrow:     string;
+    companyTitle:       string;
+    companySubtitle:    string;
+    // Other Services page
+    otherEyebrow:       string;
+    otherTitle:         string;
+    otherSubtitle:      string;
+    // Back labels
+    backHome:           string;
+  };
+
   // Notifications screen
   notifs: {
     title:        string;
@@ -562,6 +585,23 @@ const en: AppStrings = {
     fullName:          'Full Name',
     phoneNumber:       'Phone Number',
   },
+  services: {
+    availableServices:  'Available Services',
+    selectType:         'Select Type',
+    noServices:         'No services available at the moment.',
+    unableToLoad:       'Unable to load services. Please try again.',
+    ninetyDayEyebrow:   '90-Day Report',
+    ninetyDayTitle:     '90-Day Report',
+    ninetyDaySubtitle:  'Select the report type that matches your visa category.',
+    ninetyDaySubmitted: "Your 90-day report has been submitted.\nWe'll process it and notify you shortly.",
+    companyEyebrow:     'Business & Company',
+    companyTitle:       'Company Services',
+    companySubtitle:    'Company registration and business documentation.',
+    otherEyebrow:       'Registration & More',
+    otherTitle:         'Other Services',
+    otherSubtitle:      'Additional immigration and registration services.',
+    backHome:           'Home',
+  },
   notifs: {
     title:        'Notifications',
     markAllRead:  'Mark all read',
@@ -825,6 +865,23 @@ const mm: AppStrings = {
     fullName:          'နာမည်အပြည့်အစုံ',
     phoneNumber:       'ဖုန်းနံပါတ်',
   },
+  services: {
+    availableServices:  '၀န်ဆောင်မှုများ',
+    selectType:         'အမျိုးအစားရွေးပါ',
+    noServices:         'ယခုအချိန်တွင် ၀န်ဆောင်မှုများ မရှိသေးပါ',
+    unableToLoad:       '၀န်ဆောင်မှုများ ဖတ်မရပါ။ ထပ်ကြိုးစားပါ',
+    ninetyDayEyebrow:   'ရက် ၉၀ တုံး',
+    ninetyDayTitle:     'ရက် ၉၀ တုံး',
+    ninetyDaySubtitle:  'သင်၏ ဗီဇာအမျိုးအစားနှင့် ကိုက်ညီသော ၀န်ဆောင်မှုကို ရွေးပါ',
+    ninetyDaySubmitted: 'သင်၏ ရက် ၉၀ တုံးကို တင်သွင်းပြီးပါပြီ။\nကျွန်ုပ်တို့ ဆောင်ရွက်ပေးပြီး အကြောင်းကြားပါမည်',
+    companyEyebrow:     'စီးပွားရေးနှင့် ကုမ္ပဏီ',
+    companyTitle:       'ကုမ္ပဏီ၀န်ဆောင်မှုများ',
+    companySubtitle:    'ကုမ္ပဏီမှတ်ပုံတင်ခြင်းနှင့် စီးပွားရေးစာရွက်စာတမ်းများ',
+    otherEyebrow:       'မှတ်ပုံတင်ခြင်းနှင့် အခြားကဏ္ဍများ',
+    otherTitle:         'အခြား၀န်ဆောင်မှုများ',
+    otherSubtitle:      'ကိုယ်ရောက်နေထိုင်မှုနှင့် မှတ်ပုံတင်ဆိုင်ရာ ၀န်ဆောင်မှုများ',
+    backHome:           'ပင်မ',
+  },
   notifs: {
     title:        'အကြောင်းကြားချက်များ',
     markAllRead:  'အားလုံး ဖတ်ပြီးဟုသတ်မှတ်ပါ',
@@ -1087,6 +1144,23 @@ const th: AppStrings = {
     requiredDocuments: 'เอกสารที่ต้องการ',
     fullName:          'ชื่อ-นามสกุล',
     phoneNumber:       'หมายเลขโทรศัพท์',
+  },
+  services: {
+    availableServices:  'บริการที่มี',
+    selectType:         'เลือกประเภท',
+    noServices:         'ไม่มีบริการในขณะนี้',
+    unableToLoad:       'ไม่สามารถโหลดบริการได้ กรุณาลองอีกครั้ง',
+    ninetyDayEyebrow:   'รายงาน 90 วัน',
+    ninetyDayTitle:     'รายงาน 90 วัน',
+    ninetyDaySubtitle:  'เลือกประเภทรายงานที่ตรงกับหมวดหมู่วีซ่าของคุณ',
+    ninetyDaySubmitted: 'ส่งรายงาน 90 วันของคุณแล้ว\nเราจะดำเนินการและแจ้งให้ทราบ',
+    companyEyebrow:     'ธุรกิจ & บริษัท',
+    companyTitle:       'บริการบริษัท',
+    companySubtitle:    'จดทะเบียนบริษัทและเอกสารธุรกิจ',
+    otherEyebrow:       'การจดทะเบียน & อื่นๆ',
+    otherTitle:         'บริการอื่นๆ',
+    otherSubtitle:      'บริการตรวจคนเข้าเมืองและการจดทะเบียนเพิ่มเติม',
+    backHome:           'หน้าหลัก',
   },
   notifs: {
     title:        'การแจ้งเตือน',

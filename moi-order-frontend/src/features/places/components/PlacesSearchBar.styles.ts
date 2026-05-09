@@ -27,14 +27,13 @@ export const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colours.inputBg,    // rgba(255,255,255,0.12)
+    backgroundColor: colours.inputBg,
     borderRadius: radius.xl,
     borderWidth: 1,
-    borderColor: colours.inputBorder,    // colours.tertiary — matches back-btn text
+    borderColor: colours.inputBorder,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
+    height: 44,   // fixed height — removes vertical asymmetry
     gap: spacing.sm,
-    minHeight: 44,
   },
   searchIcon: {
     fontSize: 15,
@@ -45,6 +44,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     color: colours.textOnDark,
     padding: 0,
+    height: 44,
     textAlignVertical: 'center',
     includeFontPadding: false,
   },

@@ -1,5 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 import { create } from 'zustand';
+import apiClient from '@/shared/api/client';
 
 import { setMemoryLocale } from '@/shared/api/client';
 import { LOCALE_KEY } from '@/shared/constants/config';
@@ -18,5 +19,8 @@ export const useLocaleStore = create<LocaleState>((set) => ({
     setMemoryLocale(locale);
     SecureStore.setItemAsync(LOCALE_KEY, locale).catch(() => {});
     set({ locale });
+    // Sync to backend so push notifications arrive in the user's language.
+    // Fire-and-forget — locale change is immediate locally regardless of network.
+    apiClient.patch('/api/v1/profile/locale', { locale }).catch(() => {});
   },
 }));

@@ -13,7 +13,7 @@ interface NotificationItemProps {
   onDelete: (id: string) => void;
 }
 
-export function NotificationItem({ notification, onPress, onDelete }: NotificationItemProps): React.JSX.Element {
+export const NotificationItem = React.memo(function NotificationItem({ notification, onPress, onDelete }: NotificationItemProps): React.JSX.Element {
   const isUnread = notification.read_at === null;
 
   return (
@@ -48,4 +48,7 @@ export function NotificationItem({ notification, onPress, onDelete }: Notificati
       </Pressable>
     </Pressable>
   );
-}
+}, (prev, next) =>
+  prev.notification.id === next.notification.id &&
+  prev.notification.read_at === next.notification.read_at,
+);
