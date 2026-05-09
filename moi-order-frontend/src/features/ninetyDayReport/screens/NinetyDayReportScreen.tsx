@@ -31,6 +31,7 @@ export function NinetyDayReportScreen(): React.JSX.Element {
           accentColor={editorialPalette.sage}
           eyebrow={s.services.ninetyDayEyebrow}
           title={s.services.ninetyDayTitle}
+          titleStyle={locale === 'mm' ? { fontSize: 20, lineHeight: 36, includeFontPadding: false } : undefined}
           subtitle={s.services.ninetyDaySubtitle}
           onBack={handleBack}
           backLabel={s.services.backHome}

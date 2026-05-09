@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, StyleProp, Text, TextStyle, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
@@ -14,6 +14,8 @@ interface HeroHeaderProps {
   // Standard stacked layout
   eyebrow?: string;
   title?: string;
+  // Optional style override for the title line (e.g. smaller font for long MM text)
+  titleStyle?: StyleProp<TextStyle>;
   // Composition slot — replaces eyebrow+title when provided (e.g. inline single-line title)
   titleNode?: React.ReactNode;
   // Override the container's minHeight when content is shorter than the default 180px
@@ -25,6 +27,7 @@ export function HeroHeader({
   eyebrow,
   title,
   subtitle,
+  titleStyle,
   titleNode,
   onBack,
   backLabel,
@@ -55,7 +58,7 @@ export function HeroHeader({
         ) : (
           <>
             <Text style={[styles.eyebrow, { color: accentColor }]}>{eyebrow}</Text>
-            <Text style={styles.title}>{title}</Text>
+            <Text style={[styles.title, titleStyle]}>{title}</Text>
           </>
         )}
         {subtitle != null && <Text style={styles.subtitle}>{subtitle}</Text>}

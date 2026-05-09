@@ -32,6 +32,7 @@ export function EmbassyServicesScreen(): React.JSX.Element {
           accentColor={editorialPalette.rose}
           eyebrow={s.services.embassyEyebrow}
           title={s.services.embassyTitle}
+          titleStyle={locale === 'mm' ? { fontSize: 20, lineHeight: 36, includeFontPadding: false } : undefined}
           subtitle={s.services.embassySubtitle}
           onBack={handleBack}
           backLabel={s.services.backHome}
