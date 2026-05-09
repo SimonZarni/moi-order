@@ -29,7 +29,7 @@ export function GoogleSignInButton({
   return (
     <Pressable
       style={[styles.button, (isLoading || disabled) && styles.buttonDisabled]}
-      onPress={onPress}
+      onPress={() => onPress()}  {/* wrap so GestureResponderEvent is never forwarded */}
       disabled={isLoading || disabled}
       accessibilityLabel="Continue with Google"
       accessibilityRole="button"

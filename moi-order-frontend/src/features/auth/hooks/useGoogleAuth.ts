@@ -12,7 +12,7 @@ import { ApiError } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 
 export interface UseGoogleAuthResult {
-  handleGoogleSignIn: (loginHint?: string) => Promise<void>;
+  handleGoogleSignIn: (loginHintOrEvent?: string | unknown) => Promise<void>;
   isGoogleSigningIn: boolean;
   googleBannerError: string;
 }
@@ -44,7 +44,11 @@ export function useGoogleAuth(): UseGoogleAuthResult {
   const [isGoogleSigningIn, setIsGoogleSigningIn] = useState(false);
   const [googleBannerError, setGoogleBannerError] = useState('');
 
-  const handleGoogleSignIn = useCallback(async (loginHint?: string): Promise<void> => {
+  const handleGoogleSignIn = useCallback(async (loginHintOrEvent?: string | unknown): Promise<void> => {
+    // Pressable passes a GestureResponderEvent as the first arg at runtime even
+    // though the prop is typed () => void.  Guard so we never pass an event
+    // object to the native Google Sign-In module (causes JSI type crash).
+    const loginHint = typeof loginHintOrEvent === 'string' ? loginHintOrEvent : undefined;
     try {
       setGoogleBannerError('');
       setIsGoogleSigningIn(true);
