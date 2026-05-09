@@ -67,7 +67,8 @@ class MerchantRestaurantController extends Controller
     /** POST /api/merchant/v1/restaurant/cover_photo */
     public function uploadCoverPhoto(Request $request): JsonResponse
     {
-        $request->validate(['photo' => ['required', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120']]);
+        // 'image' rule uses getimagesize() which does not support HEIC/HEIF — omitted intentionally.
+        $request->validate(['photo' => ['required', 'file', 'mimes:jpeg,jpg,png,webp,heic,heif', 'max:5120']]);
         $restaurant = $request->user()->restaurant()->firstOrFail();
         $restaurant = $this->restaurantService->update($restaurant, ['cover_photo' => $request->file('photo')]);
         return response()->json(['data' => new RestaurantResource($restaurant, $this->storage)]);
@@ -87,7 +88,8 @@ class MerchantRestaurantController extends Controller
     /** POST /api/merchant/v1/restaurant/logo */
     public function uploadLogo(Request $request): JsonResponse
     {
-        $request->validate(['photo' => ['required', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120']]);
+        // 'image' rule uses getimagesize() which does not support HEIC/HEIF — omitted intentionally.
+        $request->validate(['photo' => ['required', 'file', 'mimes:jpeg,jpg,png,webp,heic,heif', 'max:5120']]);
         $restaurant = $request->user()->restaurant()->firstOrFail();
         $restaurant = $this->restaurantService->update($restaurant, ['logo' => $request->file('photo')]);
         return response()->json(['data' => new RestaurantResource($restaurant, $this->storage)]);

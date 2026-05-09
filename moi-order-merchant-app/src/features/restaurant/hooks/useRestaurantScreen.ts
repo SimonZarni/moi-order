@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import { Platform } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getRestaurant, updateRestaurant, createRestaurant,
@@ -227,17 +228,31 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
   // ── Photos ────────────────────────────────────────────────────────────────────
 
   const handleUploadCoverPhoto = useCallback((uri: string, name: string, type: string) => {
-    const fd = new FormData();
-    fd.append('photo', { uri, name, type } as unknown as Blob);
-    mutateCoverUpload(fd);
+    void (async () => {
+      const fd = new FormData();
+      if (Platform.OS === 'web') {
+        const blob = await fetch(uri).then((r) => r.blob());
+        fd.append('photo', new File([blob], name, { type }));
+      } else {
+        fd.append('photo', { uri, name, type } as unknown as Blob);
+      }
+      mutateCoverUpload(fd);
+    })();
   }, [mutateCoverUpload]);
 
   const handleRemoveCoverPhoto = useCallback(() => mutateCoverRemove(), [mutateCoverRemove]);
 
   const handleUploadLogo = useCallback((uri: string, name: string, type: string) => {
-    const fd = new FormData();
-    fd.append('photo', { uri, name, type } as unknown as Blob);
-    mutateLogoUpload(fd);
+    void (async () => {
+      const fd = new FormData();
+      if (Platform.OS === 'web') {
+        const blob = await fetch(uri).then((r) => r.blob());
+        fd.append('photo', new File([blob], name, { type }));
+      } else {
+        fd.append('photo', { uri, name, type } as unknown as Blob);
+      }
+      mutateLogoUpload(fd);
+    })();
   }, [mutateLogoUpload]);
 
   const handleRemoveLogo = useCallback(() => mutateLogoRemove(), [mutateLogoRemove]);

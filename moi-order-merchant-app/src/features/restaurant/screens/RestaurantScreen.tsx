@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import {
   View, Text, ScrollView, Pressable, TextInput, ActivityIndicator,
-  Image, Linking, Switch, Modal,
+  Image, Linking, Switch, Modal, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -43,25 +43,37 @@ export function RestaurantScreen(): React.JSX.Element {
     handleResubmitFinalSubmit,
   } = useRestaurantScreen();
 
-  const handlePickCoverPhoto = useCallback(async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8,
-    });
+  const pickAndConvert = useCallback(async (
+    onPick: (uri: string, name: string, type: string) => void,
+    baseName: string,
+  ) => {
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'images', quality: 0.8 });
     if (result.canceled || !result.assets[0]) return;
     const asset = result.assets[0];
-    const ext = asset.uri.split('.').pop() ?? 'jpg';
-    handleUploadCoverPhoto(asset.uri, `cover.${ext}`, `image/${ext}`);
-  }, [handleUploadCoverPhoto]);
+    let mimeType = asset.mimeType ?? 'image/jpeg';
+    let uri = asset.uri;
+    let fileName = asset.fileName ?? `${baseName}.${mimeType.split('/')[1] ?? 'jpg'}`;
+    if (Platform.OS === 'web' && (mimeType === 'image/heic' || mimeType === 'image/heif')) {
+      try {
+        const heic2any = (await import('heic2any')).default;
+        const srcBlob = await fetch(uri).then((r) => r.blob());
+        const converted = await heic2any({ blob: srcBlob, toType: 'image/jpeg', quality: 0.85 });
+        const jpegBlob = Array.isArray(converted) ? converted[0] : converted;
+        uri = URL.createObjectURL(jpegBlob);
+        mimeType = 'image/jpeg';
+        fileName = fileName.replace(/\.(heic|heif)$/i, '.jpg');
+      } catch { /* fall through with original file */ }
+    }
+    onPick(uri, fileName, mimeType);
+  }, []);
+
+  const handlePickCoverPhoto = useCallback(async () => {
+    await pickAndConvert(handleUploadCoverPhoto, 'cover');
+  }, [pickAndConvert, handleUploadCoverPhoto]);
 
   const handlePickLogo = useCallback(async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8,
-    });
-    if (result.canceled || !result.assets[0]) return;
-    const asset = result.assets[0];
-    const ext = asset.uri.split('.').pop() ?? 'jpg';
-    handleUploadLogo(asset.uri, `logo.${ext}`, `image/${ext}`);
-  }, [handleUploadLogo]);
+    await pickAndConvert(handleUploadLogo, 'logo');
+  }, [pickAndConvert, handleUploadLogo]);
 
   const handleContactSupport = useCallback(() => {
     Linking.openURL(LINE_OA_URL).catch(() => {});
