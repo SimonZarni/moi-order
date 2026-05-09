@@ -326,4 +326,13 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: colours.primary,
   },
+  kycNote: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  kycNoteText: {
+    fontSize: typography.xxs,
+    color: colours.textMuted,
+    fontStyle: 'italic',
+  },
 });

@@ -179,24 +179,19 @@ export function RestaurantScreen(): React.JSX.Element {
           </View>
         </View>
 
-        {isEditing ? (
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>{isNewRestaurant ? 'Create Restaurant' : 'Edit Profile'}</Text>
-            </View>
-            <View style={styles.formBody}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Restaurant Name</Text>
-                <TextInput
-                  style={styles.input}
-                  value={form.name}
-                  onChangeText={(v) => handleFieldChange('name', v)}
-                  placeholder="Restaurant name"
-                  placeholderTextColor={colours.medium}
-                  accessibilityLabel="Restaurant name"
-                />
-              </View>
-              <View style={styles.inputGroup}>
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Profile</Text>
+          </View>
+          <View style={styles.cardBody}>
+            <InfoRow label="Name" value={restaurant?.name ?? '—'} />
+            <View style={styles.divider} />
+            <InfoRow label="Address" value={restaurant?.address ?? '—'} />
+            <View style={styles.divider} />
+            <InfoRow label="Phone" value={restaurant?.phone ?? '—'} />
+            <View style={styles.divider} />
+            {isEditing ? (
+              <>
                 <Text style={styles.inputLabel}>Description</Text>
                 <TextInput
                   style={[styles.input, styles.inputMultiline]}
@@ -208,69 +203,38 @@ export function RestaurantScreen(): React.JSX.Element {
                   numberOfLines={3}
                   accessibilityLabel="Restaurant description"
                 />
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Address</Text>
-                <TextInput
-                  style={styles.input}
-                  value={form.address}
-                  onChangeText={(v) => handleFieldChange('address', v)}
-                  placeholder="Restaurant address"
-                  placeholderTextColor={colours.medium}
-                  accessibilityLabel="Restaurant address"
-                />
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Phone</Text>
-                <TextInput
-                  style={styles.input}
-                  value={form.phone}
-                  onChangeText={(v) => handleFieldChange('phone', v)}
-                  placeholder="+66 xx xxx xxxx"
-                  placeholderTextColor={colours.medium}
-                  keyboardType="phone-pad"
-                  accessibilityLabel="Restaurant phone number"
-                />
-              </View>
-            </View>
-            <View style={styles.formActions}>
-              <Pressable
-                style={styles.cancelButton}
-                onPress={handleCancelEdit}
-                accessibilityLabel="Cancel editing"
-                accessibilityRole="button"
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
-                onPress={handleSave}
-                disabled={isSaving}
-                accessibilityLabel="Save restaurant profile"
-                accessibilityRole="button"
-              >
-                <Text style={styles.saveButtonText}>
-                  {isSaving ? 'Saving…' : isNewRestaurant ? 'Create Restaurant' : 'Save Changes'}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        ) : (
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>Profile</Text>
-            </View>
-            <View style={styles.cardBody}>
-              <InfoRow label="Name" value={restaurant?.name ?? '—'} />
-              <View style={styles.divider} />
+                <View style={styles.formActions}>
+                  <Pressable
+                    style={styles.cancelButton}
+                    onPress={handleCancelEdit}
+                    accessibilityLabel="Cancel editing"
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.cancelButtonText}>Cancel</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
+                    onPress={handleSave}
+                    disabled={isSaving}
+                    accessibilityLabel="Save description"
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.saveButtonText}>{isSaving ? 'Saving…' : 'Save'}</Text>
+                  </Pressable>
+                </View>
+              </>
+            ) : (
               <InfoRow label="Description" value={restaurant?.description ?? '—'} />
-              <View style={styles.divider} />
-              <InfoRow label="Address" value={restaurant?.address ?? '—'} />
-              <View style={styles.divider} />
-              <InfoRow label="Phone" value={restaurant?.phone ?? '—'} />
-            </View>
+            )}
           </View>
-        )}
+          {!isEditing && restaurant !== null && (
+            <View style={styles.kycNote}>
+              <Text style={styles.kycNoteText}>
+                To change name, address or phone, please resubmit KYC for admin approval.
+              </Text>
+            </View>
+          )}
+        </View>
 
         {restaurant != null && (
           <View style={styles.card}>

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRestaurant, updateRestaurant, createRestaurant, uploadRestaurantPhoto, removeRestaurantPhoto } from '../../../api/restaurant';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
@@ -7,10 +7,7 @@ import type { Restaurant } from '../../../types/models';
 import type { RestaurantStatus } from '../../../types/enums';
 
 interface EditForm {
-  name: string;
   description: string;
-  address: string;
-  phone: string;
 }
 
 interface UseRestaurantScreenResult {
@@ -44,12 +41,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingDelivery, setIsEditingDelivery] = useState(false);
   const [minOrderInput, setMinOrderInput] = useState('');
-  const [form, setForm] = useState<EditForm>({
-    name: '',
-    description: '',
-    address: '',
-    phone: '',
-  });
+  const [form, setForm] = useState<EditForm>({ description: '' });
 
   const { data, isLoading } = useQuery({
     queryKey: QUERY_KEYS.RESTAURANT,
@@ -58,20 +50,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
   });
 
   const restaurant = data?.restaurant ?? null;
-  const prefill = data?.prefill ?? null;
   const isNewRestaurant = !isLoading && restaurant === null;
-
-  useEffect(() => {
-    if (isNewRestaurant && prefill !== null && !isEditing) {
-      setForm({
-        name: prefill.name ?? '',
-        description: '',
-        address: prefill.address ?? '',
-        phone: prefill.phone ?? '',
-      });
-      setIsEditing(true);
-    }
-  }, [isNewRestaurant, prefill, isEditing]);
 
   const invalidateRestaurant = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.RESTAURANT });
@@ -115,14 +94,9 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
   });
 
   const handleStartEdit = useCallback(() => {
-    setForm({
-      name: restaurant?.name ?? prefill?.name ?? '',
-      description: restaurant?.description ?? '',
-      address: restaurant?.address ?? prefill?.address ?? '',
-      phone: restaurant?.phone ?? prefill?.phone ?? '',
-    });
+    setForm({ description: restaurant?.description ?? '' });
     setIsEditing(true);
-  }, [restaurant, prefill]);
+  }, [restaurant]);
 
   const handleCancelEdit = useCallback(() => setIsEditing(false), []);
 
@@ -133,12 +107,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
   );
 
   const handleSave = useCallback(() => {
-    save({
-      name: form.name.trim() || undefined,
-      description: form.description.trim() || undefined,
-      address: form.address.trim() || undefined,
-      phone: form.phone.trim() || undefined,
-    });
+    save({ description: form.description.trim() || undefined });
   }, [form, save]);
 
   const handleToggleStatus = useCallback(
