@@ -8,6 +8,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -33,6 +34,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+
+        // This is a pure JSON API — never redirect to web login route.
+        $exceptions->shouldRenderJsonWhen(function (Request $request, \Throwable $e): bool {
+            return true;
+        });
 
         $exceptions->render(function (DomainException $e): JsonResponse {
             Log::error('Domain exception', ['code' => $e->getMessage(), 'status' => $e->getStatus()]);
