@@ -272,7 +272,7 @@ export function RestaurantScreen(): React.JSX.Element {
           </View>
         )}
 
-        {restaurant !== undefined && (
+        {restaurant != null && (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={styles.cardTitle}>Delivery Settings</Text>

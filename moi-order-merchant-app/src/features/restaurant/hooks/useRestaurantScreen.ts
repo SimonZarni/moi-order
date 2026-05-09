@@ -14,7 +14,7 @@ interface EditForm {
 }
 
 interface UseRestaurantScreenResult {
-  restaurant: Restaurant | undefined;
+  restaurant: Restaurant | null | undefined;
   isLoading: boolean;
   isEditing: boolean;
   isSaving: boolean;
