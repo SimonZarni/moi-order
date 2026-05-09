@@ -23,12 +23,13 @@ class TicketOrderPaymentController extends Controller
     ) {}
 
     /** POST /api/v1/ticket-orders/{id}/payment */
-    public function store(int $id, Request $request): JsonResponse
+    public function store(string $id, Request $request): JsonResponse
     {
         $order = TicketOrder::with(['items', 'payment', 'user'])
             ->forUser($request->user()->id)
             ->whereIn('status', [TicketOrderStatus::PendingPayment, TicketOrderStatus::PaymentFailed])
-            ->findOrFail($id);
+            ->where('uuid', $id)
+            ->firstOrFail();
 
         abort_if(! $order->payment_authorized, 403, 'Order not yet authorized for payment.');
 
@@ -44,11 +45,12 @@ class TicketOrderPaymentController extends Controller
     }
 
     /** GET /api/v1/ticket-orders/{id}/payment */
-    public function show(int $id, Request $request): JsonResponse
+    public function show(string $id, Request $request): JsonResponse
     {
         $order = TicketOrder::with('payment')
             ->forUser($request->user()->id)
-            ->findOrFail($id);
+            ->where('uuid', $id)
+            ->firstOrFail();
 
         abort_if($order->payment === null, 404, 'No payment found for this order.');
 
@@ -56,11 +58,12 @@ class TicketOrderPaymentController extends Controller
     }
 
     /** POST /api/v1/ticket-orders/{id}/payment/sync */
-    public function sync(int $id, Request $request): JsonResponse
+    public function sync(string $id, Request $request): JsonResponse
     {
         $order = TicketOrder::with(['items', 'payment', 'user'])
             ->forUser($request->user()->id)
-            ->findOrFail($id);
+            ->where('uuid', $id)
+            ->firstOrFail();
 
         $this->service->syncWithStripe($order);
 

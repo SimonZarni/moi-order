@@ -44,9 +44,12 @@ class FoodOrderController extends Controller
     }
 
     /** GET /api/v1/food-orders/{id} */
-    public function show(Request $request, int $id): JsonResponse
+    public function show(Request $request, string $id): JsonResponse
     {
-        $order = FoodOrder::forUser($request->user()->id)->with(['items', 'restaurant', 'user'])->findOrFail($id);
+        $order = FoodOrder::forUser($request->user()->id)
+            ->with(['items', 'restaurant', 'user'])
+            ->where('uuid', $id)
+            ->firstOrFail();
 
         return response()->json(['data' => new FoodOrderResource($order, $this->storage)]);
     }
@@ -60,27 +63,33 @@ class FoodOrderController extends Controller
     }
 
     /** POST /api/v1/food-orders/{id}/cancel */
-    public function cancel(CancelFoodOrderRequest $request, int $id): JsonResponse
+    public function cancel(CancelFoodOrderRequest $request, string $id): JsonResponse
     {
-        $order = FoodOrder::forUser($request->user()->id)->findOrFail($id);
+        $order = FoodOrder::forUser($request->user()->id)
+            ->where('uuid', $id)
+            ->firstOrFail();
         $order = $this->orderService->cancelByCustomer($order);
 
         return response()->json(['data' => new FoodOrderResource($order, $this->storage)]);
     }
 
     /** DELETE /api/v1/food-orders/{id} */
-    public function destroy(DeleteFoodOrderRequest $request, int $id): JsonResponse
+    public function destroy(DeleteFoodOrderRequest $request, string $id): JsonResponse
     {
-        $order = FoodOrder::forUser($request->user()->id)->findOrFail($id);
+        $order = FoodOrder::forUser($request->user()->id)
+            ->where('uuid', $id)
+            ->firstOrFail();
         $this->orderService->deleteCancelled($order);
 
         return response()->json(null, 204);
     }
 
     /** POST /api/v1/food-orders/{id}/complete */
-    public function complete(CompleteFoodOrderRequest $request, int $id): JsonResponse
+    public function complete(CompleteFoodOrderRequest $request, string $id): JsonResponse
     {
-        $order = FoodOrder::forUser($request->user()->id)->findOrFail($id);
+        $order = FoodOrder::forUser($request->user()->id)
+            ->where('uuid', $id)
+            ->firstOrFail();
         $dto   = CompleteFoodOrderDTO::fromRequest($request);
 
         $order = $this->orderService->completeByCustomer($order, $dto->rating, $dto->review);

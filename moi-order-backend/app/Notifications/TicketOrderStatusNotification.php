@@ -44,7 +44,7 @@ class TicketOrderStatusNotification extends Notification
             body:  $payload['body'],
             data:  [
                 'notification_type' => 'ticket_order_status',
-                'ticket_order_id'   => $this->order->id,
+                'ticket_order_id'   => $this->order->uuid,
             ],
         );
     }
@@ -59,7 +59,7 @@ class TicketOrderStatusNotification extends Notification
             'body'              => $isProcessing
                 ? 'Your ticket booking is being processed.'
                 : 'Your e-ticket is ready to download.',
-            'ticket_order_id'   => $this->order->id,
+            'ticket_order_id'   => $this->order->uuid,
             'status'            => $this->order->status->value,
         ];
     }

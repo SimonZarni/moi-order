@@ -18,10 +18,10 @@ class MerchantOrderChatController extends Controller
     public function __construct(private readonly FileStorageInterface $storage) {}
 
     /** GET /api/merchant/v1/orders/{id}/chat */
-    public function index(Request $request, int $id): JsonResponse
+    public function index(Request $request, string $id): JsonResponse
     {
         $restaurant = $request->user()->restaurant()->firstOrFail();
-        $order      = $restaurant->foodOrders()->findOrFail($id);
+        $order      = $restaurant->foodOrders()->where('uuid', $id)->firstOrFail();
 
         $messages = OrderChatMessage::query()
             ->forOrder($order->id)
@@ -34,10 +34,10 @@ class MerchantOrderChatController extends Controller
     }
 
     /** POST /api/merchant/v1/orders/{id}/chat */
-    public function store(StoreOrderChatMessageRequest $request, int $id): JsonResponse
+    public function store(StoreOrderChatMessageRequest $request, string $id): JsonResponse
     {
         $restaurant = $request->user()->restaurant()->firstOrFail();
-        $order      = $restaurant->foodOrders()->findOrFail($id);
+        $order      = $restaurant->foodOrders()->where('uuid', $id)->firstOrFail();
         $user       = $request->user();
 
         $imagePath = null;

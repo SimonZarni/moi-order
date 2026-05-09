@@ -50,7 +50,7 @@ class AdminFoodOrderController extends Controller
 
         return response()->json([
             'data' => collect($orders->items())->map(fn (FoodOrder $o) => [
-                'id'               => $o->id,
+                'id'               => $o->uuid,
                 'status'           => $o->status->value,
                 'status_label'     => $o->status->label(),
                 'payment_method'   => $o->payment_method->value,
@@ -61,7 +61,7 @@ class AdminFoodOrderController extends Controller
                     'name' => $o->restaurant->name,
                 ],
                 'user'             => [
-                    'id'    => $o->user->id,
+                    'id'    => $o->user->uuid,
                     'name'  => $o->user->name,
                     'email' => $o->user->email,
                 ],
@@ -87,7 +87,7 @@ class AdminFoodOrderController extends Controller
         return response()->json([
             'data' => (new FoodOrderResource($foodOrder, $this->storage))->toArray(request()) + [
                 'user' => [
-                    'id'    => $foodOrder->user->id,
+                    'id'    => $foodOrder->user->uuid,
                     'name'  => $foodOrder->user->name,
                     'email' => $foodOrder->user->email,
                 ],
@@ -110,7 +110,7 @@ class AdminFoodOrderController extends Controller
         return response()->json([
             'data' => (new FoodOrderResource($fresh, $this->storage))->toArray(request()) + [
                 'user' => [
-                    'id'    => $fresh->user->id,
+                    'id'    => $fresh->user->uuid,
                     'name'  => $fresh->user->name,
                     'email' => $fresh->user->email,
                 ],

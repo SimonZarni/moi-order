@@ -38,7 +38,7 @@ class FoodOrderStatusNotification extends Notification
             body:  $p['body'],
             data:  [
                 'notification_type' => 'food_order_status',
-                'food_order_id'     => $this->order->id,
+                'food_order_id'     => $this->order->uuid,
                 'status'            => $this->order->status->value,
             ],
         );
@@ -52,7 +52,7 @@ class FoodOrderStatusNotification extends Notification
             'notification_type' => 'food_order_status',
             'title'             => $title,
             'body'              => $body,
-            'food_order_id'     => $this->order->id,
+            'food_order_id'     => $this->order->uuid,
             'order_number'      => $this->order->order_number,
             'status'            => $this->order->status->value,
         ];
@@ -61,7 +61,7 @@ class FoodOrderStatusNotification extends Notification
     /** @return array{0: string, 1: string} */
     private function statusCopy(FoodOrderStatus $status): array
     {
-        $num = $this->order->order_number ?? "#{$this->order->id}";
+        $num = $this->order->order_number ?? '#—';
 
         return match($status) {
             FoodOrderStatus::WaitingForPayment  => [

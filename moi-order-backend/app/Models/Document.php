@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\DocumentType;
+use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Document extends Model
 {
-    use SoftDeletes;
+    use HasUuid, SoftDeletes;
 
     protected $fillable = [
         'user_id',

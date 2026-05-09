@@ -21,7 +21,7 @@ class AdminPaymentResource extends JsonResource
         }
 
         return [
-            'id'               => $this->id,
+            'id'               => $this->uuid,
             'status'           => $this->status->value,
             'status_label'     => $this->status->label(),
             'amount'           => $this->amount,
@@ -31,12 +31,10 @@ class AdminPaymentResource extends JsonResource
             'expires_at'       => $this->expires_at?->toISOString(),
             'created_at'       => $this->created_at->toISOString(),
             'user_name'        => $userName,
-            'payable_type'     => $this->payable_type,
-            'payable_id'       => $this->payable_id,
             'payable'          => $this->when(
                 $this->relationLoaded('payable') && $this->payable !== null,
                 fn () => [
-                    'id'   => $this->payable->getKey(),
+                    'id'   => $this->payable->uuid,
                     'type' => class_basename($this->payable_type),
                 ]
             ),

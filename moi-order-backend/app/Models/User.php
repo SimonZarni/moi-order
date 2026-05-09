@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\UserRole;
 use App\Enums\UserStatusEnum;
+use App\Traits\HasUuid;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -28,7 +29,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, HasUuid, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

@@ -91,11 +91,12 @@ class DocumentService
             ->get();
     }
 
-    public function delete(User $user, int $documentId): void
+    public function delete(User $user, string $documentUuid): void
     {
         $document = Document::query()
             ->forUser($user->id)
-            ->findOrFail($documentId);
+            ->where('uuid', $documentUuid)
+            ->firstOrFail();
 
         DB::transaction(function () use ($document): void {
             if ($document->file_path) {

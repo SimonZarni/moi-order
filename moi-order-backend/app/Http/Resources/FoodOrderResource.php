@@ -24,7 +24,7 @@ class FoodOrderResource extends JsonResource
         }
 
         return [
-            'id'                     => $this->id,
+            'id'                     => $this->uuid,
             'order_number'           => $this->order_number,
             'restaurant_id'          => $this->restaurant_id,
             'restaurant_name'        => $this->whenLoaded('restaurant', fn () => $this->restaurant->name),
@@ -40,7 +40,7 @@ class FoodOrderResource extends JsonResource
             'prompt_pay_url'         => $this->prompt_pay_url,
             'can_show_prompt_pay'    => $this->canShowPromptPay(),
             'user'                   => $this->whenLoaded('user', fn () => [
-                'id'    => $this->user->id,
+                'id'    => $this->user->uuid,
                 'name'  => $this->user->name,
                 'phone' => $this->user->phone_number,
             ]),

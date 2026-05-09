@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Contracts\PayableInterface;
 use App\Enums\TicketOrderStatus;
+use App\Traits\HasUuid;
 use App\Events\TicketOrderPaymentConfirmed;
 use App\Events\TicketOrderPaymentProcessed;
 use App\Events\TicketOrderStatusChanged;
@@ -25,7 +26,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class TicketOrder extends Model implements PayableInterface
 {
-    use SoftDeletes;
+    use HasUuid, SoftDeletes;
 
     protected $fillable = [
         'user_id',

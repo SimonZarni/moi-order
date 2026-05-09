@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Contracts\PayableInterface;
 use App\Enums\SubmissionStatus;
+use App\Traits\HasUuid;
 use App\Events\PaymentConfirmed;
 use App\Events\SubmissionPaymentProcessed;
 use App\Events\SubmissionStatusChanged;
@@ -28,7 +29,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ServiceSubmission extends Model implements PayableInterface
 {
     /** @use HasFactory<ServiceSubmissionFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasUuid, SoftDeletes;
 
     protected $fillable = [
         'user_id',

@@ -16,7 +16,7 @@ class DocumentResource extends JsonResource
         $storage = resolve(FileStorageInterface::class);
 
         return [
-            'id'                 => $this->id,
+            'id'                 => $this->uuid,
             'type'               => $this->type->value,
             'subtype'            => $this->subtype,
             // Signed 60-min URL — null for admin-created records that have no file.

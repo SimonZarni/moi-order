@@ -26,6 +26,7 @@ class NotificationResource extends JsonResource
             'data'       => array_filter([
                 'submission_id'   => $data['submission_id'] ?? null,
                 'ticket_order_id' => $data['ticket_order_id'] ?? null,
+                'food_order_id'   => $data['food_order_id'] ?? null,
             ], fn (mixed $v): bool => $v !== null),
             'read_at'    => $this->read_at?->toIso8601String(),
             'created_at' => $this->created_at->toIso8601String(),

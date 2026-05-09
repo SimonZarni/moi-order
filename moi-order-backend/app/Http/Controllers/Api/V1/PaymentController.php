@@ -27,12 +27,13 @@ class PaymentController extends Controller
      * Create (or return existing pending) PromptPay QR for this submission.
      * Idempotent: calling twice returns the same pending payment.
      */
-    public function store(int $id, Request $request): JsonResponse
+    public function store(string $id, Request $request): JsonResponse
     {
         $submission = ServiceSubmission::with('payment')
             ->forUser($request->user()->id)
             ->whereIn('status', [SubmissionStatus::PendingPayment, SubmissionStatus::PaymentFailed])
-            ->findOrFail($id);
+            ->where('uuid', $id)
+            ->firstOrFail();
 
         abort_if(! $submission->payment_authorized, 403, 'Order not yet authorized for payment.');
 
@@ -51,11 +52,12 @@ class PaymentController extends Controller
      * GET /api/v1/submissions/{id}/payment
      * Return the latest payment record for a submission.
      */
-    public function show(int $id, Request $request): JsonResponse
+    public function show(string $id, Request $request): JsonResponse
     {
         $submission = ServiceSubmission::with('payment')
             ->forUser($request->user()->id)
-            ->findOrFail($id);
+            ->where('uuid', $id)
+            ->firstOrFail();
 
         abort_if($submission->payment === null, 404, 'No payment found for this submission.');
 
@@ -67,11 +69,12 @@ class PaymentController extends Controller
      * Client-initiated Stripe status sync — fallback for missed or undelivered webhooks.
      * Queries Stripe directly and applies any state transition; returns 200 always.
      */
-    public function sync(int $id, Request $request): JsonResponse
+    public function sync(string $id, Request $request): JsonResponse
     {
         $submission = ServiceSubmission::with(['payment', 'user'])
             ->forUser($request->user()->id)
-            ->findOrFail($id);
+            ->where('uuid', $id)
+            ->firstOrFail();
 
         $this->service->syncWithStripe($submission);
 

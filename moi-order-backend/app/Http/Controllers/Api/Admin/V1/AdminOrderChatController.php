@@ -20,9 +20,9 @@ class AdminOrderChatController extends Controller
     public function __construct(private readonly FileStorageInterface $storage) {}
 
     /** GET /api/admin/v1/food-orders/{foodOrderId}/chat */
-    public function index(Request $request, int $foodOrderId): JsonResponse
+    public function index(Request $request, string $foodOrderId): JsonResponse
     {
-        $order = FoodOrder::findOrFail($foodOrderId);
+        $order = FoodOrder::where('uuid', $foodOrderId)->firstOrFail();
 
         $messages = OrderChatMessage::query()
             ->forOrder($order->id)
@@ -35,9 +35,9 @@ class AdminOrderChatController extends Controller
     }
 
     /** POST /api/admin/v1/food-orders/{foodOrderId}/chat */
-    public function store(StoreOrderChatMessageRequest $request, int $foodOrderId): JsonResponse
+    public function store(StoreOrderChatMessageRequest $request, string $foodOrderId): JsonResponse
     {
-        $order = FoodOrder::findOrFail($foodOrderId);
+        $order = FoodOrder::where('uuid', $foodOrderId)->firstOrFail();
 
         /** @var Admin $admin */
         $admin = $request->user();

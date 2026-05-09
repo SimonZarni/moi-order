@@ -46,7 +46,7 @@ export interface Place {
 }
 
 export interface User {
-  id: number;
+  id: string; // UUID
   name: string;
   email: string;
   phone_number: string | null;
@@ -149,7 +149,7 @@ export interface SubmissionDocument {
 }
 
 export interface Payment {
-  id: number;
+  id: string; // UUID
   status: string;
   status_label: string;
   amount: number;      // satangs (divide by 100 for THB display)
@@ -159,7 +159,7 @@ export interface Payment {
 }
 
 export interface ServiceSubmission {
-  id: number;
+  id: string; // UUID
   status: string;
   status_label: string;
   payment_authorized: boolean;
@@ -220,7 +220,7 @@ export interface TicketOrderItem {
 }
 
 export interface TicketOrder {
-  id: number;
+  id: string; // UUID
   status: string;
   status_label: string;
   payment_authorized: boolean;
@@ -246,8 +246,9 @@ export interface AppNotification {
   title: string;
   body: string;
   data: {
-    submission_id?: number;
-    ticket_order_id?: number;
+    submission_id?: string;    // UUID
+    ticket_order_id?: string;  // UUID
+    food_order_id?: string;    // UUID
   };
   read_at: string | null;
   created_at: string;
@@ -261,7 +262,7 @@ export interface NotificationsResponse {
 // ── Documents (OCR vault) ──────────────────────────────────────────────────
 
 export interface Document {
-  id: number;
+  id: string; // UUID
   type: import('./enums').DocumentType;
   subtype: string | null;
   file_url: string | null;
@@ -342,7 +343,7 @@ export interface FoodOrderItem {
 }
 
 export interface FoodOrder {
-  id: number;
+  id: string; // UUID
   order_number: string | null;
   restaurant_id: number;
   restaurant_name: string | null;

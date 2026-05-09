@@ -19,9 +19,11 @@ class OrderChatController extends Controller
     public function __construct(private readonly FileStorageInterface $storage) {}
 
     /** GET /api/v1/food-orders/{id}/chat */
-    public function index(Request $request, int $id): JsonResponse
+    public function index(Request $request, string $id): JsonResponse
     {
-        $order = FoodOrder::forUser($request->user()->id)->findOrFail($id);
+        $order = FoodOrder::forUser($request->user()->id)
+            ->where('uuid', $id)
+            ->firstOrFail();
 
         $messages = OrderChatMessage::query()
             ->forOrder($order->id)
@@ -34,9 +36,11 @@ class OrderChatController extends Controller
     }
 
     /** POST /api/v1/food-orders/{id}/chat */
-    public function store(StoreOrderChatMessageRequest $request, int $id): JsonResponse
+    public function store(StoreOrderChatMessageRequest $request, string $id): JsonResponse
     {
-        $order = FoodOrder::forUser($request->user()->id)->findOrFail($id);
+        $order = FoodOrder::forUser($request->user()->id)
+            ->where('uuid', $id)
+            ->firstOrFail();
         $user  = $request->user();
 
         $imagePath = null;

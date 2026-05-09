@@ -25,9 +25,11 @@ class SubmissionResultController extends Controller
     ) {}
 
     /** GET /api/v1/submissions/{id}/result */
-    public function show(int $id, Request $request): JsonResponse
+    public function show(string $id, Request $request): JsonResponse
     {
-        $submission = ServiceSubmission::forUser($request->user()->id)->findOrFail($id);
+        $submission = ServiceSubmission::forUser($request->user()->id)
+            ->where('uuid', $id)
+            ->firstOrFail();
 
         abort_if(
             $submission->status !== SubmissionStatus::Completed || $submission->result_path === null,

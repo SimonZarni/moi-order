@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\FoodOrderStatus;
 use App\Enums\FoodPaymentMethod;
 use App\Exceptions\DomainException;
+use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FoodOrder extends Model
 {
-    use SoftDeletes;
+    use HasUuid, SoftDeletes;
 
     protected $fillable = [
         'order_number',

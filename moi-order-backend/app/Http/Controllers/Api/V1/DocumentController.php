@@ -40,7 +40,7 @@ class DocumentController extends Controller
         ], 201);
     }
 
-    public function destroy(Request $request, int $id): JsonResponse
+    public function destroy(Request $request, string $id): JsonResponse
     {
         $this->service->delete($request->user(), $id);
 

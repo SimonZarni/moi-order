@@ -37,21 +37,23 @@ class SubmissionController extends Controller
     }
 
     /** GET /api/v1/submissions/{id} */
-    public function show(int $id, Request $request): JsonResponse
+    public function show(string $id, Request $request): JsonResponse
     {
         $submission = ServiceSubmission::with(['serviceType.service', 'documents.documentType', 'payment'])
             ->forUser($request->user()->id)
-            ->findOrFail($id);
+            ->where('uuid', $id)
+            ->firstOrFail();
 
         return response()->json(['data' => new ServiceSubmissionResource($submission)]);
     }
 
     /** POST /api/v1/submissions/{id}/cancel */
-    public function cancel(CancelSubmissionRequest $request, int $id): JsonResponse
+    public function cancel(CancelSubmissionRequest $request, string $id): JsonResponse
     {
         $submission = ServiceSubmission::with(['serviceType.service'])
             ->forUser($request->user()->id)
-            ->findOrFail($id);
+            ->where('uuid', $id)
+            ->firstOrFail();
 
         $submission = $this->service->cancelByCustomer($submission);
 
@@ -59,9 +61,11 @@ class SubmissionController extends Controller
     }
 
     /** DELETE /api/v1/submissions/{id} */
-    public function destroy(DeleteSubmissionRequest $request, int $id): JsonResponse
+    public function destroy(DeleteSubmissionRequest $request, string $id): JsonResponse
     {
-        $submission = ServiceSubmission::forUser($request->user()->id)->findOrFail($id);
+        $submission = ServiceSubmission::forUser($request->user()->id)
+            ->where('uuid', $id)
+            ->firstOrFail();
         $this->service->deleteCancelled($submission);
 
         return response()->json(null, 204);

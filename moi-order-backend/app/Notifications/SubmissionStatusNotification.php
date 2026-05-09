@@ -44,7 +44,7 @@ class SubmissionStatusNotification extends Notification
             body:  $payload['body'],
             data:  [
                 'notification_type' => 'submission_status',
-                'submission_id'     => $this->submission->id,
+                'submission_id'     => $this->submission->uuid,
             ],
         );
     }
@@ -59,7 +59,7 @@ class SubmissionStatusNotification extends Notification
             'body'              => $isProcessing
                 ? 'Your service submission is being processed.'
                 : 'Your submission is complete — your result is ready.',
-            'submission_id'     => $this->submission->id,
+            'submission_id'     => $this->submission->uuid,
             'status'            => $this->submission->status->value,
         ];
     }

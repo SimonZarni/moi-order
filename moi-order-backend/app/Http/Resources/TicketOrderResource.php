@@ -16,7 +16,7 @@ class TicketOrderResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'           => $this->id,
+            'id'           => $this->uuid,
             'status'              => $this->status->value,
             'status_label'        => $this->status->label(),
             'payment_authorized'  => (bool) $this->payment_authorized,
@@ -33,7 +33,7 @@ class TicketOrderResource extends JsonResource
                 $this->relationLoaded('ticket'),
                 fn () => [
                     'id'   => $this->ticket->id,
-                    'name' => $this->ticket->name,
+                    'name' => $this->ticket->name, // ticket has no UUID (admin-only resource)
                 ],
             ),
             'items'        => $this->when(
@@ -47,7 +47,7 @@ class TicketOrderResource extends JsonResource
             'user'         => $this->when(
                 $this->relationLoaded('user') && $this->user !== null,
                 fn () => [
-                    'id'    => $this->user->id,
+                    'id'    => $this->user->uuid,
                     'name'  => $this->user->name,
                     'email' => $this->user->email,
                 ],

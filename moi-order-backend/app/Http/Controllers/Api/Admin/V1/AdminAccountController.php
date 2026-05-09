@@ -54,18 +54,18 @@ class AdminAccountController extends Controller
         return (new AdminAccountResource($admin->load('adminRole')))->response()->setStatusCode(201);
     }
 
-    public function update(UpdateAdminRequest $request, int $id): JsonResponse
+    public function update(UpdateAdminRequest $request, string $id): JsonResponse
     {
-        $target = User::where('is_admin', true)->findOrFail($id);
+        $target = User::where('is_admin', true)->where('uuid', $id)->firstOrFail();
 
         $this->service->update($request->user(), $target, $request->validated());
 
         return (new AdminAccountResource($target->fresh('adminRole')))->response();
     }
 
-    public function toggle(int $id): JsonResponse
+    public function toggle(string $id): JsonResponse
     {
-        $user = User::where('is_admin', true)->findOrFail($id);
+        $user = User::where('is_admin', true)->where('uuid', $id)->firstOrFail();
 
         if ($user->isSuperAdmin()) {
             throw new DomainException('admins.cannot_deactivate_super_admin', 403);
@@ -76,9 +76,9 @@ class AdminAccountController extends Controller
         return (new AdminAccountResource($user->fresh('adminRole')))->response();
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy(string $id): JsonResponse
     {
-        $user = User::where('is_admin', true)->findOrFail($id);
+        $user = User::where('is_admin', true)->where('uuid', $id)->firstOrFail();
 
         if ($user->isSuperAdmin()) {
             throw new DomainException('admins.cannot_delete_super_admin', 403);

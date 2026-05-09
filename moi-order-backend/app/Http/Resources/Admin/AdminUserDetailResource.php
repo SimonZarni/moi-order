@@ -18,7 +18,7 @@ class AdminUserDetailResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'                 => $this->id,
+            'id'                 => $this->uuid,
             'name'               => $this->name,
             'email'              => $this->email,
             'phone_number'       => $this->phone_number,
@@ -49,7 +49,7 @@ class AdminUserDetailResource extends JsonResource
             'recent_ticket_orders' => $this->when(
                 $this->relationLoaded('ticketOrders'),
                 fn () => $this->ticketOrders->map(fn ($order) => [
-                    'id'           => $order->id,
+                    'id'           => $order->uuid,
                     'status'       => $order->status->value,
                     'status_label' => $order->status->label(),
                     'visit_date'   => $order->visit_date->toDateString(),
@@ -60,7 +60,7 @@ class AdminUserDetailResource extends JsonResource
             'recent_food_orders' => $this->when(
                 $this->relationLoaded('foodOrders'),
                 fn () => $this->foodOrders->map(fn ($order) => [
-                    'id'           => $order->id,
+                    'id'           => $order->uuid,
                     'status'       => $order->status->value ?? $order->status,
                     'order_number' => $order->order_number,
                     'total'        => $order->total,
@@ -71,7 +71,7 @@ class AdminUserDetailResource extends JsonResource
             'service_submissions' => $this->when(
                 $this->relationLoaded('serviceSubmissions'),
                 fn () => $this->serviceSubmissions->map(fn ($sub) => [
-                    'id'           => $sub->id,
+                    'id'           => $sub->uuid,
                     'status'       => $sub->status->value,
                     'status_label' => $sub->status->label(),
                     'service_name' => $sub->serviceType?->service?->name_en

@@ -25,9 +25,11 @@ class TicketOrderEticketController extends Controller
     ) {}
 
     /** GET /api/v1/ticket-orders/{id}/eticket */
-    public function show(int $id, Request $request): JsonResponse
+    public function show(string $id, Request $request): JsonResponse
     {
-        $order = TicketOrder::forUser($request->user()->id)->findOrFail($id);
+        $order = TicketOrder::forUser($request->user()->id)
+            ->where('uuid', $id)
+            ->firstOrFail();
 
         abort_if(
             $order->status !== TicketOrderStatus::Completed || $order->eticket_path === null,

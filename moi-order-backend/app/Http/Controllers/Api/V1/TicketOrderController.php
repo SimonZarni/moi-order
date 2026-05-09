@@ -53,21 +53,23 @@ class TicketOrderController extends Controller
         ]);
     }
 
-    public function show(int $id, Request $request): JsonResponse
+    public function show(string $id, Request $request): JsonResponse
     {
         $order = TicketOrder::with(['ticket', 'items.variant', 'payment'])
             ->forUser($request->user()->id)
-            ->findOrFail($id);
+            ->where('uuid', $id)
+            ->firstOrFail();
 
         return response()->json(['data' => new TicketOrderResource($order)]);
     }
 
     /** POST /api/v1/ticket-orders/{id}/cancel */
-    public function cancel(CancelTicketOrderRequest $request, int $id): JsonResponse
+    public function cancel(CancelTicketOrderRequest $request, string $id): JsonResponse
     {
         $order = TicketOrder::with(['ticket', 'items.variant'])
             ->forUser($request->user()->id)
-            ->findOrFail($id);
+            ->where('uuid', $id)
+            ->firstOrFail();
 
         $order = $this->service->cancel($order);
 
@@ -75,9 +77,11 @@ class TicketOrderController extends Controller
     }
 
     /** DELETE /api/v1/ticket-orders/{id} */
-    public function destroy(DeleteTicketOrderRequest $request, int $id): JsonResponse
+    public function destroy(DeleteTicketOrderRequest $request, string $id): JsonResponse
     {
-        $order = TicketOrder::forUser($request->user()->id)->findOrFail($id);
+        $order = TicketOrder::forUser($request->user()->id)
+            ->where('uuid', $id)
+            ->firstOrFail();
         $this->service->deleteCancelled($order);
 
         return response()->json(null, 204);
