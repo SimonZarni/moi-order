@@ -24,7 +24,11 @@ class MerchantOrderController extends Controller
     /** GET /api/merchant/v1/orders */
     public function index(Request $request): JsonResponse
     {
-        $restaurant = $request->user()->restaurant()->firstOrFail();
+        $restaurant = $request->user()->restaurant()->first();
+
+        if ($restaurant === null) {
+            return response()->json(['data' => [], 'meta' => ['current_page' => 1, 'last_page' => 1, 'per_page' => 20, 'total' => 0]]);
+        }
 
         $orders = $this->orderService->listForRestaurant($restaurant->id);
 

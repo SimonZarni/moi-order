@@ -20,9 +20,17 @@ class MerchantAnalyticsController extends Controller
     /** GET /api/merchant/v1/analytics */
     public function index(Request $request): JsonResponse
     {
-        $restaurant = $request->user()->restaurant()->firstOrFail();
-        $rid        = $restaurant->id;
-        $excluded   = [FoodOrderStatus::Cancelled->value];
+        $restaurant = $request->user()->restaurant()->first();
+
+        if ($restaurant === null) {
+            $zero = ['order_count' => 0, 'revenue_cents' => 0];
+            return response()->json(['data' => [
+                'today' => $zero, 'this_week' => $zero, 'this_month' => $zero, 'pending_count' => 0,
+            ]]);
+        }
+
+        $rid      = $restaurant->id;
+        $excluded = [FoodOrderStatus::Cancelled->value];
 
         return response()->json([
             'data' => [

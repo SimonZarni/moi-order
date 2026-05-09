@@ -22,7 +22,11 @@ class MenuCategoryController extends Controller
     /** GET /api/merchant/v1/menu/categories */
     public function index(Request $request): JsonResponse
     {
-        $restaurant = $request->user()->restaurant()->with(['menuCategories.menuItems'])->firstOrFail();
+        $restaurant = $request->user()->restaurant()->with(['menuCategories.menuItems'])->first();
+
+        if ($restaurant === null) {
+            return response()->json(['data' => []]);
+        }
 
         $data = $restaurant->menuCategories->map(
             fn ($cat) => (new MenuCategoryResource($cat, $this->storage))->toArray($request)
