@@ -49,7 +49,11 @@ export function useGoogleAuth(): UseGoogleAuthResult {
       setGoogleBannerError('');
       setIsGoogleSigningIn(true);
 
-      await GoogleSignin.hasPlayServices();
+      // hasPlayServices() is Android-only — on iOS it throws a JSI error in
+      // @react-native-google-signin v15 on New Architecture (Expo SDK 54/RN 0.76).
+      if (Platform.OS === 'android') {
+        await GoogleSignin.hasPlayServices();
+      }
 
       let idToken: string | null = null;
 
