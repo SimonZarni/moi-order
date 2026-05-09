@@ -35,9 +35,17 @@ export function useLineAuth(): UseLineAuthResult {
         throw new Error('Missing LINE identity token.');
       }
 
+      // The nonce is required for backend replay-attack prevention.
+      // Guard both SDK shape variants; throw rather than silently omitting it —
+      // the backend should reject nonce-less LINE auth requests.
+      const nonce = result.idTokenNonce ?? result.IDTokenNonce;
+      if (!nonce) {
+        throw new Error('Missing LINE nonce. Please try again.');
+      }
+
       const { user, token } = await lineAuth(
         idToken,
-        result.idTokenNonce ?? result.IDTokenNonce,
+        nonce,
         result.userProfile?.displayName,
       );
 

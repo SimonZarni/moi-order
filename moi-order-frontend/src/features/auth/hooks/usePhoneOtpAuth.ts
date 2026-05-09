@@ -69,15 +69,35 @@ export function usePhoneOtpAuth({
   const handleRequestOtp = useCallback(async (): Promise<void> => {
     if (isRequestingOtp || resendSecondsLeft > 0) return;
 
+    // Client-side format check — backend always re-validates, but this prevents
+    // obviously malformed inputs from consuming a rate-limit slot.
+    const cleaned = phoneNumber.trim();
+    const digitsOnly = cleaned.replace(/[\s\-\(\)]/g, '');
+    if (cleaned.length === 0) {
+      setOtpError('Phone number is required.');
+      return;
+    }
+    if (!/^\+?\d{7,15}$/.test(digitsOnly)) {
+      setOtpError('Enter a valid phone number.');
+      return;
+    }
+
     try {
       setOtpError('');
       setIsRequestingOtp(true);
-      const response = await requestOtp(phoneNumber.trim(), purpose);
+      const response = await requestOtp(cleaned, purpose);
       setOtpRequestId(response.otp_request_id);
       setResendUntil(Date.now() + 60_000);
     } catch (error: unknown) {
       const apiError = error as ApiError;
-      setOtpError(apiError.errors?.phone_number?.[0] ?? apiError.message ?? 'Failed to send OTP.');
+      if (apiError.status === 429) {
+        // Backend throttle hit — enforce cooldown so the user can't bypass it
+        // by modifying JS state. Surface a clear message.
+        setResendUntil(Date.now() + 60_000);
+        setOtpError('Too many requests. Please wait before trying again.');
+      } else {
+        setOtpError(apiError.errors?.phone_number?.[0] ?? apiError.message ?? 'Failed to send OTP.');
+      }
     } finally {
       setIsRequestingOtp(false);
     }

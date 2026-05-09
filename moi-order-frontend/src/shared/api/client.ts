@@ -57,13 +57,20 @@ apiClient.interceptors.response.use(
     const status = error.response?.status ?? 0;
     const data = error.response?.data;
 
+    // Only pass through the known-safe context fields used by the UI.
+    // This prevents accidental backend data leakage (e.g. internal IDs, paths)
+    // from reaching UI code if the server ever attaches extra context fields.
+    const safeContext = data?.context !== undefined
+      ? { suspended_until: data.context['suspended_until'] }
+      : undefined;
+
     const apiError: ApiError = {
       message: status === 413
         ? (_FILE_TOO_LARGE[_locale] ?? _FILE_TOO_LARGE['en']!)
         : (data?.message ?? 'Something went wrong.'),
       code: status === 413 ? 'file_too_large' : (data?.code ?? 'internal'),
       ...(data?.errors   !== undefined && { errors:  data.errors }),
-      ...(data?.context  !== undefined && { context: data.context }),
+      ...(safeContext     !== undefined && { context: safeContext }),
       status,
     };
 

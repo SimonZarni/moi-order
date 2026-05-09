@@ -130,7 +130,14 @@ function guardedScreen<P extends object>(Screen: React.ComponentType<P>): React.
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2,
+      // Never retry 4xx errors — retrying 401/403 wastes the token window and delays
+      // the logout redirect; retrying 422/409 won't produce a different result.
+      // Only retry on network failures (status 0) or 5xx server errors.
+      retry: (failureCount, error) => {
+        const status = (error as { status?: number }).status;
+        if (status !== undefined && status >= 400 && status < 500) return false;
+        return failureCount < 2;
+      },
       staleTime: CACHE_TTL.USER_DATA,   // 5 min — no refetch on screen focus
       gcTime:    10 * 60 * 1000,        // 10 min — keep unmounted screen data in memory
     },
@@ -264,9 +271,13 @@ export default function App(): React.JSX.Element {
           const user = await fetchMe();
           setUser(user, token);
         }
-      } catch {
-        // Token expired or invalid — clear silently; user browses as guest.
-        await SecureStore.deleteItemAsync(TOKEN_KEY).catch(() => {});
+      } catch (error: unknown) {
+        const status = (error as { status?: number }).status;
+        if (status === 401) {
+          // Confirmed invalid token — clear it so the user starts fresh.
+          await SecureStore.deleteItemAsync(TOKEN_KEY).catch(() => {});
+        }
+        // Network failure or 5xx — keep the token; it may be valid once connectivity returns.
       } finally {
         setInitDone(true);
       }
