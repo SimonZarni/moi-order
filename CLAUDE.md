@@ -359,6 +359,8 @@ TESTS (Pest + Vitest+RTL):
       return $job->orderId === $order->id;
     });
 
+10. **Google Sign-In on iOS — GestureResponderEvent passed as loginHint (iOS only, not Android).** `Pressable.onPress` always passes a `GestureResponderEvent` as the first argument at JavaScript runtime, regardless of TypeScript types. If `handleGoogleSignIn` is used directly as `onPress={handleGoogleSignIn}`, the event object is received as `loginHint`. Since the event is truthy, the code enters the `if (loginHint)` branch and calls `GoogleSignin.signIn({ loginHint: <event> })` — passing a JS object to the native iOS module causes `Exception in HostFunction: Unsupported jsi::Value kind`. This only affects iOS because on Android, `hasPlayServices()` gates the flow differently and the error manifests differently. **Fix**: (a) In the handler: `const loginHint = typeof loginHintOrEvent === 'string' ? loginHintOrEvent : undefined;` (b) In the button: `onPress={() => onPress()}` so the event is never forwarded. Also required: both `iosClientId` AND `webClientId` must be non-empty strings in `GoogleSignin.configure()` — passing an empty string for either causes the same JSI crash. Hardcode fallback values in `config.ts` so env vars missing from an old build don't cause empty strings.
+
 RESPONSE FORMAT:
 1. Answer checklist (one line each).
 2. List files: path | layer role | principle demonstrated.
