@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\Merchant\V1\KycController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantAnalyticsController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantOrderChatController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantOrderController;
@@ -40,6 +41,11 @@ Route::patch('/orders/{id}/status',  [MerchantOrderController::class, 'updateSta
 // ── Order chat ────────────────────────────────────────────────────────────────
 Route::get('/orders/{id}/chat',   [MerchantOrderChatController::class, 'index']);
 Route::post('/orders/{id}/chat',  [MerchantOrderChatController::class, 'store']);
+
+// ── KYC resubmission (name/address change) ────────────────────────────────────
+Route::post('/kyc/resubmit',                             [KycController::class, 'resubmit']);
+Route::post('/kyc/resubmit/{id}/documents',              [KycController::class, 'uploadResubmitDocument']);
+Route::post('/kyc/resubmit/{id}/submit',                 [KycController::class, 'submitResubmission']);
 
 // ── Restaurant photos ─────────────────────────────────────────────────────────
 Route::post('/restaurant/cover_photo', [MerchantRestaurantController::class, 'uploadCoverPhoto']);

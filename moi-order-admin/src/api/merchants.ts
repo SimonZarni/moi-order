@@ -23,12 +23,16 @@ export type KycApplicationStatus =
   | 'approved'
   | 'rejected';
 
+export type KycApplicationType = 'initial' | 'resubmission';
+
 export type KycApplication = {
   id: number;
+  type: KycApplicationType;
   user_id: number;
   user_name: string;
   user_email: string;
   user_phone: string | null;
+  shop_id: number | null;
   business_name: string;
   business_type: string;
   business_address: string;
@@ -57,7 +61,7 @@ export type CreateMerchantResponse = {
 };
 
 type Meta = { current_page: number; last_page: number; per_page: number; total: number };
-type KycListParams = { status?: string; page?: number; per_page?: number };
+type KycListParams = { status?: string; type?: string; search?: string; page?: number; per_page?: number };
 
 // ----------------------------------------------------------------------
 

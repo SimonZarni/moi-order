@@ -26,6 +26,7 @@ class KycApplication extends Model
      */
     protected $fillable = [
         'user_id',
+        'type',
         'business_name',
         'business_type',
         'business_address',
@@ -77,18 +78,25 @@ class KycApplication extends Model
         // Domain side-effect: the applicant becomes a merchant.
         $this->applicant->update(['is_merchant' => true]);
 
-        // Sync restaurant name/address/phone from KYC — merchant cannot change
-        // these directly; they must re-submit KYC for admin approval.
-        $restaurantData = [
-            'name'    => $this->business_name,
-            'address' => $this->business_address,
-            'phone'   => $this->business_phone,
-        ];
-
-        if ($this->applicant->restaurant()->exists()) {
-            $this->applicant->restaurant()->update($restaurantData);
+        if ($this->type === 'resubmission') {
+            // Resubmission: only update name and address on the existing restaurant.
+            $this->applicant->restaurant()->update([
+                'name'    => $this->business_name,
+                'address' => $this->business_address,
+            ]);
         } else {
-            $this->applicant->restaurant()->create($restaurantData);
+            // Initial KYC: create restaurant (or update if exists from a prior draft).
+            $restaurantData = [
+                'name'    => $this->business_name,
+                'address' => $this->business_address,
+                'phone'   => $this->business_phone,
+            ];
+
+            if ($this->applicant->restaurant()->exists()) {
+                $this->applicant->restaurant()->update($restaurantData);
+            } else {
+                $this->applicant->restaurant()->create($restaurantData);
+            }
         }
     }
 

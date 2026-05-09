@@ -2,16 +2,22 @@ import type { Restaurant } from '../types/models';
 import type { RestaurantStatus } from '../types/enums';
 import { apiClient } from './client';
 
+export interface OpeningHourInput {
+  day_of_week: number;
+  opens_at: string | null;
+  closes_at: string | null;
+  is_closed: boolean;
+}
+
 export interface UpdateRestaurantPayload {
-  name?: string;
   description?: string;
-  address?: string;
   phone?: string;
   status?: RestaurantStatus;
   delivery_radius_km?: number | null;
   is_delivery_available?: boolean;
   is_pickup_available?: boolean;
   min_order_cents?: number;
+  opening_hours?: OpeningHourInput[];
 }
 
 export interface RestaurantPrefill {

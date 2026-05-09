@@ -72,3 +72,40 @@ export async function submitKycApplication(): Promise<KycApplication> {
   const response = await apiClient.post<{ data: KycApplication }>('/kyc/submit');
   return response.data.data;
 }
+
+export async function createKycResubmission(
+  businessName: string,
+  businessAddress: string,
+): Promise<KycApplication> {
+  const response = await apiClient.post<{ data: KycApplication }>('/kyc/resubmit', {
+    business_name: businessName,
+    business_address: businessAddress,
+  });
+  return response.data.data;
+}
+
+export async function uploadResubmitDocument(
+  resubmissionId: number,
+  type: KycDocType,
+  file: UploadFileRef,
+): Promise<KycDocument> {
+  const formData = new FormData();
+  formData.append('type', type);
+  if (Platform.OS === 'web') {
+    const blob = await fetch(file.uri).then((r) => r.blob());
+    formData.append('file', new File([blob], file.name, { type: file.type }));
+  } else {
+    formData.append('file', { uri: file.uri, name: file.name, type: file.type } as unknown as Blob);
+  }
+  const response = await apiClient.post<{ data: KycDocument }>(
+    `/kyc/resubmit/${resubmissionId}/documents`,
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' }, transformRequest: [(d: FormData) => d] },
+  );
+  return response.data.data;
+}
+
+export async function submitKycResubmission(resubmissionId: number): Promise<KycApplication> {
+  const response = await apiClient.post<{ data: KycApplication }>(`/kyc/resubmit/${resubmissionId}/submit`);
+  return response.data.data;
+}

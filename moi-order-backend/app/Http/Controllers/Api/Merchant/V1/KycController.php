@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\Merchant\V1;
 
 use App\DTOs\KycApplicationDTO;
 use App\Enums\KycDocumentType;
+use App\Models\KycApplication;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Merchant\CreateKycApplicationRequest;
 use App\Http\Requests\Merchant\UploadKycDocumentRequest;
@@ -60,6 +61,55 @@ class KycController extends Controller
         $app = $this->kycService->getOrCreateApplication($request->user());
         $app = $this->kycService->submit($app);
         $app->load('documents');
+
+        return response()->json(['data' => new KycApplicationResource($app)]);
+    }
+
+    /** POST /api/merchant/v1/kyc/resubmit — request name/address change */
+    public function resubmit(Request $request): JsonResponse
+    {
+        $request->validate([
+            'business_name'    => ['required', 'string', 'max:255'],
+            'business_address' => ['required', 'string', 'max:500'],
+        ]);
+
+        $app = $this->kycService->createResubmission(
+            $request->user(),
+            $request->validated('business_name'),
+            $request->validated('business_address'),
+        );
+
+        return response()->json(['data' => new KycApplicationResource($app)], 201);
+    }
+
+    /** POST /api/merchant/v1/kyc/resubmit/{id}/documents — upload doc to a resubmission */
+    public function uploadResubmitDocument(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'type' => ['required', 'string'],
+            'file' => ['required', 'file', 'mimes:jpeg,jpg,png,pdf', 'max:10240'],
+        ]);
+
+        $app = KycApplication::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->where('type', 'resubmission')
+            ->firstOrFail();
+
+        $type = KycDocumentType::from($request->validated('type'));
+        $doc  = $this->kycService->uploadDocument($app, $request->file('file'), $type);
+
+        return response()->json(['data' => new KycDocumentResource($doc)], 201);
+    }
+
+    /** POST /api/merchant/v1/kyc/resubmit/{id}/submit */
+    public function submitResubmission(Request $request, int $id): JsonResponse
+    {
+        $app = KycApplication::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->where('type', 'resubmission')
+            ->firstOrFail();
+
+        $app = $this->kycService->submit($app);
 
         return response()->json(['data' => new KycApplicationResource($app)]);
     }

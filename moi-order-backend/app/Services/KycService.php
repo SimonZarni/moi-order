@@ -144,6 +144,49 @@ class KycService
     }
 
     /**
+     * Create a resubmission KYC application for name/address change.
+     * Principle: CQS — creates and returns the new application.
+     * Principle: Security — only approved merchants can resubmit.
+     */
+    public function createResubmission(
+        User $user,
+        string $businessName,
+        string $businessAddress,
+    ): KycApplication {
+        if (! $user->isMerchant()) {
+            throw new DomainException('kyc.not_a_merchant', 403);
+        }
+
+        $existing = KycApplication::where('user_id', $user->id)
+            ->where('type', 'resubmission')
+            ->whereNotIn('status', [
+                KycApplicationStatus::Approved->value,
+                KycApplicationStatus::Rejected->value,
+            ])
+            ->first();
+
+        if ($existing !== null) {
+            throw new DomainException('kyc.resubmission_pending', 409);
+        }
+
+        $original = KycApplication::where('user_id', $user->id)
+            ->where('type', 'initial')
+            ->where('status', KycApplicationStatus::Approved->value)
+            ->latest()
+            ->first();
+
+        return KycApplication::create([
+            'user_id'          => $user->id,
+            'type'             => 'resubmission',
+            'business_name'    => $businessName,
+            'business_type'    => $original?->business_type ?? '',
+            'business_address' => $businessAddress,
+            'business_phone'   => $original?->business_phone,
+            'status'           => KycApplicationStatus::Draft,
+        ]);
+    }
+
+    /**
      * Approve the KYC application.
      * DB::transaction — two-table write (application + user.is_merchant).
      */

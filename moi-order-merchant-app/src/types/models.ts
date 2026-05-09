@@ -85,6 +85,13 @@ export interface MenuCategory {
   items: MenuItem[];
 }
 
+export interface OpeningHour {
+  day_of_week: number;
+  opens_at: string | null;
+  closes_at: string | null;
+  is_closed: boolean;
+}
+
 export interface Restaurant {
   id: number;
   name: string;
@@ -100,6 +107,7 @@ export interface Restaurant {
   is_delivery_available: boolean;
   is_pickup_available: boolean;
   min_order_cents: number;
+  opening_hours: OpeningHour[] | null;
 }
 
 export interface OrderChatMessage {

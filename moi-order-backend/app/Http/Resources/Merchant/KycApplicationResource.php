@@ -20,10 +20,12 @@ class KycApplicationResource extends JsonResource
         /** @var \App\Models\KycApplication $this */
         return [
             'id'               => $this->id,
+            'type'             => $this->type ?? 'initial',
             'user_id'          => $this->user_id,
             'user_name'        => $this->whenLoaded('applicant', fn () => $this->applicant->name),
             'user_email'       => $this->whenLoaded('applicant', fn () => $this->applicant->email),
             'user_phone'       => $this->whenLoaded('applicant', fn () => $this->applicant->phone_number),
+            'shop_id'          => $this->whenLoaded('applicant', fn () => $this->applicant->restaurant?->id),
             'business_name'    => $this->business_name,
             'business_type'    => $this->business_type,
             'business_address' => $this->business_address,

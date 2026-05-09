@@ -327,12 +327,147 @@ export const styles = StyleSheet.create({
     color: colours.primary,
   },
   kycNote: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.sm,
+    alignItems: 'center',
   },
   kycNoteText: {
     fontSize: typography.xxs,
     color: colours.textMuted,
     fontStyle: 'italic',
+  },
+  kycNoteLink: {
+    fontSize: typography.xxs,
+    color: colours.primary,
+    fontWeight: '600',
+  },
+  infoRowWithAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  inlineEditBtn: {
+    padding: 6,
+    marginLeft: spacing.xs,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  toggleLabel: {
+    fontSize: typography.sm,
+    color: colours.textOnLight,
+    fontWeight: '500',
+  },
+  // Opening hours
+  hoursHeader: {
+    flexDirection: 'row',
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
+  },
+  hoursRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
+  },
+  hoursReadRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  hoursCell: {
+    fontSize: typography.xs,
+    color: colours.textMuted,
+    fontWeight: '600',
+  },
+  hoursDayCell: {
+    width: 36,
+  },
+  hoursTimeCell: {
+    flex: 1,
+    marginHorizontal: 4,
+  },
+  hoursStatusCell: {
+    width: 48,
+  },
+  hoursInput: {
+    borderWidth: 1,
+    borderColor: colours.divider,
+    borderRadius: radius.sm,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    fontSize: typography.xs,
+    color: colours.textOnLight,
+    backgroundColor: colours.surfaceMuted,
+    fontWeight: '400',
+  },
+  hoursInputDisabled: {
+    opacity: 0.35,
+  },
+  hoursDayLabel: {
+    width: 36,
+    fontSize: typography.sm,
+    color: colours.textOnLight,
+    fontWeight: '600',
+  },
+  hoursClosed: {
+    fontSize: typography.sm,
+    color: colours.textMuted,
+    fontStyle: 'italic',
+  },
+  hoursTime: {
+    fontSize: typography.sm,
+    color: colours.textOnLight,
+  },
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    backgroundColor: colours.backgroundDark,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+    maxHeight: '85%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.dividerDark,
+  },
+  modalTitle: {
+    fontSize: typography.lg,
+    fontWeight: '700',
+    color: colours.textOnDark,
+  },
+  modalBody: {
+    padding: spacing.lg,
+    gap: spacing.md,
+  },
+  modalNote: {
+    fontSize: typography.sm,
+    color: colours.textSubtle,
+    lineHeight: 20,
+  },
+  modalDocNote: {
+    fontSize: typography.sm,
+    color: colours.textSubtle,
+    lineHeight: 20,
+    backgroundColor: colours.dividerDark,
+    padding: spacing.sm,
+    borderRadius: radius.md,
   },
 });

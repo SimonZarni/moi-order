@@ -19,11 +19,8 @@ class UpdateRestaurantRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'                  => ['sometimes', 'string', 'max:255'],
+            // name and address locked — only updated via KYC resubmission + admin approval.
             'description'           => ['sometimes', 'nullable', 'string', 'max:2000'],
-            'address'               => ['sometimes', 'nullable', 'string', 'max:500'],
-            'latitude'              => ['sometimes', 'nullable', 'numeric', 'between:-90,90'],
-            'longitude'             => ['sometimes', 'nullable', 'numeric', 'between:-180,180'],
             'phone'                 => ['sometimes', 'nullable', 'string', 'max:30'],
             'status'                => ['sometimes', Rule::enum(RestaurantStatus::class)],
             'delivery_radius_km'    => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],

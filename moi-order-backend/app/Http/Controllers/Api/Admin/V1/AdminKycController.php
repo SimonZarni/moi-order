@@ -23,11 +23,19 @@ class AdminKycController extends Controller
         private readonly KycService $kycService,
     ) {}
 
-    /** GET /api/admin/v1/kyc-applications?status=&page= */
+    /** GET /api/admin/v1/kyc-applications?status=&type=&search=&page= */
     public function index(Request $request): JsonResponse
     {
-        $query = KycApplication::with(['applicant', 'documents'])
+        $query = KycApplication::with(['applicant.restaurant', 'documents'])
             ->when($request->query('status'), fn ($q, $status) => $q->where('status', $status))
+            ->when($request->query('type'), fn ($q, $type) => $q->where('type', $type))
+            ->when($request->query('search'), function ($q, $search): void {
+                $q->where(function ($inner) use ($search): void {
+                    $inner->where('business_name', 'like', "%{$search}%")
+                          ->orWhereHas('applicant', fn ($u) => $u->where('name', 'like', "%{$search}%")
+                              ->orWhere('email', 'like', "%{$search}%"));
+                });
+            })
             ->latest('submitted_at');
 
         $paginated = $query->paginate(20);
