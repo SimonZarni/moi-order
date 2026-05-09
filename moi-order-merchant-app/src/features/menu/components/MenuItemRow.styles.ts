@@ -5,12 +5,14 @@ import { typography } from '../../../shared/theme/typography';
 import { radius } from '../../../shared/theme/radius';
 
 export const styles = StyleSheet.create({
+  wrapper: {
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colours.divider,
     gap: spacing.sm,
   },
   photo: {
@@ -26,36 +28,91 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     fontWeight: '600',
     color: colours.textOnLight,
-    marginBottom: spacing.xs,
+    marginBottom: 2,
+  },
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    flexWrap: 'wrap',
   },
   price: {
     fontSize: typography.xs,
     color: colours.textMuted,
+    fontWeight: '600',
+  },
+  originalPrice: {
+    fontSize: typography.xxs,
+    color: colours.medium,
+    textDecorationLine: 'line-through',
+  },
+  modifierCount: {
+    fontSize: typography.xxs,
+    color: colours.primary,
+    fontWeight: '500',
+    backgroundColor: colours.primary + '15',
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: radius.sm,
   },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
   statusBadge: {
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: radius.full,
-    minHeight: 44,
+    minHeight: 32,
     justifyContent: 'center',
   },
   statusText: {
     fontSize: typography.xxs,
     fontWeight: '700',
   },
-  deleteButton: {
-    width: 32,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
+  // Accordion
+  accordion: {
+    backgroundColor: colours.surfaceMuted,
+    borderTopWidth: 1,
+    borderTopColor: colours.divider,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    gap: spacing.sm,
   },
-  deleteText: {
-    fontSize: typography.sm,
-    color: colours.error,
+  groupBlock: {
+    gap: 4,
+  },
+  groupHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 2,
+  },
+  groupName: {
+    fontSize: typography.xs,
+    fontWeight: '700',
+    color: colours.textOnLight,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  groupMeta: {
+    fontSize: typography.xxs,
+    color: colours.textMuted,
+  },
+  optionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingLeft: spacing.sm,
+    paddingVertical: 2,
+  },
+  optionName: {
+    fontSize: typography.xs,
+    color: colours.textOnLight,
+  },
+  optionPrice: {
+    fontSize: typography.xs,
+    color: colours.primary,
+    fontWeight: '600',
   },
 });
