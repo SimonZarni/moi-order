@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Models\Document;
+use App\Models\KycApplication;
 use App\Models\TicketOrder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -202,7 +203,7 @@ class User extends Authenticatable
 
     public function kycApplication(): HasOne
     {
-        return $this->hasOne(KycApplication::class)->latestOfMany();
+        return $this->hasMany(KycApplication::class)->latestOfMany();
     }
 
     public function foodOrders(): HasMany
