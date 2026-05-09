@@ -30,14 +30,7 @@ export const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: radius.md,
-    backgroundColor: colours.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoMarkText: {
-    color: colours.white,
-    fontSize: typography.lg,
-    fontWeight: '800',
+    overflow: 'hidden',
   },
   logoText: {
     color: colours.textOnDark,

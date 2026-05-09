@@ -14,8 +14,24 @@ export interface UpdateRestaurantPayload {
   min_order_cents?: number;
 }
 
-export async function getRestaurant(): Promise<Restaurant | null> {
-  const response = await apiClient.get<{ data: Restaurant | null }>('/restaurant');
+export interface RestaurantPrefill {
+  name: string;
+  address: string | null;
+  phone: string | null;
+}
+
+export interface GetRestaurantResult {
+  restaurant: Restaurant | null;
+  prefill: RestaurantPrefill | null;
+}
+
+export async function getRestaurant(): Promise<GetRestaurantResult> {
+  const response = await apiClient.get<{ data: Restaurant | null; prefill?: RestaurantPrefill | null }>('/restaurant');
+  return { restaurant: response.data.data, prefill: response.data.prefill ?? null };
+}
+
+export async function createRestaurant(data: UpdateRestaurantPayload): Promise<Restaurant> {
+  const response = await apiClient.post<{ data: Restaurant }>('/restaurant', data);
   return response.data.data;
 }
 

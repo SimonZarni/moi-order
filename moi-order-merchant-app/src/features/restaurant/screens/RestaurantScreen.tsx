@@ -22,7 +22,7 @@ const STATUS_CONFIG: Record<RestaurantStatus, { label: string; color: string; bg
 
 export function RestaurantScreen(): React.JSX.Element {
   const {
-    restaurant, isLoading, isEditing, isSaving,
+    restaurant, isLoading, isEditing, isSaving, isNewRestaurant,
     isUploadingCover, isUploadingLogo,
     isEditingDelivery, minOrderInput,
     form, handleStartEdit, handleCancelEdit,
@@ -74,7 +74,7 @@ export function RestaurantScreen(): React.JSX.Element {
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Restaurant</Text>
+          <Text style={styles.headerTitle}>{isNewRestaurant ? 'Setup Restaurant' : 'Restaurant'}</Text>
           {!isEditing && (
             <Pressable
               style={styles.editButton}
@@ -182,7 +182,7 @@ export function RestaurantScreen(): React.JSX.Element {
         {isEditing ? (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>Edit Profile</Text>
+              <Text style={styles.cardTitle}>{isNewRestaurant ? 'Create Restaurant' : 'Edit Profile'}</Text>
             </View>
             <View style={styles.formBody}>
               <View style={styles.inputGroup}>
@@ -250,7 +250,7 @@ export function RestaurantScreen(): React.JSX.Element {
                 accessibilityRole="button"
               >
                 <Text style={styles.saveButtonText}>
-                  {isSaving ? 'Saving…' : 'Save Changes'}
+                  {isSaving ? 'Saving…' : isNewRestaurant ? 'Create Restaurant' : 'Save Changes'}
                 </Text>
               </Pressable>
             </View>

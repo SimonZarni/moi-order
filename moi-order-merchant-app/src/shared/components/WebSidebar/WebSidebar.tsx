@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './WebSidebar.styles';
 import { colours } from '../../theme/colours';
@@ -39,9 +39,11 @@ export function WebSidebar({
   return (
     <View style={styles.sidebar}>
       <View style={styles.logoContainer}>
-        <View style={styles.logoMark}>
-          <Text style={styles.logoMarkText}>M</Text>
-        </View>
+        <Image
+          source={require('../../../../assets/icon.png')}
+          style={styles.logoMark}
+          resizeMode="cover"
+        />
         <View>
           <Text style={styles.logoText}>Moi Order</Text>
           <Text style={styles.logoSubText}>Merchant Portal</Text>

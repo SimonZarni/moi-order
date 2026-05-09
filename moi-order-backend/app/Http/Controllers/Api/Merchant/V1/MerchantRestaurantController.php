@@ -27,7 +27,15 @@ class MerchantRestaurantController extends Controller
         $restaurant = $this->restaurantService->getForMerchant($request->user());
 
         if ($restaurant === null) {
-            return response()->json(['data' => null]);
+            $kyc = $request->user()->kycApplication;
+            return response()->json([
+                'data'    => null,
+                'prefill' => $kyc ? [
+                    'name'    => $kyc->business_name,
+                    'address' => $kyc->business_address,
+                    'phone'   => $kyc->business_phone,
+                ] : null,
+            ]);
         }
 
         return response()->json(['data' => new RestaurantResource($restaurant, $this->storage)]);

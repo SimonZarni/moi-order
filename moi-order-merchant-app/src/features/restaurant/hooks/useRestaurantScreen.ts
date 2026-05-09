@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getRestaurant, updateRestaurant, uploadRestaurantPhoto, removeRestaurantPhoto } from '../../../api/restaurant';
+import { getRestaurant, updateRestaurant, createRestaurant, uploadRestaurantPhoto, removeRestaurantPhoto } from '../../../api/restaurant';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { CACHE_TTL } from '../../../shared/constants/config';
 import type { Restaurant } from '../../../types/models';
@@ -15,6 +15,7 @@ interface EditForm {
 
 interface UseRestaurantScreenResult {
   restaurant: Restaurant | null | undefined;
+  isNewRestaurant: boolean;
   isLoading: boolean;
   isEditing: boolean;
   isSaving: boolean;
@@ -50,20 +51,37 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     phone: '',
   });
 
-  const { data: restaurant, isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: QUERY_KEYS.RESTAURANT,
     queryFn: getRestaurant,
     staleTime: CACHE_TTL.USER,
   });
+
+  const restaurant = data?.restaurant ?? null;
+  const prefill = data?.prefill ?? null;
+  const isNewRestaurant = !isLoading && restaurant === null;
+
+  useEffect(() => {
+    if (isNewRestaurant && prefill !== null && !isEditing) {
+      setForm({
+        name: prefill.name ?? '',
+        description: '',
+        address: prefill.address ?? '',
+        phone: prefill.phone ?? '',
+      });
+      setIsEditing(true);
+    }
+  }, [isNewRestaurant, prefill, isEditing]);
 
   const invalidateRestaurant = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.RESTAURANT });
   }, [queryClient]);
 
   const { mutate: save, isPending: isSaving } = useMutation({
-    mutationFn: updateRestaurant,
+    mutationFn: (payload: Parameters<typeof updateRestaurant>[0]) =>
+      restaurant === null ? createRestaurant(payload) : updateRestaurant(payload),
     onSuccess: (updated) => {
-      queryClient.setQueryData(QUERY_KEYS.RESTAURANT, updated);
+      queryClient.setQueryData(QUERY_KEYS.RESTAURANT, { restaurant: updated, prefill: null });
       setIsEditing(false);
     },
   });
@@ -71,7 +89,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
   const { mutate: saveDelivery, isPending: isSavingDelivery } = useMutation({
     mutationFn: updateRestaurant,
     onSuccess: (updated) => {
-      queryClient.setQueryData(QUERY_KEYS.RESTAURANT, updated);
+      queryClient.setQueryData(QUERY_KEYS.RESTAURANT, { restaurant: updated, prefill: null });
       setIsEditingDelivery(false);
     },
   });
@@ -98,13 +116,13 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
 
   const handleStartEdit = useCallback(() => {
     setForm({
-      name: restaurant?.name ?? '',
+      name: restaurant?.name ?? prefill?.name ?? '',
       description: restaurant?.description ?? '',
-      address: restaurant?.address ?? '',
-      phone: restaurant?.phone ?? '',
+      address: restaurant?.address ?? prefill?.address ?? '',
+      phone: restaurant?.phone ?? prefill?.phone ?? '',
     });
     setIsEditing(true);
-  }, [restaurant]);
+  }, [restaurant, prefill]);
 
   const handleCancelEdit = useCallback(() => setIsEditing(false), []);
 
@@ -164,6 +182,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
 
   return {
     restaurant,
+    isNewRestaurant,
     isLoading,
     isEditing,
     isSaving: isSaving || isSavingDelivery,
