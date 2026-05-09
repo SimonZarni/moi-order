@@ -81,24 +81,26 @@ export function useGoogleAuth(): UseGoogleAuthResult {
         // Never call getTokens() after signIn() on iOS: it throws a JSI error
         // because the native session may not be fully committed yet.
         // The idToken is always present in the signIn() result when webClientId is set.
-        console.log('[GoogleAuth] calling signIn()…');
         let rawResult: unknown;
         try {
           rawResult = await GoogleSignin.signIn();
-          const allKeys = rawResult && typeof rawResult === 'object' ? Object.keys(rawResult) : [];
-          console.log('[GoogleAuth] signIn() resolved. keys:', allKeys.join(','));
-          const asRec = rawResult as Record<string, unknown>;
-          console.log('[GoogleAuth] type:', asRec?.type, '| dataKeys:', asRec?.data && typeof asRec.data === 'object' ? Object.keys(asRec.data).join(',') : String(asRec?.data));
-          const d = asRec?.data as Record<string, unknown> | null | undefined;
-          console.log('[GoogleAuth] idToken type:', typeof d?.idToken, '| defined:', d?.idToken !== undefined && d?.idToken !== null);
+          if (__DEV__) {
+            const allKeys = rawResult && typeof rawResult === 'object' ? Object.keys(rawResult) : [];
+            console.log('[GoogleAuth] signIn() resolved. keys:', allKeys.join(','));
+            const asRec = rawResult as Record<string, unknown>;
+            console.log('[GoogleAuth] type:', asRec?.type, '| dataKeys:', asRec?.data && typeof asRec.data === 'object' ? Object.keys(asRec.data).join(',') : String(asRec?.data));
+            const d = asRec?.data as Record<string, unknown> | null | undefined;
+            console.log('[GoogleAuth] idToken type:', typeof d?.idToken, '| defined:', d?.idToken !== undefined && d?.idToken !== null);
+          }
         } catch (signInErr: unknown) {
-          console.error('[GoogleAuth] signIn() threw!');
-          console.error('[GoogleAuth] err string:', String(signInErr));
-          console.error('[GoogleAuth] err JSON:', JSON.stringify(signInErr, Object.getOwnPropertyNames(signInErr ?? {})));
+          if (__DEV__) {
+            console.error('[GoogleAuth] signIn() threw!');
+            console.error('[GoogleAuth] err string:', String(signInErr));
+            console.error('[GoogleAuth] err JSON:', JSON.stringify(signInErr, Object.getOwnPropertyNames(signInErr ?? {})));
+          }
           throw signInErr;
         }
         idToken = extractIdToken(rawResult);
-        console.log('[GoogleAuth] extractedIdToken:', !!idToken);
       }
 
       if (!idToken) throw new Error('no_id_token');
@@ -108,10 +110,12 @@ export function useGoogleAuth(): UseGoogleAuthResult {
       setUser(user, token);
       navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
     } catch (error: unknown) {
-      console.error('[GoogleAuth]', String(error),
-        'code:', (error as { code?: string })?.code,
-        'msg:', error instanceof Error ? error.message : 'none',
-      );
+      if (__DEV__) {
+        console.error('[GoogleAuth]', String(error),
+          'code:', (error as { code?: string })?.code,
+          'msg:', error instanceof Error ? error.message : 'none',
+        );
+      }
 
       const asGoogle = error as { code?: string };
       if (asGoogle.code === statusCodes.SIGN_IN_CANCELLED) return;

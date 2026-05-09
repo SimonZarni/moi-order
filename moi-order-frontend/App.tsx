@@ -6,14 +6,15 @@
  *   RootStack (native-stack) → MainTabs (bottom-tabs) → Home / Places / Orders / Profile
  *   Non-tab screens (Login, OrderDetail, etc.) are pushed onto the root stack.
  *   FloatingTabBar is the tabBar prop of MainTabs — renders once, never remounts.
- * Guest access: all screens are always mounted. Auth guard lives in form-submission
- *   coordinator hooks (redirect to Login on submit when unauthenticated).
+ * Auth guards: sensitive screens (document vaults, account edits, emergency contacts)
+ *   are wrapped with guardedScreen() which redirects to Login if isLoggedIn is false.
+ *   All other screens are accessible to guests; their coordinator hooks gate on submit.
  * Provider order (outermost → innermost):
  *   SafeAreaProvider → QueryClientProvider → NavigationContainer → RootStack
  */
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
+import { NavigationContainer, useNavigation, useNavigationContainerRef } from '@react-navigation/native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
 import * as SplashScreen from 'expo-splash-screen';
@@ -109,6 +110,23 @@ import { RootStackParamList, TabParamList } from '@/types/navigation';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
+// Wraps a screen so unauthenticated users are immediately redirected to Login.
+// Applied to screens that render sensitive personal data (documents, account edits)
+// where a nav-layer bypass on a compromised device should not expose any UI.
+function guardedScreen<P extends object>(Screen: React.ComponentType<P>): React.ComponentType<P> {
+  function Guarded(props: P): React.JSX.Element | null {
+    const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+    useEffect(() => {
+      if (!isLoggedIn) navigation.replace('Login');
+    }, [isLoggedIn, navigation]);
+    if (!isLoggedIn) return null;
+    return <Screen {...props} />;
+  }
+  Guarded.displayName = `Guarded(${Screen.displayName ?? Screen.name})`;
+  return Guarded;
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -170,14 +188,14 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="PrivacyPolicy"                 component={PrivacyPolicyScreen} />
       <Stack.Screen name="TermsAndConditions"            component={TermsAndConditionsScreen} />
       <Stack.Screen name="PdpaNotice"                    component={PdpaNoticeScreen} />
-      <Stack.Screen name="PassportVault"                 component={PassportVaultScreen} />
-      <Stack.Screen name="NinetyDayVault"                component={NinetyDayVaultScreen} />
-      <Stack.Screen name="MyDocuments"                   component={MyDocumentsScreen} />
-      <Stack.Screen name="MoiVerified"                   component={MoiVerifiedScreen} />
-      <Stack.Screen name="UpdatePhone"                   component={UpdatePhoneScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="UpdateEmail"                   component={UpdateEmailScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="EmergencyContactList"          component={EmergencyContactListScreen} />
-      <Stack.Screen name="EmergencyContactDetail"        component={EmergencyContactDetailScreen} />
+      <Stack.Screen name="PassportVault"                 component={guardedScreen(PassportVaultScreen)} />
+      <Stack.Screen name="NinetyDayVault"                component={guardedScreen(NinetyDayVaultScreen)} />
+      <Stack.Screen name="MyDocuments"                   component={guardedScreen(MyDocumentsScreen)} />
+      <Stack.Screen name="MoiVerified"                   component={guardedScreen(MoiVerifiedScreen)} />
+      <Stack.Screen name="UpdatePhone"                   component={guardedScreen(UpdatePhoneScreen)} options={{ headerShown: false }} />
+      <Stack.Screen name="UpdateEmail"                   component={guardedScreen(UpdateEmailScreen)} options={{ headerShown: false }} />
+      <Stack.Screen name="EmergencyContactList"          component={guardedScreen(EmergencyContactListScreen)} />
+      <Stack.Screen name="EmergencyContactDetail"        component={guardedScreen(EmergencyContactDetailScreen)} />
       <Stack.Screen name="Food"                          component={FoodScreen} />
       <Stack.Screen name="RestaurantDetail"              component={RestaurantDetailScreen} />
       <Stack.Screen name="RestaurantMap"                 component={RestaurantMapScreen} options={{ animation: 'slide_from_bottom' }} />
