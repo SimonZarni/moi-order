@@ -60,25 +60,21 @@ export function useGoogleAuth(): UseGoogleAuthResult {
           if (silentResult.data?.user?.email?.toLowerCase() !== loginHint.toLowerCase()) {
             throw new Error('account_mismatch');
           }
-          idToken = extractIdToken(silentResult)
-            ?? (await GoogleSignin.getTokens()).idToken;
+          idToken = extractIdToken(silentResult);
         } catch {
           await GoogleSignin.signOut();
           const result = Platform.OS === 'ios'
             ? await GoogleSignin.signIn({ loginHint })
             : await GoogleSignin.signIn();
-          // Prefer token from signIn() result — avoids a race where getTokens()
-          // runs before the native session is fully committed.
-          idToken = extractIdToken(result)
-            ?? (await GoogleSignin.getTokens()).idToken;
+          idToken = extractIdToken(result);
         }
       } else {
-        // Register / direct sign-in: show the full account picker.
-        // Do NOT signOut() here — it causes a race that prevents getTokens()
-        // from finding the session. The picker shows naturally without it.
+        // Register / direct sign-in — show full account picker.
+        // Never call getTokens() after signIn() on iOS: it throws a JSI error
+        // because the native session may not be fully committed yet.
+        // The idToken is always present in the signIn() result when webClientId is set.
         const result = await GoogleSignin.signIn();
-        idToken = extractIdToken(result)
-          ?? (await GoogleSignin.getTokens()).idToken;
+        idToken = extractIdToken(result);
       }
 
       if (!idToken) throw new Error('no_id_token');
