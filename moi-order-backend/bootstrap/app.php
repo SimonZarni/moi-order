@@ -39,7 +39,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
             $body = ['message' => $e->getMessage(), 'code' => $e->getMessage()];
 
-            if ($e->getContext() !== []) {
+            // Only expose internal context in debug mode — never leak implementation
+            // details (model IDs, query data, stack frames) to production clients.
+            if (config('app.debug') && $e->getContext() !== []) {
                 $body['context'] = $e->getContext();
             }
 

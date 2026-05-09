@@ -153,7 +153,7 @@ export const routesSection: RouteObject[] = [
 
       { path: 'account/profile', element: <ProfilePage /> },
       { path: 'account/settings', element: <SettingsPage /> },
-      { path: 'account/create-admin', element: <CreateAdminPage /> },
+      { path: 'account/create-admin', element: guard('admins.manage', <CreateAdminPage />) },
 
       { path: 'unauthorized', element: <UnauthorizedPage /> },
     ],

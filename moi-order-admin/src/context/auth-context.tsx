@@ -42,7 +42,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setAdmin(user);
         registerPushSubscription(); // restore subscription on page reload
       })
-      .catch(() => {})
+      .catch((err: unknown) => {
+        // 401 is handled by the Axios interceptor (clears token + redirects).
+        // Any other error (network failure, 5xx) silently clears the session
+        // so the guard redirects to sign-in rather than showing a broken state.
+        const status = (err as { response?: { status?: number } }).response?.status;
+        if (status !== 401) {
+          localStorage.removeItem(TOKEN_KEY);
+        }
+      })
       .finally(() => setIsLoading(false));
   }, []);
 

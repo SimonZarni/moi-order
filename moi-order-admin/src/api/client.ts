@@ -26,7 +26,12 @@ apiClient.interceptors.request.use((config) => {
 let redirectingToLogin = false;
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Reset flag on any successful response so a freshly-logged-in session
+    // isn't silently blocked from redirecting on a subsequent 401.
+    redirectingToLogin = false;
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401 && !redirectingToLogin) {
       redirectingToLogin = true;

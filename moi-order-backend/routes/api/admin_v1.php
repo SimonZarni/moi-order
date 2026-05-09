@@ -269,14 +269,17 @@ Route::prefix('tickets')->name('admin.tickets.')->group(function (): void {
 });
 
 Route::get('/payment-settings',  [AdminPaymentSettingController::class, 'show'])->name('admin.payment-settings.show');
-Route::put('/payment-settings',  [AdminPaymentSettingController::class, 'update'])->name('admin.payment-settings.update');
+Route::put('/payment-settings',  [AdminPaymentSettingController::class, 'update'])->name('admin.payment-settings.update')
+    ->middleware('ensure.super_admin');
 
 Route::prefix('ticket-orders')->name('admin.ticket-orders.')->group(function (): void {
     Route::get('/stats',                          [AdminTicketOrderController::class, 'stats'])->name('stats');
     Route::get('/',                               [AdminTicketOrderController::class, 'index'])->name('index');
     Route::get('/{ticketOrder}',                  [AdminTicketOrderController::class, 'show'])->name('show');
-    Route::post('/{ticketOrder}/confirm-payment', [AdminTicketOrderController::class, 'confirmPayment'])->name('confirmPayment');
-    Route::post('/{ticketOrder}/eticket',         [AdminTicketOrderController::class, 'uploadEticket'])->name('eticket.store');
+    Route::post('/{ticketOrder}/confirm-payment', [AdminTicketOrderController::class, 'confirmPayment'])->name('confirmPayment')
+        ->middleware('check.permission:payments.manage');
+    Route::post('/{ticketOrder}/eticket',         [AdminTicketOrderController::class, 'uploadEticket'])->name('eticket.store')
+        ->middleware('check.permission:payments.manage');
     Route::get('/{ticketOrder}/eticket',  [AdminTicketOrderController::class, 'downloadEticket'])->name('eticket.download');
 });
 
@@ -356,7 +359,8 @@ Route::get('/merchants/kyc-badge',                              [AdminKycControl
 Route::post('/merchants',                                       [AdminMerchantCreateController::class, 'store']);
 Route::get('/kyc-applications',                                 [AdminKycController::class, 'index']);
 Route::get('/kyc-applications/{application}',                   [AdminKycController::class, 'show']);
-Route::post('/kyc-applications/{application}/review',           [AdminKycController::class, 'review']);
+Route::post('/kyc-applications/{application}/review',           [AdminKycController::class, 'review'])
+    ->middleware('check.permission:admins.manage');
 
 // ── Document Types ────────────────────────────────────────────────────────────
 Route::prefix('document-types')->name('admin.document-types.')->group(function (): void {

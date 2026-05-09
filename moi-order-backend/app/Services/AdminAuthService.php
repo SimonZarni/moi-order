@@ -8,6 +8,7 @@ use App\DTOs\AdminLoginDTO;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -31,6 +32,12 @@ class AdminAuthService
         $user = User::where('email', $dto->email)->first();
 
         if ($user === null || ! Hash::check($dto->password, $user->password)) {
+            Log::warning('Admin login failed — bad credentials', [
+                'email'  => $dto->email,
+                'ip'     => request()->ip(),
+                'reason' => $user === null ? 'user_not_found' : 'password_mismatch',
+            ]);
+
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
@@ -39,6 +46,12 @@ class AdminAuthService
         // Check admin role only AFTER password verification — prevents timing-based
         // enumeration of admin vs non-admin accounts.
         if (! $user->isAdmin()) {
+            Log::warning('Admin login failed — non-admin account', [
+                'user_id' => $user->id,
+                'email'   => $dto->email,
+                'ip'      => request()->ip(),
+            ]);
+
             throw new AuthorizationException('Admin access required.');
         }
 
