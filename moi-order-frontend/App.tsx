@@ -33,12 +33,15 @@ import { Line } from '@/shared/utils/lineLogin';
 
 import { setMemoryToken, setMemoryLocale } from '@/shared/api/client';
 import { fetchMe } from '@/shared/api/auth';
-import { TOKEN_KEY, LOCALE_KEY, CACHE_TTL, GOOGLE_IOS_CLIENT_ID, LINE_CHANNEL_ID } from '@/shared/constants/config';
+import { TOKEN_KEY, LOCALE_KEY, CACHE_TTL, GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID, LINE_CHANNEL_ID } from '@/shared/constants/config';
 
 void Line.setup({ channelId: LINE_CHANNEL_ID });
-// GoogleSignin.configure() is called inside App() useEffect (see below)
-// to ensure the TurboModule is fully initialised before we configure it
-// on New Architecture (Expo SDK 54 / RN 0.76).
+// Configure at module level so it's ready before any sign-in call.
+// v15 uses GoogleSignIn 8.x / AppAuth 1.7 — no __NSMallocBlock__ crash.
+// Both iosClientId AND webClientId are required; iosClientId alone causes
+// the "Unsupported jsi::Value kind" JSI error on some SDK versions.
+GoogleSignin.configure({ iosClientId: GOOGLE_IOS_CLIENT_ID, webClientId: GOOGLE_WEB_CLIENT_ID });
+console.log('[GoogleSignin] configure() called. iosClientId:', GOOGLE_IOS_CLIENT_ID?.slice(0, 20), '| webClientId:', GOOGLE_WEB_CLIENT_ID?.slice(0, 20));
 import { useAuthStore } from '@/shared/store/authStore';
 import { useLocaleStore, Locale } from '@/shared/store/localeStore';
 import { RootFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
@@ -228,16 +231,6 @@ export default function App(): React.JSX.Element {
   // covering the screen with the same green background, so the transition is invisible.
   useEffect(() => { SplashScreen.hideAsync().catch(() => {}); }, []);
 
-  // Configure Google Sign-In inside useEffect so the TurboModule is ready
-  // (calling configure() at module level can fail on New Architecture).
-  useEffect(() => {
-    try {
-      GoogleSignin.configure({ iosClientId: GOOGLE_IOS_CLIENT_ID });
-      console.log('[GoogleSignin] configured with iosClientId:', GOOGLE_IOS_CLIENT_ID?.slice(0, 20) + '…');
-    } catch (e) {
-      console.error('[GoogleSignin] configure failed:', String(e));
-    }
-  }, []);
 
   // Minimum-hold timer — fires after 1.5 s regardless of init speed.
   useEffect(() => {
