@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Merchant\StoreRestaurantRequest;
 use App\Http\Requests\Merchant\UpdateRestaurantRequest;
 use App\Http\Resources\RestaurantResource;
+use App\Models\KycApplication;
 use App\Services\RestaurantService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -27,7 +28,7 @@ class MerchantRestaurantController extends Controller
         $restaurant = $this->restaurantService->getForMerchant($request->user());
 
         if ($restaurant === null) {
-            $kyc = $request->user()->kycApplication;
+            $kyc = KycApplication::where('user_id', $request->user()->id)->latest()->first();
             return response()->json([
                 'data'    => null,
                 'prefill' => $kyc ? [

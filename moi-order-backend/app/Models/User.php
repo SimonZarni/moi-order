@@ -203,7 +203,7 @@ class User extends Authenticatable
 
     public function kycApplication(): HasOne
     {
-        return $this->hasMany(KycApplication::class)->latestOfMany();
+        return $this->hasOne(KycApplication::class)->latest('id');
     }
 
     public function foodOrders(): HasMany
