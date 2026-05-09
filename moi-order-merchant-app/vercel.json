@@ -3,7 +3,7 @@
   "outputDirectory": "dist",
   "build": {
     "env": {
-      "EXPO_PUBLIC_API_URL": "https://moi-order-production.up.railway.app/api/merchant/v1"
+      "EXPO_PUBLIC_API_URL": "https://api.moiorder.com/api/merchant/v1"
     }
   },
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
