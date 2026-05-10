@@ -15,6 +15,11 @@ use Illuminate\Support\Facades\Route;
 |   3. Admin   — /api/admin/v1 auth:sanctum  throttle:admin
 */
 
+// Health check — intentionally public, no throttle, excluded from maintenance mode in bootstrap/app.php
+Route::get('/health', static function () {
+    return response()->json(['status' => 'ok', 'time' => now()->toIso8601String()]);
+});
+
 // Public routes — intentionally unauthenticated
 Route::prefix('v1')->middleware(['throttle:api'])->group(
     base_path('routes/api/public.php')

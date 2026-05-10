@@ -15,10 +15,12 @@ export interface UseCheckoutScreenResult {
   paymentMethod: FoodPaymentMethod;
   notes: string;
   isPlacing: boolean;
-  setPaymentMethod: (method: FoodPaymentMethod) => void;
-  setNotes: (text: string) => void;
-  handleBack: () => void;
-  handlePlaceOrder: () => void;
+  setPaymentMethod:  (method: FoodPaymentMethod) => void;
+  setNotes:          (text: string) => void;
+  handleIncrement:   (cartKey: string) => void;
+  handleDecrement:   (cartKey: string) => void;
+  handleBack:        () => void;
+  handlePlaceOrder:  () => void;
 }
 
 export function useCheckoutScreen(): UseCheckoutScreenResult {
@@ -29,13 +31,17 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
   const restaurantName = useCartStore((s) => s.restaurantName);
   const totalCents     = useCartStore((s) => s.totalCents());
   const clearCart      = useCartStore((s) => s.clearCart);
+  const increment      = useCartStore((s) => s.increment);
+  const decrement      = useCartStore((s) => s.decrement);
 
   const [paymentMethod, setPaymentMethod] = useState<FoodPaymentMethod>(FOOD_PAYMENT_METHOD.Cod);
   const [notes, setNotes]                 = useState('');
 
   const { mutate: placeOrder, isPending: isPlacing } = usePlaceFoodOrder();
 
-  const handleBack = useCallback(() => navigation.goBack(), [navigation]);
+  const handleBack      = useCallback(() => navigation.goBack(), [navigation]);
+  const handleIncrement = useCallback((cartKey: string) => increment(cartKey), [increment]);
+  const handleDecrement = useCallback((cartKey: string) => decrement(cartKey), [decrement]);
 
   const handlePlaceOrder = useCallback(async () => {
     if (restaurantId === null || items.length === 0) return;
@@ -80,6 +86,8 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
     isPlacing,
     setPaymentMethod,
     setNotes,
+    handleIncrement,
+    handleDecrement,
     handleBack,
     handlePlaceOrder,
   };

@@ -126,6 +126,9 @@ export type RootStackParamList = {
   EmergencyContactList:   { type: import('./enums').EmergencyContactType };
   EmergencyContactDetail: { contactId: number };
 
+  // ── System
+  Maintenance: { message: string; details: string; retryAfter?: number };
+
   // ── Food ordering ─────────────────────────────────────────────────────────
   Food: undefined;
   RestaurantDetail: { restaurantId: number };

@@ -20,7 +20,9 @@ export function CheckoutScreen(): React.JSX.Element {
   const {
     items, restaurantName, subtotalCents,
     paymentMethod, notes, isPlacing,
-    setPaymentMethod, setNotes, handleBack, handlePlaceOrder,
+    setPaymentMethod, setNotes,
+    handleIncrement, handleDecrement,
+    handleBack, handlePlaceOrder,
   } = useCheckoutScreen();
 
   return (
@@ -44,7 +46,25 @@ export function CheckoutScreen(): React.JSX.Element {
                   </Text>
                 )}
               </View>
-              <Text style={styles.itemQty}>×{item.quantity}</Text>
+              <View style={styles.qtyControls}>
+                <Pressable
+                  style={styles.qtyBtn}
+                  onPress={() => handleDecrement(item.cartKey)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Remove one ${item.name}`}
+                >
+                  <Text style={styles.qtyBtnText}>−</Text>
+                </Pressable>
+                <Text style={styles.qtyValue}>{item.quantity}</Text>
+                <Pressable
+                  style={[styles.qtyBtn, styles.qtyBtnActive]}
+                  onPress={() => handleIncrement(item.cartKey)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Add one more ${item.name}`}
+                >
+                  <Text style={[styles.qtyBtnText, styles.qtyBtnTextActive]}>+</Text>
+                </Pressable>
+              </View>
               <Text style={styles.itemPrice}>
                 {formatPrice(((item.basePriceCents + item.additionalPriceCents) * item.quantity) / 100)}
               </Text>

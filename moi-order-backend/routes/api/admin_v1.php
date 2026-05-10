@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\Admin\V1\AdminAccountController;
+use App\Http\Controllers\Api\Admin\V1\AdminMaintenanceController;
 use App\Http\Controllers\Api\Admin\V1\AdminAuthController;
 use App\Http\Controllers\Api\Admin\V1\AdminKycController;
 use App\Http\Controllers\Api\Admin\V1\AdminMerchantCreateController;
@@ -365,6 +366,16 @@ Route::get('/kyc-applications',                                 [AdminKycControl
 Route::get('/kyc-applications/{application}',                   [AdminKycController::class, 'show']);
 Route::post('/kyc-applications/{application}/review',           [AdminKycController::class, 'review'])
     ->middleware('check.permission:admins.manage');
+
+// ── Document Types ────────────────────────────────────────────────────────────
+// ── Maintenance ───────────────────────────────────────────────────────────────
+// These routes are also excluded from maintenance mode in bootstrap/app.php so admins
+// can disable maintenance without CLI access.
+Route::prefix('maintenance')->name('admin.maintenance.')->group(function (): void {
+    Route::get('/',        [AdminMaintenanceController::class, 'status'])->name('status');
+    Route::post('/enable', [AdminMaintenanceController::class, 'enable'])->name('enable');
+    Route::post('/disable',[AdminMaintenanceController::class, 'disable'])->name('disable');
+});
 
 // ── Document Types ────────────────────────────────────────────────────────────
 Route::prefix('document-types')->name('admin.document-types.')->group(function (): void {

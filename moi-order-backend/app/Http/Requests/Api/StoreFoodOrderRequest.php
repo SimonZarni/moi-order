@@ -15,6 +15,25 @@ class StoreFoodOrderRequest extends FormRequest
         return $this->user() !== null;
     }
 
+    public function prepareForValidation(): void
+    {
+        if ($this->has('customer_notes')) {
+            $this->merge(['customer_notes' => strip_tags(trim((string) $this->input('customer_notes')))]);
+        }
+
+        $items = $this->input('items', []);
+        if (is_array($items)) {
+            $this->merge([
+                'items' => array_map(static function (mixed $item): mixed {
+                    if (is_array($item) && isset($item['notes'])) {
+                        $item['notes'] = strip_tags(trim((string) $item['notes']));
+                    }
+                    return $item;
+                }, $items),
+            ]);
+        }
+    }
+
     /** @return array<string, mixed> */
     public function rules(): array
     {

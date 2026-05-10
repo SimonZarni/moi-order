@@ -75,6 +75,21 @@ apiClient.interceptors.response.use(
       status,
     };
 
+    // 503 — server is in maintenance mode; navigate to the maintenance screen.
+    // Import navigationRef lazily to avoid circular deps (client ← navigationRef ← @react-navigation).
+    if (status === 503) {
+      const body = error.response?.data as { message?: string; details?: string; retry_after?: number } | undefined;
+      const { navigationRef } = await import('@/shared/navigation/navigationRef');
+      if (navigationRef.isReady()) {
+        const params: { message: string; details: string; retryAfter?: number } = {
+          message: body?.message ?? 'System Upgrade',
+          details: body?.details ?? 'We are updating our services. Please check back shortly.',
+        };
+        if (body?.retry_after !== undefined) params.retryAfter = body.retry_after;
+        navigationRef.navigate('Maintenance', params);
+      }
+    }
+
     // 401 — clear credentials and let the UI react via authStore
     if (status === 401) {
       _accessToken = null;

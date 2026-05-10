@@ -22,6 +22,16 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
 
+        // These paths respond normally even when the app is in maintenance mode.
+        // /api/health — lets the mobile app poll for restoration.
+        // /api/admin/v1/maintenance* — lets the admin toggle maintenance off without CLI access.
+        $middleware->preventMaintenanceModeExclude([
+            '/api/health',
+            '/api/admin/v1/maintenance',
+            '/api/admin/v1/maintenance/enable',
+            '/api/admin/v1/maintenance/disable',
+        ]);
+
         $middleware->alias([
             'admin.auth'          => \App\Http\Middleware\AdminAuthenticate::class,
             'check.permission'    => \App\Http\Middleware\CheckPermission::class,

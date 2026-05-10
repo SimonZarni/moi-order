@@ -75,6 +75,43 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     fontWeight: '700',
     color: colours.textOnLight,
+    minWidth: 56,
+    textAlign: 'right',
+  },
+  qtyControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginRight: spacing.sm,
+  },
+  qtyBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colours.backgroundLight,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  qtyBtnText: {
+    fontSize: 16,
+    lineHeight: 20,
+    color: colours.textMuted,
+    fontWeight: '600',
+  },
+  qtyBtnActive: {
+    borderColor: colours.primary,
+  },
+  qtyBtnTextActive: {
+    color: colours.primary,
+  },
+  qtyValue: {
+    fontSize: typography.sm,
+    fontWeight: '700',
+    color: colours.textOnLight,
+    minWidth: 18,
+    textAlign: 'center',
   },
   totalRow: {
     flexDirection: 'row',

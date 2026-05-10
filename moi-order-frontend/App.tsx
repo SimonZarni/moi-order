@@ -14,7 +14,7 @@
  */
 import { createNativeStackNavigator, NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer, useNavigation, useNavigationContainerRef } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
 import * as SplashScreen from 'expo-splash-screen';
@@ -94,6 +94,8 @@ import { CartOrdersScreen } from '@/features/food/screens/CartOrdersScreen';
 import { CheckoutScreen } from '@/features/food/screens/CheckoutScreen';
 import { FoodOrderDetailScreen } from '@/features/food/screens/FoodOrderDetailScreen';
 import { OrderChatScreen } from '@/features/food/screens/OrderChatScreen';
+import { MaintenanceScreen } from '@/features/maintenance/screens/MaintenanceScreen';
+import { navigationRef } from '@/shared/navigation/navigationRef';
 
 import { useNotificationsData } from '@/features/notifications/hooks/useNotificationsData';
 import { usePusherNotifications } from '@/features/notifications/hooks/usePusherNotifications';
@@ -214,6 +216,7 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="Checkout"                      component={CheckoutScreen} />
       <Stack.Screen name="FoodOrderDetail"               component={FoodOrderDetailScreen} />
       <Stack.Screen name="OrderChat"                     component={OrderChatScreen} />
+      <Stack.Screen name="Maintenance"                   component={MaintenanceScreen} options={{ animation: 'fade', gestureEnabled: false }} />
     </Stack.Navigator>
     <NoticeModal isVisible={noticeVisible} onClose={dismissNotice} />
     </>
@@ -243,7 +246,6 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 const SPLASH_MIN_MS = 1500;
 
 export default function App(): React.JSX.Element {
-  const navigationRef = useNavigationContainerRef<RootStackParamList>();
   const [initDone, setInitDone]     = useState(false);
   const [timerDone, setTimerDone]   = useState(false);
   const [splashGone, setSplashGone] = useState(false);
