@@ -18,6 +18,7 @@ enum HomeCardNavigationScreen: string
     case Search                = 'Search';
     case PlacesMap             = 'PlacesMap';
     case EmergencyContactList  = 'EmergencyContactList';
+    case PassportCiServices    = 'PassportCiServices';
 
     public function label(): string
     {
@@ -34,6 +35,7 @@ enum HomeCardNavigationScreen: string
             self::Search               => 'Search',
             self::PlacesMap            => 'Places Map',
             self::EmergencyContactList => 'Emergency Contact List',
+            self::PassportCiServices   => 'Passport / CI Services',
         };
     }
 }

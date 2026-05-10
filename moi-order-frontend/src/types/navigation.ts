@@ -43,6 +43,7 @@ export type RootStackParamList = {
   OtherServices: undefined;
   EmbassyServices: undefined;
   CompanyServices: undefined;
+  PassportCiServices: undefined;
   CompanyRegistrationForm: {
     serviceTypeId: number;
     price: number;

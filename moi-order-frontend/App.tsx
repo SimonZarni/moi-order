@@ -55,6 +55,7 @@ import { NinetyDayReportFormScreen } from '@/features/ninetyDayReport/screens/Ni
 import { OtherServicesScreen } from '@/features/otherServices/screens/OtherServicesScreen';
 import { EmbassyServicesScreen } from '@/features/embassyServices/screens/EmbassyServicesScreen';
 import { CompanyServicesScreen } from '@/features/companyServices/screens/CompanyServicesScreen';
+import { PassportCiServicesScreen } from '@/features/passportCiServices/screens/PassportCiServicesScreen';
 import { AirportFastTrackFormScreen } from '@/features/airportFastTrack/screens/AirportFastTrackFormScreen';
 import { EmbassyResidentialFormScreen } from '@/features/embassyResidential/screens/EmbassyResidentialFormScreen';
 import { EmbassyCarLicenseFormScreen } from '@/features/embassyCarLicense/screens/EmbassyCarLicenseFormScreen';
@@ -176,6 +177,7 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="OtherServices"                 component={OtherServicesScreen} />
       <Stack.Screen name="EmbassyServices"               component={EmbassyServicesScreen} />
       <Stack.Screen name="CompanyServices"               component={CompanyServicesScreen} />
+      <Stack.Screen name="PassportCiServices"            component={PassportCiServicesScreen} />
       <Stack.Screen name="CompanyRegistrationForm"       component={CompanyRegistrationFormScreen} />
       <Stack.Screen name="AirportFastTrackForm"          component={AirportFastTrackFormScreen} />
       <Stack.Screen name="EmbassyResidentialForm"        component={EmbassyResidentialFormScreen} />

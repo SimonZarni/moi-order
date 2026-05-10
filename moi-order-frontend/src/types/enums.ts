@@ -135,6 +135,7 @@ export const HOME_CARD_NAV_SCREEN = {
   PlacesMap:            'PlacesMap',
   CompanyServices:      'CompanyServices',
   EmergencyContactList: 'EmergencyContactList',
+  PassportCiServices:   'PassportCiServices',
 } as const;
 
 // Mirrors App\Enums\HomeCardIconType

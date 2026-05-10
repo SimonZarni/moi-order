@@ -308,6 +308,10 @@ export interface AppStrings {
     embassyEyebrow:     string;
     embassyTitle:       string;
     embassySubtitle:    string;
+    // Passport & CI Services page
+    passportCiEyebrow:  string;
+    passportCiTitle:    string;
+    passportCiSubtitle: string;
   };
 
   // Notifications screen
@@ -608,6 +612,9 @@ const en: AppStrings = {
     embassyEyebrow:     'Embassy Services',
     embassyTitle:       'Embassy Services',
     embassySubtitle:    'Embassy support letters and documentation services.',
+    passportCiEyebrow:  'Documents',
+    passportCiTitle:    'Passport / CI Services',
+    passportCiSubtitle: 'Passport and certificate of identity services.',
   },
   notifs: {
     title:        'Notifications',
@@ -891,6 +898,9 @@ const mm: AppStrings = {
     embassyEyebrow:     'သံရုံးဝန်ဆောင်မှုများ',
     embassyTitle:       'သံရုံးထောက်ခံစာများ',
     embassySubtitle:    'သံရုံး ထောက်ခံစာများနှင့် စာရွက်စာတမ်း ဝန်ဆောင်မှုများ',
+    passportCiEyebrow:  'စာရွက်စာတမ်းများ',
+    passportCiTitle:    'နိုင်ငံကူးလက်မှတ် / CI',
+    passportCiSubtitle: 'နိုင်ငံကူးလက်မှတ်နှင့် CI ဝန်ဆောင်မှုများ',
   },
   notifs: {
     title:        'အကြောင်းကြားချက်များ',
@@ -1174,6 +1184,9 @@ const th: AppStrings = {
     embassyEyebrow:     'บริการสถานทูต',
     embassyTitle:       'บริการสถานทูต',
     embassySubtitle:    'บริการหนังสือรับรองสถานทูตและเอกสาร',
+    passportCiEyebrow:  'เอกสาร',
+    passportCiTitle:    'หนังสือเดินทาง / CI',
+    passportCiSubtitle: 'บริการหนังสือเดินทางและใบรับรองตัวตน',
   },
   notifs: {
     title:        'การแจ้งเตือน',

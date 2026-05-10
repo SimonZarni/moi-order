@@ -73,6 +73,9 @@ export function navigateToCardScreen(
     case HOME_CARD_NAV_SCREEN.PlacesMap:
       navigation.navigate('MainTabs', { screen: 'Map' });
       break;
+    case HOME_CARD_NAV_SCREEN.PassportCiServices:
+      navigation.navigate('PassportCiServices');
+      break;
     case HOME_CARD_NAV_SCREEN.EmergencyContactList: {
       const typeParam = navigationParams?.type as string | undefined;
       const validTypes: EmergencyContactType[] = Object.values(EMERGENCY_CONTACT_TYPE);
