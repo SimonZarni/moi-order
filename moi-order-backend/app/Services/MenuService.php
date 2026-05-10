@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\FileStorageInterface;
+use App\Enums\MenuCategoryType;
 use App\Enums\MenuItemStatus;
 use App\Exceptions\DomainException;
 use App\Models\MenuCategory;
@@ -23,6 +24,69 @@ class MenuService
         private readonly FileStorageInterface $storage,
     ) {}
 
+    // ─── System categories ────────────────────────────────────────────────────
+
+    /**
+     * Idempotent: only creates system categories that don't already exist.
+     * Called on restaurant creation and safe to re-run on existing restaurants.
+     */
+    public function createSystemCategoriesForRestaurant(Restaurant $restaurant): void
+    {
+        foreach (MenuCategoryType::cases() as $type) {
+            $exists = $restaurant->menuCategories()
+                ->where('category_type', $type->value)
+                ->withTrashed()
+                ->exists();
+
+            if (! $exists) {
+                MenuCategory::create([
+                    'restaurant_id' => $restaurant->id,
+                    'name'          => $type->label(),
+                    'category_type' => $type->value,
+                    'sort_order'    => $type->sortOrder(),
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Throws DomainException if the restaurant is not ready to open.
+     * Rules: required system categories (Popular Picks, Recommendations) must have
+     * at least one available item, AND at least one merchant-added category must have
+     * at least one available item.
+     */
+    public function validateOpenReady(Restaurant $restaurant): void
+    {
+        $restaurant->load('menuCategories.menuItems');
+
+        foreach (MenuCategoryType::cases() as $type) {
+            if (! $type->isRequired()) {
+                continue;
+            }
+
+            $category = $restaurant->menuCategories
+                ->first(fn ($c) => $c->category_type === $type);
+
+            $hasItems = $category !== null
+                && $category->menuItems->where('status', MenuItemStatus::Available)->isNotEmpty();
+
+            if (! $hasItems) {
+                throw new DomainException('menu.system_category_empty');
+            }
+        }
+
+        $merchantCategories = $restaurant->menuCategories
+            ->filter(fn ($c) => $c->category_type === null);
+
+        $hasFilledMerchantCategory = $merchantCategories->contains(
+            fn ($c) => $c->menuItems->where('status', MenuItemStatus::Available)->isNotEmpty()
+        );
+
+        if (! $hasFilledMerchantCategory) {
+            throw new DomainException('menu.no_merchant_category_items');
+        }
+    }
+
     // ─── Categories ───────────────────────────────────────────────────────────
 
     /** @param array<string, mixed> $data */
@@ -38,6 +102,10 @@ class MenuService
     /** @param array<string, mixed> $data */
     public function updateCategory(MenuCategory $category, array $data): MenuCategory
     {
+        if ($category->isSystem()) {
+            throw new DomainException('menu.system_category_immutable');
+        }
+
         $category->update(array_filter([
             'name'       => $data['name'] ?? null,
             'sort_order' => $data['sort_order'] ?? null,
@@ -48,6 +116,10 @@ class MenuService
 
     public function deleteCategory(MenuCategory $category): void
     {
+        if ($category->isSystem()) {
+            throw new DomainException('menu.system_category_immutable');
+        }
+
         DB::transaction(function () use ($category): void {
             // Soft-delete items before category so FK stays valid for order history.
             $category->menuItems()->delete();

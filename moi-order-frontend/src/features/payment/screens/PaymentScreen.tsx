@@ -32,7 +32,7 @@ export function PaymentScreen(): React.JSX.Element {
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.header}>
         <BackButton onPress={handleBack} />
-        <Text style={styles.headerTitle}>Pay with PromptPay</Text>
+        <Text style={styles.headerTitle}>Pay with LINE Pay</Text>
       </View>
 
       <View style={styles.body}>

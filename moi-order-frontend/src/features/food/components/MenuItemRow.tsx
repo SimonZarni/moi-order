@@ -4,21 +4,30 @@ import { Image } from 'expo-image';
 import { MenuItem } from '@/types/models';
 import { MENU_ITEM_STATUS } from '@/types/enums';
 import { formatPrice } from '@/shared/utils/formatCurrency';
+import { useStrings } from '@/shared/i18n';
 import { styles } from './MenuItemRow.styles';
 
 interface Props {
-  item: MenuItem;
-  quantity: number;
-  onAdd: (item: MenuItem) => void;
-  onRemove: (cartKey: string) => void;
+  item:       MenuItem;
+  quantity:   number;
+  onAdd:      (item: MenuItem) => void;
+  onRemove:   (cartKey: string) => void;
+  onPress:    (item: MenuItem) => void;
 }
 
-export function MenuItemRow({ item, quantity, onAdd, onRemove }: Props): React.JSX.Element {
+export function MenuItemRow({ item, quantity, onAdd, onRemove, onPress }: Props): React.JSX.Element {
+  const s             = useStrings();
   const isUnavailable = item.status === MENU_ITEM_STATUS.Unavailable;
-  const hasOptions = item.option_groups.length > 0;
+  const hasOptions    = item.option_groups.length > 0;
+  const isDiscounted  = item.original_price_cents !== null && item.original_price_cents > item.price_cents;
 
   return (
-    <View style={[styles.row, isUnavailable && styles.unavailable]}>
+    <Pressable
+      style={[styles.row, isUnavailable && styles.unavailable]}
+      onPress={() => onPress(item)}
+      accessibilityRole="button"
+      accessibilityLabel={`View details for ${item.name}`}
+    >
       {item.photo_url !== null && (
         <Image source={{ uri: item.photo_url }} style={styles.photo} contentFit="cover" transition={200} />
       )}
@@ -29,15 +38,17 @@ export function MenuItemRow({ item, quantity, onAdd, onRemove }: Props): React.J
           <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
         )}
         <View style={styles.priceRow}>
+          {isDiscounted && (
+            <Text style={styles.originalPrice}>{formatPrice(item.original_price_cents! / 100)}</Text>
+          )}
           <Text style={styles.price}>{formatPrice(item.price_cents / 100)}</Text>
-          {hasOptions && <Text style={styles.customizeHint}>Customizable</Text>}
+          {hasOptions && <Text style={styles.customizeHint}>{s.restaurant.customizable}</Text>}
         </View>
-        {isUnavailable && <Text style={styles.unavailableLabel}>Unavailable</Text>}
+        {isUnavailable && <Text style={styles.unavailableLabel}>{s.restaurant.unavailable}</Text>}
       </View>
 
       {!isUnavailable && (
         <View style={styles.controls}>
-          {/* Items without options: show −/qty/+ inline. Items with options: show qty badge + + only. */}
           {quantity > 0 && !hasOptions && (
             <>
               <Pressable
@@ -66,6 +77,6 @@ export function MenuItemRow({ item, quantity, onAdd, onRemove }: Props): React.J
           </Pressable>
         </View>
       )}
-    </View>
+    </Pressable>
   );
 }

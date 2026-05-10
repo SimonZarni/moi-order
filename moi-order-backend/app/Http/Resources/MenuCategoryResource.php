@@ -23,6 +23,8 @@ class MenuCategoryResource extends JsonResource
             'restaurant_id' => $this->restaurant_id,
             'name'          => $this->name,
             'sort_order'    => $this->sort_order,
+            'category_type' => $this->category_type?->value,
+            'is_system'     => $this->isSystem(),
             'items'         => $this->whenLoaded('menuItems', fn () =>
                 $this->menuItems
                     ->map(fn ($item) => (new MenuItemResource($item, $this->storage))->toArray($request))

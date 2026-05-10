@@ -30,7 +30,7 @@ export function QrCodeDisplay({ qrImageUrl, amountFormatted, countdownLabel, sec
             style={styles.qrImage}
             contentFit="contain"
             cachePolicy="memory"
-            accessibilityLabel="PromptPay QR code"
+            accessibilityLabel="LINE Pay QR code"
           />
         ) : (
           <View style={styles.qrPlaceholder} />
@@ -38,7 +38,7 @@ export function QrCodeDisplay({ qrImageUrl, amountFormatted, countdownLabel, sec
       </View>
 
       <Text style={styles.hint}>
-        Open your banking app and scan{'\n'}this QR code to pay via PromptPay
+        Open your banking app and scan{'\n'}this QR code to pay via LINE Pay
       </Text>
 
       {countdownLabel !== '' && (

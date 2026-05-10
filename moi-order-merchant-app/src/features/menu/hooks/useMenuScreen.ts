@@ -24,6 +24,7 @@ export interface OptionInput {
 export interface OptionGroupInput {
   name: string;
   is_required: boolean;
+  min_selections: number;
   max_selections: number;
   options: OptionInput[];
 }
@@ -56,7 +57,7 @@ interface UseMenuScreenResult {
   handleAddItemPhotoChange: (photo: AddItemForm['photo']) => void;
   handleAddOptionGroup: () => void;
   handleRemoveOptionGroup: (index: number) => void;
-  handleOptionGroupChange: (groupIndex: number, field: 'name' | 'is_required' | 'max_selections', value: string | boolean | number) => void;
+  handleOptionGroupChange: (groupIndex: number, field: 'name' | 'is_required' | 'min_selections' | 'max_selections', value: string | boolean | number) => void;
   handleAddOption: (groupIndex: number) => void;
   handleRemoveOption: (groupIndex: number, optIndex: number) => void;
   handleOptionChange: (groupIndex: number, optIndex: number, field: 'name' | 'additional_price_cents', value: string | number) => void;
@@ -72,7 +73,7 @@ interface UseMenuScreenResult {
   handleEditItemPhotoChange: (photo: AddItemForm['photo']) => void;
   handleEditAddOptionGroup: () => void;
   handleEditRemoveOptionGroup: (index: number) => void;
-  handleEditOptionGroupChange: (groupIndex: number, field: 'name' | 'is_required' | 'max_selections', value: string | boolean | number) => void;
+  handleEditOptionGroupChange: (groupIndex: number, field: 'name' | 'is_required' | 'min_selections' | 'max_selections', value: string | boolean | number) => void;
   handleEditAddOption: (groupIndex: number) => void;
   handleEditRemoveOption: (groupIndex: number, optIndex: number) => void;
   handleEditOptionChange: (groupIndex: number, optIndex: number, field: 'name' | 'additional_price_cents', value: string | number) => void;
@@ -98,6 +99,7 @@ async function buildItemFormData(form: AddItemForm): Promise<FormData> {
   form.option_groups.forEach((group, gi) => {
     fd.append(`option_groups[${gi}][name]`, group.name);
     fd.append(`option_groups[${gi}][is_required]`, group.is_required ? '1' : '0');
+    fd.append(`option_groups[${gi}][min_selections]`, String(group.min_selections));
     fd.append(`option_groups[${gi}][max_selections]`, String(group.max_selections));
     group.options.forEach((opt, oi) => {
       fd.append(`option_groups[${gi}][options][${oi}][name]`, opt.name);
@@ -123,14 +125,14 @@ function makeOptionGroupHandlers(
       ...prev,
       option_groups: [
         ...prev.option_groups,
-        { name: '', is_required: false, max_selections: 1, options: [{ name: '', additional_price_cents: 0 }] },
+        { name: '', is_required: false, min_selections: 0, max_selections: 1, options: [{ name: '', additional_price_cents: 0 }] },
       ],
     }));
 
   const removeOptionGroup = (index: number) =>
     setForm((prev) => ({ ...prev, option_groups: prev.option_groups.filter((_, i) => i !== index) }));
 
-  const changeOptionGroup = (groupIndex: number, field: 'name' | 'is_required' | 'max_selections', value: string | boolean | number) =>
+  const changeOptionGroup = (groupIndex: number, field: 'name' | 'is_required' | 'min_selections' | 'max_selections', value: string | boolean | number) =>
     setForm((prev) => {
       const groups = [...prev.option_groups];
       groups[groupIndex] = { ...groups[groupIndex], [field]: value };
@@ -179,7 +181,16 @@ export function useMenuScreen(): UseMenuScreenResult {
     placeholderData: keepPreviousData,
   });
 
-  const categories = useMemo(() => data ?? [], [data]);
+  const SYSTEM_SORT: Record<string, number> = { popular_picks: 0, promotions: 1, recommendations: 2 };
+
+  const categories = useMemo(() => {
+    const all = data ?? [];
+    return [...all].sort((a, b) => {
+      const aOrder = a.is_system ? (SYSTEM_SORT[a.category_type ?? ''] ?? 99) : 100;
+      const bOrder = b.is_system ? (SYSTEM_SORT[b.category_type ?? ''] ?? 99) : 100;
+      return aOrder !== bOrder ? aOrder - bOrder : a.id - b.id;
+    });
+  }, [data]);
 
   const invalidateMenu = useCallback(
     () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MENU_CATEGORIES }),
@@ -266,7 +277,7 @@ export function useMenuScreen(): UseMenuScreenResult {
   const handleAddItemPhotoChange = useCallback((photo: AddItemForm['photo']) => setAddItemForm((prev) => ({ ...prev, photo })), []);
   const handleAddOptionGroup = useCallback(() => addHandlers.addOptionGroup(), []);
   const handleRemoveOptionGroup = useCallback((i: number) => addHandlers.removeOptionGroup(i), []);
-  const handleOptionGroupChange = useCallback((gi: number, field: 'name' | 'is_required' | 'max_selections', value: string | boolean | number) => addHandlers.changeOptionGroup(gi, field, value), []);
+  const handleOptionGroupChange = useCallback((gi: number, field: 'name' | 'is_required' | 'min_selections' | 'max_selections', value: string | boolean | number) => addHandlers.changeOptionGroup(gi, field, value), []);
   const handleAddOption = useCallback((gi: number) => addHandlers.addOption(gi), []);
   const handleRemoveOption = useCallback((gi: number, oi: number) => addHandlers.removeOption(gi, oi), []);
   const handleOptionChange = useCallback((gi: number, oi: number, field: 'name' | 'additional_price_cents', value: string | number) => addHandlers.changeOption(gi, oi, field, value), []);
@@ -288,6 +299,7 @@ export function useMenuScreen(): UseMenuScreenResult {
       option_groups: item.option_groups.map((g) => ({
         name: g.name,
         is_required: g.is_required,
+        min_selections: g.min_selections,
         max_selections: g.max_selections,
         options: g.options.map((o) => ({ name: o.name, additional_price_cents: o.additional_price_cents })),
       })),
@@ -307,7 +319,7 @@ export function useMenuScreen(): UseMenuScreenResult {
   const handleEditItemPhotoChange = useCallback((photo: AddItemForm['photo']) => setEditItemForm((prev) => ({ ...prev, photo })), []);
   const handleEditAddOptionGroup = useCallback(() => editHandlers.addOptionGroup(), []);
   const handleEditRemoveOptionGroup = useCallback((i: number) => editHandlers.removeOptionGroup(i), []);
-  const handleEditOptionGroupChange = useCallback((gi: number, field: 'name' | 'is_required' | 'max_selections', value: string | boolean | number) => editHandlers.changeOptionGroup(gi, field, value), []);
+  const handleEditOptionGroupChange = useCallback((gi: number, field: 'name' | 'is_required' | 'min_selections' | 'max_selections', value: string | boolean | number) => editHandlers.changeOptionGroup(gi, field, value), []);
   const handleEditAddOption = useCallback((gi: number) => editHandlers.addOption(gi), []);
   const handleEditRemoveOption = useCallback((gi: number, oi: number) => editHandlers.removeOption(gi, oi), []);
   const handleEditOptionChange = useCallback((gi: number, oi: number, field: 'name' | 'additional_price_cents', value: string | number) => editHandlers.changeOption(gi, oi, field, value), []);

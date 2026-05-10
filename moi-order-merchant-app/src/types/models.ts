@@ -100,6 +100,8 @@ export interface MenuItem {
 export interface MenuCategory {
   id: number;
   name: string;
+  category_type: string | null;
+  is_system: boolean;
   items: MenuItem[];
 }
 

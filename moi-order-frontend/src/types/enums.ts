@@ -75,11 +75,20 @@ export type FoodOrderStatus = (typeof FOOD_ORDER_STATUS)[keyof typeof FOOD_ORDER
 
 // Mirrors App\Enums\FoodPaymentMethod
 export const FOOD_PAYMENT_METHOD = {
-  Cod:       'cod',
-  PromptPay: 'prompt_pay',
+  Cod:     'cod',
+  LinePay: 'line_pay',
 } as const;
 
 export type FoodPaymentMethod = (typeof FOOD_PAYMENT_METHOD)[keyof typeof FOOD_PAYMENT_METHOD];
+
+// Mirrors App\Enums\MenuCategoryType
+export const MENU_CATEGORY_TYPE = {
+  PopularPicks:    'popular_picks',
+  Promotions:      'promotions',
+  Recommendations: 'recommendations',
+} as const;
+
+export type MenuCategoryType = (typeof MENU_CATEGORY_TYPE)[keyof typeof MENU_CATEGORY_TYPE];
 
 // Mirrors App\Enums\MenuItemStatus
 export const MENU_ITEM_STATUS = {

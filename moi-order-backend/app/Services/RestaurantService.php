@@ -16,12 +16,13 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Principle: SRP — restaurant CRUD + opening-hours management only.
- * Principle: DIP — depends on FileStorageInterface, never calls Storage::disk() directly.
+ * Principle: DIP — depends on FileStorageInterface and MenuService interfaces, never calls Storage::disk() directly.
  */
 class RestaurantService
 {
     public function __construct(
         private readonly FileStorageInterface $storage,
+        private readonly MenuService          $menuService,
     ) {}
 
     public function getForMerchant(User $merchant): ?Restaurant
@@ -57,6 +58,8 @@ class RestaurantService
                 $this->syncOpeningHours($restaurant, $data['opening_hours']);
             }
 
+            $this->menuService->createSystemCategoriesForRestaurant($restaurant);
+
             return $restaurant->load(['openingHours', 'photos', 'menuCategories.menuItems']);
         });
     }
@@ -64,6 +67,12 @@ class RestaurantService
     /** @param array<string, mixed> $data */
     public function update(Restaurant $restaurant, array $data): Restaurant
     {
+        $newStatus = isset($data['status']) ? RestaurantStatus::from($data['status']) : null;
+
+        if ($newStatus === RestaurantStatus::Open) {
+            $this->menuService->validateOpenReady($restaurant);
+        }
+
         return DB::transaction(function () use ($restaurant, $data): Restaurant {
             $updates = array_filter([
                 'name'                  => $data['name'] ?? null,

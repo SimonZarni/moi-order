@@ -129,6 +129,7 @@ export type RootStackParamList = {
   // ── Food ordering ─────────────────────────────────────────────────────────
   Food: undefined;
   RestaurantDetail: { restaurantId: number };
+  MenuItemDetail: { restaurantId: number; menuItemId: number };
   RestaurantMap: undefined;
   CartOrders: undefined;
   Checkout: undefined;

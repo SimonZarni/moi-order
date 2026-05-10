@@ -189,7 +189,7 @@ interface ItemFormContentProps {
   onPickPhoto: () => void;
   onAddOptionGroup: () => void;
   onRemoveOptionGroup: (index: number) => void;
-  onOptionGroupChange: (gi: number, field: 'name' | 'is_required' | 'max_selections', value: string | boolean | number) => void;
+  onOptionGroupChange: (gi: number, field: 'name' | 'is_required' | 'min_selections' | 'max_selections', value: string | boolean | number) => void;
   onAddOption: (gi: number) => void;
   onRemoveOption: (gi: number, oi: number) => void;
   onOptionChange: (gi: number, oi: number, field: 'name' | 'additional_price_cents', value: string | number) => void;
@@ -290,6 +290,16 @@ function ItemFormContent({
                 trackColor={{ false: colours.divider, true: colours.primary + '66' }}
                 thumbColor={group.is_required ? colours.primary : colours.medium}
                 accessibilityLabel={`Group ${gi + 1} required`}
+              />
+            </View>
+            <View style={styles.toggleRowSmall}>
+              <Text style={styles.toggleLabelSmall}>Min choose</Text>
+              <TextInput
+                style={styles.smallNumInput}
+                value={String(group.min_selections)}
+                onChangeText={(v) => onOptionGroupChange(gi, 'min_selections', parseInt(v, 10) || 0)}
+                keyboardType="number-pad"
+                accessibilityLabel={`Min selections for group ${gi + 1}`}
               />
             </View>
             <View style={styles.toggleRowSmall}>

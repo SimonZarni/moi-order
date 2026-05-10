@@ -16,7 +16,7 @@ interface Props {
 
 const PAYMENT_LABEL: Record<string, string> = {
   [FOOD_PAYMENT_METHOD.Cod]:       'Cash on Delivery',
-  [FOOD_PAYMENT_METHOD.PromptPay]: 'PromptPay',
+  [FOOD_PAYMENT_METHOD.LinePay]: 'LINE Pay',
 };
 
 function formatDate(iso: string): string {

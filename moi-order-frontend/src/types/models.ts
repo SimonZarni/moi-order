@@ -314,6 +314,7 @@ export interface MenuItem {
   name: string;
   description: string | null;
   price_cents: number;
+  original_price_cents: number | null;
   photo_url: string | null;
   status: import('./enums').MenuItemStatus;
   sort_order: number;
@@ -325,6 +326,8 @@ export interface MenuCategory {
   restaurant_id: number;
   name: string;
   sort_order: number;
+  category_type: import('./enums').MenuCategoryType | null;
+  is_system: boolean;
   items?: MenuItem[];
 }
 

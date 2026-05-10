@@ -338,6 +338,29 @@ export interface AppStrings {
     generating:       string;
     contactUs:        string;
   };
+
+  // Food ordering — restaurant detail + item detail
+  restaurant: {
+    couldNotLoad:            string; // "Could not load restaurant."
+    closesAt:                string; // "Closes at {time}"
+    statusOpen:              string;
+    statusClosed:            string;
+    statusPaused:            string;
+    popularPicks:            string;
+    promotions:              string;
+    recommendations:         string;
+    noItemsYet:              string;
+    specialInstructions:     string;
+    instructionsPlaceholder: string;
+    addToCart:               string; // prefix — caller appends " · {price}"
+    customizable:            string;
+    unavailable:             string;
+    required:                string;
+    optional:                string;
+    chooseOne:               string; // "Choose 1"
+    chooseAtLeast:           string; // "Choose at least {n}"
+    chooseUpTo:              string; // "Choose up to {n}"
+  };
 }
 
 // ─── English ─────────────────────────────────────────────────────────────────
@@ -623,6 +646,27 @@ const en: AppStrings = {
     clearAll:     'Clear all',
     noNotifs:     'No notifications',
     loading:      'Loading…',
+  },
+  restaurant: {
+    couldNotLoad:            'Could not load restaurant.',
+    closesAt:                'Closes at {time}',
+    statusOpen:              'Open',
+    statusClosed:            'Closed',
+    statusPaused:            'Paused',
+    popularPicks:            'Popular Picks',
+    promotions:              'Promotions',
+    recommendations:         'Recommendations',
+    noItemsYet:              'No items yet',
+    specialInstructions:     'Special Instructions (optional)',
+    instructionsPlaceholder: 'e.g. no spice, extra sauce…',
+    addToCart:               'Add to Cart',
+    customizable:            'Customizable',
+    unavailable:             'Unavailable',
+    required:                'Required',
+    optional:                'Optional',
+    chooseOne:               'Choose 1',
+    chooseAtLeast:           'Choose at least {n}',
+    chooseUpTo:              'Choose up to {n}',
   },
 };
 
@@ -910,6 +954,27 @@ const mm: AppStrings = {
     noNotifs:     'အကြောင်းကြားချက်မရှိပါ',
     loading:      'ဖတ်နေသည်…',
   },
+  restaurant: {
+    couldNotLoad:            'စားသောက်ဆိုင်ကို ဖွင့်မရပါ။',
+    closesAt:                '{time} တွင် ပိတ်သည်',
+    statusOpen:              'ဖွင့်ထား',
+    statusClosed:            'ပိတ်ထား',
+    statusPaused:            'ယာယီရပ်ဆိုင်း',
+    popularPicks:            'လူကြိုက်များသော ဟင်းများ',
+    promotions:              'ပရိုမိုးရှင်း',
+    recommendations:         'အကြံပြုချက်များ',
+    noItemsYet:              'ပစ္စည်းမရှိသေးပါ',
+    specialInstructions:     'အထူးညွှန်ကြားချက် (ရွေးချယ်နိုင်)',
+    instructionsPlaceholder: 'ဥပမာ မဆီမထည့်နဲ့၊ ဆော့စ်ပိုထည့်…',
+    addToCart:               'ခြင်းတောင်းထဲ ထည့်မည်',
+    customizable:            'စိတ်ကြိုက်ရွေးချယ်နိုင်',
+    unavailable:             'မရရှိနိုင်ပါ',
+    required:                'မဖြစ်မနေ',
+    optional:                'ရွေးချယ်နိုင်',
+    chooseOne:               'တစ်ခုရွေးချယ်ပါ',
+    chooseAtLeast:           'အနည်းဆုံး {n} ခုရွေးချယ်ပါ',
+    chooseUpTo:              'အများဆုံး {n} ခုအထိ ရွေးချယ်နိုင်',
+  },
 };
 
 // ─── Thai ─────────────────────────────────────────────────────────────────────
@@ -1195,6 +1260,27 @@ const th: AppStrings = {
     clearAll:     'ล้างทั้งหมด',
     noNotifs:     'ไม่มีการแจ้งเตือน',
     loading:      'กำลังโหลด…',
+  },
+  restaurant: {
+    couldNotLoad:            'ไม่สามารถโหลดร้านอาหารได้',
+    closesAt:                'ปิดเวลา {time}',
+    statusOpen:              'เปิด',
+    statusClosed:            'ปิด',
+    statusPaused:            'หยุดชั่วคราว',
+    popularPicks:            'เมนูยอดนิยม',
+    promotions:              'โปรโมชัน',
+    recommendations:         'แนะนำ',
+    noItemsYet:              'ยังไม่มีเมนู',
+    specialInstructions:     'คำแนะนำพิเศษ (ถ้ามี)',
+    instructionsPlaceholder: 'เช่น ไม่ใส่พริก, เพิ่มซอส…',
+    addToCart:               'เพิ่มในตะกร้า',
+    customizable:            'ปรับแต่งได้',
+    unavailable:             'ไม่พร้อมให้บริการ',
+    required:                'จำเป็น',
+    optional:                'เพิ่มเติม',
+    chooseOne:               'เลือก 1 อย่าง',
+    chooseAtLeast:           'เลือกอย่างน้อย {n} อย่าง',
+    chooseUpTo:              'เลือกได้สูงสุด {n} อย่าง',
   },
 };
 

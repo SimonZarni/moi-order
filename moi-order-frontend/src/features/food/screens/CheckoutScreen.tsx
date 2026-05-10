@@ -13,7 +13,7 @@ const LINE_GREEN = '#00B900';
 
 const PAYMENT_OPTIONS: Array<{ value: FoodPaymentMethod; label: string; iconName: string; iconColor?: string }> = [
   { value: FOOD_PAYMENT_METHOD.Cod,       label: 'Cash on Delivery',  iconName: 'cash-outline' },
-  { value: FOOD_PAYMENT_METHOD.PromptPay, label: 'PromptPay / LINE Pay', iconName: 'chatbubble-ellipses', iconColor: LINE_GREEN },
+  { value: FOOD_PAYMENT_METHOD.LinePay, label: 'LINE Pay', iconName: 'chatbubble-ellipses', iconColor: LINE_GREEN },
 ];
 
 export function CheckoutScreen(): React.JSX.Element {
@@ -95,7 +95,7 @@ export function CheckoutScreen(): React.JSX.Element {
         <Pressable
           style={[
             styles.placeBtn,
-            paymentMethod === FOOD_PAYMENT_METHOD.PromptPay && styles.placeBtnLine,
+            paymentMethod === FOOD_PAYMENT_METHOD.LinePay && styles.placeBtnLine,
             isPlacing && styles.placeBtnDisabled,
           ]}
           onPress={handlePlaceOrder}
@@ -105,7 +105,7 @@ export function CheckoutScreen(): React.JSX.Element {
         >
           {isPlacing ? (
             <Text style={styles.placeBtnText}>Placing order…</Text>
-          ) : paymentMethod === FOOD_PAYMENT_METHOD.PromptPay ? (
+          ) : paymentMethod === FOOD_PAYMENT_METHOD.LinePay ? (
             <View style={styles.placeBtnRow}>
               <Ionicons name="chatbubble-ellipses" size={18} color={colours.white} />
               <Text style={styles.placeBtnText}>Place Order & Pay via LINE</Text>

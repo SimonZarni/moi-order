@@ -14,6 +14,13 @@ class RegisterRequest extends FormRequest
         return true; // intentionally public
     }
 
+    public function prepareForValidation(): void
+    {
+        if ($this->has('name')) {
+            $this->merge(['name' => strip_tags(trim((string) $this->input('name')))]);
+        }
+    }
+
     public function rules(): array
     {
         return [

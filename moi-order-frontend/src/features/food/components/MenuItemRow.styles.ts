@@ -35,6 +35,12 @@ export const styles = StyleSheet.create({
     lineHeight: 17,
     marginTop: 2,
   },
+  originalPrice: {
+    fontSize: typography.xs,
+    color: colours.textMuted,
+    textDecorationLine: 'line-through',
+    marginTop: spacing.xs,
+  },
   price: {
     fontSize: typography.sm,
     fontWeight: '700',

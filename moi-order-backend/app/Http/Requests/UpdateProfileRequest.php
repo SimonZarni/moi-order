@@ -17,6 +17,13 @@ class UpdateProfileRequest extends FormRequest
         return $this->user() !== null;
     }
 
+    public function prepareForValidation(): void
+    {
+        if ($this->has('name')) {
+            $this->merge(['name' => strip_tags(trim((string) $this->input('name')))]);
+        }
+    }
+
     public function rules(): array
     {
         return [

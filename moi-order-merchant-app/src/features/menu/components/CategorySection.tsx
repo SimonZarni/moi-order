@@ -53,7 +53,7 @@ export function CategorySection({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        {isRenaming ? (
+        {isRenaming && !category.is_system ? (
           <View style={styles.renameRow}>
             <TextInput
               style={styles.renameInput}
@@ -92,22 +92,28 @@ export function CategorySection({
 
         {!isRenaming && (
           <View style={styles.headerActions}>
-            <Pressable
-              onPress={handleStartRename}
-              style={styles.actionButton}
-              accessibilityLabel={`Rename category ${category.name}`}
-              accessibilityRole="button"
-            >
-              <Ionicons name="pencil-outline" size={16} color={colours.primary} />
-            </Pressable>
-            <Pressable
-              onPress={handleDeleteCategory}
-              style={styles.actionButton}
-              accessibilityLabel={`Delete category ${category.name}`}
-              accessibilityRole="button"
-            >
-              <Ionicons name="trash-outline" size={16} color={colours.error} />
-            </Pressable>
+            {category.is_system ? (
+              <Ionicons name="lock-closed-outline" size={16} color={colours.textMuted} />
+            ) : (
+              <>
+                <Pressable
+                  onPress={handleStartRename}
+                  style={styles.actionButton}
+                  accessibilityLabel={`Rename category ${category.name}`}
+                  accessibilityRole="button"
+                >
+                  <Ionicons name="pencil-outline" size={16} color={colours.primary} />
+                </Pressable>
+                <Pressable
+                  onPress={handleDeleteCategory}
+                  style={styles.actionButton}
+                  accessibilityLabel={`Delete category ${category.name}`}
+                  accessibilityRole="button"
+                >
+                  <Ionicons name="trash-outline" size={16} color={colours.error} />
+                </Pressable>
+              </>
+            )}
           </View>
         )}
       </View>
@@ -124,7 +130,11 @@ export function CategorySection({
             />
           ))}
           {category.items.length === 0 && (
-            <Text style={styles.empty}>No items in this category</Text>
+            <Text style={styles.empty}>
+              {category.is_system
+                ? `Add items here to fill the "${category.name}" section shown to customers.`
+                : 'No items in this category'}
+            </Text>
           )}
           <Pressable
             style={styles.addItemButton}
