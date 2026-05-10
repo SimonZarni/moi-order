@@ -146,8 +146,12 @@ Route::prefix('services')->name('admin.services.')->group(function (): void {
 
 // ── Service Categories ────────────────────────────────────────────────────────
 Route::prefix('service-categories')->name('admin.service-categories.')->group(function (): void {
-    Route::get('/', [AdminServiceCategoryController::class, 'index'])->name('index');
+    Route::get('/',       [AdminServiceCategoryController::class, 'index'])->name('index');
+    Route::post('/',      [AdminServiceCategoryController::class, 'store'])->name('store')
+        ->middleware('check.permission:services.create');
     Route::get('/{slug}', [AdminServiceCategoryController::class, 'show'])->name('show');
+    Route::put('/{slug}', [AdminServiceCategoryController::class, 'update'])->name('update')
+        ->middleware('check.permission:services.update');
     Route::put('/{slug}/services/reorder', [AdminServiceCategoryController::class, 'reorderServices'])
         ->name('services.reorder')
         ->middleware('check.permission:services.update');

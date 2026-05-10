@@ -98,6 +98,14 @@ export const serviceCategoriesApi = {
     apiClient
       .get<{ data: ServiceCategoryData }>(`/service-categories/${slug}`)
       .then((r) => r.data.data),
+  create: (payload: Record<string, unknown>) =>
+    apiClient
+      .post<{ data: ServiceCategoryData }>('/service-categories', payload)
+      .then((r) => r.data.data),
+  update: (slug: string, payload: Record<string, unknown>) =>
+    apiClient
+      .put<{ data: ServiceCategoryData }>(`/service-categories/${slug}`, payload)
+      .then((r) => r.data.data),
   reorderServices: (slug: string, order: number[]) =>
     apiClient.put(`/service-categories/${slug}/services/reorder`, { order }),
 };

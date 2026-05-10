@@ -8,14 +8,18 @@ import Radio from '@mui/material/Radio';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+import Select from '@mui/material/Select';
 import Divider from '@mui/material/Divider';
 import Checkbox from '@mui/material/Checkbox';
+import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import RadioGroup from '@mui/material/RadioGroup';
+import InputLabel from '@mui/material/InputLabel';
 import DialogTitle from '@mui/material/DialogTitle';
 import CardContent from '@mui/material/CardContent';
+import FormControl from '@mui/material/FormControl';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -26,6 +30,7 @@ import { useRouter } from 'src/routes/hooks';
 import { useAuth } from 'src/context/auth-context';
 import { submissionsApi } from 'src/api/submissions';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { homeCardRoutesApi } from 'src/api/home-card-routes';
 import { servicesApi, type ServiceData, serviceCategoriesApi, type ServiceCategoryData } from 'src/api/services';
 
 import { Label } from 'src/components/label';
@@ -181,6 +186,236 @@ function ServiceCreateDialog({ open, categories, onClose, onCreated }: ServiceCr
 
 // ----------------------------------------------------------------------
 
+type CategoryFormDialogProps = {
+  open: boolean;
+  category: ServiceCategoryData | null; // null = create mode
+  onClose: () => void;
+  onSaved: () => void;
+};
+
+function CategoryFormDialog({ open, category, onClose, onSaved }: CategoryFormDialogProps) {
+  const isEdit = category !== null;
+
+  const [name, setName]                     = useState('');
+  const [nameEn, setNameEn]                 = useState('');
+  const [nameMm, setNameMm]                 = useState('');
+  const [slug, setSlug]                     = useState('');
+  const [navigationScreen, setNavigationScreen] = useState('');
+  const [isActive, setIsActive]             = useState(true);
+  const [routes, setRoutes]                 = useState<{ key: string; label_en: string }[]>([]);
+  const [saving, setSaving]                 = useState(false);
+  const [error, setError]                   = useState('');
+
+  useEffect(() => {
+    homeCardRoutesApi.list().then((r) => setRoutes(r.filter((rt) => rt.type === 'internal'))).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      setName(category?.name ?? '');
+      setNameEn(category?.name_en ?? '');
+      setNameMm(category?.name_mm ?? '');
+      setSlug(category?.slug ?? '');
+      setNavigationScreen(category?.navigation_screen ?? '');
+      setIsActive(category?.is_active ?? true);
+      setError('');
+    }
+  }, [open, category]);
+
+  const handleNameEnChange = (v: string) => {
+    setNameEn(v);
+    if (!isEdit) {
+      setSlug(v.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''));
+    }
+  };
+
+  const handleClose = () => { setError(''); onClose(); };
+
+  const handleSave = () => {
+    if (!name.trim() || !nameEn.trim() || !slug.trim()) return;
+    setSaving(true);
+    setError('');
+
+    const payload = {
+      name,
+      name_en:           nameEn,
+      name_mm:           nameMm || null,
+      slug,
+      navigation_screen: navigationScreen || null,
+      is_active:         isActive,
+    };
+
+    const request = isEdit
+      ? serviceCategoriesApi.update(category!.slug, payload)
+      : serviceCategoriesApi.create(payload);
+
+    request
+      .then(() => { onSaved(); handleClose(); })
+      .catch((err) => {
+        const msg = err?.response?.data?.errors
+          ? Object.values(err.response.data.errors as Record<string, string[]>).flat().join(' ')
+          : (err?.response?.data?.message ?? 'Failed to save. Please try again.');
+        setError(msg);
+      })
+      .finally(() => setSaving(false));
+  };
+
+  return (
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <DialogTitle>{isEdit ? 'Edit Category' : 'New Category'}</DialogTitle>
+      <DialogContent>
+        <Stack spacing={2.5} sx={{ mt: 1 }}>
+          {error && <Alert severity="error">{error}</Alert>}
+
+          <TextField fullWidth label="Thai Name" value={name} onChange={(e) => setName(e.target.value)} />
+          <TextField
+            fullWidth
+            label="English Name"
+            value={nameEn}
+            onChange={(e) => handleNameEnChange(e.target.value)}
+            helperText="Slug is auto-derived from this"
+          />
+          <TextField fullWidth label="Myanmar Name" value={nameMm} onChange={(e) => setNameMm(e.target.value)} />
+          <TextField
+            fullWidth
+            label="Slug"
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+            helperText="Lowercase letters, numbers, hyphens only"
+          />
+
+          <FormControl fullWidth size="small">
+            <InputLabel>Navigation Screen</InputLabel>
+            <Select
+              value={navigationScreen}
+              label="Navigation Screen"
+              onChange={(e) => setNavigationScreen(e.target.value)}
+            >
+              <MenuItem value=""><em>None</em></MenuItem>
+              {routes.map((r) => (
+                <MenuItem key={r.key} value={r.key}>
+                  <Stack>
+                    <Typography variant="body2">{r.label_en}</Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                      {r.key}
+                    </Typography>
+                  </Stack>
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControlLabel
+            control={<Checkbox checked={isActive} onChange={(e) => setIsActive(e.target.checked)} size="small" />}
+            label="Active"
+          />
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose}>Cancel</Button>
+        <Button
+          variant="contained"
+          onClick={handleSave}
+          disabled={!name.trim() || !nameEn.trim() || !slug.trim() || saving}
+          startIcon={saving ? <CircularProgress size={14} color="inherit" /> : undefined}
+        >
+          {saving ? 'Saving…' : isEdit ? 'Save' : 'Create'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+type ManageCategoriesDialogProps = {
+  open: boolean;
+  categories: ServiceCategoryData[];
+  canUpdate: boolean;
+  onClose: () => void;
+  onChanged: () => void;
+};
+
+function ManageCategoriesDialog({ open, categories, canUpdate, onClose, onChanged }: ManageCategoriesDialogProps) {
+  const [formOpen, setFormOpen]             = useState(false);
+  const [editing, setEditing]               = useState<ServiceCategoryData | null>(null);
+
+  const handleEdit = (cat: ServiceCategoryData) => { setEditing(cat); setFormOpen(true); };
+  const handleNew  = () => { setEditing(null); setFormOpen(true); };
+
+  const handleFormClose = () => { setFormOpen(false); setEditing(null); };
+  const handleSaved     = () => { onChanged(); };
+
+  return (
+    <>
+      <Dialog open={open && !formOpen} onClose={onClose} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <span>Service Categories</span>
+            {canUpdate && (
+              <Button
+                size="small"
+                variant="contained"
+                startIcon={<Iconify icon="mingcute:add-line" width={14} />}
+                onClick={handleNew}
+              >
+                New
+              </Button>
+            )}
+          </Stack>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0 }}>
+          {categories.length === 0 ? (
+            <Box sx={{ py: 6, textAlign: 'center', color: 'text.disabled' }}>
+              <Typography variant="body2">No categories yet.</Typography>
+            </Box>
+          ) : (
+            <Stack divider={<Divider />}>
+              {categories.map((cat) => (
+                <Stack key={cat.id} direction="row" alignItems="center" sx={{ px: 3, py: 2 }}>
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="subtitle2">{cat.name_en ?? cat.name}</Typography>
+                    <Stack direction="row" spacing={1} sx={{ mt: 0.5 }} alignItems="center">
+                      <Typography variant="caption" color="text.disabled" sx={{ fontFamily: 'monospace' }}>
+                        /{cat.slug}
+                      </Typography>
+                      {cat.navigation_screen && (
+                        <Label variant="soft" color="default" sx={{ fontFamily: 'monospace', fontSize: 10 }}>
+                          {cat.navigation_screen}
+                        </Label>
+                      )}
+                      <Label variant="soft" color={cat.is_active ? 'success' : 'default'}>
+                        {cat.is_active ? 'Active' : 'Inactive'}
+                      </Label>
+                    </Stack>
+                  </Box>
+                  {canUpdate && (
+                    <IconButton size="small" onClick={() => handleEdit(cat)}>
+                      <Iconify icon="solar:pen-bold" width={16} />
+                    </IconButton>
+                  )}
+                </Stack>
+              ))}
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      <CategoryFormDialog
+        open={formOpen}
+        category={editing}
+        onClose={handleFormClose}
+        onSaved={handleSaved}
+      />
+    </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
 type ServiceCardProps = {
   service: ServiceData;
   submissionCount: number | undefined;
@@ -311,12 +546,13 @@ export function ServicesView() {
   const canUpdate = hasPermission('services.update');
   const canDelete = hasPermission('services.delete');
 
-  const [services, setServices]       = useState<ServiceData[]>([]);
-  const [categories, setCategories]   = useState<ServiceCategoryData[]>([]);
-  const [loading, setLoading]         = useState(false);
-  const [createOpen, setCreateOpen]   = useState(false);
+  const [services, setServices]           = useState<ServiceData[]>([]);
+  const [categories, setCategories]       = useState<ServiceCategoryData[]>([]);
+  const [loading, setLoading]             = useState(false);
+  const [createOpen, setCreateOpen]       = useState(false);
+  const [manageCatsOpen, setManageCatsOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
-  const [deleteError, setDeleteError] = useState('');
+  const [deleteError, setDeleteError]     = useState('');
   const [submissionCounts, setSubmissionCounts] = useState<Record<number, number>>({});
 
   const fetchAll = useCallback(() => {
@@ -350,15 +586,26 @@ export function ServicesView() {
           </Typography>
         </Box>
         <Box sx={{ flexGrow: 1 }} />
-        {canCreate && (
-          <Button
-            variant="contained"
-            startIcon={<Iconify icon="mingcute:add-line" />}
-            onClick={() => setCreateOpen(true)}
-          >
-            New Service
-          </Button>
-        )}
+        <Stack direction="row" spacing={1.5}>
+          {canUpdate && (
+            <Button
+              variant="outlined"
+              startIcon={<Iconify icon="solar:settings-bold-duotone" />}
+              onClick={() => setManageCatsOpen(true)}
+            >
+              Manage Categories
+            </Button>
+          )}
+          {canCreate && (
+            <Button
+              variant="contained"
+              startIcon={<Iconify icon="mingcute:add-line" />}
+              onClick={() => setCreateOpen(true)}
+            >
+              New Service
+            </Button>
+          )}
+        </Stack>
       </Box>
 
       {loading ? (
@@ -438,6 +685,14 @@ export function ServicesView() {
         categories={categories}
         onClose={() => setCreateOpen(false)}
         onCreated={fetchAll}
+      />
+
+      <ManageCategoriesDialog
+        open={manageCatsOpen}
+        categories={categories}
+        canUpdate={canUpdate}
+        onClose={() => setManageCatsOpen(false)}
+        onChanged={fetchAll}
       />
 
       <Dialog
