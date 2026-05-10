@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -20,14 +20,20 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
+import DialogTitle from '@mui/material/DialogTitle';
 import TableContainer from '@mui/material/TableContainer';
 import InputAdornment from '@mui/material/InputAdornment';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import CircularProgress from '@mui/material/CircularProgress';
+import Dialog from '@mui/material/Dialog';
 
 import { fDate } from 'src/utils/format-time';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
+import { settingsApi } from 'src/api/settings';
 
 // ----------------------------------------------------------------------
 
@@ -75,6 +81,44 @@ export function SettingsView() {
   const [notifPayments, setNotifPayments] = useState(true);
   const [notifReviews, setNotifReviews] = useState(false);
   const [sessions, setSessions] = useState<DeviceSession[]>(MOCK_SESSIONS);
+
+  // ── Maintenance mode ──────────────────────────────────────────────────────
+  const [maintenanceActive, setMaintenanceActive] = useState<boolean | null>(null);
+  const [maintenanceLoading, setMaintenanceLoading] = useState(false);
+  const [maintenanceError, setMaintenanceError] = useState<string | null>(null);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+
+  useEffect(() => {
+    settingsApi
+      .getMaintenanceStatus()
+      .then((s) => setMaintenanceActive(s.active))
+      .catch(() => setMaintenanceActive(false));
+  }, []);
+
+  const handleMaintenanceToggle = useCallback(() => {
+    if (maintenanceActive) {
+      setMaintenanceLoading(true);
+      setMaintenanceError(null);
+      settingsApi
+        .disableMaintenance()
+        .then((s) => setMaintenanceActive(s.active))
+        .catch(() => setMaintenanceError('Failed to disable maintenance mode. Try again.'))
+        .finally(() => setMaintenanceLoading(false));
+    } else {
+      setConfirmDialogOpen(true);
+    }
+  }, [maintenanceActive]);
+
+  const handleConfirmEnable = useCallback(() => {
+    setConfirmDialogOpen(false);
+    setMaintenanceLoading(true);
+    setMaintenanceError(null);
+    settingsApi
+      .enableMaintenance()
+      .then((s) => setMaintenanceActive(s.active))
+      .catch(() => setMaintenanceError('Failed to enable maintenance mode. Try again.'))
+      .finally(() => setMaintenanceLoading(false));
+  }, []);
 
   const pwMatch = newPw === confirmPw;
   const pwValid = currentPw.length > 0 && newPw.length >= 8 && pwMatch;
@@ -265,6 +309,93 @@ export function SettingsView() {
           </Card>
         </Grid>
 
+        {/* Maintenance Mode */}
+        <Grid size={{ xs: 12 }}>
+          <Card
+            sx={{
+              border: '1px solid',
+              borderColor: maintenanceActive ? 'warning.light' : 'divider',
+              transition: 'border-color 0.3s',
+            }}
+          >
+            <CardHeader
+              title="Maintenance Mode"
+              subheader="Block all users and display a maintenance screen in the app"
+              action={
+                maintenanceActive === null || maintenanceLoading ? (
+                  <CircularProgress size={24} sx={{ mr: 1, mt: 0.5 }} />
+                ) : (
+                  <Switch
+                    checked={maintenanceActive}
+                    onChange={handleMaintenanceToggle}
+                    color="warning"
+                    disabled={maintenanceLoading}
+                  />
+                )
+              }
+            />
+            <Divider />
+            <CardContent>
+              {maintenanceError && (
+                <Alert severity="error" sx={{ mb: 2 }} onClose={() => setMaintenanceError(null)}>
+                  {maintenanceError}
+                </Alert>
+              )}
+              <Stack direction="row" alignItems="center" spacing={2}>
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    bgcolor: maintenanceActive ? 'warning.lighter' : 'success.lighter',
+                    flexShrink: 0,
+                  }}
+                >
+                  <Iconify
+                    icon={maintenanceActive ? 'solar:restart-bold' : 'solar:check-circle-bold'}
+                    width={24}
+                    sx={{ color: maintenanceActive ? 'warning.dark' : 'success.dark' }}
+                  />
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
+                    <Typography variant="body2" fontWeight={600}>
+                      {maintenanceActive ? 'Under Maintenance' : 'All Systems Live'}
+                    </Typography>
+                    <Chip
+                      size="small"
+                      variant="outlined"
+                      label={maintenanceActive ? 'Maintenance' : 'Live'}
+                      color={maintenanceActive ? 'warning' : 'success'}
+                    />
+                  </Stack>
+                  <Typography variant="caption" color="text.secondary">
+                    {maintenanceActive
+                      ? 'The app is in maintenance mode. All users see a maintenance screen. Admin routes remain accessible.'
+                      : 'The app is running normally. All users have full access to the service.'}
+                  </Typography>
+                </Box>
+              </Stack>
+
+              {maintenanceActive && (
+                <Alert
+                  severity="warning"
+                  sx={{ mt: 2 }}
+                  icon={<Iconify icon="solar:clock-circle-outline" width={20} />}
+                >
+                  <Typography variant="caption">
+                    Users are currently blocked. Disable maintenance mode as soon as your work is complete.
+                    The retry countdown shown in the app is set to <strong>60 minutes</strong>.
+                  </Typography>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
         {/* Logged In Devices */}
         <Grid size={{ xs: 12 }}>
           <Card>
@@ -367,6 +498,39 @@ export function SettingsView() {
           </Card>
         </Grid>
       </Grid>
+
+      {/* Maintenance enable confirmation */}
+      <Dialog
+        open={confirmDialogOpen}
+        onClose={() => setConfirmDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Iconify icon="solar:restart-bold" width={22} sx={{ color: 'warning.main' }} />
+          Enable Maintenance Mode?
+        </DialogTitle>
+        <DialogContent>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            This will immediately block <strong>all users</strong> from the app.
+          </Alert>
+          <Typography variant="body2" color="text.secondary">
+            The app will display a maintenance screen to every user. Requests to all API endpoints
+            will return a 503 response. Admin routes and the health check endpoint remain accessible.
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+            Make sure you are ready to take the service down before confirming.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5 }}>
+          <Button onClick={() => setConfirmDialogOpen(false)} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmEnable} variant="contained" color="warning">
+            Enable Maintenance
+          </Button>
+        </DialogActions>
+      </Dialog>
 
     </DashboardContent>
   );
