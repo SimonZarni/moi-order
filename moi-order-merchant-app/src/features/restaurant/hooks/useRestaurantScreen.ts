@@ -37,7 +37,7 @@ interface DescriptionForm {
 }
 
 interface UseRestaurantScreenResult {
-  restaurant: Restaurant | null | undefined;
+  restaurant: Restaurant | null;
   isNewRestaurant: boolean;
   isLoading: boolean;
   isEditing: boolean;

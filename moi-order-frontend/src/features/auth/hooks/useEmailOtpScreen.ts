@@ -43,7 +43,7 @@ export function useEmailOtpScreen(): UseEmailOtpScreenResult {
   const { mutate: verify, isPending: isVerifying } = useMutation({
     mutationFn: () => verifyEmailOtp(email, form.otp, purpose),
     onSuccess: ({ verified_token }) => {
-      navigation.navigate('SetPassword', { email, verifiedToken: verified_token, purpose, name });
+      navigation.navigate('SetPassword', { email, verifiedToken: verified_token, purpose, ...(name !== undefined && { name }) });
     },
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {

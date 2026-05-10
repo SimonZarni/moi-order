@@ -10,7 +10,7 @@ import { useOrderChatData, useSendChatMessage } from './useOrderChatData';
 type Route = RouteProp<RootStackParamList, 'OrderChat'>;
 
 export interface UseOrderChatScreenResult {
-  orderId: number;
+  orderId: string;
   orderNumber: string | null;
   restaurantName: string | null;
   messages: ReturnType<typeof useOrderChatData>['messages'];

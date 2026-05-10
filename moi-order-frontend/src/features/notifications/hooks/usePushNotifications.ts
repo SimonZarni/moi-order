@@ -55,10 +55,10 @@ if (Constants.appOwnership !== 'expo') {
 
 interface PushNotificationData {
   notification_type?: 'submission_status' | 'ticket_order_status' | 'custom_announcement' | 'ninety_day_reminder' | 'payment_ready' | string;
-  submission_id?: number;
-  ticket_order_id?: number;
+  submission_id?: string;
+  ticket_order_id?: string;
   order_type?: 'ticket_order' | 'submission';
-  order_id?: number;
+  order_id?: string;
 }
 
 export function usePushNotifications(): void {

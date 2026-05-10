@@ -15,14 +15,17 @@ const INVALID_TYPE_MESSAGES: Record<DocumentType, Record<Locale, string>> = {
   [DOCUMENT_TYPE.Passport]: {
     en: 'This does not appear to be a passport. Please upload your passport bio data page or a visa/stamp page.',
     mm: 'ဤပုံသည် နိုင်ငံကူးလက်မှတ် မဟုတ်ပါ။ ကျေးဇူးပြုပြီး သင်၏ နိုင်ငံကူးလက်မှတ်ရဲ့ ဓာတ်ပုံ စာမျက်နှာ သို့မဟုတ် ဗီဇာ/တံဆိပ်တုံး စာမျက်နှာကို တင်ပေးပါ။',
+    th: 'รูปนี้ไม่ใช่หนังสือเดินทาง กรุณาอัปโหลดหน้าข้อมูลชีวภาพหรือหน้าวีซ่า/ตราประทับ',
   },
   [DOCUMENT_TYPE.NinetyDayReport]: {
     en: 'This does not appear to be a 90-day report slip. Please upload your TM47 notification receipt.',
     mm: 'ဤပုံသည် ၉၀ ရက် အကြောင်းကြားစာ မဟုတ်ပါ။ ကျေးဇူးပြုပြီး သင်၏ TM47 ထောက်ခံချက်ကို တင်ပေးပါ။',
+    th: 'รูปนี้ไม่ใช่ใบแจ้งที่พักอาศัย 90 วัน กรุณาอัปโหลดใบเสร็จการแจ้ง TM47',
   },
   [DOCUMENT_TYPE.Other]: {
     en: 'This does not appear to be a valid official document. Please upload a recognised document such as a work permit, ID card, or driving licence.',
     mm: 'ဤပုံသည် တရားဝင် စာရွက်စာတမ်း မဟုတ်ပါ။ ကျေးဇူးပြုပြီး လုပ်ငန်းခွင် ခွင့်ပြုချက်၊ မှတ်ပုံတင်ကတ် သို့မဟုတ် ယာဉ်မောင်းလိုင်စင် ကဲ့သို့သော တရားဝင် စာရွက်စာတမ်းကို တင်ပေးပါ။',
+    th: 'รูปนี้ไม่ใช่เอกสารราชการที่ถูกต้อง กรุณาอัปโหลดเอกสารที่รับรอง เช่น ใบอนุญาตทำงาน บัตรประชาชน หรือใบขับขี่',
   },
 };
 

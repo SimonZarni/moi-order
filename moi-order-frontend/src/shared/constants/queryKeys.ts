@@ -18,10 +18,10 @@ export const QUERY_KEYS = {
   },
   SUBMISSIONS: {
     LIST:   ['submissions', 'list'] as const,
-    DETAIL: (id: number) => ['submissions', 'detail', id] as const,
+    DETAIL: (id: string) => ['submissions', 'detail', id] as const,
   },
   PAYMENTS: {
-    FOR_SUBMISSION: (submissionId: number) => ['payments', 'submission', submissionId] as const,
+    FOR_SUBMISSION: (submissionId: string) => ['payments', 'submission', submissionId] as const,
   },
   AUTH: {
     ME: ['auth', 'me'] as const,
@@ -35,7 +35,7 @@ export const QUERY_KEYS = {
   },
   TICKET_ORDERS: {
     LIST:   ['ticket-orders', 'list'] as const,
-    DETAIL: (id: number) => ['ticket-orders', 'detail', id] as const,
+    DETAIL: (id: string) => ['ticket-orders', 'detail', id] as const,
   },
   NOTIFICATIONS: {
     LIST: ['notifications', 'list'] as const,
@@ -53,8 +53,8 @@ export const QUERY_KEYS = {
   },
   FOOD_ORDERS: {
     LIST:   ['food-orders', 'list'] as const,
-    DETAIL: (id: number) => ['food-orders', 'detail', id] as const,
-    CHAT:   (id: number) => ['food-orders', 'chat', id] as const,
+    DETAIL: (id: string) => ['food-orders', 'detail', id] as const,
+    CHAT:   (id: string) => ['food-orders', 'chat', id] as const,
   },
   HOME_CARDS: {
     LIST: ['home-cards', 'list'] as const,

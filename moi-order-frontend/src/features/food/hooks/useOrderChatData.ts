@@ -9,11 +9,11 @@ export interface UseOrderChatDataResult {
   isError: boolean;
 }
 
-export function useOrderChatData(orderId: number): UseOrderChatDataResult {
+export function useOrderChatData(orderId: string): UseOrderChatDataResult {
   const query = useQuery({
     queryKey: QUERY_KEYS.FOOD_ORDERS.CHAT(orderId),
     queryFn:  () => fetchOrderChat(orderId),
-    enabled:  orderId > 0,
+    enabled:  orderId.length > 0,
     refetchInterval: 10_000,
   });
 
@@ -25,7 +25,7 @@ export function useOrderChatData(orderId: number): UseOrderChatDataResult {
 }
 
 export interface SendMessageInput {
-  orderId: number;
+  orderId: string;
   body: string | null;
   image: { uri: string; name: string; type: string } | null;
 }

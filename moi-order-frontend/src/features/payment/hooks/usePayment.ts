@@ -30,7 +30,7 @@ export interface UsePaymentRefreshable extends UsePaymentResult {
  *   webhooks. After sync we invalidate the submission query so polling picks up the
  *   updated status immediately.
  */
-export function usePayment(submissionId: number): UsePaymentRefreshable {
+export function usePayment(submissionId: string): UsePaymentRefreshable {
   const queryClient = useQueryClient();
 
   const {
@@ -44,6 +44,7 @@ export function usePayment(submissionId: number): UsePaymentRefreshable {
 
   // Create payment intent on mount.
   useEffect(() => {
+    if (!submissionId) return;
     create();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submissionId]);
@@ -51,6 +52,7 @@ export function usePayment(submissionId: number): UsePaymentRefreshable {
   const { data: submission, isLoading: isLoadingSubmission } = useQuery({
     queryKey: QUERY_KEYS.SUBMISSIONS.DETAIL(submissionId),
     queryFn:  () => fetchSubmission(submissionId),
+    enabled:  submissionId.length > 0,
     // Poll every 3 seconds while awaiting payment; stop once status changes.
     refetchInterval: (query) => {
       const status = query.state.data?.status;

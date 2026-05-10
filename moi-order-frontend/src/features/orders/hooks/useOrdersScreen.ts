@@ -28,10 +28,10 @@ export interface UseOrdersScreenResult {
   handleTabChange: (tab: OrdersTab) => void;
   handleEndReached: () => void;
   handleRefresh: () => void;
-  handleOrderPress: (submissionId: number) => void;
-  handleDeleteSubmission: (id: number) => void;
-  handleTicketOrderPress: (ticketOrderId: number) => void;
-  handleDeleteTicketOrder: (id: number) => void;
+  handleOrderPress: (submissionId: string) => void;
+  handleDeleteSubmission: (id: string) => void;
+  handleTicketOrderPress: (ticketOrderId: string) => void;
+  handleDeleteTicketOrder: (id: string) => void;
   handleNavigateToLogin: () => void;
   handleBack: () => void;
 }
@@ -80,7 +80,7 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     else refetchTickets();
   }, [activeTab, refetchSubmissions, refetchTickets]);
 
-  const handleOrderPress = useCallback((submissionId: number): void => {
+  const handleOrderPress = useCallback((submissionId: string): void => {
     queryClient.prefetchQuery({
       queryKey: QUERY_KEYS.SUBMISSIONS.DETAIL(submissionId),
       queryFn:  () => fetchSubmission(submissionId),
@@ -89,7 +89,7 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     navigation.navigate('OrderDetail', { submissionId });
   }, [navigation, queryClient]);
 
-  const handleTicketOrderPress = useCallback((ticketOrderId: number): void => {
+  const handleTicketOrderPress = useCallback((ticketOrderId: string): void => {
     queryClient.prefetchQuery({
       queryKey: QUERY_KEYS.TICKET_ORDERS.DETAIL(ticketOrderId),
       queryFn:  () => fetchTicketOrder(ticketOrderId),
@@ -98,7 +98,7 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     navigation.navigate('TicketOrderDetail', { ticketOrderId });
   }, [navigation, queryClient]);
 
-  const handleDeleteSubmission = useCallback((id: number): void => {
+  const handleDeleteSubmission = useCallback((id: string): void => {
     Alert.alert(
       'Delete Order',
       'Remove this cancelled order from your history?',
@@ -113,7 +113,7 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     );
   }, [deleteSubmissionMutation]);
 
-  const handleDeleteTicketOrder = useCallback((id: number): void => {
+  const handleDeleteTicketOrder = useCallback((id: string): void => {
     Alert.alert(
       'Delete Order',
       'Remove this cancelled order from your history?',

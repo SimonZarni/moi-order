@@ -386,7 +386,7 @@ export const styles = StyleSheet.create({
   hoursCell: {
     fontSize: typography.xs,
     color: colours.textMuted,
-    fontWeight: '600',
+    fontWeight: '600' as const,
   },
   hoursDayCell: {
     width: 36,

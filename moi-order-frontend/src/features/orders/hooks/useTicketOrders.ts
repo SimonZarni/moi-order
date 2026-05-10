@@ -15,7 +15,7 @@ export interface UseTicketOrdersResult {
   isFetchingNextPage: boolean;
   fetchNextPage: () => void;
   refetch: () => void;
-  deleteMutation: ReturnType<typeof useMutation<void, ApiError, number>>;
+  deleteMutation: ReturnType<typeof useMutation<void, ApiError, string>>;
 }
 
 export function useTicketOrders(): UseTicketOrdersResult {
@@ -38,7 +38,7 @@ export function useTicketOrders(): UseTicketOrdersResult {
     }),
   });
 
-  const deleteMutation = useMutation<void, ApiError, number>({
+  const deleteMutation = useMutation<void, ApiError, string>({
     mutationFn: (id) => deleteTicketOrder(id),
     onSuccess: (_, id) => {
       queryClient.setQueryData(

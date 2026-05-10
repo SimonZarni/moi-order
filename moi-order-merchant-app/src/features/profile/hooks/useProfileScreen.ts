@@ -21,12 +21,13 @@ export function useProfileScreen(): UseProfileScreenResult {
   const queryClient = useQueryClient();
   const { user, logout } = useAuthStore();
 
-  const { data: restaurant, isLoading, isError } = useQuery({
+  const { data: restaurantResult, isLoading, isError } = useQuery({
     queryKey: QUERY_KEYS.RESTAURANT,
     queryFn: getRestaurant,
     staleTime: CACHE_TTL.USER,
     enabled: !!user?.is_merchant,
   });
+  const restaurant = restaurantResult?.restaurant;
 
   const { mutateAsync: mutatePhoto } = useMutation({
     mutationFn: ({ field, form }: { field: 'cover_photo' | 'logo'; form: FormData }) =>

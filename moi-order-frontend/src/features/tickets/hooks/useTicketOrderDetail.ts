@@ -14,7 +14,7 @@ export interface UseTicketOrderDetailResult {
   cancelMutation: ReturnType<typeof useMutation<TicketOrder, ApiError, void>>;
 }
 
-export function useTicketOrderDetail(ticketOrderId: number): UseTicketOrderDetailResult {
+export function useTicketOrderDetail(ticketOrderId: string): UseTicketOrderDetailResult {
   const queryClient = useQueryClient();
 
   const query = useQuery({

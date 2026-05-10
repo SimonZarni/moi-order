@@ -32,14 +32,14 @@ export interface UseFoodOrderDetailDataResult {
   refetch: () => void;
 }
 
-export function useFoodOrderDetailData(id: number): UseFoodOrderDetailDataResult {
+export function useFoodOrderDetailData(id: string): UseFoodOrderDetailDataResult {
   const isTerminal = (order?: FoodOrder) =>
     order?.status === FOOD_ORDER_STATUS.Completed || order?.status === FOOD_ORDER_STATUS.Cancelled;
 
   const query = useQuery({
     queryKey:       QUERY_KEYS.FOOD_ORDERS.DETAIL(id),
     queryFn:        () => fetchFoodOrderDetail(id),
-    enabled:        id > 0,
+    enabled:        id.length > 0,
     // Poll every 8 s while order is in a non-terminal state.
     refetchInterval: (q) => (isTerminal(q.state.data) ? false : 8000),
   });

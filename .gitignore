@@ -68,3 +68,7 @@ Thumbs.db
 
 .claude/
 
+# Business proposals (internal documents)
+BUSINESS_PROPOSAL_EN.md
+BUSINESS_PROPOSAL_TH.md
+

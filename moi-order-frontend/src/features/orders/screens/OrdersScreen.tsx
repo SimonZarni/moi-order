@@ -21,8 +21,8 @@ import { styles, STATUS_COLOURS } from './OrdersScreen.styles';
 
 interface OrderCardProps {
   item: ServiceSubmission;
-  onPress: (id: number) => void;
-  onDelete: (id: number) => void;
+  onPress: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
 function OrderCard({ item, onPress, onDelete }: OrderCardProps): React.JSX.Element {
@@ -85,8 +85,8 @@ function OrderCard({ item, onPress, onDelete }: OrderCardProps): React.JSX.Eleme
 
 interface TicketOrderCardProps {
   item: TicketOrder;
-  onPress: (id: number) => void;
-  onDelete: (id: number) => void;
+  onPress: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
 function TicketOrderCard({ item, onPress, onDelete }: TicketOrderCardProps): React.JSX.Element {

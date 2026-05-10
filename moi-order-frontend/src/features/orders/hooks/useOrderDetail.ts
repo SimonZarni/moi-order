@@ -14,7 +14,7 @@ export interface UseOrderDetailResult {
   cancelMutation: ReturnType<typeof useMutation<ServiceSubmission, ApiError, void>>;
 }
 
-export function useOrderDetail(submissionId: number): UseOrderDetailResult {
+export function useOrderDetail(submissionId: string): UseOrderDetailResult {
   const queryClient = useQueryClient();
 
   const query = useQuery({

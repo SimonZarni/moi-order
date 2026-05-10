@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSetPasswordForm, UseSetPasswordFormResult } from './useSetPasswordForm';
 import { completeEmailRegistration, resetPassword } from '@/shared/api/emailAuth';
 import { useAuthStore } from '@/shared/store/authStore';
-import { ApiError } from '@/types/models';
+import { ApiError, User } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 import { MESSAGES } from '@/shared/constants/messages';
 
@@ -39,14 +39,14 @@ export function useSetPasswordScreen(): UseSetPasswordScreenResult {
   } = useSetPasswordForm();
   const [bannerError, setBannerError] = useState('');
 
-  const { mutate, isPending: isSubmitting } = useMutation({
-    mutationFn: () =>
+  const { mutate, isPending: isSubmitting } = useMutation<{ user: User; token: string } | void, ApiError>({
+    mutationFn: async () =>
       purpose === 'registration'
         ? completeEmailRegistration(email, name ?? '', form.password, form.passwordConfirmation, verifiedToken)
         : resetPassword(email, form.password, form.passwordConfirmation, verifiedToken),
     onSuccess: (result) => {
       if (purpose === 'registration' && result != null) {
-        const authResult = result as { user: import('@/types/models').User; token: string };
+        const authResult = result as { user: User; token: string };
         queryClient.clear();
         setUser(authResult.user, authResult.token);
         navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });

@@ -23,7 +23,7 @@ import { useAuthStore } from '@/shared/store/authStore';
 import { useNotificationStore } from '@/shared/store/notificationStore';
 
 interface FoodOrderStatusPayload {
-  order_id: number;
+  order_id: string;
   status: string;
   status_label: string;
 }

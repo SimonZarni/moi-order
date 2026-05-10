@@ -33,6 +33,6 @@ export async function uploadDocument(
   return { document: response.data.data, quota: response.data.quota };
 }
 
-export async function deleteDocument(id: number): Promise<void> {
+export async function deleteDocument(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/documents/${id}`);
 }

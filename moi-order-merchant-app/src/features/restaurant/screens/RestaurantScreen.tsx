@@ -316,7 +316,7 @@ export function RestaurantScreen(): React.JSX.Element {
                       editable={!h.is_closed}
                       accessibilityLabel={`Closing time for ${DAY_SHORT[h.day_of_week]}`}
                     />
-                    <View style={[styles.hoursCell, styles.hoursStatusCell, { alignItems: 'center' }]}>
+                    <View style={[styles.hoursStatusCell, { alignItems: 'center' }]}>
                       <Switch
                         value={!h.is_closed}
                         onValueChange={(v) => handleHourToggle(h.day_of_week, !v)}

@@ -13,6 +13,7 @@ export interface PlaceFoodOrderInput {
     menu_item_id: number;
     quantity: number;
     notes: string | null;
+    selected_options: Array<{ option_group_id: number; option_id: number }>;
   }>;
 }
 
@@ -28,7 +29,7 @@ export async function fetchFoodOrders(page = 1): Promise<PaginatedResponse<FoodO
   return res.data;
 }
 
-export async function fetchFoodOrderDetail(id: number): Promise<FoodOrder> {
+export async function fetchFoodOrderDetail(id: string): Promise<FoodOrder> {
   const res = await apiClient.get<ApiResponse<FoodOrder>>(`/api/v1/food-orders/${id}`);
   return res.data.data;
 }
@@ -38,27 +39,27 @@ export async function placeFoodOrder(input: PlaceFoodOrderInput): Promise<FoodOr
   return res.data.data;
 }
 
-export async function completeFoodOrder(id: number, input: CompleteFoodOrderInput): Promise<FoodOrder> {
+export async function completeFoodOrder(id: string, input: CompleteFoodOrderInput): Promise<FoodOrder> {
   const res = await apiClient.post<ApiResponse<FoodOrder>>(`/api/v1/food-orders/${id}/complete`, input);
   return res.data.data;
 }
 
-export async function cancelFoodOrder(id: number): Promise<FoodOrder> {
+export async function cancelFoodOrder(id: string): Promise<FoodOrder> {
   const res = await apiClient.post<ApiResponse<FoodOrder>>(`/api/v1/food-orders/${id}/cancel`);
   return res.data.data;
 }
 
-export async function deleteFoodOrder(id: number): Promise<void> {
+export async function deleteFoodOrder(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/food-orders/${id}`);
 }
 
-export async function fetchOrderChat(orderId: number): Promise<OrderChatMessage[]> {
+export async function fetchOrderChat(orderId: string): Promise<OrderChatMessage[]> {
   const res = await apiClient.get<{ data: OrderChatMessage[] }>(`/api/v1/food-orders/${orderId}/chat`);
   return res.data.data;
 }
 
 export async function sendOrderChatMessage(
-  orderId: number,
+  orderId: string,
   body: string | null,
   image: { uri: string; name: string; type: string } | null,
 ): Promise<OrderChatMessage> {

@@ -52,23 +52,23 @@ export async function fetchSubmissions(page: number): Promise<PaginatedResponse<
   return response.data;
 }
 
-export async function fetchSubmission(id: number): Promise<ServiceSubmission> {
+export async function fetchSubmission(id: string): Promise<ServiceSubmission> {
   const response = await apiClient.get<ApiResponse<ServiceSubmission>>(`/api/v1/submissions/${id}`);
   return response.data.data;
 }
 
-export async function fetchSubmissionResultUrl(submissionId: number): Promise<{ url: string; mime_type: string }> {
+export async function fetchSubmissionResultUrl(submissionId: string): Promise<{ url: string; mime_type: string }> {
   const { data } = await apiClient.get<ApiResponse<{ url: string; mime_type: string }>>(
     `/api/v1/submissions/${submissionId}/result`,
   );
   return data.data;
 }
 
-export async function cancelSubmission(id: number): Promise<ServiceSubmission> {
+export async function cancelSubmission(id: string): Promise<ServiceSubmission> {
   const { data } = await apiClient.post<ApiResponse<ServiceSubmission>>(`/api/v1/submissions/${id}/cancel`);
   return data.data;
 }
 
-export async function deleteSubmission(id: number): Promise<void> {
+export async function deleteSubmission(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/submissions/${id}`);
 }

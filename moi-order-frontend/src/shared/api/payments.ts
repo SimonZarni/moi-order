@@ -1,20 +1,20 @@
 import apiClient from '@/shared/api/client';
 import { ApiResponse, Payment } from '@/types/models';
 
-export async function createPayment(submissionId: number): Promise<Payment> {
+export async function createPayment(submissionId: string): Promise<Payment> {
   const response = await apiClient.post<ApiResponse<Payment>>(
     `/api/v1/submissions/${submissionId}/payment`,
   );
   return response.data.data;
 }
 
-export async function fetchPayment(submissionId: number): Promise<Payment> {
+export async function fetchPayment(submissionId: string): Promise<Payment> {
   const response = await apiClient.get<ApiResponse<Payment>>(
     `/api/v1/submissions/${submissionId}/payment`,
   );
   return response.data.data;
 }
 
-export async function syncPaymentStatus(submissionId: number): Promise<void> {
+export async function syncPaymentStatus(submissionId: string): Promise<void> {
   await apiClient.post(`/api/v1/submissions/${submissionId}/payment/sync`);
 }

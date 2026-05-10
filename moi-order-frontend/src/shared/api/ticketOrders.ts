@@ -18,35 +18,35 @@ export async function fetchTicketOrders(page = 1): Promise<PaginatedResponse<Tic
   return data;
 }
 
-export async function fetchTicketOrder(id: number): Promise<TicketOrder> {
+export async function fetchTicketOrder(id: string): Promise<TicketOrder> {
   const { data } = await apiClient.get<ApiResponse<TicketOrder>>(`/api/v1/ticket-orders/${id}`);
   return data.data;
 }
 
-export async function createTicketOrderPayment(ticketOrderId: number): Promise<Payment> {
+export async function createTicketOrderPayment(ticketOrderId: string): Promise<Payment> {
   const { data } = await apiClient.post<ApiResponse<Payment>>(`/api/v1/ticket-orders/${ticketOrderId}/payment`);
   return data.data;
 }
 
-export async function fetchTicketOrderPayment(ticketOrderId: number): Promise<Payment> {
+export async function fetchTicketOrderPayment(ticketOrderId: string): Promise<Payment> {
   const { data } = await apiClient.get<ApiResponse<Payment>>(`/api/v1/ticket-orders/${ticketOrderId}/payment`);
   return data.data;
 }
 
-export async function syncTicketOrderPaymentStatus(ticketOrderId: number): Promise<void> {
+export async function syncTicketOrderPaymentStatus(ticketOrderId: string): Promise<void> {
   await apiClient.post(`/api/v1/ticket-orders/${ticketOrderId}/payment/sync`);
 }
 
-export async function fetchTicketOrderEticketUrl(ticketOrderId: number): Promise<{ url: string; mime_type: string }> {
+export async function fetchTicketOrderEticketUrl(ticketOrderId: string): Promise<{ url: string; mime_type: string }> {
   const { data } = await apiClient.get<ApiResponse<{ url: string; mime_type: string }>>(`/api/v1/ticket-orders/${ticketOrderId}/eticket`);
   return data.data;
 }
 
-export async function cancelTicketOrder(id: number): Promise<TicketOrder> {
+export async function cancelTicketOrder(id: string): Promise<TicketOrder> {
   const { data } = await apiClient.post<ApiResponse<TicketOrder>>(`/api/v1/ticket-orders/${id}/cancel`);
   return data.data;
 }
 
-export async function deleteTicketOrder(id: number): Promise<void> {
+export async function deleteTicketOrder(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/ticket-orders/${id}`);
 }

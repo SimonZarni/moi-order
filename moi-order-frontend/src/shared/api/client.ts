@@ -60,8 +60,9 @@ apiClient.interceptors.response.use(
     // Only pass through the known-safe context fields used by the UI.
     // This prevents accidental backend data leakage (e.g. internal IDs, paths)
     // from reaching UI code if the server ever attaches extra context fields.
-    const safeContext = data?.context !== undefined
-      ? { suspended_until: data.context['suspended_until'] }
+    const suspendedUntil = data?.context?.['suspended_until'];
+    const safeContext: Record<string, string> | undefined = suspendedUntil !== undefined
+      ? { suspended_until: suspendedUntil }
       : undefined;
 
     const apiError: ApiError = {

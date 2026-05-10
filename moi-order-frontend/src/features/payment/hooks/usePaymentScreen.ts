@@ -40,7 +40,7 @@ export function usePaymentScreen(): UsePaymentScreenResult {
   const params = route.params;
 
   // ── Submission path ───────────────────────────────────────────────────────
-  const submissionId = params.kind === 'submission' ? params.submissionId : 0;
+  const submissionId = params.kind === 'submission' ? params.submissionId : '';
   const {
     payment: submissionPayment,
     submission,
@@ -50,7 +50,7 @@ export function usePaymentScreen(): UsePaymentScreenResult {
   } = usePayment(submissionId);
 
   // ── Ticket order path ─────────────────────────────────────────────────────
-  const ticketOrderId = params.kind === 'ticket_order' ? params.ticketOrderId : 0;
+  const ticketOrderId = params.kind === 'ticket_order' ? params.ticketOrderId : '';
   const {
     payment: ticketPayment,
     ticketOrder,

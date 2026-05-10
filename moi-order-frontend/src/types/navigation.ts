@@ -32,7 +32,7 @@ export type RootStackParamList = {
   // At runtime these are handled by the tab navigator, not the root stack.
   Home: undefined;
   Orders: undefined;
-  OrderDetail: { submissionId: number };
+  OrderDetail: { submissionId: string };
   NinetyDayReport: undefined;
   NinetyDayReportForm: {
     serviceTypeId: number;
@@ -80,8 +80,8 @@ export type RootStackParamList = {
 
   // ── Payment ──────────────────────────────────────────────────────────────
   Payment:
-    | { kind: 'submission'; submissionId: number }
-    | { kind: 'ticket_order'; ticketOrderId: number };
+    | { kind: 'submission'; submissionId: string }
+    | { kind: 'ticket_order'; ticketOrderId: string };
 
   // ── Tickets ──────────────────────────────────────────────────────────────
   Tickets: undefined;
@@ -91,7 +91,7 @@ export type RootStackParamList = {
     /** JSON-encoded Record<variantId, quantity> */
     selectionsJson: string;
   };
-  TicketOrderDetail: { ticketOrderId: number };
+  TicketOrderDetail: { ticketOrderId: string };
 
   // ── Existing public screens ─────────────────────────────────────────────
   Places: undefined;
@@ -131,6 +131,6 @@ export type RootStackParamList = {
   RestaurantMap: undefined;
   CartOrders: undefined;
   Checkout: undefined;
-  FoodOrderDetail: { orderId: number };
-  OrderChat: { orderId: number; orderNumber: string | null; restaurantName: string | null };
+  FoodOrderDetail: { orderId: string };
+  OrderChat: { orderId: string; orderNumber: string | null; restaurantName: string | null };
 };

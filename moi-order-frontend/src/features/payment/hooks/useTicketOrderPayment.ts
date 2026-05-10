@@ -27,7 +27,7 @@ export interface UseTicketOrderPaymentRefreshable extends UseTicketOrderPaymentR
  * Mirrors usePayment but for TicketOrder — same polling + AppState sync pattern.
  * Principle: OCP — new payable type adds a new hook instead of modifying usePayment.
  */
-export function useTicketOrderPayment(ticketOrderId: number): UseTicketOrderPaymentRefreshable {
+export function useTicketOrderPayment(ticketOrderId: string): UseTicketOrderPaymentRefreshable {
   const queryClient = useQueryClient();
 
   const {
@@ -40,6 +40,7 @@ export function useTicketOrderPayment(ticketOrderId: number): UseTicketOrderPaym
   });
 
   useEffect(() => {
+    if (!ticketOrderId) return;
     create();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketOrderId]);
@@ -47,6 +48,7 @@ export function useTicketOrderPayment(ticketOrderId: number): UseTicketOrderPaym
   const { data: ticketOrder, isLoading: isLoadingOrder } = useQuery({
     queryKey: QUERY_KEYS.TICKET_ORDERS.DETAIL(ticketOrderId),
     queryFn:  () => fetchTicketOrder(ticketOrderId),
+    enabled:  ticketOrderId.length > 0,
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       return status === TICKET_ORDER_STATUS.PendingPayment ? 3000 : false;
