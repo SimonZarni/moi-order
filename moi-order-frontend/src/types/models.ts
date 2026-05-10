@@ -291,6 +291,22 @@ export interface RestaurantPhoto {
   sort_order: number;
 }
 
+export interface MenuItemOption {
+  id: number;
+  name: string;
+  additional_price_cents: number;
+  is_available: boolean;
+}
+
+export interface MenuItemOptionGroup {
+  id: number;
+  name: string;
+  is_required: boolean;
+  min_selections: number;
+  max_selections: number;
+  options: MenuItemOption[];
+}
+
 export interface MenuItem {
   id: number;
   menu_category_id: number;
@@ -301,6 +317,7 @@ export interface MenuItem {
   photo_url: string | null;
   status: import('./enums').MenuItemStatus;
   sort_order: number;
+  option_groups: MenuItemOptionGroup[];
 }
 
 export interface MenuCategory {
@@ -332,13 +349,23 @@ export interface Restaurant {
   created_at: string;
 }
 
+export interface FoodOrderSelectedOption {
+  option_group_id: number;
+  option_group_name: string;
+  option_id: number;
+  option_name: string;
+  price_cents: number;
+}
+
 export interface FoodOrderItem {
   id: number;
   menu_item_id: number | null;
   name: string;
   price_cents: number;
+  additional_price_cents: number;
   quantity: number;
   notes: string | null;
+  selected_options: FoodOrderSelectedOption[];
   subtotal_cents: number;
 }
 

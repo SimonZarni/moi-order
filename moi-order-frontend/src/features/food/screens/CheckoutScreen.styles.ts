@@ -52,11 +52,19 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colours.divider,
   },
-  itemName: {
+  itemInfo: {
     flex: 1,
+  },
+  itemName: {
     fontSize: typography.sm,
     color: colours.textOnLight,
     fontWeight: '500',
+  },
+  itemOptions: {
+    fontSize: typography.xxs,
+    color: colours.textMuted,
+    marginTop: 2,
+    lineHeight: 14,
   },
   itemQty: {
     fontSize: typography.sm,

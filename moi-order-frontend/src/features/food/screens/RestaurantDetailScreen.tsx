@@ -8,6 +8,7 @@ import { RESTAURANT_STATUS } from '@/types/enums';
 import { MenuCategory, OpeningHour } from '@/types/models';
 import { MenuItemRow } from '../components/MenuItemRow';
 import { CartBar } from '../components/CartBar';
+import { ModifierSheet } from '../components/ModifierSheet';
 import { useRestaurantDetailScreen } from '../hooks/useRestaurantDetailScreen';
 import { styles } from './RestaurantDetailScreen.styles';
 
@@ -27,8 +28,9 @@ export function RestaurantDetailScreen(): React.JSX.Element {
   const insets = useSafeAreaInsets();
   const {
     restaurant, isLoading, isError,
-    cartItemCount, cartTotalCents, getQuantity,
+    cartItemCount, cartTotalCents, getQuantity, pendingItem,
     handleBack, handleAddItem, handleRemoveItem, handleCartPress,
+    handleCloseModifierSheet, handleConfirmModifiers,
   } = useRestaurantDetailScreen();
 
   if (isLoading) {
@@ -101,6 +103,12 @@ export function RestaurantDetailScreen(): React.JSX.Element {
       </ScrollView>
 
       <CartBar itemCount={cartItemCount} totalCents={cartTotalCents} onPress={handleCartPress} />
+
+      <ModifierSheet
+        item={pendingItem}
+        onClose={handleCloseModifierSheet}
+        onConfirm={handleConfirmModifiers}
+      />
     </SafeAreaView>
   );
 }

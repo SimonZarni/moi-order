@@ -30,6 +30,10 @@ class StoreFoodOrderRequest extends FormRequest
             'items.*.menu_item_id' => ['required', 'integer', 'exists:menu_items,id'],
             'items.*.quantity'     => ['required', 'integer', 'min:1', 'max:99'],
             'items.*.notes'        => ['nullable', 'string', 'max:200'],
+            // selected_options validated structurally here; ownership validated in FoodOrderService.
+            'items.*.selected_options'                           => ['sometimes', 'nullable', 'array'],
+            'items.*.selected_options.*.option_group_id'        => ['required', 'integer', 'exists:menu_item_option_groups,id'],
+            'items.*.selected_options.*.option_id'              => ['required', 'integer', 'exists:menu_item_options,id'],
         ];
     }
 

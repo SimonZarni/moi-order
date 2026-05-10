@@ -14,17 +14,21 @@ class FoodOrderItem extends Model
         'menu_item_id',
         'name',
         'price_cents',
+        'additional_price_cents',
         'quantity',
         'notes',
+        'selected_options',
         'subtotal_cents',
     ];
 
     protected function casts(): array
     {
         return [
-            'price_cents'    => 'integer',
-            'quantity'       => 'integer',
-            'subtotal_cents' => 'integer',
+            'price_cents'            => 'integer',
+            'additional_price_cents' => 'integer',
+            'quantity'               => 'integer',
+            'subtotal_cents'         => 'integer',
+            'selected_options'       => 'array',
         ];
     }
 

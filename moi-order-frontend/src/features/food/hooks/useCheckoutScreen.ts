@@ -50,9 +50,13 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
         delivery_address: null,
         customer_notes:   notes.trim() || null,
         items: items.map((i) => ({
-          menu_item_id: i.menuItemId,
-          quantity:     i.quantity,
-          notes:        null,
+          menu_item_id:     i.menuItemId,
+          quantity:         i.quantity,
+          notes:            null,
+          selected_options: i.selectedOptions.map((o) => ({
+            option_group_id: o.optionGroupId,
+            option_id:       o.optionId,
+          })),
         })),
       },
       {

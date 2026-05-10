@@ -35,10 +35,12 @@ export function CartOrdersScreen(): React.JSX.Element {
             )}
             <View style={styles.card}>
               {cartItems.map((item: CartItem) => (
-                <View key={item.menuItemId} style={styles.cartItemRow}>
+                <View key={item.cartKey} style={styles.cartItemRow}>
                   <Text style={styles.cartItemName} numberOfLines={1}>{item.name}</Text>
                   <Text style={styles.cartItemQty}>×{item.quantity}</Text>
-                  <Text style={styles.cartItemPrice}>{formatPrice((item.priceCents * item.quantity) / 100)}</Text>
+                  <Text style={styles.cartItemPrice}>
+                    {formatPrice(((item.basePriceCents + item.additionalPriceCents) * item.quantity) / 100)}
+                  </Text>
                 </View>
               ))}
               <View style={styles.subtotalRow}>

@@ -76,11 +76,37 @@ export const styles = StyleSheet.create({
   controlBtnTextMinus: {
     color: colours.primary,
   },
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
   quantity: {
     fontSize: typography.md,
     fontWeight: '700',
     color: colours.textOnLight,
     minWidth: 20,
     textAlign: 'center',
+  },
+  quantityBadge: {
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: colours.primary + '1a',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  quantityBadgeText: {
+    fontSize: typography.xs,
+    fontWeight: '700',
+    color: colours.primary,
+  },
+  customizeHint: {
+    fontSize: typography.xxs,
+    color: colours.primary,
+    fontWeight: '600',
+    letterSpacing: 0.2,
   },
 });

@@ -11,6 +11,7 @@ use App\Events\NewFoodOrder;
 use App\Exceptions\DomainException;
 use App\Models\FoodOrder;
 use App\Models\MenuItem;
+use App\Models\MenuItemOptionGroup;
 use App\Models\Restaurant;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -56,20 +57,73 @@ class FoodOrderService
                 }
             }
 
+            // Load option groups for items that have selected options — server validates
+            // ownership and computes additional price from DB (never from client).
+            $itemIdsWithOptions = collect($dto->items)
+                ->filter(fn ($l) => ! empty($l['selected_options'] ?? []))
+                ->pluck('menu_item_id')
+                ->unique()
+                ->all();
+
+            $optionGroupsByItem = collect();
+            if (! empty($itemIdsWithOptions)) {
+                $optionGroupsByItem = MenuItemOptionGroup::with('options')
+                    ->whereIn('menu_item_id', $itemIdsWithOptions)
+                    ->get()
+                    ->groupBy('menu_item_id');
+            }
+
             // Server-side total calculation — never use client-supplied prices.
             $subtotal = 0;
             $lines    = [];
             foreach ($dto->items as $line) {
-                $item      = $menuItems[$line['menu_item_id']];
-                $lineTotal = $item->price_cents * $line['quantity'];
+                $item           = $menuItems[$line['menu_item_id']];
+                $rawSelections  = $line['selected_options'] ?? [];
+                $groups         = $optionGroupsByItem->get($item->id, collect());
+
+                // Validate each submitted option belongs to this item's groups.
+                $additionalPriceCents = 0;
+                $selectedOptionsData  = [];
+                foreach ($rawSelections as $sel) {
+                    $group = $groups->firstWhere('id', $sel['option_group_id']);
+                    if ($group === null) {
+                        throw new DomainException('order.invalid_option', 422);
+                    }
+                    $option = $group->options->firstWhere('id', $sel['option_id']);
+                    if ($option === null || ! $option->is_available) {
+                        throw new DomainException('order.invalid_option', 422);
+                    }
+                    // Price read from DB — client value ignored.
+                    $additionalPriceCents += $option->additional_price_cents;
+                    $selectedOptionsData[] = [
+                        'option_group_id'   => $group->id,
+                        'option_group_name' => $group->name,
+                        'option_id'         => $option->id,
+                        'option_name'       => $option->name,
+                        'price_cents'       => $option->additional_price_cents,
+                    ];
+                }
+
+                // Validate required groups have at least one selection.
+                foreach ($groups->where('is_required', true) as $group) {
+                    $filled = collect($selectedOptionsData)->firstWhere('option_group_id', $group->id);
+                    if ($filled === null) {
+                        throw new DomainException('order.required_option_missing', 422);
+                    }
+                }
+
+                $unitPrice = $item->price_cents + $additionalPriceCents;
+                $lineTotal = $unitPrice * $line['quantity'];
                 $subtotal += $lineTotal;
                 $lines[]   = [
-                    'menu_item_id'   => $item->id,
-                    'name'           => $item->name,
-                    'price_cents'    => $item->price_cents,
-                    'quantity'       => $line['quantity'],
-                    'notes'          => $line['notes'] ?? null,
-                    'subtotal_cents' => $lineTotal,
+                    'menu_item_id'           => $item->id,
+                    'name'                   => $item->name,
+                    'price_cents'            => $item->price_cents,
+                    'additional_price_cents' => $additionalPriceCents,
+                    'quantity'               => $line['quantity'],
+                    'notes'                  => $line['notes'] ?? null,
+                    'selected_options'       => empty($selectedOptionsData) ? null : $selectedOptionsData,
+                    'subtotal_cents'         => $lineTotal,
                 ];
             }
 

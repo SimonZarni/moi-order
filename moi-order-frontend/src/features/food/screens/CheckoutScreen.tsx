@@ -35,10 +35,19 @@ export function CheckoutScreen(): React.JSX.Element {
 
         <View style={styles.card}>
           {items.map((item) => (
-            <View key={item.menuItemId} style={styles.itemRow}>
-              <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
+            <View key={item.cartKey} style={styles.itemRow}>
+              <View style={styles.itemInfo}>
+                <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
+                {item.selectedOptions.length > 0 && (
+                  <Text style={styles.itemOptions} numberOfLines={2}>
+                    {item.selectedOptions.map((o) => o.optionName).join(', ')}
+                  </Text>
+                )}
+              </View>
               <Text style={styles.itemQty}>×{item.quantity}</Text>
-              <Text style={styles.itemPrice}>{formatPrice((item.priceCents * item.quantity) / 100)}</Text>
+              <Text style={styles.itemPrice}>
+                {formatPrice(((item.basePriceCents + item.additionalPriceCents) * item.quantity) / 100)}
+              </Text>
             </View>
           ))}
           <View style={styles.totalRow}>

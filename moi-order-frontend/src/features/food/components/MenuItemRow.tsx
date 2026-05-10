@@ -10,11 +10,12 @@ interface Props {
   item: MenuItem;
   quantity: number;
   onAdd: (item: MenuItem) => void;
-  onRemove: (menuItemId: number) => void;
+  onRemove: (cartKey: string) => void;
 }
 
 export function MenuItemRow({ item, quantity, onAdd, onRemove }: Props): React.JSX.Element {
   const isUnavailable = item.status === MENU_ITEM_STATUS.Unavailable;
+  const hasOptions = item.option_groups.length > 0;
 
   return (
     <View style={[styles.row, isUnavailable && styles.unavailable]}>
@@ -27,17 +28,21 @@ export function MenuItemRow({ item, quantity, onAdd, onRemove }: Props): React.J
         {item.description !== null && (
           <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
         )}
-        <Text style={styles.price}>{formatPrice(item.price_cents / 100)}</Text>
+        <View style={styles.priceRow}>
+          <Text style={styles.price}>{formatPrice(item.price_cents / 100)}</Text>
+          {hasOptions && <Text style={styles.customizeHint}>Customizable</Text>}
+        </View>
         {isUnavailable && <Text style={styles.unavailableLabel}>Unavailable</Text>}
       </View>
 
       {!isUnavailable && (
         <View style={styles.controls}>
-          {quantity > 0 && (
+          {/* Items without options: show −/qty/+ inline. Items with options: show qty badge + + only. */}
+          {quantity > 0 && !hasOptions && (
             <>
               <Pressable
                 style={[styles.controlBtn, styles.controlBtnMinus]}
-                onPress={() => onRemove(item.id)}
+                onPress={() => onRemove(`${item.id}:`)}
                 accessibilityRole="button"
                 accessibilityLabel={`Remove one ${item.name}`}
               >
@@ -45,6 +50,11 @@ export function MenuItemRow({ item, quantity, onAdd, onRemove }: Props): React.J
               </Pressable>
               <Text style={styles.quantity}>{quantity}</Text>
             </>
+          )}
+          {quantity > 0 && hasOptions && (
+            <View style={styles.quantityBadge}>
+              <Text style={styles.quantityBadgeText}>{quantity}</Text>
+            </View>
           )}
           <Pressable
             style={styles.controlBtn}

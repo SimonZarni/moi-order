@@ -47,7 +47,7 @@ class RestaurantBrowseController extends Controller
         $restaurant = Restaurant::with([
             'openingHours',
             'photos',
-            'menuCategories.menuItems' => fn ($q) => $q->available(),
+            'menuCategories.menuItems' => fn ($q) => $q->with('optionGroups.options')->available(),
         ])->findOrFail($id);
 
         return response()->json(['data' => new RestaurantResource($restaurant, $this->storage)]);
