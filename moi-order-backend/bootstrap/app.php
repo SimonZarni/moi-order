@@ -7,6 +7,7 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Exceptions\MaintenanceModeException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -22,15 +23,14 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
 
-        // These paths respond normally even when the app is in maintenance mode.
-        // /api/health — lets the mobile app poll for restoration.
-        // /api/admin/v1/maintenance* — lets the admin toggle maintenance off without CLI access.
-        $middleware->preventMaintenanceModeExclude([
-            '/api/health',
-            '/api/admin/v1/maintenance',
-            '/api/admin/v1/maintenance/enable',
-            '/api/admin/v1/maintenance/disable',
-        ]);
+        // Swap in our custom PreventRequestsDuringMaintenance which declares the
+        // $except list of paths that bypass the 503 maintenance gate.
+        // Using replace() instead of preventMaintenanceModeExclude() for
+        // compatibility with all Laravel 11/12 minor versions.
+        $middleware->replace(
+            \Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,
+            \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
+        );
 
         $middleware->alias([
             'admin.auth'          => \App\Http\Middleware\AdminAuthenticate::class,
@@ -79,6 +79,20 @@ return Application::configure(basePath: dirname(__DIR__))
                 'message' => 'Unauthenticated.',
                 'code'    => 'unauthenticated',
             ], 401);
+        });
+
+        // MaintenanceModeException must be caught before HttpException because it is
+        // a subclass — the generic HttpException handler would match it first and
+        // return the unhelpful {"message":"An error occurred.","code":"http_error"}.
+        // retryAfter comes from `php artisan down --retry=3600` so the mobile app
+        // can display an accurate countdown timer.
+        $exceptions->render(function (MaintenanceModeException $e): JsonResponse {
+            return response()->json([
+                'status'      => 'maintenance',
+                'message'     => 'System Upgrade',
+                'details'     => 'Moi Order is getting better! We are updating our services. Please check back shortly.',
+                'retry_after' => $e->retryAfter,
+            ], 503);
         });
 
         // Catches ALL HttpException subclasses (including 405 MethodNotAllowed and

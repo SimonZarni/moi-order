@@ -159,4 +159,9 @@ export const navData: NavItem[] = [
     icon: icon('solar:shield-keyhole-bold-duotone'),
     permission: 'admins.manage',
   },
+  {
+    title: 'Settings',
+    path: '/account/settings',
+    icon: icon('solar:settings-bold-duotone'),
+  },
 ];

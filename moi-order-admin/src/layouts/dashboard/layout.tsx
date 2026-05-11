@@ -1,6 +1,8 @@
 import type { Breakpoint } from '@mui/material/styles';
 
 import { useMemo } from 'react';
+
+import { useHeartbeat } from 'src/hooks/useHeartbeat';
 import { merge } from 'es-toolkit';
 import { useBoolean } from 'minimal-shared/hooks';
 
@@ -65,6 +67,7 @@ export function DashboardLayout({
 }: DashboardLayoutProps) {
   const theme = useTheme();
   const { hasPermission, isSuperAdmin } = useAuth();
+  useHeartbeat();
 
   const filteredNav = useMemo(() => filterNavData(navData, hasPermission), [hasPermission]);
 
