@@ -98,6 +98,50 @@ export const styles = StyleSheet.create({
     fontSize: typography.xxs,
     fontWeight: '700',
   },
+  // Inline confirmation bar (delete + status picker) — replaces Alert.alert
+  confirmBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+    backgroundColor: colours.errorBg,
+    borderTopWidth: 1,
+    borderTopColor: colours.error + '33',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  confirmText: {
+    flex: 1,
+    fontSize: typography.xs,
+    color: colours.error,
+    fontWeight: '600',
+  },
+  confirmYes: {
+    backgroundColor: colours.error,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    borderRadius: radius.sm,
+    minHeight: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  confirmYesText: {
+    fontSize: typography.xs,
+    color: colours.white,
+    fontWeight: '700',
+  },
+  confirmNo: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    minHeight: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  confirmNoText: {
+    fontSize: typography.xs,
+    color: colours.textMuted,
+    fontWeight: '600',
+  },
   // Accordion
   accordion: {
     backgroundColor: colours.surfaceMuted,

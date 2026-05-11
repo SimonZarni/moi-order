@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Alert, View, Text, Pressable, Image } from 'react-native';
+import { View, Text, Pressable, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './MenuItemRow.styles';
 import { colours } from '../../../shared/theme/colours';
@@ -29,6 +29,9 @@ interface MenuItemRowProps {
 
 export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleStatus, onDelete, onEdit }: MenuItemRowProps): React.JSX.Element {
   const [expanded, setExpanded] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [confirmingStatus, setConfirmingStatus] = useState(false);
+
   const statusColour = STATUS_COLOURS[item.status];
   const hasModifiers = item.option_groups.length > 0;
   const hasDiscount = item.original_price_cents != null && item.original_price_cents > item.price_cents;
@@ -40,38 +43,33 @@ export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleSt
   const handleEditPress = useCallback(() => onEdit(item), [item, onEdit]);
 
   const handleDeletePress = useCallback(() => {
-    console.log('[MenuItemRow] handleDeletePress fired', { id: item.id, name: item.name, isLastInRequiredCategory });
     if (isLastInRequiredCategory) {
-      console.log('[MenuItemRow] → last in required category, calling onDelete with fallback');
       onDelete(item.id, handleEditPress);
       return;
     }
-    console.log('[MenuItemRow] → scheduling Alert.alert via setTimeout');
-    setTimeout(() => {
-      console.log('[MenuItemRow] → Alert.alert firing now');
-      Alert.alert('Remove item?', `"${item.name}" will be permanently deleted.`, [
-        { text: 'Delete', style: 'destructive', onPress: () => { console.log('[MenuItemRow] Alert confirmed — calling onDelete'); onDelete(item.id); } },
-        { text: 'Cancel', style: 'cancel' },
-      ]);
-    }, 50);
-  }, [item.id, item.name, isLastInRequiredCategory, onDelete, handleEditPress]);
+    setConfirmingDelete(true);
+  }, [isLastInRequiredCategory, item.id, handleEditPress, onDelete]);
 
-  const handleStatusPress = useCallback(() => {
-    Alert.alert(
-      item.name,
-      'Set item status',
-      [
-        { text: 'Available', onPress: () => onToggleStatus(item.id, MENU_ITEM_STATUS.Available) },
-        { text: 'Out of Stock', onPress: () => onToggleStatus(item.id, MENU_ITEM_STATUS.OutOfStock) },
-        { text: 'Cancel', style: 'cancel' },
-      ],
-    );
-  }, [item.id, item.name, onToggleStatus]);
+  const handleConfirmDelete = useCallback(() => {
+    setConfirmingDelete(false);
+    onDelete(item.id);
+  }, [item.id, onDelete]);
+
+  const handleCancelDelete = useCallback(() => setConfirmingDelete(false), []);
+
+  const handleStatusPress = useCallback(() => setConfirmingStatus(true), []);
+
+  const handleSelectStatus = useCallback((status: MenuItemStatus) => {
+    setConfirmingStatus(false);
+    onToggleStatus(item.id, status);
+  }, [item.id, onToggleStatus]);
+
+  const handleCancelStatus = useCallback(() => setConfirmingStatus(false), []);
 
   return (
     <View style={styles.wrapper}>
       <View style={styles.row}>
-        {/* Plain View — no Pressable here; a flex:1 Pressable sibling blocks Android touch dispatch to actions */}
+        {/* Plain View — a flex:1 Pressable sibling blocks Android touch dispatch to actions */}
         <View style={styles.rowTapArea}>
           {item.photo_url !== null && (
             <Image source={{ uri: item.photo_url }} style={styles.photo} accessibilityLabel={item.name} />
@@ -100,7 +98,7 @@ export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleSt
           </Pressable>
           <Pressable
             style={styles.deleteButton}
-            onPress={(e) => { console.log('[MenuItemRow] Pressable onPress raw', e.nativeEvent); handleDeletePress(); }}
+            onPress={handleDeletePress}
             accessibilityLabel={`Delete ${item.name}`}
             accessibilityRole="button"
           >
@@ -132,6 +130,35 @@ export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleSt
           )}
         </View>
       </View>
+
+      {/* Inline delete confirmation — replaces Alert.alert which is unreliable inside FlatList+Modal trees */}
+      {confirmingDelete && (
+        <View style={styles.confirmBar}>
+          <Text style={styles.confirmText}>Delete "{item.name}"?</Text>
+          <Pressable style={styles.confirmYes} onPress={handleConfirmDelete} accessibilityRole="button" accessibilityLabel="Confirm delete">
+            <Text style={styles.confirmYesText}>Delete</Text>
+          </Pressable>
+          <Pressable style={styles.confirmNo} onPress={handleCancelDelete} accessibilityRole="button" accessibilityLabel="Cancel delete">
+            <Text style={styles.confirmNoText}>Cancel</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {/* Inline status picker — replaces Alert.alert for the same reason */}
+      {confirmingStatus && (
+        <View style={styles.confirmBar}>
+          <Text style={styles.confirmText}>Set status:</Text>
+          <Pressable style={[styles.confirmYes, { backgroundColor: colours.success }]} onPress={() => handleSelectStatus(MENU_ITEM_STATUS.Available)} accessibilityRole="button" accessibilityLabel="Set available">
+            <Text style={styles.confirmYesText}>Available</Text>
+          </Pressable>
+          <Pressable style={[styles.confirmYes, { backgroundColor: colours.warning }]} onPress={() => handleSelectStatus(MENU_ITEM_STATUS.OutOfStock)} accessibilityRole="button" accessibilityLabel="Set out of stock">
+            <Text style={styles.confirmYesText}>Out of Stock</Text>
+          </Pressable>
+          <Pressable style={styles.confirmNo} onPress={handleCancelStatus} accessibilityRole="button" accessibilityLabel="Cancel">
+            <Text style={styles.confirmNoText}>Cancel</Text>
+          </Pressable>
+        </View>
+      )}
 
       {expanded && hasModifiers && (
         <View style={styles.accordion}>
