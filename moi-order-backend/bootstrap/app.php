@@ -7,6 +7,7 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Exceptions\MaintenanceModeException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -78,6 +79,20 @@ return Application::configure(basePath: dirname(__DIR__))
                 'message' => 'Unauthenticated.',
                 'code'    => 'unauthenticated',
             ], 401);
+        });
+
+        // MaintenanceModeException must be caught before HttpException because it is
+        // a subclass — the generic HttpException handler would match it first and
+        // return the unhelpful {"message":"An error occurred.","code":"http_error"}.
+        // retryAfter comes from `php artisan down --retry=3600` so the mobile app
+        // can display an accurate countdown timer.
+        $exceptions->render(function (MaintenanceModeException $e): JsonResponse {
+            return response()->json([
+                'status'      => 'maintenance',
+                'message'     => 'System Upgrade',
+                'details'     => 'Moi Order is getting better! We are updating our services. Please check back shortly.',
+                'retry_after' => $e->retryAfter,
+            ], 503);
         });
 
         // Catches ALL HttpException subclasses (including 405 MethodNotAllowed and
