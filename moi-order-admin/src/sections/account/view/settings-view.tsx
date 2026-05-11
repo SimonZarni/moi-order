@@ -35,10 +35,9 @@ import { fDate, fToNow } from 'src/utils/format-time';
 
 import { settingsApi } from 'src/api/settings';
 import { useAuth } from 'src/context/auth-context';
+import { DashboardContent } from 'src/layouts/dashboard';
 import { adminSessionsApi, type AdminSession } from 'src/api/adminSessions';
 import { appConfigApi, type AppAlertConfig, type AppUpdateConfig } from 'src/api/appConfig';
-
-import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
 
