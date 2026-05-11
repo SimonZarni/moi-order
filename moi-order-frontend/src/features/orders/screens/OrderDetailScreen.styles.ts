@@ -232,6 +232,21 @@ export const styles = StyleSheet.create({
     color: colours.destructive,
     letterSpacing: 0.4,
   },
+  viewAllOrdersBtn: {
+    borderWidth: 1.5,
+    borderColor: 'rgba(0,0,0,0.12)',
+    borderRadius: radius.lg,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.sm,
+  },
+  viewAllOrdersBtnText: {
+    fontSize: typography.sm,
+    fontWeight: '700',
+    color: colours.textMuted,
+    letterSpacing: 0.4,
+  },
 
   // ── Download button ────────────────────────────────────────────────────────
   downloadBtn: {

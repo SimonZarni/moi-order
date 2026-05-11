@@ -40,6 +40,7 @@ export interface UseOrderDetailScreenResult {
   handleDownloadResult: () => void;
   handleSaveResult: () => Promise<void>;
   handleClosePreview: () => void;
+  handleViewAllOrders: () => void;
 }
 
 export function useOrderDetailScreen(): UseOrderDetailScreenResult {
@@ -154,8 +155,9 @@ export function useOrderDetailScreen(): UseOrderDetailScreenResult {
     }
   }, [previewImageUrl, submissionId]);
 
-  const handleRefresh      = useCallback((): void => { refetch(); }, [refetch]);
-  const handleBack         = useCallback((): void => { navigation.goBack(); }, [navigation]);
+  const handleRefresh        = useCallback((): void => { refetch(); }, [refetch]);
+  const handleBack           = useCallback((): void => { navigation.goBack(); }, [navigation]);
+  const handleViewAllOrders  = useCallback((): void => { navigation.navigate('Orders'); }, [navigation]);
   const handleClosePreview = useCallback((): void => { setPreviewImageUrl(null); }, []);
 
   const handleDocumentPress = useCallback((url: string): void => {
@@ -185,5 +187,6 @@ export function useOrderDetailScreen(): UseOrderDetailScreenResult {
     docPreviewUrl, handleDocumentPress, handleCloseDocPreview,
     handleRefresh, handleBack, handlePayNow,
     handleDownloadResult, handleSaveResult, handleClosePreview,
+    handleViewAllOrders,
   };
 }

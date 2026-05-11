@@ -41,6 +41,7 @@ export function OrderDetailScreen(): React.JSX.Element {
     docPreviewUrl, handleDocumentPress, handleCloseDocPreview,
     handleRefresh, handleBack, handlePayNow,
     handleDownloadResult, handleSaveResult, handleClosePreview,
+    handleViewAllOrders,
   } = useOrderDetailScreen();
   const { locale } = useLocale();
   const s = useStrings();
@@ -197,6 +198,16 @@ export function OrderDetailScreen(): React.JSX.Element {
               </Text>
             </Pressable>
           )}
+
+          {/* ── View All Orders ── */}
+          <Pressable
+            style={({ pressed }) => [styles.viewAllOrdersBtn, { opacity: pressed ? 0.7 : 1 }]}
+            onPress={handleViewAllOrders}
+            accessibilityLabel="View all orders"
+            accessibilityRole="button"
+          >
+            <Text style={styles.viewAllOrdersBtnText}>View All Orders  →</Text>
+          </Pressable>
 
           {/* ── Download / View Result File (completed) ── */}
           {canDownload && (
