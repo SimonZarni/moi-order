@@ -36,9 +36,17 @@ module.exports = {
       infoPlist: {
         UIViewControllerBasedStatusBarAppearance: false,
         NSLocationWhenInUseUsageDescription:
-          "Used to show nearby places on the map.",
+          "Moi Order uses your location to show nearby restaurants, bus ticket counters, and places on the map.",
         NSLocationAlwaysAndWhenInUseUsageDescription:
-          "Used to show nearby places on the map.",
+          "Moi Order uses your location to show nearby restaurants, bus ticket counters, and places on the map.",
+        NSPhotoLibraryUsageDescription:
+          "Moi Order needs access to your photo library to upload your profile picture and company registration documents.",
+        NSPhotoLibraryAddUsageDescription:
+          "Moi Order saves your ticket QR codes and payment receipts to your photo library.",
+        NSCameraUsageDescription:
+          "Moi Order uses your camera to photograph documents for company registration.",
+        NSUserNotificationsUsageDescription:
+          "Moi Order sends you order updates, delivery alerts, and important account notifications.",
         ITSAppUsesNonExemptEncryption: false,
         LSApplicationQueriesSchemes: ["lineauth2"],
       },
