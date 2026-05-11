@@ -12,7 +12,7 @@ module.exports = {
     slug: "moi-order-frontend",
     owner: "simonzarni",
     scheme: "moiorder",
-    version: "1.0.0",
+    version: "2.0.0",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -56,7 +56,7 @@ module.exports = {
     },
     android: {
       package: "com.moiorder.app",
-      versionCode: 1,
+      versionCode: 2,
       adaptiveIcon: {
         foregroundImage: "./assets/icon.png",
         backgroundColor: "#00000000",
