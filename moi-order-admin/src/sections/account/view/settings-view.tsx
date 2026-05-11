@@ -26,8 +26,8 @@ import ToggleButton from '@mui/material/ToggleButton';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
-import TablePagination from '@mui/material/TablePagination';
 import InputAdornment from '@mui/material/InputAdornment';
+import TablePagination from '@mui/material/TablePagination';
 import CircularProgress from '@mui/material/CircularProgress';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -37,8 +37,8 @@ import { fDate, fToNow } from 'src/utils/format-time';
 import { settingsApi } from 'src/api/settings';
 import { useAuth } from 'src/context/auth-context';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { adminSessionsApi, type AdminSession, type AdminSessionMeta } from 'src/api/adminSessions';
 import { appConfigApi, type AppAlertConfig, type AppUpdateConfig } from 'src/api/appConfig';
+import { adminSessionsApi, type AdminSession, type AdminSessionMeta } from 'src/api/adminSessions';
 
 import { Iconify } from 'src/components/iconify';
 
