@@ -20,12 +20,32 @@ class AdminTokenFromCookie
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $token = $request->cookie('admin_token');
+        if (! $request->hasHeader('Authorization')) {
+            $token = $this->parseCookieHeader($request->headers->get('Cookie', ''));
 
-        if ($token && ! $request->hasHeader('Authorization')) {
-            $request->headers->set('Authorization', 'Bearer ' . $token);
+            if ($token !== null) {
+                $request->headers->set('Authorization', 'Bearer ' . $token);
+            }
         }
 
         return $next($request);
+    }
+
+    /**
+     * Parse the raw Cookie header directly instead of using $request->cookie(),
+     * which goes through the EncryptCookies middleware and returns null when the
+     * cookie was written unencrypted (as it is on API routes).
+     */
+    private function parseCookieHeader(string $cookieHeader): ?string
+    {
+        foreach (explode(';', $cookieHeader) as $pair) {
+            [$name, $value] = array_pad(explode('=', trim($pair), 2), 2, null);
+
+            if (trim((string) $name) === 'admin_token' && $value !== null) {
+                return urldecode(trim($value));
+            }
+        }
+
+        return null;
     }
 }
