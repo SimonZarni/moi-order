@@ -5,7 +5,8 @@ import * as SecureStore from 'expo-secure-store';
 import { useFocusEffect } from '@react-navigation/native';
 import { useMapStore } from '@/shared/store/mapStore';
 
-const LAST_MAP_LOCATION_KEY = 'last_map_location';
+const LAST_MAP_LOCATION_KEY       = 'last_map_location';
+const LOCATION_PERMISSION_ASKED_KEY = 'location_permission_asked';
 
 import { usePlacesList, usePlaceDetailForMap, useTagsList } from './usePlacesMapData';
 import {
@@ -154,12 +155,19 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
       let sub: Location.LocationSubscription | null = null;
 
       (async () => {
-        // Check without prompting first — only request if never asked.
         const { status: existing } = await Location.getForegroundPermissionsAsync();
         let status = existing;
-        if (existing === Location.PermissionStatus.UNDETERMINED) {
-          ({ status } = await Location.requestForegroundPermissionsAsync());
+
+        if (existing !== Location.PermissionStatus.GRANTED) {
+          // On Android, "denied but can ask again" returns UNDETERMINED — identical
+          // to "never asked". Use a persisted flag so we only auto-prompt once.
+          const alreadyAsked = await SecureStore.getItemAsync(LOCATION_PERMISSION_ASKED_KEY);
+          if (!alreadyAsked) {
+            await SecureStore.setItemAsync(LOCATION_PERMISSION_ASKED_KEY, '1');
+            ({ status } = await Location.requestForegroundPermissionsAsync());
+          }
         }
+
         if (status !== Location.PermissionStatus.GRANTED) return;
 
         // Seed the camera instantly from the device's cached position — zero network
