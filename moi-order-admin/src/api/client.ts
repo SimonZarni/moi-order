@@ -1,6 +1,15 @@
 import type { ApiError } from 'src/types';
+import type { InternalAxiosRequestConfig } from 'axios';
 
 import axios from 'axios';
+
+// Extend Axios config to carry the pathname captured at request time.
+// This prevents a race condition where the initial /auth/me session check
+// (started on /sign-in before any login) completes after the user has already
+// logged in and navigated to the dashboard — causing a spurious 401 redirect.
+type ExtendedAxiosRequestConfig = InternalAxiosRequestConfig & {
+  _originPathname?: string;
+};
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -13,7 +22,11 @@ const apiClient = axios.create({
   },
 });
 
-apiClient.interceptors.request.use((config) => {
+apiClient.interceptors.request.use((config: ExtendedAxiosRequestConfig) => {
+  // Snapshot the current pathname so the response interceptor can check where
+  // the request *originated*, not where the user is when the response arrives.
+  config._originPathname = window.location.pathname;
+
   // For FormData, remove the default application/json Content-Type so the browser
   // can set multipart/form-data with the correct boundary automatically.
   if (config.data instanceof FormData) {
@@ -37,10 +50,12 @@ apiClient.interceptors.response.use(
       | { message?: string; code?: string; errors?: Record<string, string[]> }
       | undefined;
 
-    // Guard against redirect loops: if we are already on the sign-in page (e.g. the
-    // initial session check on app load returns 401), let the auth context handle it
-    // via React state rather than triggering a hard navigation to the same URL.
-    if (status === 401 && !redirectingToLogin && window.location.pathname !== '/sign-in') {
+    // Only redirect to sign-in if the request itself originated from a protected
+    // page (not /sign-in). This prevents the initial session-check /auth/me — fired
+    // on mount while on /sign-in — from triggering a redirect if the user logs in
+    // and navigates to the dashboard before that request resolves.
+    const originPathname = (error.config as ExtendedAxiosRequestConfig | undefined)?._originPathname;
+    if (status === 401 && !redirectingToLogin && originPathname !== '/sign-in') {
       redirectingToLogin = true;
       window.location.href = '/sign-in';
     }
