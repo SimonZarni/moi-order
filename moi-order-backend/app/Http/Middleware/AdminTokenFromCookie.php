@@ -20,16 +20,20 @@ class AdminTokenFromCookie
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // $_SERVER['HTTP_COOKIE'] is populated by Nginx via fastcgi_param HTTP_COOKIE $http_cookie
+        // and is more reliable than $request->headers->get('Cookie') which Symfony may not expose.
+        $cookieHeader = $_SERVER['HTTP_COOKIE'] ?? $request->headers->get('Cookie') ?? '';
+
         \Illuminate\Support\Facades\Log::error('AdminTokenFromCookie', [
-            'running'      => true,
-            'has_auth'     => $request->hasHeader('Authorization'),
-            'cookie_raw'   => $request->headers->get('Cookie'),
-            'server_cookie' => $_SERVER['HTTP_COOKIE'] ?? null,
-            'request_cookie' => $request->cookie('admin_token'),
+            'running'             => true,
+            'has_auth'            => $request->hasHeader('Authorization'),
+            'cookie_from_server'  => $_SERVER['HTTP_COOKIE'] ?? null,
+            'cookie_from_headers' => $request->headers->get('Cookie'),
+            'cookie_used'         => $cookieHeader,
         ]);
 
         if (! $request->hasHeader('Authorization')) {
-            $token = $this->parseCookieHeader($request->headers->get('Cookie', ''));
+            $token = $this->parseCookieHeader($cookieHeader);
 
             if ($token !== null) {
                 $request->headers->set('Authorization', 'Bearer ' . $token);
