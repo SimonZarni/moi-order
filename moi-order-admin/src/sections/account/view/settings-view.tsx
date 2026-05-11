@@ -161,7 +161,18 @@ export function SettingsView() {
   useEffect(() => {
     appConfigApi
       .get()
-      .then((data) => setUpdateConfig(data.update))
+      .then((data) => {
+        const u = data.update;
+        setUpdateConfig({
+          ios_min_version:     u.ios_min_version     ?? '',
+          android_min_version: u.android_min_version ?? '',
+          type:                u.type,
+          title:               u.title               ?? '',
+          message:             u.message             ?? '',
+          ios_store_url:       u.ios_store_url        ?? '',
+          android_store_url:   u.android_store_url    ?? '',
+        });
+      })
       .catch(() => {});
   }, []);
 
