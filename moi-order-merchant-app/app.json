@@ -9,7 +9,8 @@
       "bundleIdentifier": "com.moiorder.merchant",
       "supportsTablet": true,
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Moi Order needs access to your photo library to upload menu item photos, your restaurant cover photo, logo, and KYC identity documents."
+        "NSPhotoLibraryUsageDescription": "Moi Order needs access to your photo library to upload menu item photos, your restaurant cover photo, logo, and KYC identity documents.",
+        "NSUserNotificationsUsageDescription": "Moi Order sends you order alerts and important account updates."
       }
     },
     "android": {
