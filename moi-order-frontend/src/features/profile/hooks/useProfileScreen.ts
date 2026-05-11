@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Linking, Platform } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
@@ -7,7 +7,6 @@ import type { DateTimePickerEvent } from '@react-native-community/datetimepicker
 
 import { useProfileData } from '@/features/profile/hooks/useProfileData';
 import { TriggerReminderResult } from '@/shared/api/profile';
-import { fetchAppConfig } from '@/shared/api/appConfig';
 import { useProfileForm } from '@/features/profile/hooks/useProfileForm';
 import { useChangePasswordForm } from '@/features/profile/hooks/useChangePasswordForm';
 import { useProfilePicture } from '@/features/profile/hooks/useProfilePicture';
@@ -16,7 +15,6 @@ import { useAuthStore } from '@/shared/store/authStore';
 import { useNotificationStore } from '@/shared/store/notificationStore';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { Locale } from '@/shared/store/localeStore';
-import { APP_UPDATE_TYPE } from '@/types/enums';
 import { RootStackParamList } from '@/types/navigation';
 import { User } from '@/types/models';
 
@@ -312,74 +310,8 @@ export function useProfileScreen(): UseProfileScreenResult {
   }, [clearAuth, pushToken, queryClient]);
 
   const handleCheckVersion = useCallback((): void => {
-    // Async internally — wrapped in void so the callback signature stays () => void
-    void (async (): Promise<void> => {
-      const currentVersion = (await import('expo-application')).default.nativeApplicationVersion;
-      if (currentVersion === null) {
-        Alert.alert('Version Unknown', 'Cannot determine the current app version.');
-        return;
-      }
-
-      let config;
-      try {
-        config = await fetchAppConfig();
-      } catch {
-        Alert.alert('Error', 'Could not check for updates. Please try again.');
-        return;
-      }
-
-      const { update } = config;
-      const minVersion = Platform.OS === 'ios'
-        ? update.ios_min_version
-        : update.android_min_version;
-      const storeUrl = Platform.OS === 'ios'
-        ? update.ios_store_url
-        : update.android_store_url;
-
-      if (minVersion === null || update.type === APP_UPDATE_TYPE.None) {
-        Alert.alert("You're up to date", `Version ${currentVersion} is the latest version.`);
-        return;
-      }
-
-      // Semver comparison: split by '.' and compare numerically
-      const parse = (v: string): [number, number, number] => {
-        const parts = v.split('.').map(Number);
-        return [parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0];
-      };
-      const [cMaj, cMin, cPat] = parse(currentVersion);
-      const [mMaj, mMin, mPat] = parse(minVersion);
-      const isBehind = mMaj > cMaj || (mMaj === cMaj && mMin > cMin) || (mMaj === cMaj && mMin === cMin && mPat > cPat);
-
-      if (!isBehind) {
-        Alert.alert("You're up to date", `Version ${currentVersion} is the latest version.`);
-        return;
-      }
-
-      const alertTitle   = update.title   ?? 'Update Available';
-      const alertMessage = update.message ?? `Version ${minVersion} is now available.`;
-
-      if (update.type === APP_UPDATE_TYPE.Required) {
-        Alert.alert(alertTitle, alertMessage, [
-          {
-            text: 'Update Now',
-            onPress: () => {
-              if (storeUrl) Linking.openURL(storeUrl).catch(() => {});
-            },
-          },
-        ]);
-      } else {
-        Alert.alert(alertTitle, alertMessage, [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Update',
-            onPress: () => {
-              if (storeUrl) Linking.openURL(storeUrl).catch(() => {});
-            },
-          },
-        ]);
-      }
-    })();
-  }, []);
+    navigation.navigate('AppVersion');
+  }, [navigation]);
 
   const handleDeleteAccount = useCallback((): void => {
     Alert.alert(

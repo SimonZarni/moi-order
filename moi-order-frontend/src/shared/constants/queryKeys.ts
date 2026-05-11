@@ -66,4 +66,5 @@ export const QUERY_KEYS = {
     LIST:   (type: string) => ['emergency-contacts', 'list', type] as const,
     DETAIL: (id: number)   => ['emergency-contacts', 'detail', id] as const,
   },
+  APP_CONFIG: ['app-config'] as const,
 } as const;

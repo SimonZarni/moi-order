@@ -108,6 +108,8 @@ export function SettingsView() {
     message: '',
     ios_store_url: '',
     android_store_url: '',
+    next_version: '',
+    changelog: [],
   });
   const [updateSaving, setUpdateSaving] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
@@ -171,6 +173,8 @@ export function SettingsView() {
           message:             u.message             ?? '',
           ios_store_url:       u.ios_store_url        ?? '',
           android_store_url:   u.android_store_url    ?? '',
+          next_version:        u.next_version         ?? '',
+          changelog:           u.changelog            ?? [],
         });
       })
       .catch(() => {});
@@ -256,6 +260,10 @@ export function SettingsView() {
         update_message:      updateConfig.message || null,
         ios_store_url:       updateConfig.ios_store_url || null,
         android_store_url:   updateConfig.android_store_url || null,
+        next_version:        updateConfig.next_version || null,
+        changelog:           updateConfig.changelog.filter((s) => s.trim()).length > 0
+                               ? updateConfig.changelog.filter((s) => s.trim())
+                               : null,
       })
       .then((data) => { setUpdateConfig(data.update); setUpdateSuccess(true); })
       .catch(() => setUpdateError('Failed to save update settings. Please try again.'))
@@ -756,6 +764,67 @@ export function SettingsView() {
                 </Grid>
                 <TextField fullWidth label="Update Title" placeholder="Update Available" value={updateConfig.title} onChange={(e) => setUpdateConfig((prev) => ({ ...prev, title: e.target.value }))} />
                 <TextField fullWidth multiline minRows={3} label="Update Message" placeholder="A new version of the app is available with improvements and fixes." value={updateConfig.message} onChange={(e) => setUpdateConfig((prev) => ({ ...prev, message: e.target.value }))} inputProps={{ maxLength: 1000 }} helperText={`${updateConfig.message.length}/1000`} />
+
+                {/* ── Upcoming Release ─────────────────────────────────── */}
+                <Box>
+                  <Typography variant="subtitle2" sx={{ mb: 0.5 }}>Upcoming Release</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Shown to users on the App Version screen — announce the next version before it ships.
+                  </Typography>
+                </Box>
+                <TextField
+                  fullWidth
+                  label="Next Version"
+                  placeholder="1.2.0"
+                  value={updateConfig.next_version}
+                  onChange={(e) => setUpdateConfig((prev) => ({ ...prev, next_version: e.target.value }))}
+                  helperText="Semver format, e.g. 1.2.0"
+                  inputProps={{ maxLength: 20 }}
+                />
+                <Box>
+                  <Typography variant="body2" fontWeight={500} sx={{ mb: 1 }}>
+                    What&apos;s Coming (Changelog)
+                  </Typography>
+                  <Stack spacing={1}>
+                    {updateConfig.changelog.map((item, idx) => (
+                      <Stack key={idx} direction="row" spacing={1} alignItems="center">
+                        <TextField
+                          fullWidth
+                          size="small"
+                          placeholder={`Feature ${idx + 1}`}
+                          value={item}
+                          onChange={(e) => {
+                            const next = [...updateConfig.changelog];
+                            next[idx] = e.target.value;
+                            setUpdateConfig((prev) => ({ ...prev, changelog: next }));
+                          }}
+                          inputProps={{ maxLength: 200 }}
+                        />
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => {
+                            const next = updateConfig.changelog.filter((_, i) => i !== idx);
+                            setUpdateConfig((prev) => ({ ...prev, changelog: next }));
+                          }}
+                        >
+                          <Iconify icon="mingcute:close-line" width={16} />
+                        </IconButton>
+                      </Stack>
+                    ))}
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<Iconify icon="mingcute:add-line" width={16} />}
+                      onClick={() => setUpdateConfig((prev) => ({ ...prev, changelog: [...prev.changelog, ''] }))}
+                      disabled={updateConfig.changelog.length >= 20}
+                      sx={{ alignSelf: 'flex-start' }}
+                    >
+                      Add Feature
+                    </Button>
+                  </Stack>
+                </Box>
+
                 <Button variant="contained" color="primary" disabled={updateSaving} onClick={handleSaveUpdate}
                   startIcon={updateSaving ? <CircularProgress size={16} color="inherit" /> : undefined}
                   sx={{ alignSelf: 'flex-start' }}

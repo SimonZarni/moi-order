@@ -47,6 +47,8 @@ class AppConfigPublicResource extends JsonResource
                 'message'             => $this->update_message,
                 'ios_store_url'       => $this->ios_store_url,
                 'android_store_url'   => $this->android_store_url,
+                'next_version'        => $this->next_version,
+                'changelog'           => $this->changelog ?? [],
             ],
             'alerts' => $alerts,
         ];

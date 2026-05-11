@@ -121,6 +121,7 @@ export type RootStackParamList = {
   MoiVerified: undefined;
   UpdatePhone: undefined;
   UpdateEmail: undefined;
+  AppVersion: undefined;
 
   // ── Emergency Contacts ────────────────────────────────────────────────────
   EmergencyContactList:   { type: import('./enums').EmergencyContactType };

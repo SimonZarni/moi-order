@@ -8,6 +8,8 @@ export type AppUpdateConfig = {
   message: string;
   ios_store_url: string;
   android_store_url: string;
+  next_version: string;
+  changelog: string[];
 };
 
 export type AppConfigData = {
@@ -22,6 +24,8 @@ export type UpdateAppConfigPayload = {
   update_message: string | null;
   ios_store_url: string | null;
   android_store_url: string | null;
+  next_version: string | null;
+  changelog: string[] | null;
 };
 
 export const appConfigApi = {

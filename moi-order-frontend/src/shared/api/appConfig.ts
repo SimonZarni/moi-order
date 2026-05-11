@@ -13,6 +13,8 @@ export interface AppConfigUpdate {
   message: string | null;
   ios_store_url: string | null;
   android_store_url: string | null;
+  next_version: string | null;
+  changelog: string[];
 }
 
 export interface AppConfigAlertItem {

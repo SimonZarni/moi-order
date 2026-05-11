@@ -36,6 +36,8 @@ class AppConfig extends Model
         'update_message',
         'ios_store_url',
         'android_store_url',
+        'next_version',
+        'changelog',
     ];
 
     /** @return array<string, mixed> */
@@ -43,6 +45,7 @@ class AppConfig extends Model
     {
         return [
             'update_type' => AppUpdateType::class,
+            'changelog'   => 'array',
         ];
     }
 
