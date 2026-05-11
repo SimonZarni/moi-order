@@ -138,11 +138,11 @@ export const navData: NavItem[] = [
     path: '/push-notifications',
     icon: icon('solar:settings-bold-duotone'),
   },
-  {
-    title: 'Content',
-    path: '/content',
-    icon: icon('solar:pen-bold'),
-  },
+  // {
+  //   title: 'Content',
+  //   path: '/content',
+  //   icon: icon('solar:pen-bold'),
+  // },
   {
     title: 'Support',
     path: '/support',
