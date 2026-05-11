@@ -21,6 +21,7 @@ module.exports = {
     },
     updates: {
       enabled: true,
+      checkOnLaunch: "ALWAYS",
       fallbackToCacheTimeout: 0,
       url: "https://u.expo.dev/299e73b6-58b0-43d0-9a56-c7a212af98e5",
     },

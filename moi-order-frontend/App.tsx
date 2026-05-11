@@ -101,6 +101,7 @@ import { useNotificationsData } from '@/features/notifications/hooks/useNotifica
 import { usePusherNotifications } from '@/features/notifications/hooks/usePusherNotifications';
 import { usePushNotifications } from '@/features/notifications/hooks/usePushNotifications';
 import { useAppUpdate } from '@/shared/hooks/useAppUpdate';
+import { useOtaUpdate } from '@/shared/hooks/useOtaUpdate';
 import { useNoticeModal } from '@/shared/hooks/useNoticeModal';
 import { NoticeModal } from '@/shared/components/NoticeModal/NoticeModal';
 import { PlacesMapScreen } from '@/features/map/screens/PlacesMapScreen';
@@ -153,6 +154,7 @@ const queryClient = new QueryClient({
 // the user logs in (userId becomes non-null).
 function AppShell(): React.JSX.Element {
   useAppUpdate();
+  useOtaUpdate();
   usePusherNotifications();
   usePushNotifications();
   useNotificationsData();
