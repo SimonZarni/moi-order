@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\Admin\V1\AdminAccountController;
 use App\Http\Controllers\Api\Admin\V1\AdminAppConfigController;
+use App\Http\Controllers\Api\Admin\V1\AdminSessionController;
 use App\Http\Controllers\Api\Admin\V1\AdminMaintenanceController;
 use App\Http\Controllers\Api\Admin\V1\AdminAuthController;
 use App\Http\Controllers\Api\Admin\V1\AdminKycController;
@@ -105,6 +106,14 @@ Route::prefix('admins')->name('admin.admins.')->group(function (): void {
         Route::post('/verify-otp', [AdminAccountController::class, 'verifyOtp'])->name('verify-otp');
         Route::post('/', [AdminAccountController::class, 'store'])->name('store');
     });
+});
+
+// ── Admin Sessions (super-admin only) ────────────────────────────────────────
+Route::middleware('ensure.super_admin')->prefix('sessions')->name('admin.sessions.')->group(function (): void {
+    Route::get('/', [AdminSessionController::class, 'index'])->name('index');
+    // /others must come before /{tokenId} so "others" is not captured as an integer
+    Route::delete('/others', [AdminSessionController::class, 'destroyOthers'])->name('destroyOthers');
+    Route::delete('/{tokenId}', [AdminSessionController::class, 'destroy'])->name('destroy')->whereNumber('tokenId');
 });
 
 // ── Submissions ───────────────────────────────────────────────────────────────

@@ -21,12 +21,13 @@ const STATUS_COLOURS: Record<MenuItemStatus, string> = {
 
 interface MenuItemRowProps {
   item: MenuItem;
+  isLastInRequiredCategory?: boolean;
   onToggleStatus: (id: number, status: MenuItemStatus) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: number, onEditFallback?: () => void) => void;
   onEdit: (item: MenuItem) => void;
 }
 
-export function MenuItemRow({ item, onToggleStatus, onDelete, onEdit }: MenuItemRowProps): React.JSX.Element {
+export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleStatus, onDelete, onEdit }: MenuItemRowProps): React.JSX.Element {
   const [expanded, setExpanded] = useState(false);
   const statusColour = STATUS_COLOURS[item.status];
   const hasModifiers = item.option_groups.length > 0;
@@ -39,11 +40,16 @@ export function MenuItemRow({ item, onToggleStatus, onDelete, onEdit }: MenuItem
   const handleEditPress = useCallback(() => onEdit(item), [item, onEdit]);
 
   const handleDeletePress = useCallback(() => {
+    if (isLastInRequiredCategory) {
+      // Pass the edit handler so the guard alert in the hook can offer "Edit Item".
+      onDelete(item.id, handleEditPress);
+      return;
+    }
     Alert.alert('Remove item?', `"${item.name}" will be permanently deleted.`, [
       { text: 'Delete', style: 'destructive', onPress: () => onDelete(item.id) },
       { text: 'Cancel', style: 'cancel' },
     ]);
-  }, [item.id, item.name, onDelete]);
+  }, [item.id, item.name, isLastInRequiredCategory, onDelete, handleEditPress]);
 
   const handleStatusPress = useCallback(() => {
     Alert.alert(
@@ -59,27 +65,30 @@ export function MenuItemRow({ item, onToggleStatus, onDelete, onEdit }: MenuItem
 
   return (
     <View style={styles.wrapper}>
-      <Pressable
-        style={styles.row}
-        onPress={handleRowPress}
-        accessibilityLabel={`${item.name}${hasModifiers ? ', tap to see modifiers' : ''}`}
-        accessibilityRole="button"
-      >
-        {item.photo_url !== null && (
-          <Image source={{ uri: item.photo_url }} style={styles.photo} accessibilityLabel={item.name} />
-        )}
-        <View style={styles.info}>
-          <Text style={styles.name}>{item.name}</Text>
-          <View style={styles.priceRow}>
-            <Text style={styles.price}>{formatPrice(item.price_cents)}</Text>
-            {hasDiscount && (
-              <Text style={styles.originalPrice}>{formatPrice(item.original_price_cents!)}</Text>
-            )}
-            {hasModifiers && (
-              <Text style={styles.modifierCount}>{item.option_groups.length} modifier{item.option_groups.length !== 1 ? 's' : ''}</Text>
-            )}
+      {/* Row is a View, not a Pressable — nested Pressable on Android swallows inner taps */}
+      <View style={styles.row}>
+        <Pressable
+          style={styles.rowTapArea}
+          onPress={handleRowPress}
+          accessibilityLabel={`${item.name}${hasModifiers ? ', tap to see modifiers' : ''}`}
+          accessibilityRole="button"
+        >
+          {item.photo_url !== null && (
+            <Image source={{ uri: item.photo_url }} style={styles.photo} accessibilityLabel={item.name} />
+          )}
+          <View style={styles.info}>
+            <Text style={styles.name}>{item.name}</Text>
+            <View style={styles.priceRow}>
+              <Text style={styles.price}>{formatPrice(item.price_cents)}</Text>
+              {hasDiscount && (
+                <Text style={styles.originalPrice}>{formatPrice(item.original_price_cents!)}</Text>
+              )}
+              {hasModifiers && (
+                <Text style={styles.modifierCount}>{item.option_groups.length} modifier{item.option_groups.length !== 1 ? 's' : ''}</Text>
+              )}
+            </View>
           </View>
-        </View>
+        </Pressable>
         <View style={styles.actions}>
           <Pressable
             style={styles.editButton}
@@ -115,7 +124,7 @@ export function MenuItemRow({ item, onToggleStatus, onDelete, onEdit }: MenuItem
             />
           )}
         </View>
-      </Pressable>
+      </View>
 
       {expanded && hasModifiers && (
         <View style={styles.accordion}>

@@ -19,8 +19,8 @@ import type { AddItemForm } from '../hooks/useMenuScreen';
 
 export function MenuScreen(): React.JSX.Element {
   const {
-    categories, isLoading, hasMissingSystemCategories, showAddCategoryModal,
-    addItemCategoryId, addItemForm, isAddingItem,
+    categories, isLoading, hasMissingSystemCategories, restaurantStatus,
+    showAddCategoryModal, addItemCategoryId, addItemForm, isAddingItem,
     handleAddCategory, handleDeleteCategory,
     handleToggleItemStatus, handleDeleteItem,
     setShowAddCategoryModal,
@@ -89,6 +89,7 @@ export function MenuScreen(): React.JSX.Element {
         renderItem={({ item }) => (
           <CategorySection
             category={item}
+            restaurantStatus={restaurantStatus}
             onDeleteCategory={handleDeleteCategory}
             onRenameCategory={handleRenameCategory}
             onToggleItemStatus={handleToggleItemStatus}

@@ -31,46 +31,23 @@ import CircularProgress from '@mui/material/CircularProgress';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
-import { fDate } from 'src/utils/format-time';
+import { fDate, fToNow } from 'src/utils/format-time';
 
 import { settingsApi } from 'src/api/settings';
-import { DashboardContent } from 'src/layouts/dashboard';
+import { useAuth } from 'src/context/auth-context';
+import { adminSessionsApi, type AdminSession } from 'src/api/adminSessions';
 import { appConfigApi, type AppAlertConfig, type AppUpdateConfig } from 'src/api/appConfig';
+
+import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-type DeviceSession = {
-  id: string;
-  username: string;
-  account: string;
-  browser: string;
-  device: string;
-  ip: string;
-  location: string;
-  lastActive: Date;
-  isCurrent: boolean;
-};
-
-const MOCK_SESSIONS: DeviceSession[] = [
-  { id: 's1', username: 'Admin User', account: 'admin@moiorder.com', browser: 'Chrome 124', device: 'MacBook Pro', ip: '192.168.1.42', location: 'Bangkok, Thailand', lastActive: new Date(), isCurrent: true },
-  { id: 's2', username: 'Admin User', account: 'admin@moiorder.com', browser: 'Safari 17', device: 'iPhone 15 Pro', ip: '203.144.12.87', location: 'Bangkok, Thailand', lastActive: new Date(Date.now() - 3600000 * 2), isCurrent: false },
-  { id: 's3', username: 'Admin User', account: 'admin@moiorder.com', browser: 'Firefox 125', device: 'Windows PC', ip: '58.11.220.5', location: 'Yangon, Myanmar', lastActive: new Date(Date.now() - 86400000 * 1), isCurrent: false },
-  { id: 's4', username: 'Manager Ko', account: 'manager@moiorder.com', browser: 'Chrome 124', device: 'iPad Air', ip: '171.100.43.21', location: 'Vientiane, Laos', lastActive: new Date(Date.now() - 86400000 * 3), isCurrent: false },
-];
-
-const BROWSER_ICON: Record<string, string> = {
-  Chrome: '/assets/icons/browsers/ic-chrome.svg',
-  Safari: '/assets/icons/browsers/ic-safari.svg',
-  Firefox: '/assets/icons/browsers/ic-firefox.svg',
-};
-
-const getBrowserKey = (browser: string) => Object.keys(BROWSER_ICON).find((k) => browser.startsWith(k)) ?? '';
-
-// ----------------------------------------------------------------------
-
 export function SettingsView() {
+  const { isSuperAdmin } = useAuth();
+  const superAdmin = isSuperAdmin();
+
   const [pwSaved, setPwSaved] = useState(false);
   const [emailSaved, setEmailSaved] = useState(false);
   const [showCurrent, setShowCurrent] = useState(false);
@@ -84,7 +61,13 @@ export function SettingsView() {
   const [notifSubmissions, setNotifSubmissions] = useState(true);
   const [notifPayments, setNotifPayments] = useState(true);
   const [notifReviews, setNotifReviews] = useState(false);
-  const [sessions, setSessions] = useState<DeviceSession[]>(MOCK_SESSIONS);
+
+  // ── Admin Sessions (super-admin only) ────────────────────────────────────
+  const [sessions, setSessions] = useState<AdminSession[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [sessionsError, setSessionsError] = useState<string | null>(null);
+  const [revoking, setRevoking] = useState<number | null>(null);
+  const [revokingAll, setRevokingAll] = useState(false);
 
   // ── Maintenance mode ──────────────────────────────────────────────────────
   const [maintenanceActive, setMaintenanceActive] = useState<boolean | null>(null);
@@ -123,6 +106,16 @@ export function SettingsView() {
       .then((s) => setMaintenanceActive(s.active))
       .catch(() => setMaintenanceActive(false));
   }, []);
+
+  useEffect(() => {
+    if (!superAdmin) return;
+    setSessionsLoading(true);
+    adminSessionsApi
+      .list()
+      .then(setSessions)
+      .catch(() => setSessionsError('Failed to load sessions.'))
+      .finally(() => setSessionsLoading(false));
+  }, [superAdmin]);
 
   useEffect(() => {
     appConfigApi
@@ -216,13 +209,25 @@ export function SettingsView() {
   const pwMatch = newPw === confirmPw;
   const pwValid = currentPw.length > 0 && newPw.length >= 8 && pwMatch;
 
-  const handleSignOutDevice = (id: string) => {
-    setSessions((prev) => prev.filter((s) => s.id !== id));
-  };
+  const handleRevokeSession = useCallback((tokenId: number) => {
+    setRevoking(tokenId);
+    setSessionsError(null);
+    adminSessionsApi
+      .revoke(tokenId)
+      .then(() => setSessions((prev) => prev.filter((s) => s.id !== tokenId)))
+      .catch(() => setSessionsError('Failed to revoke session. Please try again.'))
+      .finally(() => setRevoking(null));
+  }, []);
 
-  const handleSignOutAll = () => {
-    setSessions((prev) => prev.filter((s) => s.isCurrent));
-  };
+  const handleRevokeOthers = useCallback(() => {
+    setRevokingAll(true);
+    setSessionsError(null);
+    adminSessionsApi
+      .revokeOthers()
+      .then(() => setSessions((prev) => prev.filter((s) => s.is_current)))
+      .catch(() => setSessionsError('Failed to sign out others. Please try again.'))
+      .finally(() => setRevokingAll(false));
+  }, []);
 
   return (
     <DashboardContent>
@@ -387,7 +392,7 @@ export function SettingsView() {
                     <Typography variant="body2" fontWeight={500}>Sign out all devices</Typography>
                     <Typography variant="caption" color="text.secondary">Revoke all active sessions</Typography>
                   </Box>
-                  <Button variant="outlined" color="warning" size="small" onClick={handleSignOutAll}>Sign Out All</Button>
+                  <Button variant="outlined" color="warning" size="small" onClick={handleRevokeOthers}>Sign Out All</Button>
                 </Box>
                 <Divider />
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -489,107 +494,125 @@ export function SettingsView() {
           </Card>
         </Grid>
 
-        {/* Logged In Devices */}
-        <Grid size={{ xs: 12 }}>
-          <Card>
-            <CardHeader
-              title="Logged In Devices"
-              subheader={`${sessions.length} active session${sessions.length !== 1 ? 's' : ''}`}
-              action={
-                sessions.filter((s) => !s.isCurrent).length > 0 && (
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    color="warning"
-                    startIcon={<Iconify icon="solar:restart-bold" width={14} />}
-                    onClick={handleSignOutAll}
-                  >
-                    Sign Out All Others
-                  </Button>
-                )
-              }
-            />
-            <Divider />
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Device / Browser</TableCell>
-                    <TableCell>User</TableCell>
-                    <TableCell>IP Address</TableCell>
-                    <TableCell>Location</TableCell>
-                    <TableCell>Last Active</TableCell>
-                    <TableCell align="right">Action</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {sessions.map((session) => (
-                    <TableRow key={session.id} hover>
-                      <TableCell>
-                        <Stack direction="row" alignItems="center" spacing={1.5}>
-                          <Avatar
-                            sx={{ width: 36, height: 36, bgcolor: 'background.neutral' }}
-                          >
-                            <Iconify
-                              icon={getBrowserKey(session.browser) === 'Safari' ? 'solar:eye-bold' : getBrowserKey(session.browser) === 'Firefox' ? 'solar:share-bold' : 'solar:settings-bold-duotone'}
-                              width={18}
-                              sx={{ color: 'text.secondary' }}
-                            />
-                          </Avatar>
-                          <Box>
-                            <Typography variant="body2" fontWeight={500}>{session.device}</Typography>
-                            <Typography variant="caption" color="text.secondary">{session.browser}</Typography>
-                          </Box>
-                        </Stack>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" fontWeight={500}>{session.username}</Typography>
-                        <Typography variant="caption" color="text.secondary">{session.account}</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>{session.ip}</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Stack direction="row" alignItems="center" spacing={0.5}>
-                          <Iconify icon="solar:eye-bold" width={13} sx={{ color: 'text.disabled' }} />
-                          <Typography variant="body2">{session.location}</Typography>
-                        </Stack>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">{session.isCurrent ? 'Now' : fDate(session.lastActive)}</Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        {session.isCurrent
-                          ? (
+        {/* Admin Sessions — super-admin only */}
+        {superAdmin && (
+          <Grid size={{ xs: 12 }}>
+            <Card>
+              <CardHeader
+                title="Admin Sessions"
+                subheader="All currently active admin logins — revoke any session instantly"
+                action={
+                  sessions.filter((s) => !s.is_current).length > 0 && (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      color="warning"
+                      disabled={revokingAll}
+                      startIcon={
+                        revokingAll
+                          ? <CircularProgress size={12} color="inherit" />
+                          : <Iconify icon="solar:restart-bold" width={14} />
+                      }
+                      onClick={handleRevokeOthers}
+                    >
+                      Sign Out All Others
+                    </Button>
+                  )
+                }
+              />
+              <Divider />
+              {sessionsError && (
+                <Alert severity="error" sx={{ mx: 2, mt: 2 }} onClose={() => setSessionsError(null)}>
+                  {sessionsError}
+                </Alert>
+              )}
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Admin</TableCell>
+                      <TableCell>Role</TableCell>
+                      <TableCell>Logged In</TableCell>
+                      <TableCell>Last Active</TableCell>
+                      <TableCell align="right">Action</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {sessionsLoading && (
+                      <TableRow>
+                        <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                          <CircularProgress size={24} />
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {!sessionsLoading && sessions.map((session) => (
+                      <TableRow key={session.id} hover>
+                        <TableCell>
+                          <Stack direction="row" alignItems="center" spacing={1.5}>
+                            <Avatar sx={{ width: 36, height: 36, fontSize: 14 }}>
+                              {session.admin?.name?.[0]?.toUpperCase() ?? '?'}
+                            </Avatar>
+                            <Box>
+                              <Typography variant="body2" fontWeight={500}>
+                                {session.admin?.name ?? '—'}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {session.admin?.email ?? '—'}
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={session.admin?.role?.label ?? '—'}
+                            size="small"
+                            variant="outlined"
+                            color={session.admin?.role?.slug === 'super_admin' ? 'error' : 'default'}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2">{fDate(session.created_at)}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2">
+                            {session.is_current ? 'Now (you)' : session.last_used_at ? fToNow(session.last_used_at) : '—'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          {session.is_current ? (
                             <Chip label="Current" size="small" color="primary" variant="outlined" />
-                          )
-                          : (
+                          ) : (
                             <Button
                               size="small"
                               variant="outlined"
                               color="error"
-                              startIcon={<Iconify icon="mingcute:close-line" width={13} />}
-                              onClick={() => handleSignOutDevice(session.id)}
+                              disabled={revoking === session.id}
+                              startIcon={
+                                revoking === session.id
+                                  ? <CircularProgress size={12} color="inherit" />
+                                  : <Iconify icon="mingcute:close-line" width={13} />
+                              }
+                              onClick={() => handleRevokeSession(session.id)}
                             >
-                              Sign Out
+                              Revoke
                             </Button>
-                          )
-                        }
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {sessions.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={6} align="center" sx={{ py: 4, color: 'text.secondary' }}>
-                        No active sessions
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Card>
-        </Grid>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {!sessionsLoading && sessions.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={5} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                          No active sessions
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Card>
+          </Grid>
+        )}
         {/* App Updates */}
         <Grid size={{ xs: 12 }}>
           <Card>

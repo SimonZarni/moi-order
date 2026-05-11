@@ -15,6 +15,12 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     gap: spacing.sm,
   },
+  rowTapArea: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
   photo: {
     width: 48,
     height: 48,

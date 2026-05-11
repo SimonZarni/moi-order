@@ -5,20 +5,25 @@ import { styles } from './CategorySection.styles';
 import { colours } from '../../../shared/theme/colours';
 import { MenuItemRow } from './MenuItemRow';
 import type { MenuCategory, MenuItem } from '../../../types/models';
-import type { MenuItemStatus } from '../../../types/enums';
+import type { MenuItemStatus, RestaurantStatus } from '../../../types/enums';
+import { RESTAURANT_STATUS } from '../../../types/enums';
+
+const REQUIRED_SYSTEM_TYPES = new Set(['popular_picks', 'recommendations']);
 
 interface CategorySectionProps {
   category: MenuCategory;
+  restaurantStatus: RestaurantStatus | null;
   onDeleteCategory: (id: number) => void;
   onRenameCategory: (id: number, newName: string) => void;
   onToggleItemStatus: (itemId: number, status: MenuItemStatus) => void;
-  onDeleteItem: (id: number) => void;
+  onDeleteItem: (id: number, onEditFallback?: () => void) => void;
   onAddItem: (categoryId: number) => void;
   onEditItem: (item: MenuItem) => void;
 }
 
 export function CategorySection({
   category,
+  restaurantStatus,
   onDeleteCategory,
   onRenameCategory,
   onToggleItemStatus,
@@ -26,6 +31,11 @@ export function CategorySection({
   onAddItem,
   onEditItem,
 }: CategorySectionProps): React.JSX.Element {
+  // Last item in Popular Picks or Recommendations is protected from deletion
+  // unless the restaurant is explicitly closed (merchant can clean up while closed).
+  const isRequiredSystem = category.is_system && REQUIRED_SYSTEM_TYPES.has(category.category_type ?? '');
+  const restaurantIsClosed = restaurantStatus === RESTAURANT_STATUS.Closed;
+  const lastItemGuarded = isRequiredSystem && category.items.length === 1 && !restaurantIsClosed;
   const [isExpanded, setIsExpanded] = useState(true);
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameInput, setRenameInput] = useState('');
@@ -124,6 +134,7 @@ export function CategorySection({
             <MenuItemRow
               key={item.id}
               item={item}
+              isLastInRequiredCategory={lastItemGuarded}
               onToggleStatus={onToggleItemStatus}
               onDelete={onDeleteItem}
               onEdit={onEditItem}
