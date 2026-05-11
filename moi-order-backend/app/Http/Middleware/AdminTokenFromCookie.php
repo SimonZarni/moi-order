@@ -20,7 +20,7 @@ class AdminTokenFromCookie
 {
     public function handle(Request $request, Closure $next): Response
     {
-        \Illuminate\Support\Facades\Log::debug('AdminTokenFromCookie', [
+        \Illuminate\Support\Facades\Log::warning('AdminTokenFromCookie', [
             'running'      => true,
             'has_auth'     => $request->hasHeader('Authorization'),
             'cookie_raw'   => $request->headers->get('Cookie'),
