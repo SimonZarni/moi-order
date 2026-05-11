@@ -22,20 +22,20 @@ import IconButton from '@mui/material/IconButton';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import ToggleButton from '@mui/material/ToggleButton';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 import InputAdornment from '@mui/material/InputAdornment';
 import CircularProgress from '@mui/material/CircularProgress';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import { fDate } from 'src/utils/format-time';
 
 import { settingsApi } from 'src/api/settings';
-import { appConfigApi, type AppUpdateConfig, type AppAlertConfig } from 'src/api/appConfig';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { appConfigApi, type AppAlertConfig, type AppUpdateConfig } from 'src/api/appConfig';
 
 import { Iconify } from 'src/components/iconify';
 
