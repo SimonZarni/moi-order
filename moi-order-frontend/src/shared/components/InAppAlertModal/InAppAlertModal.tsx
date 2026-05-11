@@ -1,6 +1,8 @@
 import React from 'react';
-import { Image, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { Image, Modal, Pressable, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
+import { colours } from '@/shared/theme/colours';
 import type { AppConfigAlertItem } from '@/shared/api/appConfig';
 
 import { styles } from './InAppAlertModal.styles';
@@ -33,18 +35,19 @@ export function InAppAlertModal({ alert, onDismiss }: Props): React.JSX.Element 
               accessibilityLabel="Alert image"
             />
           )}
-          <ScrollView style={styles.body} scrollEnabled={false}>
-            <Text style={styles.title}>{alert.title}</Text>
+          <View style={styles.body}>
+            <View style={styles.header}>
+              <Ionicons name="warning-outline" size={22} color={colours.warning} />
+              <Text style={styles.title}>{alert.title}</Text>
+            </View>
             <Text style={styles.message}>{alert.message}</Text>
-          </ScrollView>
-          <View style={styles.footer}>
             <Pressable
-              style={styles.dismissButton}
+              style={styles.closeButton}
               onPress={onDismiss}
-              accessibilityLabel="Dismiss alert"
+              accessibilityLabel="Close alert"
               accessibilityRole="button"
             >
-              <Text style={styles.dismissText}>Got it</Text>
+              <Text style={styles.closeButtonText}>Close</Text>
             </Pressable>
           </View>
         </View>

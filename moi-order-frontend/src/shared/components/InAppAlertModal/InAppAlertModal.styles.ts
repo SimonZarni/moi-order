@@ -1,57 +1,64 @@
 import { StyleSheet } from 'react-native';
 
+import { radius } from '@/shared/theme/radius';
+import { colours } from '@/shared/theme/colours';
+import { spacing } from '@/shared/theme/spacing';
+import { typography } from '@/shared/theme/typography';
+
 export const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.55)',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
   },
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    overflow: 'hidden',
+    backgroundColor: colours.white,
+    borderRadius: radius.sheet,
     width: '100%',
     maxWidth: 360,
+    overflow: 'hidden',
   },
   image: {
     width: '100%',
     height: 180,
   },
   body: {
-    paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 8,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.lg,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
   },
   title: {
-    fontSize: 18,
+    fontSize: typography.lg,
     fontWeight: '700',
-    color: '#111827',
-    marginBottom: 8,
-    lineHeight: 24,
+    color: colours.textOnLight,
+    letterSpacing: 0.3,
   },
   message: {
-    fontSize: 14,
-    color: '#6B7280',
-    lineHeight: 22,
+    fontSize: typography.sm,
+    color: colours.textMuted,
+    lineHeight: 24,
+    marginBottom: spacing.xl,
+    textAlign: 'center',
   },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+  closeButton: {
+    backgroundColor: colours.primary,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
   },
-  dismissButton: {
-    backgroundColor: '#063B21',
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 28,
-  },
-  dismissText: {
-    fontSize: 14,
+  closeButtonText: {
+    color: colours.white,
+    fontSize: typography.md,
     fontWeight: '600',
-    color: '#FFFFFF',
-    letterSpacing: 0.2,
+    letterSpacing: 0.5,
   },
 });
