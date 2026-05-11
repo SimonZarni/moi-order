@@ -160,6 +160,12 @@ export const navData: NavItem[] = [
     permission: 'admins.manage',
   },
   {
+    title: 'Audit Log',
+    path: '/audit-logs',
+    icon: icon('solar:clock-circle-outline'),
+    permission: 'admins.manage',
+  },
+  {
     title: 'Settings',
     path: '/account/settings',
     icon: icon('solar:settings-bold-duotone'),

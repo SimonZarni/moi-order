@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Contracts\PayableInterface;
 use App\Enums\SubmissionStatus;
+use App\Traits\HasAuditLog;
 use App\Traits\HasUuid;
 use App\Events\PaymentConfirmed;
 use App\Events\SubmissionPaymentProcessed;
@@ -29,7 +30,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ServiceSubmission extends Model implements PayableInterface
 {
     /** @use HasFactory<ServiceSubmissionFactory> */
-    use HasFactory, HasUuid, SoftDeletes;
+    use HasAuditLog, HasFactory, HasUuid, SoftDeletes;
 
     protected $fillable = [
         'user_id',
@@ -70,6 +71,11 @@ class ServiceSubmission extends Model implements PayableInterface
     {
         $this->loadMissing('user');
         return $this->user->email;
+    }
+
+    public function getAuditEntityType(): string
+    {
+        return 'submission';
     }
 
     public function onPaymentConfirmed(): void

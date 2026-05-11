@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\AuditLogInterface;
 use App\Contracts\DocumentOcrInterface;
 use App\Contracts\FileStorageInterface;
 use App\Contracts\PaymentGatewayInterface;
 use App\Contracts\PushNotificationInterface;
 use App\Contracts\WebPushInterface;
+use App\Services\AuditLogService;
 use App\Services\WebPushService;
 use App\Services\ClaudeOcrService;
 use App\Services\DocumentService;
@@ -37,6 +39,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // DIP: bind audit log contract — singleton so the same instance handles all writes per request.
+        $this->app->singleton(AuditLogInterface::class, AuditLogService::class);
+
         // DIP: bind the contract to the appropriate disk adapter.
         //
         // Production (FILESYSTEM_DISK=s3): uses S3 / R2 / any S3-compatible store.

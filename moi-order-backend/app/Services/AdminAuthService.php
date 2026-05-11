@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\AuditLogInterface;
 use App\DTOs\AdminLoginDTO;
+use App\Enums\AuditAction;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Hash;
@@ -22,6 +24,8 @@ use Illuminate\Validation\ValidationException;
  */
 class AdminAuthService
 {
+    public function __construct(private readonly AuditLogInterface $auditLog) {}
+
     /**
      * @return array{user: User, token: string}
      * @throws ValidationException      when credentials do not match.
@@ -64,6 +68,8 @@ class AdminAuthService
             'user_agent' => $dto->userAgent ?: null,
         ])->save();
 
+        $this->auditLog->recordAs($user, AuditAction::Login);
+
         return ['user' => $user, 'token' => $newToken->plainTextToken];
     }
 
@@ -92,5 +98,7 @@ class AdminAuthService
         if ($accessToken instanceof \Laravel\Sanctum\PersonalAccessToken) {
             $accessToken->delete();
         }
+
+        $this->auditLog->recordAs($user, AuditAction::Logout);
     }
 }

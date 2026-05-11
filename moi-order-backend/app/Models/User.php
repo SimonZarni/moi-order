@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\UserRole;
 use App\Enums\UserStatusEnum;
+use App\Traits\HasAuditLog;
 use App\Traits\HasUuid;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
@@ -29,7 +30,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, HasUuid, Notifiable, SoftDeletes;
+    use HasApiTokens, HasAuditLog, HasFactory, HasUuid, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -115,6 +116,12 @@ class User extends Authenticatable
     public function grantRole(UserRole $role): void
     {
         $this->update(['user_role' => $role->value]);
+    }
+
+    public function auditExcludedFields(): array
+    {
+        // last_active_at changes on every request — too noisy to log.
+        return ['last_active_at', 'simulated_date'];
     }
 
     public function isAdmin(): bool

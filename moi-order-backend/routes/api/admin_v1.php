@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\Admin\V1\AdminAuditLogController;
 use App\Http\Controllers\Api\Admin\V1\AdminAccountController;
 use App\Http\Controllers\Api\Admin\V1\AdminAppConfigController;
 use App\Http\Controllers\Api\Admin\V1\AdminInAppAlertController;
@@ -44,6 +45,12 @@ use Illuminate\Support\Facades\Route;
 | Admin Authenticated Routes — requires auth:sanctum + admin.auth
 |--------------------------------------------------------------------------
 */
+
+// ── Audit Log ─────────────────────────────────────────────────────────────────
+Route::prefix('audit-logs')->name('admin.audit-logs.')->group(function (): void {
+    Route::get('/',       [AdminAuditLogController::class, 'index'])->name('index');
+    Route::get('/export', [AdminAuditLogController::class, 'export'])->name('export');
+});
 
 // ── Heartbeat — excluded from maintenance mode in bootstrap/app.php ───────────
 // Admin dashboard calls this every 5 minutes to keep the Sanctum token active.
