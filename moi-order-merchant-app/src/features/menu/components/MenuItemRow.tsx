@@ -40,13 +40,15 @@ export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleSt
   const handleEditPress = useCallback(() => onEdit(item), [item, onEdit]);
 
   const handleDeletePress = useCallback(() => {
+    console.log('[MenuItemRow] handleDeletePress fired', { id: item.id, name: item.name, isLastInRequiredCategory });
     if (isLastInRequiredCategory) {
-      // Pass the edit handler so the guard alert in the hook can offer "Edit Item".
+      console.log('[MenuItemRow] → last in required category, calling onDelete with fallback');
       onDelete(item.id, handleEditPress);
       return;
     }
+    console.log('[MenuItemRow] → calling Alert.alert');
     Alert.alert('Remove item?', `"${item.name}" will be permanently deleted.`, [
-      { text: 'Delete', style: 'destructive', onPress: () => onDelete(item.id) },
+      { text: 'Delete', style: 'destructive', onPress: () => { console.log('[MenuItemRow] Alert confirmed — calling onDelete'); onDelete(item.id); } },
       { text: 'Cancel', style: 'cancel' },
     ]);
   }, [item.id, item.name, isLastInRequiredCategory, onDelete, handleEditPress]);
@@ -95,7 +97,7 @@ export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleSt
           </Pressable>
           <Pressable
             style={styles.deleteButton}
-            onPress={handleDeletePress}
+            onPress={(e) => { console.log('[MenuItemRow] Pressable onPress raw', e.nativeEvent); handleDeletePress(); }}
             accessibilityLabel={`Delete ${item.name}`}
             accessibilityRole="button"
           >
