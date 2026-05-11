@@ -32,16 +32,19 @@ class AdminAuthController extends Controller
         // Token is written into an httpOnly cookie — never returned in the JSON body.
         // JS on the admin dashboard cannot read this cookie; the browser attaches it
         // automatically, and AdminTokenFromCookie middleware converts it to a Bearer header.
+        // SameSite=None is required because the admin dashboard (vercel.app) and the API
+        // (moiorder.com) are different registrable domains — Lax silently blocks cross-domain
+        // AJAX cookie sending. None requires Secure=true (enforced below).
         $cookie = new Cookie(
             name: 'admin_token',
             value: $result['token'],
             expire: time() + (8 * 60 * 60), // matches createToken() expiry in AdminAuthService
             path: '/api/admin',
             domain: config('session.domain'),
-            secure: app()->isProduction(),
+            secure: true,
             httpOnly: true,
             raw: false,
-            sameSite: Cookie::SAMESITE_LAX,
+            sameSite: Cookie::SAMESITE_NONE,
         );
 
         return response()->json([
@@ -62,10 +65,10 @@ class AdminAuthController extends Controller
             expire: 1,
             path: '/api/admin',
             domain: config('session.domain'),
-            secure: app()->isProduction(),
+            secure: true,
             httpOnly: true,
             raw: false,
-            sameSite: Cookie::SAMESITE_LAX,
+            sameSite: Cookie::SAMESITE_NONE,
         );
 
         return response()->json(null, 204)->withCookie($expired);
