@@ -10,6 +10,7 @@ import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
 import Switch from '@mui/material/Switch';
 import Avatar from '@mui/material/Avatar';
+import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
@@ -21,19 +22,18 @@ import IconButton from '@mui/material/IconButton';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import TableContainer from '@mui/material/TableContainer';
-import InputAdornment from '@mui/material/InputAdornment';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
+import TableContainer from '@mui/material/TableContainer';
+import InputAdornment from '@mui/material/InputAdornment';
 import CircularProgress from '@mui/material/CircularProgress';
-import Dialog from '@mui/material/Dialog';
 
 import { fDate } from 'src/utils/format-time';
 
+import { settingsApi } from 'src/api/settings';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
-import { settingsApi } from 'src/api/settings';
 
 // ----------------------------------------------------------------------
 
