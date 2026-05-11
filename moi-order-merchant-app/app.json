@@ -5,6 +5,9 @@
     "version": "1.0.0",
     "scheme": "merchant",
     "platforms": ["ios", "android", "web"],
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "ios": {
       "bundleIdentifier": "com.moiorder.merchant",
       "supportsTablet": true,
