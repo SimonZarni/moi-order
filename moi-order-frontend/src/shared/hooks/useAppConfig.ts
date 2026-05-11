@@ -62,8 +62,6 @@ export function useAppConfig(): UseAppConfigResult {
   const dismissAlert = useCallback(() => setAlertIndex((i) => i + 1), []);
 
   const run = useCallback(async (): Promise<void> => {
-    if (__DEV__) return;
-
     const currentVersion = Application.nativeApplicationVersion;
     if (currentVersion === null) return;
 
