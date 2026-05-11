@@ -1,14 +1,14 @@
 import type { Breakpoint } from '@mui/material/styles';
 
 import { useMemo } from 'react';
-
-import { useHeartbeat } from 'src/hooks/useHeartbeat';
 import { merge } from 'es-toolkit';
 import { useBoolean } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
+
+import { useHeartbeat } from 'src/hooks/useHeartbeat';
 
 import { useAuth } from 'src/context/auth-context';
 
