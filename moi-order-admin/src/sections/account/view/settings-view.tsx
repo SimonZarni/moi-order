@@ -265,7 +265,21 @@ export function SettingsView() {
                                ? updateConfig.changelog.filter((s) => s.trim())
                                : null,
       })
-      .then((data) => { setUpdateConfig(data.update); setUpdateSuccess(true); })
+      .then((data) => {
+        const u = data.update;
+        setUpdateConfig({
+          type:                u.type,
+          ios_min_version:     u.ios_min_version     ?? '',
+          android_min_version: u.android_min_version ?? '',
+          title:               u.title               ?? '',
+          message:             u.message             ?? '',
+          ios_store_url:       u.ios_store_url        ?? '',
+          android_store_url:   u.android_store_url    ?? '',
+          next_version:        u.next_version         ?? '',
+          changelog:           u.changelog            ?? [],
+        });
+        setUpdateSuccess(true);
+      })
       .catch(() => setUpdateError('Failed to save update settings. Please try again.'))
       .finally(() => setUpdateSaving(false));
   }, [updateConfig]);
