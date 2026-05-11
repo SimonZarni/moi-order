@@ -93,7 +93,8 @@ export function useGoogleAuth(): UseGoogleAuthResult {
             console.log('[GoogleAuth] idToken type:', typeof d?.idToken, '| defined:', d?.idToken !== undefined && d?.idToken !== null);
           }
         } catch (signInErr: unknown) {
-          if (__DEV__) {
+          const isCancelled = (signInErr as { code?: string })?.code === statusCodes.SIGN_IN_CANCELLED;
+          if (__DEV__ && !isCancelled) {
             console.error('[GoogleAuth] signIn() threw!');
             console.error('[GoogleAuth] err string:', String(signInErr));
             console.error('[GoogleAuth] err JSON:', JSON.stringify(signInErr, Object.getOwnPropertyNames(signInErr ?? {})));
@@ -110,15 +111,15 @@ export function useGoogleAuth(): UseGoogleAuthResult {
       setUser(user, token);
       navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
     } catch (error: unknown) {
+      const asGoogle = error as { code?: string };
+      if (asGoogle.code === statusCodes.SIGN_IN_CANCELLED) return;
+
       if (__DEV__) {
         console.error('[GoogleAuth]', String(error),
-          'code:', (error as { code?: string })?.code,
+          'code:', asGoogle?.code,
           'msg:', error instanceof Error ? error.message : 'none',
         );
       }
-
-      const asGoogle = error as { code?: string };
-      if (asGoogle.code === statusCodes.SIGN_IN_CANCELLED) return;
 
       const asApiError = error as ApiError;
       if (typeof asApiError.status === 'number') {
