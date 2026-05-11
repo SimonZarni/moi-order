@@ -65,14 +65,9 @@ export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleSt
 
   return (
     <View style={styles.wrapper}>
-      {/* Row is a View, not a Pressable — nested Pressable on Android swallows inner taps */}
       <View style={styles.row}>
-        <Pressable
-          style={styles.rowTapArea}
-          onPress={handleRowPress}
-          accessibilityLabel={`${item.name}${hasModifiers ? ', tap to see modifiers' : ''}`}
-          accessibilityRole="button"
-        >
+        {/* Plain View — no Pressable here; a flex:1 Pressable sibling blocks Android touch dispatch to actions */}
+        <View style={styles.rowTapArea}>
           {item.photo_url !== null && (
             <Image source={{ uri: item.photo_url }} style={styles.photo} accessibilityLabel={item.name} />
           )}
@@ -88,7 +83,7 @@ export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleSt
               )}
             </View>
           </View>
-        </Pressable>
+        </View>
         <View style={styles.actions}>
           <Pressable
             style={styles.editButton}
@@ -117,11 +112,18 @@ export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleSt
             </Text>
           </Pressable>
           {hasModifiers && (
-            <Ionicons
-              name={expanded ? 'chevron-up' : 'chevron-down'}
-              size={16}
-              color={colours.textMuted}
-            />
+            <Pressable
+              style={styles.chevronButton}
+              onPress={handleRowPress}
+              accessibilityLabel={expanded ? `Collapse ${item.name} modifiers` : `Expand ${item.name} modifiers`}
+              accessibilityRole="button"
+            >
+              <Ionicons
+                name={expanded ? 'chevron-up' : 'chevron-down'}
+                size={16}
+                color={colours.textMuted}
+              />
+            </Pressable>
           )}
         </View>
       </View>
