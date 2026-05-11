@@ -103,7 +103,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             \App\Services\RestaurantService::class,
             fn ($app) => new \App\Services\RestaurantService(
-                $app->make(FileStorageInterface::class)
+                $app->make(FileStorageInterface::class),
+                $app->make(\App\Services\MenuService::class),
             )
         );
 

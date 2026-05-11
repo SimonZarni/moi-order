@@ -42,6 +42,7 @@ interface UseMenuScreenResult {
   categories: MenuCategory[];
   isLoading: boolean;
   isError: boolean;
+  hasMissingSystemCategories: boolean;
   showAddCategoryModal: boolean;
   addItemCategoryId: number | null;
   addItemForm: AddItemForm;
@@ -182,6 +183,7 @@ export function useMenuScreen(): UseMenuScreenResult {
   });
 
   const SYSTEM_SORT: Record<string, number> = { popular_picks: 0, promotions: 1, recommendations: 2 };
+  const REQUIRED_SYSTEM_TYPES = ['popular_picks', 'recommendations'] as const;
 
   const categories = useMemo(() => {
     const all = data ?? [];
@@ -191,6 +193,14 @@ export function useMenuScreen(): UseMenuScreenResult {
       return aOrder !== bOrder ? aOrder - bOrder : a.id - b.id;
     });
   }, [data]);
+
+  const hasMissingSystemCategories = useMemo(
+    () => REQUIRED_SYSTEM_TYPES.some((type) => {
+      const cat = categories.find((c) => c.is_system && c.category_type === type);
+      return cat === undefined || cat.items.length === 0;
+    }),
+    [categories],
+  );
 
   const invalidateMenu = useCallback(
     () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MENU_CATEGORIES }),
@@ -334,7 +344,7 @@ export function useMenuScreen(): UseMenuScreenResult {
   );
 
   return {
-    categories, isLoading, isError,
+    categories, isLoading, isError, hasMissingSystemCategories,
     showAddCategoryModal, addItemCategoryId, addItemForm, isAddingItem,
     handleAddCategory, handleDeleteCategory, handleToggleItemStatus, handleDeleteItem,
     setShowAddCategoryModal,

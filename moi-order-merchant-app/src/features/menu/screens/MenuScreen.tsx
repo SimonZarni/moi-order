@@ -19,7 +19,7 @@ import type { AddItemForm } from '../hooks/useMenuScreen';
 
 export function MenuScreen(): React.JSX.Element {
   const {
-    categories, isLoading, showAddCategoryModal,
+    categories, isLoading, hasMissingSystemCategories, showAddCategoryModal,
     addItemCategoryId, addItemForm, isAddingItem,
     handleAddCategory, handleDeleteCategory,
     handleToggleItemStatus, handleDeleteItem,
@@ -99,10 +99,20 @@ export function MenuScreen(): React.JSX.Element {
         )}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
-          <Pressable style={styles.addButton} onPress={() => setShowAddCategoryModal(true)}
-            accessibilityLabel="Add a new menu category" accessibilityRole="button">
-            <Text style={styles.addButtonText}>+ Add Category</Text>
-          </Pressable>
+          <>
+            {hasMissingSystemCategories && (
+              <View style={styles.warnBanner} accessibilityRole="alert">
+                <Ionicons name="warning-outline" size={16} color={colours.warning} />
+                <Text style={styles.warnText}>
+                  Your menu won't be visible to customers until Popular Picks and Recommendations each have at least 1 item.
+                </Text>
+              </View>
+            )}
+            <Pressable style={styles.addButton} onPress={() => setShowAddCategoryModal(true)}
+              accessibilityLabel="Add a new menu category" accessibilityRole="button">
+              <Text style={styles.addButtonText}>+ Add Category</Text>
+            </Pressable>
+          </>
         }
         ListEmptyComponent={<Text style={styles.empty}>No categories yet. Add one to get started.</Text>}
       />

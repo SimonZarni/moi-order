@@ -38,6 +38,13 @@ export function MenuItemRow({ item, onToggleStatus, onDelete, onEdit }: MenuItem
 
   const handleEditPress = useCallback(() => onEdit(item), [item, onEdit]);
 
+  const handleDeletePress = useCallback(() => {
+    Alert.alert('Remove item?', `"${item.name}" will be permanently deleted.`, [
+      { text: 'Delete', style: 'destructive', onPress: () => onDelete(item.id) },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+  }, [item.id, item.name, onDelete]);
+
   const handleStatusPress = useCallback(() => {
     Alert.alert(
       item.name,
@@ -45,11 +52,10 @@ export function MenuItemRow({ item, onToggleStatus, onDelete, onEdit }: MenuItem
       [
         { text: 'Available', onPress: () => onToggleStatus(item.id, MENU_ITEM_STATUS.Available) },
         { text: 'Out of Stock', onPress: () => onToggleStatus(item.id, MENU_ITEM_STATUS.OutOfStock) },
-        { text: 'Delete Item', style: 'destructive', onPress: () => onDelete(item.id) },
         { text: 'Cancel', style: 'cancel' },
       ],
     );
-  }, [item.id, item.name, onToggleStatus, onDelete]);
+  }, [item.id, item.name, onToggleStatus]);
 
   return (
     <View style={styles.wrapper}>
@@ -82,6 +88,14 @@ export function MenuItemRow({ item, onToggleStatus, onDelete, onEdit }: MenuItem
             accessibilityRole="button"
           >
             <Ionicons name="pencil-outline" size={15} color={colours.primary} />
+          </Pressable>
+          <Pressable
+            style={styles.deleteButton}
+            onPress={handleDeletePress}
+            accessibilityLabel={`Delete ${item.name}`}
+            accessibilityRole="button"
+          >
+            <Ionicons name="trash-outline" size={15} color={colours.error} />
           </Pressable>
           <Pressable
             style={[styles.statusBadge, { backgroundColor: statusColour + '22' }]}
