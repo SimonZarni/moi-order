@@ -94,6 +94,22 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     color: colours.textOnLight,
   },
+  statusWarningBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    backgroundColor: colours.warningBg,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.warning + '33',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  statusWarningText: {
+    flex: 1,
+    fontSize: typography.xs,
+    color: colours.warning,
+    fontWeight: '600',
+  },
   statusRow: {
     flexDirection: 'row',
     gap: spacing.sm,

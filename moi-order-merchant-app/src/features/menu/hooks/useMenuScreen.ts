@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, type Dispatch, type SetStateAction } from 'react';
-import { Platform, Alert } from 'react-native';
+import { Platform } from 'react-native';
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import {
   getMenuCategories,
@@ -53,7 +53,7 @@ interface UseMenuScreenResult {
   handleAddCategory: (name: string) => Promise<void>;
   handleDeleteCategory: (id: number) => void;
   handleToggleItemStatus: (itemId: number, status: MenuItemStatus) => void;
-  handleDeleteItem: (id: number, onEditFallback?: () => void) => void;
+  handleDeleteItem: (id: number) => void;
   setShowAddCategoryModal: (v: boolean) => void;
   handleOpenAddItem: (categoryId: number) => void;
   handleCloseAddItem: () => void;
@@ -284,26 +284,15 @@ export function useMenuScreen(): UseMenuScreenResult {
   const handleDeleteCategory = useCallback((id: number) => { mutateDeleteCategory(id); }, [mutateDeleteCategory]);
   const handleToggleItemStatus = useCallback((itemId: number, status: MenuItemStatus) => { mutateToggleStatus({ id: itemId, status }); }, [mutateToggleStatus]);
 
-  const handleDeleteItem = useCallback((id: number, onEditFallback?: () => void) => {
-    // Find the category containing this item.
+  const handleDeleteItem = useCallback((id: number) => {
     const category = categories.find((c) => c.items.some((i) => i.id === id));
     const isRequiredSystem = category?.is_system === true
       && (category?.category_type === 'popular_picks' || category?.category_type === 'recommendations');
     const isLastItem = (category?.items.length ?? 0) === 1;
     const restaurantIsClosed = restaurantStatus === RESTAURANT_STATUS.Closed;
 
-    // Block deletion of the last item in a required system category unless the restaurant is closed.
-    if (isRequiredSystem && isLastItem && !restaurantIsClosed) {
-      Alert.alert(
-        `${category!.name} needs at least 1 item`,
-        'Your menu won\'t be visible to customers unless this section has at least 1 item. Edit this item or add another before removing it.',
-        [
-          ...(onEditFallback ? [{ text: 'Edit Item', onPress: onEditFallback }] : []),
-          { text: 'OK', style: 'cancel' as const },
-        ],
-      );
-      return;
-    }
+    // Safety guard — MenuItemRow's inline warning should have already blocked this path.
+    if (isRequiredSystem && isLastItem && !restaurantIsClosed) return;
 
     mutateDeleteItem(id);
   }, [categories, restaurantStatus, mutateDeleteItem]);

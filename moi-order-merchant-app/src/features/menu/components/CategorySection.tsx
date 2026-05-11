@@ -16,7 +16,7 @@ interface CategorySectionProps {
   onDeleteCategory: (id: number) => void;
   onRenameCategory: (id: number, newName: string) => void;
   onToggleItemStatus: (itemId: number, status: MenuItemStatus) => void;
-  onDeleteItem: (id: number, onEditFallback?: () => void) => void;
+  onDeleteItem: (id: number) => void;
   onAddItem: (categoryId: number) => void;
   onEditItem: (item: MenuItem) => void;
 }

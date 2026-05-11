@@ -98,6 +98,53 @@ export const styles = StyleSheet.create({
     fontSize: typography.xxs,
     fontWeight: '700',
   },
+  // Guard warning bar — last item in required system category
+  guardBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+    backgroundColor: colours.warningBg,
+    borderTopWidth: 1,
+    borderTopColor: colours.warning + '44',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  guardIcon: {
+    marginRight: 2,
+  },
+  guardText: {
+    flex: 1,
+    fontSize: typography.xs,
+    color: colours.warning,
+    fontWeight: '600',
+  },
+  guardEdit: {
+    backgroundColor: colours.warning,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    borderRadius: radius.sm,
+    minHeight: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  guardEditText: {
+    fontSize: typography.xs,
+    color: colours.white,
+    fontWeight: '700',
+  },
+  guardCancel: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    minHeight: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  guardCancelText: {
+    fontSize: typography.xs,
+    color: colours.textMuted,
+    fontWeight: '600',
+  },
   // Inline confirmation bar (delete + status picker) — replaces Alert.alert
   confirmBar: {
     flexDirection: 'row',

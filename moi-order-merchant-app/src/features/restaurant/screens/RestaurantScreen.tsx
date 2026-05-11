@@ -41,6 +41,7 @@ export function RestaurantScreen(): React.JSX.Element {
     handleOpenResubmit, handleCloseResubmit,
     handleResubmitFieldChange, handleResubmitSubmitForm,
     handleResubmitFinalSubmit,
+    statusWarning, handleDismissStatusWarning,
   } = useRestaurantScreen();
 
   const pickAndConvert = useCallback(async (
@@ -112,6 +113,15 @@ export function RestaurantScreen(): React.JSX.Element {
             <View style={styles.cardHeader}>
               <Text style={styles.cardTitle}>Status</Text>
             </View>
+            {statusWarning !== null && (
+              <View style={styles.statusWarningBar}>
+                <Ionicons name="warning-outline" size={14} color={colours.warning} />
+                <Text style={styles.statusWarningText}>{statusWarning}</Text>
+                <Pressable onPress={handleDismissStatusWarning} accessibilityRole="button" accessibilityLabel="Dismiss warning">
+                  <Ionicons name="close" size={16} color={colours.textMuted} />
+                </Pressable>
+              </View>
+            )}
             <View style={styles.statusRow}>
               {(Object.values(RESTAURANT_STATUS) as RestaurantStatus[]).map((s) => {
                 const cfg = STATUS_CONFIG[s];

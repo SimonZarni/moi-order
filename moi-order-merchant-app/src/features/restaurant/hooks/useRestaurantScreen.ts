@@ -12,9 +12,15 @@ import {
 } from '../../../api/kyc';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { CACHE_TTL } from '../../../shared/constants/config';
-import type { Restaurant, OpeningHour } from '../../../types/models';
-import type { KycDocType } from '../../../types/enums';
-import type { RestaurantStatus } from '../../../types/enums';
+import type { Restaurant, OpeningHour, MenuCategory } from '../../../types/models';
+import type { KycDocType, RestaurantStatus } from '../../../types/enums';
+import { RESTAURANT_STATUS } from '../../../types/enums';
+
+const REQUIRED_MENU_TYPES = ['popular_picks', 'recommendations'] as const;
+const REQUIRED_MENU_LABELS: Record<string, string> = {
+  popular_picks: 'Popular Picks',
+  recommendations: 'Recommendations',
+};
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
 
@@ -59,6 +65,8 @@ interface UseRestaurantScreenResult {
   handleDescriptionChange: (v: string) => void;
   handleSave: () => void;
   handleToggleStatus: (status: RestaurantStatus) => void;
+  statusWarning: string | null;
+  handleDismissStatusWarning: () => void;
   handleUploadCoverPhoto: (uri: string, name: string, type: string) => void;
   handleRemoveCoverPhoto: () => void;
   handleUploadLogo: (uri: string, name: string, type: string) => void;
@@ -97,6 +105,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
   const [openingHoursInput, setOpeningHoursInput] = useState<OpeningHourInput[]>(DEFAULT_HOURS);
   const [descriptionForm, setDescriptionForm] = useState<DescriptionForm>({ description: '' });
   const [resubmitModal, setResubmitModal] = useState(false);
+  const [statusWarning, setStatusWarning] = useState<string | null>(null);
   const [resubmitForm, setResubmitForm] = useState<ResubmitForm>({
     business_name: '',
     business_address: '',
@@ -220,10 +229,26 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
 
   // ── Status ────────────────────────────────────────────────────────────────────
 
-  const handleToggleStatus = useCallback(
-    (status: RestaurantStatus) => save({ status }),
-    [save],
-  );
+  const handleToggleStatus = useCallback((status: RestaurantStatus) => {
+    // Block opening if required system categories have no items.
+    if (status === RESTAURANT_STATUS.Open) {
+      const menuData = queryClient.getQueryData<MenuCategory[]>(QUERY_KEYS.MENU_CATEGORIES);
+      if (menuData) {
+        const emptyRequired = REQUIRED_MENU_TYPES.filter((type) => {
+          const cat = menuData.find((c) => c.is_system && c.category_type === type);
+          return !cat || cat.items.length === 0;
+        });
+        if (emptyRequired.length > 0) {
+          const labels = emptyRequired.map((t) => REQUIRED_MENU_LABELS[t]).join(' and ');
+          setStatusWarning(`Add at least 1 item to ${labels} before opening your restaurant.`);
+          return;
+        }
+      }
+    }
+    save({ status });
+  }, [save, queryClient]);
+
+  const handleDismissStatusWarning = useCallback(() => setStatusWarning(null), []);
 
   // ── Photos ────────────────────────────────────────────────────────────────────
 
@@ -393,6 +418,8 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     handleDescriptionChange,
     handleSave,
     handleToggleStatus,
+    statusWarning,
+    handleDismissStatusWarning,
     handleUploadCoverPhoto,
     handleRemoveCoverPhoto,
     handleUploadLogo,

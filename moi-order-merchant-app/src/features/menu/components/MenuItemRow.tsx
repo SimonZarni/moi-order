@@ -23,13 +23,14 @@ interface MenuItemRowProps {
   item: MenuItem;
   isLastInRequiredCategory?: boolean;
   onToggleStatus: (id: number, status: MenuItemStatus) => void;
-  onDelete: (id: number, onEditFallback?: () => void) => void;
+  onDelete: (id: number) => void;
   onEdit: (item: MenuItem) => void;
 }
 
 export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleStatus, onDelete, onEdit }: MenuItemRowProps): React.JSX.Element {
   const [expanded, setExpanded] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [showGuardWarning, setShowGuardWarning] = useState(false);
   const [confirmingStatus, setConfirmingStatus] = useState(false);
 
   const statusColour = STATUS_COLOURS[item.status];
@@ -44,11 +45,11 @@ export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleSt
 
   const handleDeletePress = useCallback(() => {
     if (isLastInRequiredCategory) {
-      onDelete(item.id, handleEditPress);
+      setShowGuardWarning(true);
       return;
     }
     setConfirmingDelete(true);
-  }, [isLastInRequiredCategory, item.id, handleEditPress, onDelete]);
+  }, [isLastInRequiredCategory]);
 
   const handleConfirmDelete = useCallback(() => {
     setConfirmingDelete(false);
@@ -56,6 +57,13 @@ export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleSt
   }, [item.id, onDelete]);
 
   const handleCancelDelete = useCallback(() => setConfirmingDelete(false), []);
+
+  const handleEditFromGuard = useCallback(() => {
+    setShowGuardWarning(false);
+    onEdit(item);
+  }, [item, onEdit]);
+
+  const handleDismissGuard = useCallback(() => setShowGuardWarning(false), []);
 
   const handleStatusPress = useCallback(() => setConfirmingStatus(true), []);
 
@@ -131,6 +139,20 @@ export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleSt
         </View>
       </View>
 
+      {/* Guard warning — shown when tapping delete on the last item in a required system category */}
+      {showGuardWarning && (
+        <View style={styles.guardBar}>
+          <Ionicons name="warning-outline" size={14} color={colours.warning} style={styles.guardIcon} />
+          <Text style={styles.guardText}>This category needs at least 1 item. Edit instead?</Text>
+          <Pressable style={styles.guardEdit} onPress={handleEditFromGuard} accessibilityRole="button" accessibilityLabel="Edit item">
+            <Text style={styles.guardEditText}>Edit</Text>
+          </Pressable>
+          <Pressable style={styles.guardCancel} onPress={handleDismissGuard} accessibilityRole="button" accessibilityLabel="Cancel">
+            <Text style={styles.guardCancelText}>Cancel</Text>
+          </Pressable>
+        </View>
+      )}
+
       {/* Inline delete confirmation — replaces Alert.alert which is unreliable inside FlatList+Modal trees */}
       {confirmingDelete && (
         <View style={styles.confirmBar}>
@@ -144,7 +166,7 @@ export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleSt
         </View>
       )}
 
-      {/* Inline status picker — replaces Alert.alert for the same reason */}
+      {/* Inline status picker */}
       {confirmingStatus && (
         <View style={styles.confirmBar}>
           <Text style={styles.confirmText}>Set status:</Text>
