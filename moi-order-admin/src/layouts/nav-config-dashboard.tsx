@@ -139,11 +139,6 @@ export const navData: NavItem[] = [
     icon: icon('solar:settings-bold-duotone'),
   },
   {
-    title: 'Reviews',
-    path: '/reviews',
-    icon: icon('solar:check-circle-bold'),
-  },
-  {
     title: 'Content',
     path: '/content',
     icon: icon('solar:pen-bold'),

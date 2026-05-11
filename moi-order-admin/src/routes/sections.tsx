@@ -20,7 +20,6 @@ export const RolesPage = lazy(() => import('src/pages/roles'));
 export const UsersPage = lazy(() => import('src/pages/users'));
 export const UserDetailPage = lazy(() => import('src/pages/user-detail'));
 export const ReportPage = lazy(() => import('src/pages/report'));
-export const ReviewsPage = lazy(() => import('src/pages/reviews'));
 export const PlacesPage = lazy(() => import('src/pages/places'));
 export const ProfilePage = lazy(() => import('src/pages/profile'));
 export const BookingsPage = lazy(() => import('src/pages/bookings'));
@@ -126,7 +125,6 @@ export const routesSection: RouteObject[] = [
       // Roles — requires admins.manage
       { path: 'roles', element: guard('admins.manage', <RolesPage />) },
 
-      { path: 'reviews', element: <ReviewsPage /> },
       { path: 'content', element: <ContentPage /> },
       { path: 'support', element: <SupportPage /> },
 
