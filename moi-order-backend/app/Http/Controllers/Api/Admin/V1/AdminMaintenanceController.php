@@ -27,10 +27,13 @@ class AdminMaintenanceController extends Controller
 
         $secret = config('app.maintenance_secret', 'trusted-brothers-2026');
 
+        // Do NOT pass --render: that pre-renders a Blade view as base64 and the
+        // middleware returns it directly, bypassing the exception handler entirely.
+        // Without --render, the middleware throws MaintenanceModeException which
+        // our handler in bootstrap/app.php catches and returns clean JSON.
         Artisan::call('down', [
-            '--secret'  => $secret,
-            '--retry'   => 3600,
-            '--render'  => 'errors.503',
+            '--secret' => $secret,
+            '--retry'  => 3600,
         ]);
 
         Log::info('Maintenance mode enabled', ['admin_id' => $request->user()?->id]);
