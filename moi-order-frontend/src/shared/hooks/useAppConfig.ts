@@ -1,28 +1,26 @@
 /**
- * Principle: SRP — this hook owns exactly one concern: checking app-update gating
- * and in-app alert display on every app launch.
+ * Principle: SRP — owns app-update gating and in-app alert queuing on every launch.
  *
- * Architecture notes:
- *  - Runs only in production builds (__DEV__ = skip entirely).
- *  - Semver comparison is numeric (no string lexicography).
- *  - SecureStore is read once at mount into local vars — never awaited in callbacks.
- *  - If both optional-update and alert need to show, the update alert appears first;
- *    the app alert is shown only after the user taps "Later" (or not at all if they
- *    tap "Update", since the app will background/exit).
- *  - ForceUpdate state is returned so App.tsx can render an undismissable Modal —
- *    navigation-layer workarounds cannot bypass a React Native Modal.
+ * Architecture:
+ *  - Skips entirely in __DEV__ to avoid noise while coding.
+ *  - Returns { forceUpdate, pendingAlert, dismissAlert } — callers render the UI.
+ *  - Alerts are queued in declaration order; dismissAlert() advances the queue.
+ *  - "once_per_day" alerts use a per-alert-ID SecureStore key so that each alert
+ *    has its own seen-today state (independent of other alerts in the same slot).
+ *  - "every_open" alerts always appear.
+ *  - Optional update alert (Alert.alert) resolves before the app-alert queue starts.
  */
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Linking, Platform } from 'react-native';
 import * as Application from 'expo-application';
 import * as SecureStore from 'expo-secure-store';
 
+import type { AppConfigAlertItem } from '@/shared/api/appConfig';
 import { fetchAppConfig } from '@/shared/api/appConfig';
 import { APP_UPDATE_TYPE, APP_ALERT_FREQUENCY } from '@/types/enums';
 
-// SecureStore keys — namespaced to avoid collisions
 const KEY_UPDATE_ALERT_DATE = 'moi_update_alert_date';
-const KEY_APP_ALERT_DATE    = 'moi_app_alert_date';
+const alertSeenKey = (id: number): string => `moi_app_alert_seen_${id}`;
 
 export interface ForceUpdateState {
   title: string;
@@ -32,21 +30,17 @@ export interface ForceUpdateState {
 
 export interface UseAppConfigResult {
   forceUpdate: ForceUpdateState | null;
+  pendingAlert: AppConfigAlertItem | null;
+  dismissAlert: () => void;
 }
 
 function todayString(): string {
-  // YYYY-MM-DD in local time — consistent with SecureStore-stored values
   const d = new Date();
-  const yyyy = d.getFullYear();
-  const mm   = String(d.getMonth() + 1).padStart(2, '0');
-  const dd   = String(d.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
 }
 
-/**
- * Returns true when storeVersion is strictly greater than currentVersion.
- * Compares each semver component numerically (major → minor → patch).
- */
 function isVersionBelow(currentVersion: string, minVersion: string): boolean {
   const parse = (v: string): [number, number, number] => {
     const parts = v.split('.').map(Number);
@@ -61,9 +55,13 @@ function isVersionBelow(currentVersion: string, minVersion: string): boolean {
 
 export function useAppConfig(): UseAppConfigResult {
   const [forceUpdate, setForceUpdate] = useState<ForceUpdateState | null>(null);
+  const [alertQueue, setAlertQueue] = useState<AppConfigAlertItem[]>([]);
+  const [alertIndex, setAlertIndex] = useState(0);
+
+  const pendingAlert = alertQueue[alertIndex] ?? null;
+  const dismissAlert = useCallback(() => setAlertIndex((i) => i + 1), []);
 
   const run = useCallback(async (): Promise<void> => {
-    // Skip all checks in development — avoids noisy alerts while coding
     if (__DEV__) return;
 
     const currentVersion = Application.nativeApplicationVersion;
@@ -73,60 +71,44 @@ export function useAppConfig(): UseAppConfigResult {
     try {
       config = await fetchAppConfig();
     } catch {
-      // Network unavailable — skip silently; never block launch on a network error
       return;
     }
 
     const today = todayString();
-    const { update, alert } = config;
+    const { update, alerts } = config;
 
-    // ── 1. Determine update need ────────────────────────────────────────────
-    const minVersion = Platform.OS === 'ios'
-      ? update.ios_min_version
-      : update.android_min_version;
-
-    const storeUrl = Platform.OS === 'ios'
-      ? update.ios_store_url
-      : update.android_store_url;
+    // ── 1. Version gating ──────────────────────────────────────────────────
+    const minVersion = Platform.OS === 'ios' ? update.ios_min_version : update.android_min_version;
+    const storeUrl   = Platform.OS === 'ios' ? update.ios_store_url   : update.android_store_url;
 
     const needsUpdate =
       minVersion !== null &&
-      storeUrl !== null &&
+      storeUrl   !== null &&
       update.type !== APP_UPDATE_TYPE.None &&
       isVersionBelow(currentVersion, minVersion);
 
-    // ── 2. Required update — set state so App.tsx renders blocking Modal ──
     if (needsUpdate && update.type === APP_UPDATE_TYPE.Required) {
       setForceUpdate({
-        title:    update.title    ?? 'Update Required',
-        message:  update.message  ?? 'Please update the app to continue.',
-        storeUrl: storeUrl!,
+        title:    update.title   ?? 'Update Required',
+        message:  update.message ?? 'Please update the app to continue.',
+        storeUrl,
       });
-      return; // Don't show any other alert — modal blocks the UI entirely
+      return;
     }
 
-    // ── 3. Optional update ─────────────────────────────────────────────────
-    const showOptional = needsUpdate && update.type === APP_UPDATE_TYPE.Optional;
-    let shownUpdateAlert = false;
-
-    if (showOptional) {
+    // ── 2. Optional update (Alert.alert, awaited) ─────────────────────────
+    if (needsUpdate && update.type === APP_UPDATE_TYPE.Optional) {
       const lastShown = await SecureStore.getItemAsync(KEY_UPDATE_ALERT_DATE).catch(() => null);
       if (lastShown !== today) {
         await SecureStore.setItemAsync(KEY_UPDATE_ALERT_DATE, today).catch(() => {});
-
-        // Wrap in a Promise so we can sequence the app alert AFTER the user taps "Later"
         await new Promise<void>((resolve) => {
           Alert.alert(
             update.title   ?? 'Update Available',
             update.message ?? 'A new version of the app is available.',
             [
+              { text: 'Later', style: 'cancel', onPress: () => resolve() },
               {
-                text:    'Later',
-                style:   'cancel',
-                onPress: () => resolve(),
-              },
-              {
-                text:    'Update',
+                text: 'Update',
                 onPress: () => {
                   Linking.openURL(storeUrl!).catch(() => {});
                   resolve();
@@ -136,36 +118,27 @@ export function useAppConfig(): UseAppConfigResult {
             { cancelable: false },
           );
         });
-        shownUpdateAlert = true;
       }
     }
 
-    // ── 4. In-app alert ────────────────────────────────────────────────────
-    if (!alert.is_active || alert.message === null) return;
-
-    let showAlert = false;
-    if (alert.frequency === APP_ALERT_FREQUENCY.EveryOpen) {
-      showAlert = true;
-    } else {
-      // once_per_day
-      const lastShown = await SecureStore.getItemAsync(KEY_APP_ALERT_DATE).catch(() => null);
-      if (lastShown !== today) {
-        await SecureStore.setItemAsync(KEY_APP_ALERT_DATE, today).catch(() => {});
-        showAlert = true;
+    // ── 3. App alerts queue ────────────────────────────────────────────────
+    const toShow: AppConfigAlertItem[] = [];
+    for (const alert of alerts) {
+      if (alert.frequency === APP_ALERT_FREQUENCY.EveryOpen) {
+        toShow.push(alert);
+      } else {
+        // once_per_day — per-alert-ID seen key so alerts are independent
+        const key = alertSeenKey(alert.id);
+        const lastShown = await SecureStore.getItemAsync(key).catch(() => null);
+        if (lastShown !== today) {
+          await SecureStore.setItemAsync(key, today).catch(() => {});
+          toShow.push(alert);
+        }
       }
     }
 
-    if (showAlert) {
-      // If we just showed an update alert (and the user tapped "Later"), give a small
-      // tick so the first Alert fully dismisses before the second one appears.
-      if (shownUpdateAlert) {
-        await new Promise<void>((r) => setTimeout(r, 300));
-      }
-      Alert.alert(
-        alert.title ?? 'Notice',
-        alert.message,
-        [{ text: 'OK' }],
-      );
+    if (toShow.length > 0) {
+      setAlertQueue(toShow);
     }
   }, []);
 
@@ -173,5 +146,5 @@ export function useAppConfig(): UseAppConfigResult {
     void run();
   }, [run]);
 
-  return { forceUpdate };
+  return { forceUpdate, pendingAlert, dismissAlert };
 }

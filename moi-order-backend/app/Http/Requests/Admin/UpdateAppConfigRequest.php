@@ -4,24 +4,18 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
-use App\Enums\AppAlertFrequency;
 use App\Enums\AppUpdateType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 /**
- * Validates the admin PATCH/PUT payload for app configuration.
- *
- * SRP: validation + authorisation only — never passed to the service layer.
- * Security: all string fields have max length guards; URL fields validated as URLs.
- * Validation: semver pattern enforced via regex; enums use Rule::enum().
+ * Validates the admin PUT payload for app update-gating configuration only.
+ * Alerts are managed separately via /in-app-alerts endpoints.
  */
 class UpdateAppConfigRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Auth is enforced by AdminAuthenticate middleware on the route group.
-        // Super-admin is NOT required; any authenticated admin may update app config.
         return true;
     }
 
@@ -36,10 +30,6 @@ class UpdateAppConfigRequest extends FormRequest
             'update_message'      => ['nullable', 'string', 'max:1000'],
             'ios_store_url'       => ['nullable', 'string', 'url', 'max:500'],
             'android_store_url'   => ['nullable', 'string', 'url', 'max:500'],
-            'alert_is_active'     => ['required', 'boolean'],
-            'alert_title'         => ['nullable', 'string', 'max:255'],
-            'alert_message'       => ['nullable', 'string', 'max:1000'],
-            'alert_frequency'     => ['required', Rule::enum(AppAlertFrequency::class)],
         ];
     }
 
@@ -52,7 +42,6 @@ class UpdateAppConfigRequest extends FormRequest
             'ios_store_url.url'         => 'iOS store URL must be a valid URL.',
             'android_store_url.url'     => 'Android store URL must be a valid URL.',
             'update_type.enum'          => 'Update type must be one of: none, optional, required.',
-            'alert_frequency.enum'      => 'Alert frequency must be one of: once_per_day, every_open.',
         ];
     }
 
@@ -67,10 +56,6 @@ class UpdateAppConfigRequest extends FormRequest
             'update_message'      => 'update message',
             'ios_store_url'       => 'iOS App Store URL',
             'android_store_url'   => 'Google Play URL',
-            'alert_is_active'     => 'alert active',
-            'alert_title'         => 'alert title',
-            'alert_message'       => 'alert message',
-            'alert_frequency'     => 'alert frequency',
         ];
     }
 }

@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api\Admin\V1;
 use App\DTOs\AdminLoginDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AdminLoginRequest;
+use App\Http\Requests\Admin\UpdateAdminPasswordRequest;
 use App\Http\Resources\Admin\AdminUserResource;
 use App\Services\AdminAuthService;
 use Illuminate\Http\JsonResponse;
@@ -82,5 +83,17 @@ class AdminAuthController extends Controller
         $user->loadMissing('adminRole.permissions');
 
         return response()->json(['data' => new AdminUserResource($user)]);
+    }
+
+    /** PUT /api/admin/v1/auth/password — requires auth:sanctum + admin.auth */
+    public function changePassword(UpdateAdminPasswordRequest $request): JsonResponse
+    {
+        $this->authService->changePassword(
+            $request->user(),
+            $request->validated('current_password'),
+            $request->validated('new_password'),
+        );
+
+        return response()->json(null, 204);
     }
 }

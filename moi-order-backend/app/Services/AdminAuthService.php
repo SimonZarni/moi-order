@@ -67,6 +67,20 @@ class AdminAuthService
         return ['user' => $user, 'token' => $newToken->plainTextToken];
     }
 
+    /**
+     * @throws ValidationException when current password is wrong.
+     */
+    public function changePassword(User $user, string $currentPassword, string $newPassword): void
+    {
+        if (! Hash::check($currentPassword, $user->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => ['The current password is incorrect.'],
+            ]);
+        }
+
+        $user->update(['password' => Hash::make($newPassword)]);
+    }
+
     public function logout(User $user): void
     {
         // currentAccessToken() returns the PersonalAccessToken set by Sanctum during

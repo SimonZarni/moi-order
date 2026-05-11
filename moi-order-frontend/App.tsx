@@ -105,6 +105,7 @@ import { useOtaUpdate } from '@/shared/hooks/useOtaUpdate';
 import { useNoticeModal } from '@/shared/hooks/useNoticeModal';
 import { useAppConfig, type ForceUpdateState } from '@/shared/hooks/useAppConfig';
 import { NoticeModal } from '@/shared/components/NoticeModal/NoticeModal';
+import { InAppAlertModal } from '@/shared/components/InAppAlertModal/InAppAlertModal';
 import { PlacesMapScreen } from '@/features/map/screens/PlacesMapScreen';
 import { SearchScreen } from '@/features/search/screens/SearchScreen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -244,7 +245,7 @@ function AppShell(): React.JSX.Element {
   usePusherNotifications();
   usePushNotifications();
   useNotificationsData();
-  const { forceUpdate } = useAppConfig();
+  const { forceUpdate, pendingAlert, dismissAlert } = useAppConfig();
   const { isVisible: noticeVisible, dismiss: dismissNotice } = useNoticeModal();
   return (
     <>
@@ -308,6 +309,7 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="Maintenance"                   component={MaintenanceScreen} options={{ animation: 'fade', gestureEnabled: false }} />
     </Stack.Navigator>
     <NoticeModal isVisible={noticeVisible} onClose={dismissNotice} />
+    <InAppAlertModal alert={pendingAlert} onDismiss={dismissAlert} />
     {forceUpdate !== null && <ForceUpdateModal state={forceUpdate} />}
     </>
   );

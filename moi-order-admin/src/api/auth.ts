@@ -28,4 +28,10 @@ export const authApi = {
     apiClient
       .get<{ data: AppUser }>('/auth/me')
       .then((r) => r.data.data),
+
+  changePassword: (payload: {
+    current_password: string;
+    new_password: string;
+    new_password_confirmation: string;
+  }) => apiClient.put('/auth/password', payload),
 };

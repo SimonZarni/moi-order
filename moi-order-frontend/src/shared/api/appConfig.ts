@@ -15,16 +15,17 @@ export interface AppConfigUpdate {
   android_store_url: string | null;
 }
 
-export interface AppConfigAlert {
-  is_active: boolean;
-  title: string | null;
-  message: string | null;
+export interface AppConfigAlertItem {
+  id: number;
+  title: string;
+  message: string;
+  image_url: string | null;
   frequency: AppAlertFrequency;
 }
 
 export interface AppConfig {
   update: AppConfigUpdate;
-  alert: AppConfigAlert;
+  alerts: AppConfigAlertItem[];
 }
 
 export async function fetchAppConfig(): Promise<AppConfig> {

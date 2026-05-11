@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\Admin\V1\AdminAccountController;
 use App\Http\Controllers\Api\Admin\V1\AdminAppConfigController;
+use App\Http\Controllers\Api\Admin\V1\AdminInAppAlertController;
 use App\Http\Controllers\Api\Admin\V1\AdminSessionController;
 use App\Http\Controllers\Api\Admin\V1\AdminMaintenanceController;
 use App\Http\Controllers\Api\Admin\V1\AdminAuthController;
@@ -79,6 +80,7 @@ Route::prefix('custom-notifications')->name('admin.custom-notifications.')->grou
 Route::prefix('auth')->name('admin.auth.')->group(function (): void {
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
     Route::get('/me', [AdminAuthController::class, 'me'])->name('me');
+    Route::put('/password', [AdminAuthController::class, 'changePassword'])->name('change-password');
 });
 
 // ── Roles & Permissions ───────────────────────────────────────────────────────
@@ -387,6 +389,18 @@ Route::post('/kyc-applications/{application}/review',           [AdminKycControl
 // ── App Config ────────────────────────────────────────────────────────────────
 Route::get('/app-config', [AdminAppConfigController::class, 'show'])->name('admin.app-config.show');
 Route::put('/app-config', [AdminAppConfigController::class, 'update'])->name('admin.app-config.update');
+
+// ── In-App Alerts ─────────────────────────────────────────────────────────────
+Route::prefix('in-app-alerts')->name('admin.in-app-alerts.')->group(function (): void {
+    Route::get('/',    [AdminInAppAlertController::class, 'index'])->name('index');
+    Route::post('/',   [AdminInAppAlertController::class, 'store'])->name('store');
+    Route::put('/{id}',    [AdminInAppAlertController::class, 'update'])->name('update')->whereNumber('id');
+    Route::delete('/{id}', [AdminInAppAlertController::class, 'destroy'])->name('destroy')->whereNumber('id');
+    Route::patch('/{id}/activate',   [AdminInAppAlertController::class, 'activate'])->name('activate')->whereNumber('id');
+    Route::patch('/{id}/deactivate', [AdminInAppAlertController::class, 'deactivate'])->name('deactivate')->whereNumber('id');
+    Route::post('/{id}/image',   [AdminInAppAlertController::class, 'uploadImage'])->name('image.store')->whereNumber('id');
+    Route::delete('/{id}/image', [AdminInAppAlertController::class, 'removeImage'])->name('image.destroy')->whereNumber('id');
+});
 
 // ── Maintenance ───────────────────────────────────────────────────────────────
 // These routes are also excluded from maintenance mode in bootstrap/app.php so admins
