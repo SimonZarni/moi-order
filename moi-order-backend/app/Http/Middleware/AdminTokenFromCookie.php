@@ -20,6 +20,14 @@ class AdminTokenFromCookie
 {
     public function handle(Request $request, Closure $next): Response
     {
+        \Illuminate\Support\Facades\Log::debug('AdminTokenFromCookie', [
+            'running'      => true,
+            'has_auth'     => $request->hasHeader('Authorization'),
+            'cookie_raw'   => $request->headers->get('Cookie'),
+            'server_cookie' => $_SERVER['HTTP_COOKIE'] ?? null,
+            'request_cookie' => $request->cookie('admin_token'),
+        ]);
+
         if (! $request->hasHeader('Authorization')) {
             $token = $this->parseCookieHeader($request->headers->get('Cookie', ''));
 
