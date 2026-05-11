@@ -46,11 +46,14 @@ export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleSt
       onDelete(item.id, handleEditPress);
       return;
     }
-    console.log('[MenuItemRow] → calling Alert.alert');
-    Alert.alert('Remove item?', `"${item.name}" will be permanently deleted.`, [
-      { text: 'Delete', style: 'destructive', onPress: () => { console.log('[MenuItemRow] Alert confirmed — calling onDelete'); onDelete(item.id); } },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
+    console.log('[MenuItemRow] → scheduling Alert.alert via setTimeout');
+    setTimeout(() => {
+      console.log('[MenuItemRow] → Alert.alert firing now');
+      Alert.alert('Remove item?', `"${item.name}" will be permanently deleted.`, [
+        { text: 'Delete', style: 'destructive', onPress: () => { console.log('[MenuItemRow] Alert confirmed — calling onDelete'); onDelete(item.id); } },
+        { text: 'Cancel', style: 'cancel' },
+      ]);
+    }, 50);
   }, [item.id, item.name, isLastInRequiredCategory, onDelete, handleEditPress]);
 
   const handleStatusPress = useCallback(() => {
