@@ -55,9 +55,16 @@ class AdminAuthService
             throw new AuthorizationException('Admin access required.');
         }
 
-        $token = $user->createToken('admin-auth', ['admin'], now()->addHours(8))->plainTextToken;
+        $newToken = $user->createToken('admin-auth', ['admin'], now()->addHours(8));
 
-        return ['user' => $user, 'token' => $token];
+        // forceFill bypasses Sanctum's default $fillable since ip_address and user_agent
+        // are not in the base PersonalAccessToken model — they're our custom columns.
+        $newToken->accessToken->forceFill([
+            'ip_address' => $dto->ipAddress ?: null,
+            'user_agent' => $dto->userAgent ?: null,
+        ])->save();
+
+        return ['user' => $user, 'token' => $newToken->plainTextToken];
     }
 
     public function logout(User $user): void

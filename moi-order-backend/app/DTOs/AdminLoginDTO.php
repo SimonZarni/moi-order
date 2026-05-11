@@ -11,13 +11,17 @@ readonly class AdminLoginDTO
     public function __construct(
         public string $email,
         public string $password,
+        public string $ipAddress,
+        public string $userAgent,
     ) {}
 
     public static function fromRequest(AdminLoginRequest $request): self
     {
         return new self(
-            email:    $request->string('email')->lower()->toString(),
-            password: $request->string('password')->toString(),
+            email:     $request->string('email')->lower()->toString(),
+            password:  $request->string('password')->toString(),
+            ipAddress: $request->ip() ?? '',
+            userAgent: $request->userAgent() ?? '',
         );
     }
 }

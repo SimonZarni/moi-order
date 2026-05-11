@@ -3,6 +3,9 @@ import apiClient from './client';
 export type AdminSession = {
   id: number;
   is_current: boolean;
+  device: string | null;
+  ip_address: string | null;
+  location: string | null;
   last_used_at: string | null;
   created_at: string;
   expires_at: string | null;
@@ -14,11 +17,18 @@ export type AdminSession = {
   } | null;
 };
 
+export type AdminSessionMeta = {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+};
+
 export const adminSessionsApi = {
-  list: () =>
+  list: (page = 1) =>
     apiClient
-      .get<{ data: AdminSession[] }>('/sessions')
-      .then((r) => r.data.data),
+      .get<{ data: AdminSession[]; meta: AdminSessionMeta }>('/sessions', { params: { page } })
+      .then((r) => r.data),
 
   revoke: (tokenId: number) =>
     apiClient.delete(`/sessions/${tokenId}`),

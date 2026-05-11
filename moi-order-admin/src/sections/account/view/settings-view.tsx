@@ -26,6 +26,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
+import TablePagination from '@mui/material/TablePagination';
 import InputAdornment from '@mui/material/InputAdornment';
 import CircularProgress from '@mui/material/CircularProgress';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -36,7 +37,7 @@ import { fDate, fToNow } from 'src/utils/format-time';
 import { settingsApi } from 'src/api/settings';
 import { useAuth } from 'src/context/auth-context';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { adminSessionsApi, type AdminSession } from 'src/api/adminSessions';
+import { adminSessionsApi, type AdminSession, type AdminSessionMeta } from 'src/api/adminSessions';
 import { appConfigApi, type AppAlertConfig, type AppUpdateConfig } from 'src/api/appConfig';
 
 import { Iconify } from 'src/components/iconify';
@@ -63,6 +64,8 @@ export function SettingsView() {
 
   // ── Admin Sessions (super-admin only) ────────────────────────────────────
   const [sessions, setSessions] = useState<AdminSession[]>([]);
+  const [sessionsMeta, setSessionsMeta] = useState<AdminSessionMeta | null>(null);
+  const [sessionsPage, setSessionsPage] = useState(0); // MUI is 0-based; backend is 1-based
   const [sessionsLoading, setSessionsLoading] = useState(false);
   const [sessionsError, setSessionsError] = useState<string | null>(null);
   const [revoking, setRevoking] = useState<number | null>(null);
@@ -106,15 +109,19 @@ export function SettingsView() {
       .catch(() => setMaintenanceActive(false));
   }, []);
 
-  useEffect(() => {
-    if (!superAdmin) return;
+  const fetchSessions = useCallback((page: number) => {
     setSessionsLoading(true);
     adminSessionsApi
-      .list()
-      .then(setSessions)
+      .list(page + 1)
+      .then(({ data, meta }) => { setSessions(data); setSessionsMeta(meta); })
       .catch(() => setSessionsError('Failed to load sessions.'))
       .finally(() => setSessionsLoading(false));
-  }, [superAdmin]);
+  }, []);
+
+  useEffect(() => {
+    if (!superAdmin) return;
+    fetchSessions(sessionsPage);
+  }, [superAdmin, sessionsPage, fetchSessions]);
 
   useEffect(() => {
     appConfigApi
@@ -213,20 +220,29 @@ export function SettingsView() {
     setSessionsError(null);
     adminSessionsApi
       .revoke(tokenId)
-      .then(() => setSessions((prev) => prev.filter((s) => s.id !== tokenId)))
-      .catch(() => setSessionsError('Failed to revoke session. Please try again.'))
+      .then(() => {
+        // If we just deleted the last row on a non-first page, step back.
+        const remaining = sessions.filter((s) => s.id !== tokenId).length;
+        const targetPage = remaining === 0 && sessionsPage > 0 ? sessionsPage - 1 : sessionsPage;
+        if (targetPage !== sessionsPage) {
+          setSessionsPage(targetPage);
+        } else {
+          fetchSessions(sessionsPage);
+        }
+      })
+      .catch(() => setSessionsError('Failed to delete session. Please try again.'))
       .finally(() => setRevoking(null));
-  }, []);
+  }, [sessions, sessionsPage, fetchSessions]);
 
   const handleRevokeOthers = useCallback(() => {
     setRevokingAll(true);
     setSessionsError(null);
     adminSessionsApi
       .revokeOthers()
-      .then(() => setSessions((prev) => prev.filter((s) => s.is_current)))
+      .then(() => { setSessionsPage(0); fetchSessions(0); })
       .catch(() => setSessionsError('Failed to sign out others. Please try again.'))
       .finally(() => setRevokingAll(false));
-  }, []);
+  }, [fetchSessions]);
 
   return (
     <DashboardContent>
@@ -530,8 +546,8 @@ export function SettingsView() {
                   <TableHead>
                     <TableRow>
                       <TableCell>Admin</TableCell>
-                      <TableCell>Role</TableCell>
-                      <TableCell>Logged In</TableCell>
+                      <TableCell>Device</TableCell>
+                      <TableCell>IP / Location</TableCell>
                       <TableCell>Last Active</TableCell>
                       <TableCell align="right">Action</TableCell>
                     </TableRow>
@@ -555,22 +571,37 @@ export function SettingsView() {
                               <Typography variant="body2" fontWeight={500}>
                                 {session.admin?.name ?? '—'}
                               </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {session.admin?.email ?? '—'}
-                              </Typography>
+                              <Stack direction="row" alignItems="center" spacing={0.75}>
+                                <Typography variant="caption" color="text.secondary">
+                                  {session.admin?.email ?? '—'}
+                                </Typography>
+                                {session.admin?.role && (
+                                  <Chip
+                                    label={session.admin.role.label}
+                                    size="small"
+                                    variant="outlined"
+                                    color={session.admin.role.slug === 'super_admin' ? 'error' : 'default'}
+                                    sx={{ height: 16, fontSize: 10 }}
+                                  />
+                                )}
+                              </Stack>
                             </Box>
                           </Stack>
                         </TableCell>
                         <TableCell>
-                          <Chip
-                            label={session.admin?.role?.label ?? '—'}
-                            size="small"
-                            variant="outlined"
-                            color={session.admin?.role?.slug === 'super_admin' ? 'error' : 'default'}
-                          />
+                          <Typography variant="body2">
+                            {session.device ?? '—'}
+                          </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2">{fDate(session.created_at)}</Typography>
+                          <Typography variant="body2">
+                            {session.location ?? session.ip_address ?? '—'}
+                          </Typography>
+                          {session.location && session.ip_address && session.location !== session.ip_address && (
+                            <Typography variant="caption" color="text.secondary">
+                              {session.ip_address}
+                            </Typography>
+                          )}
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2">
@@ -589,11 +620,11 @@ export function SettingsView() {
                               startIcon={
                                 revoking === session.id
                                   ? <CircularProgress size={12} color="inherit" />
-                                  : <Iconify icon="mingcute:close-line" width={13} />
+                                  : <Iconify icon="solar:trash-bin-trash-bold" width={14} />
                               }
                               onClick={() => handleRevokeSession(session.id)}
                             >
-                              Revoke
+                              Delete
                             </Button>
                           )}
                         </TableCell>
@@ -609,6 +640,16 @@ export function SettingsView() {
                   </TableBody>
                 </Table>
               </TableContainer>
+              {sessionsMeta && sessionsMeta.total > sessionsMeta.per_page && (
+                <TablePagination
+                  component="div"
+                  count={sessionsMeta.total}
+                  page={sessionsPage}
+                  onPageChange={(_, newPage) => setSessionsPage(newPage)}
+                  rowsPerPage={5}
+                  rowsPerPageOptions={[5]}
+                />
+              )}
             </Card>
           </Grid>
         )}
