@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -40,8 +40,8 @@ import { settingsApi } from 'src/api/settings';
 import { useAuth } from 'src/context/auth-context';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { appAlertsApi, type InAppAlert } from 'src/api/appAlerts';
-import { adminSessionsApi, type AdminSession, type AdminSessionMeta } from 'src/api/adminSessions';
 import { appConfigApi, type AppUpdateConfig } from 'src/api/appConfig';
+import { adminSessionsApi, type AdminSession, type AdminSessionMeta } from 'src/api/adminSessions';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -1023,7 +1023,7 @@ export function SettingsView() {
         <DialogTitle>Delete Alert?</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary">
-            <strong>"{deleteTarget?.title}"</strong> will be permanently removed. This cannot be undone.
+            <strong>&quot;{deleteTarget?.title}&quot;</strong> will be permanently removed. This cannot be undone.
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2.5 }}>
