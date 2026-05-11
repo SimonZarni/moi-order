@@ -1,8 +1,12 @@
+import type { ApiError } from 'src/types';
 import type { DashboardStats } from 'src/api/dashboard';
 
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
+import { QUERY_KEYS } from 'src/api/queryKeys';
 import { dashboardApi } from 'src/api/dashboard';
+
+// ----------------------------------------------------------------------
 
 export type UseDashboardStatsResult = {
   stats: DashboardStats | null;
@@ -21,32 +25,15 @@ export function getLastEightMonthLabels(): string[] {
 }
 
 export function useDashboardStats(): UseDashboardStatsResult {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, isError } = useQuery<DashboardStats, ApiError>({
+    queryKey: QUERY_KEYS.dashboard.stats,
+    queryFn: dashboardApi.get,
+    staleTime: 5 * 60_000,
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-
-    setIsLoading(true);
-    setError(null);
-
-    dashboardApi
-      .get()
-      .then((data) => {
-        if (!cancelled) setStats(data);
-      })
-      .catch(() => {
-        if (!cancelled) setError('Failed to load dashboard data');
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return { stats, isLoading, error };
+  return {
+    stats: data ?? null,
+    isLoading,
+    error: isError ? 'Failed to load dashboard data' : null,
+  };
 }

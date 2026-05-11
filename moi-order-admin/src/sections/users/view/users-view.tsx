@@ -1,7 +1,7 @@
+import type { UserData } from 'src/api/users';
 import type { SelectChangeEvent } from '@mui/material/Select';
 
-import { useSearchParams } from 'react-router-dom';
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -32,19 +32,15 @@ import TablePagination from '@mui/material/TablePagination';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { useRouter } from 'src/routes/hooks';
-
-import { usePresenceOnlineUsers } from 'src/hooks/usePresenceOnlineUsers';
-
 import { fDate, fDateTime } from 'src/utils/format-time';
 
-import { useAuth } from 'src/context/auth-context';
-import { usersApi, type UserData } from 'src/api/users';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
+
+import { useUsersView } from '../hooks/useUsersView';
 
 // ----------------------------------------------------------------------
 
@@ -62,7 +58,7 @@ function getAccountStatus(row: UserData): { label: string; color: StatusLabelCol
   return { label: 'Active', color: 'success' };
 }
 
-// ── Suspend dialog ───────────────────────────────────────────────────────────
+// ── Suspend dialog ────────────────────────────────────────────────────────────
 
 interface SuspendDialogProps {
   name: string;
@@ -112,107 +108,35 @@ function SuspendDialog({ name, open, onClose, onConfirm }: SuspendDialogProps) {
   );
 }
 
-// ── Main view ────────────────────────────────────────────────────────────────
+// ── Main view ─────────────────────────────────────────────────────────────────
 
 export function UsersView() {
-  const { hasPermission, isSuperAdmin } = useAuth();
-  const router      = useRouter();
-  const canManage   = hasPermission('users.manage');
-  const canDelete   = hasPermission('users.delete');
-  const superAdmin  = isSuperAdmin();
-  const { onlineIds, ready: presenceReady } = usePresenceOnlineUsers();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [users, setUsers] = useState<UserData[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const page         = Number(searchParams.get('page')     ?? '0');
-  const rowsPerPage  = Number(searchParams.get('per_page') ?? '10');
-  const filterName   = searchParams.get('search') ?? '';
-  const filterRole   = searchParams.get('role')   ?? 'all';
-  const filterStatus = searchParams.get('status') ?? 'all';
-
-  const updateParams = useCallback(
-    (updates: Record<string, string>) => {
-      setSearchParams(
-        (prev) => { Object.entries(updates).forEach(([k, v]) => prev.set(k, v)); return prev; },
-        { replace: true }
-      );
-    },
-    [setSearchParams]
-  );
-
-  const [suspendDialog, setSuspendDialog] = useState<{ open: boolean; userId: number; userName: string } | null>(null);
-
-  const fetchUsers = useCallback(() => {
-    setLoading(true);
-    usersApi
-      .list({ page: page + 1, per_page: rowsPerPage, search: filterName || undefined })
-      .then(({ data, meta }) => {
-        setUsers(data);
-        setTotal(meta.total);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [page, rowsPerPage, filterName]);
-
-  useEffect(() => { fetchUsers(); }, [fetchUsers]);
-
-  const updateRow = useCallback((id: number, updated: UserData) => {
-    setUsers((prev) => prev.map((u) => (u.id === id ? updated : u)));
-  }, []);
-
-  const removeRow = useCallback((id: number) => {
-    setUsers((prev) => prev.filter((u) => u.id !== id));
-    setTotal((t) => t - 1);
-  }, []);
-
-  const handleToggleAdmin = useCallback((id: number) => {
-    usersApi.toggleAdmin(id).then((u) => updateRow(id, u)).catch(() => {});
-  }, [updateRow]);
-
-  const handlePromoteRole = useCallback((id: number, current: string) => {
-    const next = current === 'privileged' ? 'regular' : 'privileged';
-    const label = next === 'privileged' ? 'Promote to Privileged' : 'Demote to Regular';
-    if (!window.confirm(`${label} for this user?`)) return;
-    usersApi.promoteRole(id, next).then((u) => updateRow(id, u)).catch(() => {});
-  }, [updateRow]);
-
-  const handleRestore = useCallback((id: number) => {
-    usersApi.restore(id).then((u) => updateRow(id, u)).catch(() => {});
-  }, [updateRow]);
-
-  const handleDelete = useCallback((id: number, name: string) => {
-    if (!window.confirm(`Delete ${name}? This can be undone with Restore.`)) return;
-    usersApi.destroy(id).then(() => removeRow(id)).catch(() => {});
-  }, [removeRow]);
-
-  const handleSuspendConfirm = useCallback((suspendedUntil: string | null) => {
-    if (!suspendDialog) return;
-    const { userId } = suspendDialog;
-    setSuspendDialog(null);
-    // Convert datetime-local string to ISO if provided
-    const isoUntil = suspendedUntil ? new Date(suspendedUntil).toISOString() : null;
-    usersApi.suspend(userId, isoUntil).then((u) => updateRow(userId, u)).catch(() => {});
-  }, [suspendDialog, updateRow]);
-
-  const handleBan = useCallback((id: number) => {
-    if (!window.confirm('Ban this user? They will be permanently blocked from logging in.')) return;
-    usersApi.ban(id).then((u) => updateRow(id, u)).catch(() => {});
-  }, [updateRow]);
-
-  const handleActivate = useCallback((id: number) => {
-    usersApi.activate(id).then((u) => updateRow(id, u)).catch(() => {});
-  }, [updateRow]);
-
-  const filtered = users.filter((u) => {
-    if (filterRole === 'admin' && !u.is_admin) return false;
-    if (filterRole === 'user'  &&  u.is_admin) return false;
-    if (filterStatus === 'deleted'   && !u.deleted_at)                          return false;
-    if (filterStatus === 'active'    && (u.deleted_at || u.status !== 'active'))    return false;
-    if (filterStatus === 'suspended' && (u.deleted_at || u.status !== 'suspended')) return false;
-    if (filterStatus === 'banned'    && (u.deleted_at || u.status !== 'banned'))    return false;
-    return true;
-  });
+  const {
+    filteredUsers,
+    total,
+    isLoading,
+    page,
+    rowsPerPage,
+    filterName,
+    filterRole,
+    filterStatus,
+    onlineIds,
+    presenceReady,
+    canManage,
+    canDelete,
+    superAdmin,
+    suspendDialog,
+    setSuspendDialog,
+    updateParams,
+    navigateToUser,
+    handleToggleAdmin,
+    handlePromoteRole,
+    handleSuspendConfirm,
+    handleBan,
+    handleActivate,
+    handleRestore,
+    handleDelete,
+  } = useUsersView();
 
   return (
     <DashboardContent>
@@ -267,7 +191,7 @@ export function UsersView() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {loading ? (
+                {isLoading ? (
                   <TableRow>
                     <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
                       <CircularProgress size={28} />
@@ -275,11 +199,10 @@ export function UsersView() {
                   </TableRow>
                 ) : (
                   <>
-                    {filtered.map((row) => {
+                    {filteredUsers.map((row) => {
                       const accountStatus = getAccountStatus(row);
                       const isDeleted    = Boolean(row.deleted_at);
                       const isRestricted = row.status !== 'active';
-                      // Once Pusher presence is ready, use real-time data; fall back to API value.
                       const isOnline = presenceReady ? onlineIds.has(row.id) : row.is_online;
 
                       return (
@@ -287,7 +210,7 @@ export function UsersView() {
                           key={row.id}
                           hover
                           sx={{ opacity: isDeleted ? 0.55 : 1, cursor: 'pointer' }}
-                          onClick={() => router.push(`/users/${row.id}`)}
+                          onClick={() => navigateToUser(row.id)}
                         >
                           <TableCell>
                             <Stack direction="row" alignItems="center" spacing={1.5}>
@@ -397,7 +320,7 @@ export function UsersView() {
                         </TableRow>
                       );
                     })}
-                    {filtered.length === 0 && (
+                    {filteredUsers.length === 0 && (
                       <TableRow>
                         <TableCell colSpan={6} align="center" sx={{ py: 6, color: 'text.secondary' }}>
                           No users found

@@ -1,4 +1,14 @@
 // ----------------------------------------------------------------------
+// API Error — normalized shape thrown by every apiClient rejection.
+
+export type ApiError = {
+  message: string;
+  code: string;
+  errors?: Record<string, string[]>;
+  status: number;
+};
+
+// ----------------------------------------------------------------------
 // Custom Notifications
 
 export type CustomNotification = {

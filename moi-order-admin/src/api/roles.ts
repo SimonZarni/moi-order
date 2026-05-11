@@ -1,14 +1,6 @@
 import type { AdminAccount, AdminRole, Permission } from 'src/types';
 
-import { TOKEN_KEY } from 'src/api/client';
-
-const BASE = import.meta.env.VITE_API_BASE_URL;
-
-const authHeaders = (): Record<string, string> => ({
-  'Content-Type': 'application/json',
-  'Accept': 'application/json',
-  Authorization: `Bearer ${localStorage.getItem(TOKEN_KEY) ?? ''}`,
-});
+import apiClient from './client';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -38,10 +30,10 @@ export type UpdateAdminData = {
 // ── Permissions matrix ────────────────────────────────────────────────────────
 
 export async function fetchPermissionMatrix(): Promise<PermissionMatrix> {
-  const res = await fetch(`${BASE}/roles/permissions`, { headers: authHeaders() });
-  if (!res.ok) return { roles: [], permissions: [] };
-  const json = await res.json();
-  const d = json.data ?? {};
+  const res = await apiClient.get<{ data: { roles: AdminRole[]; permissions: Permission[] } }>(
+    '/roles/permissions'
+  );
+  const d = res.data.data ?? {};
   return {
     roles: Array.isArray(d.roles) ? d.roles : [],
     permissions: Array.isArray(d.permissions) ? d.permissions : [],
@@ -49,115 +41,43 @@ export async function fetchPermissionMatrix(): Promise<PermissionMatrix> {
 }
 
 export async function updateRolePermissions(roleId: number, permissionKeys: string[]): Promise<void> {
-  const res = await fetch(`${BASE}/roles/${roleId}/permissions`, {
-    method: 'PUT',
-    headers: authHeaders(),
-    body: JSON.stringify({ permission_keys: permissionKeys }),
-  });
-
-  if (!res.ok) {
-    const json = await res.json();
-    throw new Error(json.message ?? 'Failed to save permissions.');
-  }
+  await apiClient.put(`/roles/${roleId}/permissions`, { permission_keys: permissionKeys });
 }
 
 // ── Admin account OTP flow ────────────────────────────────────────────────────
 
 export async function sendAdminOtp(email: string): Promise<SendAdminOtpResult> {
-  const res = await fetch(`${BASE}/admins/send-otp`, {
-    method: 'POST',
-    headers: authHeaders(),
-    body: JSON.stringify({ email }),
-  });
-
-  const json = await res.json();
-  if (!res.ok) {
-    throw Object.assign(new Error(json.message ?? 'Failed to send OTP.'), { errors: json.errors, code: json.code });
-  }
-  return json as SendAdminOtpResult;
+  const res = await apiClient.post<SendAdminOtpResult>('/admins/send-otp', { email });
+  return res.data;
 }
 
 export async function verifyAdminOtp(email: string, otp: string): Promise<string> {
-  const res = await fetch(`${BASE}/admins/verify-otp`, {
-    method: 'POST',
-    headers: authHeaders(),
-    body: JSON.stringify({ email, otp }),
-  });
-
-  const json = await res.json();
-  if (!res.ok) {
-    throw Object.assign(new Error(json.message ?? 'Invalid OTP.'), { errors: json.errors });
-  }
-  return json.verified_token as string;
+  const res = await apiClient.post<{ verified_token: string }>('/admins/verify-otp', { email, otp });
+  return res.data.verified_token;
 }
 
 // ── Admin accounts ────────────────────────────────────────────────────────────
 
 export async function fetchAdminAccounts(): Promise<AdminAccount[]> {
-  const res = await fetch(`${BASE}/admins`, { headers: authHeaders() });
-  if (!res.ok) {
-    const json = await res.json().catch(() => ({}));
-    throw new Error(json.message ?? `Server error ${res.status}`);
-  }
-  const json = await res.json();
-  return Array.isArray(json.data) ? json.data : [];
+  const res = await apiClient.get<{ data: AdminAccount[] }>('/admins');
+  return Array.isArray(res.data.data) ? res.data.data : [];
 }
 
 export async function createAdminAccount(data: CreateAdminData): Promise<AdminAccount> {
-  const res = await fetch(`${BASE}/admins`, {
-    method: 'POST',
-    headers: authHeaders(),
-    body: JSON.stringify(data),
-  });
-
-  if (!res.ok) {
-    const json = await res.json();
-    throw Object.assign(new Error(json.message ?? 'Failed to create admin.'), { errors: json.errors });
-  }
-
-  const json = await res.json();
-  return json.data as AdminAccount;
+  const res = await apiClient.post<{ data: AdminAccount }>('/admins', data);
+  return res.data.data;
 }
 
 export async function updateAdminAccount(id: number, data: UpdateAdminData): Promise<AdminAccount> {
-  const res = await fetch(`${BASE}/admins/${id}`, {
-    method: 'PUT',
-    headers: authHeaders(),
-    body: JSON.stringify(data),
-  });
-
-  if (!res.ok) {
-    const json = await res.json();
-    throw Object.assign(new Error(json.message ?? 'Failed to update admin.'), { errors: json.errors });
-  }
-
-  const json = await res.json();
-  return json.data as AdminAccount;
+  const res = await apiClient.put<{ data: AdminAccount }>(`/admins/${id}`, data);
+  return res.data.data;
 }
 
 export async function toggleAdminAccount(id: number): Promise<AdminAccount> {
-  const res = await fetch(`${BASE}/admins/${id}/toggle`, {
-    method: 'PATCH',
-    headers: authHeaders(),
-  });
-
-  if (!res.ok) {
-    const json = await res.json();
-    throw new Error(json.message ?? 'Failed to toggle admin.');
-  }
-
-  const json = await res.json();
-  return json.data as AdminAccount;
+  const res = await apiClient.patch<{ data: AdminAccount }>(`/admins/${id}/toggle`);
+  return res.data.data;
 }
 
 export async function deleteAdminAccount(id: number): Promise<void> {
-  const res = await fetch(`${BASE}/admins/${id}`, {
-    method: 'DELETE',
-    headers: authHeaders(),
-  });
-
-  if (!res.ok) {
-    const json = await res.json();
-    throw new Error(json.message ?? 'Failed to remove admin.');
-  }
+  await apiClient.delete(`/admins/${id}`);
 }

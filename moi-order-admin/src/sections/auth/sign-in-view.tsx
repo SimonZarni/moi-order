@@ -1,3 +1,5 @@
+import type { ApiError } from 'src/types';
+
 import { useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
@@ -38,7 +40,7 @@ export function SignInView() {
       await login(email, password);
       router.push('/');
     } catch (err: unknown) {
-      const status = (err as { response?: { status?: number } }).response?.status;
+      const { status } = err as ApiError;
       if (status === 422 || status === 403) {
         setError('Invalid email or password.');
       } else {

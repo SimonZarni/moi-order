@@ -35,7 +35,8 @@ Route::prefix('admin/v1')->middleware(['throttle:auth'])->group(
     base_path('routes/api/admin_public.php')
 );
 
-// Admin authenticated routes — token must carry the 'admin' ability; admin.auth asserts is_admin
+// Admin authenticated routes — token must carry the 'admin' ability; admin.auth asserts is_admin.
+// AdminTokenFromCookie runs via the api group (see bootstrap/app.php) before auth:sanctum.
 Route::prefix('admin/v1')->middleware(['auth:sanctum', 'abilities:admin', 'admin.auth', 'throttle:admin'])->group(
     base_path('routes/api/admin_v1.php')
 );

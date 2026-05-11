@@ -1,6 +1,7 @@
 import 'src/global.css';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
@@ -13,6 +14,18 @@ import { NotificationsProvider } from 'src/context/notifications-context';
 
 // ----------------------------------------------------------------------
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 60_000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+// ----------------------------------------------------------------------
+
 type AppProps = {
   children: React.ReactNode;
 };
@@ -21,14 +34,16 @@ export default function App({ children }: AppProps) {
   useScrollToTop();
 
   return (
-    <AuthProvider>
-      <NotificationsProvider>
-        <ThemeProvider>
-          {children}
-          <ForbiddenSnackbar />
-        </ThemeProvider>
-      </NotificationsProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <NotificationsProvider>
+          <ThemeProvider>
+            {children}
+            <ForbiddenSnackbar />
+          </ThemeProvider>
+        </NotificationsProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 

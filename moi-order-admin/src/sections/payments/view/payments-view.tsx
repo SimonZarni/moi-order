@@ -1,8 +1,5 @@
 import type { SelectChangeEvent } from '@mui/material/Select';
 
-import { useSearchParams } from 'react-router-dom';
-import { useState, useEffect, useCallback } from 'react';
-
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
@@ -27,18 +24,16 @@ import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { useRouter } from 'src/routes/hooks';
-
 import { fDate } from 'src/utils/format-time';
-import { fNumber, fCurrency } from 'src/utils/format-number';
+import { fNumber } from 'src/utils/format-number';
 
-import { settingsApi } from 'src/api/settings';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { paymentsApi, type PaymentData, type PaymentStats } from 'src/api/payments';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
+
+import { usePaymentsView } from '../hooks/usePaymentsView';
 
 // ----------------------------------------------------------------------
 
@@ -56,70 +51,21 @@ const formatPayableType = (type: string | null): string => {
 // ----------------------------------------------------------------------
 
 export function PaymentsView() {
-  const router = useRouter();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [payments, setPayments] = useState<PaymentData[]>([]);
-  const [stats, setStats] = useState<PaymentStats | null>(null);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [autoPayment, setAutoPayment] = useState<boolean | null>(null);
-  const [togglingAutoPayment, setTogglingAutoPayment] = useState(false);
-  const page         = Number(searchParams.get('page')     ?? '0');
-  const rowsPerPage  = Number(searchParams.get('per_page') ?? '10');
-  const filterStatus = searchParams.get('status') ?? 'all';
-  const filterSearch = searchParams.get('search') ?? '';
-
-  const updateParams = useCallback(
-    (updates: Record<string, string>) => {
-      setSearchParams(
-        (prev) => { Object.entries(updates).forEach(([k, v]) => prev.set(k, v)); return prev; },
-        { replace: true }
-      );
-    },
-    [setSearchParams]
-  );
-
-  useEffect(() => {
-    paymentsApi.stats().then(setStats).catch(() => {});
-    settingsApi.getPaymentSettings().then((s) => setAutoPayment(s.auto_payment_enabled)).catch(() => {});
-  }, []);
-
-  const handleToggleAutoPayment = useCallback(() => {
-    setTogglingAutoPayment(true);
-    settingsApi
-      .toggleAutoPayment()
-      .then((s) => setAutoPayment(s.auto_payment_enabled))
-      .catch(() => {})
-      .finally(() => setTogglingAutoPayment(false));
-  }, []);
-
-  const fetchPayments = useCallback(() => {
-    setLoading(true);
-    paymentsApi
-      .list({
-        page: page + 1,
-        per_page: rowsPerPage,
-        status: filterStatus !== 'all' ? filterStatus : undefined,
-        search: filterSearch.trim() || undefined,
-      })
-      .then(({ data, meta }) => {
-        setPayments(data);
-        setTotal(meta.total);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [page, rowsPerPage, filterStatus, filterSearch]);
-
-  useEffect(() => {
-    fetchPayments();
-  }, [fetchPayments]);
-
-  const summary = [
-    { label: 'Total Revenue', value: fCurrency((stats?.total_revenue ?? 0) / 100), color: 'primary' as const },
-    { label: 'Succeeded', value: String(stats?.succeeded_count ?? 0), color: 'success' as const },
-    { label: 'Pending', value: String(stats?.pending_count ?? 0), color: 'warning' as const },
-    { label: 'Failed', value: String(stats?.failed_count ?? 0), color: 'error' as const },
-  ];
+  const {
+    payments,
+    total,
+    isLoading,
+    autoPayment,
+    togglingAutoPayment,
+    page,
+    rowsPerPage,
+    filterStatus,
+    filterSearch,
+    summary,
+    updateParams,
+    navigateToPayment,
+    handleToggleAutoPayment,
+  } = usePaymentsView();
 
   return (
     <DashboardContent>
@@ -213,7 +159,7 @@ export function PaymentsView() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {loading ? (
+                {isLoading ? (
                   <TableRow>
                     <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
                       <CircularProgress size={28} />
@@ -226,7 +172,7 @@ export function PaymentsView() {
                         key={row.id}
                         hover
                         sx={{ cursor: 'pointer' }}
-                        onClick={() => router.push(`/payments/${row.id}`)}
+                        onClick={() => navigateToPayment(row.id)}
                       >
                         <TableCell>
                           <Typography variant="caption" color="text.disabled" display="block">
@@ -261,7 +207,7 @@ export function PaymentsView() {
                         <TableCell align="right">
                           <IconButton
                             size="small"
-                            onClick={(e) => { e.stopPropagation(); router.push(`/payments/${row.id}`); }}
+                            onClick={(e) => { e.stopPropagation(); navigateToPayment(row.id); }}
                           >
                             <Iconify icon="solar:eye-bold" width={16} />
                           </IconButton>

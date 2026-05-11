@@ -3,7 +3,6 @@ import type { AppUser } from 'src/types';
 import { useState, useEffect, useContext, useCallback, createContext } from 'react';
 
 import { authApi } from 'src/api/auth';
-import { TOKEN_KEY } from 'src/api/client';
 import { registerPushSubscription, unregisterPushSubscription } from 'src/lib/web-push';
 
 // ----------------------------------------------------------------------
@@ -31,40 +30,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (!token) {
-      setIsLoading(false);
-      return;
-    }
+    // Always call /me on mount to check whether the httpOnly admin_token cookie is
+    // still valid. There is no JS-visible token to check first — that is intentional.
+    // On 401: the Axios interceptor redirects to /sign-in (unless already there).
+    // On any other error: isLoading becomes false, admin stays null, AuthGuard redirects.
     authApi
       .me()
       .then((user) => {
         setAdmin(user);
-        registerPushSubscription(); // restore subscription on page reload
+        registerPushSubscription(); // restore push subscription on page reload
       })
-      .catch((err: unknown) => {
-        // 401 is handled by the Axios interceptor (clears token + redirects).
-        // Any other error (network failure, 5xx) silently clears the session
-        // so the guard redirects to sign-in rather than showing a broken state.
-        const status = (err as { response?: { status?: number } }).response?.status;
-        if (status !== 401) {
-          localStorage.removeItem(TOKEN_KEY);
-        }
+      .catch(() => {
+        // 401 on /sign-in page: interceptor skips redirect, we just stay unauthenticated.
+        // 401 on protected page: interceptor handles redirect; this catch is a no-op.
+        // Network / 5xx: clear state, AuthGuard redirects to sign-in.
       })
       .finally(() => setIsLoading(false));
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const { user, token } = await authApi.login({ email, password });
-    localStorage.setItem(TOKEN_KEY, token);
+    // Server sets the httpOnly cookie in the response — nothing to store on our side.
+    const { user } = await authApi.login({ email, password });
     setAdmin(user);
     registerPushSubscription(); // fire-and-forget — never blocks login
   }, []);
 
   const logout = useCallback(async () => {
-    await unregisterPushSubscription(); // DELETE from backend before token is cleared
+    await unregisterPushSubscription(); // DELETE from backend before session is cleared
     await authApi.logout().catch(() => {});
-    localStorage.removeItem(TOKEN_KEY);
+    // Server clears the cookie; we clear local state. Browser discards the expired cookie.
     setAdmin(null);
   }, []);
 

@@ -3,7 +3,6 @@ import type { AdminNotification } from 'src/types';
 import Pusher from 'pusher-js';
 import { useState, useEffect, useContext, useCallback, createContext } from 'react';
 
-import { TOKEN_KEY } from 'src/api/client';
 import { notificationsApi } from 'src/api/notifications';
 
 import { useAuth } from './auth-context';
@@ -80,13 +79,14 @@ export function NotificationsProvider({ children }: Props) {
       channelAuthorization: {
         customHandler: async ({ channelName, socketId }, callback) => {
           try {
-            const token = localStorage.getItem(TOKEN_KEY);
+            // credentials: 'include' sends the httpOnly admin_token cookie automatically.
+            // AdminTokenFromCookie middleware on the backend converts it to a Bearer header.
             const res = await fetch(`${appOrigin}/broadcasting/auth`, {
               method: 'POST',
+              credentials: 'include',
               headers: {
                 'Content-Type': 'application/json',
                 Accept: 'application/json',
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
               },
               body: JSON.stringify({ socket_id: socketId, channel_name: channelName }),
             });

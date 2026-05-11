@@ -35,6 +35,9 @@ return [
 
     'max_age' => 86400,
 
-    'supports_credentials' => false,
+    // Required for the admin dashboard to send the httpOnly admin_token cookie on
+    // cross-origin requests. Does not affect mobile apps (no browser cookie jar).
+    // Note: allowed_origins must be explicit (no wildcard) when this is true.
+    'supports_credentials' => true,
 
 ];

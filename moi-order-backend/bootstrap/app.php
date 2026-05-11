@@ -22,6 +22,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
 
+        // AdminTokenFromCookie runs globally on every API route so it covers both the
+        // admin authenticated routes AND /broadcasting/auth (used by Pusher channel auth).
+        // It is a no-op on any request that has no admin_token cookie or already carries
+        // an Authorization header, so mobile app routes are completely unaffected.
+        $middleware->appendToGroup('api', \App\Http\Middleware\AdminTokenFromCookie::class);
+
         // Swap in our custom PreventRequestsDuringMaintenance which declares the
         // $except list of paths that bypass the 503 maintenance gate.
         // Using replace() instead of preventMaintenanceModeExclude() for
@@ -33,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'admin.auth'          => \App\Http\Middleware\AdminAuthenticate::class,
+            'admin.token.cookie'  => \App\Http\Middleware\AdminTokenFromCookie::class,
             'check.permission'    => \App\Http\Middleware\CheckPermission::class,
             'merchant.auth'       => \App\Http\Middleware\MerchantAuthenticate::class,
             'user.not_suspended'  => \App\Http\Middleware\CheckUserNotSuspended::class,

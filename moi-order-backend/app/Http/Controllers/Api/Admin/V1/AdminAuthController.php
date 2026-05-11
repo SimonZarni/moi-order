@@ -11,6 +11,7 @@ use App\Http\Resources\Admin\AdminUserResource;
 use App\Services\AdminAuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Cookie;
 
 /**
  * Principle: SRP — HTTP layer only. ≤20 lines/action. One service call per action.
@@ -28,12 +29,26 @@ class AdminAuthController extends Controller
         $result = $this->authService->login(AdminLoginDTO::fromRequest($request));
         $result['user']->loadMissing('adminRole.permissions');
 
+        // Token is written into an httpOnly cookie — never returned in the JSON body.
+        // JS on the admin dashboard cannot read this cookie; the browser attaches it
+        // automatically, and AdminTokenFromCookie middleware converts it to a Bearer header.
+        $cookie = new Cookie(
+            name: 'admin_token',
+            value: $result['token'],
+            expire: time() + (8 * 60 * 60), // matches createToken() expiry in AdminAuthService
+            path: '/api/admin',
+            domain: config('session.domain'),
+            secure: app()->isProduction(),
+            httpOnly: true,
+            raw: false,
+            sameSite: Cookie::SAMESITE_LAX,
+        );
+
         return response()->json([
             'data' => [
-                'user'  => new AdminUserResource($result['user']),
-                'token' => $result['token'],
+                'user' => new AdminUserResource($result['user']),
             ],
-        ]);
+        ])->withCookie($cookie);
     }
 
     /** POST /api/admin/v1/auth/logout — requires auth:sanctum + admin.auth */
@@ -41,7 +56,19 @@ class AdminAuthController extends Controller
     {
         $this->authService->logout($request->user());
 
-        return response()->json(null, 204);
+        $expired = new Cookie(
+            name: 'admin_token',
+            value: '',
+            expire: 1,
+            path: '/api/admin',
+            domain: config('session.domain'),
+            secure: app()->isProduction(),
+            httpOnly: true,
+            raw: false,
+            sameSite: Cookie::SAMESITE_LAX,
+        );
+
+        return response()->json(null, 204)->withCookie($expired);
     }
 
     /** GET /api/admin/v1/auth/me — requires auth:sanctum + admin.auth */

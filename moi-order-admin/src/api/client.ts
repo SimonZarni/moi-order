@@ -1,9 +1,12 @@
-import axios from 'axios';
+import type { ApiError } from 'src/types';
 
-export const TOKEN_KEY = 'admin_token';
+import axios from 'axios';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
+  // withCredentials tells the browser to include the httpOnly admin_token cookie on every
+  // request. The server's AdminTokenFromCookie middleware converts it to a Bearer header.
+  withCredentials: true,
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -11,10 +14,6 @@ const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem(TOKEN_KEY);
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
   // For FormData, remove the default application/json Content-Type so the browser
   // can set multipart/form-data with the correct boundary automatically.
   if (config.data instanceof FormData) {
@@ -33,20 +32,33 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response?.status === 401 && !redirectingToLogin) {
+    const status = error.response?.status as number | undefined;
+    const data   = error.response?.data as
+      | { message?: string; code?: string; errors?: Record<string, string[]> }
+      | undefined;
+
+    // Guard against redirect loops: if we are already on the sign-in page (e.g. the
+    // initial session check on app load returns 401), let the auth context handle it
+    // via React state rather than triggering a hard navigation to the same URL.
+    if (status === 401 && !redirectingToLogin && window.location.pathname !== '/sign-in') {
       redirectingToLogin = true;
-      localStorage.removeItem(TOKEN_KEY);
       window.location.href = '/sign-in';
     }
-    if (error.response?.status === 403) {
-      const message =
-        error.response.data?.message ?? "You don't have permission to perform this action.";
+    if (status === 403) {
+      const message = data?.message ?? "You don't have permission to perform this action.";
       window.dispatchEvent(new CustomEvent('api:forbidden', { detail: { message } }));
     }
-    if (error.response?.status === 429) {
+    if (status === 429) {
       console.warn('[API] Rate limit hit — too many requests.');
     }
-    return Promise.reject(error);
+
+    const apiError: ApiError = {
+      message: data?.message ?? 'An unexpected error occurred.',
+      code:    data?.code    ?? 'internal',
+      errors:  data?.errors,
+      status:  status        ?? 0,
+    };
+    return Promise.reject(apiError);
   }
 );
 
