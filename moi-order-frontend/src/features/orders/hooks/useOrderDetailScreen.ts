@@ -157,7 +157,7 @@ export function useOrderDetailScreen(): UseOrderDetailScreenResult {
 
   const handleRefresh        = useCallback((): void => { refetch(); }, [refetch]);
   const handleBack           = useCallback((): void => { navigation.goBack(); }, [navigation]);
-  const handleViewAllOrders  = useCallback((): void => { navigation.navigate('Orders'); }, [navigation]);
+  const handleViewAllOrders  = useCallback((): void => { navigation.navigate('MainTabs', { screen: 'Orders' }); }, [navigation]);
   const handleClosePreview = useCallback((): void => { setPreviewImageUrl(null); }, []);
 
   const handleDocumentPress = useCallback((url: string): void => {
