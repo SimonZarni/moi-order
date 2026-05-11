@@ -7,7 +7,10 @@
     "platforms": ["ios", "android", "web"],
     "ios": {
       "bundleIdentifier": "com.moiorder.merchant",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Moi Order needs access to your photo library to upload menu item photos, your restaurant cover photo, logo, and KYC identity documents."
+      }
     },
     "android": {
       "package": "com.moiorder.merchant",
