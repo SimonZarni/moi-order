@@ -4,7 +4,11 @@
     "slug": "moi-order-merchant",
     "version": "1.0.0",
     "scheme": "merchant",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "runtimeVersion": {
       "policy": "appVersion"
     },
@@ -22,6 +26,25 @@
         "backgroundColor": "#f97316"
       }
     },
-    "web": { "bundler": "metro", "output": "single" }
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#f97316",
+          "sounds": []
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "54d96096-5cb5-424c-a37d-c00420d783d7"
+      }
+    },
+    "owner": "kaungsithu03"
   }
 }

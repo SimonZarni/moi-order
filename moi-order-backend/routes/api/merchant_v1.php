@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\Merchant\V1\KycController;
+use App\Http\Controllers\Api\V1\DeviceTokenController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantAnalyticsController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantOrderChatController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantOrderController;
@@ -46,6 +47,10 @@ Route::post('/orders/{id}/chat',  [MerchantOrderChatController::class, 'store'])
 Route::post('/kyc/resubmit',                             [KycController::class, 'resubmit']);
 Route::post('/kyc/resubmit/{id}/documents',              [KycController::class, 'uploadResubmitDocument']);
 Route::post('/kyc/resubmit/{id}/submit',                 [KycController::class, 'submitResubmission']);
+
+// ── Device tokens — push notification registration ────────────────────────────
+Route::post('/device-tokens',   [DeviceTokenController::class, 'store']);
+Route::delete('/device-tokens', [DeviceTokenController::class, 'destroy']);
 
 // ── Restaurant photos ─────────────────────────────────────────────────────────
 Route::post('/restaurant/cover_photo', [MerchantRestaurantController::class, 'uploadCoverPhoto']);

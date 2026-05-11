@@ -12,10 +12,16 @@ import { colours } from '../shared/theme/colours';
 import { AuthNavigator } from './AuthNavigator';
 import { KycNavigator } from './KycNavigator';
 import { MerchantTabsNavigator } from './MerchantTabsNavigator';
+import { usePushNotifications } from '../features/notifications/hooks/usePushNotifications';
 import { KYC_STATUS } from '../types/enums';
 import type { RootStackParamList } from '../types/navigation';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
+
+function PushNotificationManager(): null {
+  usePushNotifications();
+  return null;
+}
 
 export function AppNavigator(): React.JSX.Element {
   const { token, user, isLoading, initFromStorage, setUser } = useAuthStore();
@@ -61,6 +67,7 @@ export function AppNavigator(): React.JSX.Element {
 
   return (
     <NavigationContainer>
+      {!!token && !needsKyc && <PushNotificationManager />}
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
         {!token ? (
           <RootStack.Screen name="Auth" component={AuthNavigator} />
