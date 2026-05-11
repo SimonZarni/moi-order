@@ -186,3 +186,20 @@ export const USER_ROLE = {
 
 export type UserRole = (typeof USER_ROLE)[keyof typeof USER_ROLE];
 
+// Mirrors App\Enums\AppUpdateType
+export const APP_UPDATE_TYPE = {
+  None:     'none',
+  Optional: 'optional',
+  Required: 'required',
+} as const;
+
+export type AppUpdateType = (typeof APP_UPDATE_TYPE)[keyof typeof APP_UPDATE_TYPE];
+
+// Mirrors App\Enums\AppAlertFrequency
+export const APP_ALERT_FREQUENCY = {
+  OncePerDay: 'once_per_day',
+  EveryOpen:  'every_open',
+} as const;
+
+export type AppAlertFrequency = (typeof APP_ALERT_FREQUENCY)[keyof typeof APP_ALERT_FREQUENCY];
+

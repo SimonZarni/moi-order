@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import * as Application from 'expo-application';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -55,6 +56,7 @@ export function ProfileScreen(): React.JSX.Element {
     realThaiDate, simulatedDate, isUpdatingSimulatedDate, showSimulatedDatePicker,
     handleSimulatedDateFieldPress, handleSimulatedDatePickerChange, handleClearSimulatedDate,
     isTriggeringReminder, lastTriggerResult, handleTriggerReminder,
+    handleCheckVersion,
   } = useProfileScreen();
   const {
     isLinkingGoogle, isLinkingApple, isLinkingLine,
@@ -828,6 +830,27 @@ export function ProfileScreen(): React.JSX.Element {
                 <Ionicons name="shield-checkmark-outline" size={16} color={colours.tertiary} />
               </View>
               <Text style={styles.rowLabel}>{t.pdpa}</Text>
+              <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
+            </Pressable>
+          </View>
+
+          {/* § Version */}
+          <View style={styles.sectionRow}>
+            <Text style={styles.sectionLabel}>App</Text>
+            <View style={styles.sectionLine} />
+          </View>
+          <View style={styles.card}>
+            <Pressable
+              style={styles.row}
+              onPress={handleCheckVersion}
+              accessibilityLabel="Check app version"
+              accessibilityRole="button"
+            >
+              <View style={[styles.iconBadge, styles.iconBadgePrimary]}>
+                <Ionicons name="information-circle-outline" size={16} color={colours.primary} />
+              </View>
+              <Text style={styles.rowLabel}>App Version</Text>
+              <Text style={styles.rowValue}>{Application.nativeApplicationVersion ?? '—'}</Text>
               <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </Pressable>
           </View>

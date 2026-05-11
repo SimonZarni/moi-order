@@ -27,10 +27,14 @@ import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 import InputAdornment from '@mui/material/InputAdornment';
 import CircularProgress from '@mui/material/CircularProgress';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 import { fDate } from 'src/utils/format-time';
 
 import { settingsApi } from 'src/api/settings';
+import { appConfigApi, type AppUpdateConfig, type AppAlertConfig } from 'src/api/appConfig';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
@@ -88,11 +92,48 @@ export function SettingsView() {
   const [maintenanceError, setMaintenanceError] = useState<string | null>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
+  // ── App Updates ───────────────────────────────────────────────────────────
+  const [updateConfig, setUpdateConfig] = useState<AppUpdateConfig>({
+    ios_min_version: '',
+    android_min_version: '',
+    type: 'none',
+    title: '',
+    message: '',
+    ios_store_url: '',
+    android_store_url: '',
+  });
+  const [updateSaving, setUpdateSaving] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+
+  // ── In-App Alert ──────────────────────────────────────────────────────────
+  const [alertConfig, setAlertConfig] = useState<AppAlertConfig>({
+    is_active: false,
+    title: '',
+    message: '',
+    frequency: 'once_per_day',
+  });
+  const [alertSaving, setAlertSaving] = useState(false);
+  const [alertError, setAlertError] = useState<string | null>(null);
+  const [alertSuccess, setAlertSuccess] = useState(false);
+
   useEffect(() => {
     settingsApi
       .getMaintenanceStatus()
       .then((s) => setMaintenanceActive(s.active))
       .catch(() => setMaintenanceActive(false));
+  }, []);
+
+  useEffect(() => {
+    appConfigApi
+      .get()
+      .then((data) => {
+        setUpdateConfig(data.update);
+        setAlertConfig(data.alert);
+      })
+      .catch(() => {
+        // Non-fatal — admin can still edit; defaults will be saved on first save
+      });
   }, []);
 
   const handleMaintenanceToggle = useCallback(() => {
@@ -119,6 +160,58 @@ export function SettingsView() {
       .catch(() => setMaintenanceError('Failed to enable maintenance mode. Try again.'))
       .finally(() => setMaintenanceLoading(false));
   }, []);
+
+  const handleSaveUpdate = useCallback(() => {
+    setUpdateSaving(true);
+    setUpdateError(null);
+    setUpdateSuccess(false);
+    appConfigApi
+      .update({
+        ios_min_version:     updateConfig.ios_min_version || null,
+        android_min_version: updateConfig.android_min_version || null,
+        update_type:         updateConfig.type,
+        update_title:        updateConfig.title || null,
+        update_message:      updateConfig.message || null,
+        ios_store_url:       updateConfig.ios_store_url || null,
+        android_store_url:   updateConfig.android_store_url || null,
+        alert_is_active:     alertConfig.is_active,
+        alert_title:         alertConfig.title || null,
+        alert_message:       alertConfig.message || null,
+        alert_frequency:     alertConfig.frequency,
+      })
+      .then((data) => {
+        setUpdateConfig(data.update);
+        setUpdateSuccess(true);
+      })
+      .catch(() => setUpdateError('Failed to save update settings. Please try again.'))
+      .finally(() => setUpdateSaving(false));
+  }, [updateConfig, alertConfig]);
+
+  const handleSaveAlert = useCallback(() => {
+    setAlertSaving(true);
+    setAlertError(null);
+    setAlertSuccess(false);
+    appConfigApi
+      .update({
+        ios_min_version:     updateConfig.ios_min_version || null,
+        android_min_version: updateConfig.android_min_version || null,
+        update_type:         updateConfig.type,
+        update_title:        updateConfig.title || null,
+        update_message:      updateConfig.message || null,
+        ios_store_url:       updateConfig.ios_store_url || null,
+        android_store_url:   updateConfig.android_store_url || null,
+        alert_is_active:     alertConfig.is_active,
+        alert_title:         alertConfig.title || null,
+        alert_message:       alertConfig.message || null,
+        alert_frequency:     alertConfig.frequency,
+      })
+      .then((data) => {
+        setAlertConfig(data.alert);
+        setAlertSuccess(true);
+      })
+      .catch(() => setAlertError('Failed to save alert settings. Please try again.'))
+      .finally(() => setAlertSaving(false));
+  }, [updateConfig, alertConfig]);
 
   const pwMatch = newPw === confirmPw;
   const pwValid = currentPw.length > 0 && newPw.length >= 8 && pwMatch;
@@ -497,6 +590,200 @@ export function SettingsView() {
             </TableContainer>
           </Card>
         </Grid>
+        {/* App Updates */}
+        <Grid size={{ xs: 12 }}>
+          <Card>
+            <CardHeader
+              title="App Updates"
+              subheader="Control version gating — force or suggest updates to mobile users"
+            />
+            <Divider />
+            <CardContent>
+              {updateError && (
+                <Alert severity="error" sx={{ mb: 2 }} onClose={() => setUpdateError(null)}>
+                  {updateError}
+                </Alert>
+              )}
+              {updateSuccess && (
+                <Alert severity="success" sx={{ mb: 2 }} onClose={() => setUpdateSuccess(false)}>
+                  Update settings saved successfully.
+                </Alert>
+              )}
+              <Stack spacing={2.5}>
+                <Box>
+                  <Typography variant="body2" fontWeight={500} sx={{ mb: 1 }}>Update Type</Typography>
+                  <ToggleButtonGroup
+                    value={updateConfig.type}
+                    exclusive
+                    onChange={(_, v) => { if (v !== null) setUpdateConfig((prev) => ({ ...prev, type: v as string })); }}
+                    size="small"
+                  >
+                    <ToggleButton value="none">None</ToggleButton>
+                    <ToggleButton value="optional">Optional</ToggleButton>
+                    <ToggleButton value="required">Required</ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>
+                <Grid container spacing={2}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      fullWidth
+                      label="iOS App Store URL"
+                      placeholder="https://apps.apple.com/app/id..."
+                      value={updateConfig.ios_store_url}
+                      onChange={(e) => setUpdateConfig((prev) => ({ ...prev, ios_store_url: e.target.value }))}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      fullWidth
+                      label="Google Play URL"
+                      placeholder="https://play.google.com/store/apps/details?id=..."
+                      value={updateConfig.android_store_url}
+                      onChange={(e) => setUpdateConfig((prev) => ({ ...prev, android_store_url: e.target.value }))}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      fullWidth
+                      label="iOS Min Version"
+                      placeholder="1.0.0"
+                      value={updateConfig.ios_min_version}
+                      onChange={(e) => setUpdateConfig((prev) => ({ ...prev, ios_min_version: e.target.value }))}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      fullWidth
+                      label="Android Min Version"
+                      placeholder="1.0.0"
+                      value={updateConfig.android_min_version}
+                      onChange={(e) => setUpdateConfig((prev) => ({ ...prev, android_min_version: e.target.value }))}
+                    />
+                  </Grid>
+                </Grid>
+                <TextField
+                  fullWidth
+                  label="Update Title"
+                  placeholder="Update Available"
+                  value={updateConfig.title}
+                  onChange={(e) => setUpdateConfig((prev) => ({ ...prev, title: e.target.value }))}
+                />
+                <TextField
+                  fullWidth
+                  multiline
+                  minRows={3}
+                  label="Update Message"
+                  placeholder="A new version of the app is available with improvements and fixes."
+                  value={updateConfig.message}
+                  onChange={(e) => setUpdateConfig((prev) => ({ ...prev, message: e.target.value }))}
+                  inputProps={{ maxLength: 1000 }}
+                  helperText={`${updateConfig.message.length}/1000`}
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  disabled={updateSaving}
+                  onClick={handleSaveUpdate}
+                  startIcon={updateSaving ? <CircularProgress size={16} color="inherit" /> : undefined}
+                  sx={{ alignSelf: 'flex-start' }}
+                >
+                  {updateSaving ? 'Saving…' : 'Save Update Settings'}
+                </Button>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* In-App Alert */}
+        <Grid size={{ xs: 12 }}>
+          <Card>
+            <CardHeader
+              title="In-App Alert"
+              subheader="Display a dismissible notice to all users on app open"
+              action={
+                <Switch
+                  checked={alertConfig.is_active}
+                  onChange={(e) => setAlertConfig((prev) => ({ ...prev, is_active: e.target.checked }))}
+                  color="primary"
+                />
+              }
+            />
+            <Divider />
+            <CardContent>
+              {alertError && (
+                <Alert severity="error" sx={{ mb: 2 }} onClose={() => setAlertError(null)}>
+                  {alertError}
+                </Alert>
+              )}
+              {alertSuccess && (
+                <Alert severity="success" sx={{ mb: 2 }} onClose={() => setAlertSuccess(false)}>
+                  Alert settings saved successfully.
+                </Alert>
+              )}
+              <Stack spacing={2.5}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box>
+                    <Typography variant="body2" fontWeight={500}>Alert Active</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      When enabled, the alert is shown to all users according to the frequency below
+                    </Typography>
+                  </Box>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={alertConfig.is_active}
+                        onChange={(e) => setAlertConfig((prev) => ({ ...prev, is_active: e.target.checked }))}
+                        color="primary"
+                      />
+                    }
+                    label={alertConfig.is_active ? 'Active' : 'Inactive'}
+                  />
+                </Box>
+                <Box>
+                  <Typography variant="body2" fontWeight={500} sx={{ mb: 1 }}>Frequency</Typography>
+                  <ToggleButtonGroup
+                    value={alertConfig.frequency}
+                    exclusive
+                    onChange={(_, v) => { if (v !== null) setAlertConfig((prev) => ({ ...prev, frequency: v as string })); }}
+                    size="small"
+                  >
+                    <ToggleButton value="once_per_day">Once per day</ToggleButton>
+                    <ToggleButton value="every_open">Every open</ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>
+                <TextField
+                  fullWidth
+                  label="Alert Title"
+                  placeholder="Important Notice"
+                  value={alertConfig.title}
+                  onChange={(e) => setAlertConfig((prev) => ({ ...prev, title: e.target.value }))}
+                />
+                <TextField
+                  fullWidth
+                  multiline
+                  minRows={3}
+                  label="Alert Message"
+                  placeholder="We have an important update for our users…"
+                  value={alertConfig.message}
+                  onChange={(e) => setAlertConfig((prev) => ({ ...prev, message: e.target.value }))}
+                  inputProps={{ maxLength: 1000 }}
+                  helperText={`${alertConfig.message.length}/1000`}
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  disabled={alertSaving}
+                  onClick={handleSaveAlert}
+                  startIcon={alertSaving ? <CircularProgress size={16} color="inherit" /> : undefined}
+                  sx={{ alignSelf: 'flex-start' }}
+                >
+                  {alertSaving ? 'Saving…' : 'Save Alert Settings'}
+                </Button>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+
       </Grid>
 
       {/* Maintenance enable confirmation */}

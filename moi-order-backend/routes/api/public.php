@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\V1\AppConfigController;
 use App\Http\Controllers\Api\V1\Auth\EmailAuthController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\EmergencyContactController;
@@ -69,3 +70,6 @@ Route::get('/home-cards', [HomeCardController::class, 'index']);
 // Emergency contacts — public browsing, no auth required
 Route::get('/emergency/contacts',          [EmergencyContactController::class, 'index']);
 Route::get('/emergency/contacts/{contact}', [EmergencyContactController::class, 'show']);
+
+// App config — intentionally public — called on every app launch to check update/alert status
+Route::get('/app-config', [AppConfigController::class, 'index']);

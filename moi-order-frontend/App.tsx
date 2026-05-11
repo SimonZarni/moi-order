@@ -20,7 +20,7 @@ import * as SecureStore from 'expo-secure-store';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Platform, View } from 'react-native';
+import { Linking, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { enableScreens } from 'react-native-screens';
 
@@ -103,6 +103,7 @@ import { usePushNotifications } from '@/features/notifications/hooks/usePushNoti
 import { useAppUpdate } from '@/shared/hooks/useAppUpdate';
 import { useOtaUpdate } from '@/shared/hooks/useOtaUpdate';
 import { useNoticeModal } from '@/shared/hooks/useNoticeModal';
+import { useAppConfig, type ForceUpdateState } from '@/shared/hooks/useAppConfig';
 import { NoticeModal } from '@/shared/components/NoticeModal/NoticeModal';
 import { PlacesMapScreen } from '@/features/map/screens/PlacesMapScreen';
 import { SearchScreen } from '@/features/search/screens/SearchScreen';
@@ -149,6 +150,91 @@ const queryClient = new QueryClient({
   },
 });
 
+// Full-screen blocking modal for required app updates.
+// Rendered as a sibling to the navigation stack so it covers everything,
+// including screens, tab bars, and modals rendered by individual screens.
+// The user CANNOT dismiss this — onRequestClose is a no-op and there is no close button.
+function ForceUpdateModal({ state }: { state: ForceUpdateState }): React.JSX.Element {
+  const storeUrl = Platform.OS === 'ios' ? state.storeUrl : state.storeUrl;
+  return (
+    <Modal
+      visible
+      transparent={false}
+      animationType="fade"
+      onRequestClose={() => {
+        // Intentionally empty — required update cannot be dismissed
+      }}
+      statusBarTranslucent
+    >
+      <View style={forceUpdateStyles.root}>
+        <View style={forceUpdateStyles.card}>
+          <Text style={forceUpdateStyles.icon}>⬆</Text>
+          <Text style={forceUpdateStyles.title}>{state.title}</Text>
+          <Text style={forceUpdateStyles.message}>{state.message}</Text>
+          <Pressable
+            style={forceUpdateStyles.button}
+            onPress={() => { Linking.openURL(storeUrl).catch(() => {}); }}
+            accessibilityLabel="Update the app now"
+            accessibilityRole="button"
+          >
+            <Text style={forceUpdateStyles.buttonText}>Update Now</Text>
+          </Pressable>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const forceUpdateStyles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#063B21',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 32,
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 360,
+  },
+  icon: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#063B21',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  message: {
+    fontSize: 15,
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 28,
+  },
+  button: {
+    backgroundColor: '#063B21',
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    alignItems: 'center',
+    width: '100%',
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
+    letterSpacing: 0.3,
+  },
+});
+
 // Mounted inside QueryClientProvider — manages the Pusher connection and seeds the
 // unread notification count for the entire session. Both hooks are no-ops until
 // the user logs in (userId becomes non-null).
@@ -158,6 +244,7 @@ function AppShell(): React.JSX.Element {
   usePusherNotifications();
   usePushNotifications();
   useNotificationsData();
+  const { forceUpdate } = useAppConfig();
   const { isVisible: noticeVisible, dismiss: dismissNotice } = useNoticeModal();
   return (
     <>
@@ -221,6 +308,7 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="Maintenance"                   component={MaintenanceScreen} options={{ animation: 'fade', gestureEnabled: false }} />
     </Stack.Navigator>
     <NoticeModal isVisible={noticeVisible} onClose={dismissNotice} />
+    {forceUpdate !== null && <ForceUpdateModal state={forceUpdate} />}
     </>
   );
 }

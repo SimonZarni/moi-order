@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\Admin\V1\AdminAccountController;
+use App\Http\Controllers\Api\Admin\V1\AdminAppConfigController;
 use App\Http\Controllers\Api\Admin\V1\AdminMaintenanceController;
 use App\Http\Controllers\Api\Admin\V1\AdminAuthController;
 use App\Http\Controllers\Api\Admin\V1\AdminKycController;
@@ -374,6 +375,10 @@ Route::post('/kyc-applications/{application}/review',           [AdminKycControl
     ->middleware('check.permission:admins.manage');
 
 // ── Document Types ────────────────────────────────────────────────────────────
+// ── App Config ────────────────────────────────────────────────────────────────
+Route::get('/app-config', [AdminAppConfigController::class, 'show'])->name('admin.app-config.show');
+Route::put('/app-config', [AdminAppConfigController::class, 'update'])->name('admin.app-config.update');
+
 // ── Maintenance ───────────────────────────────────────────────────────────────
 // These routes are also excluded from maintenance mode in bootstrap/app.php so admins
 // can disable maintenance without CLI access.
