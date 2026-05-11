@@ -23,10 +23,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         // These paths respond normally even when the app is in maintenance mode.
-        // /api/health — lets the mobile app poll for restoration.
+        // /api/health              — lets the mobile app poll for restoration.
+        // /api/admin/v1/auth/login — lets admins log back in if their session expired while
+        //                            maintenance was active (prevents the "locked keys in the car" scenario).
         // /api/admin/v1/maintenance* — lets the admin toggle maintenance off without CLI access.
         $middleware->preventMaintenanceModeExclude([
             '/api/health',
+            '/api/admin/v1/auth/login',
             '/api/admin/v1/maintenance',
             '/api/admin/v1/maintenance/enable',
             '/api/admin/v1/maintenance/disable',
