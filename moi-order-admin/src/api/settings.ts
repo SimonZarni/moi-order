@@ -27,4 +27,7 @@ export const settingsApi = {
 
   disableMaintenance: () =>
     apiClient.post<MaintenanceStatus>('/maintenance/disable').then((r) => r.data),
+
+  ping: () =>
+    apiClient.get<{ pong: boolean; time: string }>('/ping').then((r) => r.data),
 };

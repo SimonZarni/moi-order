@@ -30,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->preventMaintenanceModeExclude([
             '/api/health',
             '/api/admin/v1/auth/login',
+            '/api/admin/v1/ping',
             '/api/admin/v1/maintenance',
             '/api/admin/v1/maintenance/enable',
             '/api/admin/v1/maintenance/disable',

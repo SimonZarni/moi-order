@@ -42,6 +42,12 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
+// ── Heartbeat — excluded from maintenance mode in bootstrap/app.php ───────────
+// Admin dashboard calls this every 5 minutes to keep the Sanctum token active.
+Route::get('/ping', static function () {
+    return response()->json(['pong' => true, 'time' => now()->toIso8601String()]);
+})->name('admin.ping');
+
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
