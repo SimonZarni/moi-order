@@ -7,7 +7,6 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Foundation\Http\Exceptions\MaintenanceModeException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -81,25 +80,25 @@ return Application::configure(basePath: dirname(__DIR__))
             ], 401);
         });
 
-        // MaintenanceModeException must be caught before HttpException because it is
-        // a subclass — the generic HttpException handler would match it first and
-        // return the unhelpful {"message":"An error occurred.","code":"http_error"}.
-        // retryAfter comes from `php artisan down --retry=3600` so the mobile app
-        // can display an accurate countdown timer.
-        $exceptions->render(function (MaintenanceModeException $e): JsonResponse {
-            return response()->json([
-                'status'      => 'maintenance',
-                'message'     => 'System Upgrade',
-                'details'     => 'Moi Order is getting better! We are updating our services. Please check back shortly.',
-                'retry_after' => $e->retryAfter,
-            ], 503);
-        });
-
-        // Catches ALL HttpException subclasses (including 405 MethodNotAllowed and
-        // 429 ThrottleRequests) with a clean {message,code} shape.
-        // Previously, unhandled status codes returned null here and fell through to
-        // Laravel's built-in renderer which dumps the full stack trace when APP_DEBUG=true.
+        // Catches ALL HttpException subclasses with a clean JSON shape.
+        // 503 is handled here explicitly — relying on a separate MaintenanceModeException
+        // handler is fragile because Laravel reverses render callbacks on registration,
+        // making the ordering unpredictable. Checking status code inside this one
+        // handler is simpler and guaranteed to work.
         $exceptions->render(function (HttpException $e): JsonResponse {
+            if ($e->getStatusCode() === 503) {
+                $retryAfter = $e instanceof \Illuminate\Foundation\Http\Exceptions\MaintenanceModeException
+                    ? $e->retryAfter
+                    : null;
+
+                return response()->json([
+                    'status'      => 'maintenance',
+                    'message'     => 'System Upgrade',
+                    'details'     => 'Moi Order is getting better! We are updating our services. Please check back shortly.',
+                    'retry_after' => $retryAfter,
+                ], 503);
+            }
+
             return match ($e->getStatusCode()) {
                 401 => response()->json(['message' => 'Unauthenticated.', 'code' => 'unauthenticated'], 401),
                 403 => response()->json(['message' => 'Unauthorized.', 'code' => 'unauthorized'], 403),
