@@ -11,7 +11,7 @@ type LoginPayload = {
 
 type LoginResult = {
   user: AppUser;
-  // token is no longer returned — it lives in the httpOnly admin_token cookie set by the server.
+  token: string;
 };
 
 // ----------------------------------------------------------------------

@@ -30,35 +30,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Always call /me on mount to check whether the httpOnly admin_token cookie is
-    // still valid. There is no JS-visible token to check first — that is intentional.
-    // On 401: the Axios interceptor redirects to /sign-in (unless already there).
-    // On any other error: isLoading becomes false, admin stays null, AuthGuard redirects.
+    if (!sessionStorage.getItem('admin_token')) {
+      setIsLoading(false);
+      return;
+    }
     authApi
       .me()
       .then((user) => {
         setAdmin(user);
-        registerPushSubscription(); // restore push subscription on page reload
+        registerPushSubscription();
       })
       .catch(() => {
-        // 401 on /sign-in page: interceptor skips redirect, we just stay unauthenticated.
-        // 401 on protected page: interceptor handles redirect; this catch is a no-op.
-        // Network / 5xx: clear state, AuthGuard redirects to sign-in.
+        sessionStorage.removeItem('admin_token');
       })
       .finally(() => setIsLoading(false));
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    // Server sets the httpOnly cookie in the response — nothing to store on our side.
-    const { user } = await authApi.login({ email, password });
+    const { user, token } = await authApi.login({ email, password });
+    sessionStorage.setItem('admin_token', token);
     setAdmin(user);
-    registerPushSubscription(); // fire-and-forget — never blocks login
+    registerPushSubscription();
   }, []);
 
   const logout = useCallback(async () => {
-    await unregisterPushSubscription(); // DELETE from backend before session is cleared
+    await unregisterPushSubscription();
     await authApi.logout().catch(() => {});
-    // Server clears the cookie; we clear local state. Browser discards the expired cookie.
+    sessionStorage.removeItem('admin_token');
     setAdmin(null);
   }, []);
 

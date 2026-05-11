@@ -23,12 +23,13 @@ const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config: ExtendedAxiosRequestConfig) => {
-  // Snapshot the current pathname so the response interceptor can check where
-  // the request *originated*, not where the user is when the response arrives.
   config._originPathname = window.location.pathname;
 
-  // For FormData, remove the default application/json Content-Type so the browser
-  // can set multipart/form-data with the correct boundary automatically.
+  const token = sessionStorage.getItem('admin_token');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+
   if (config.data instanceof FormData) {
     delete config.headers['Content-Type'];
   }
@@ -57,6 +58,7 @@ apiClient.interceptors.response.use(
     const originPathname = (error.config as ExtendedAxiosRequestConfig | undefined)?._originPathname;
     if (status === 401 && !redirectingToLogin && originPathname !== '/sign-in') {
       redirectingToLogin = true;
+      sessionStorage.removeItem('admin_token');
       window.location.href = '/sign-in';
     }
     if (status === 403) {
