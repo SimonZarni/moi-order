@@ -34,6 +34,10 @@ class AuditLogService implements AuditLogInterface
             return; // No admin context: queue job, artisan command, seeder, etc.
         }
 
+        if (! str_starts_with(request()->path(), 'api/admin/')) {
+            return; // User-side API request — skip; only admin-initiated changes are audited.
+        }
+
         $this->write($admin, $action, $entity, $oldValues, $newValues);
     }
 
