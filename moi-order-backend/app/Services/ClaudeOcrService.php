@@ -110,7 +110,8 @@ class ClaudeOcrService implements DocumentOcrInterface
 
             $text = $response->json('content.0.text', '');
 
-            Log::debug('ClaudeOcrService: cache stats', [
+            Log::info('ClaudeOcrService: raw response', ['text' => $text]);
+            Log::info('ClaudeOcrService: cache stats', [
                 'cache_creation_input_tokens' => $response->json('usage.cache_creation_input_tokens', 0),
                 'cache_read_input_tokens'     => $response->json('usage.cache_read_input_tokens', 0),
                 'input_tokens'                => $response->json('usage.input_tokens', 0),
@@ -127,11 +128,25 @@ class ClaudeOcrService implements DocumentOcrInterface
 
     private function buildUserInstruction(DocumentType $type): string
     {
-        return match ($type) {
-            DocumentType::Passport        => 'Analyze the image above as a PASSPORT document. Apply the passport/visa schema and return the JSON.',
-            DocumentType::NinetyDayReport => 'Analyze the image above as a THAI 90-DAY NOTIFICATION SLIP (TM47). Apply the ninety_day_slip schema and return the JSON.',
-            DocumentType::Other           => 'Analyze the image above as an OTHER OFFICIAL DOCUMENT. Identify which document type it is from the recognised list, apply the matching schema, and return the JSON.',
+        $docInstruction = match ($type) {
+            DocumentType::Passport        => 'This is a PASSPORT document. Apply the passport/visa schema.',
+            DocumentType::NinetyDayReport => 'This is a THAI 90-DAY NOTIFICATION SLIP (TM47). Apply the ninety_day_slip schema.',
+            DocumentType::Other           => 'This is an OTHER OFFICIAL DOCUMENT. Identify the type from the recognised list and apply the matching schema.',
         };
+
+        return <<<INSTRUCTION
+        {$docInstruction}
+
+        Before you write any JSON, follow the accuracy steps from your instructions:
+        1. Scan the full document image and locate every field.
+        2. For each field, read it character by character — do NOT read words or numbers as a single glance.
+        3. For every number or ID sequence: read each digit one at a time left to right, then verify by reading it again. Only write it after two consistent reads.
+        4. For every name: spell it out letter by letter. Do not assume spelling — read what is printed.
+        5. Cross-check each extracted value against the image before writing the JSON.
+        6. If any digit or character is uncertain after careful inspection, return null for that entire field.
+
+        Return ONLY the JSON object. No explanation, no markdown.
+        INSTRUCTION;
     }
 
     private function parseResponse(string $text): OcrResult
