@@ -156,17 +156,15 @@ class ClaudeOcrService implements DocumentOcrInterface
         return <<<INSTRUCTION
         {$docInstruction}
 
-        Before writing any number field (ID number, document number, card number, passport number):
-        1. Read every digit left to right, one at a time. Consecutive identical digits (00, 11) are separate — never merge them.
-        2. Count how many digits you read.
-        3. Read again left to right and count again.
-        4. If both reads match, use that value.
-        5. If they differ, do a third read and go with the majority result.
-        Always write your best reading. Only return null if the entire field is physically unreadable (obscured, cut off, or completely illegible).
+        STEP 1 — READ (write plain text notes here before the JSON):
+        - Identify the document layout and locate each field.
+        - For every number field: spell each digit aloud left to right, state the total digit count, then read a second time to verify. If both reads agree, that is your value. If they differ, do a third read and take the majority.
+        - For every name field: spell each letter individually. Do not assume spelling.
+        - Consecutive identical digits (00, 11, 33) are separate digits — never merge them.
+        - Always write your best reading. Only use null if a field is physically obscured or cut off.
 
-        Before writing any name: read each letter individually. Do not assume spelling. Always write your best reading.
-
-        Output ONLY the JSON object. No explanation, no labels, no markdown.
+        STEP 2 — JSON (immediately after your Step 1 notes, output the JSON on a new line starting with {):
+        Both steps are required. Step 1 is not optional.
         INSTRUCTION;
     }
 
