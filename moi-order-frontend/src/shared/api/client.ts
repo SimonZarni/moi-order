@@ -10,6 +10,7 @@ import { Alert } from 'react-native';
 
 import { TOKEN_KEY } from '@/shared/constants/config';
 import { ERROR_CODES, getAccountErrorMessage } from '@/shared/constants/errorCodes';
+import { getMaintenanceEpoch, shouldIgnoreMaintenanceNavigation } from '@/shared/maintenance/maintenanceState';
 import { ApiError } from '@/types/models';
 
 // Inline translations — avoids circular: client → i18n → localeStore → client
@@ -43,10 +44,12 @@ const apiClient = axios.create({
 
 // ── Request interceptor ──────────────────────────────────────────────────────
 apiClient.interceptors.request.use((config) => {
+  config.headers = config.headers ?? {};
   if (_accessToken !== null) {
     config.headers['Authorization'] = `Bearer ${_accessToken}`;
   }
   config.headers['Accept-Language'] = _locale;
+  (config as typeof config & { _maintenanceEpoch?: number })._maintenanceEpoch = getMaintenanceEpoch();
   return config;
 });
 
@@ -79,8 +82,14 @@ apiClient.interceptors.response.use(
     // Import navigationRef lazily to avoid circular deps (client ← navigationRef ← @react-navigation).
     if (status === 503) {
       const body = error.response?.data as { message?: string; details?: string; retry_after?: number } | undefined;
+      const requestEpoch = (error.config as { _maintenanceEpoch?: number } | undefined)?._maintenanceEpoch;
       const { navigationRef } = await import('@/shared/navigation/navigationRef');
-      if (navigationRef.isReady()) {
+      const currentRoute = navigationRef.getCurrentRoute();
+      if (
+        navigationRef.isReady() &&
+        currentRoute?.name !== 'Maintenance' &&
+        !shouldIgnoreMaintenanceNavigation(requestEpoch)
+      ) {
         const params: { message: string; details: string; retryAfter?: number } = {
           message: body?.message ?? 'System Upgrade',
           details: body?.details ?? 'We are updating our services. Please check back shortly.',
