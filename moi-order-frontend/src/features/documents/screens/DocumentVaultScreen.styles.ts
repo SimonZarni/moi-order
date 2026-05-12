@@ -86,6 +86,26 @@ export const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
+  // ── Photo quality tip ────────────────────────────────────────────────────
+  photoTipCard: {
+    backgroundColor: `${colours.warning}14`,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: `${colours.warning}33`,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+  },
+  photoTipText: {
+    flex: 1,
+    fontSize: typography.xs,
+    color: colours.warning,
+    lineHeight: 18,
+    fontWeight: '500',
+  },
+
   // ── Privacy notice ───────────────────────────────────────────────────────
   privacyCard: {
     backgroundColor: `${colours.medium}12`,

@@ -43,6 +43,13 @@ export function NinetyDayVaultScreen(): React.JSX.Element {
               Upload your Thai 90-day notification slip (TM47). The next report date will be extracted automatically.
             </Text>
           </View>
+          <View style={styles.photoTipCard}>
+            <Ionicons name="camera-outline" size={16} color={colours.warning} />
+            <Text style={styles.photoTipText}>
+              For accurate data extraction, hold your phone 15–20 cm from the document so it fills the screen. Avoid glare and shadows.
+            </Text>
+          </View>
+
           <View style={styles.privacyCard}>
             <Ionicons name="eye-outline" size={16} color={colours.textMuted} />
             <Text style={styles.privacyText}>
