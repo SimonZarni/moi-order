@@ -137,24 +137,42 @@ class ClaudeOcrService implements DocumentOcrInterface
         return <<<INSTRUCTION
         {$docInstruction}
 
-        Before you write any JSON, follow the accuracy steps from your instructions:
-        1. Scan the full document image and locate every field.
-        2. For each field, read it character by character — do NOT read words or numbers as a single glance.
-        3. For every number or ID sequence: read each digit one at a time left to right, then verify by reading it again. Only write it after two consistent reads.
-        4. For every name: spell it out letter by letter. Do not assume spelling — read what is printed.
-        5. Cross-check each extracted value against the image before writing the JSON.
-        6. If any digit or character is uncertain after careful inspection, return null for that entire field.
+        You MUST follow this two-phase process. Do not skip Phase 1.
 
-        Return ONLY the JSON object. No explanation, no markdown.
+        ── PHASE 1: READ ALOUD (required before any JSON) ──────────────────
+        For every numeric field (ID number, document number, passport number, card number, any digit sequence) AND every name field:
+
+        Write a line exactly like this for each:
+          READING [field_name]: [digit/letter] [digit/letter] ... → [full value]
+          VERIFY  [field_name]: [read again separately] → [full value]
+
+        Rules for Phase 1:
+        • Read each digit/character one at a time. Pause on each before moving to the next.
+        • After reaching the end, look at the image again from the start and read the sequence a second time independently.
+        • If READING and VERIFY produce different results, write:
+          CONFLICT [field_name]: reading=[value1] verify=[value2] → look again → FINAL=[correct value]
+        • Only move to Phase 2 after you have written READING and VERIFY lines for every number and name field.
+
+        ── PHASE 2: OUTPUT JSON ─────────────────────────────────────────────
+        After all READING/VERIFY lines, output the JSON object using the verified values.
+        The JSON must be the last thing you write. No markdown fences around it.
         INSTRUCTION;
     }
 
     private function parseResponse(string $text): OcrResult
     {
-        $json = preg_replace('/^```(?:json)?\s*/m', '', $text);
-        $json = preg_replace('/\s*```$/m', '', $json ?? $text);
+        // Strip markdown code fences if present.
+        $cleaned = preg_replace('/^```(?:json)?\s*/m', '', $text);
+        $cleaned = preg_replace('/\s*```\s*$/m', '', $cleaned ?? $text);
+        $cleaned = trim($cleaned ?? $text);
 
-        $data = json_decode(trim($json ?? $text), true);
+        // Phase-1 thinking (READING/VERIFY lines) may precede the JSON object.
+        // Extract the last top-level { ... } block — that is always the JSON output.
+        if (preg_match('/(\{(?:[^{}]|(?R))*\})\s*$/s', $cleaned, $matches)) {
+            $cleaned = $matches[1];
+        }
+
+        $data = json_decode($cleaned, true);
 
         if (!is_array($data)) {
             Log::warning('ClaudeOcrService: could not parse JSON response', ['text' => $text]);
