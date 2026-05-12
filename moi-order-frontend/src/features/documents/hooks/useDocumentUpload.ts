@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 
 import { uploadDocument, deleteDocument } from '@/shared/api/documents';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
@@ -40,6 +41,25 @@ export interface UseDocumentUploadResult {
   handleLimitModalCancel: () => void;
 }
 
+// Always re-encode to JPEG before upload so the server and Claude receive a supported format.
+// On iOS production builds, gallery images resolve to HEIC (ph:// URIs) which Claude cannot
+// decode. Camera shots can also be HEIF in some device configurations.
+// Resize cap prevents oversized payloads; 0.7 quality keeps document text readable.
+const MAX_DIM = 2048;
+async function compressAssetToJpeg(
+  uri: string,
+  width: number,
+  height: number,
+): Promise<{ uri: string; mimeType: string }> {
+  const ctx = ImageManipulator.manipulate(uri);
+  if (width > MAX_DIM || height > MAX_DIM) {
+    ctx.resize(width >= height ? { width: MAX_DIM } : { height: MAX_DIM });
+  }
+  const rendered = await ctx.renderAsync();
+  const compressed = await rendered.saveAsync({ compress: 0.7, format: SaveFormat.JPEG });
+  return { uri: compressed.uri, mimeType: 'image/jpeg' };
+}
+
 export function useDocumentUpload(type: DocumentType): UseDocumentUploadResult {
   const queryClient   = useQueryClient();
   const { stats }     = useUploadStats();
@@ -71,10 +91,12 @@ export function useDocumentUpload(type: DocumentType): UseDocumentUploadResult {
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
-      quality: 0.9,
+      quality: 1,
     });
     if (result.canceled || !result.assets[0]) return;
-    await doUpload(result.assets[0].uri, result.assets[0].mimeType ?? 'image/jpeg');
+    const asset = result.assets[0];
+    const { uri, mimeType } = await compressAssetToJpeg(asset.uri, asset.width, asset.height);
+    await doUpload(uri, mimeType);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -87,10 +109,14 @@ export function useDocumentUpload(type: DocumentType): UseDocumentUploadResult {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: false,
-      quality: 0.9,
+      quality: 1,
     });
     if (result.canceled || !result.assets[0]) return;
-    await doUpload(result.assets[0].uri, result.assets[0].mimeType ?? 'image/jpeg');
+    // compressAssetToJpeg converts HEIC/HEIF (common on iOS production ph:// URIs) to JPEG.
+    // Claude's vision API only supports JPEG/PNG/GIF/WebP — HEIC causes garbled extraction.
+    const asset = result.assets[0];
+    const { uri, mimeType } = await compressAssetToJpeg(asset.uri, asset.width, asset.height);
+    await doUpload(uri, mimeType);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

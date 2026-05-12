@@ -25,10 +25,12 @@ export async function uploadDocument(
   formData.append('type', type);
   formData.append('image', { uri: imageUri, name: filename, type: mimeType } as unknown as Blob);
 
+  // Do NOT set Content-Type here. Axios detects FormData and clears the header so
+  // the native XHR can set "multipart/form-data; boundary=..." automatically.
+  // Explicitly setting it (without boundary) breaks multipart parsing in Hermes production builds.
   const response = await apiClient.post<ApiResponse<Document> & { quota: UploadStats }>(
     '/api/v1/documents',
     formData,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
   );
   return { document: response.data.data, quota: response.data.quota };
 }
