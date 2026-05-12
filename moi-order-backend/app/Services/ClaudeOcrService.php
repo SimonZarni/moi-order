@@ -30,7 +30,9 @@ class ClaudeOcrService implements DocumentOcrInterface
 {
     private const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
     private const ANTHROPIC_VERSION = '2023-06-01';
-    private const MAX_IMAGE_BYTES   = 5 * 1024 * 1024;
+    // Raised from 5 MB: 0.85-quality 4096px JPEGs from the mobile client can exceed 5 MB.
+    // Anthropic's base64 image limit is ~8 MB of raw bytes (before base64 expansion).
+    private const MAX_IMAGE_BYTES   = 8 * 1024 * 1024;
 
     private readonly string $apiKey;
     private readonly string $model;
@@ -38,7 +40,10 @@ class ClaudeOcrService implements DocumentOcrInterface
     public function __construct()
     {
         $this->apiKey = config('services.anthropic.api_key', '');
-        $this->model  = config('services.anthropic.model', 'claude-haiku-4-5-20251001');
+        // Sonnet is used by default: Haiku has poor digit-level OCR accuracy on ID cards and
+        // small printed text, producing confusions like 6↔8, 3↔9, 1↔7 even on clear images.
+        // Override via ANTHROPIC_MODEL env var if cost is a concern.
+        $this->model  = config('services.anthropic.model', 'claude-sonnet-4-6');
     }
 
     public function analyze(UploadedFile $file, DocumentType $type): OcrResult
@@ -202,6 +207,7 @@ GENERAL RULES
 - If a field appears in both English and the local language, prefer the English rendering.
 - Be conservative: if you cannot confidently read a field, return null rather than guessing.
 - Never hallucinate document numbers, dates, or names. If a value is unclear, return null.
+- NUMBER SEQUENCES (ID numbers, document numbers, passport numbers): read each digit individually, left to right. Common look-alike pairs in printed documents: 1/7, 6/8, 3/9, 0/8, 5/6. When a digit is ambiguous, examine its shape carefully — 8 has two closed loops, 6 has one open bottom, 3 opens to the right, 9 has a closed top loop. If you cannot confidently distinguish a digit, return null for the entire field rather than guessing a sequence.
 - A photograph of a physical document is acceptable — extract fields exactly as printed.
 - Laminated, worn, or partially obscured documents should still be processed; return null only for fields that are genuinely unreadable.
 - If the image is completely unreadable (solid colour, corrupted, or obviously not a document at all), return is_valid_document_type: false with an appropriate validation_message.

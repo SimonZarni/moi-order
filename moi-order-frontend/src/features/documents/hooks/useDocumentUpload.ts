@@ -44,8 +44,9 @@ export interface UseDocumentUploadResult {
 // Always re-encode to JPEG before upload so the server and Claude receive a supported format.
 // On iOS production builds, gallery images resolve to HEIC (ph:// URIs) which Claude cannot
 // decode. Camera shots can also be HEIF in some device configurations.
-// Resize cap prevents oversized payloads; 0.7 quality keeps document text readable.
-const MAX_DIM = 2048;
+// 4096px cap + 0.85 quality preserves the fine edge contrast needed for accurate digit OCR.
+// Lower quality (0.7) was causing 6↔8, 1↔2, 3↔9 confusions on ID card numbers.
+const MAX_DIM = 4096;
 async function compressAssetToJpeg(
   uri: string,
   width: number,
@@ -56,7 +57,7 @@ async function compressAssetToJpeg(
     ctx.resize(width >= height ? { width: MAX_DIM } : { height: MAX_DIM });
   }
   const rendered = await ctx.renderAsync();
-  const compressed = await rendered.saveAsync({ compress: 0.7, format: SaveFormat.JPEG });
+  const compressed = await rendered.saveAsync({ compress: 0.85, format: SaveFormat.JPEG });
   return { uri: compressed.uri, mimeType: 'image/jpeg' };
 }
 
@@ -136,7 +137,13 @@ export function useDocumentUpload(type: DocumentType): UseDocumentUploadResult {
       if (apiError.status === 429) {
         Alert.alert('Upload Limit Reached', 'You have reached your monthly upload limit.');
       } else {
-        Alert.alert('Upload failed', apiError.message ?? 'Could not upload document. Please try again.');
+        // Include field-level validation errors so upload failures can be diagnosed.
+        const fieldErrors = apiError.errors
+          ? '\n\n' + Object.entries(apiError.errors)
+              .map(([field, msgs]) => `${field}: ${(msgs as string[]).join(', ')}`)
+              .join('\n')
+          : '';
+        Alert.alert('Upload failed', (apiError.message ?? 'Could not upload document. Please try again.') + fieldErrors);
       }
     } finally {
       setIsUploading(false);
