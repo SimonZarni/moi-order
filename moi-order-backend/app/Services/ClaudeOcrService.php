@@ -137,42 +137,36 @@ class ClaudeOcrService implements DocumentOcrInterface
         return <<<INSTRUCTION
         {$docInstruction}
 
-        You MUST follow this two-phase process. Do not skip Phase 1.
+        IMPORTANT — read every number and every name character by character from the image before writing it. Do not guess or assume. If a character is unclear, return null for that field.
 
-        ── PHASE 1: READ ALOUD (required before any JSON) ──────────────────
-        For every numeric field (ID number, document number, passport number, card number, any digit sequence) AND every name field:
-
-        Write a line exactly like this for each:
-          READING [field_name]: [digit/letter] [digit/letter] ... → [full value]
-          VERIFY  [field_name]: [read again separately] → [full value]
-
-        Rules for Phase 1:
-        • Read each digit/character one at a time. Pause on each before moving to the next.
-        • After reaching the end, look at the image again from the start and read the sequence a second time independently.
-        • If READING and VERIFY produce different results, write:
-          CONFLICT [field_name]: reading=[value1] verify=[value2] → look again → FINAL=[correct value]
-        • Only move to Phase 2 after you have written READING and VERIFY lines for every number and name field.
-
-        ── PHASE 2: OUTPUT JSON ─────────────────────────────────────────────
-        After all READING/VERIFY lines, output the JSON object using the verified values.
-        The JSON must be the last thing you write. No markdown fences around it.
+        Output ONLY the JSON object. No explanation, no labels, no markdown.
         INSTRUCTION;
     }
 
     private function parseResponse(string $text): OcrResult
     {
-        // Strip markdown code fences if present.
-        $cleaned = preg_replace('/^```(?:json)?\s*/m', '', $text);
-        $cleaned = preg_replace('/\s*```\s*$/m', '', $cleaned ?? $text);
+        // Strip markdown code fences.
+        $cleaned = preg_replace('/```(?:json)?\s*/m', '', $text);
+        $cleaned = preg_replace('/```/m', '', $cleaned ?? $text);
         $cleaned = trim($cleaned ?? $text);
 
-        // Phase-1 thinking (READING/VERIFY lines) may precede the JSON object.
-        // Extract the last top-level { ... } block — that is always the JSON output.
-        if (preg_match('/(\{(?:[^{}]|(?R))*\})\s*$/s', $cleaned, $matches)) {
-            $cleaned = $matches[1];
-        }
-
+        // Try direct parse first (pure JSON response).
         $data = json_decode($cleaned, true);
+
+        // If that fails, scan forward for the first { that starts a valid JSON
+        // object containing our required schema key. This handles responses where
+        // Claude prefixes prose or reasoning before the JSON block.
+        if (!is_array($data)) {
+            $pos = 0;
+            while (($pos = strpos($cleaned, '{', $pos)) !== false) {
+                $candidate = json_decode(substr($cleaned, $pos), true);
+                if (is_array($candidate) && array_key_exists('is_valid_document_type', $candidate)) {
+                    $data = $candidate;
+                    break;
+                }
+                $pos++;
+            }
+        }
 
         if (!is_array($data)) {
             Log::warning('ClaudeOcrService: could not parse JSON response', ['text' => $text]);
