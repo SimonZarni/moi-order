@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\QueueHeartbeatJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -32,3 +33,6 @@ Schedule::command('documents:send-ninety-day-reminders')
     ->onFailure(function () {
         \Illuminate\Support\Facades\Log::error('documents:send-ninety-day-reminders failed');
     });
+
+// Pulse queue worker liveness — System Health dashboard reads this cache key.
+Schedule::job(new QueueHeartbeatJob)->everyMinute()->onOneServer();

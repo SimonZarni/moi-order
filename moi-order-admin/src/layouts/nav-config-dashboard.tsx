@@ -161,6 +161,12 @@ export const navData: NavItem[] = [
     permission: 'admins.manage',
   },
   {
+    title: 'System Health',
+    path: '/system-health',
+    icon: icon('solar:check-circle-bold'),
+    permission: 'admins.manage',
+  },
+  {
     title: 'Settings',
     path: '/account/settings',
     icon: icon('solar:settings-bold-duotone'),

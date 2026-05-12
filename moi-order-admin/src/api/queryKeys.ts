@@ -15,6 +15,7 @@ type AuditLogsListParams = {
 };
 
 export const QUERY_KEYS = {
+  systemHealth: ['system-health'] as const,
   dashboard: {
     stats: ['dashboard', 'stats'] as const,
   },

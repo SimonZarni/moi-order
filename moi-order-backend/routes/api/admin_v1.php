@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\Admin\V1\AdminAuditLogController;
+use App\Http\Controllers\Api\Admin\V1\AdminSystemHealthController;
 use App\Http\Controllers\Api\Admin\V1\AdminAccountController;
 use App\Http\Controllers\Api\Admin\V1\AdminAppConfigController;
 use App\Http\Controllers\Api\Admin\V1\AdminInAppAlertController;
@@ -396,6 +397,11 @@ Route::post('/kyc-applications/{application}/review',           [AdminKycControl
 // ── App Config ────────────────────────────────────────────────────────────────
 Route::get('/app-config', [AdminAppConfigController::class, 'show'])->name('admin.app-config.show');
 Route::put('/app-config', [AdminAppConfigController::class, 'update'])->name('admin.app-config.update');
+
+// ── System Health ─────────────────────────────────────────────────────────────
+Route::get('/system-health', [AdminSystemHealthController::class, 'index'])
+    ->name('admin.system-health.index')
+    ->middleware('check.permission:admins.manage');
 
 // ── In-App Alerts ─────────────────────────────────────────────────────────────
 Route::prefix('in-app-alerts')->name('admin.in-app-alerts.')->group(function (): void {
