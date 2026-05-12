@@ -96,12 +96,13 @@ class SystemHealthService
 
     private function pingThaiBulkSms(): void
     {
-        $response = Http::timeout(5)
-            ->asForm()
-            ->post('https://www.thaibulksms.com/api/wallet.php', [
+        $response = Http::timeout(5)->get(
+            'https://www.thaibulksms.com/api/wallet.php',
+            [
                 'key'    => config('services.thaibulksms.key'),
                 'secret' => config('services.thaibulksms.secret'),
-            ]);
+            ]
+        );
 
         if (! $response->successful()) {
             throw new \RuntimeException("HTTP {$response->status()}");
