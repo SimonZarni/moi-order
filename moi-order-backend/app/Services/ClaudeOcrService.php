@@ -59,6 +59,22 @@ class ClaudeOcrService implements DocumentOcrInterface
             return $this->uncheckedResult();
         }
 
+        // Diagnose what actually arrives before we base64-encode and send.
+        // 1,752 input tokens ≈ degraded/tiny image; a clear 1080p+ ID photo is 4,000–8,000+ tokens.
+        $finfo      = new \finfo(FILEINFO_MIME_TYPE);
+        $actualMime = $finfo->buffer($imageContent);
+        $headerHex  = bin2hex(substr($imageContent, 0, 12));
+        $imgSize    = @getimagesize($file->getRealPath());
+        Log::info('ClaudeOcrService: image diagnostics', [
+            'file_size_kb' => round(strlen($imageContent) / 1024, 1),
+            'claimed_mime' => $file->getMimeType(),
+            'actual_mime'  => $actualMime,
+            'header_hex'   => $headerHex,
+            'dimensions'   => $imgSize ? "{$imgSize[0]}x{$imgSize[1]}" : 'unknown',
+            'is_jpeg'      => str_starts_with($headerHex, 'ffd8ff'),
+            'is_heic_ftyp' => str_starts_with($headerHex, '00000'),
+        ]);
+
         $mediaType = $this->resolveMediaType($file->getMimeType() ?? 'image/jpeg');
         $base64    = base64_encode($imageContent);
 
@@ -68,8 +84,11 @@ class ClaudeOcrService implements DocumentOcrInterface
                 'anthropic-version' => self::ANTHROPIC_VERSION,
                 'anthropic-beta'    => 'prompt-caching-2024-07-31',
             ])->timeout(30)->post(self::ANTHROPIC_API_URL, [
-                'model'      => $this->model,
-                'max_tokens' => 2048,
+                'model'       => $this->model,
+                'max_tokens'  => 2048,
+                // temperature 0 eliminates sampling randomness — critical for OCR where
+                // the correct answer is deterministic (the digit printed on the card).
+                'temperature' => 0,
                 // System prompt carries ALL document-type schemas with cache_control.
                 // It is identical on every request so the cache is always hit once warm.
                 'system'     => [
@@ -138,15 +157,14 @@ class ClaudeOcrService implements DocumentOcrInterface
         {$docInstruction}
 
         Before writing any number field (ID number, document number, card number, passport number):
-        1. Count the total visible digits first. Write the count in your head.
-        2. Read each digit one at a time left to right.
-        3. Consecutive identical digits (00, 11, 33) are separate digits — do NOT merge them into one.
-        4. After reading, count again to confirm you have the same total. If counts differ, look again.
-        5. Only write the value after two consistent reads with the same digit count.
+        1. Read every digit left to right, one at a time. Consecutive identical digits (00, 11) are separate — never merge them.
+        2. Count how many digits you read.
+        3. Read again left to right and count again.
+        4. If both reads match, use that value.
+        5. If they differ, do a third read and go with the majority result.
+        Always write your best reading. Only return null if the entire field is physically unreadable (obscured, cut off, or completely illegible).
 
-        Before writing any name: read each letter individually. Do not assume spelling.
-
-        If any digit or letter is unclear after careful inspection, return null for that entire field.
+        Before writing any name: read each letter individually. Do not assume spelling. Always write your best reading.
 
         Output ONLY the JSON object. No explanation, no labels, no markdown.
         INSTRUCTION;
