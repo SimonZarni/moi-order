@@ -69,7 +69,7 @@ class ClaudeOcrService implements DocumentOcrInterface
                 'anthropic-beta'    => 'prompt-caching-2024-07-31',
             ])->timeout(30)->post(self::ANTHROPIC_API_URL, [
                 'model'      => $this->model,
-                'max_tokens' => 1024,
+                'max_tokens' => 2048,
                 // System prompt carries ALL document-type schemas with cache_control.
                 // It is identical on every request so the cache is always hit once warm.
                 'system'     => [
@@ -207,10 +207,40 @@ GENERAL RULES
 - If a field appears in both English and the local language, prefer the English rendering.
 - Be conservative: if you cannot confidently read a field, return null rather than guessing.
 - Never hallucinate document numbers, dates, or names. If a value is unclear, return null.
-- NUMBER SEQUENCES (ID numbers, document numbers, passport numbers): read each digit individually, left to right. Common look-alike pairs in printed documents: 1/7, 6/8, 3/9, 0/8, 5/6. When a digit is ambiguous, examine its shape carefully — 8 has two closed loops, 6 has one open bottom, 3 opens to the right, 9 has a closed top loop. If you cannot confidently distinguish a digit, return null for the entire field rather than guessing a sequence.
 - A photograph of a physical document is acceptable — extract fields exactly as printed.
 - Laminated, worn, or partially obscured documents should still be processed; return null only for fields that are genuinely unreadable.
 - If the image is completely unreadable (solid colour, corrupted, or obviously not a document at all), return is_valid_document_type: false with an appropriate validation_message.
+
+ACCURACY REQUIREMENTS — READ THIS CAREFULLY BEFORE EXTRACTING ANYTHING
+These documents hold personal identification data. A wrong digit or wrong character has serious consequences for the user. Speed does not matter — accuracy does. Follow every step below without exception.
+
+Step 1 — Examine the whole image first.
+Before writing any field value, scan the entire document. Identify the layout, locate each field label, and understand what text belongs to each field. Do not start extracting until you have oriented yourself fully.
+
+Step 2 — Extract each field character by character. No rushing.
+For every field value, read one character at a time, left to right. Do not read a word or number as a single glance — spell it out in your mind character by character.
+
+Step 3 — Numbers require extra care. Read digit by digit, then verify.
+For every numeric sequence (ID number, document number, passport number, card number, any sequence of digits):
+  • Read the first digit. Confirm its shape before moving to the next.
+  • Continue one digit at a time through the entire sequence.
+  • After reaching the end, read the sequence again from left to right to verify you got the same result.
+  • Only then write the value.
+  Common digit confusions in printed documents: 1 vs 7 vs l, 0 vs 8 vs O, 6 vs 8, 3 vs 8, 5 vs 6, 2 vs 7, 9 vs 4.
+  Shape rules: 8 has two fully closed loops top and bottom; 6 has one closed loop at the bottom only; 9 has one closed loop at the top only; 3 opens to the right on both curves; 0 is a single closed oval; 1 is a single vertical stroke, sometimes with a serif base.
+
+Step 4 — Names require the same care. Read letter by letter.
+Spell out every name character by character. Common letter confusions in printed documents: I vs l vs 1, O vs 0, rn vs m, cl vs d, li vs h, vv vs w, B vs 8, S vs 5, G vs 6, Z vs 2.
+Preserve the exact capitalisation printed on the document.
+
+Step 5 — Dates: verify each component independently.
+Read the day, month, and year as separate numbers using the digit-by-digit method from Step 3. If a month name is also printed, cross-check it against the numeric month. Convert Buddhist Era years (> 2500) by subtracting 543.
+
+Step 6 — Final check before writing JSON.
+After you have formed all your field values, look at the image one more time. For each field, glance at the source text in the image and confirm your extracted value matches what is printed. If anything does not match, correct it.
+
+Step 7 — When in doubt, return null. Never guess.
+If you are not fully confident in a character or digit after careful inspection, return null for that entire field. A null value is always safer than a wrong value for identification documents.
 
 IMAGE QUALITY GUIDANCE
 Poor image quality does not automatically make a document invalid. Apply these rules:

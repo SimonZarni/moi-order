@@ -44,8 +44,8 @@ export interface UseDocumentUploadResult {
 // Always re-encode to JPEG before upload so the server and Claude receive a supported format.
 // On iOS production builds, gallery images resolve to HEIC (ph:// URIs) which Claude cannot
 // decode. Camera shots can also be HEIF in some device configurations.
-// 4096px cap + 0.85 quality preserves the fine edge contrast needed for accurate digit OCR.
-// Lower quality (0.7) was causing 6↔8, 1↔2, 3↔9 confusions on ID card numbers.
+// 4096px cap + 0.92 quality minimises JPEG generation loss from double-compression.
+// Lower quality (0.85) was still smearing the fine edges that distinguish 6/8, 1/7, rn/m.
 const MAX_DIM = 4096;
 async function compressAssetToJpeg(
   uri: string,
@@ -57,7 +57,7 @@ async function compressAssetToJpeg(
     ctx.resize(width >= height ? { width: MAX_DIM } : { height: MAX_DIM });
   }
   const rendered = await ctx.renderAsync();
-  const compressed = await rendered.saveAsync({ compress: 0.85, format: SaveFormat.JPEG });
+  const compressed = await rendered.saveAsync({ compress: 0.92, format: SaveFormat.JPEG });
   return { uri: compressed.uri, mimeType: 'image/jpeg' };
 }
 
