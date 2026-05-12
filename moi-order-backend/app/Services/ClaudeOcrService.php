@@ -137,7 +137,16 @@ class ClaudeOcrService implements DocumentOcrInterface
         return <<<INSTRUCTION
         {$docInstruction}
 
-        IMPORTANT — read every number and every name character by character from the image before writing it. Do not guess or assume. If a character is unclear, return null for that field.
+        Before writing any number field (ID number, document number, card number, passport number):
+        1. Count the total visible digits first. Write the count in your head.
+        2. Read each digit one at a time left to right.
+        3. Consecutive identical digits (00, 11, 33) are separate digits — do NOT merge them into one.
+        4. After reading, count again to confirm you have the same total. If counts differ, look again.
+        5. Only write the value after two consistent reads with the same digit count.
+
+        Before writing any name: read each letter individually. Do not assume spelling.
+
+        If any digit or letter is unclear after careful inspection, return null for that entire field.
 
         Output ONLY the JSON object. No explanation, no labels, no markdown.
         INSTRUCTION;
