@@ -343,6 +343,7 @@ export default function App(): React.JSX.Element {
   const [initDone, setInitDone]     = useState(false);
   const [timerDone, setTimerDone]   = useState(false);
   const [splashGone, setSplashGone] = useState(false);
+  const [nativeSplashHidden, setNativeSplashHidden] = useState(false);
   const { setUser } = useAuthStore();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [fontsLoaded, fontError] = useFonts({ PlayfairDisplay_700Bold_Italic, PlayfairDisplay_700Bold });
@@ -390,16 +391,14 @@ export default function App(): React.JSX.Element {
   const fontsDone = fontsLoaded || fontError !== null;
   const canHide = initDone && timerDone && fontsDone;
   const onSplashHidden = useCallback(() => setSplashGone(true), []);
+  const onSplashReady = useCallback(() => {
+    if (nativeSplashHidden) return;
+    setNativeSplashHidden(true);
+    SplashScreen.hideAsync().catch(() => {});
+  }, [nativeSplashHidden]);
 
   // iOS: hide native splash immediately — AnimatedSplash covers with same background.
   // Android: wait until canHide (min 1.5 s) so splashscreen_logo shows long enough.
-  useEffect(() => {
-    if (Platform.OS !== 'android') { SplashScreen.hideAsync().catch(() => {}); }
-  }, []);
-  useEffect(() => {
-    if (Platform.OS === 'android' && canHide) { SplashScreen.hideAsync().catch(() => {}); }
-  }, [canHide]);
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
@@ -420,7 +419,7 @@ export default function App(): React.JSX.Element {
       {/* Outside NavigationContainer so absoluteFillObject covers the full physical
           screen on Android (including status bar + gesture-nav bar areas). */}
       {!splashGone && (
-        <AnimatedSplash canHide={canHide} onHidden={onSplashHidden} />
+        <AnimatedSplash canHide={canHide} onHidden={onSplashHidden} onReady={onSplashReady} />
       )}
     </GestureHandlerRootView>
   );

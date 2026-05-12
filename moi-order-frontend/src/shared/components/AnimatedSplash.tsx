@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, Dimensions, Image, Platform, StyleSheet, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Dimensions, Image, StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const { width: SCREEN_W } = Dimensions.get('window');
@@ -12,23 +12,21 @@ const ICON = require('../../../assets/splash-icon.png');
 interface Props {
   canHide: boolean;
   onHidden: () => void;
+  onReady?: () => void;
 }
 
-export function AnimatedSplash({ canHide, onHidden }: Props): React.JSX.Element {
+export function AnimatedSplash({ canHide, onHidden, onReady }: Props): React.JSX.Element {
   const shineX    = useRef(new Animated.Value(-LOGO_SIZE)).current;
   const opacity   = useRef(new Animated.Value(1)).current;
   const shineRef  = useRef<Animated.CompositeAnimation | null>(null);
   const hidingRef = useRef(false);
+  const readySent = useRef(false);
+  const [viewReady, setViewReady] = useState(false);
+  const [imageReady, setImageReady] = useState(false);
 
   // Android: skip JS splash entirely — the native splash (splashscreen.xml) already
   // covers the launch. Call onHidden immediately so the app renders without delay.
   useEffect(() => {
-    if (Platform.OS === 'android') { onHidden(); }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (Platform.OS === 'android') return;
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(shineX, { toValue: LOGO_SIZE * 1.6, duration: 900, useNativeDriver: true }),
@@ -43,19 +41,30 @@ export function AnimatedSplash({ canHide, onHidden }: Props): React.JSX.Element 
   }, []);
 
   useEffect(() => {
-    if (Platform.OS === 'android') return;
     if (!canHide || hidingRef.current) return;
     hidingRef.current = true;
     shineRef.current?.stop();
     Animated.timing(opacity, { toValue: 0, duration: 350, useNativeDriver: true }).start(onHidden);
   }, [canHide, opacity, onHidden]);
 
-  if (Platform.OS === 'android') return <View />;
+  useEffect(() => {
+    if (readySent.current || !viewReady || !imageReady) return;
+    readySent.current = true;
+    onReady?.();
+  }, [imageReady, onReady, viewReady]);
 
   return (
-    <Animated.View style={[styles.root, { opacity }]}>
+    <Animated.View
+      style={[styles.root, { opacity }]}
+      onLayout={() => { setViewReady(true); }}
+    >
       <View style={styles.logoWrap}>
-        <Image source={ICON} style={styles.logo} resizeMode="contain" />
+        <Image
+          source={ICON}
+          style={styles.logo}
+          resizeMode="contain"
+          onLoadEnd={() => { setImageReady(true); }}
+        />
         <Animated.View
           pointerEvents="none"
           style={[StyleSheet.absoluteFill, { transform: [{ translateX: shineX }] }]}
