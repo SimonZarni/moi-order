@@ -13,7 +13,8 @@ class CancelSubmissionRequest extends FormRequest
     public function authorize(): bool
     {
         $submission = ServiceSubmission::where('user_id', $this->user()->id)
-            ->find((int) $this->route('id'));
+            ->where('uuid', $this->route('id'))
+            ->first();
 
         return $submission !== null
             && $submission->status === SubmissionStatus::PendingPayment;
