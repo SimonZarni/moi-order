@@ -67,16 +67,9 @@ class ClaudeOcrService implements DocumentOcrInterface
                 'x-api-key'         => $this->apiKey,
                 'anthropic-version' => self::ANTHROPIC_VERSION,
                 'anthropic-beta'    => 'prompt-caching-2024-07-31',
-            ])->timeout(60)->post(self::ANTHROPIC_API_URL, [
+            ])->timeout(30)->post(self::ANTHROPIC_API_URL, [
                 'model'      => $this->model,
-                // Extended thinking gives the model internal scratchpad to examine each
-                // digit character-by-character before committing to JSON. Without it, the
-                // model "glances" at numeric sequences and collapses consecutive identical
-                // digits (e.g. "1681003974" → "16820097").
-                // budget_tokens=5000: sufficient for careful per-character digit analysis.
-                // max_tokens must exceed budget_tokens + expected JSON output (~300 tokens).
-                'thinking'   => ['type' => 'enabled', 'budget_tokens' => 5000],
-                'max_tokens' => 6000,
+                'max_tokens' => 2048,
                 // System prompt carries ALL document-type schemas with cache_control.
                 // It is identical on every request so the cache is always hit once warm.
                 'system'     => [
@@ -115,16 +108,7 @@ class ClaudeOcrService implements DocumentOcrInterface
                 return $this->uncheckedResult();
             }
 
-            // With extended thinking enabled the content array contains a "thinking" block
-            // followed by the "text" block. Find the text block explicitly instead of
-            // assuming index 0, which would return an empty string when thinking is on.
-            $text = '';
-            foreach ($response->json('content', []) as $block) {
-                if (($block['type'] ?? '') === 'text') {
-                    $text = $block['text'] ?? '';
-                    break;
-                }
-            }
+            $text = $response->json('content.0.text', '');
 
             Log::info('ClaudeOcrService: raw response', ['text' => $text]);
             Log::info('ClaudeOcrService: cache stats', [
