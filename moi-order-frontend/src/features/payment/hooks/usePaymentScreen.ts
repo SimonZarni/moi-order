@@ -115,7 +115,7 @@ export function usePaymentScreen(): UsePaymentScreenResult {
     if (!url) return;
 
     try {
-      const fileUri = new FileSystem.File(FileSystem.Paths.cache, `qr_${Date.now()}.png`).uri;
+      const fileUri = `${FileSystem.cacheDirectory}qr_${Date.now()}.png`;
       const result = await FileSystem.downloadAsync(url, fileUri);
       if (result.status !== 200) throw new Error(`Download failed: ${result.status}`);
 

@@ -97,7 +97,7 @@ export function useTicketOrderDetailScreen(): UseTicketOrderDetailScreenResult {
       }
 
       const ext = mime_type.includes('pdf') ? 'pdf' : (mime_type.split('/')[1] ?? 'bin');
-      const fileUri = new FileSystem.File(FileSystem.Paths.cache, `eticket_${ticketOrderId}.${ext}`).uri;
+      const fileUri = `${FileSystem.cacheDirectory}eticket_${ticketOrderId}.${ext}`;
       const result = await FileSystem.downloadAsync(
         url,
         fileUri,
@@ -129,10 +129,7 @@ export function useTicketOrderDetailScreen(): UseTicketOrderDetailScreenResult {
     if (!previewImageUrl) return;
     setIsSavingEticket(true);
     try {
-      const fileUri = new FileSystem.File(
-        FileSystem.Paths.cache,
-        `eticket_${ticketOrderId}_${Date.now()}.png`,
-      ).uri;
+      const fileUri = `${FileSystem.cacheDirectory}eticket_${ticketOrderId}_${Date.now()}.png`;
       const result = await FileSystem.downloadAsync(previewImageUrl, fileUri);
       if (result.status !== 200) throw new Error(`Download failed (HTTP ${result.status})`);
 

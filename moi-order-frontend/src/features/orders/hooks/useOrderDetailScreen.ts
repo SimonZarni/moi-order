@@ -103,7 +103,7 @@ export function useOrderDetailScreen(): UseOrderDetailScreenResult {
       }
 
       const ext    = mime_type.includes('pdf') ? 'pdf' : (mime_type.split('/')[1] ?? 'bin');
-      const fileUri = new FileSystem.File(FileSystem.Paths.cache, `result_${submissionId}.${ext}`).uri;
+      const fileUri = `${FileSystem.cacheDirectory}result_${submissionId}.${ext}`;
       const result = await FileSystem.downloadAsync(url, fileUri);
       if (result.status !== 200) throw new Error(`Download failed (HTTP ${result.status}).`);
 
@@ -130,10 +130,7 @@ export function useOrderDetailScreen(): UseOrderDetailScreenResult {
     if (!previewImageUrl) return;
     setIsSavingResult(true);
     try {
-      const fileUri = new FileSystem.File(
-        FileSystem.Paths.cache,
-        `result_${submissionId}_${Date.now()}.png`,
-      ).uri;
+      const fileUri = `${FileSystem.cacheDirectory}result_${submissionId}_${Date.now()}.png`;
       const result  = await FileSystem.downloadAsync(previewImageUrl, fileUri);
       if (result.status !== 200) throw new Error(`Download failed (HTTP ${result.status})`);
 

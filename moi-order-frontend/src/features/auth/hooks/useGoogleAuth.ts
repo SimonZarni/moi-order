@@ -81,6 +81,9 @@ export function useGoogleAuth(): UseGoogleAuthResult {
         // Never call getTokens() after signIn() on iOS: it throws a JSI error
         // because the native session may not be fully committed yet.
         // The idToken is always present in the signIn() result when webClientId is set.
+        // Sign out first so Android always shows the account chooser instead of
+        // silently reusing the last cached Google session.
+        await GoogleSignin.signOut();
         let rawResult: unknown;
         try {
           rawResult = await GoogleSignin.signIn();
