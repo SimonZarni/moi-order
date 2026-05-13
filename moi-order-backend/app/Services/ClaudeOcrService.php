@@ -90,10 +90,10 @@ class ClaudeOcrService implements DocumentOcrInterface
             && $type === DocumentType::Other
             && ($imgSize[1] ?? 0) > ($imgSize[0] ?? 0) * 1.5
         ) {
-            $rotated = $this->rotateImageCw90($imageContent);
+            $rotated = $this->rotateImageCcw90($imageContent);
             if ($rotated !== $imageContent) {
                 $imageContent = $rotated;
-                Log::info('ClaudeOcrService: portrait Other document rotated 90° CW');
+                Log::info('ClaudeOcrService: portrait Other document rotated 90° CCW');
             }
         }
 
@@ -297,7 +297,7 @@ class ClaudeOcrService implements DocumentOcrInterface
      * into the pixel data and re-encodes at 95 % JPEG quality so the tag is no longer
      * needed. Non-JPEG formats are returned unchanged (they rarely carry EXIF orientation).
      */
-    private function rotateImageCw90(string $imageContent): string
+    private function rotateImageCcw90(string $imageContent): string
     {
         if (!str_starts_with($imageContent, "\xFF\xD8\xFF")) {
             return $imageContent;
@@ -306,8 +306,8 @@ class ClaudeOcrService implements DocumentOcrInterface
         if ($img === false) {
             return $imageContent;
         }
-        // PHP imagerotate is CCW; negative degrees = CW.
-        $rotated = imagerotate($img, -90, 0);
+        // PHP imagerotate is CCW; +90 = 90° CCW, which corrects a 90° CW content rotation.
+        $rotated = imagerotate($img, 90, 0);
         if ($rotated === false) {
             imagedestroy($img);
             return $imageContent;
