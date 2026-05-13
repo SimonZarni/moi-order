@@ -79,12 +79,29 @@ class ClaudeOcrService implements DocumentOcrInterface
         // re-encoding from HEIC/ph:// URIs, causing Claude to see sideways text.
         [$imageContent, $didRotateByExif] = $this->applyExifRotation($imageContent);
 
-        // Detect portrait-oriented images where EXIF couldn't help — the most common
-        // case is a landscape document card photographed with the phone held upright
-        // (EXIF=1 is correct: the photo is upright, but the card content is sideways).
-        // When this is true we tell Claude to apply extra digit-verification rigour.
+        // For "Other" documents (ID cards, driving licences, CI cards — mostly landscape)
+        // photographed in portrait mode, the card content arrives sideways and EXIF=1
+        // (the photo is correctly upright, but the card is at 90°). EXIF rotation can't
+        // help. Physically rotate 90° CW when height/width > 1.5:
+        //   • Student ID / CI card (ISO ID-1): natural ratio 1.585 → rotates ✓
+        //   • A4 portrait letter/certificate:  natural ratio 1.414 → stays  ✓
+        // Passport and NinetyDayReport are always portrait — never touch them here.
+        if (!$didRotateByExif
+            && $type === DocumentType::Other
+            && ($imgSize[1] ?? 0) > ($imgSize[0] ?? 0) * 1.5
+        ) {
+            $rotated = $this->rotateImageCw90($imageContent);
+            if ($rotated !== $imageContent) {
+                $imageContent = $rotated;
+                Log::info('ClaudeOcrService: portrait Other document rotated 90° CW');
+            }
+        }
+
+        // Only flag as portrait when no physical rotation was applied — used to
+        // inject an extra digit-verification warning into the user instruction.
         $isPortrait = !$didRotateByExif
-            && ($imgSize[1] ?? 0) > ($imgSize[0] ?? 0) * 1.3;
+            && ($imgSize[1] ?? 0) > ($imgSize[0] ?? 0) * 1.3
+            && !($type === DocumentType::Other && ($imgSize[1] ?? 0) > ($imgSize[0] ?? 0) * 1.5);
 
         $mediaType = $this->resolveMediaType($file->getMimeType() ?? 'image/jpeg');
         $base64    = base64_encode($imageContent);
@@ -280,6 +297,29 @@ class ClaudeOcrService implements DocumentOcrInterface
      * into the pixel data and re-encodes at 95 % JPEG quality so the tag is no longer
      * needed. Non-JPEG formats are returned unchanged (they rarely carry EXIF orientation).
      */
+    private function rotateImageCw90(string $imageContent): string
+    {
+        if (!str_starts_with($imageContent, "\xFF\xD8\xFF")) {
+            return $imageContent;
+        }
+        $img = @imagecreatefromstring($imageContent);
+        if ($img === false) {
+            return $imageContent;
+        }
+        // PHP imagerotate is CCW; negative degrees = CW.
+        $rotated = imagerotate($img, -90, 0);
+        if ($rotated === false) {
+            imagedestroy($img);
+            return $imageContent;
+        }
+        ob_start();
+        imagejpeg($rotated, null, 95);
+        $out = ob_get_clean();
+        imagedestroy($img);
+        imagedestroy($rotated);
+        return ($out !== false && $out !== '') ? $out : $imageContent;
+    }
+
     /**
      * @return array{0: string, 1: bool}  [rotated-or-original content, whether rotation was applied]
      */
