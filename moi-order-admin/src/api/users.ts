@@ -147,10 +147,13 @@ export const usersApi = {
     },
     update: (userId: number | string, documentUuid: string, payload: CreateDocumentPayload) => {
       const fd = buildDocFormData(payload);
-      // Use PATCH directly — _method spoofing is unreliable on API routes in Laravel 12.
+      // POST is used (not PATCH) because PHP only populates $_POST and $_FILES for POST
+      // requests. Sending a real PATCH with multipart/form-data results in an empty body —
+      // $request->all() returns nothing, $document->update([]) saves nothing.
+      // The backend route accepts both POST and PATCH for this endpoint.
       // Document uses uuid as route key (HasUuid trait) — never pass the integer id here.
       // Do NOT set Content-Type manually — Axios sets multipart/form-data + boundary automatically.
-      return apiClient.patch<{ data: UserDocument }>(`/users/${userId}/documents/${documentUuid}`, fd).then((r) => r.data.data);
+      return apiClient.post<{ data: UserDocument }>(`/users/${userId}/documents/${documentUuid}`, fd).then((r) => r.data.data);
     },
     delete: (userId: number | string, documentUuid: string) =>
       // Document uses uuid as route key — never pass the integer id here.
