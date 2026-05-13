@@ -36,6 +36,7 @@ export type UserData = {
 
 export type UserDocument = {
   id: number;
+  uuid: string;
   type: string;
   type_label: string;
   subtype: string | null;
@@ -144,13 +145,15 @@ export const usersApi = {
       // Do NOT set Content-Type manually — Axios sets multipart/form-data + boundary automatically
       return apiClient.post<{ data: UserDocument }>(`/users/${userId}/documents`, fd).then((r) => r.data.data);
     },
-    update: (userId: number | string, documentId: number | string, payload: CreateDocumentPayload) => {
+    update: (userId: number | string, documentUuid: string, payload: CreateDocumentPayload) => {
       const fd = buildDocFormData(payload);
       // Use PATCH directly — _method spoofing is unreliable on API routes in Laravel 12.
+      // Document uses uuid as route key (HasUuid trait) — never pass the integer id here.
       // Do NOT set Content-Type manually — Axios sets multipart/form-data + boundary automatically.
-      return apiClient.patch<{ data: UserDocument }>(`/users/${userId}/documents/${documentId}`, fd).then((r) => r.data.data);
+      return apiClient.patch<{ data: UserDocument }>(`/users/${userId}/documents/${documentUuid}`, fd).then((r) => r.data.data);
     },
-    delete: (userId: number | string, documentId: number | string) =>
-      apiClient.delete(`/users/${userId}/documents/${documentId}`),
+    delete: (userId: number | string, documentUuid: string) =>
+      // Document uses uuid as route key — never pass the integer id here.
+      apiClient.delete(`/users/${userId}/documents/${documentUuid}`),
   },
 };

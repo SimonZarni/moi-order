@@ -19,6 +19,7 @@ class AdminUserDocumentResource extends JsonResource
 
         return [
             'id'                 => $this->id,
+            'uuid'               => $this->uuid,
             'type'               => $this->type->value,
             'type_label'         => $this->type->label(),
             'subtype'            => $this->subtype,

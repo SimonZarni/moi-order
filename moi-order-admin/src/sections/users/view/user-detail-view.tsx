@@ -471,7 +471,7 @@ export function UserDetailView() {
       if (!id || !editDoc) return;
       setEditDocLoading(true);
       usersApi.documents
-        .update(id, editDoc.id, payload)
+        .update(id, editDoc.uuid, payload)
         .then((updated) => {
           setUser((prev) =>
             prev ? { ...prev, documents: prev.documents.map((d) => d.id === updated.id ? updated : d) } : prev
@@ -491,7 +491,7 @@ export function UserDetailView() {
       if (!id) return;
       if (!window.confirm(`Delete "${doc.type_label}" record? The user will be notified.`)) return;
       usersApi.documents
-        .delete(id, doc.id)
+        .delete(id, doc.uuid)
         .then(() =>
           setUser((prev) => prev ? { ...prev, documents: prev.documents.filter((d) => d.id !== doc.id) } : prev)
         )
