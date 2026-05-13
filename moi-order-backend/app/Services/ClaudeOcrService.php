@@ -272,6 +272,11 @@ class ClaudeOcrService implements DocumentOcrInterface
             $exif        = @exif_read_data($meta['uri']);
             $orientation = is_array($exif) ? (int) ($exif['Orientation'] ?? 1) : 1;
 
+            Log::info('ClaudeOcrService: EXIF read', [
+                'has_exif'    => is_array($exif),
+                'orientation' => $orientation,
+            ]);
+
             if ($orientation === 1) {
                 return $imageContent;
             }
