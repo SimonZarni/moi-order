@@ -44,21 +44,39 @@ export interface UseDocumentUploadResult {
 // Always re-encode to JPEG before upload so the server and Claude receive a supported format.
 // On iOS production builds, gallery images resolve to HEIC (ph:// URIs) which Claude cannot
 // decode. Camera shots can also be HEIF in some device configurations.
-// 0.99 quality: keeps JPEG block artefacts far below the ~25px digit stroke width so Claude
-// can distinguish digits like 0/6/8 and 1/3/9. 0.92 introduced enough block noise to cause
-// misreads even when the original photo (tested in Claude chat) was perfectly readable.
-const MAX_DIM = 4096;
+//
+// MAX_DIM 4096 → 2048: a 4096px JPEG at quality 0.92 is 10–20 MB and triggers a 413 on
+// nginx. 2048px on the longer side is plenty for OCR — digit strokes remain ~40px+ tall.
+//
+// Always resize (not conditional): without at least one manipulator operation, expo-image-
+// manipulator may pass through raw HEIC data unchanged for ph:// URIs, producing huge uploads.
+//
+// HEIC (ph:// assets) gets quality 0.85; non-HEIC gets 0.92. Both are well above the
+// artifact threshold for OCR — the previous 0.92→0.99 bump was needed when images were
+// sideways (mental-rotation + artifacts compounded errors). With server-side orientation
+// correction now in place, 0.92 is safe for correctly-oriented images.
+const MAX_DIM = 2048;
 async function compressAssetToJpeg(
   uri: string,
-  width: number,
+  width:  number,
   height: number,
 ): Promise<{ uri: string; mimeType: string }> {
+  // ph:// URIs are iOS Photos Library assets and are commonly HEIC.
+  // Use lower quality to prevent 50 MB+ uploads when HEIC decodes to deep-colour JPEG.
+  const isHeic   = uri.startsWith('ph://');
+  const quality  = isHeic ? 0.85 : 0.92;
+  const w = width  > 0 ? width  : MAX_DIM;
+  const h = height > 0 ? height : MAX_DIM;
+
   const ctx = ImageManipulator.manipulate(uri);
-  if (width > MAX_DIM || height > MAX_DIM) {
-    ctx.resize(width >= height ? { width: MAX_DIM } : { height: MAX_DIM });
+  // Always resize — forces full decode → JPEG encode cycle even for small images.
+  if (w >= h) {
+    ctx.resize({ width: Math.min(w, MAX_DIM) });
+  } else {
+    ctx.resize({ height: Math.min(h, MAX_DIM) });
   }
-  const rendered = await ctx.renderAsync();
-  const compressed = await rendered.saveAsync({ compress: 0.99, format: SaveFormat.JPEG });
+  const rendered   = await ctx.renderAsync();
+  const compressed = await rendered.saveAsync({ compress: quality, format: SaveFormat.JPEG });
   return { uri: compressed.uri, mimeType: 'image/jpeg' };
 }
 
