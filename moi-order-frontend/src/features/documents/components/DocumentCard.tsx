@@ -53,12 +53,26 @@ function subtypeLabel(subtype: string | null): string {
 const DATE_KEY_RE = /date/i;
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-function extractedRows(data: Record<string, string | null>): Array<{ label: string; value: string }> {
+// Keys to promote as the primary bold identifier for student_id documents,
+// checked in priority order (Claude's open-ended extraction may use any of these).
+const STUDENT_ID_KEYS = ['student_id', 'student_id_number', 'id_number', 'card_number'] as const;
+
+// Display-label overrides for specific extracted_data keys.
+const LABEL_OVERRIDES: Record<string, string> = {
+  student_id:        'Student Id',
+  student_id_number: 'Student Id',
+};
+
+function extractedRows(
+  data:      Record<string, string | null>,
+  extraSkip: ReadonlySet<string> = new Set(),
+): Array<{ label: string; value: string }> {
   // Handled explicitly in JSX — skip to avoid duplicates
   const skip = new Set([
     'full_name', 'type', 'country_code', 'passport_number',
     'date_of_birth', 'expiry_date', 'issue_date',
     'previous_report_date', 'next_report_date',
+    ...extraSkip,
   ]);
   return Object.entries(data)
     .filter(([key, val]) => val !== null && val !== '' && !skip.has(key))
@@ -69,7 +83,7 @@ function extractedRows(data: Record<string, string | null>): Array<{ label: stri
         ? (() => { try { return formatDateDMY(raw); } catch { return raw; } })()
         : raw;
       return {
-        label: key.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+        label: LABEL_OVERRIDES[key] ?? key.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
         value,
       };
     });
@@ -89,7 +103,16 @@ export function DocumentCard({ document: doc, onDelete, isDeleting }: Props): Re
     return getAlertLevel(getDaysRemaining(doc.extension_date));
   }, [doc.type, doc.extension_date]);
 
-  const rows = extractedRows(doc.extracted_data ?? {});
+  // For student_id documents, find whichever key Claude used for the card number
+  // so we can display it prominently and exclude it from the generic field rows.
+  const studentIdKey = doc.subtype === 'student_id'
+    ? (STUDENT_ID_KEYS.find(k => (doc.extracted_data?.[k] ?? null) !== null) ?? null)
+    : null;
+
+  const rows = extractedRows(
+    doc.extracted_data ?? {},
+    studentIdKey !== null ? new Set([studentIdKey]) : new Set(),
+  );
   const name = doc.extracted_data?.['full_name'] ?? null;
 
   return (
@@ -155,6 +178,13 @@ export function DocumentCard({ document: doc, onDelete, isDeleting }: Props): Re
           </View>
 
           {name !== null && <Text style={styles.nameText}>{name}</Text>}
+
+          {/* Student Id — card number displayed prominently, second-largest after name */}
+          {studentIdKey !== null && doc.extracted_data?.[studentIdKey] != null && (
+            <Text style={styles.passportNumber}>
+              {doc.extracted_data[studentIdKey] as string}
+            </Text>
+          )}
 
           {/* Passport bio page — number (bold), type, country, DOB — expiry stays last */}
           {doc.subtype === 'bio_page' && (
