@@ -121,6 +121,7 @@ export const styles = StyleSheet.create({
     overflow:         'hidden',
     borderWidth:      1,
     borderColor:      MAP_COLORS.border,
+    maxHeight:        300,
   },
   sectionHeader: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

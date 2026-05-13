@@ -147,7 +147,12 @@ export function MapSearchBar({
 
       {/* ── Dropdown suggestions ── */}
       {showDropdown && (
-        <View style={styles.dropdown}>
+        <ScrollView
+          style={styles.dropdown}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          nestedScrollEnabled
+        >
           {hasPlaces && (
             <>
               <View style={styles.sectionHeader}>
@@ -231,7 +236,7 @@ export function MapSearchBar({
               <Text style={styles.emptyText}>No results for "{value}"</Text>
             </View>
           )}
-        </View>
+        </ScrollView>
       )}
     </View>
   );
