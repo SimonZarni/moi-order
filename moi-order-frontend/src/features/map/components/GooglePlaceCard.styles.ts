@@ -1,10 +1,11 @@
 import { StyleSheet } from 'react-native';
 import { MAP_COLORS } from '@/shared/theme/mapTheme';
+import { TAB_BAR_CLEARANCE } from '@/shared/components/FloatingTabBar/FloatingTabBar.styles';
 
 export const styles = StyleSheet.create({
   card: {
     position:        'absolute',
-    bottom:          24,
+    bottom:          TAB_BAR_CLEARANCE,
     left:            16,
     right:           16,
     backgroundColor: MAP_COLORS.textPrimary,
