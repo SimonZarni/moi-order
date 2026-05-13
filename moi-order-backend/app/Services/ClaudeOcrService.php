@@ -77,7 +77,14 @@ class ClaudeOcrService implements DocumentOcrInterface
         // Auto-rotate based on EXIF orientation so Claude receives an upright image.
         // expo-image-manipulator does not always strip the EXIF orientation tag when
         // re-encoding from HEIC/ph:// URIs, causing Claude to see sideways text.
-        $imageContent = $this->applyExifRotation($imageContent);
+        [$imageContent, $didRotateByExif] = $this->applyExifRotation($imageContent);
+
+        // Detect portrait-oriented images where EXIF couldn't help — the most common
+        // case is a landscape document card photographed with the phone held upright
+        // (EXIF=1 is correct: the photo is upright, but the card content is sideways).
+        // When this is true we tell Claude to apply extra digit-verification rigour.
+        $isPortrait = !$didRotateByExif
+            && ($imgSize[1] ?? 0) > ($imgSize[0] ?? 0) * 1.3;
 
         $mediaType = $this->resolveMediaType($file->getMimeType() ?? 'image/jpeg');
         $base64    = base64_encode($imageContent);
@@ -117,7 +124,7 @@ class ClaudeOcrService implements DocumentOcrInterface
                         // Short type instruction — tells the model which schema to apply.
                         [
                             'type' => 'text',
-                            'text' => $this->buildUserInstruction($type),
+                            'text' => $this->buildUserInstruction($type, $isPortrait),
                         ],
                     ],
                 ]],
@@ -149,7 +156,7 @@ class ClaudeOcrService implements DocumentOcrInterface
         }
     }
 
-    private function buildUserInstruction(DocumentType $type): string
+    private function buildUserInstruction(DocumentType $type, bool $isPortrait = false): string
     {
         $docInstruction = match ($type) {
             DocumentType::Passport        => 'This is a PASSPORT document. Apply the passport/visa schema.',
@@ -157,8 +164,27 @@ class ClaudeOcrService implements DocumentOcrInterface
             DocumentType::Other           => 'This is an OTHER OFFICIAL DOCUMENT. Identify the type from the recognised list and apply the matching schema.',
         };
 
+        // Portrait images often contain landscape cards photographed sideways.
+        // Mental rotation significantly increases digit-level OCR errors — warn Claude.
+        $rotationCaution = $isPortrait
+            ? <<<'CAUTION'
+
+        ⚠ PORTRAIT IMAGE — ROTATED CONTENT LIKELY: This image is taller than it is wide.
+        If the document content appears rotated 90°, it IS rotated — correct for it immediately.
+        Rotated images cause significantly more digit errors (6↔9, 1↔7, 3↔8, 0↔8, 5↔6).
+        For EVERY digit sequence in a rotated image you MUST:
+          1. State which direction the image is rotated.
+          2. Spell each digit left-to-right in the CORRECTED orientation.
+          3. State the total digit count.
+          4. Read the sequence a SECOND time from scratch and compare.
+          5. If there is ANY discrepancy between reads, do a THIRD read and take the majority.
+          6. Write the value only after completing all steps above.
+        CAUTION
+            : '';
+
         return <<<INSTRUCTION
         {$docInstruction}
+        {$rotationCaution}
 
         STEP 1 — READ (write plain text notes here before the JSON):
         - Identify the document layout and locate each field.
@@ -254,16 +280,19 @@ class ClaudeOcrService implements DocumentOcrInterface
      * into the pixel data and re-encodes at 95 % JPEG quality so the tag is no longer
      * needed. Non-JPEG formats are returned unchanged (they rarely carry EXIF orientation).
      */
-    private function applyExifRotation(string $imageContent): string
+    /**
+     * @return array{0: string, 1: bool}  [rotated-or-original content, whether rotation was applied]
+     */
+    private function applyExifRotation(string $imageContent): array
     {
         // JPEG magic bytes: FF D8 FF — only JPEGs carry EXIF orientation.
         if (!str_starts_with($imageContent, "\xFF\xD8\xFF")) {
-            return $imageContent;
+            return [$imageContent, false];
         }
 
         $tmp = tmpfile();
         if ($tmp === false) {
-            return $imageContent;
+            return [$imageContent, false];
         }
 
         try {
@@ -278,12 +307,12 @@ class ClaudeOcrService implements DocumentOcrInterface
             ]);
 
             if ($orientation === 1) {
-                return $imageContent;
+                return [$imageContent, false];
             }
 
             $img = @imagecreatefromstring($imageContent);
             if ($img === false) {
-                return $imageContent;
+                return [$imageContent, false];
             }
 
             $rotated = match ($orientation) {
@@ -295,7 +324,7 @@ class ClaudeOcrService implements DocumentOcrInterface
 
             if ($rotated === null || $rotated === false) {
                 imagedestroy($img);
-                return $imageContent;
+                return [$imageContent, false];
             }
 
             Log::info('ClaudeOcrService: EXIF rotation applied', ['orientation' => $orientation]);
@@ -306,7 +335,8 @@ class ClaudeOcrService implements DocumentOcrInterface
             imagedestroy($img);
             imagedestroy($rotated);
 
-            return ($out !== false && $out !== '') ? $out : $imageContent;
+            $result = ($out !== false && $out !== '') ? $out : $imageContent;
+            return [$result, $result !== $imageContent];
 
         } finally {
             fclose($tmp); // tmpfile() cleans up the temp file on fclose
