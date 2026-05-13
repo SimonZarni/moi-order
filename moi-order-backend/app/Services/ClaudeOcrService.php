@@ -60,7 +60,6 @@ class ClaudeOcrService implements DocumentOcrInterface
         }
 
         // Diagnose what actually arrives before we base64-encode and send.
-        // 1,752 input tokens ≈ degraded/tiny image; a clear 1080p+ ID photo is 4,000–8,000+ tokens.
         $finfo      = new \finfo(FILEINFO_MIME_TYPE);
         $actualMime = $finfo->buffer($imageContent);
         $headerHex  = bin2hex(substr($imageContent, 0, 12));
@@ -74,6 +73,11 @@ class ClaudeOcrService implements DocumentOcrInterface
             'is_jpeg'      => str_starts_with($headerHex, 'ffd8ff'),
             'is_heic_ftyp' => str_starts_with($headerHex, '00000'),
         ]);
+
+        // Auto-rotate based on EXIF orientation so Claude receives an upright image.
+        // expo-image-manipulator does not always strip the EXIF orientation tag when
+        // re-encoding from HEIC/ph:// URIs, causing Claude to see sideways text.
+        $imageContent = $this->applyExifRotation($imageContent);
 
         $mediaType = $this->resolveMediaType($file->getMimeType() ?? 'image/jpeg');
         $base64    = base64_encode($imageContent);
@@ -239,6 +243,69 @@ class ClaudeOcrService implements DocumentOcrInterface
             expiryDate:          null,
             extensionDate:       null,
         );
+    }
+
+    /**
+     * Physically rotate JPEG pixel data to match its EXIF orientation tag.
+     *
+     * The Anthropic Vision API (and the raw base64 pipeline) ignores EXIF orientation,
+     * so a portrait photo taken on iOS arrives with sideways pixels and an EXIF tag
+     * saying "rotate 90°" — Claude sees sideways text. This method bakes the rotation
+     * into the pixel data and re-encodes at 95 % JPEG quality so the tag is no longer
+     * needed. Non-JPEG formats are returned unchanged (they rarely carry EXIF orientation).
+     */
+    private function applyExifRotation(string $imageContent): string
+    {
+        // JPEG magic bytes: FF D8 FF — only JPEGs carry EXIF orientation.
+        if (!str_starts_with($imageContent, "\xFF\xD8\xFF")) {
+            return $imageContent;
+        }
+
+        $tmp = tmpfile();
+        if ($tmp === false) {
+            return $imageContent;
+        }
+
+        try {
+            fwrite($tmp, $imageContent);
+            $meta        = stream_get_meta_data($tmp);
+            $exif        = @exif_read_data($meta['uri']);
+            $orientation = is_array($exif) ? (int) ($exif['Orientation'] ?? 1) : 1;
+
+            if ($orientation === 1) {
+                return $imageContent;
+            }
+
+            $img = @imagecreatefromstring($imageContent);
+            if ($img === false) {
+                return $imageContent;
+            }
+
+            $rotated = match ($orientation) {
+                3 => imagerotate($img, 180, 0),
+                6 => imagerotate($img, -90, 0),
+                8 => imagerotate($img,  90, 0),
+                default => null,
+            };
+
+            if ($rotated === null || $rotated === false) {
+                imagedestroy($img);
+                return $imageContent;
+            }
+
+            Log::info('ClaudeOcrService: EXIF rotation applied', ['orientation' => $orientation]);
+
+            ob_start();
+            imagejpeg($rotated, null, 95);
+            $out = ob_get_clean();
+            imagedestroy($img);
+            imagedestroy($rotated);
+
+            return ($out !== false && $out !== '') ? $out : $imageContent;
+
+        } finally {
+            fclose($tmp); // tmpfile() cleans up the temp file on fclose
+        }
     }
 
     // ---------------------------------------------------------------------------

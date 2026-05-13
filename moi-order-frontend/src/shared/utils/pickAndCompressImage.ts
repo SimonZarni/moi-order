@@ -42,6 +42,12 @@ export async function pickAndCompressImage(
   const ctx = ImageManipulator.manipulate(asset.uri);
   if (asset.width > MAX_DIM || asset.height > MAX_DIM) {
     ctx.resize(asset.width >= asset.height ? { width: MAX_DIM } : { height: MAX_DIM });
+  } else {
+    // Without an explicit operation, expo-image-manipulator may pass through the
+    // raw ph:// pixels without applying the EXIF orientation tag — the server
+    // receives sideways pixel data. rotate(0) forces a re-encode that bakes
+    // the EXIF rotation into pixel data so the tag is no longer needed.
+    ctx.rotate(0);
   }
   const rendered = await ctx.renderAsync();
   const compressed = await rendered.saveAsync({ compress: 0.7, format: SaveFormat.JPEG });
