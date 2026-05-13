@@ -7,7 +7,7 @@ import { stripAsset } from './stripAsset';
 
 // NOTE: localeStore → client.ts → (no i18n import now) so no cycle here.
 
-const MAX_DIM = 2048;
+const MAX_DIM = 1500; // keeps output well under nginx's default 1 MB body limit
 
 /**
  * Shared image picker + compressor used by all service submission forms.

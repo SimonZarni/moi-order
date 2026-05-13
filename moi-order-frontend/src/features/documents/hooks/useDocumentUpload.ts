@@ -55,7 +55,7 @@ export interface UseDocumentUploadResult {
 // artifact threshold for OCR — the previous 0.92→0.99 bump was needed when images were
 // sideways (mental-rotation + artifacts compounded errors). With server-side orientation
 // correction now in place, 0.92 is safe for correctly-oriented images.
-const MAX_DIM = 2048;
+const MAX_DIM = 1500; // keeps output well under nginx's default 1 MB body limit
 async function compressAssetToJpeg(
   uri: string,
   width:  number,
