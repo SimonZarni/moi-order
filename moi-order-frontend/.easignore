@@ -1,13 +1,18 @@
-# EAS Build does not need local build artifacts or dependencies
+# EAS generates android/ and ios/ from app.config.js via prebuild — exclude entirely
+android/
+ios/
+
+# Dependencies installed during build
 node_modules/
-android/build/
-android/app/build/
-android/.gradle/
-android/.idea/
-ios/build/
-ios/Pods/
+
+# Expo and build artifacts
 .expo/
 dist/
 web-build/
-*.orig.*
+
+# Misc
 .DS_Store
+*.orig.*
+*.ipa
+*.apk
+*.aab
