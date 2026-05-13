@@ -7,19 +7,24 @@ import { stripAsset } from './stripAsset';
 
 // NOTE: localeStore → client.ts → (no i18n import now) so no cycle here.
 
-// EXIF orientation → clockwise rotation degrees needed to make pixels upright.
-// expo-image-manipulator strips the EXIF tag when it re-encodes but does NOT
-// physically rotate pixels for ph:// assets on iOS. Without this map we'd send
-// sideways pixel data to the server even though the gallery showed it correctly.
-const EXIF_ROTATION: Record<number, number> = { 3: 180, 6: 90, 8: -90 };
+const MAX_DIM = 2048;
 
 /**
  * Shared image picker + compressor used by all service submission forms.
  *
- * Picks at full quality, reads the EXIF orientation tag, physically rotates the
- * pixels to match, then scales down to ≤2048 px on the longer side and
- * re-encodes at JPEG 0.7 — keeps document photos readable while staying well
- * under the 12 MB per-file and 50 MB total server limits.
+ * Always resizes to ≤2048 px on the longer side and re-encodes as JPEG.
+ * The mandatory resize forces expo-image-manipulator to fully decode the source
+ * (including HEIC/HEIF from iPhone 16 Pro) and produce a proper JPEG rather
+ * than passing through raw pixel data or the HEIC container.
+ *
+ * HEIC files get quality 0.5 instead of 0.7 — HEIC stores deep-colour / HDR
+ * data that expands significantly when converted to 8-bit JPEG, so the extra
+ * compression is needed to stay within the server's 50 MB body limit.
+ *
+ * EXIF orientation is handled server-side (applyExifRotation + portrait heuristic)
+ * rather than client-side. Requesting exif:true from the picker causes iOS to
+ * deliver the full ProRAW original from iCloud on Optimize-Storage devices,
+ * producing 50 MB+ uploads for what looks like a 1.8 MB gallery photo.
  */
 export async function pickAndCompressImage(
   onPermissionDenied: (message: string) => void,
@@ -39,32 +44,37 @@ export async function pickAndCompressImage(
     quality:       1,
     allowsEditing: false,
     base64:        false,
-    exif:          true, // needed to read Orientation tag before manipulator strips it
+    // exif: true intentionally omitted — on iPhone 16 Pro with iCloud Optimize
+    // Storage, it triggers a download of the full ProRAW original (can be 50 MB+)
+    // instead of the local HEIC proxy. EXIF rotation is handled server-side.
   });
 
   if (result.canceled || result.assets.length === 0) return null;
   const asset = result.assets[0];
   if (asset == null) return null;
 
-  const exifOrientation = (asset.exif?.Orientation as number | undefined) ?? 1;
-  const rotateDeg = EXIF_ROTATION[exifOrientation] ?? 0;
+  const mimeType = (asset.mimeType ?? '').toLowerCase();
+  const isHeic   = mimeType.includes('heic') || mimeType.includes('heif');
 
-  // After a 90°/-90° rotation, width and height swap. Use the corrected
-  // dimensions for the resize decision so we pick the right axis.
-  const isTransposed = rotateDeg === 90 || rotateDeg === -90;
-  const logicalW = isTransposed ? asset.height : asset.width;
-  const logicalH = isTransposed ? asset.width  : asset.height;
+  // HEIC deep-colour / HDR content expands significantly when converted to
+  // 8-bit JPEG — use lower quality to stay within upload size limits.
+  const quality = isHeic ? 0.5 : 0.7;
 
-  const MAX_DIM = 2048;
+  const w = asset.width  > 0 ? asset.width  : MAX_DIM;
+  const h = asset.height > 0 ? asset.height : MAX_DIM;
+
   const ctx = ImageManipulator.manipulate(asset.uri);
-  if (rotateDeg !== 0) {
-    ctx.rotate(rotateDeg);
+  // Always apply a resize — even when both dimensions are already under MAX_DIM.
+  // Without at least one operation, expo-image-manipulator may pass through raw
+  // HEIC data unchanged for ph:// URIs on iOS, producing huge uploads. The resize
+  // forces a full decode → encode cycle that always produces a proper JPEG.
+  if (w >= h) {
+    ctx.resize({ width: Math.min(w, MAX_DIM) });
+  } else {
+    ctx.resize({ height: Math.min(h, MAX_DIM) });
   }
-  if (logicalW > MAX_DIM || logicalH > MAX_DIM) {
-    ctx.resize(logicalW >= logicalH ? { width: MAX_DIM } : { height: MAX_DIM });
-  }
-  const rendered = await ctx.renderAsync();
-  const compressed = await rendered.saveAsync({ compress: 0.7, format: SaveFormat.JPEG });
+  const rendered   = await ctx.renderAsync();
+  const compressed = await rendered.saveAsync({ compress: quality, format: SaveFormat.JPEG });
 
   return stripAsset({
     ...asset,
