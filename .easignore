@@ -1,0 +1,30 @@
+# ── Frontend ──────────────────────────────────────────────────────────────────
+# EAS generates android/ and ios/ from app.config.js — exclude local copies
+moi-order-frontend/android/
+moi-order-frontend/ios/
+moi-order-frontend/node_modules/
+moi-order-frontend/.expo/
+moi-order-frontend/dist/
+moi-order-frontend/web-build/
+moi-order-frontend/*.ipa
+moi-order-frontend/*.apk
+moi-order-frontend/*.aab
+moi-order-frontend/.env
+moi-order-frontend/.env*.local
+
+# ── Backend ───────────────────────────────────────────────────────────────────
+moi-order-backend/vendor/
+moi-order-backend/.env
+moi-order-backend/storage/logs/
+moi-order-backend/storage/app/
+moi-order-backend/bootstrap/cache/
+
+# ── Common ────────────────────────────────────────────────────────────────────
+.git/
+.DS_Store
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
