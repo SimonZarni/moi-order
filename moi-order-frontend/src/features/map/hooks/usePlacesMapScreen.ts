@@ -274,13 +274,20 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     [searchResults, searchQuery],
   );
 
-  // ── Reset nav bar whenever the map screen loses focus (back button, tab switch) ──
+  // ── Reset nav bar and search state when screen loses focus ──────────────
   useFocusEffect(
     useCallback(() => () => {
       setMapFullscreen(false);
       setMapBottomSheetOpen(false);
       setIsFullscreen(false);
       setSheetExpanded(false);
+      setSearchQuery('');
+      setGeoSuggestions([]);
+      setGoogleSuggestions([]);
+      setSelectedGooglePlace(null);
+      setSelectedPlace(null);
+      setDrivingRoute(null);
+      setWalkingRoute(null);
     }, [setMapFullscreen, setMapBottomSheetOpen]),
   );
 
