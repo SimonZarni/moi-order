@@ -146,9 +146,9 @@ export const usersApi = {
     },
     update: (userId: number | string, documentId: number | string, payload: CreateDocumentPayload) => {
       const fd = buildDocFormData(payload);
-      fd.append('_method', 'PATCH');
-      // Do NOT set Content-Type manually — Axios sets multipart/form-data + boundary automatically
-      return apiClient.post<{ data: UserDocument }>(`/users/${userId}/documents/${documentId}`, fd).then((r) => r.data.data);
+      // Use PATCH directly — _method spoofing is unreliable on API routes in Laravel 12.
+      // Do NOT set Content-Type manually — Axios sets multipart/form-data + boundary automatically.
+      return apiClient.patch<{ data: UserDocument }>(`/users/${userId}/documents/${documentId}`, fd).then((r) => r.data.data);
     },
     delete: (userId: number | string, documentId: number | string) =>
       apiClient.delete(`/users/${userId}/documents/${documentId}`),

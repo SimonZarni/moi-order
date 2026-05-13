@@ -478,7 +478,9 @@ export function UserDetailView() {
           );
           setEditDoc(null);
         })
-        .catch(() => {})
+        .catch((err: { message?: string }) => {
+          alert(`Save failed: ${err?.message ?? 'Unknown error'}`);
+        })
         .finally(() => setEditDocLoading(false));
     },
     [id, editDoc],
