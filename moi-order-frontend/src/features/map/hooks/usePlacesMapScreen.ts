@@ -15,6 +15,11 @@ import {
   type GeocodingResult,
   type DirectionsResult,
 } from '@/shared/api/mapbox';
+import {
+  searchGooglePlaces,
+  getGooglePlaceLocation,
+  type GooglePlaceSuggestion,
+} from '@/shared/api/googlePlaces';
 import type { Place, Category, Tag } from '@/types/models';
 import type { Camera } from '@rnmapbox/maps';
 
@@ -52,10 +57,13 @@ export interface UsePlacesMapScreenResult {
   cameraRef:        React.RefObject<Camera | null>;
   gpsCoords:        [number, number] | null;
   userLocation:     UserLocation | null;
-  searchQuery:      string;
-  placeSuggestions: Place[];
-  geoSuggestions:   GeocodingResult[];
-  isGeoLoading:     boolean;
+  searchQuery:        string;
+  placeSuggestions:   Place[];
+  geoSuggestions:     GeocodingResult[];
+  googleSuggestions:  GooglePlaceSuggestion[];
+  isGeoLoading:       boolean;
+  isGoogleLoading:    boolean;
+  selectedGooglePlace: GooglePlaceSuggestion | null;
   categories:       Category[];
   allTags:          Tag[];
   activeTab:        string | null;
@@ -81,6 +89,8 @@ export interface UsePlacesMapScreenResult {
   handleClearSearch:          () => void;
   handleSelectPlace:          (place: Place) => void;
   handleSelectGeocoding:      (result: GeocodingResult) => void;
+  handleSelectGooglePlace:    (place: GooglePlaceSuggestion) => void;
+  handleDismissGooglePlace:   () => void;
   handleGetDirections:        () => void;
   handleDismiss:              () => void;
   handleNavigate:             () => void;
@@ -121,8 +131,11 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const [longPressCoords, setLongPressCoords]     = useState<[number, number] | null>(null);
   const [showLocationOptions, setShowLocationOptions] = useState(false);
   const [longPressMarker, setLongPressMarker]     = useState<[number, number] | null>(null);
-  const [isTabSwitching, setIsTabSwitching]       = useState(false);
+  const [isTabSwitching, setIsTabSwitching]             = useState(false);
   const tabSwitchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [googleSuggestions, setGoogleSuggestions]       = useState<GooglePlaceSuggestion[]>([]);
+  const [isGoogleLoading, setIsGoogleLoading]           = useState(false);
+  const [selectedGooglePlace, setSelectedGooglePlace]   = useState<GooglePlaceSuggestion | null>(null);
 
   const { places, isLoading: isLoadingPlaces, isError, refetch } = usePlacesList();
   const { place: selectedDetail, isLoading: isLoadingDetail } =
@@ -295,6 +308,25 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     return () => clearTimeout(t);
   }, [searchQuery, userLocation]);
 
+  // ── Google Places autocomplete ────────────────────────────────────────────
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) { setGoogleSuggestions([]); return; }
+    setIsGoogleLoading(true);
+    const coords = userLocation?.coords;
+    const t = setTimeout(async () => {
+      try {
+        const r = await searchGooglePlaces(
+          searchQuery,
+          coords ? coords[1] : undefined,
+          coords ? coords[0] : undefined,
+        );
+        setGoogleSuggestions(r.slice(0, 4));
+      } catch { setGoogleSuggestions([]); }
+      finally  { setIsGoogleLoading(false); }
+    }, 500);
+    return () => clearTimeout(t);
+  }, [searchQuery, userLocation]);
+
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleTabPress = useCallback((tabId: string) => {
     setActiveTab(prev => prev === tabId ? null : tabId);
@@ -363,6 +395,7 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     if (ignoreNextMapPressRef.current) return;
     Keyboard.dismiss();
     setIsFABOpen(false);
+    setSelectedGooglePlace(null);
     if (selectedPlace === null && searchQuery.length === 0) {
       setIsFullscreen(prev => !prev);
     }
@@ -429,6 +462,8 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const handleSelectPlace = useCallback((place: Place) => {
     setSearchQuery('');
     setGeoSuggestions([]);
+    setGoogleSuggestions([]);
+    setSelectedGooglePlace(null);
     setSelectedPlace(place);
     setDrivingRoute(null);
     setWalkingRoute(null);
@@ -438,6 +473,7 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const handleSelectGeocoding = useCallback((result: GeocodingResult) => {
     setSearchQuery('');
     setGeoSuggestions([]);
+    setGoogleSuggestions([]);
     setSelectedPlace(null);
     setDrivingRoute(null);
     setWalkingRoute(null);
@@ -445,6 +481,34 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
       centerCoordinate: result.coordinates, zoomLevel: 14,
       animationMode: 'flyTo', animationDuration: 800,
     });
+  }, []);
+
+  const handleSelectGooglePlace = useCallback((place: GooglePlaceSuggestion) => {
+    setSearchQuery('');
+    setGeoSuggestions([]);
+    setGoogleSuggestions([]);
+    setSelectedPlace(null);
+    setDrivingRoute(null);
+    setWalkingRoute(null);
+    Keyboard.dismiss();
+    setSelectedGooglePlace(place);
+
+    // Fetch coordinates and fly camera — card is shown immediately above
+    getGooglePlaceLocation(place.place_id)
+      .then((location) => {
+        if (!location) return;
+        cameraRef.current?.setCamera({
+          centerCoordinate: [location.lng, location.lat],
+          zoomLevel: 15,
+          animationMode: 'flyTo',
+          animationDuration: 800,
+        });
+      })
+      .catch(() => {/* camera stays where it is — card still shows */});
+  }, []);
+
+  const handleDismissGooglePlace = useCallback(() => {
+    setSelectedGooglePlace(null);
   }, []);
 
   const handleMyLocation = useCallback(async () => {
@@ -474,7 +538,11 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   }, [userLocation, gpsCoords]);
 
   const handleSearchChange = useCallback((q: string) => setSearchQuery(q), []);
-  const handleClearSearch  = useCallback(() => { setSearchQuery(''); setGeoSuggestions([]); }, []);
+  const handleClearSearch  = useCallback(() => {
+    setSearchQuery('');
+    setGeoSuggestions([]);
+    setGoogleSuggestions([]);
+  }, []);
   const handleRefetch      = useCallback(() => refetch(), [refetch]);
 
   useEffect(() => () => { if (tabSwitchTimer.current) clearTimeout(tabSwitchTimer.current); }, []);
@@ -483,7 +551,8 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     displayedPlaces, selectedPlace, selectedDetail,
     isLoadingPlaces, isLoadingTags, isTabSwitching, isLoadingDetail, isError,
     cameraRef, gpsCoords, userLocation,
-    searchQuery, placeSuggestions, geoSuggestions, isGeoLoading,
+    searchQuery, placeSuggestions, geoSuggestions, googleSuggestions,
+    isGeoLoading, isGoogleLoading, selectedGooglePlace,
     categories, allTags: fetchedTags, activeTab, activeCategories, activeTags,
     isFABOpen, showTagFilter, isFullscreen, isBottomSheetFullyExpanded,
     handleBottomSheetSnapChange,
@@ -492,6 +561,7 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     handleTabPress, handleMarkerPress, handleMapPress, handleMapLongPress,
     handleMyLocation, handleSearchChange, handleClearSearch,
     handleSelectPlace, handleSelectGeocoding,
+    handleSelectGooglePlace, handleDismissGooglePlace,
     handleGetDirections, handleDismiss, handleNavigate, handleRefetch,
     handleUseCurrentGPS, handleUseMapLocation, handleDismissLocationOptions,
     handleToggleFAB, handleSelectCategory,

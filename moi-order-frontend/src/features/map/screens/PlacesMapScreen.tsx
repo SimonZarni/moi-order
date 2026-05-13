@@ -14,6 +14,7 @@ import { MapFAB } from '../components/MapFAB';
 import { MyLocationButton } from '../components/MyLocationButton';
 import { LocationOptionsSheet } from '../components/LocationOptionsSheet';
 import { TagFilterSheet } from '../components/TagFilterSheet';
+import { GooglePlaceCard } from '../components/GooglePlaceCard';
 import { styles } from './PlacesMapScreen.styles';
 import { MAP_COLORS } from '@/shared/theme/mapTheme';
 
@@ -42,7 +43,8 @@ export function PlacesMapScreen(): React.JSX.Element {
     displayedPlaces, selectedPlace, selectedDetail,
     isLoadingPlaces, isLoadingTags, isTabSwitching, isLoadingDetail, isError,
     cameraRef, gpsCoords, userLocation,
-    searchQuery, placeSuggestions, geoSuggestions, isGeoLoading,
+    searchQuery, placeSuggestions, geoSuggestions, googleSuggestions,
+    isGeoLoading, isGoogleLoading, selectedGooglePlace,
     categories, allTags, activeTab, activeCategories, activeTags,
     isFABOpen, showTagFilter, isFullscreen, isBottomSheetFullyExpanded,
     handleBottomSheetSnapChange,
@@ -51,6 +53,7 @@ export function PlacesMapScreen(): React.JSX.Element {
     handleTabPress, handleMarkerPress, handleMapPress, handleMapLongPress,
     handleMyLocation, handleSearchChange, handleClearSearch,
     handleSelectPlace, handleSelectGeocoding,
+    handleSelectGooglePlace, handleDismissGooglePlace,
     handleGetDirections, handleDismiss, handleNavigate, handleRefetch,
     handleUseCurrentGPS, handleUseMapLocation, handleDismissLocationOptions,
     handleToggleFAB, handleSelectCategory,
@@ -100,9 +103,12 @@ export function PlacesMapScreen(): React.JSX.Element {
             onClear={handleClearSearch}
             onSelectPlace={handleSelectPlace}
             onSelectGeocoding={handleSelectGeocoding}
+            onSelectGooglePlace={handleSelectGooglePlace}
             placeSuggestions={placeSuggestions}
             geoSuggestions={geoSuggestions}
+            googleSuggestions={googleSuggestions}
             isGeoLoading={isGeoLoading}
+            isGoogleLoading={isGoogleLoading}
             activeTab={activeTab}
             onTabPress={handleTabPress}
             activeTagCount={activeTags.length}
@@ -240,6 +246,13 @@ export function PlacesMapScreen(): React.JSX.Element {
             onNavigate={handleNavigate}
             onReadMore={handleReadMore}
             onSnapChange={handleBottomSheetSnapChange}
+          />
+        )}
+
+        {selectedGooglePlace && (
+          <GooglePlaceCard
+            place={selectedGooglePlace}
+            onDismiss={handleDismissGooglePlace}
           />
         )}
 

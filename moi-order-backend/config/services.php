@@ -46,6 +46,10 @@ return [
         'ios_client_id' => env('GOOGLE_IOS_CLIENT_ID'),
     ],
 
+    'google_places' => [
+        'api_key' => env('GOOGLE_PLACES_API_KEY'),
+    ],
+
     'apple' => [
         'client_id' => env('APPLE_CLIENT_ID', 'com.moiorder.app'),
     ],

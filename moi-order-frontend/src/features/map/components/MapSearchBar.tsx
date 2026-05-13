@@ -7,29 +7,34 @@ import { useStrings } from '@/shared/i18n';
 import { styles } from './MapSearchBar.styles';
 import type { Place } from '@/types/models';
 import type { GeocodingResult } from '@/shared/api/mapbox';
+import type { GooglePlaceSuggestion } from '@/shared/api/googlePlaces';
 
 const TAB_NEARBY = 'nearby';
 const TAB_ALL    = 'all';
 
 interface Props {
-  value:             string;
-  onChangeText:      (v: string) => void;
-  onClear:           () => void;
-  onSelectPlace:     (place: Place) => void;
-  onSelectGeocoding: (result: GeocodingResult) => void;
-  placeSuggestions:  Place[];
-  geoSuggestions:    GeocodingResult[];
-  isGeoLoading:      boolean;
-  activeTab:         string | null;
-  onTabPress:        (tabId: string) => void;
-  activeTagCount:    number;
-  onFilterPress:     () => void;
+  value:                  string;
+  onChangeText:           (v: string) => void;
+  onClear:                () => void;
+  onSelectPlace:          (place: Place) => void;
+  onSelectGeocoding:      (result: GeocodingResult) => void;
+  onSelectGooglePlace:    (place: GooglePlaceSuggestion) => void;
+  placeSuggestions:       Place[];
+  geoSuggestions:         GeocodingResult[];
+  googleSuggestions:      GooglePlaceSuggestion[];
+  isGeoLoading:           boolean;
+  isGoogleLoading:        boolean;
+  activeTab:              string | null;
+  onTabPress:             (tabId: string) => void;
+  activeTagCount:         number;
+  onFilterPress:          () => void;
 }
 
 export function MapSearchBar({
   value, onChangeText, onClear,
-  onSelectPlace, onSelectGeocoding,
-  placeSuggestions, geoSuggestions, isGeoLoading,
+  onSelectPlace, onSelectGeocoding, onSelectGooglePlace,
+  placeSuggestions, geoSuggestions, googleSuggestions,
+  isGeoLoading, isGoogleLoading,
   activeTab, onTabPress,
   activeTagCount, onFilterPress,
 }: Props): React.JSX.Element {
@@ -44,7 +49,8 @@ export function MapSearchBar({
   const hasQuery     = value.trim().length > 1;
   const hasPlaces    = placeSuggestions.length > 0;
   const hasGeo       = geoSuggestions.length > 0;
-  const showDropdown = hasQuery && (hasPlaces || hasGeo || isGeoLoading);
+  const hasGoogle    = googleSuggestions.length > 0;
+  const showDropdown = hasQuery && (hasPlaces || hasGeo || hasGoogle || isGeoLoading || isGoogleLoading);
   const filterActive = activeTagCount > 0;
 
   const pillStyle = useAnimatedStyle(() => ({
@@ -54,8 +60,9 @@ export function MapSearchBar({
   const handleFocus = useCallback(() => { focusScale.value = 1; }, [focusScale]);
   const handleBlur  = useCallback(() => { focusScale.value = 0; }, [focusScale]);
 
-  const handleSelectPlace = useCallback((place: Place) => onSelectPlace(place), [onSelectPlace]);
-  const handleSelectGeo   = useCallback((r: GeocodingResult) => onSelectGeocoding(r), [onSelectGeocoding]);
+  const handleSelectPlace  = useCallback((place: Place) => onSelectPlace(place), [onSelectPlace]);
+  const handleSelectGeo    = useCallback((r: GeocodingResult) => onSelectGeocoding(r), [onSelectGeocoding]);
+  const handleSelectGoogle = useCallback((p: GooglePlaceSuggestion) => onSelectGooglePlace(p), [onSelectGooglePlace]);
 
   return (
     <View style={styles.wrapper}>
@@ -170,9 +177,36 @@ export function MapSearchBar({
             </>
           )}
 
-          {(hasGeo || isGeoLoading) && (
+          {(hasGoogle || isGoogleLoading) && (
             <>
               <View style={[styles.sectionHeader, hasPlaces && styles.sectionHeaderBorderTop]}>
+                <Text style={styles.sectionLabel}>🔍 Google Places</Text>
+                {isGoogleLoading && <Text style={styles.loadingDot}>…</Text>}
+              </View>
+              {googleSuggestions.map((result, i) => (
+                <Pressable key={result.place_id} onPress={() => handleSelectGoogle(result)}
+                  style={[styles.suggestionRow, i < googleSuggestions.length - 1 && styles.rowBorder]}
+                  accessibilityRole="button" accessibilityLabel={`Select ${result.name}`}>
+                  <View style={[styles.thumbCircle, styles.thumbGoogle]}>
+                    <Text style={styles.thumbGoogleText}>G</Text>
+                  </View>
+                  <View style={styles.rowText}>
+                    <Text style={styles.rowName} numberOfLines={1}>{result.name}</Text>
+                    {!!result.address && (
+                      <Text style={styles.rowSub} numberOfLines={1}>{result.address}</Text>
+                    )}
+                  </View>
+                  <View style={styles.googleBadge}>
+                    <Text style={styles.googleBadgeText}>Maps</Text>
+                  </View>
+                </Pressable>
+              ))}
+            </>
+          )}
+
+          {(hasGeo || isGeoLoading) && (
+            <>
+              <View style={[styles.sectionHeader, (hasPlaces || hasGoogle) && styles.sectionHeaderBorderTop]}>
                 <Text style={styles.sectionLabel}>🗺 Other Locations</Text>
                 {isGeoLoading && <Text style={styles.loadingDot}>…</Text>}
               </View>
@@ -192,7 +226,7 @@ export function MapSearchBar({
             </>
           )}
 
-          {hasQuery && !hasPlaces && !hasGeo && !isGeoLoading && (
+          {hasQuery && !hasPlaces && !hasGoogle && !hasGeo && !isGeoLoading && !isGoogleLoading && (
             <View style={styles.emptyRow}>
               <Text style={styles.emptyText}>No results for "{value}"</Text>
             </View>

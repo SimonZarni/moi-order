@@ -153,6 +153,18 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 7, paddingVertical: 3,
   },
   appBadgeText:  { fontSize: 10, fontWeight: '700', color: MAP_COLORS.primary },
+  // ── Google Places ──────────────────────────────────────────────────────────
+  thumbGoogle: {
+    backgroundColor: '#e8f0fe',
+  },
+  thumbGoogleText: {
+    fontSize: 15, fontWeight: '800', color: '#4285F4',
+  },
+  googleBadge: {
+    backgroundColor: '#e8f0fe', borderRadius: 9999,
+    paddingHorizontal: 7, paddingVertical: 3,
+  },
+  googleBadgeText: { fontSize: 10, fontWeight: '700', color: '#4285F4' },
   emptyRow:  { padding: 14, alignItems: 'center' },
   emptyText: { fontSize: 13, color: MAP_COLORS.textMuted },
   placeholder: { color: MAP_COLORS.textMuted },

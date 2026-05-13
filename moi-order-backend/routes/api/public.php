@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\AppConfigController;
 use App\Http\Controllers\Api\V1\Auth\EmailAuthController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\EmergencyContactController;
+use App\Http\Controllers\Api\V1\GooglePlacesController;
 use App\Http\Controllers\Api\V1\HomeCardController;
 use App\Http\Controllers\Api\V1\PlaceController;
 use App\Http\Controllers\Api\V1\RestaurantBrowseController;
@@ -44,6 +45,11 @@ Route::middleware('throttle:auth')->group(function (): void {
     Route::post('/auth/email/register',       [EmailAuthController::class, 'completeRegistration']);
     Route::post('/auth/email/reset-password', [EmailAuthController::class, 'resetPassword']);
 });
+
+// Google Places search proxy — intentionally public, no auth required
+// Proxies requests to Google Places API so the API key never leaves the server.
+Route::get('/google-places',                        [GooglePlacesController::class, 'search']);
+Route::get('/google-places/{placeId}/location',     [GooglePlacesController::class, 'location']);
 
 // Places — public browsing, no auth required
 Route::get('/places', [PlaceController::class, 'index']);
