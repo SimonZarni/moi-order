@@ -36,6 +36,10 @@ const LONG_PRESS_STYLE = {
   circleRadius: 10, circleColor: MAP_COLORS.primary, circleOpacity: 0.9,
   circleStrokeWidth: 3, circleStrokeColor: MAP_COLORS.white,
 };
+const GOOGLE_PLACE_STYLE = {
+  circleRadius: 11, circleColor: '#4285F4', circleOpacity: 0.95,
+  circleStrokeWidth: 3, circleStrokeColor: MAP_COLORS.white,
+};
 
 export function PlacesMapScreen(): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -44,7 +48,7 @@ export function PlacesMapScreen(): React.JSX.Element {
     isLoadingPlaces, isLoadingTags, isTabSwitching, isLoadingDetail, isError,
     cameraRef, gpsCoords, userLocation,
     searchQuery, placeSuggestions, geoSuggestions, googleSuggestions,
-    isGeoLoading, isGoogleLoading, selectedGooglePlace,
+    isGeoLoading, isGoogleLoading, selectedGooglePlace, googlePlaceCoords,
     categories, allTags, activeTab, activeCategories, activeTags,
     isFABOpen, showTagFilter, isFullscreen, isBottomSheetFullyExpanded,
     handleBottomSheetSnapChange,
@@ -161,6 +165,13 @@ export function PlacesMapScreen(): React.JSX.Element {
             <MapboxGL.ShapeSource id="long-press-marker"
               shape={{ type: 'Feature', geometry: { type: 'Point', coordinates: longPressMarker }, properties: {} }}>
               <MapboxGL.CircleLayer id="long-press-circle" style={LONG_PRESS_STYLE} />
+            </MapboxGL.ShapeSource>
+          )}
+
+          {googlePlaceCoords && (
+            <MapboxGL.ShapeSource id="google-place-marker"
+              shape={{ type: 'Feature', geometry: { type: 'Point', coordinates: googlePlaceCoords }, properties: {} }}>
+              <MapboxGL.CircleLayer id="google-place-circle" style={GOOGLE_PLACE_STYLE} />
             </MapboxGL.ShapeSource>
           )}
 

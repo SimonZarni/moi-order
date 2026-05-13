@@ -63,7 +63,8 @@ export interface UsePlacesMapScreenResult {
   googleSuggestions:  GooglePlaceSuggestion[];
   isGeoLoading:       boolean;
   isGoogleLoading:    boolean;
-  selectedGooglePlace: GooglePlaceSuggestion | null;
+  selectedGooglePlace:  GooglePlaceSuggestion | null;
+  googlePlaceCoords:    [number, number] | null;
   categories:       Category[];
   allTags:          Tag[];
   activeTab:        string | null;
@@ -136,6 +137,7 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const [googleSuggestions, setGoogleSuggestions]       = useState<GooglePlaceSuggestion[]>([]);
   const [isGoogleLoading, setIsGoogleLoading]           = useState(false);
   const [selectedGooglePlace, setSelectedGooglePlace]   = useState<GooglePlaceSuggestion | null>(null);
+  const [googlePlaceCoords, setGooglePlaceCoords]       = useState<[number, number] | null>(null);
 
   const { places, isLoading: isLoadingPlaces, isError, refetch } = usePlacesList();
   const { place: selectedDetail, isLoading: isLoadingDetail } =
@@ -285,6 +287,7 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
       setGeoSuggestions([]);
       setGoogleSuggestions([]);
       setSelectedGooglePlace(null);
+      setGooglePlaceCoords(null);
       setSelectedPlace(null);
       setDrivingRoute(null);
       setWalkingRoute(null);
@@ -403,6 +406,7 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     Keyboard.dismiss();
     setIsFABOpen(false);
     setSelectedGooglePlace(null);
+    setGooglePlaceCoords(null);
     if (selectedPlace === null && searchQuery.length === 0) {
       setIsFullscreen(prev => !prev);
     }
@@ -500,12 +504,14 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     Keyboard.dismiss();
     setSelectedGooglePlace(place);
 
-    // Fetch coordinates and fly camera — card is shown immediately above
+    // Fetch coordinates, drop pin and fly camera — card is shown immediately above
     getGooglePlaceLocation(place.place_id)
       .then((location) => {
         if (!location) return;
+        const coords: [number, number] = [location.lng, location.lat];
+        setGooglePlaceCoords(coords);
         cameraRef.current?.setCamera({
-          centerCoordinate: [location.lng, location.lat],
+          centerCoordinate: [location.lng, location.lat - 0.003],
           zoomLevel: 15,
           animationMode: 'flyTo',
           animationDuration: 800,
@@ -516,6 +522,7 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
 
   const handleDismissGooglePlace = useCallback(() => {
     setSelectedGooglePlace(null);
+    setGooglePlaceCoords(null);
   }, []);
 
   const handleMyLocation = useCallback(async () => {
@@ -559,7 +566,7 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     isLoadingPlaces, isLoadingTags, isTabSwitching, isLoadingDetail, isError,
     cameraRef, gpsCoords, userLocation,
     searchQuery, placeSuggestions, geoSuggestions, googleSuggestions,
-    isGeoLoading, isGoogleLoading, selectedGooglePlace,
+    isGeoLoading, isGoogleLoading, selectedGooglePlace, googlePlaceCoords,
     categories, allTags: fetchedTags, activeTab, activeCategories, activeTags,
     isFABOpen, showTagFilter, isFullscreen, isBottomSheetFullyExpanded,
     handleBottomSheetSnapChange,
