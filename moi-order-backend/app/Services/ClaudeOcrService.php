@@ -113,7 +113,10 @@ class ClaudeOcrService implements DocumentOcrInterface
                 'anthropic-beta'    => 'prompt-caching-2024-07-31',
             ])->timeout(30)->post(self::ANTHROPIC_API_URL, [
                 'model'       => $this->model,
-                'max_tokens'  => 2048,
+                // Raised from 2048: complex images (card on table, partial view, background)
+                // need more Step 1 reasoning space. Simple clean-card photos won't use
+                // the extra capacity — output cost only applies to actual tokens generated.
+                'max_tokens'  => 3500,
                 // temperature 0 eliminates sampling randomness — critical for OCR where
                 // the correct answer is deterministic (the digit printed on the card).
                 'temperature' => 0,
@@ -204,6 +207,13 @@ class ClaudeOcrService implements DocumentOcrInterface
         {$rotationCaution}
 
         STEP 1 — READ (write plain text notes here before the JSON):
+
+        FRAME THE DOCUMENT FIRST — before reading any field:
+        Locate the document's four corners and draw a tight mental boundary around it.
+        If the image shows background (table, surface, hand, other objects), everything outside those corners is irrelevant — ignore it completely.
+        All field extraction happens exclusively within the framed document area.
+
+        Then, within the framed document:
         - Identify the document layout and locate each field.
         - For every number field: spell each digit aloud left to right, state the total digit count, then read a second time to verify. If both reads agree, that is your value. If they differ, do a third read and take the majority.
         - For every name field: spell each letter individually. Do not assume spelling.
@@ -443,6 +453,7 @@ Poor image quality does not automatically make a document invalid. Apply these r
 - Low contrast or faded ink: attempt to read even faint text; return null only if truly indecipherable.
 - Glare or reflection on part of the image: extract fields from the unaffected areas normally.
 - Rotated or skewed image: mentally correct the orientation and extract as normal.
+- Document surrounded by background (table, surface, hand, other objects): locate the document's four corners first and work exclusively within those boundaries. Surface texture, shadows, and objects outside the document are not fields — do not let them influence extraction.
 - Black-and-white scan or photocopy: fully valid; extract all fields normally.
 - Multiple documents visible in one image: focus on the document matching the requested category.
 - Holographic overlays and security foils: these are not data fields — ignore them.
