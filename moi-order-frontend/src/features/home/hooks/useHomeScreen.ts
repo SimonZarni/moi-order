@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -44,8 +45,9 @@ export function useHomeScreen(): UseHomeScreenResult {
     refetchCards();
   }, [refetch, refetchCards]);
 
-  const resetUnread = useNotificationStore((state) => state.resetUnread);
-  const pushToken   = useNotificationStore((state) => state.pushToken);
+  const resetUnread  = useNotificationStore((state) => state.resetUnread);
+  const pushToken    = useNotificationStore((state) => state.pushToken);
+  const queryClient  = useQueryClient();
 
   const handleNavigateToNotifications = useCallback((): void => {
     navigation.navigate('Notifications');
@@ -60,9 +62,10 @@ export function useHomeScreen(): UseHomeScreenResult {
       unregisterDeviceToken(pushToken).catch(() => {});
     }
     logout().catch(() => {});
-    clearAuth();
     resetUnread();
-  }, [clearAuth, resetUnread, pushToken]);
+    queryClient.clear();
+    clearAuth();
+  }, [clearAuth, resetUnread, queryClient, pushToken]);
 
   const handleNavigateToSearch = useCallback((): void => {
     navigation.navigate('Search');

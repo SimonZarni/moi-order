@@ -96,7 +96,8 @@ export function useProfileScreen(): UseProfileScreenResult {
   const queryClient = useQueryClient();
   const isLoggedIn  = useAuthStore((s) => s.isLoggedIn);
   const clearAuth   = useAuthStore((s) => s.clearAuth);
-  const pushToken   = useNotificationStore((s) => s.pushToken);
+  const pushToken    = useNotificationStore((s) => s.pushToken);
+  const resetUnread  = useNotificationStore((s) => s.resetUnread);
   const { locale, setLocale } = useLocale();
 
   const { user, isLoading, isRefreshing, refetch, updateMutation, changePasswordMutation, deleteAccountMutation, simulatedDateMutation, triggerReminderMutation } = useProfileData();
@@ -302,6 +303,7 @@ export function useProfileScreen(): UseProfileScreenResult {
           if (pushToken !== null) {
             unregisterDeviceToken(pushToken).catch(() => {});
           }
+          resetUnread();
           queryClient.clear();
           clearAuth(); // isLoggedIn → false → effect navigates to Home
         },
