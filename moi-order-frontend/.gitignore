@@ -45,3 +45,8 @@ yarn-error.*
 
 # EAS credentials
 credentials.json
+
+# Build outputs
+*.ipa
+*.apk
+*.aab

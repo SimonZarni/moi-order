@@ -1,0 +1,13 @@
+# EAS Build does not need local build artifacts or dependencies
+node_modules/
+android/build/
+android/app/build/
+android/.gradle/
+android/.idea/
+ios/build/
+ios/Pods/
+.expo/
+dist/
+web-build/
+*.orig.*
+.DS_Store
