@@ -21,7 +21,7 @@ export async function searchGooglePlaces(
   if (lng !== undefined) params['lng'] = String(lng);
 
   const response = await apiClient.get<{ data: GooglePlaceSuggestion[] }>(
-    '/google-places',
+    '/api/v1/google-places',
     { params },
   );
   return response.data.data;
@@ -31,7 +31,7 @@ export async function getGooglePlaceLocation(
   placeId: string,
 ): Promise<GooglePlaceLocation | null> {
   const response = await apiClient.get<{ data: GooglePlaceLocation }>(
-    `/google-places/${encodeURIComponent(placeId)}/location`,
+    `/api/v1/google-places/${encodeURIComponent(placeId)}/location`,
   );
   return response.data.data;
 }
