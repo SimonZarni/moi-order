@@ -510,7 +510,15 @@ If NOT a 90-day notification slip:
 ══════════════════════════════════════════════════════════════
 DOCUMENT CATEGORY 3 — OTHER OFFICIAL DOCUMENTS
 ══════════════════════════════════════════════════════════════
-Identify the document from the list of recognised subtypes below. If it matches one, use that subtype slug and extract the listed fields. If it is an official/government document not on the list, use a descriptive snake_case slug and extract whatever fields are present. If it is NOT any kind of official, legal, or government-issued document, return is_valid_document_type: false.
+Identify the document from the list of recognised subtypes below. If it matches one, use that subtype slug. If it is an official/government document not on the list, use a descriptive snake_case slug. If it is NOT any kind of official, legal, or government-issued document, return is_valid_document_type: false.
+
+FIELD EXTRACTION — OPEN-ENDED
+Do not apply a fixed field list. Extract every key-value pair clearly printed on the document into extracted_data using descriptive snake_case keys. The subtype notes help you identify the document — they do not constrain what you extract. Always capture at minimum:
+  • holder name (full_name, or name_en / name_th if both scripts appear)
+  • every number that uniquely identifies the document or holder — card number, ID number, permit number, licence number, reference number, etc. Never skip these even if not explicitly listed.
+  • issue_date and expiry_date, or their nearest equivalents
+  • issuing_office or issuing_authority
+  • any other dates or important fields printed on the document
 
 SUBTYPE IDENTIFICATION RULES
 - Read the document title, header, or any official label first.
@@ -523,99 +531,76 @@ SUBTYPE IDENTIFICATION RULES
 - Documents with "กรมขนส่งทางบก" (Land Transport Dept.) are driving_license or international_driving_permit.
 - Documents with "สำนักงานประกันสังคม" (Social Security Office) are social_security_card.
 
-RECOGNISED SUBTYPES AND FIELDS:
+RECOGNISED SUBTYPES:
 
 1. ci_pink_card — Thai Confirmation of Identity (บัตรประจำตัวบุคคลไม่มีสัญชาติไทย / CI Pink Card)
-   Fields: full_name, ci_number, nationality, date_of_birth, issue_date, expiry_date, issuing_office
-   Notes: The CI number is 13 digits. Issued by the Thai Interior Ministry to stateless persons and ethnic minorities. The card is pink or light-red in colour.
+   Notes: Pink/light-red laminated card issued by the Thai Interior Ministry to stateless persons and ethnic minorities. The CI number is 13 digits.
 
 2. non_la_visa — Thai Non-Immigrant L-A Labour Visa (visa sticker inside passport)
-   Fields: full_name, visa_type ("Non-Immigrant L-A"), entries, issue_date, expiry_date, issuing_embassy, passport_number
    Notes: Issued specifically for Myanmar workers under the MOU labour agreement. The visa sticker will say "NON-IMMIGRANT L-A" or "NON-IMMI. L-A".
 
 3. driving_license — Thai Driving Licence (ใบอนุญาตขับขี่)
-   Fields: full_name, license_number, license_class, date_of_birth, issue_date, expiry_date, issuing_office
-   Notes: license_class values: "รย.1" (motorcycle ≤125cc), "รย.2" (motorcycle >125cc), "รย.3" (car), "รย.4" (taxi), "ท.1" (truck), "ป.1" (bus). Return the class code exactly as printed. Driving licences are valid for 2 years (new) or 5 years (renewal).
+   Notes: licence_class values: "รย.1" (motorcycle ≤125cc), "รย.2" (motorcycle >125cc), "รย.3" (car), "รย.4" (taxi), "ท.1" (truck), "ป.1" (bus). Return the class code exactly as printed. Driving licences are valid for 2 years (new) or 5 years (renewal).
 
 4. international_driving_permit — International Driving Permit (IDP)
-   Fields: full_name, permit_number, date_of_birth, issue_date, expiry_date, issuing_country
    Notes: A grey booklet with the UN emblem and the title "International Driving Permit". Valid for 1 year from issue date.
 
 5. student_id — Student ID Card
-   Fields: full_name, student_id, institution_name, faculty, issue_date, expiry_date
-   Notes: May be issued by any accredited school, college, or university. The institution name is usually prominent on the front.
+   Notes: May be issued by any accredited school, college, or university. The institution name is usually prominent on the front. Always extract the student ID number printed on the card.
 
 6. work_permit — Thai Work Permit (ใบอนุญาตทำงาน)
-   Fields: full_name, permit_number, employer_name, occupation, issue_date, expiry_date, issuing_office
-   Notes: Blue booklet format. Permit number prefix indicates the issuing province. Employer name is the Thai company or individual employer. Occupation is the job title printed on the permit.
+   Notes: Blue booklet format. Permit number prefix indicates the issuing province. Extract the employer name and occupation as printed on the permit.
 
 7. thai_national_id — Thai National ID Card (บัตรประชาชน)
-   Fields: full_name, id_number, date_of_birth, issue_date, expiry_date
    Notes: White plastic card with the Thai government emblem. The ID number is 13 digits. Return null for expiry_date if the card reads "ตลอดชีพ" (lifetime validity).
 
 8. social_security_card — Thai Social Security Card / SSO membership card
-   Fields: full_name, card_number, issue_date, expiry_date, coverage_notes
-   Notes: Issued by the Social Security Office (สำนักงานประกันสังคม). coverage_notes may mention the assigned hospital or benefit type.
+   Notes: Issued by the Social Security Office (สำนักงานประกันสังคม). May mention the assigned hospital or benefit type.
 
 9. health_insurance_card — Private or government health insurance card
-   Fields: full_name, card_number, insurer_name, issue_date, expiry_date, coverage_notes
-   Notes: May be from a private insurer (BUPA, AXA, Cigna, Allianz) or the government 30-Baht Universal Coverage scheme (บัตรทอง). coverage_notes should capture the plan name or benefit tier if visible.
+   Notes: May be from a private insurer (BUPA, AXA, Cigna, Allianz) or the government 30-Baht Universal Coverage scheme (บัตรทอง). Capture the plan name or benefit tier if visible.
 
 10. marriage_certificate — Marriage certificate (any country)
-    Fields: full_name, spouse_name, document_number, marriage_date, issue_date, issuing_office
     Notes: Thai marriage certificates are issued by the district office (สำนักงานเขต / ที่ว่าการอำเภอ). marriage_date is when the couple wed; issue_date is when the certificate was printed. These may differ if the certificate was issued long after the marriage.
 
 11. birth_certificate — Birth certificate (any country)
-    Fields: full_name, document_number, date_of_birth, place_of_birth, issue_date, issuing_office
-    Notes: Thai birth certificate is "สูติบัตร". Myanmar equivalent is the "Birth Certificate" or "ကိုယ်ရေးမှတ်တမ်း". place_of_birth should be the hospital or city name if printed.
+    Notes: Thai birth certificate is "สูติบัตร". Myanmar equivalent is the "Birth Certificate" or "ကိုယ်ရေးမှတ်တမ်း". Extract the place of birth if printed.
 
 12. residence_certificate — Certificate of residence / address certificate
-    Fields: full_name, address, document_number, issue_date, issuing_office
     Notes: Issued by a local Thai authority (district office or police station) to confirm the holder's address. Typically valid for 30–90 days from issue date.
 
 13. tax_id_card — Tax Identification card (Thailand or home country)
-    Fields: full_name, tax_id, issue_date, expiry_date, issuing_authority
     Notes: Thai individual TIN is 13 digits (same format as national ID). Corporate TIN is also 13 digits. Issued by the Revenue Department (กรมสรรพากร).
 
 14. border_pass — Border pass / border crossing card
-    Fields: full_name, document_number, nationality, issue_date, expiry_date, issuing_office, permitted_areas
-    Notes: Issued at official border crossing points. permitted_areas lists specific Thai provinces the holder is permitted to enter. Common for Myanmar-Thailand cross-border day workers and seasonal labourers.
+    Notes: Issued at official border crossing points. Extract the Thai provinces or areas the holder is permitted to enter. Common for Myanmar-Thailand cross-border day workers and seasonal labourers.
 
 15. tor_ror_13 — TOR ROR 13 (ท.ร.13) — Thai household registration extract for non-citizens
-    Fields: full_name, id_number, address, date_of_birth, issue_date, issuing_office
     Notes: Printed on yellow paper. Issued by the district office (อำเภอ) to register non-citizen residents. The non-citizen equivalent of the Thai tabien baan (ทะเบียนบ้าน).
 
 16. tm6_departure_card — Thai TM6 Arrival/Departure card
-    Fields: full_name, nationality, passport_number, flight_number, arrival_date, departure_date, visa_type, purpose_of_visit
     Notes: White card filled in on arrival at a Thai port of entry. The bottom stub is the departure record retained in the passport. arrival_date and departure_date may be on separate stubs of the same card.
 
 17. tm30_receipt — Thai TM30 receipt (landlord/host notification)
-    Fields: full_name, nationality, address, report_date, issuing_office
-    Notes: Landlords and hosts must notify the local immigration office of a foreign guest's address within 24 hours of arrival. This receipt confirms that notification. Often a small thermal-printed slip with an official stamp.
+    Notes: Landlords and hosts notify immigration of a foreign guest's address within 24 hours of arrival. Often a small thermal-printed slip with an official stamp.
 
 18. certificate_of_employment — Employment certificate or letter
-    Fields: full_name, employer_name, position, start_date, issue_date, issuing_officer
-    Notes: A formal letter or certificate from an employer confirming the holder's employment status and position. Not a government form but still an official document for immigration and visa purposes.
+    Notes: A formal letter or certificate from an employer confirming the holder's employment status and position. Not a government form but still official for immigration and visa purposes.
 
 19. bank_statement_page — Bank statement page
-    Fields: full_name, bank_name, account_number_masked, statement_period, issuing_branch
-    Notes: A single printed page from a bank statement. account_number_masked must show only the last 4 digits (e.g. "****1234"). statement_period is the date range printed on the statement (e.g. "2025-01-01 to 2025-01-31").
+    Notes: account_number must show only the last 4 digits masked (e.g. "****1234"). Extract the statement period date range as printed.
 
 20. diploma_or_transcript — Academic diploma, degree certificate, or official transcript
-    Fields: full_name, institution_name, qualification, field_of_study, graduation_date, issue_date
-    Notes: Issued by a school or university. qualification examples: "Bachelor of Science", "High School Diploma", "ปริญญาตรี", "Master of Arts". field_of_study is the major or programme name.
+    Notes: Issued by a school or university. Extract the qualification name (e.g. "Bachelor of Science"), field of study, and graduation date.
 
 21. police_clearance_certificate — Police clearance / criminal record certificate
-    Fields: full_name, document_number, date_of_birth, nationality, issue_date, expiry_date, issuing_authority, result
-    Notes: result field should be "No criminal record" or the equivalent translated phrase, or describe any record if one is noted. Thai version: "หนังสือรับรองความประพฤติ" issued by the Royal Thai Police. Myanmar version issued by Myanmar Police Force.
+    Notes: Always extract the result field ("No criminal record" or equivalent). Thai version: "หนังสือรับรองความประพฤติ". Myanmar version issued by Myanmar Police Force.
 
 22. un_refugee_card — UNHCR Refugee Card or Asylum Seeker Certificate
-    Fields: full_name, card_number, date_of_birth, nationality, issue_date, expiry_date, issuing_office
-    Notes: Issued by the United Nations High Commissioner for Refugees (UNHCR). A yellow or blue laminated card. The card number is the UNHCR case number.
+    Notes: Issued by UNHCR. A yellow or blue laminated card. The card number is the UNHCR case number.
 
 23. Any other official government or legal document not listed above:
-    Use a descriptive snake_case subtype slug (e.g. "bank_reference_letter", "embassy_letter", "military_id", "refugee_certificate", "power_of_attorney").
-    Fields: document_name, full_name, document_number, issue_date, expiry_date, issuing_office, notes
+    Use a descriptive snake_case subtype slug (e.g. "bank_reference_letter", "embassy_letter", "military_id", "refugee_certificate", "power_of_attorney"). Extract all visible fields.
 
 EXAMPLE RESPONSE for ci_pink_card:
 {
