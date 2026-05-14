@@ -1,9 +1,49 @@
+const { withAppBuildGradle, withGradleProperties } = require('@expo/config-plugins');
+
 const mapboxDownloadToken = process.env.RNMAPBOX_MAPS_DOWNLOAD_TOKEN;
 const lineChannelId = process.env.EXPO_PUBLIC_LINE_CHANNEL_ID ?? '';
 const googleIosClientId =
   process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ??
   '661538209777-o33avjo80379ui26kj2clbn4snla6j2g.apps.googleusercontent.com';
 const googleIosUrlScheme = `com.googleusercontent.apps.${googleIosClientId.replace('.apps.googleusercontent.com', '')}`;
+
+// Injects ABI splits into the prebuild-generated build.gradle so EAS produces
+// per-ABI APKs instead of a single universal APK containing all architectures.
+const ABI_SPLITS = [
+  '    splits {',
+  '        abi {',
+  '            reset()',
+  '            enable true',
+  '            universalApk false',
+  '            include "arm64-v8a", "armeabi-v7a"',
+  '        }',
+  '    }',
+].join('\n');
+
+const withAbiSplits = (config) => {
+  config = withAppBuildGradle(config, (mod) => {
+    if (mod.modResults.contents.includes('splits {')) return mod;
+    mod.modResults.contents = mod.modResults.contents.replace(
+      /([ \t]+androidResources \{[^}]*\})\n\}/,
+      `$1\n${ABI_SPLITS}\n}`
+    );
+    return mod;
+  });
+
+  config = withGradleProperties(config, (mod) => {
+    mod.modResults = mod.modResults.filter(
+      (item) => !(item.type === 'property' && item.key === 'reactNativeArchitectures')
+    );
+    mod.modResults.push({
+      type: 'property',
+      key: 'reactNativeArchitectures',
+      value: 'armeabi-v7a,arm64-v8a',
+    });
+    return mod;
+  });
+
+  return config;
+};
 
 /** @type {import('expo/config').ExpoConfig} */
 module.exports = {
@@ -58,8 +98,8 @@ module.exports = {
       package: "com.moiorder.app",
       versionCode: 2,
       adaptiveIcon: {
-        foregroundImage: "./assets/icon.png",
-        backgroundColor: "#00000000",
+        foregroundImage: "./assets/adaptive-icon.png",
+        backgroundColor: "#063B21",
       },
       predictiveBackGestureEnabled: false,
       permissions: [
@@ -78,6 +118,7 @@ module.exports = {
       favicon: "./assets/icon.png",
     },
     plugins: [
+      withAbiSplits,
       "expo-apple-authentication",
       "expo-updates",
       "expo-secure-store",
