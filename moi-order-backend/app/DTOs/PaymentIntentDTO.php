@@ -14,6 +14,7 @@ readonly class PaymentIntentDTO
         public string              $stripeIntentId,
         public string              $clientSecret,
         public string              $qrImageUrl,
+        public string              $qrData,
         public array               $stripePayload,
         public ?\DateTimeImmutable $expiresAt = null,
     ) {}

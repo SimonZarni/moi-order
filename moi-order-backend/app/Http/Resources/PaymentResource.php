@@ -23,6 +23,7 @@ class PaymentResource extends JsonResource
             'amount'       => $this->amount,
             'currency'     => $this->currency,
             'qr_image_url' => $this->qr_image_url,
+            'qr_data'      => $this->qr_data,
             'expires_at'   => $this->expires_at?->toISOString(),
         ];
     }

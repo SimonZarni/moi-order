@@ -139,6 +139,7 @@ class PaymentService
                 'currency'         => 'thb',
                 'status'           => PaymentStatus::Pending,
                 'qr_image_url'     => $dto->qrImageUrl,
+                'qr_data'          => $dto->qrData,
                 'stripe_payload'   => $dto->stripePayload,
                 'idempotency_key'  => $idempotencyKey,
                 // Always store an expiry — fall back to 60 min if Stripe omits it.

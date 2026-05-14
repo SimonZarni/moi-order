@@ -100,7 +100,8 @@ export function PaymentScreen(): React.JSX.Element {
         ) : (
           <>
             <QrCodeDisplay
-              qrImageUrl={payment.qr_image_url ?? ''}
+              qrData={payment.qr_data ?? null}
+              qrImageUrl={payment.qr_image_url ?? null}
               amountFormatted={amountFormatted}
               countdownLabel={countdownLabel}
               secondsLeft={secondsLeft}

@@ -155,6 +155,7 @@ export interface Payment {
   amount: number;      // satangs (divide by 100 for THB display)
   currency: string;
   qr_image_url: string | null;
+  qr_data: string | null;
   expires_at: string | null;
 }
 

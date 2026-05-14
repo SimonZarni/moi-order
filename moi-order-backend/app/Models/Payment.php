@@ -29,6 +29,7 @@ class Payment extends Model
         'currency',
         'status',
         'qr_image_url',
+        'qr_data',
         'expires_at',
         'stripe_payload',
         'idempotency_key',
