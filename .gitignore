@@ -1,5 +1,11 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+# System manual (local only — generated PDFs, videos, HTML ads)
+system-manual/
+
+# Business documents (local only)
+BUSINESS_PROPOSAL_EN.md
+
 # dependencies
 node_modules/
 
