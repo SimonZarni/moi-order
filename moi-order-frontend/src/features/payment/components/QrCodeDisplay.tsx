@@ -7,7 +7,7 @@ import QRCode from 'react-native-qrcode-svg';
 import { colours } from '@/shared/theme/colours';
 import { styles } from './QrCodeDisplay.styles';
 
-const PROMPTPAY_PURPLE = '#4B2DB5';
+const HEADER_COLOR = colours.backgroundDark;
 const QR_SIZE = 220;
 const LOGO_SIZE = 44;
 
@@ -31,7 +31,7 @@ export function QrCodeDisplay({
   return (
     <View style={styles.card}>
       {/* ── PromptPay header strip ─────────────────────────────── */}
-      <View style={[styles.header, { backgroundColor: PROMPTPAY_PURPLE }]}>
+      <View style={[styles.header, { backgroundColor: HEADER_COLOR }]}>
         <Text style={styles.headerBrand}>PromptPay</Text>
         <Text style={styles.headerApp}>Moi Order</Text>
       </View>
@@ -50,11 +50,6 @@ export function QrCodeDisplay({
             size={QR_SIZE}
             color={colours.backgroundDark}
             backgroundColor={colours.white}
-            logo={require('../../../../assets/adaptive-icon.png')}
-            logoSize={LOGO_SIZE}
-            logoBackgroundColor={colours.white}
-            logoBorderRadius={LOGO_SIZE / 2}
-            logoMargin={4}
             quietZone={12}
           />
         ) : qrImageUrl ? (

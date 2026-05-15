@@ -68,6 +68,24 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  qrContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoOverlay: {
+    position: 'absolute',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    overflow: 'hidden',
+    backgroundColor: colours.white,
+    padding: 2,
+  },
+  logoImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
   qrImage: {
     width: 220,
     height: 220,
