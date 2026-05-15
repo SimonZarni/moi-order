@@ -25,17 +25,18 @@ class AdminPushSubscriptionController extends Controller
     /** POST /api/admin/v1/push-subscriptions — register or refresh a browser subscription */
     public function store(StorePushSubscriptionRequest $request): JsonResponse
     {
-        $dto = StorePushSubscriptionDTO::fromRequest($request);
+        $dto    = StorePushSubscriptionDTO::fromRequest($request);
+        $userId = $request->user()->id;
+
+        // Remove any stale subscriptions for this user (rotated or forgotten endpoints)
+        // so the admin never accumulates multiple rows and receives duplicate notifications.
+        PushSubscription::where('user_id', $userId)
+            ->where('endpoint', '!=', $dto->endpoint)
+            ->delete();
 
         PushSubscription::updateOrCreate(
-            [
-                'user_id'  => $request->user()->id,
-                'endpoint' => $dto->endpoint,
-            ],
-            [
-                'p256dh_key' => $dto->p256dhKey,
-                'auth_key'   => $dto->authKey,
-            ],
+            ['user_id'  => $userId, 'endpoint' => $dto->endpoint],
+            ['p256dh_key' => $dto->p256dhKey, 'auth_key' => $dto->authKey],
         );
 
         return response()->json(null, 204);
