@@ -6,6 +6,9 @@ import App from './app';
 import { routesSection } from './routes/sections';
 import { ErrorBoundary } from './routes/components';
 
+// Reload once when a stale chunk URL 404s after a new deployment.
+window.addEventListener('vite:preloadError', () => window.location.reload());
+
 // ----------------------------------------------------------------------
 
 const router = createBrowserRouter([
