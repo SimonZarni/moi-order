@@ -38,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $middleware->alias([
+            'hmac.verify'         => \App\Http\Middleware\VerifyHmacSignature::class,
             'admin.auth'          => \App\Http\Middleware\AdminAuthenticate::class,
             'admin.token.cookie'  => \App\Http\Middleware\AdminTokenFromCookie::class,
             'check.permission'    => \App\Http\Middleware\CheckPermission::class,

@@ -21,39 +21,39 @@ Route::get('/health', static function () {
 });
 
 // Public routes — intentionally unauthenticated
-Route::prefix('v1')->middleware(['throttle:api'])->group(
+Route::prefix('v1')->middleware(['hmac.verify', 'throttle:api'])->group(
     base_path('routes/api/public.php')
 );
 
 // User API routes — token must carry the 'user' ability; status checked on every request
-Route::prefix('v1')->middleware(['auth:sanctum', 'abilities:user', 'user.not_suspended', 'update.last_active', 'throttle:api'])->group(
+Route::prefix('v1')->middleware(['hmac.verify', 'auth:sanctum', 'abilities:user', 'user.not_suspended', 'update.last_active', 'throttle:api'])->group(
     base_path('routes/api/v1.php')
 );
 
 // Admin public routes (login only) — intentionally unauthenticated
-Route::prefix('admin/v1')->middleware(['throttle:auth'])->group(
+Route::prefix('admin/v1')->middleware(['hmac.verify', 'throttle:auth'])->group(
     base_path('routes/api/admin_public.php')
 );
 
 // Admin authenticated routes — token must carry the 'admin' ability; admin.auth asserts is_admin.
 // admin.token.cookie must be listed before auth:sanctum so the httpOnly cookie is converted
 // to a Bearer header before Sanctum attempts authentication.
-Route::prefix('admin/v1')->middleware(['admin.token.cookie', 'auth:sanctum', 'abilities:admin', 'admin.auth', 'throttle:admin'])->group(
+Route::prefix('admin/v1')->middleware(['hmac.verify', 'admin.token.cookie', 'auth:sanctum', 'abilities:admin', 'admin.auth', 'throttle:admin'])->group(
     base_path('routes/api/admin_v1.php')
 );
 
 // Merchant public routes (login only) — intentionally unauthenticated
-Route::prefix('merchant/v1')->middleware(['throttle:auth'])->group(
+Route::prefix('merchant/v1')->middleware(['hmac.verify', 'throttle:auth'])->group(
     base_path('routes/api/merchant_public.php')
-); 
+);
 
 // Merchant KYC routes — token with 'merchant' ability; no is_merchant gate (KYC is how they earn it)
-Route::prefix('merchant/v1')->middleware(['auth:sanctum', 'abilities:merchant', 'user.not_suspended', 'throttle:api'])->group(
+Route::prefix('merchant/v1')->middleware(['hmac.verify', 'auth:sanctum', 'abilities:merchant', 'user.not_suspended', 'throttle:api'])->group(
     base_path('routes/api/merchant_kyc.php')
 );
 
 // Merchant authenticated routes — token must carry the 'merchant' ability; merchant.auth asserts is_merchant
-Route::prefix('merchant/v1')->middleware(['auth:sanctum', 'abilities:merchant', 'merchant.auth', 'user.not_suspended', 'throttle:api'])->group(
+Route::prefix('merchant/v1')->middleware(['hmac.verify', 'auth:sanctum', 'abilities:merchant', 'merchant.auth', 'user.not_suspended', 'throttle:api'])->group(
     base_path('routes/api/merchant_v1.php')
 );
 

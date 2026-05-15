@@ -123,4 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'hmac_secret' => env('HMAC_SECRET'),
+
 ];
