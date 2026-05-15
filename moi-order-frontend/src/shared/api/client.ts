@@ -52,14 +52,13 @@ apiClient.interceptors.request.use((config) => {
   config.headers['Accept-Language'] = _locale;
   (config as typeof config & { _maintenanceEpoch?: number })._maintenanceEpoch = getMaintenanceEpoch();
 
-  const timestamp = Math.floor(Date.now() / 1000).toString();
-  const method    = (config.method ?? 'get').toUpperCase();
-  const uri       = config.url ?? '';
+  const timestamp  = Math.floor(Date.now() / 1000).toString();
+  const method     = (config.method ?? 'get').toUpperCase();
   const isFormData = typeof FormData !== 'undefined' && config.data instanceof FormData;
   const body = isFormData || config.data === undefined || config.data === null
     ? ''
     : typeof config.data === 'string' ? config.data : JSON.stringify(config.data);
-  const payload   = timestamp + method + uri + body;
+  const payload   = timestamp + method + body;
   const signature = CryptoJS.HmacSHA256(payload, HMAC_SECRET).toString();
   config.headers['X-Timestamp'] = timestamp;
   config.headers['X-Signature'] = signature;

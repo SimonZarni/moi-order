@@ -33,7 +33,6 @@ class VerifyHmacSignature
 
         $payload  = $timestamp
             . strtoupper($request->method())
-            . $request->getRequestUri()
             . $request->getContent();
 
         $expected = hash_hmac('sha256', $payload, (string) config('app.hmac_secret'));
