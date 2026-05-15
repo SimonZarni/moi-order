@@ -4,12 +4,11 @@
  * Security: token read from in-memory ref (populated at login); SecureStore is async and
  *           must never be awaited inside the request interceptor per request.
  */
-import CryptoJS from 'crypto-js';
 import axios, { AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { Alert } from 'react-native';
 
-import { HMAC_SECRET, TOKEN_KEY } from '@/shared/constants/config';
+import { TOKEN_KEY } from '@/shared/constants/config';
 import { ERROR_CODES, getAccountErrorMessage } from '@/shared/constants/errorCodes';
 import { getMaintenanceEpoch, shouldIgnoreMaintenanceNavigation } from '@/shared/maintenance/maintenanceState';
 import { ApiError } from '@/types/models';
@@ -51,18 +50,6 @@ apiClient.interceptors.request.use((config) => {
   }
   config.headers['Accept-Language'] = _locale;
   (config as typeof config & { _maintenanceEpoch?: number })._maintenanceEpoch = getMaintenanceEpoch();
-
-  const timestamp  = Math.floor(Date.now() / 1000).toString();
-  const method     = (config.method ?? 'get').toUpperCase();
-  const isFormData = typeof FormData !== 'undefined' && config.data instanceof FormData;
-  const body = isFormData || config.data === undefined || config.data === null
-    ? ''
-    : typeof config.data === 'string' ? config.data : JSON.stringify(config.data);
-  const payload   = timestamp + method + body;
-  const signature = CryptoJS.HmacSHA256(payload, HMAC_SECRET).toString();
-  config.headers['X-Timestamp'] = timestamp;
-  config.headers['X-Signature'] = signature;
-
   return config;
 });
 
