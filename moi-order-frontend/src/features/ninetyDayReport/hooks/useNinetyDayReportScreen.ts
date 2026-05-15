@@ -30,22 +30,19 @@ export function useNinetyDayReportScreen(): UseNinetyDayReportScreenResult {
 
   const handleSelectType = useCallback(
     (type: ServiceType): void => {
-      // Use locale-appropriate name so the form header shows the right language.
-      // type.name is the primary name (Thai in this database).
-      // type.name_mm is Burmese. type.name_en is English.
-      const localeName =
+      const typeLocaleName =
         locale === 'mm' ? (type.name_mm ?? type.name_en ?? type.name)
         : locale === 'en' ? (type.name_en ?? type.name)
-        : type.name; // 'th' — use the Thai primary name
+        : type.name;
 
-      navigation.navigate('NinetyDayReportForm', {
-        serviceTypeId:     type.id,
-        serviceTypeName:   localeName,
-        serviceTypeNameEn: type.name_en,
-        price:             type.price,
+      navigation.navigate('GenericServiceForm', {
+        serviceTypeId: type.id,
+        serviceId:     ninetyDayService?.id ?? 0,
+        serviceName:   typeLocaleName,
+        price:         type.price,
       });
     },
-    [navigation, locale],
+    [navigation, locale, ninetyDayService],
   );
 
   const handleBack = useCallback((): void => {

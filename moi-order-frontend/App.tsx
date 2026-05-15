@@ -51,19 +51,12 @@ import { SetPasswordScreen } from '@/features/auth/screens/SetPasswordScreen';
 import { ForgotPasswordScreen } from '@/features/auth/screens/ForgotPasswordScreen';
 import { HomeScreen } from '@/features/home/screens/HomeScreen';
 import { NinetyDayReportScreen } from '@/features/ninetyDayReport/screens/NinetyDayReportScreen';
-import { NinetyDayReportFormScreen } from '@/features/ninetyDayReport/screens/NinetyDayReportFormScreen';
 import { OtherServicesScreen } from '@/features/otherServices/screens/OtherServicesScreen';
 import { EmbassyServicesScreen } from '@/features/embassyServices/screens/EmbassyServicesScreen';
 import { CompanyServicesScreen } from '@/features/companyServices/screens/CompanyServicesScreen';
 import { PassportCiServicesScreen } from '@/features/passportCiServices/screens/PassportCiServicesScreen';
-import { AirportFastTrackFormScreen } from '@/features/airportFastTrack/screens/AirportFastTrackFormScreen';
-import { EmbassyResidentialFormScreen } from '@/features/embassyResidential/screens/EmbassyResidentialFormScreen';
-import { EmbassyCarLicenseFormScreen } from '@/features/embassyCarLicense/screens/EmbassyCarLicenseFormScreen';
-import { EmbassyBankFormScreen } from '@/features/embassyBank/screens/EmbassyBankFormScreen';
-import { EmbassyVisaRecommendationFormScreen } from '@/features/embassyVisaRecommendation/screens/EmbassyVisaRecommendationFormScreen';
 import { TestServiceFormScreen } from '@/features/testService/screens/TestServiceFormScreen';
 import { GenericServiceFormScreen } from '@/features/genericService/screens/GenericServiceFormScreen';
-import { CompanyRegistrationFormScreen } from '@/features/companyRegistration/screens/CompanyRegistrationFormScreen';
 import { OrdersScreen } from '@/features/orders/screens/OrdersScreen';
 import { OrderDetailScreen } from '@/features/orders/screens/OrderDetailScreen';
 import { PaymentScreen } from '@/features/payment/screens/PaymentScreen';
@@ -267,17 +260,10 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
       <Stack.Screen name="Payment"                       component={PaymentScreen} />
       <Stack.Screen name="NinetyDayReport"               component={NinetyDayReportScreen} />
-      <Stack.Screen name="NinetyDayReportForm"           component={NinetyDayReportFormScreen} />
       <Stack.Screen name="OtherServices"                 component={OtherServicesScreen} />
       <Stack.Screen name="EmbassyServices"               component={EmbassyServicesScreen} />
       <Stack.Screen name="CompanyServices"               component={CompanyServicesScreen} />
       <Stack.Screen name="PassportCiServices"            component={PassportCiServicesScreen} />
-      <Stack.Screen name="CompanyRegistrationForm"       component={CompanyRegistrationFormScreen} />
-      <Stack.Screen name="AirportFastTrackForm"          component={AirportFastTrackFormScreen} />
-      <Stack.Screen name="EmbassyResidentialForm"        component={EmbassyResidentialFormScreen} />
-      <Stack.Screen name="EmbassyCarLicenseForm"         component={EmbassyCarLicenseFormScreen} />
-      <Stack.Screen name="EmbassyBankForm"               component={EmbassyBankFormScreen} />
-      <Stack.Screen name="EmbassyVisaRecommendationForm" component={EmbassyVisaRecommendationFormScreen} />
       <Stack.Screen name="TestServiceForm"               component={TestServiceFormScreen} />
       <Stack.Screen name="GenericServiceForm"            component={GenericServiceFormScreen} />
       <Stack.Screen name="Places"                          component={PlacesScreen} />

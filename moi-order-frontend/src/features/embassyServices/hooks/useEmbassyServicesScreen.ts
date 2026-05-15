@@ -8,14 +8,6 @@ import { RootStackParamList } from '@/types/navigation';
 import { localeName } from '@/shared/utils/localeName';
 import { useLocale } from '@/shared/hooks/useLocale';
 
-// OCP: new embassy service = new entry here only. No changes to screen.
-const SLUG_TO_SCREEN: Partial<Record<string, keyof RootStackParamList>> = {
-  'embassy-residential-service':  'EmbassyResidentialForm',
-  'embassy-car-license':          'EmbassyCarLicenseForm',
-  'embassy-bank-service':         'EmbassyBankForm',
-  'embassy-visa-recommendation':  'EmbassyVisaRecommendationForm',
-};
-
 export interface UseEmbassyServicesScreenResult {
   services: UseEmbassyServicesResult['services'];
   isLoading: boolean;
@@ -37,27 +29,12 @@ export function useEmbassyServicesScreen(): UseEmbassyServicesScreenResult {
     const firstType = service.types[0];
     if (firstType === undefined) return;
 
-    const screen = SLUG_TO_SCREEN[service.slug];
-
-    if (screen === undefined) {
-      navigation.navigate('GenericServiceForm', {
-        serviceTypeId: firstType.id,
-        serviceId:     service.id,
-        serviceName:   localeName(service, locale),
-        price:         firstType.price,
-      });
-      return;
-    }
-
-    if (screen === 'EmbassyResidentialForm') {
-      navigation.navigate('EmbassyResidentialForm', { serviceTypeId: firstType.id, price: firstType.price });
-    } else if (screen === 'EmbassyCarLicenseForm') {
-      navigation.navigate('EmbassyCarLicenseForm', { serviceTypeId: firstType.id, price: firstType.price });
-    } else if (screen === 'EmbassyBankForm') {
-      navigation.navigate('EmbassyBankForm', { serviceTypeId: firstType.id, price: firstType.price });
-    } else if (screen === 'EmbassyVisaRecommendationForm') {
-      navigation.navigate('EmbassyVisaRecommendationForm', { serviceTypeId: firstType.id, price: firstType.price });
-    }
+    navigation.navigate('GenericServiceForm', {
+      serviceTypeId: firstType.id,
+      serviceId:     service.id,
+      serviceName:   localeName(service, locale),
+      price:         firstType.price,
+    });
   }, [navigation, locale]);
 
   const handleBack = useCallback((): void => { navigation.goBack(); }, [navigation]);

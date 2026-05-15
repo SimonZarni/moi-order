@@ -8,16 +8,8 @@ import { RootStackParamList } from '@/types/navigation';
 import { localeName } from '@/shared/utils/localeName';
 import { useLocale } from '@/shared/hooks/useLocale';
 
-// Maps service slugs to their destination screen.
-// OCP: new service = new entry here + new screen. No changes to OtherServicesScreen.
 const SLUG_TO_SCREEN: Partial<Record<string, keyof RootStackParamList>> = {
-  'company-registration': 'CompanyRegistrationForm',
-  'airport-fast-track':   'AirportFastTrackForm',
-  'embassy-residential-service': 'EmbassyResidentialForm',
-  'embassy-car-license':  'EmbassyCarLicenseForm',
-  'embassy-bank-service':         'EmbassyBankForm',
-  'embassy-visa-recommendation':  'EmbassyVisaRecommendationForm',
-  'test-service':                 'TestServiceForm',
+  'test-service': 'TestServiceForm',
 };
 
 export interface UseOtherServicesScreenResult {
@@ -54,37 +46,7 @@ export function useOtherServicesScreen(): UseOtherServicesScreenResult {
       return;
     }
 
-    if (screen === 'CompanyRegistrationForm') {
-      navigation.navigate('CompanyRegistrationForm', {
-        serviceTypeId: firstType.id,
-        price:         firstType.price,
-      });
-    } else if (screen === 'AirportFastTrackForm') {
-      navigation.navigate('AirportFastTrackForm', {
-        serviceTypeId: firstType.id,
-        price:         firstType.price,
-      });
-    } else if (screen === 'EmbassyResidentialForm') {
-      navigation.navigate('EmbassyResidentialForm', {
-        serviceTypeId: firstType.id,
-        price:         firstType.price,
-      });
-    } else if (screen === 'EmbassyCarLicenseForm') {
-      navigation.navigate('EmbassyCarLicenseForm', {
-        serviceTypeId: firstType.id,
-        price:         firstType.price,
-      });
-    } else if (screen === 'EmbassyBankForm') {
-      navigation.navigate('EmbassyBankForm', {
-        serviceTypeId: firstType.id,
-        price:         firstType.price,
-      });
-    } else if (screen === 'EmbassyVisaRecommendationForm') {
-      navigation.navigate('EmbassyVisaRecommendationForm', {
-        serviceTypeId: firstType.id,
-        price:         firstType.price,
-      });
-    } else if (screen === 'TestServiceForm') {
+    if (screen === 'TestServiceForm') {
       navigation.navigate('TestServiceForm', {
         serviceTypeId: firstType.id,
         price:         firstType.price,

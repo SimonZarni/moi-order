@@ -34,40 +34,10 @@ export type RootStackParamList = {
   Orders: undefined;
   OrderDetail: { submissionId: string };
   NinetyDayReport: undefined;
-  NinetyDayReportForm: {
-    serviceTypeId: number;
-    serviceTypeName: string;
-    serviceTypeNameEn: string;
-    price: number;
-  };
   OtherServices: undefined;
   EmbassyServices: undefined;
   CompanyServices: undefined;
   PassportCiServices: undefined;
-  CompanyRegistrationForm: {
-    serviceTypeId: number;
-    price: number;
-  };
-  AirportFastTrackForm: {
-    serviceTypeId: number;
-    price: number;
-  };
-  EmbassyResidentialForm: {
-    serviceTypeId: number;
-    price: number;
-  };
-  EmbassyCarLicenseForm: {
-    serviceTypeId: number;
-    price: number;
-  };
-  EmbassyBankForm: {
-    serviceTypeId: number;
-    price: number;
-  };
-  EmbassyVisaRecommendationForm: {
-    serviceTypeId: number;
-    price: number;
-  };
   TestServiceForm: {
     serviceTypeId: number;
     price: number;

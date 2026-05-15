@@ -5,6 +5,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCompanyServices, UseCompanyServicesResult } from './useCompanyServices';
 import { Service } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
+import { localeName } from '@/shared/utils/localeName';
+import { useLocale } from '@/shared/hooks/useLocale';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -20,6 +22,7 @@ export interface UseCompanyServicesScreenResult {
 
 export function useCompanyServicesScreen(): UseCompanyServicesScreenResult {
   const navigation = useNavigation<Nav>();
+  const { locale } = useLocale();
   const { services, isLoading, isRefreshing, isError, refetch } = useCompanyServices();
 
   const handleRefresh = useCallback((): void => { refetch(); }, [refetch]);
@@ -28,13 +31,13 @@ export function useCompanyServicesScreen(): UseCompanyServicesScreenResult {
     const firstType = service.types[0];
     if (firstType === undefined) return;
 
-    if (service.slug === 'company-registration') {
-      navigation.navigate('CompanyRegistrationForm', {
-        serviceTypeId: firstType.id,
-        price:         firstType.price,
-      });
-    }
-  }, [navigation]);
+    navigation.navigate('GenericServiceForm', {
+      serviceTypeId: firstType.id,
+      serviceId:     service.id,
+      serviceName:   localeName(service, locale),
+      price:         firstType.price,
+    });
+  }, [navigation, locale]);
 
   const handleBack = useCallback((): void => {
     navigation.goBack();

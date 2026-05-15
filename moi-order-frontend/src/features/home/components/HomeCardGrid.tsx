@@ -17,6 +17,8 @@ import { styles } from './HomeCardGrid.styles';
 export interface HomeCardGridProps {
   cards: HomeCard[];
   airportServiceTypeId: number | null;
+  airportServiceId: number | null;
+  airportServiceName: string | null;
   airportPrice: number | null;
 }
 
@@ -25,6 +27,8 @@ export interface HomeCardGridProps {
 export function HomeCardGrid({
   cards,
   airportServiceTypeId,
+  airportServiceId,
+  airportServiceName,
   airportPrice,
 }: HomeCardGridProps): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -38,11 +42,11 @@ export function HomeCardGrid({
         card.navigation_screen,
         card.route_type,
         card.route_url,
-        { serviceTypeId: airportServiceTypeId, price: airportPrice },
+        { serviceTypeId: airportServiceTypeId, serviceId: airportServiceId, serviceName: airportServiceName, price: airportPrice },
         card.navigation_params,
       );
     },
-    [navigation, airportServiceTypeId, airportPrice]
+    [navigation, airportServiceTypeId, airportServiceId, airportServiceName, airportPrice]
   );
 
   const items: React.JSX.Element[] = [];
@@ -59,6 +63,8 @@ export function HomeCardGrid({
           key={card.id}
           card={card}
           airportServiceTypeId={airportServiceTypeId}
+          airportServiceId={airportServiceId}
+          airportServiceName={airportServiceName}
           airportPrice={airportPrice}
         />
       );

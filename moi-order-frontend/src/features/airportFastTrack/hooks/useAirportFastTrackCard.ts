@@ -8,6 +8,8 @@ const AIRPORT_SLUG = 'airport-fast-track';
 
 export interface UseAirportFastTrackCardResult {
   serviceTypeId: number | null;
+  serviceId: number | null;
+  serviceName: string | null;
   price: number | null;
   isReady: boolean;
   isRefreshing: boolean;
@@ -26,6 +28,8 @@ export function useAirportFastTrackCard(): UseAirportFastTrackCardResult {
 
   return {
     serviceTypeId: firstType?.id ?? null,
+    serviceId:     service?.id ?? null,
+    serviceName:   service?.name_en ?? service?.name ?? null,
     price:         firstType?.price ?? null,
     isReady:       firstType !== null,
     isRefreshing:  query.isFetching && !query.isPending,

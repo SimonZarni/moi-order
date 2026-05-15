@@ -15,6 +15,8 @@ import { styles } from './HomeCardGroup.styles';
 interface HomeCardGroupProps {
   card: HomeCard;
   airportServiceTypeId: number | null;
+  airportServiceId: number | null;
+  airportServiceName: string | null;
   airportPrice: number | null;
 }
 
@@ -23,6 +25,8 @@ interface HomeCardGroupProps {
 export function HomeCardGroup({
   card,
   airportServiceTypeId,
+  airportServiceId,
+  airportServiceName,
   airportPrice,
 }: HomeCardGroupProps): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -36,11 +40,11 @@ export function HomeCardGroup({
         child.navigation_screen,
         child.route_type,
         child.route_url,
-        { serviceTypeId: airportServiceTypeId, price: airportPrice },
+        { serviceTypeId: airportServiceTypeId, serviceId: airportServiceId, serviceName: airportServiceName, price: airportPrice },
         child.navigation_params,
       );
     },
-    [navigation, airportServiceTypeId, airportPrice]
+    [navigation, airportServiceTypeId, airportServiceId, airportServiceName, airportPrice]
   );
 
   const title    = locale === 'mm' ? card.title_mm    : card.title_en;

@@ -7,7 +7,7 @@ import { RootStackParamList } from '@/types/navigation';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-type AirportParams = { serviceTypeId: number | null; price: number | null };
+type AirportParams = { serviceTypeId: number | null; serviceId: number | null; serviceName: string | null; price: number | null };
 
 /**
  * Navigates to the screen associated with a home card.
@@ -54,9 +54,11 @@ export function navigateToCardScreen(
       navigation.navigate('EmbassyServices');
       break;
     case HOME_CARD_NAV_SCREEN.AirportFastTrack:
-      if (airportParams.serviceTypeId !== null && airportParams.price !== null) {
-        navigation.navigate('AirportFastTrackForm', {
+      if (airportParams.serviceTypeId !== null && airportParams.serviceId !== null && airportParams.price !== null) {
+        navigation.navigate('GenericServiceForm', {
           serviceTypeId: airportParams.serviceTypeId,
+          serviceId:     airportParams.serviceId,
+          serviceName:   airportParams.serviceName ?? 'Airport Fast Track',
           price:         airportParams.price,
         });
       }

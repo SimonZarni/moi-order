@@ -19,6 +19,8 @@ export function HomeScreen(): React.JSX.Element {
     cards,
     isLoadingCards,
     airportServiceTypeId,
+    airportServiceId,
+    airportServiceName,
     airportPrice,
     handleRefresh,
     handleNavigateToNotifications,
@@ -83,6 +85,8 @@ export function HomeScreen(): React.JSX.Element {
             <HomeCardGrid
               cards={cards}
               airportServiceTypeId={airportServiceTypeId}
+              airportServiceId={airportServiceId}
+              airportServiceName={airportServiceName}
               airportPrice={airportPrice}
             />
           )}

@@ -43,7 +43,7 @@ const UNCATEGORIZED_LABEL = 'Other Services';
 const UNCATEGORIZED_SCREEN = 'OtherServices';
 
 // Slugs that are hardcoded to dedicated screens — excluded from general lists.
-const DEDICATED_SLUGS = new Set(['90-day-report', 'airport-fast-track']);
+const DEDICATED_SLUGS = new Set(['90-day-report']);
 
 // ----------------------------------------------------------------------
 

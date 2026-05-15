@@ -20,6 +20,8 @@ export interface UseHomeScreenResult {
   cards: HomeCard[];
   isLoadingCards: boolean;
   airportServiceTypeId: number | null;
+  airportServiceId: number | null;
+  airportServiceName: string | null;
   airportPrice: number | null;
   handleRefresh: () => void;
   handleNavigateToNotifications: () => void;
@@ -33,6 +35,8 @@ export function useHomeScreen(): UseHomeScreenResult {
   const { user, isLoggedIn, clearAuth } = useAuthStore();
   const {
     serviceTypeId: airportServiceTypeId,
+    serviceId:     airportServiceId,
+    serviceName:   airportServiceName,
     price:         airportPrice,
     isRefreshing,
     refetch,
@@ -78,6 +82,8 @@ export function useHomeScreen(): UseHomeScreenResult {
     cards,
     isLoadingCards,
     airportServiceTypeId,
+    airportServiceId,
+    airportServiceName,
     airportPrice,
     handleRefresh,
     handleNavigateToNotifications,
