@@ -1,5 +1,11 @@
-// Service worker for Moi Order admin browser push notifications (VAPID / Web Push API).
+// Service worker for Moi Order admin — Web Push + PWA (iOS 16.4+).
 // Scope: root — must live in public/ so it is served at /sw.js.
+
+// iOS requires install + activate + fetch handlers for a valid PWA service worker.
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => { event.waitUntil(self.clients.claim()); });
+// Pass all requests through — no caching needed for an always-online admin dashboard.
+self.addEventListener('fetch', (event) => { event.respondWith(fetch(event.request)); });
 
 self.addEventListener('push', (event) => {
   if (!event.data) return;
@@ -14,8 +20,8 @@ self.addEventListener('push', (event) => {
   const title = payload.title ?? 'Moi Order';
   const options = {
     body: payload.body ?? '',
-    icon: '/favicon.ico',
-    badge: '/favicon.ico',
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
     data: payload.data ?? {},
     requireInteraction: false,
   };
