@@ -81,12 +81,14 @@ export function NotificationsProvider({ children }: Props) {
           try {
             // credentials: 'include' sends the httpOnly admin_token cookie automatically.
             // AdminTokenFromCookie middleware on the backend converts it to a Bearer header.
+            const token = sessionStorage.getItem('admin_token') ?? '';
             const res = await fetch(`${appOrigin}/broadcasting/auth`, {
               method: 'POST',
               credentials: 'include',
               headers: {
                 'Content-Type': 'application/json',
                 Accept: 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
               },
               body: JSON.stringify({ socket_id: socketId, channel_name: channelName }),
             });
