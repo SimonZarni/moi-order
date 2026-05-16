@@ -6,15 +6,17 @@ import apiClient from './client';
 import type { AppUpdateType, AppAlertFrequency } from '@/types/enums';
 
 export interface AppConfigUpdate {
-  ios_min_version: string | null;
+  ios_min_version:     string | null;
+  ios_min_build:       number | null;
   android_min_version: string | null;
-  type: AppUpdateType;
-  title: string | null;
-  message: string | null;
-  ios_store_url: string | null;
-  android_store_url: string | null;
-  next_version: string | null;
-  changelog: string[];
+  android_min_code:    number | null;
+  type:                AppUpdateType;
+  title:               string | null;
+  message:             string | null;
+  ios_store_url:       string | null;
+  android_store_url:   string | null;
+  next_version:        string | null;
+  changelog:           string[];
 }
 
 export interface AppConfigAlertItem {

@@ -16,7 +16,9 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @property int            $id
  * @property string|null    $ios_min_version
+ * @property int|null       $ios_min_build
  * @property string|null    $android_min_version
+ * @property int|null       $android_min_code
  * @property AppUpdateType  $update_type
  * @property string|null    $update_title
  * @property string|null    $update_message
@@ -30,7 +32,9 @@ class AppConfig extends Model
     /** @var list<string> */
     protected $fillable = [
         'ios_min_version',
+        'ios_min_build',
         'android_min_version',
+        'android_min_code',
         'update_type',
         'update_title',
         'update_message',
@@ -44,8 +48,10 @@ class AppConfig extends Model
     protected function casts(): array
     {
         return [
-            'update_type' => AppUpdateType::class,
-            'changelog'   => 'array',
+            'update_type'      => AppUpdateType::class,
+            'changelog'        => 'array',
+            'ios_min_build'    => 'integer',
+            'android_min_code' => 'integer',
         ];
     }
 

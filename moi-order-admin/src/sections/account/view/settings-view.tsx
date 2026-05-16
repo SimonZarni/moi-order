@@ -101,15 +101,17 @@ export function SettingsView() {
 
   // ── App Updates ───────────────────────────────────────────────────────────
   const [updateConfig, setUpdateConfig] = useState<AppUpdateConfig>({
-    ios_min_version: '',
+    ios_min_version:     '',
+    ios_min_build:       null,
     android_min_version: '',
-    type: 'none',
-    title: '',
-    message: '',
-    ios_store_url: '',
-    android_store_url: '',
-    next_version: '',
-    changelog: [],
+    android_min_code:    null,
+    type:                'none',
+    title:               '',
+    message:             '',
+    ios_store_url:       '',
+    android_store_url:   '',
+    next_version:        '',
+    changelog:           [],
   });
   const [updateSaving, setUpdateSaving] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
@@ -167,7 +169,9 @@ export function SettingsView() {
         const u = data.update;
         setUpdateConfig({
           ios_min_version:     u.ios_min_version     ?? '',
+          ios_min_build:       u.ios_min_build       ?? null,
           android_min_version: u.android_min_version ?? '',
+          android_min_code:    u.android_min_code    ?? null,
           type:                u.type,
           title:               u.title               ?? '',
           message:             u.message             ?? '',
@@ -254,7 +258,9 @@ export function SettingsView() {
     appConfigApi
       .update({
         ios_min_version:     updateConfig.ios_min_version || null,
+        ios_min_build:       updateConfig.ios_min_build   || null,
         android_min_version: updateConfig.android_min_version || null,
+        android_min_code:    updateConfig.android_min_code    || null,
         update_type:         updateConfig.type,
         update_title:        updateConfig.title || null,
         update_message:      updateConfig.message || null,
@@ -270,7 +276,9 @@ export function SettingsView() {
         setUpdateConfig({
           type:                u.type,
           ios_min_version:     u.ios_min_version     ?? '',
+          ios_min_build:       u.ios_min_build       ?? null,
           android_min_version: u.android_min_version ?? '',
+          android_min_code:    u.android_min_code    ?? null,
           title:               u.title               ?? '',
           message:             u.message             ?? '',
           ios_store_url:       u.ios_store_url        ?? '',
@@ -770,10 +778,34 @@ export function SettingsView() {
                     <TextField fullWidth label="Google Play URL" placeholder="https://play.google.com/store/apps/details?id=..." value={updateConfig.android_store_url} onChange={(e) => setUpdateConfig((prev) => ({ ...prev, android_store_url: e.target.value }))} />
                   </Grid>
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <TextField fullWidth label="iOS Min Version" placeholder="1.0.0" value={updateConfig.ios_min_version} onChange={(e) => setUpdateConfig((prev) => ({ ...prev, ios_min_version: e.target.value }))} />
+                    <TextField fullWidth label="iOS Min Version" placeholder="2.0.0" value={updateConfig.ios_min_version} onChange={(e) => setUpdateConfig((prev) => ({ ...prev, ios_min_version: e.target.value }))} helperText="Semver — e.g. 2.0.0" />
                   </Grid>
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <TextField fullWidth label="Android Min Version" placeholder="1.0.0" value={updateConfig.android_min_version} onChange={(e) => setUpdateConfig((prev) => ({ ...prev, android_min_version: e.target.value }))} />
+                    <TextField fullWidth label="Android Min Version" placeholder="2.0.0" value={updateConfig.android_min_version} onChange={(e) => setUpdateConfig((prev) => ({ ...prev, android_min_version: e.target.value }))} helperText="Semver — e.g. 2.0.0" />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      fullWidth
+                      type="number"
+                      label="iOS Min Build"
+                      placeholder="2"
+                      value={updateConfig.ios_min_build ?? ''}
+                      onChange={(e) => setUpdateConfig((prev) => ({ ...prev, ios_min_build: e.target.value ? Number(e.target.value) : null }))}
+                      helperText="iOS Build Number — gates builds with same version string (e.g. 2)"
+                      inputProps={{ min: 1, step: 1 }}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      fullWidth
+                      type="number"
+                      label="Android Min Version Code"
+                      placeholder="3"
+                      value={updateConfig.android_min_code ?? ''}
+                      onChange={(e) => setUpdateConfig((prev) => ({ ...prev, android_min_code: e.target.value ? Number(e.target.value) : null }))}
+                      helperText="Android versionCode integer — e.g. 3"
+                      inputProps={{ min: 1, step: 1 }}
+                    />
                   </Grid>
                 </Grid>
                 <TextField fullWidth label="Update Title" placeholder="Update Available" value={updateConfig.title} onChange={(e) => setUpdateConfig((prev) => ({ ...prev, title: e.target.value }))} />

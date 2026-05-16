@@ -41,7 +41,9 @@ class AppConfigPublicResource extends JsonResource
         return [
             'update' => [
                 'ios_min_version'     => $this->ios_min_version,
+                'ios_min_build'       => $this->ios_min_build,
                 'android_min_version' => $this->android_min_version,
+                'android_min_code'    => $this->android_min_code,
                 'type'                => $this->update_type->value,
                 'title'               => $this->update_title,
                 'message'             => $this->update_message,

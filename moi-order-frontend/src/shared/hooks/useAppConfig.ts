@@ -41,16 +41,34 @@ function todayString(): string {
   return `${d.getFullYear()}-${mm}-${dd}`;
 }
 
-function isVersionBelow(currentVersion: string, minVersion: string): boolean {
+// Semver-aware comparison — avoids string comparison bug where "2.10.0" < "2.9.0".
+function compareVersions(a: string, b: string): number {
   const parse = (v: string): [number, number, number] => {
     const parts = v.split('.').map(Number);
     return [parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0];
   };
-  const [cMaj, cMin, cPat] = parse(currentVersion);
-  const [mMaj, mMin, mPat] = parse(minVersion);
-  if (mMaj !== cMaj) return mMaj > cMaj;
-  if (mMin !== cMin) return mMin > cMin;
-  return mPat > cPat;
+  const [aMaj, aMin, aPat] = parse(a);
+  const [bMaj, bMin, bPat] = parse(b);
+  if (aMaj !== bMaj) return aMaj - bMaj;
+  if (aMin !== bMin) return aMin - bMin;
+  return aPat - bPat;
+}
+
+// Returns true when the device needs to update.
+// Checks version string first; if equal, falls back to build number gating.
+function needsNativeUpdate(
+  currentVersion: string,
+  currentBuild:   number,
+  minVersion:     string | null,
+  minBuild:       number | null,
+): boolean {
+  if (!minVersion) return false;
+  const vCmp = compareVersions(currentVersion, minVersion);
+  if (vCmp < 0) return true;          // version is older — must update
+  if (vCmp > 0) return false;         // version is newer — fine
+  // Same version string: gate on build number if admin set one
+  if (minBuild !== null && currentBuild < minBuild) return true;
+  return false;
 }
 
 export function useAppConfig(): UseAppConfigResult {
@@ -65,6 +83,10 @@ export function useAppConfig(): UseAppConfigResult {
     const currentVersion = Application.nativeApplicationVersion;
     if (currentVersion === null) return;
 
+    // nativeBuildVersion: iOS Build Number (string) or Android versionCode (string).
+    // Both are integers in practice so parsing is safe.
+    const currentBuild = parseInt(Application.nativeBuildVersion ?? '0', 10);
+
     let config;
     try {
       config = await fetchAppConfig();
@@ -75,15 +97,15 @@ export function useAppConfig(): UseAppConfigResult {
     const today = todayString();
     const { update, alerts } = config;
 
-    // ── 1. Version gating ──────────────────────────────────────────────────
-    const minVersion = Platform.OS === 'ios' ? update.ios_min_version : update.android_min_version;
-    const storeUrl   = Platform.OS === 'ios' ? update.ios_store_url   : update.android_store_url;
+    // ── 1. Version + build gating ──────────────────────────────────────────
+    const minVersion = Platform.OS === 'ios' ? update.ios_min_version     : update.android_min_version;
+    const minBuild   = Platform.OS === 'ios' ? update.ios_min_build       : update.android_min_code;
+    const storeUrl   = Platform.OS === 'ios' ? update.ios_store_url       : update.android_store_url;
 
     const needsUpdate =
-      minVersion !== null &&
       storeUrl   !== null &&
       update.type !== APP_UPDATE_TYPE.None &&
-      isVersionBelow(currentVersion, minVersion);
+      needsNativeUpdate(currentVersion, currentBuild, minVersion, minBuild);
 
     if (needsUpdate && update.type === APP_UPDATE_TYPE.Required) {
       setForceUpdate({

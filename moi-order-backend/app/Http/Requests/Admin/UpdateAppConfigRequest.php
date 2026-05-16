@@ -24,7 +24,9 @@ class UpdateAppConfigRequest extends FormRequest
     {
         return [
             'ios_min_version'     => ['nullable', 'string', 'max:20', 'regex:/^\d+\.\d+\.\d+$/'],
+            'ios_min_build'       => ['nullable', 'integer', 'min:1'],
             'android_min_version' => ['nullable', 'string', 'max:20', 'regex:/^\d+\.\d+\.\d+$/'],
+            'android_min_code'    => ['nullable', 'integer', 'min:1'],
             'update_type'         => ['required', Rule::enum(AppUpdateType::class)],
             'update_title'        => ['nullable', 'string', 'max:255'],
             'update_message'      => ['nullable', 'string', 'max:1000'],
