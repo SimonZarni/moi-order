@@ -28,12 +28,11 @@ class AdminPushSubscriptionController extends Controller
         $dto    = StorePushSubscriptionDTO::fromRequest($request);
         $userId = $request->user()->id;
 
-        // Remove any stale subscriptions for this user (rotated or forgotten endpoints)
-        // so the admin never accumulates multiple rows and receives duplicate notifications.
-        PushSubscription::where('user_id', $userId)
-            ->where('endpoint', '!=', $dto->endpoint)
-            ->delete();
-
+        // Upsert this device's subscription only — never delete other endpoints.
+        // Each device (iPhone PWA, Mac browser, Windows Chrome, etc.) registers
+        // its own subscription and all must receive notifications simultaneously.
+        // Stale/expired endpoints are removed naturally when the push service
+        // returns 410 Gone on a failed delivery.
         PushSubscription::updateOrCreate(
             ['user_id'  => $userId, 'endpoint' => $dto->endpoint],
             ['p256dh_key' => $dto->p256dhKey, 'auth_key' => $dto->authKey],
