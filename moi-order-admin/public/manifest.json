@@ -1,6 +1,6 @@
 {
   "name": "Moi Order Admin",
-  "short_name": "MO Admin",
+  "short_name": "Moi Admin",
   "description": "Moi Order Administration Dashboard",
   "start_url": "/",
   "display": "standalone",
