@@ -76,6 +76,10 @@ export async function registerPushSubscription(): Promise<void> {
  * Delete the subscription from the backend (while the auth token is still valid),
  * then unsubscribe in the browser.
  * Called at the start of logout, before the token is cleared.
+ *
+ * Always unsubscribes the browser-level subscription regardless of whether the
+ * backend API call succeeds — this prevents the service worker from receiving
+ * pushes after logout even if the backend row wasn't cleaned up.
  */
 export async function unregisterPushSubscription(): Promise<void> {
   if (!isWebPushSupported()) return;
@@ -87,7 +91,11 @@ export async function unregisterPushSubscription(): Promise<void> {
       const subscription = await registration.pushManager.getSubscription();
       if (!subscription) continue;
 
-      await pushSubscriptionsApi.destroy(subscription.endpoint).catch(() => {});
+      // Best-effort backend cleanup — do not let a failure block the browser unsubscribe.
+      pushSubscriptionsApi.destroy(subscription.endpoint).catch(() => {});
+
+      // Always unsubscribe at the browser level so the service worker stops
+      // receiving pushes immediately, regardless of backend success.
       await subscription.unsubscribe();
     }
   } catch (err) {
