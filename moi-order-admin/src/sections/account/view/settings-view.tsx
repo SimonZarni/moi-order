@@ -100,7 +100,7 @@ export function SettingsView() {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
   // ── App Updates ───────────────────────────────────────────────────────────
-  const [updateConfig, setUpdateConfig] = useState<AppUpdateConfig>({
+  const EMPTY_UPDATE_CONFIG: AppUpdateConfig = {
     ios_min_version:     '',
     ios_min_build:       null,
     android_min_version: '',
@@ -112,7 +112,11 @@ export function SettingsView() {
     android_store_url:   '',
     next_version:        '',
     changelog:           [],
-  });
+  };
+  const [updateConfig, setUpdateConfig] = useState<AppUpdateConfig>(EMPTY_UPDATE_CONFIG);
+  // Tracks the last-saved state — button is disabled when form matches this.
+  const [savedUpdateConfig, setSavedUpdateConfig] = useState<AppUpdateConfig>(EMPTY_UPDATE_CONFIG);
+  const updateIsDirty = JSON.stringify(updateConfig) !== JSON.stringify(savedUpdateConfig);
   const [updateSaving, setUpdateSaving] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [updateSuccess, setUpdateSuccess] = useState(false);
@@ -167,7 +171,7 @@ export function SettingsView() {
       .get()
       .then((data) => {
         const u = data.update;
-        setUpdateConfig({
+        const loaded: AppUpdateConfig = {
           ios_min_version:     u.ios_min_version     ?? '',
           ios_min_build:       u.ios_min_build       ?? null,
           android_min_version: u.android_min_version ?? '',
@@ -179,7 +183,9 @@ export function SettingsView() {
           android_store_url:   u.android_store_url    ?? '',
           next_version:        u.next_version         ?? '',
           changelog:           u.changelog            ?? [],
-        });
+        };
+        setUpdateConfig(loaded);
+        setSavedUpdateConfig(loaded);
       })
       .catch(() => {});
   }, []);
@@ -273,7 +279,7 @@ export function SettingsView() {
       })
       .then((data) => {
         const u = data.update;
-        setUpdateConfig({
+        const saved: AppUpdateConfig = {
           type:                u.type,
           ios_min_version:     u.ios_min_version     ?? '',
           ios_min_build:       u.ios_min_build       ?? null,
@@ -285,7 +291,9 @@ export function SettingsView() {
           android_store_url:   u.android_store_url    ?? '',
           next_version:        u.next_version         ?? '',
           changelog:           u.changelog            ?? [],
-        });
+        };
+        setUpdateConfig(saved);
+        setSavedUpdateConfig(saved);
         setUpdateSuccess(true);
       })
       .catch(() => setUpdateError('Failed to save update settings. Please try again.'))
@@ -871,7 +879,7 @@ export function SettingsView() {
                   </Stack>
                 </Box>
 
-                <Button variant="contained" color="primary" disabled={updateSaving} onClick={handleSaveUpdate}
+                <Button variant="contained" color="primary" disabled={updateSaving || !updateIsDirty} onClick={handleSaveUpdate}
                   startIcon={updateSaving ? <CircularProgress size={16} color="inherit" /> : undefined}
                   sx={{ alignSelf: 'flex-start' }}
                 >
