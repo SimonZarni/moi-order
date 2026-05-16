@@ -773,7 +773,7 @@ export function SettingsView() {
                     onChange={(_, v) => { if (v !== null) setUpdateConfig((prev) => ({ ...prev, type: v as string })); }}
                     size="small"
                   >
-                    <ToggleButton value="none">None</ToggleButton>
+                    <ToggleButton value="none">Off</ToggleButton>
                     <ToggleButton value="optional">Optional</ToggleButton>
                     <ToggleButton value="required">Required</ToggleButton>
                   </ToggleButtonGroup>
