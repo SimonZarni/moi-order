@@ -13,7 +13,8 @@ class DeleteTicketOrderRequest extends FormRequest
     public function authorize(): bool
     {
         $order = TicketOrder::where('user_id', $this->user()->id)
-            ->find((int) $this->route('id'));
+            ->where('uuid', $this->route('id'))
+            ->first();
 
         return $order !== null
             && $order->status === TicketOrderStatus::Cancelled;

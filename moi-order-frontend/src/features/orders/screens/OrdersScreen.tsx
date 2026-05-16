@@ -281,7 +281,6 @@ export function OrdersScreen(): React.JSX.Element {
           initialNumToRender={8}
           maxToRenderPerBatch={8}
           windowSize={5}
-          removeClippedSubviews
           accessibilityRole="list"
           showsVerticalScrollIndicator={false}
         />
@@ -318,7 +317,6 @@ export function OrdersScreen(): React.JSX.Element {
         initialNumToRender={8}
         maxToRenderPerBatch={8}
         windowSize={5}
-        removeClippedSubviews
         accessibilityRole="list"
         showsVerticalScrollIndicator={false}
       />
