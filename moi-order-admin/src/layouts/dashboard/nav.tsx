@@ -77,7 +77,7 @@ export function NavMobile({
       onClose={onClose}
       sx={{
         [`& .${drawerClasses.paper}`]: {
-          pt: 2.5,
+          pt: 'calc(20px + env(safe-area-inset-top))',
           px: 2.5,
           overflow: 'unset',
           width: 'var(--layout-nav-mobile-width)',

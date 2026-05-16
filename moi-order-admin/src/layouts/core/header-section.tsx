@@ -131,6 +131,8 @@ const HeaderRoot = styled(AppBar, {
   return {
     boxShadow: 'none',
     zIndex: 'var(--layout-header-zIndex)',
+    // iOS PWA safe area — pushes header content below the notch/status bar
+    paddingTop: 'env(safe-area-inset-top)',
     ...(!disableOffset && { '&::before': bgStyles }),
     ...(!disableElevation && { '&::after': shadowStyles }),
   };

@@ -22,4 +22,6 @@ const MainRoot = styled('main')({
   display: 'flex',
   flex: '1 1 auto',
   flexDirection: 'column',
+  // iOS PWA: pad bottom so content clears the home indicator bar
+  paddingBottom: 'env(safe-area-inset-bottom)',
 });
