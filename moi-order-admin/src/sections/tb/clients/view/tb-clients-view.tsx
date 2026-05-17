@@ -64,7 +64,7 @@ export function TBClientsView() {
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: 3 }}>
-        Clients Overview
+        Companies Overview
       </Typography>
 
       <TextField
