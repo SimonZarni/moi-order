@@ -109,6 +109,9 @@ export type TBClient = {
   history: CompanyHistoryEntry[];
   dbdUrl: string;
   notes?: string;
+  clientAppAccess?: boolean;
+  clientEmail?: string;
+  clientPasswordSet?: boolean;
 };
 
 // ----------------------------------------------------------------------
@@ -570,7 +573,7 @@ function appendAuditEntry(action: string, category: AuditLogEntry['category']) {
   });
 }
 
-export function addCompany(client: Omit<TBClient, 'id' | 'history' | 'dbdUrl'>): TBClient {
+export function addCompany(client: Omit<TBClient, 'id' | 'history' | 'dbdUrl' | 'clientPasswordSet'> & { clientPasswordSet?: boolean }): TBClient {
   const newClient: TBClient = {
     ...client,
     id: `cl-${Date.now()}`,

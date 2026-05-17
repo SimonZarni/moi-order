@@ -17,6 +17,8 @@ import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 import TableContainer from '@mui/material/TableContainer';
 
+import { useRouter } from 'src/routes/hooks';
+
 import { fDate } from 'src/utils/format-time';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -25,7 +27,6 @@ import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 
 import { TBCompanyFormDialog } from './tb-company-form-dialog';
-import { TBCompanyDetailDrawer } from './tb-company-detail-drawer';
 import { tbStore, addCompany, STATUS_COLORS } from '../../shared/tb-mock-store';
 
 import type { TBClient, StatusLevel } from '../../shared/tb-mock-store';
@@ -35,58 +36,52 @@ import type { TBClient, StatusLevel } from '../../shared/tb-mock-store';
 function StatusDots({ tax, company, visa }: { tax: StatusLevel; company: StatusLevel; visa: StatusLevel }) {
   return (
     <Stack spacing={0.5}>
-      <Tooltip title={`Tax: ${tax}`} placement="left">
-        <Stack direction="row" spacing={0.75} alignItems="center" sx={{ cursor: 'default' }}>
-          <Box sx={{ width: 9, height: 9, borderRadius: '50%', bgcolor: STATUS_COLORS[tax], flexShrink: 0 }} />
-          <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>Tax</Typography>
-        </Stack>
-      </Tooltip>
-      <Tooltip title={`Company: ${company}`} placement="left">
-        <Stack direction="row" spacing={0.75} alignItems="center" sx={{ cursor: 'default' }}>
-          <Box sx={{ width: 9, height: 9, borderRadius: '50%', bgcolor: STATUS_COLORS[company], flexShrink: 0 }} />
-          <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>Company</Typography>
-        </Stack>
-      </Tooltip>
-      <Tooltip title={`Director Visa: ${visa}`} placement="left">
-        <Stack direction="row" spacing={0.75} alignItems="center" sx={{ cursor: 'default' }}>
-          <Box sx={{ width: 9, height: 9, borderRadius: '50%', bgcolor: STATUS_COLORS[visa], flexShrink: 0 }} />
-          <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>Visa</Typography>
-        </Stack>
-      </Tooltip>
+      {([['Tax', tax], ['Company', company], ['Visa', visa]] as [string, StatusLevel][]).map(([label, level]) => (
+        <Tooltip key={label} title={`${label}: ${level}`} placement="left">
+          <Stack direction="row" spacing={0.75} alignItems="center" sx={{ cursor: 'default' }}>
+            <Box sx={{ width: 9, height: 9, borderRadius: '50%', bgcolor: STATUS_COLORS[level], flexShrink: 0 }} />
+            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>{label}</Typography>
+          </Stack>
+        </Tooltip>
+      ))}
     </Stack>
   );
 }
 
 // ----------------------------------------------------------------------
 
-type LocalRow = TBClient;
-
 export function TBClientsView() {
+  const router = useRouter();
   const [search, setSearch] = useState('');
-  const [rows, setRows] = useState<LocalRow[]>(() => tbStore.clients.map((c) => ({ ...c })));
+  const [rows, setRows] = useState<TBClient[]>(() => tbStore.clients.map((c) => ({ ...c })));
   const [addOpen, setAddOpen] = useState(false);
-  const [detailCompany, setDetailCompany] = useState<TBClient | null>(null);
 
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   }, []);
 
-  const handleToggleVat = useCallback((id: string) => {
+  const handleToggleVat = useCallback((e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
     setRows((prev) => prev.map((r) => r.id === id ? { ...r, vatRegistered: !r.vatRegistered } : r));
   }, []);
 
-  const handleToggleMonthly = useCallback((id: string) => {
+  const handleToggleMonthly = useCallback((e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
     setRows((prev) => prev.map((r) => r.id === id ? { ...r, monthlyAccounting: !r.monthlyAccounting } : r));
   }, []);
 
+  const handleRowClick = useCallback((id: string) => {
+    router.push(`/tb/clients/${id}`);
+  }, [router]);
+
   const handleAddCompany = useCallback(
-    (data: Omit<TBClient, 'id' | 'history' | 'dbdUrl'>) => {
+    (data: Omit<TBClient, 'id' | 'history' | 'dbdUrl' | 'clientPasswordSet'> & { clientPasswordSet?: boolean }) => {
       const created = addCompany(data);
       setRows([...tbStore.clients]);
-      setDetailCompany(created);
       setAddOpen(false);
+      router.push(`/tb/clients/${created.id}`);
     },
-    []
+    [router]
   );
 
   const filtered = rows.filter(
@@ -136,7 +131,7 @@ export function TBClientsView() {
                 <TableCell>Status</TableCell>
                 <TableCell align="center">VAT</TableCell>
                 <TableCell align="center">Monthly</TableCell>
-                <TableCell align="center">Actions</TableCell>
+                <TableCell align="center">DBD</TableCell>
               </TableRow>
             </TableHead>
 
@@ -152,7 +147,12 @@ export function TBClientsView() {
               )}
 
               {filtered.map((row) => (
-                <TableRow key={row.id} hover>
+                <TableRow
+                  key={row.id}
+                  hover
+                  onClick={() => handleRowClick(row.id)}
+                  sx={{ cursor: 'pointer' }}
+                >
                   {/* Company + client */}
                   <TableCell sx={{ maxWidth: 240 }}>
                     <Typography variant="body2" fontWeight="fontWeightMedium" noWrap>
@@ -183,12 +183,13 @@ export function TBClientsView() {
                   </TableCell>
 
                   {/* VAT toggle */}
-                  <TableCell align="center">
+                  <TableCell align="center" onClick={(e) => e.stopPropagation()}>
                     <Stack direction="row" alignItems="center" justifyContent="center" spacing={0.5}>
                       <Switch
                         size="small"
                         checked={row.vatRegistered}
-                        onChange={() => handleToggleVat(row.id)}
+                        onChange={(e) => handleToggleVat(e as unknown as React.MouseEvent, row.id)}
+                        onClick={(e) => e.stopPropagation()}
                         color="success"
                       />
                       <Typography variant="caption" color={row.vatRegistered ? 'success.main' : 'text.disabled'}>
@@ -198,12 +199,13 @@ export function TBClientsView() {
                   </TableCell>
 
                   {/* Monthly toggle */}
-                  <TableCell align="center">
+                  <TableCell align="center" onClick={(e) => e.stopPropagation()}>
                     <Stack direction="row" alignItems="center" justifyContent="center" spacing={0.5}>
                       <Switch
                         size="small"
                         checked={row.monthlyAccounting}
-                        onChange={() => handleToggleMonthly(row.id)}
+                        onChange={(e) => handleToggleMonthly(e as unknown as React.MouseEvent, row.id)}
+                        onClick={(e) => e.stopPropagation()}
                         color="primary"
                       />
                       <Typography variant="caption" color={row.monthlyAccounting ? 'primary.main' : 'text.disabled'}>
@@ -212,26 +214,20 @@ export function TBClientsView() {
                     </Stack>
                   </TableCell>
 
-                  {/* Actions */}
-                  <TableCell align="center">
-                    <Stack direction="row" justifyContent="center" spacing={0.5}>
-                      <Tooltip title="View details">
-                        <IconButton size="small" onClick={() => setDetailCompany(row)}>
-                          <Iconify icon="solar:eye-bold" width={18} />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="DBD Portal">
-                        <IconButton
-                          size="small"
-                          component={Link}
-                          href={row.dbdUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Iconify icon="solar:share-bold" width={18} />
-                        </IconButton>
-                      </Tooltip>
-                    </Stack>
+                  {/* DBD link */}
+                  <TableCell align="center" onClick={(e) => e.stopPropagation()}>
+                    <Tooltip title="DBD Portal">
+                      <IconButton
+                        size="small"
+                        component={Link}
+                        href={row.dbdUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                      >
+                        <Iconify icon="solar:share-bold" width={18} />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))}
@@ -244,11 +240,6 @@ export function TBClientsView() {
         open={addOpen}
         onClose={() => setAddOpen(false)}
         onSubmit={handleAddCompany}
-      />
-
-      <TBCompanyDetailDrawer
-        company={detailCompany}
-        onClose={() => setDetailCompany(null)}
       />
     </DashboardContent>
   );

@@ -59,6 +59,10 @@ type FormState = {
   directorVisaStatus: StatusLevel;
   vatRegistered: boolean;
   monthlyAccounting: boolean;
+  clientAppAccess: boolean;
+  clientEmail: string;
+  clientPassword: string;
+  clientPasswordConfirm: string;
 };
 
 type FormErrors = Partial<Record<keyof FormState | 'directors', string>>;
@@ -77,6 +81,10 @@ const INITIAL_FORM: FormState = {
   directorVisaStatus: 'good',
   vatRegistered: false,
   monthlyAccounting: false,
+  clientAppAccess: false,
+  clientEmail: '',
+  clientPassword: '',
+  clientPasswordConfirm: '',
 };
 
 const genId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -332,13 +340,24 @@ export function TBCompanyFormDialog({ open, onClose, onSubmit }: TBCompanyFormDi
     if (!form.clientName.trim()) newErrors.clientName = 'Client name is required';
     if (!form.clientPhone.trim()) newErrors.clientPhone = 'Client phone is required';
     if (directors.some((d) => !d.name.trim())) newErrors.directors = 'All directors must have a name';
+    if (form.clientAppAccess) {
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.clientEmail);
+      if (!form.clientEmail.trim()) newErrors.clientEmail = 'Email is required';
+      else if (!emailOk) newErrors.clientEmail = 'Enter a valid email address';
+      if (!form.clientPassword) newErrors.clientPassword = 'Password is required';
+      else if (form.clientPassword.length < 8) newErrors.clientPassword = 'Minimum 8 characters';
+      if (form.clientPassword && form.clientPassword !== form.clientPasswordConfirm) {
+        newErrors.clientPasswordConfirm = 'Passwords do not match';
+      }
+    }
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
-      // Jump to the tab that has the first error
       if (newErrors.companyName || newErrors.thaiRegNumber || newErrors.registrationDate || newErrors.clientName || newErrors.clientPhone) {
         setTab(0);
       } else if (newErrors.directors) {
         setTab(1);
+      } else if (newErrors.clientEmail || newErrors.clientPassword || newErrors.clientPasswordConfirm) {
+        setTab(3);
       }
     }
     return Object.keys(newErrors).length === 0;
@@ -376,6 +395,9 @@ export function TBCompanyFormDialog({ open, onClose, onSubmit }: TBCompanyFormDi
       vatRegistered: form.vatRegistered,
       monthlyAccounting: form.monthlyAccounting,
       documents,
+      clientAppAccess: form.clientAppAccess,
+      ...(form.clientAppAccess && form.clientEmail ? { clientEmail: form.clientEmail.trim() } : {}),
+      clientPasswordSet: form.clientAppAccess && form.clientPassword.length >= 8,
     });
 
     // Reset form
@@ -399,6 +421,7 @@ export function TBCompanyFormDialog({ open, onClose, onSubmit }: TBCompanyFormDi
     (tabIndex: number): boolean => {
       if (tabIndex === 0) return !!(errors.companyName || errors.thaiRegNumber || errors.registrationDate || errors.clientName || errors.clientPhone);
       if (tabIndex === 1) return !!errors.directors;
+      if (tabIndex === 3) return !!(errors.clientEmail || errors.clientPassword || errors.clientPasswordConfirm);
       return false;
     },
     [errors]
@@ -416,6 +439,7 @@ export function TBCompanyFormDialog({ open, onClose, onSubmit }: TBCompanyFormDi
         <Tab label={<Stack direction="row" spacing={0.5} alignItems="center"><span>Company & Client</span>{hasTabError(0) && <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'error.main' }} />}</Stack>} />
         <Tab label={<Stack direction="row" spacing={0.5} alignItems="center"><span>Directors ({directors.length})</span>{hasTabError(1) && <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'error.main' }} />}</Stack>} />
         <Tab label="Status & Documents" />
+        <Tab label={<Stack direction="row" spacing={0.5} alignItems="center"><span>Client Access</span>{hasTabError(3) && <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'error.main' }} />}</Stack>} />
       </Tabs>
 
       <DialogContent dividers sx={{ minHeight: 440, maxHeight: '60vh' }}>
@@ -598,6 +622,76 @@ export function TBCompanyFormDialog({ open, onClose, onSubmit }: TBCompanyFormDi
             </Box>
           </Stack>
         )}
+
+        {/* Tab 3: Client Access */}
+        {tab === 3 && (
+          <Stack spacing={3}>
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5 }}>
+                Client App Access
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                When enabled, the client will receive login credentials to access their company
+                portal on the mobile app.
+              </Typography>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={form.clientAppAccess}
+                    onChange={(e) => {
+                      handleFormChange('clientAppAccess', e.target.checked);
+                      if (!e.target.checked) {
+                        handleFormChange('clientEmail', '');
+                        handleFormChange('clientPassword', '');
+                        handleFormChange('clientPasswordConfirm', '');
+                      }
+                    }}
+                  />
+                }
+                label="Enable Client App Access"
+              />
+            </Box>
+
+            {form.clientAppAccess && (
+              <Stack spacing={2.5}>
+                <TextField
+                  fullWidth
+                  type="email"
+                  label="Client Email *"
+                  value={form.clientEmail}
+                  onChange={(e) => handleFormChange('clientEmail', e.target.value)}
+                  error={!!errors.clientEmail}
+                  helperText={errors.clientEmail ?? 'This email will be used to log in to the mobile app'}
+                  placeholder="client@company.com"
+                />
+                <Grid container spacing={2}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      fullWidth
+                      type="password"
+                      label="Password *"
+                      value={form.clientPassword}
+                      onChange={(e) => handleFormChange('clientPassword', e.target.value)}
+                      error={!!errors.clientPassword}
+                      helperText={errors.clientPassword ?? 'Minimum 8 characters'}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      fullWidth
+                      type="password"
+                      label="Confirm Password *"
+                      value={form.clientPasswordConfirm}
+                      onChange={(e) => handleFormChange('clientPasswordConfirm', e.target.value)}
+                      error={!!errors.clientPasswordConfirm}
+                      helperText={errors.clientPasswordConfirm}
+                    />
+                  </Grid>
+                </Grid>
+              </Stack>
+            )}
+          </Stack>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2 }}>
@@ -608,7 +702,7 @@ export function TBCompanyFormDialog({ open, onClose, onSubmit }: TBCompanyFormDi
               Back
             </Button>
           )}
-          {tab < 2 ? (
+          {tab < 3 ? (
             <Button variant="contained" onClick={() => setTab((v) => v + 1)}>
               Next
             </Button>
