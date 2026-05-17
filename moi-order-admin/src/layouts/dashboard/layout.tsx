@@ -1,4 +1,5 @@
 import type { Breakpoint } from '@mui/material/styles';
+import type { WorkspaceId } from 'src/context/workspace-context';
 
 import { merge } from 'es-toolkit';
 import { useMemo, useCallback } from 'react';
@@ -9,8 +10,6 @@ import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 
 import { useRouter } from 'src/routes/hooks';
-
-import type { WorkspaceId } from 'src/context/workspace-context';
 
 import { useHeartbeat } from 'src/hooks/useHeartbeat';
 
