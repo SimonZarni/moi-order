@@ -48,6 +48,19 @@ class AdminAccountService
         }
 
         return DB::transaction(function () use ($dto, $adminRole): User {
+            $existing = User::where('email', $dto->email)->first();
+
+            if ($existing !== null) {
+                $existing->update([
+                    'name'          => $dto->name,
+                    'password'      => $dto->password,
+                    'is_admin'      => true,
+                    'admin_role_id' => $adminRole->id,
+                ]);
+
+                return $existing->fresh('adminRole');
+            }
+
             return User::create([
                 'name'          => $dto->name,
                 'email'         => $dto->email,
@@ -68,6 +81,19 @@ class AdminAccountService
         }
 
         return DB::transaction(function () use ($dto, $adminRole): User {
+            $existing = User::where('email', $dto->email)->first();
+
+            if ($existing !== null) {
+                $existing->update([
+                    'name'          => $dto->name,
+                    'password'      => $dto->password,
+                    'is_admin'      => true,
+                    'admin_role_id' => $adminRole->id,
+                ]);
+
+                return $existing->fresh('adminRole');
+            }
+
             return User::create([
                 'name'          => $dto->name,
                 'email'         => $dto->email,

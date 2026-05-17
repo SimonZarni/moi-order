@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SendAdminOtpRequest extends FormRequest
 {
@@ -17,7 +18,7 @@ class SendAdminOtpRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:users,email'],
+            'email' => ['required', 'string', 'email:rfc,dns', 'max:255', Rule::unique('users', 'email')->where('is_admin', true)],
         ];
     }
 
@@ -25,7 +26,7 @@ class SendAdminOtpRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.unique' => 'An account with this email already exists.',
+            'email.unique' => 'This email already has an admin account.',
         ];
     }
 }
