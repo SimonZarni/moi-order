@@ -117,9 +117,15 @@ export type TBClient = {
 // ----------------------------------------------------------------------
 // Kanban
 
-export type KanbanColumn = 'backlog' | 'processing' | 'document_review' | 'completed';
+export type KanbanColumn = string; // dynamic — not a fixed union
 export type KanbanPipeline = 'company_registration' | 'visa_work_permit';
 export type UrgencyLevel = 'high' | 'medium' | 'low';
+
+export type KanbanStage = {
+  id: string;
+  label: string;
+  order: number;
+};
 
 export type KanbanCard = {
   id: string;
@@ -127,6 +133,7 @@ export type KanbanCard = {
   column: KanbanColumn;
   companyName: string;
   thaiRegNumber: string;
+  companyId?: string;
   directorNames: string[];
   visaExpiryDate?: string;
   urgency: UrgencyLevel;
@@ -157,12 +164,12 @@ export type AuditLogEntry = {
   category: 'kanban' | 'document' | 'config' | 'company';
 };
 
-export const COLUMN_LABELS: Record<KanbanColumn, string> = {
-  backlog: 'Backlog',
-  processing: 'Processing',
-  document_review: 'Document Review',
-  completed: 'Completed',
-};
+const INITIAL_STAGES: KanbanStage[] = [
+  { id: 'backlog', label: 'Backlog', order: 0 },
+  { id: 'processing', label: 'Processing', order: 1 },
+  { id: 'document_review', label: 'Document Review', order: 2 },
+  { id: 'completed', label: 'Completed', order: 3 },
+];
 
 // ----------------------------------------------------------------------
 // Initial mock data
@@ -554,6 +561,7 @@ const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
 // Module-level mutable store
 
 export const tbStore = {
+  stages: INITIAL_STAGES as KanbanStage[],
   clients: INITIAL_CLIENTS as TBClient[],
   kanbanCards: INITIAL_KANBAN_CARDS as KanbanCard[],
   documentBatches: INITIAL_DOCUMENT_BATCHES as DocumentBatch[],
@@ -595,13 +603,44 @@ export function addCompany(client: Omit<TBClient, 'id' | 'history' | 'dbdUrl' | 
 export function moveKanbanCard(cardId: string, newColumn: KanbanColumn): void {
   const card = tbStore.kanbanCards.find((c) => c.id === cardId);
   if (!card || card.column === newColumn) return;
-  const oldLabel = COLUMN_LABELS[card.column];
-  const newLabel = COLUMN_LABELS[newColumn];
+  const getLabel = (id: string) => tbStore.stages.find((s) => s.id === id)?.label ?? id;
+  const oldLabel = getLabel(card.column);
+  const newLabel = getLabel(newColumn);
   card.column = newColumn;
-  appendAuditEntry(
-    `Moved "${card.companyName}" from ${oldLabel} to ${newLabel}`,
-    'kanban'
-  );
+  appendAuditEntry(`Moved "${card.companyName}" from ${oldLabel} to ${newLabel}`, 'kanban');
+}
+
+export function addKanbanCard(card: Omit<KanbanCard, 'id'>): KanbanCard {
+  const newCard: KanbanCard = { ...card, id: `card-${Date.now()}` };
+  tbStore.kanbanCards.push(newCard);
+  const pipeline = card.pipeline === 'company_registration' ? 'Company Registration' : 'Visa/Work Permit';
+  appendAuditEntry(`Added case "${newCard.companyName}" to ${pipeline} pipeline`, 'kanban');
+  return newCard;
+}
+
+export function addKanbanStage(label: string): KanbanStage {
+  const id = `stage_${Date.now()}`;
+  const stage: KanbanStage = { id, label: label.trim(), order: tbStore.stages.length };
+  tbStore.stages.push(stage);
+  appendAuditEntry(`Added pipeline stage "${label}"`, 'kanban');
+  return stage;
+}
+
+export function updateKanbanStage(stageId: string, label: string): void {
+  const stage = tbStore.stages.find((s) => s.id === stageId);
+  if (!stage) return;
+  const old = stage.label;
+  stage.label = label.trim();
+  appendAuditEntry(`Renamed stage "${old}" to "${label}"`, 'kanban');
+}
+
+export function deleteKanbanStage(stageId: string): boolean {
+  const hasCards = tbStore.kanbanCards.some((c) => c.column === stageId);
+  if (hasCards || tbStore.stages.length <= 1) return false;
+  const stage = tbStore.stages.find((s) => s.id === stageId);
+  tbStore.stages = tbStore.stages.filter((s) => s.id !== stageId);
+  if (stage) appendAuditEntry(`Deleted pipeline stage "${stage.label}"`, 'kanban');
+  return true;
 }
 
 export function approveDocumentBatch(batchId: string): void {
