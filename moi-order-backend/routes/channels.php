@@ -10,13 +10,14 @@ use Illuminate\Support\Facades\Broadcast;
  */
 
 // In-app notification bell (UserNotificationReceived broadcasts here).
-Broadcast::channel('App.Models.User.{id}', function ($user, int $id): bool {
-    return (int) $user->id === $id;
+// Channel uses uuid so the name matches what UserResource/AdminUserResource expose as "id".
+Broadcast::channel('App.Models.User.{uuid}', function ($user, string $uuid): bool {
+    return $user->uuid === $uuid;
 });
 
 // Food-order status updates (FoodOrderStatusUpdated broadcasts here).
-Broadcast::channel('user.{id}', function ($user, int $id): bool {
-    return (int) $user->id === $id;
+Broadcast::channel('user.{uuid}', function ($user, string $uuid): bool {
+    return $user->uuid === $uuid;
 });
 
 // Presence channel — any authenticated user can join; their id/name is shared with subscribers.

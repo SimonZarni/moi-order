@@ -37,7 +37,7 @@ class UserNotificationReceived implements ShouldBroadcastNow
      */
     public function broadcastOn(): array
     {
-        return [new PrivateChannel('App.Models.User.' . $this->user->id)];
+        return [new PrivateChannel('App.Models.User.' . $this->user->uuid)];
     }
 
     public function broadcastAs(): string
