@@ -12,6 +12,7 @@ export type NavItem = {
   icon: React.ReactNode;
   info?: React.ReactNode;
   permission?: string;
+  superAdminOnly?: boolean;
   children?: Omit<NavItem, 'children'>[];
 };
 
@@ -147,6 +148,7 @@ export const navData: NavItem[] = [
     title: 'Support',
     path: '/support',
     icon: icon('solar:chat-round-dots-bold'),
+    superAdminOnly: true,
   },
   {
     title: 'Roles & Permissions',
@@ -170,5 +172,6 @@ export const navData: NavItem[] = [
     title: 'Settings',
     path: '/account/settings',
     icon: icon('solar:settings-bold-duotone'),
+    superAdminOnly: true,
   },
 ];

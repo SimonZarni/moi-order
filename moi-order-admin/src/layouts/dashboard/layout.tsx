@@ -44,8 +44,13 @@ export type DashboardLayoutProps = LayoutBaseProps & {
   };
 };
 
-function filterNavData(items: NavItem[], can: (p: string) => boolean): NavItem[] {
+function filterNavData(
+  items: NavItem[],
+  can: (p: string) => boolean,
+  superAdmin: boolean,
+): NavItem[] {
   return items.reduce<NavItem[]>((acc, item) => {
+    if (item.superAdminOnly && !superAdmin) return acc;
     if (item.children) {
       const visibleChildren = item.children.filter((c) => !c.permission || can(c.permission));
       if (visibleChildren.length === 0) return acc;
@@ -69,7 +74,11 @@ export function DashboardLayout({
   const { hasPermission, isSuperAdmin } = useAuth();
   useHeartbeat();
 
-  const filteredNav = useMemo(() => filterNavData(navData, hasPermission), [hasPermission]);
+  const filteredNav = useMemo(
+    () => filterNavData(navData, hasPermission, isSuperAdmin()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [hasPermission, isSuperAdmin],
+  );
 
   const accountMenuItems = useMemo(
     () =>
