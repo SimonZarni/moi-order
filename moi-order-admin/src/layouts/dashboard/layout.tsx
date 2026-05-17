@@ -10,9 +10,9 @@ import { useTheme } from '@mui/material/styles';
 
 import { useRouter } from 'src/routes/hooks';
 
-import { useHeartbeat } from 'src/hooks/useHeartbeat';
-
 import type { WorkspaceId } from 'src/context/workspace-context';
+
+import { useHeartbeat } from 'src/hooks/useHeartbeat';
 
 import { useAuth } from 'src/context/auth-context';
 import { useWorkspace } from 'src/context/workspace-context';
