@@ -21,7 +21,7 @@ export function useCompanyServices(): UseCompanyServicesResult {
     staleTime: CACHE_TTL.STATIC_DATA,
   });
 
-  const companyService = (query.data ?? []).find((s) => s.slug === 'company-registration');
+  const companyService = (query.data ?? []).find((s) => s.slug === 'company-services');
 
   return {
     serviceId:    companyService?.id,
