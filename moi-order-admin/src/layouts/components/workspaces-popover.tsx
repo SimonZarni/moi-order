@@ -19,7 +19,7 @@ export type WorkspacesPopoverProps = ButtonBaseProps & {
     id: string;
     name: string;
     logo: string;
-    plan: string;
+    plan?: string;
   }[];
 };
 
@@ -48,9 +48,10 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
     <Box component="img" alt={alt} src={src} sx={{ width: 24, height: 24, borderRadius: '50%' }} />
   );
 
-  const renderLabel = (plan: string) => (
-    <Label color={plan === 'Free' ? 'default' : 'info'}>{plan}</Label>
-  );
+  const renderLabel = (plan?: string) => {
+    if (!plan) return null;
+    return <Label color={plan === 'Free' ? 'default' : 'info'}>{plan}</Label>;
+  };
 
   return (
     <>

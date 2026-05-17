@@ -6,13 +6,11 @@ export const _workspaces: WorkspacesPopoverProps['data'] = [
   {
     id: 'moi-order-main',
     name: 'Moi Order',
-    plan: 'Pro',
-    logo: '/assets/icons/workspaces/logo-1.webp',
+    logo: '/assets/icons/moi-order-icon.png',
   },
   {
-    id: 'moi-order-staging',
-    name: 'Staging',
-    plan: 'Free',
+    id: 'moi-order-trusted-brothers',
+    name: 'Trusted Brothers',
     logo: '/assets/icons/workspaces/logo-2.webp',
   },
 ];
