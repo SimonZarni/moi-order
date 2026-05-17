@@ -17,11 +17,9 @@ class UpdateAdminRequest extends FormRequest
     /** @return array<string,mixed> */
     public function rules(): array
     {
-        $userId = (int) $this->route('id');
-
         return [
             'name'          => ['sometimes', 'required', 'string', 'max:255'],
-            'email'         => ['sometimes', 'required', 'string', 'email:rfc,dns', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
+            'email'         => ['sometimes', 'required', 'string', 'email:rfc,dns', 'max:255', Rule::unique('users', 'email')->ignore($this->route('id'), 'uuid')],
             'admin_role_id' => ['sometimes', 'required', 'integer', Rule::exists('admin_roles', 'id')],
         ];
     }
