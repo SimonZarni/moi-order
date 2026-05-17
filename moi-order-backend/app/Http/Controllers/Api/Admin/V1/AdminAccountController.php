@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Admin\V1;
 
 use App\DTOs\CreateAdminAccountDTO;
+use App\DTOs\CreateAdminDirectDTO;
 use App\Exceptions\DomainException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\SendAdminOtpRequest;
+use App\Http\Requests\Admin\StoreAdminDirectRequest;
 use App\Http\Requests\Admin\StoreAdminRequest;
 use App\Http\Requests\Admin\UpdateAdminRequest;
 use App\Http\Requests\Admin\VerifyAdminOtpRequest;
@@ -50,6 +52,13 @@ class AdminAccountController extends Controller
     public function store(StoreAdminRequest $request): JsonResponse
     {
         $admin = $this->service->create(CreateAdminAccountDTO::fromRequest($request));
+
+        return (new AdminAccountResource($admin->load('adminRole')))->response()->setStatusCode(201);
+    }
+
+    public function storeDirect(StoreAdminDirectRequest $request): JsonResponse
+    {
+        $admin = $this->service->createDirect(CreateAdminDirectDTO::fromRequest($request));
 
         return (new AdminAccountResource($admin->load('adminRole')))->response()->setStatusCode(201);
     }

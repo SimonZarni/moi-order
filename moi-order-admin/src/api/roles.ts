@@ -21,6 +21,12 @@ export type CreateAdminData = {
   verified_token: string;
 };
 
+export type CreateAdminDirectData = {
+  name: string;
+  email: string;
+  password: string;
+};
+
 export type UpdateAdminData = {
   name?: string;
   email?: string;
@@ -65,6 +71,11 @@ export async function fetchAdminAccounts(): Promise<AdminAccount[]> {
 
 export async function createAdminAccount(data: CreateAdminData): Promise<AdminAccount> {
   const res = await apiClient.post<{ data: AdminAccount }>('/admins', data);
+  return res.data.data;
+}
+
+export async function createAdminAccountDirect(data: CreateAdminDirectData): Promise<AdminAccount> {
+  const res = await apiClient.post<{ data: AdminAccount }>('/admins/direct', data);
   return res.data.data;
 }
 

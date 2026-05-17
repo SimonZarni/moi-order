@@ -110,11 +110,12 @@ Route::prefix('admins')->name('admin.admins.')->group(function (): void {
     Route::delete('/{id}', [AdminAccountController::class, 'destroy'])->name('destroy')
         ->middleware('check.permission:admins.manage');
 
-    // Super-admin-only: create account with OTP verification
+    // Super-admin-only: create account with OTP verification or directly
     Route::middleware('ensure.super_admin')->group(function (): void {
         Route::post('/send-otp', [AdminAccountController::class, 'sendOtp'])->name('send-otp');
         Route::post('/verify-otp', [AdminAccountController::class, 'verifyOtp'])->name('verify-otp');
         Route::post('/', [AdminAccountController::class, 'store'])->name('store');
+        Route::post('/direct', [AdminAccountController::class, 'storeDirect'])->name('store-direct');
     });
 });
 

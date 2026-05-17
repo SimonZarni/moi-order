@@ -12,10 +12,12 @@ import TextField from '@mui/material/TextField';
 import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
+import ToggleButton from '@mui/material/ToggleButton';
 import CircularProgress from '@mui/material/CircularProgress';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { sendAdminOtp, verifyAdminOtp, createAdminAccount } from 'src/api/roles';
+import { sendAdminOtp, verifyAdminOtp, createAdminAccount, createAdminAccountDirect } from 'src/api/roles';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
@@ -23,12 +25,14 @@ import { Iconify } from 'src/components/iconify';
 // ----------------------------------------------------------------------
 
 type Step = 'form' | 'otp' | 'success';
+type Mode = 'otp' | 'direct';
 
 type FieldErrors = Record<string, string>;
 
 // ----------------------------------------------------------------------
 
 export function CreateAdminView() {
+  const [mode, setMode] = useState<Mode>('otp');
   const [step, setStep] = useState<Step>('form');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -56,6 +60,16 @@ export function CreateAdminView() {
       setFieldErrors(flat);
     }
   }, []);
+
+  const handleModeChange = useCallback(
+    (_: unknown, newMode: Mode | null) => {
+      if (newMode === null) return;
+      setMode(newMode);
+      if (step === 'otp') setStep('form');
+      clearErrors();
+    },
+    [step, clearErrors],
+  );
 
   const handleSendOtp = useCallback(async () => {
     clearErrors();
@@ -85,6 +99,19 @@ export function CreateAdminView() {
       setLoading(false);
     }
   }, [verifiedToken, email, otp, name, password, clearErrors, applyApiError]);
+
+  const handleCreateDirect = useCallback(async () => {
+    clearErrors();
+    setLoading(true);
+    try {
+      await createAdminAccountDirect({ name, email, password });
+      setStep('success');
+    } catch (err) {
+      applyApiError(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [name, email, password, clearErrors, applyApiError]);
 
   const handleResend = useCallback(async () => {
     clearErrors();
@@ -184,6 +211,17 @@ export function CreateAdminView() {
         </Alert>
       )}
 
+      <ToggleButtonGroup
+        exclusive
+        size="small"
+        value={mode}
+        onChange={handleModeChange}
+        sx={{ mb: 3 }}
+      >
+        <ToggleButton value="otp">With OTP verification</ToggleButton>
+        <ToggleButton value="direct">Direct (no OTP)</ToggleButton>
+      </ToggleButtonGroup>
+
       <Grid container spacing={3}>
         {/* Left info card */}
         <Grid size={{ xs: 12, md: 4 }}>
@@ -247,7 +285,11 @@ export function CreateAdminView() {
             <Card>
               <CardHeader
                 title="Account details"
-                subheader="The new admin will log in with these credentials."
+                subheader={
+                  mode === 'otp'
+                    ? 'The new admin will log in with these credentials.'
+                    : 'Account will be created immediately without email verification.'
+                }
               />
               <Divider />
               <CardContent>
@@ -283,19 +325,35 @@ export function CreateAdminView() {
                   />
 
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button
-                      size="large"
-                      variant="contained"
-                      disabled={!formReady || loading}
-                      onClick={handleSendOtp}
-                      startIcon={
-                        loading
-                          ? <CircularProgress size={16} color="inherit" />
-                          : <Iconify icon="solar:bell-bing-bold-duotone" width={18} />
-                      }
-                    >
-                      {loading ? 'Sending OTP…' : 'Send OTP'}
-                    </Button>
+                    {mode === 'otp' ? (
+                      <Button
+                        size="large"
+                        variant="contained"
+                        disabled={!formReady || loading}
+                        onClick={handleSendOtp}
+                        startIcon={
+                          loading
+                            ? <CircularProgress size={16} color="inherit" />
+                            : <Iconify icon="solar:bell-bing-bold-duotone" width={18} />
+                        }
+                      >
+                        {loading ? 'Sending OTP…' : 'Send OTP'}
+                      </Button>
+                    ) : (
+                      <Button
+                        size="large"
+                        variant="contained"
+                        disabled={!formReady || loading}
+                        onClick={handleCreateDirect}
+                        startIcon={
+                          loading
+                            ? <CircularProgress size={16} color="inherit" />
+                            : <Iconify icon="eva:checkmark-fill" width={18} />
+                        }
+                      >
+                        {loading ? 'Creating…' : 'Create Admin'}
+                      </Button>
+                    )}
                   </Box>
                 </Stack>
               </CardContent>

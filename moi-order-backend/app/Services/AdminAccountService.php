@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\DTOs\CreateAdminAccountDTO;
+use App\DTOs\CreateAdminDirectDTO;
 use App\DTOs\SendEmailOtpDTO;
 use App\DTOs\VerifyEmailOtpDTO;
 use App\Enums\EmailOtpPurpose;
@@ -40,6 +41,26 @@ class AdminAccountService
     {
         $this->otpService->consumeVerifiedToken($dto->email, $dto->verifiedToken, EmailOtpPurpose::AdminInvite);
 
+        $adminRole = AdminRole::where('slug', 'admin')->first();
+
+        if ($adminRole === null) {
+            throw new DomainException('admin_role.not_seeded', 500);
+        }
+
+        return DB::transaction(function () use ($dto, $adminRole): User {
+            return User::create([
+                'name'          => $dto->name,
+                'email'         => $dto->email,
+                'password'      => $dto->password,
+                'is_admin'      => true,
+                'admin_role_id' => $adminRole->id,
+                'status'        => UserStatusEnum::Active,
+            ]);
+        });
+    }
+
+    public function createDirect(CreateAdminDirectDTO $dto): User
+    {
         $adminRole = AdminRole::where('slug', 'admin')->first();
 
         if ($adminRole === null) {
