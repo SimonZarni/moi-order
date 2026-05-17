@@ -663,6 +663,16 @@ export function rejectDocumentBatch(batchId: string): void {
   );
 }
 
+export function reorderKanbanStages(orderedIds: string[]): void {
+  const map = new Map(tbStore.stages.map((s) => [s.id, s]));
+  tbStore.stages = orderedIds.map((id, index) => {
+    const stage = map.get(id)!;
+    stage.order = index;
+    return stage;
+  });
+  appendAuditEntry('Reordered pipeline stages', 'kanban');
+}
+
 export function addBodAuditEntry(action: string): void {
   appendAuditEntry(action, 'config');
 }

@@ -1,7 +1,8 @@
-import type { DragEndEvent } from '@dnd-kit/core';
+import type { DragEndEvent, DragOverEvent } from '@dnd-kit/core';
 
 import { CSS } from '@dnd-kit/utilities';
 import { useRef, useMemo, useState, useEffect, useCallback } from 'react';
+import { arrayMove, useSortable, SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import {
   useSensor,
   DndContext,
@@ -9,7 +10,6 @@ import {
   MouseSensor,
   TouchSensor,
   useDraggable,
-  useDroppable,
 } from '@dnd-kit/core';
 
 import Box from '@mui/material/Box';
@@ -51,6 +51,7 @@ import {
   moveKanbanCard,
   deleteKanbanStage,
   updateKanbanStage,
+  reorderKanbanStages,
 } from '../../shared/tb-mock-store';
 
 import type { KanbanCard, KanbanStage, UrgencyLevel, KanbanPipeline } from '../../shared/tb-mock-store';
@@ -77,6 +78,7 @@ function DraggableCard({ card, canEdit }: DraggableCardProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: card.id,
     disabled: !canEdit,
+    data: { type: 'card' },
   });
 
   const style = transform ? { transform: CSS.Translate.toString(transform) } : undefined;
@@ -132,32 +134,32 @@ function DraggableCard({ card, canEdit }: DraggableCardProps) {
 }
 
 // ----------------------------------------------------------------------
-// Droppable stage column with inline rename + delete
+// Sortable + droppable stage column
 
 type DroppableColumnProps = {
   stage: KanbanStage;
   cards: KanbanCard[];
   canEdit: boolean;
   canDelete: boolean;
+  isCardOver: boolean;
   onSaveLabel: (stageId: string, label: string) => void;
   onDelete: (stageId: string) => void;
 };
 
 function DroppableColumn({
-  stage, cards, canEdit, canDelete, onSaveLabel, onDelete,
+  stage, cards, canEdit, canDelete, isCardOver, onSaveLabel, onDelete,
 }: DroppableColumnProps) {
-  const { setNodeRef, isOver } = useDroppable({ id: stage.id });
+  const {
+    setNodeRef, attributes, listeners,
+    transform, transition, isDragging,
+  } = useSortable({ id: stage.id, data: { type: 'stage' } });
+
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(stage.label);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    setEditValue(stage.label);
-  }, [stage.label]);
-
-  useEffect(() => {
-    if (editing) inputRef.current?.focus();
-  }, [editing]);
+  useEffect(() => { setEditValue(stage.label); }, [stage.label]);
+  useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
 
   const handleSave = useCallback(() => {
     if (editValue.trim()) onSaveLabel(stage.id, editValue.trim());
@@ -175,19 +177,46 @@ function DroppableColumn({
   return (
     <Box
       ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+      }}
       sx={{
         flex: '1 1 230px',
         minWidth: 230,
         borderRadius: 2,
         p: 1.5,
-        bgcolor: isOver && canEdit ? 'action.selected' : 'background.neutral',
+        opacity: isDragging ? 0.5 : 1,
+        bgcolor: isCardOver && canEdit ? 'action.selected' : 'background.neutral',
         border: '2px dashed',
-        borderColor: isOver && canEdit ? 'primary.main' : 'transparent',
+        borderColor: isCardOver && canEdit ? 'primary.main' : 'transparent',
         transition: 'border-color 0.15s, background-color 0.15s',
       }}
     >
       {/* Column header */}
       <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mb: 1.5, px: 0.5 }}>
+
+        {/* Drag handle — only when canEdit and not editing */}
+        {canEdit && !editing && (
+          <Tooltip title="Drag to reorder stage">
+            <Box
+              {...attributes}
+              {...listeners}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                cursor: 'grab',
+                color: 'text.disabled',
+                flexShrink: 0,
+                touchAction: 'none',
+                '&:active': { cursor: 'grabbing' },
+              }}
+            >
+              <Iconify icon="custom:menu-duotone" width={14} />
+            </Box>
+          </Tooltip>
+        )}
+
         {editing ? (
           <>
             <TextField
@@ -222,7 +251,7 @@ function DroppableColumn({
                 <Tooltip
                   title={
                     !canDelete
-                      ? 'Move all cases out of this stage before deleting'
+                      ? 'Move all cases out before deleting'
                       : 'Delete stage'
                   }
                 >
@@ -281,6 +310,7 @@ type KanbanBoardProps = {
   cards: KanbanCard[];
   canEdit: boolean;
   onCardMoved: () => void;
+  onStageMoved: (reordered: KanbanStage[]) => void;
   onSaveStageLabel: (stageId: string, label: string) => void;
   onDeleteStage: (stageId: string) => void;
   onAddStage: () => void;
@@ -288,62 +318,83 @@ type KanbanBoardProps = {
 
 function KanbanBoard({
   pipeline, stages, cards, canEdit,
-  onCardMoved, onSaveStageLabel, onDeleteStage, onAddStage,
+  onCardMoved, onStageMoved, onSaveStageLabel, onDeleteStage, onAddStage,
 }: KanbanBoardProps) {
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
   );
 
-  const [, setVersion] = useState(0);
+  const stageIds = useMemo(() => stages.map((s) => s.id), [stages]);
+
+  // Track which stage column has an active card hovering over it (for highlight)
+  const [cardOverStageId, setCardOverStageId] = useState<string | null>(null);
+
+  const handleDragOver = useCallback((event: DragOverEvent) => {
+    const { active, over } = event;
+    if (active.data.current?.type === 'card') {
+      setCardOverStageId(over ? (over.id as string) : null);
+    }
+  }, []);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
+      setCardOverStageId(null);
       const { active, over } = event;
       if (!over || !canEdit) return;
-      moveKanbanCard(active.id as string, over.id as string);
-      setVersion((v) => v + 1);
-      onCardMoved();
+
+      if (active.data.current?.type === 'stage') {
+        const oldIndex = stages.findIndex((s) => s.id === active.id);
+        const newIndex = stages.findIndex((s) => s.id === over.id);
+        if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+          const reordered = arrayMove([...stages], oldIndex, newIndex);
+          onStageMoved(reordered);
+        }
+      } else {
+        moveKanbanCard(active.id as string, over.id as string);
+        onCardMoved();
+      }
     },
-    [canEdit, onCardMoved]
+    [canEdit, stages, onStageMoved, onCardMoved]
   );
 
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-      <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 1, alignItems: 'flex-start' }}>
-        {stages.map((stage) => {
-          const stageCards = cards.filter(
-            (c) => c.column === stage.id && c.pipeline === pipeline
-          );
-          const allCardsInStage = cards.filter((c) => c.column === stage.id);
-          const canDelete = allCardsInStage.length === 0 && stages.length > 1;
+    <DndContext sensors={sensors} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+      <SortableContext items={stageIds} strategy={horizontalListSortingStrategy}>
+        <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 1, alignItems: 'flex-start' }}>
+          {stages.map((stage) => {
+            const stageCards = cards.filter((c) => c.column === stage.id && c.pipeline === pipeline);
+            const allCardsInStage = cards.filter((c) => c.column === stage.id);
+            const canDelete = allCardsInStage.length === 0 && stages.length > 1;
 
-          return (
-            <DroppableColumn
-              key={stage.id}
-              stage={stage}
-              cards={stageCards}
-              canEdit={canEdit}
-              canDelete={canDelete}
-              onSaveLabel={onSaveStageLabel}
-              onDelete={onDeleteStage}
-            />
-          );
-        })}
+            return (
+              <DroppableColumn
+                key={stage.id}
+                stage={stage}
+                cards={stageCards}
+                canEdit={canEdit}
+                canDelete={canDelete}
+                isCardOver={cardOverStageId === stage.id}
+                onSaveLabel={onSaveStageLabel}
+                onDelete={onDeleteStage}
+              />
+            );
+          })}
 
-        {canEdit && (
-          <Box sx={{ flexShrink: 0, pt: 0.5 }}>
-            <Button
-              variant="outlined"
-              startIcon={<Iconify icon="mingcute:add-line" width={16} />}
-              onClick={onAddStage}
-              sx={{ whiteSpace: 'nowrap', minWidth: 140 }}
-            >
-              Add Stage
-            </Button>
-          </Box>
-        )}
-      </Box>
+          {canEdit && (
+            <Box sx={{ flexShrink: 0, pt: 0.5 }}>
+              <Button
+                variant="outlined"
+                startIcon={<Iconify icon="mingcute:add-line" width={16} />}
+                onClick={onAddStage}
+                sx={{ whiteSpace: 'nowrap', minWidth: 140 }}
+              >
+                Add Stage
+              </Button>
+            </Box>
+          )}
+        </Box>
+      </SortableContext>
     </DndContext>
   );
 }
@@ -461,7 +512,6 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline }: Add
 
   const handleSubmit = useCallback(() => {
     if (!validate() || !selectedCompany) return;
-
     onSubmit({
       pipeline: form.pipeline,
       column: form.columnId,
@@ -478,10 +528,8 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline }: Add
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Add Case</DialogTitle>
-
       <DialogContent dividers>
         <Stack spacing={3}>
-          {/* Company select */}
           <FormControl fullWidth error={!!errors.companyId}>
             <InputLabel>Company *</InputLabel>
             <Select
@@ -509,7 +557,6 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline }: Add
             )}
           </FormControl>
 
-          {/* Auto-populated directors */}
           {directorNames.length > 0 && (
             <Box>
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
@@ -523,7 +570,6 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline }: Add
             </Box>
           )}
 
-          {/* Pipeline */}
           <Box>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
               Pipeline *
@@ -540,7 +586,6 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline }: Add
             </ToggleButtonGroup>
           </Box>
 
-          {/* Initial stage */}
           <FormControl fullWidth size="small" error={!!errors.columnId}>
             <InputLabel>Initial Stage *</InputLabel>
             <Select
@@ -554,7 +599,6 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline }: Add
             </Select>
           </FormControl>
 
-          {/* Urgency */}
           <Box>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
               Urgency *
@@ -565,28 +609,12 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline }: Add
               onChange={(_, val) => val && handleChange('urgency', val as UrgencyLevel)}
               size="small"
             >
-              <ToggleButton
-                value="high"
-                sx={{ '&.Mui-selected': { bgcolor: '#FEE2E2', color: '#991B1B' } }}
-              >
-                High
-              </ToggleButton>
-              <ToggleButton
-                value="medium"
-                sx={{ '&.Mui-selected': { bgcolor: '#FEF3C7', color: '#92400E' } }}
-              >
-                Medium
-              </ToggleButton>
-              <ToggleButton
-                value="low"
-                sx={{ '&.Mui-selected': { bgcolor: '#D1FAE5', color: '#065F46' } }}
-              >
-                Low
-              </ToggleButton>
+              <ToggleButton value="high" sx={{ '&.Mui-selected': { bgcolor: '#FEE2E2', color: '#991B1B' } }}>High</ToggleButton>
+              <ToggleButton value="medium" sx={{ '&.Mui-selected': { bgcolor: '#FEF3C7', color: '#92400E' } }}>Medium</ToggleButton>
+              <ToggleButton value="low" sx={{ '&.Mui-selected': { bgcolor: '#D1FAE5', color: '#065F46' } }}>Low</ToggleButton>
             </ToggleButtonGroup>
           </Box>
 
-          {/* Visa expiry — more relevant for visa pipeline but available for both */}
           <TextField
             fullWidth
             size="small"
@@ -595,10 +623,9 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline }: Add
             value={form.visaExpiryDate}
             onChange={(e) => handleChange('visaExpiryDate', e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
-            helperText="Optional — used to show urgency based on expiry date"
+            helperText="Optional — shows as an expiry chip on the case card"
           />
 
-          {/* Notes */}
           <TextField
             fullWidth
             size="small"
@@ -611,7 +638,6 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline }: Add
           />
         </Stack>
       </DialogContent>
-
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose}>Cancel</Button>
         <Button variant="contained" onClick={handleSubmit} disabled={!form.companyId}>
@@ -647,6 +673,12 @@ export function TBKanbanView() {
     setHasChanges(true);
   }, []);
 
+  const handleStageMoved = useCallback((reordered: KanbanStage[]) => {
+    reorderKanbanStages(reordered.map((s) => s.id));
+    setStages([...tbStore.stages]);
+    setHasChanges(true);
+  }, []);
+
   const handleSave = useCallback(() => {
     setSaving(true);
     setTimeout(() => {
@@ -679,23 +711,26 @@ export function TBKanbanView() {
     setNotification({ msg: `Stage "${label}" added.`, severity: 'success' });
   }, []);
 
-  const handleAddCase = useCallback((card: Omit<KanbanCard, 'id'>) => {
-    addKanbanCard(card);
-    setCards([...tbStore.kanbanCards]);
-    setAddCaseOpen(false);
-    setHasChanges(true);
-    setNotification({ msg: `Case added to ${stages.find(s => s.id === card.column)?.label ?? card.column}.`, severity: 'success' });
-  }, [stages]);
+  const handleAddCase = useCallback(
+    (card: Omit<KanbanCard, 'id'>) => {
+      addKanbanCard(card);
+      setCards([...tbStore.kanbanCards]);
+      setAddCaseOpen(false);
+      setHasChanges(true);
+      const stageName = stages.find((s) => s.id === card.column)?.label ?? card.column;
+      setNotification({ msg: `Case added to "${stageName}".`, severity: 'success' });
+    },
+    [stages]
+  );
 
   return (
     <DashboardContent maxWidth={false}>
-      {/* Header */}
       <Stack direction="row" alignItems="flex-start" justifyContent="space-between" sx={{ mb: 3 }}>
         <Box>
           <Typography variant="h4">Kanban Pipelines</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             {canEdit
-              ? 'Long-press (mobile) or drag (desktop) to move cases. Click the pencil to rename a stage.'
+              ? 'Drag the ≡ handle to reorder stages. Long-press (mobile) or drag a case card to move it.'
               : 'View-only — only Super Admins can manage cases and stages.'}
           </Typography>
         </Box>
@@ -728,7 +763,6 @@ export function TBKanbanView() {
         </Alert>
       )}
 
-      {/* Pipeline tabs */}
       <Tabs
         value={activePipeline}
         onChange={handleTabChange}
@@ -752,19 +786,18 @@ export function TBKanbanView() {
         ))}
       </Tabs>
 
-      {/* Board */}
       <KanbanBoard
         pipeline={activePipeline}
         stages={stages}
         cards={cards}
         canEdit={canEdit}
         onCardMoved={handleCardMoved}
+        onStageMoved={handleStageMoved}
         onSaveStageLabel={handleSaveStageLabel}
         onDeleteStage={handleDeleteStage}
         onAddStage={() => setAddStageOpen(true)}
       />
 
-      {/* Dialogs */}
       <AddStageDialog
         open={addStageOpen}
         onClose={() => setAddStageOpen(false)}
@@ -779,7 +812,6 @@ export function TBKanbanView() {
         defaultPipeline={activePipeline}
       />
 
-      {/* Notifications */}
       <Snackbar
         open={!!notification}
         autoHideDuration={3500}
@@ -787,11 +819,7 @@ export function TBKanbanView() {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         {notification ? (
-          <Alert
-            severity={notification.severity}
-            onClose={() => setNotification(null)}
-            sx={{ width: '100%' }}
-          >
+          <Alert severity={notification.severity} onClose={() => setNotification(null)} sx={{ width: '100%' }}>
             {notification.msg}
           </Alert>
         ) : undefined}
