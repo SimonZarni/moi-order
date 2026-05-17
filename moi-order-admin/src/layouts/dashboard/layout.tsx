@@ -1,7 +1,7 @@
 import type { Breakpoint } from '@mui/material/styles';
 
-import { useMemo, useCallback } from 'react';
 import { merge } from 'es-toolkit';
+import { useMemo, useCallback } from 'react';
 import { useBoolean } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
@@ -9,10 +9,12 @@ import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 
 import { useRouter } from 'src/routes/hooks';
+
 import { useHeartbeat } from 'src/hooks/useHeartbeat';
 
-import { useAuth } from 'src/context/auth-context';
 import type { WorkspaceId } from 'src/context/workspace-context';
+
+import { useAuth } from 'src/context/auth-context';
 import { useWorkspace } from 'src/context/workspace-context';
 
 import { Iconify } from 'src/components/iconify';
@@ -84,7 +86,6 @@ export function DashboardLayout({
 
   const filteredNav = useMemo(
     () => filterNavData(activeNavData, hasPermission, isSuperAdmin()),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [activeNavData, hasPermission, isSuperAdmin],
   );
 
@@ -112,7 +113,6 @@ export function DashboardLayout({
             },
           ]
         : _account,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isSuperAdmin]
   );
 
