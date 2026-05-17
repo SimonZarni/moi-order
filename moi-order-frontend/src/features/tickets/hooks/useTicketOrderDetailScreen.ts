@@ -33,6 +33,7 @@ export interface UseTicketOrderDetailScreenResult {
   handleRefresh: () => void;
   handleBack: () => void;
   handlePayNow: () => void;
+  handleViewAllTickets: () => void;
   handleDownloadEticket: () => void;
   handleSaveEticket: () => Promise<void>;
   handleClosePreview: () => void;
@@ -153,6 +154,9 @@ export function useTicketOrderDetailScreen(): UseTicketOrderDetailScreenResult {
 
   const handleRefresh  = useCallback((): void => { refetch(); }, [refetch]);
   const handleBack     = useCallback((): void => { navigation.goBack(); }, [navigation]);
+  const handleViewAllTickets = useCallback((): void => {
+    navigation.navigate('MainTabs', { screen: 'Orders', params: { tab: 'tickets' } });
+  }, [navigation]);
   const handleClosePreview = useCallback((): void => { setPreviewImageUrl(null); }, []);
 
   const handlePayNow = useCallback((): void => {
@@ -167,6 +171,6 @@ export function useTicketOrderDetailScreen(): UseTicketOrderDetailScreenResult {
     canPayNow, awaitingConfirmation, canDownload, isDownloading, isSavingEticket,
     downloadError,
     previewImageUrl,
-    handleRefresh, handleBack, handlePayNow, handleDownloadEticket, handleSaveEticket, handleClosePreview,
+    handleRefresh, handleBack, handlePayNow, handleViewAllTickets, handleDownloadEticket, handleSaveEticket, handleClosePreview,
   };
 }

@@ -21,6 +21,7 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
     previewImageUrl,
     handleRefresh, handleBack, handlePayNow, handleDownloadEticket, handleSaveEticket, handleClosePreview,
     canCancel, isCancelling, handleCancelOrder,
+    handleViewAllTickets,
   } = useTicketOrderDetailScreen();
   const s = useStrings();
 
@@ -174,6 +175,16 @@ export function TicketOrderDetailScreen(): React.JSX.Element {
               </Text>
             </Pressable>
           )}
+
+          {/* ── View All Ticket Orders ── */}
+          <Pressable
+            style={({ pressed }) => [styles.viewAllTicketsBtn, { opacity: pressed ? 0.7 : 1 }]}
+            onPress={handleViewAllTickets}
+            accessibilityLabel="View all ticket orders"
+            accessibilityRole="button"
+          >
+            <Text style={styles.viewAllTicketsBtnText}>View All Ticket Orders  →</Text>
+          </Pressable>
 
           {/* ── Download / Preview E-Ticket (completed) ── */}
           {canDownload && (

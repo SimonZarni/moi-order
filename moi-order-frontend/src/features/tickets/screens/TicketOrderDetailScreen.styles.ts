@@ -137,6 +137,22 @@ export const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
 
+  viewAllTicketsBtn: {
+    borderWidth: 1.5,
+    borderColor: 'rgba(0,0,0,0.12)',
+    borderRadius: radius.lg,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.sm,
+  },
+  viewAllTicketsBtnText: {
+    fontSize: typography.sm,
+    fontWeight: '700',
+    color: colours.textMuted,
+    letterSpacing: 0.4,
+  },
+
   downloadError: {
     fontSize: typography.xs,
     color: colours.danger,
