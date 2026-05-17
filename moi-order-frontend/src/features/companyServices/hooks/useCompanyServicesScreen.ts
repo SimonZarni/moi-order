@@ -3,45 +3,42 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { useCompanyServices, UseCompanyServicesResult } from './useCompanyServices';
-import { Service } from '@/types/models';
+import { ServiceType } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
-import { localeName } from '@/shared/utils/localeName';
 import { useLocale } from '@/shared/hooks/useLocale';
+import { localeName } from '@/shared/utils/localeName';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 export interface UseCompanyServicesScreenResult {
-  services: UseCompanyServicesResult['services'];
+  types: UseCompanyServicesResult['types'];
   isLoading: boolean;
   isRefreshing: boolean;
   isError: boolean;
   handleRefresh: () => void;
-  handleSelectService: (service: Service) => void;
+  handleSelectType: (type: ServiceType) => void;
   handleBack: () => void;
 }
 
 export function useCompanyServicesScreen(): UseCompanyServicesScreenResult {
   const navigation = useNavigation<Nav>();
   const { locale } = useLocale();
-  const { services, isLoading, isRefreshing, isError, refetch } = useCompanyServices();
+  const { serviceId, types, isLoading, isRefreshing, isError, refetch } = useCompanyServices();
 
   const handleRefresh = useCallback((): void => { refetch(); }, [refetch]);
 
-  const handleSelectService = useCallback((service: Service): void => {
-    const firstType = service.types[0];
-    if (firstType === undefined) return;
-
+  const handleSelectType = useCallback((type: ServiceType): void => {
     navigation.navigate('GenericServiceForm', {
-      serviceTypeId: firstType.id,
-      serviceId:     service.id,
-      serviceName:   localeName(service, locale),
-      price:         firstType.price,
+      serviceTypeId: type.id,
+      serviceId:     serviceId ?? 0,
+      serviceName:   localeName(type, locale),
+      price:         type.price,
     });
-  }, [navigation, locale]);
+  }, [navigation, locale, serviceId]);
 
   const handleBack = useCallback((): void => {
     navigation.goBack();
   }, [navigation]);
 
-  return { services, isLoading, isRefreshing, isError, handleRefresh, handleSelectService, handleBack };
+  return { types, isLoading, isRefreshing, isError, handleRefresh, handleSelectType, handleBack };
 }

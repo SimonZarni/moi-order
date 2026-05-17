@@ -1,0 +1,56 @@
+import { StyleSheet } from 'react-native';
+
+import { colours } from '@/shared/theme/colours';
+import { radius } from '@/shared/theme/radius';
+import { shadows } from '@/shared/theme/shadows';
+import { spacing } from '@/shared/theme/spacing';
+import { typography } from '@/shared/theme/typography';
+
+export const styles = StyleSheet.create({
+  card: {
+    backgroundColor: colours.white,
+    borderRadius: radius.xl,
+    padding: spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+    borderLeftWidth: 4,
+    borderLeftColor: colours.primary,
+    ...shadows.light,
+  },
+  content: {
+    flex: 1,
+  },
+  nameEn: {
+    fontSize: typography.sm,
+    color: colours.textMuted,
+    marginTop: 2,
+    lineHeight: 24,
+  },
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginTop: spacing.sm,
+  },
+  priceCurrency: {
+    fontSize: typography.sm,
+    fontWeight: '600',
+    color: colours.primary,
+    marginRight: 2,
+  },
+  priceAmount: {
+    fontSize: typography.xl,
+    fontWeight: '800',
+    color: colours.primary,
+    letterSpacing: -0.5,
+  },
+  chevron: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colours.infoBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: spacing.md,
+  },
+});

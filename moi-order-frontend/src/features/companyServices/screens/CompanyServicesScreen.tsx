@@ -1,19 +1,19 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { StandaloneFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
 import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
+import { ServiceTypeCard } from '@/shared/components/ServiceTypeCard/ServiceTypeCard';
+import { ServiceTypeCardSkeleton } from '@/shared/components/ServiceTypeCardSkeleton/ServiceTypeCardSkeleton';
 import { editorialPalette } from '@/shared/theme/editorialPalette';
 import { useCompanyServicesScreen } from '@/features/companyServices/hooks/useCompanyServicesScreen';
 import { useLocale } from '@/shared/hooks/useLocale';
-import { localeName } from '@/shared/utils/localeName';
 import { useStrings } from '@/shared/i18n';
 import { styles } from './CompanyServicesScreen.styles';
 
 export function CompanyServicesScreen(): React.JSX.Element {
-  const { services, isLoading, isRefreshing, isError, handleRefresh, handleSelectService, handleBack } =
+  const { types, isLoading, isRefreshing, isError, handleRefresh, handleSelectType, handleBack } =
     useCompanyServicesScreen();
   const { locale } = useLocale();
   const s = useStrings();
@@ -38,12 +38,14 @@ export function CompanyServicesScreen(): React.JSX.Element {
         />
 
         <View style={styles.body}>
-          <Text style={styles.sectionLabel}>{s.services.availableServices}</Text>
+          <Text style={styles.sectionLabel}>{s.services.selectType}</Text>
 
           {isLoading && (
-            <View style={styles.centered}>
-              <ActivityIndicator color={editorialPalette.gold} size="large" />
-            </View>
+            <>
+              <ServiceTypeCardSkeleton />
+              <ServiceTypeCardSkeleton />
+              <ServiceTypeCardSkeleton />
+            </>
           )}
 
           {isError && (
@@ -52,32 +54,14 @@ export function CompanyServicesScreen(): React.JSX.Element {
             </View>
           )}
 
-          {!isLoading && !isError && services.length === 0 && (
+          {!isLoading && !isError && types.length === 0 && (
             <View style={styles.centered}>
               <Text style={styles.emptyText}>{s.services.noServices}</Text>
             </View>
           )}
 
-          {services.map((service) => (
-            <Pressable
-              key={service.id}
-              style={({ pressed }) => [styles.serviceCard, { opacity: pressed ? 0.88 : 1 }]}
-              onPress={() => handleSelectService(service)}
-              accessibilityLabel={`${localeName(service, locale)} service`}
-              accessibilityRole="button"
-            >
-              <View style={styles.serviceCardContent}>
-                <Text style={styles.serviceCardTitle}>{localeName(service, locale)}</Text>
-                {service.types[0] !== undefined && (
-                  <Text style={styles.serviceCardPrice}>
-                    ฿{service.types[0].price.toLocaleString('th-TH')}
-                  </Text>
-                )}
-              </View>
-              <View style={styles.serviceCardArrow}>
-                <Ionicons name="chevron-forward" size={18} color={styles.serviceCardArrowText.color} />
-              </View>
-            </Pressable>
+          {types.map((type) => (
+            <ServiceTypeCard key={type.id} type={type} onPress={handleSelectType} />
           ))}
         </View>
       </ScrollView>
