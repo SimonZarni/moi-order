@@ -30,11 +30,13 @@ export type NavContentProps = {
   data: NavItem[];
   slots?: { topArea?: React.ReactNode; bottomArea?: React.ReactNode };
   workspaces: WorkspacesPopoverProps['data'];
+  selectedWorkspaceId?: string;
+  onWorkspaceChange?: (id: string) => void;
   sx?: SxProps<Theme>;
 };
 
 export function NavDesktop({
-  sx, data, slots, workspaces, layoutQuery,
+  sx, data, slots, workspaces, selectedWorkspaceId, onWorkspaceChange, layoutQuery,
 }: NavContentProps & { layoutQuery: Breakpoint }) {
   const theme = useTheme();
   return (
@@ -55,7 +57,7 @@ export function NavDesktop({
         ...sx,
       }}
     >
-      <NavContent data={data} slots={slots} workspaces={workspaces} />
+      <NavContent data={data} slots={slots} workspaces={workspaces} selectedWorkspaceId={selectedWorkspaceId} onWorkspaceChange={onWorkspaceChange} />
     </Box>
   );
 }
@@ -63,7 +65,7 @@ export function NavDesktop({
 // ----------------------------------------------------------------------
 
 export function NavMobile({
-  sx, data, open, slots, onClose, workspaces,
+  sx, data, open, slots, onClose, workspaces, selectedWorkspaceId, onWorkspaceChange,
 }: NavContentProps & { open: boolean; onClose: () => void }) {
   const pathname = usePathname();
   useEffect(() => {
@@ -85,7 +87,7 @@ export function NavMobile({
         },
       }}
     >
-      <NavContent data={data} slots={slots} workspaces={workspaces} />
+      <NavContent data={data} slots={slots} workspaces={workspaces} selectedWorkspaceId={selectedWorkspaceId} onWorkspaceChange={onWorkspaceChange} />
     </Drawer>
   );
 }
@@ -174,13 +176,13 @@ function NavGroupRow({ item, pathname }: { item: NavItem; pathname: string }) {
 
 // ----------------------------------------------------------------------
 
-export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
+export function NavContent({ data, slots, workspaces, selectedWorkspaceId, onWorkspaceChange, sx }: NavContentProps) {
   const pathname = usePathname();
   return (
     <>
       <Logo />
       {slots?.topArea}
-      <WorkspacesPopover data={workspaces} sx={{ my: 2 }} />
+      <WorkspacesPopover data={workspaces} selectedId={selectedWorkspaceId} onWorkspaceChange={onWorkspaceChange} sx={{ my: 2 }} />
       <Scrollbar fillContent>
         <Box
           component="nav"

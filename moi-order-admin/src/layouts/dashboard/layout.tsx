@@ -1,6 +1,6 @@
 import type { Breakpoint } from '@mui/material/styles';
 
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { merge } from 'es-toolkit';
 import { useBoolean } from 'minimal-shared/hooks';
 
@@ -8,12 +8,16 @@ import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 
+import { useRouter } from 'src/routes/hooks';
 import { useHeartbeat } from 'src/hooks/useHeartbeat';
 
 import { useAuth } from 'src/context/auth-context';
+import type { WorkspaceId } from 'src/context/workspace-context';
+import { useWorkspace } from 'src/context/workspace-context';
 
 import { Iconify } from 'src/components/iconify';
 
+import { tbNavData } from '../nav-config-tb';
 import { NavMobile, NavDesktop } from './nav';
 import { layoutClasses } from '../core/classes';
 import { _account } from '../nav-config-account';
@@ -71,13 +75,29 @@ export function DashboardLayout({
   layoutQuery = 'lg',
 }: DashboardLayoutProps) {
   const theme = useTheme();
+  const router = useRouter();
   const { hasPermission, isSuperAdmin } = useAuth();
+  const { activeWorkspace, setActiveWorkspace } = useWorkspace();
   useHeartbeat();
 
+  const activeNavData = activeWorkspace === 'moi-order-trusted-brothers' ? tbNavData : navData;
+
   const filteredNav = useMemo(
-    () => filterNavData(navData, hasPermission, isSuperAdmin()),
+    () => filterNavData(activeNavData, hasPermission, isSuperAdmin()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [hasPermission, isSuperAdmin],
+    [activeNavData, hasPermission, isSuperAdmin],
+  );
+
+  const handleWorkspaceChange = useCallback(
+    (id: string) => {
+      setActiveWorkspace(id as WorkspaceId);
+      if (id === 'moi-order-trusted-brothers') {
+        router.push('/tb');
+      } else {
+        router.push('/');
+      }
+    },
+    [router, setActiveWorkspace]
   );
 
   const accountMenuItems = useMemo(
@@ -118,7 +138,7 @@ export function DashboardLayout({
             onClick={onOpen}
             sx={{ mr: 1, ml: -1, [theme.breakpoints.up(layoutQuery)]: { display: 'none' } }}
           />
-          <NavMobile data={filteredNav} open={open} onClose={onClose} workspaces={_workspaces} />
+          <NavMobile data={filteredNav} open={open} onClose={onClose} workspaces={_workspaces} selectedWorkspaceId={activeWorkspace} onWorkspaceChange={handleWorkspaceChange} />
         </>
       ),
       rightArea: (
@@ -161,7 +181,7 @@ export function DashboardLayout({
        * @Sidebar
        *************************************** */
       sidebarSection={
-        <NavDesktop data={filteredNav} layoutQuery={layoutQuery} workspaces={_workspaces} />
+        <NavDesktop data={filteredNav} layoutQuery={layoutQuery} workspaces={_workspaces} selectedWorkspaceId={activeWorkspace} onWorkspaceChange={handleWorkspaceChange} />
       }
       /** **************************************
        * @Footer

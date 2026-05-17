@@ -10,6 +10,7 @@ import { usePathname } from 'src/routes/hooks';
 
 import { AuthProvider } from 'src/context/auth-context';
 import { ThemeProvider } from 'src/theme/theme-provider';
+import { WorkspaceProvider } from 'src/context/workspace-context';
 import { NotificationsProvider } from 'src/context/notifications-context';
 
 // ----------------------------------------------------------------------
@@ -36,12 +37,14 @@ export default function App({ children }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <NotificationsProvider>
-          <ThemeProvider>
-            {children}
-            <ForbiddenSnackbar />
-          </ThemeProvider>
-        </NotificationsProvider>
+        <WorkspaceProvider>
+          <NotificationsProvider>
+            <ThemeProvider>
+              {children}
+              <ForbiddenSnackbar />
+            </ThemeProvider>
+          </NotificationsProvider>
+        </WorkspaceProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

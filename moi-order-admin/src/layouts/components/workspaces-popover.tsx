@@ -21,10 +21,12 @@ export type WorkspacesPopoverProps = ButtonBaseProps & {
     logo: string;
     plan?: string;
   }[];
+  selectedId?: string;
+  onWorkspaceChange?: (id: string) => void;
 };
 
-export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopoverProps) {
-  const [workspace, setWorkspace] = useState(data[0]);
+export function WorkspacesPopover({ data = [], selectedId, onWorkspaceChange, sx, ...other }: WorkspacesPopoverProps) {
+  const workspace = data.find((w) => w.id === selectedId) ?? data[0];
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
@@ -38,10 +40,10 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
 
   const handleChangeWorkspace = useCallback(
     (newValue: (typeof data)[number]) => {
-      setWorkspace(newValue);
       handleClosePopover();
+      onWorkspaceChange?.(newValue.id);
     },
-    [handleClosePopover]
+    [handleClosePopover, onWorkspaceChange]
   );
 
   const renderAvatar = (alt: string, src: string) => (

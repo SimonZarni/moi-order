@@ -59,6 +59,14 @@ export const CreateAdminPage = lazy(() => import('src/pages/create-admin'));
 export const AuditLogsPage = lazy(() => import('src/pages/audit-logs'));
 export const SystemHealthPage = lazy(() => import('src/pages/system-health'));
 
+// Trusted Brothers workspace pages
+export const TBOverviewPage = lazy(() => import('src/pages/tb-overview'));
+export const TBClientsPage = lazy(() => import('src/pages/tb-clients'));
+export const TBKanbanPage = lazy(() => import('src/pages/tb-kanban'));
+export const TBDocumentsPage = lazy(() => import('src/pages/tb-documents'));
+export const TBAuditLogsPage = lazy(() => import('src/pages/tb-audit-logs'));
+export const TBBODPage = lazy(() => import('src/pages/tb-bod'));
+
 const renderFallback = () => (
   <Box sx={{ display: 'flex', flex: '1 1 auto', alignItems: 'center', justifyContent: 'center' }}>
     <LinearProgress
@@ -157,6 +165,14 @@ export const routesSection: RouteObject[] = [
 
       { path: 'audit-logs', element: guard('admins.manage', <AuditLogsPage />) },
       { path: 'system-health', element: guard('admins.manage', <SystemHealthPage />) },
+
+      // Trusted Brothers workspace
+      { path: 'tb', element: <TBOverviewPage /> },
+      { path: 'tb/clients', element: <TBClientsPage /> },
+      { path: 'tb/kanban', element: <TBKanbanPage /> },
+      { path: 'tb/documents', element: <TBDocumentsPage /> },
+      { path: 'tb/audit-logs', element: <TBAuditLogsPage /> },
+      { path: 'tb/bod', element: <TBBODPage /> },
 
       { path: 'unauthorized', element: <UnauthorizedPage /> },
     ],
