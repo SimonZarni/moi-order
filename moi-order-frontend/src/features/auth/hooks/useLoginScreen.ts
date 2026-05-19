@@ -94,7 +94,13 @@ export function useLoginScreen(): UseLoginScreenResult {
     },
     onError: (error: ApiError) => {
       if (error.status === 422 && error.errors !== undefined) {
-        applyApiError(error.errors);
+        const emailMsg = error.errors['email']?.[0];
+        if (emailMsg !== undefined) {
+          // Email field is hidden on the password step — route to banner so the user sees it.
+          setBannerError(emailMsg);
+        } else {
+          applyApiError(error.errors);
+        }
       } else {
         setBannerError(getAccountErrorMessage(error.code, error.context));
       }
