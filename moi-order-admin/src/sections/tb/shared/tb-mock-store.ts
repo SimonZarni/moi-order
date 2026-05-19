@@ -115,6 +115,40 @@ export type TBClient = {
 };
 
 // ----------------------------------------------------------------------
+// Individual Clients (people, for Visa / Work Permit pipeline)
+
+export type ClientType = 'company_linked' | 'visa_only';
+
+export type TBIndividualClient = {
+  id: string;
+  name: string;
+  nationality: string;
+  phone?: string;
+  email?: string;
+  passportNo?: string;
+  companyId?: string;
+  companyName?: string;
+  visaType?: string;
+  visaExpiry?: string;
+  workPermit?: boolean;
+  clientType: ClientType;
+  notes?: string;
+};
+
+const INITIAL_INDIVIDUAL_CLIENTS: TBIndividualClient[] = [
+  { id: 'person-001', name: "Mr. James O'Brien", nationality: 'Irish', phone: '+66 84 890 1234', companyId: 'cl-007', companyName: 'บริษัท อินเตอร์เนชั่นแนล คอนซัลติ้ง จำกัด', visaType: 'Non-B', visaExpiry: '2026-05-31', workPermit: true, clientType: 'company_linked' },
+  { id: 'person-002', name: 'Ms. Sarah Lin', nationality: 'Singaporean', companyId: 'cl-007', companyName: 'บริษัท อินเตอร์เนชั่นแนล คอนซัลติ้ง จำกัด', visaType: 'Non-B', visaExpiry: '2026-08-15', workPermit: false, clientType: 'company_linked' },
+  { id: 'person-003', name: 'Mr. David Chen', nationality: 'Taiwanese', phone: '+66 85 901 2345', companyId: 'cl-008', companyName: 'บริษัท โกลบอล ซอฟแวร์ จำกัด', visaType: 'Non-B', visaExpiry: '2026-06-15', workPermit: true, clientType: 'company_linked' },
+  { id: 'person-004', name: 'Mr. Andreas Schmidt', nationality: 'German', companyId: 'cl-003', companyName: 'บริษัท แมนูแฟคเจอริ่ง ไทย จำกัด', visaType: 'Non-B', visaExpiry: '2026-05-25', workPermit: true, clientType: 'company_linked' },
+  { id: 'person-005', name: 'Ms. Yuki Tanaka', nationality: 'Japanese', companyId: 'cl-003', companyName: 'บริษัท แมนูแฟคเจอริ่ง ไทย จำกัด', visaType: 'Non-B', visaExpiry: '2026-06-10', workPermit: true, clientType: 'company_linked' },
+  { id: 'person-006', name: 'Ms. Emma Williams', nationality: 'Australian', companyId: 'cl-006', companyName: 'บริษัท ซัพพลาย เชน จำกัด', visaType: 'Non-B', visaExpiry: '2027-01-10', workPermit: true, clientType: 'company_linked' },
+  { id: 'person-007', name: 'Mr. James Thornton', nationality: 'British', companyId: 'cl-001', companyName: 'บริษัท เทคโนโลยี สยาม จำกัด', visaType: 'Non-B', visaExpiry: '2026-09-30', workPermit: true, clientType: 'company_linked' },
+  { id: 'person-008', name: 'Ms. Charlotte Brown', nationality: 'Canadian', phone: '+66 62 345 6789', visaType: 'Non-O', visaExpiry: '2026-07-01', workPermit: false, clientType: 'visa_only', notes: 'Retirement visa extension' },
+  { id: 'person-009', name: 'Mr. Henrik Larsson', nationality: 'Swedish', visaType: 'Non-OA', visaExpiry: '2027-03-15', workPermit: false, clientType: 'visa_only' },
+  { id: 'person-010', name: 'Ms. Nadia Popescu', nationality: 'Romanian', phone: '+66 91 234 5678', visaType: 'Non-B', visaExpiry: '2026-11-20', workPermit: true, clientType: 'visa_only', notes: 'Freelance consultant, no sponsoring company' },
+];
+
+// ----------------------------------------------------------------------
 // Kanban
 
 export type KanbanColumn = string; // dynamic — not a fixed union
@@ -577,6 +611,7 @@ const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
 export const tbStore = {
   stages: INITIAL_STAGES as KanbanStage[],
   clients: INITIAL_CLIENTS as TBClient[],
+  individualClients: INITIAL_INDIVIDUAL_CLIENTS as TBIndividualClient[],
   kanbanCards: INITIAL_KANBAN_CARDS as KanbanCard[],
   documentBatches: INITIAL_DOCUMENT_BATCHES as DocumentBatch[],
   auditLog: INITIAL_AUDIT_LOG as AuditLogEntry[],
@@ -686,6 +721,16 @@ export function editKanbanCard(cardId: string, updates: Omit<KanbanCard, 'id'>):
   if (idx === -1) return;
   tbStore.kanbanCards[idx] = { id: cardId, ...updates };
   appendAuditEntry(`Edited case "${updates.companyName}"`, 'kanban');
+}
+
+export function reorderKanbanCards(activeId: string, overId: string): void {
+  const ai = tbStore.kanbanCards.findIndex((c) => c.id === activeId);
+  const oi = tbStore.kanbanCards.findIndex((c) => c.id === overId);
+  if (ai === -1 || oi === -1 || ai === oi) return;
+  const list = [...tbStore.kanbanCards];
+  const [removed] = list.splice(ai, 1);
+  list.splice(oi, 0, removed);
+  tbStore.kanbanCards = list;
 }
 
 export function reorderKanbanStages(orderedIds: string[]): void {

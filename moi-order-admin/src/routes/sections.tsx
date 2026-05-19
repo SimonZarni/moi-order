@@ -63,6 +63,7 @@ export const SystemHealthPage = lazy(() => import('src/pages/system-health'));
 export const TBOverviewPage = lazy(() => import('src/pages/tb-overview'));
 export const TBClientsPage = lazy(() => import('src/pages/tb-clients'));
 export const TBClientDetailPage = lazy(() => import('src/pages/tb-client-detail'));
+export const TBPeoplePage = lazy(() => import('src/pages/tb-people'));
 export const TBKanbanPage = lazy(() => import('src/pages/tb-kanban'));
 export const TBDocumentsPage = lazy(() => import('src/pages/tb-documents'));
 export const TBAuditLogsPage = lazy(() => import('src/pages/tb-audit-logs'));
@@ -171,6 +172,7 @@ export const routesSection: RouteObject[] = [
       { path: 'tb', element: <TBOverviewPage /> },
       { path: 'tb/clients', element: <TBClientsPage /> },
       { path: 'tb/clients/:id', element: <TBClientDetailPage /> },
+      { path: 'tb/people', element: <TBPeoplePage /> },
       { path: 'tb/kanban', element: <TBKanbanPage /> },
       { path: 'tb/documents', element: <TBDocumentsPage /> },
       { path: 'tb/audit-logs', element: <TBAuditLogsPage /> },

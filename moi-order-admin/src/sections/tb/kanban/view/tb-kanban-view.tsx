@@ -1,16 +1,22 @@
-import type { DragEndEvent, DragOverEvent } from '@dnd-kit/core';
+import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core';
 
 import { CSS } from '@dnd-kit/utilities';
 import { useRef, useMemo, useState, useEffect, useCallback } from 'react';
-import { arrayMove, useSortable, SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import {
   useSensor,
   DndContext,
   useSensors,
   MouseSensor,
   TouchSensor,
-  useDraggable,
+  DragOverlay,
 } from '@dnd-kit/core';
+import {
+  arrayMove,
+  useSortable,
+  SortableContext,
+  verticalListSortingStrategy,
+  horizontalListSortingStrategy,
+} from '@dnd-kit/sortable';
 
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
@@ -23,6 +29,7 @@ import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import Select from '@mui/material/Select';
 import Tooltip from '@mui/material/Tooltip';
+import Divider from '@mui/material/Divider';
 import Snackbar from '@mui/material/Snackbar';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
@@ -52,6 +59,7 @@ import {
   moveKanbanCard,
   deleteKanbanStage,
   updateKanbanStage,
+  reorderKanbanCards,
   reorderKanbanStages,
 } from '../../shared/tb-mock-store';
 
@@ -71,41 +79,19 @@ const PIPELINE_TABS: { id: KanbanPipeline; label: string }[] = [
 ];
 
 // ----------------------------------------------------------------------
-// Draggable case card
+// Shared card content (used by both DraggableCard and CardOverlay)
 
-type DraggableCardProps = {
+function CardBody({
+  card,
+  canEdit,
+  onEditCard,
+}: {
   card: KanbanCard;
   canEdit: boolean;
-  onEditCard: (card: KanbanCard) => void;
-};
-
-function DraggableCard({ card, canEdit, onEditCard }: DraggableCardProps) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: card.id,
-    disabled: !canEdit,
-    data: { type: 'card' },
-  });
-
-  const style = transform ? { transform: CSS.Translate.toString(transform) } : undefined;
-
+  onEditCard: (c: KanbanCard) => void;
+}) {
   return (
-    <Paper
-      ref={setNodeRef}
-      style={style}
-      elevation={isDragging ? 6 : 1}
-      sx={{
-        p: 2,
-        borderRadius: 1.5,
-        userSelect: 'none',
-        opacity: isDragging ? 0.6 : 1,
-        cursor: canEdit ? 'grab' : 'default',
-        touchAction: canEdit ? 'none' : 'auto',
-        '&:active': { cursor: canEdit ? 'grabbing' : 'default' },
-      }}
-      {...attributes}
-      {...listeners}
-    >
-      {/* Company name row + edit button */}
+    <>
       <Stack direction="row" alignItems="flex-start" justifyContent="space-between" sx={{ mb: 0.5 }}>
         <Typography variant="body2" fontWeight="fontWeightSemiBold" noWrap sx={{ flex: 1, mr: 0.5 }}>
           {card.companyName}
@@ -130,12 +116,7 @@ function DraggableCard({ card, canEdit, onEditCard }: DraggableCardProps) {
       </Typography>
 
       {card.notes && (
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ display: 'block', mb: 1, fontStyle: 'italic' }}
-          noWrap
-        >
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1, fontStyle: 'italic' }} noWrap>
           {card.notes}
         </Typography>
       )}
@@ -153,6 +134,49 @@ function DraggableCard({ card, canEdit, onEditCard }: DraggableCardProps) {
       <Typography variant="caption" color="text.disabled" sx={{ display: 'block' }}>
         Created {fDate(card.createdDate)}
       </Typography>
+    </>
+  );
+}
+
+// ----------------------------------------------------------------------
+// Sortable case card (uses useSortable for both cross-column and within-column drag)
+
+type DraggableCardProps = { card: KanbanCard; canEdit: boolean; onEditCard: (c: KanbanCard) => void };
+
+function DraggableCard({ card, canEdit, onEditCard }: DraggableCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: card.id,
+    disabled: !canEdit,
+    data: { type: 'card', column: card.column },
+  });
+
+  return (
+    <Paper
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      elevation={1}
+      sx={{
+        p: 2,
+        borderRadius: 1.5,
+        userSelect: 'none',
+        opacity: isDragging ? 0.3 : 1,
+        cursor: canEdit ? 'grab' : 'default',
+        touchAction: canEdit ? 'none' : 'auto',
+        '&:active': { cursor: canEdit ? 'grabbing' : 'default' },
+      }}
+      {...attributes}
+      {...listeners}
+    >
+      <CardBody card={card} canEdit={canEdit} onEditCard={onEditCard} />
+    </Paper>
+  );
+}
+
+// Overlay card rendered inside DragOverlay (no hooks, elevated shadow)
+function CardOverlay({ card }: { card: KanbanCard }) {
+  return (
+    <Paper elevation={8} sx={{ p: 2, borderRadius: 1.5, userSelect: 'none', cursor: 'grabbing', width: 240 }}>
+      <CardBody card={card} canEdit={false} onEditCard={() => {}} />
     </Paper>
   );
 }
@@ -199,16 +223,15 @@ function DroppableColumn({
     [handleSave, stage.label]
   );
 
+  const cardIds = useMemo(() => cards.map((c) => c.id), [cards]);
+
   return (
     <Box
       ref={setNodeRef}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-      }}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
       sx={{
-        flex: '1 1 230px',
-        minWidth: 230,
+        flex: '1 1 240px',
+        minWidth: 240,
         borderRadius: 2,
         p: 1.5,
         opacity: isDragging ? 0.5 : 1,
@@ -220,22 +243,12 @@ function DroppableColumn({
     >
       {/* Column header */}
       <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mb: 1.5, px: 0.5 }}>
-
-        {/* Drag handle — only when canEdit and not editing */}
         {canEdit && !editing && (
           <Tooltip title="Drag to reorder stage">
             <Box
               {...attributes}
               {...listeners}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                cursor: 'grab',
-                color: 'text.disabled',
-                flexShrink: 0,
-                touchAction: 'none',
-                '&:active': { cursor: 'grabbing' },
-              }}
+              sx={{ display: 'flex', alignItems: 'center', cursor: 'grab', color: 'text.disabled', flexShrink: 0, touchAction: 'none', '&:active': { cursor: 'grabbing' } }}
             >
               <Iconify icon="custom:menu-duotone" width={14} />
             </Box>
@@ -265,7 +278,6 @@ function DroppableColumn({
             <Typography variant="subtitle2" color="text.secondary" sx={{ flexGrow: 1 }}>
               {stage.label}
             </Typography>
-
             {canEdit && (
               <Stack direction="row" spacing={0}>
                 <Tooltip title="Rename stage">
@@ -273,55 +285,33 @@ function DroppableColumn({
                     <Iconify icon="solar:pen-bold" width={13} />
                   </IconButton>
                 </Tooltip>
-                <Tooltip
-                  title={
-                    !canDelete
-                      ? 'Move all cases out before deleting'
-                      : 'Delete stage'
-                  }
-                >
+                <Tooltip title={!canDelete ? 'Move all cases out before deleting' : 'Delete stage'}>
                   <span>
-                    <IconButton
-                      size="small"
-                      disabled={!canDelete}
-                      onClick={() => onDelete(stage.id)}
-                      sx={{ opacity: 0.6 }}
-                    >
-                      <Iconify
-                        icon="solar:trash-bin-trash-bold"
-                        width={13}
-                        sx={{ color: canDelete ? 'error.main' : 'text.disabled' }}
-                      />
+                    <IconButton size="small" disabled={!canDelete} onClick={() => onDelete(stage.id)} sx={{ opacity: 0.6 }}>
+                      <Iconify icon="solar:trash-bin-trash-bold" width={13} sx={{ color: canDelete ? 'error.main' : 'text.disabled' }} />
                     </IconButton>
                   </span>
                 </Tooltip>
               </Stack>
             )}
-
-            <Chip
-              size="small"
-              label={cards.length}
-              sx={{ height: 20, fontSize: 11, bgcolor: 'background.paper' }}
-            />
+            <Chip size="small" label={cards.length} sx={{ height: 20, fontSize: 11, bgcolor: 'background.paper' }} />
           </>
         )}
       </Stack>
 
-      {/* Cases */}
-      <Stack spacing={1.5}>
-        {cards.map((card) => (
-          <DraggableCard key={card.id} card={card} canEdit={canEdit} onEditCard={onEditCard} />
-        ))}
-        {cards.length === 0 && (
-          <Typography
-            variant="caption"
-            color="text.disabled"
-            sx={{ textAlign: 'center', py: 3, display: 'block' }}
-          >
-            {canEdit ? 'Drop cases here' : 'No cases'}
-          </Typography>
-        )}
-      </Stack>
+      {/* Cards — wrapped in SortableContext for within-column reordering */}
+      <SortableContext items={cardIds} strategy={verticalListSortingStrategy}>
+        <Stack spacing={1.5}>
+          {cards.map((card) => (
+            <DraggableCard key={card.id} card={card} canEdit={canEdit} onEditCard={onEditCard} />
+          ))}
+          {cards.length === 0 && (
+            <Typography variant="caption" color="text.disabled" sx={{ textAlign: 'center', py: 3, display: 'block' }}>
+              {canEdit ? 'Drop cases here' : 'No cases'}
+            </Typography>
+          )}
+        </Stack>
+      </SortableContext>
     </Box>
   );
 }
@@ -352,9 +342,17 @@ function KanbanBoard({
   );
 
   const stageIds = useMemo(() => stages.map((s) => s.id), [stages]);
-
-  // Track which stage column has an active card hovering over it (for highlight)
+  const [activeCard, setActiveCard] = useState<KanbanCard | null>(null);
   const [cardOverStageId, setCardOverStageId] = useState<string | null>(null);
+
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      if (event.active.data.current?.type === 'card') {
+        setActiveCard(cards.find((c) => c.id === event.active.id) ?? null);
+      }
+    },
+    [cards]
+  );
 
   const handleDragOver = useCallback((event: DragOverEvent) => {
     const { active, over } = event;
@@ -365,41 +363,59 @@ function KanbanBoard({
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
+      setActiveCard(null);
       setCardOverStageId(null);
       const { active, over } = event;
       if (!over || !canEdit) return;
 
-      if (active.data.current?.type === 'stage') {
-        const oldIndex = stages.findIndex((s) => s.id === active.id);
-        const newIndex = stages.findIndex((s) => s.id === over.id);
-        if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
-          const reordered = arrayMove([...stages], oldIndex, newIndex);
-          onStageMoved(reordered);
+      const activeType = active.data.current?.type;
+      const overType = over.data.current?.type;
+
+      if (activeType === 'stage') {
+        const oi = stages.findIndex((s) => s.id === active.id);
+        const ni = stages.findIndex((s) => s.id === over.id);
+        if (oi !== ni) onStageMoved(arrayMove([...stages], oi, ni));
+      } else if (activeType === 'card') {
+        const activeCardData = cards.find((c) => c.id === active.id);
+        if (!activeCardData) return;
+
+        if (overType === 'card') {
+          const overCardData = cards.find((c) => c.id === over.id);
+          if (!overCardData) return;
+
+          if (activeCardData.column === overCardData.column) {
+            // Same column — reorder within column
+            reorderKanbanCards(active.id as string, over.id as string);
+          } else {
+            // Different column — move card
+            moveKanbanCard(active.id as string, overCardData.column);
+          }
+        } else if (overType === 'stage') {
+          // Dropped directly on a column (e.g. empty column)
+          if (activeCardData.column !== (over.id as string)) {
+            moveKanbanCard(active.id as string, over.id as string);
+          }
         }
-      } else {
-        moveKanbanCard(active.id as string, over.id as string);
         onCardMoved();
       }
     },
-    [canEdit, stages, onStageMoved, onCardMoved]
+    [canEdit, stages, cards, onStageMoved, onCardMoved]
   );
 
   return (
-    <DndContext sensors={sensors} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
       <SortableContext items={stageIds} strategy={horizontalListSortingStrategy}>
         <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 1, alignItems: 'flex-start' }}>
           {stages.map((stage) => {
             const stageCards = cards.filter((c) => c.column === stage.id && c.pipeline === pipeline);
-            const allCardsInStage = cards.filter((c) => c.column === stage.id);
-            const canDelete = allCardsInStage.length === 0 && stages.length > 1;
-
+            const allInStage = cards.filter((c) => c.column === stage.id);
             return (
               <DroppableColumn
                 key={stage.id}
                 stage={stage}
                 cards={stageCards}
                 canEdit={canEdit}
-                canDelete={canDelete}
+                canDelete={allInStage.length === 0 && stages.length > 1}
                 isCardOver={cardOverStageId === stage.id}
                 onSaveLabel={onSaveStageLabel}
                 onDelete={onDeleteStage}
@@ -410,18 +426,18 @@ function KanbanBoard({
 
           {canEdit && (
             <Box sx={{ flexShrink: 0, pt: 0.5 }}>
-              <Button
-                variant="outlined"
-                startIcon={<Iconify icon="mingcute:add-line" width={16} />}
-                onClick={onAddStage}
-                sx={{ whiteSpace: 'nowrap', minWidth: 140 }}
-              >
+              <Button variant="outlined" startIcon={<Iconify icon="mingcute:add-line" width={16} />} onClick={onAddStage} sx={{ whiteSpace: 'nowrap', minWidth: 140 }}>
                 Add Stage
               </Button>
             </Box>
           )}
         </Box>
       </SortableContext>
+
+      {/* Drag overlay — renders a floating card clone while dragging */}
+      <DragOverlay>
+        {activeCard ? <CardOverlay card={activeCard} /> : null}
+      </DragOverlay>
     </DndContext>
   );
 }
@@ -453,9 +469,7 @@ function AddStageDialog({ open, onClose, onSubmit }: AddStageDialogProps) {
       <DialogTitle>Add Stage</DialogTitle>
       <DialogContent>
         <TextField
-          fullWidth
-          autoFocus
-          label="Stage Name *"
+          fullWidth autoFocus label="Stage Name *"
           value={label}
           onChange={(e) => { setLabel(e.target.value); setError(''); }}
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
@@ -473,7 +487,7 @@ function AddStageDialog({ open, onClose, onSubmit }: AddStageDialogProps) {
 }
 
 // ----------------------------------------------------------------------
-// Add Case dialog
+// Add / Edit Case dialog
 
 type AddCaseForm = {
   companyId: string;
@@ -492,7 +506,7 @@ type AddCaseDialogProps = {
   onSubmit: (card: Omit<KanbanCard, 'id'>) => void;
   stages: KanbanStage[];
   defaultPipeline: KanbanPipeline;
-  editCard?: KanbanCard; // when set, dialog is in edit mode
+  editCard?: KanbanCard;
 };
 
 function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline, editCard }: AddCaseDialogProps) {
@@ -500,45 +514,23 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline, editC
   const today = new Date().toISOString().slice(0, 10);
 
   const [form, setForm] = useState<AddCaseForm>({
-    companyId: '',
-    pipeline: defaultPipeline,
-    columnId: stages[0]?.id ?? '',
-    urgency: 'medium',
-    visaExpiryDate: '',
-    durationDays: '',
-    createdDate: today,
-    notes: '',
+    companyId: '', pipeline: defaultPipeline, columnId: stages[0]?.id ?? '',
+    urgency: 'medium', visaExpiryDate: '', durationDays: '', createdDate: today, notes: '',
   });
   const [errors, setErrors] = useState<Partial<Record<keyof AddCaseForm, string>>>({});
 
   useEffect(() => {
     if (!open) return;
     if (editCard) {
-      const resolvedId =
-        editCard.companyId ??
-        tbStore.clients.find((c) => c.companyName === editCard.companyName)?.id ??
-        '';
+      const resolvedId = editCard.companyId ?? tbStore.clients.find((c) => c.companyName === editCard.companyName)?.id ?? '';
       setForm({
-        companyId: resolvedId,
-        pipeline: editCard.pipeline,
-        columnId: editCard.column,
-        urgency: editCard.urgency,
-        visaExpiryDate: editCard.visaExpiryDate ?? '',
+        companyId: resolvedId, pipeline: editCard.pipeline, columnId: editCard.column,
+        urgency: editCard.urgency, visaExpiryDate: editCard.visaExpiryDate ?? '',
         durationDays: editCard.durationDays != null ? String(editCard.durationDays) : '',
-        createdDate: editCard.createdDate,
-        notes: editCard.notes ?? '',
+        createdDate: editCard.createdDate, notes: editCard.notes ?? '',
       });
     } else {
-      setForm({
-        companyId: '',
-        pipeline: defaultPipeline,
-        columnId: stages[0]?.id ?? '',
-        urgency: 'medium',
-        visaExpiryDate: '',
-        durationDays: '',
-        createdDate: today,
-        notes: '',
-      });
+      setForm({ companyId: '', pipeline: defaultPipeline, columnId: stages[0]?.id ?? '', urgency: 'medium', visaExpiryDate: '', durationDays: '', createdDate: today, notes: '' });
     }
     setErrors({});
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -548,40 +540,32 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline, editC
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const directorNames = useMemo(() => selectedCompany?.directors.map((d) => d.name) ?? [], [form.companyId]);
 
-  const handleChange = useCallback(
-    <K extends keyof AddCaseForm>(field: K, value: AddCaseForm[K]) => {
-      setForm((prev) => ({ ...prev, [field]: value }));
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    },
-    []
-  );
+  const handleChange = useCallback(<K extends keyof AddCaseForm>(field: K, value: AddCaseForm[K]) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
+  }, []);
 
   const validate = useCallback((): boolean => {
-    const newErrors: Partial<Record<keyof AddCaseForm, string>> = {};
-    if (!form.companyId) newErrors.companyId = 'Select a company';
-    if (!form.columnId) newErrors.columnId = 'Select a stage';
-    if (!form.createdDate) newErrors.createdDate = 'Created date is required';
+    const e: Partial<Record<keyof AddCaseForm, string>> = {};
+    if (!form.companyId) e.companyId = 'Select a company';
+    if (!form.columnId) e.columnId = 'Select a stage';
+    if (!form.createdDate) e.createdDate = 'Created date is required';
     if (form.durationDays && (isNaN(Number(form.durationDays)) || Number(form.durationDays) <= 0)) {
-      newErrors.durationDays = 'Enter a positive number of days';
+      e.durationDays = 'Enter a positive number';
     }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors(e);
+    return Object.keys(e).length === 0;
   }, [form]);
 
   const handleSubmit = useCallback(() => {
     if (!validate() || !selectedCompany) return;
     onSubmit({
-      pipeline: form.pipeline,
-      column: form.columnId,
-      companyId: form.companyId,
-      companyName: selectedCompany.companyName,
-      thaiRegNumber: selectedCompany.thaiRegNumber,
-      directorNames,
-      urgency: form.urgency,
+      pipeline: form.pipeline, column: form.columnId, companyId: form.companyId,
+      companyName: selectedCompany.companyName, thaiRegNumber: selectedCompany.thaiRegNumber,
+      directorNames, urgency: form.urgency,
       visaExpiryDate: form.visaExpiryDate || undefined,
       durationDays: form.durationDays ? Number(form.durationDays) : undefined,
-      createdDate: form.createdDate,
-      notes: form.notes.trim() || undefined,
+      createdDate: form.createdDate, notes: form.notes.trim() || undefined,
     });
   }, [form, validate, selectedCompany, directorNames, onSubmit]);
 
@@ -590,139 +574,66 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline, editC
       <DialogTitle>{isEdit ? 'Edit Case' : 'Add Case'}</DialogTitle>
       <DialogContent dividers>
         <Stack spacing={3}>
-          {/* Company */}
           <FormControl fullWidth error={!!errors.companyId}>
             <InputLabel>Company *</InputLabel>
-            <Select
-              value={form.companyId}
-              label="Company *"
-              onChange={(e) => handleChange('companyId', e.target.value)}
-            >
-              {tbStore.clients.map((client) => (
-                <MenuItem key={client.id} value={client.id}>
+            <Select value={form.companyId} label="Company *" onChange={(e) => handleChange('companyId', e.target.value)}>
+              {tbStore.clients.map((c) => (
+                <MenuItem key={c.id} value={c.id}>
                   <Box>
-                    <Typography variant="body2" fontWeight="fontWeightMedium">
-                      {client.companyName}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
-                      {client.thaiRegNumber}
-                    </Typography>
+                    <Typography variant="body2" fontWeight="fontWeightMedium">{c.companyName}</Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>{c.thaiRegNumber}</Typography>
                   </Box>
                 </MenuItem>
               ))}
             </Select>
-            {errors.companyId && (
-              <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>
-                {errors.companyId}
-              </Typography>
-            )}
+            {errors.companyId && <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>{errors.companyId}</Typography>}
           </FormControl>
 
           {directorNames.length > 0 && (
             <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                Directors (from company)
-              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>Directors (from company)</Typography>
               <Stack direction="row" spacing={0.75} flexWrap="wrap">
-                {directorNames.map((name) => (
-                  <Chip key={name} size="small" label={name} sx={{ mb: 0.75 }} />
-                ))}
+                {directorNames.map((name) => <Chip key={name} size="small" label={name} sx={{ mb: 0.75 }} />)}
               </Stack>
             </Box>
           )}
 
-          {/* Pipeline */}
           <Box>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-              Pipeline *
-            </Typography>
-            <ToggleButtonGroup
-              exclusive value={form.pipeline}
-              onChange={(_, val) => val && handleChange('pipeline', val)}
-              size="small" fullWidth
-            >
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>Pipeline *</Typography>
+            <ToggleButtonGroup exclusive value={form.pipeline} onChange={(_, val) => val && handleChange('pipeline', val)} size="small" fullWidth>
               <ToggleButton value="company_registration">Company Registration</ToggleButton>
               <ToggleButton value="visa_work_permit">Visa / Work Permit</ToggleButton>
             </ToggleButtonGroup>
           </Box>
 
-          {/* Stage */}
           <FormControl fullWidth size="small" error={!!errors.columnId}>
             <InputLabel>{isEdit ? 'Stage *' : 'Initial Stage *'}</InputLabel>
-            <Select
-              value={form.columnId}
-              label={isEdit ? 'Stage *' : 'Initial Stage *'}
-              onChange={(e) => handleChange('columnId', e.target.value)}
-            >
-              {stages.map((s) => (
-                <MenuItem key={s.id} value={s.id}>{s.label}</MenuItem>
-              ))}
+            <Select value={form.columnId} label={isEdit ? 'Stage *' : 'Initial Stage *'} onChange={(e) => handleChange('columnId', e.target.value)}>
+              {stages.map((s) => <MenuItem key={s.id} value={s.id}>{s.label}</MenuItem>)}
             </Select>
           </FormControl>
 
-          {/* Urgency */}
           <Box>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-              Urgency *
-            </Typography>
-            <ToggleButtonGroup
-              exclusive value={form.urgency}
-              onChange={(_, val) => val && handleChange('urgency', val as UrgencyLevel)}
-              size="small"
-            >
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>Urgency *</Typography>
+            <ToggleButtonGroup exclusive value={form.urgency} onChange={(_, val) => val && handleChange('urgency', val as UrgencyLevel)} size="small">
               <ToggleButton value="high" sx={{ '&.Mui-selected': { bgcolor: '#FEE2E2', color: '#991B1B' } }}>High</ToggleButton>
               <ToggleButton value="medium" sx={{ '&.Mui-selected': { bgcolor: '#FEF3C7', color: '#92400E' } }}>Medium</ToggleButton>
               <ToggleButton value="low" sx={{ '&.Mui-selected': { bgcolor: '#D1FAE5', color: '#065F46' } }}>Low</ToggleButton>
             </ToggleButtonGroup>
           </Box>
 
-          {/* Created date + Duration (side by side) */}
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-            <TextField
-              fullWidth size="small" type="date"
-              label="Created Date *"
-              value={form.createdDate}
-              onChange={(e) => handleChange('createdDate', e.target.value)}
-              slotProps={{ inputLabel: { shrink: true } }}
-              error={!!errors.createdDate}
-              helperText={errors.createdDate ?? 'Defaults to today'}
-            />
-            <TextField
-              fullWidth size="small" type="number"
-              label="Duration (days)"
-              value={form.durationDays}
-              onChange={(e) => handleChange('durationDays', e.target.value)}
-              slotProps={{ input: { inputProps: { min: 1 } } }}
-              error={!!errors.durationDays}
-              helperText={errors.durationDays ?? 'Leave blank → shows "–"'}
-            />
+            <TextField fullWidth size="small" type="date" label="Created Date *" value={form.createdDate} onChange={(e) => handleChange('createdDate', e.target.value)} slotProps={{ inputLabel: { shrink: true } }} error={!!errors.createdDate} helperText={errors.createdDate ?? 'Defaults to today'} />
+            <TextField fullWidth size="small" type="number" label="Duration (days)" value={form.durationDays} onChange={(e) => handleChange('durationDays', e.target.value)} slotProps={{ input: { inputProps: { min: 1 } } }} error={!!errors.durationDays} helperText={errors.durationDays ?? 'Leave blank → shows "–"'} />
           </Stack>
 
-          {/* Visa expiry */}
-          <TextField
-            fullWidth size="small" type="date"
-            label="Visa / Permit Expiry Date"
-            value={form.visaExpiryDate}
-            onChange={(e) => handleChange('visaExpiryDate', e.target.value)}
-            slotProps={{ inputLabel: { shrink: true } }}
-            helperText="Optional"
-          />
-
-          {/* Notes */}
-          <TextField
-            fullWidth size="small" multiline rows={2}
-            label="Notes"
-            value={form.notes}
-            onChange={(e) => handleChange('notes', e.target.value)}
-            placeholder="Internal notes, special requirements…"
-          />
+          <TextField fullWidth size="small" type="date" label="Visa / Permit Expiry Date" value={form.visaExpiryDate} onChange={(e) => handleChange('visaExpiryDate', e.target.value)} slotProps={{ inputLabel: { shrink: true } }} helperText="Optional" />
+          <TextField fullWidth size="small" multiline rows={2} label="Notes" value={form.notes} onChange={(e) => handleChange('notes', e.target.value)} placeholder="Internal notes…" />
         </Stack>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={!form.companyId}>
-          {isEdit ? 'Save Changes' : 'Add Case'}
-        </Button>
+        <Button variant="contained" onClick={handleSubmit} disabled={!form.companyId}>{isEdit ? 'Save Changes' : 'Add Case'}</Button>
       </DialogActions>
     </Dialog>
   );
@@ -737,6 +648,8 @@ export function TBKanbanView() {
 
   const [activePipeline, setActivePipeline] = useState<KanbanPipeline>('company_registration');
   const [filterCompanyName, setFilterCompanyName] = useState<string | null>(null);
+  const [filterUrgency, setFilterUrgency] = useState<UrgencyLevel | 'all'>('all');
+  const [sortByDeadline, setSortByDeadline] = useState(false);
   const [stages, setStages] = useState<KanbanStage[]>(() => [...tbStore.stages]);
   const [cards, setCards] = useState<KanbanCard[]>(() => [...tbStore.kanbanCards]);
   const [hasChanges, setHasChanges] = useState(false);
@@ -746,26 +659,40 @@ export function TBKanbanView() {
   const [editingCard, setEditingCard] = useState<KanbanCard | null>(null);
   const [notification, setNotification] = useState<{ msg: string; severity: 'success' | 'error' | 'info' } | null>(null);
 
-  // Unique companies present in the active pipeline, with case counts
-  const pipelineCompanies = useMemo(() => {
+  // Companies in the CR pipeline (for company filter)
+  const crCompanies = useMemo(() => {
     const map = new Map<string, number>();
-    cards
-      .filter((c) => c.pipeline === activePipeline)
+    cards.filter((c) => c.pipeline === 'company_registration')
       .forEach((c) => map.set(c.companyName, (map.get(c.companyName) ?? 0) + 1));
-    return Array.from(map.entries())
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }, [cards, activePipeline]);
+    return Array.from(map.entries()).map(([name, count]) => ({ name, count })).sort((a, b) => a.name.localeCompare(b.name));
+  }, [cards]);
 
-  // Cards passed to the board — filtered by company when a selection is active
-  const filteredCards = useMemo(
-    () => (filterCompanyName ? cards.filter((c) => c.companyName === filterCompanyName) : cards),
-    [cards, filterCompanyName]
-  );
+  // Filtered + sorted cards
+  const filteredCards = useMemo(() => {
+    let result = cards;
+    if (filterCompanyName && activePipeline === 'company_registration') {
+      result = result.filter((c) => c.companyName === filterCompanyName);
+    }
+    if (filterUrgency !== 'all') {
+      result = result.filter((c) => c.urgency === filterUrgency);
+    }
+    if (sortByDeadline) {
+      result = [...result].sort((a, b) => (a.durationDays ?? Infinity) - (b.durationDays ?? Infinity));
+    }
+    return result;
+  }, [cards, filterCompanyName, filterUrgency, sortByDeadline, activePipeline]);
+
+  const hasActiveFilters = filterCompanyName !== null || filterUrgency !== 'all' || sortByDeadline;
 
   const handleTabChange = useCallback((_: React.SyntheticEvent, val: KanbanPipeline) => {
     setActivePipeline(val);
-    setFilterCompanyName(null); // reset filter when switching pipelines
+    setFilterCompanyName(null);
+  }, []);
+
+  const handleClearFilters = useCallback(() => {
+    setFilterCompanyName(null);
+    setFilterUrgency('all');
+    setSortByDeadline(false);
   }, []);
 
   const handleCardMoved = useCallback(() => {
@@ -784,7 +711,7 @@ export function TBKanbanView() {
     setTimeout(() => {
       setSaving(false);
       setHasChanges(false);
-      setNotification({ msg: 'Pipeline changes saved successfully.', severity: 'success' });
+      setNotification({ msg: 'Pipeline changes saved.', severity: 'success' });
     }, 800);
   }, []);
 
@@ -795,8 +722,8 @@ export function TBKanbanView() {
   }, []);
 
   const handleDeleteStage = useCallback((stageId: string) => {
-    const success = deleteKanbanStage(stageId);
-    if (success) {
+    const ok = deleteKanbanStage(stageId);
+    if (ok) {
       setStages([...tbStore.stages]);
       setNotification({ msg: 'Stage deleted.', severity: 'info' });
     } else {
@@ -811,61 +738,43 @@ export function TBKanbanView() {
     setNotification({ msg: `Stage "${label}" added.`, severity: 'success' });
   }, []);
 
-  const handleAddCase = useCallback(
-    (card: Omit<KanbanCard, 'id'>) => {
-      addKanbanCard(card);
-      setCards([...tbStore.kanbanCards]);
-      setAddCaseOpen(false);
-      setHasChanges(true);
-      const stageName = stages.find((s) => s.id === card.column)?.label ?? card.column;
-      setNotification({ msg: `Case added to "${stageName}".`, severity: 'success' });
-    },
-    [stages]
-  );
+  const handleAddCase = useCallback((card: Omit<KanbanCard, 'id'>) => {
+    addKanbanCard(card);
+    setCards([...tbStore.kanbanCards]);
+    setAddCaseOpen(false);
+    setHasChanges(true);
+    const stageName = stages.find((s) => s.id === card.column)?.label ?? card.column;
+    setNotification({ msg: `Case added to "${stageName}".`, severity: 'success' });
+  }, [stages]);
 
-  const handleOpenEdit = useCallback((card: KanbanCard) => {
-    setEditingCard(card);
-  }, []);
-
-  const handleEditCase = useCallback(
-    (card: Omit<KanbanCard, 'id'>) => {
-      if (!editingCard) return;
-      editKanbanCard(editingCard.id, card);
-      setCards([...tbStore.kanbanCards]);
-      setEditingCard(null);
-      setHasChanges(true);
-      setNotification({ msg: 'Case updated.', severity: 'success' });
-    },
-    [editingCard]
-  );
+  const handleEditCase = useCallback((card: Omit<KanbanCard, 'id'>) => {
+    if (!editingCard) return;
+    editKanbanCard(editingCard.id, card);
+    setCards([...tbStore.kanbanCards]);
+    setEditingCard(null);
+    setHasChanges(true);
+    setNotification({ msg: 'Case updated.', severity: 'success' });
+  }, [editingCard]);
 
   return (
     <DashboardContent maxWidth={false}>
+      {/* Page header */}
       <Stack direction="row" alignItems="flex-start" justifyContent="space-between" sx={{ mb: 3 }}>
         <Box>
           <Typography variant="h4">Kanban Pipelines</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             {canEdit
-              ? 'Drag the ≡ handle to reorder stages. Long-press (mobile) or drag a case card to move it.'
+              ? 'Drag the ≡ handle to reorder stages · drag cards to move or reorder within a stage'
               : 'View-only — only Super Admins can manage cases and stages.'}
           </Typography>
         </Box>
-
         <Stack direction="row" spacing={1.5} sx={{ flexShrink: 0, mt: 0.5 }}>
           {canEdit && (
             <>
-              <Button
-                variant="outlined"
-                startIcon={<Iconify icon="mingcute:add-line" width={16} />}
-                onClick={() => setAddCaseOpen(true)}
-              >
+              <Button variant="outlined" startIcon={<Iconify icon="mingcute:add-line" width={16} />} onClick={() => setAddCaseOpen(true)}>
                 Add Case
               </Button>
-              <Button
-                variant="contained"
-                disabled={!hasChanges || saving}
-                onClick={handleSave}
-              >
+              <Button variant="contained" disabled={!hasChanges || saving} onClick={handleSave}>
                 {saving ? 'Saving…' : 'Save Changes'}
               </Button>
             </>
@@ -879,11 +788,8 @@ export function TBKanbanView() {
         </Alert>
       )}
 
-      <Tabs
-        value={activePipeline}
-        onChange={handleTabChange}
-        sx={{ mb: 3, borderBottom: '1px solid', borderColor: 'divider' }}
-      >
+      {/* Pipeline tabs */}
+      <Tabs value={activePipeline} onChange={handleTabChange} sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
         {PIPELINE_TABS.map((tab) => (
           <Tab
             key={tab.id}
@@ -891,68 +797,89 @@ export function TBKanbanView() {
             label={
               <Stack direction="row" spacing={0.75} alignItems="center">
                 <span>{tab.label}</span>
-                <Chip
-                  size="small"
-                  label={cards.filter((c) => c.pipeline === tab.id).length}
-                  sx={{ height: 18, fontSize: 10 }}
-                />
+                <Chip size="small" label={cards.filter((c) => c.pipeline === tab.id).length} sx={{ height: 18, fontSize: 10 }} />
               </Stack>
             }
           />
         ))}
       </Tabs>
 
-      {/* Company filter */}
-      <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2.5 }}>
-        <FormControl size="small" sx={{ minWidth: 300 }}>
-          <InputLabel shrink>Filter by company</InputLabel>
-          <Select
-            notched
-            displayEmpty
-            value={filterCompanyName ?? ''}
-            label="Filter by company"
-            onChange={(e) => setFilterCompanyName(e.target.value || null)}
-          >
-            <MenuItem value="">
-              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
-                <Typography variant="body2">All Companies</Typography>
-                <Chip
-                  size="small"
-                  label={cards.filter((c) => c.pipeline === activePipeline).length}
-                  sx={{ height: 18, fontSize: 10, ml: 1 }}
-                />
-              </Stack>
-            </MenuItem>
-            {pipelineCompanies.map(({ name, count }) => (
-              <MenuItem key={name} value={name}>
+      {/* Filter bar */}
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        alignItems={{ sm: 'center' }}
+        spacing={1.5}
+        flexWrap="wrap"
+        sx={{ py: 2 }}
+      >
+        {/* Company filter — CR tab only */}
+        {activePipeline === 'company_registration' && (
+          <FormControl size="small" sx={{ minWidth: 240 }}>
+            <InputLabel shrink>Company</InputLabel>
+            <Select
+              notched displayEmpty
+              value={filterCompanyName ?? ''}
+              label="Company"
+              onChange={(e) => setFilterCompanyName(e.target.value || null)}
+            >
+              <MenuItem value="">
                 <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
-                  <Typography variant="body2" noWrap sx={{ maxWidth: 230 }}>{name}</Typography>
-                  <Chip size="small" label={count} sx={{ height: 18, fontSize: 10, ml: 1, flexShrink: 0 }} />
+                  <Typography variant="body2">All Companies</Typography>
+                  <Chip size="small" label={cards.filter((c) => c.pipeline === 'company_registration').length} sx={{ height: 18, fontSize: 10, ml: 1 }} />
                 </Stack>
               </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+              {crCompanies.map(({ name, count }) => (
+                <MenuItem key={name} value={name}>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
+                    <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>{name}</Typography>
+                    <Chip size="small" label={count} sx={{ height: 18, fontSize: 10, ml: 1, flexShrink: 0 }} />
+                  </Stack>
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
 
-        {filterCompanyName && (
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<Iconify icon="mingcute:close-line" width={14} />}
-            onClick={() => setFilterCompanyName(null)}
-          >
-            Show All
+        <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', sm: 'block' }, ...(activePipeline !== 'company_registration' && { display: 'none' }) }} />
+
+        {/* Urgency filter */}
+        <ToggleButtonGroup
+          exclusive
+          size="small"
+          value={filterUrgency}
+          onChange={(_, val) => val && setFilterUrgency(val as UrgencyLevel | 'all')}
+        >
+          <ToggleButton value="all">All</ToggleButton>
+          <ToggleButton value="high" sx={{ color: '#EF4444', '&.Mui-selected': { bgcolor: '#FEE2E2' } }}>HIGH</ToggleButton>
+          <ToggleButton value="medium" sx={{ color: '#F59E0B', '&.Mui-selected': { bgcolor: '#FEF3C7' } }}>MED</ToggleButton>
+          <ToggleButton value="low" sx={{ color: '#10B981', '&.Mui-selected': { bgcolor: '#D1FAE5' } }}>LOW</ToggleButton>
+        </ToggleButtonGroup>
+
+        {/* Deadline sort */}
+        <Button
+          size="small"
+          variant={sortByDeadline ? 'contained' : 'outlined'}
+          startIcon={<Iconify icon="solar:clock-circle-outline" width={15} />}
+          onClick={() => setSortByDeadline((v) => !v)}
+        >
+          Closest Deadline
+        </Button>
+
+        {/* Clear all */}
+        {hasActiveFilters && (
+          <Button size="small" color="inherit" startIcon={<Iconify icon="mingcute:close-line" width={14} />} onClick={handleClearFilters}>
+            Clear
           </Button>
         )}
 
-        {filterCompanyName && (
+        {hasActiveFilters && (
           <Typography variant="caption" color="text.secondary">
-            Showing {filteredCards.filter((c) => c.pipeline === activePipeline).length} of{' '}
-            {cards.filter((c) => c.pipeline === activePipeline).length} cases
+            {filteredCards.filter((c) => c.pipeline === activePipeline).length} of {cards.filter((c) => c.pipeline === activePipeline).length} cases
           </Typography>
         )}
       </Stack>
 
+      {/* Board */}
       <KanbanBoard
         pipeline={activePipeline}
         stages={stages}
@@ -963,42 +890,17 @@ export function TBKanbanView() {
         onSaveStageLabel={handleSaveStageLabel}
         onDeleteStage={handleDeleteStage}
         onAddStage={() => setAddStageOpen(true)}
-        onEditCard={handleOpenEdit}
+        onEditCard={setEditingCard}
       />
 
-      <AddStageDialog
-        open={addStageOpen}
-        onClose={() => setAddStageOpen(false)}
-        onSubmit={handleAddStage}
-      />
+      {/* Dialogs */}
+      <AddStageDialog open={addStageOpen} onClose={() => setAddStageOpen(false)} onSubmit={handleAddStage} />
+      <AddCaseDialog open={addCaseOpen} onClose={() => setAddCaseOpen(false)} onSubmit={handleAddCase} stages={stages} defaultPipeline={activePipeline} />
+      <AddCaseDialog open={!!editingCard} onClose={() => setEditingCard(null)} onSubmit={handleEditCase} stages={stages} defaultPipeline={activePipeline} editCard={editingCard ?? undefined} />
 
-      <AddCaseDialog
-        open={addCaseOpen}
-        onClose={() => setAddCaseOpen(false)}
-        onSubmit={handleAddCase}
-        stages={stages}
-        defaultPipeline={activePipeline}
-      />
-
-      <AddCaseDialog
-        open={!!editingCard}
-        onClose={() => setEditingCard(null)}
-        onSubmit={handleEditCase}
-        stages={stages}
-        defaultPipeline={activePipeline}
-        editCard={editingCard ?? undefined}
-      />
-
-      <Snackbar
-        open={!!notification}
-        autoHideDuration={3500}
-        onClose={() => setNotification(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
+      <Snackbar open={!!notification} autoHideDuration={3500} onClose={() => setNotification(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
         {notification ? (
-          <Alert severity={notification.severity} onClose={() => setNotification(null)} sx={{ width: '100%' }}>
-            {notification.msg}
-          </Alert>
+          <Alert severity={notification.severity} onClose={() => setNotification(null)} sx={{ width: '100%' }}>{notification.msg}</Alert>
         ) : undefined}
       </Snackbar>
     </DashboardContent>

@@ -20,6 +20,11 @@ export const tbNavData: NavItem[] = [
     icon: icon('solar:eye-bold'),
   },
   {
+    title: 'Clients',
+    path: '/tb/people',
+    icon: icon('solar:eye-closed-bold'),
+  },
+  {
     title: 'Kanban Pipelines',
     path: '/tb/kanban',
     icon: icon('solar:check-circle-bold'),
