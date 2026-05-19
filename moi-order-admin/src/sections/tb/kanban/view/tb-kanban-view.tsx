@@ -843,17 +843,38 @@ export function TBKanbanView() {
         <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', sm: 'block' }, ...(activePipeline !== 'company_registration' && { display: 'none' }) }} />
 
         {/* Urgency filter */}
-        <ToggleButtonGroup
-          exclusive
-          size="small"
-          value={filterUrgency}
-          onChange={(_, val) => val && setFilterUrgency(val as UrgencyLevel | 'all')}
-        >
-          <ToggleButton value="all">All</ToggleButton>
-          <ToggleButton value="high" sx={{ color: '#EF4444', '&.Mui-selected': { bgcolor: '#FEE2E2' } }}>HIGH</ToggleButton>
-          <ToggleButton value="medium" sx={{ color: '#F59E0B', '&.Mui-selected': { bgcolor: '#FEF3C7' } }}>MED</ToggleButton>
-          <ToggleButton value="low" sx={{ color: '#10B981', '&.Mui-selected': { bgcolor: '#D1FAE5' } }}>LOW</ToggleButton>
-        </ToggleButtonGroup>
+        <FormControl size="small" sx={{ minWidth: 140 }}>
+          <InputLabel shrink>Urgency</InputLabel>
+          <Select
+            notched
+            displayEmpty
+            value={filterUrgency}
+            label="Urgency"
+            onChange={(e) => setFilterUrgency(e.target.value as UrgencyLevel | 'all')}
+            renderValue={(val) => {
+              const DOT: Record<string, string> = { high: '#EF4444', medium: '#F59E0B', low: '#10B981' };
+              const LABEL: Record<string, string> = { all: 'All', high: 'High', medium: 'Medium', low: 'Low' };
+              return (
+                <Stack direction="row" spacing={0.75} alignItems="center">
+                  {val !== 'all' && (
+                    <Box sx={{ width: 9, height: 9, borderRadius: '50%', bgcolor: DOT[val], flexShrink: 0 }} />
+                  )}
+                  <span>{LABEL[val] ?? 'All'}</span>
+                </Stack>
+              );
+            }}
+          >
+            <MenuItem value="all">All Urgencies</MenuItem>
+            {([['high', '#EF4444', 'High'], ['medium', '#F59E0B', 'Medium'], ['low', '#10B981', 'Low']] as const).map(([val, color, label]) => (
+              <MenuItem key={val} value={val}>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Box sx={{ width: 9, height: 9, borderRadius: '50%', bgcolor: color, flexShrink: 0 }} />
+                  <span>{label}</span>
+                </Stack>
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         {/* Deadline sort */}
         <Button
