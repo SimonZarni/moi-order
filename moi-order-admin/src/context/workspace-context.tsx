@@ -15,7 +15,12 @@ const WorkspaceContext = createContext<WorkspaceContextValue>({
 });
 
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
-  const [activeWorkspace, setWorkspaceState] = useState<WorkspaceId>('moi-order-main');
+  // Derive initial workspace from the URL so a hard refresh on /tb/* restores correctly
+  const [activeWorkspace, setWorkspaceState] = useState<WorkspaceId>(() =>
+    window.location.pathname.startsWith('/tb')
+      ? 'moi-order-trusted-brothers'
+      : 'moi-order-main'
+  );
 
   const setActiveWorkspace = useCallback((id: WorkspaceId) => {
     setWorkspaceState(id);
