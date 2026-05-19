@@ -656,6 +656,7 @@ export function TBKanbanView() {
   const canEdit = isSuperAdmin();
 
   const [activePipeline, setActivePipeline] = useState<KanbanPipeline>('company_registration');
+  const [filterCompanyName, setFilterCompanyName] = useState<string | null>(null);
   const [stages, setStages] = useState<KanbanStage[]>(() => [...tbStore.stages]);
   const [cards, setCards] = useState<KanbanCard[]>(() => [...tbStore.kanbanCards]);
   const [hasChanges, setHasChanges] = useState(false);
@@ -664,8 +665,26 @@ export function TBKanbanView() {
   const [addStageOpen, setAddStageOpen] = useState(false);
   const [notification, setNotification] = useState<{ msg: string; severity: 'success' | 'error' | 'info' } | null>(null);
 
+  // Unique companies present in the active pipeline, with case counts
+  const pipelineCompanies = useMemo(() => {
+    const map = new Map<string, number>();
+    cards
+      .filter((c) => c.pipeline === activePipeline)
+      .forEach((c) => map.set(c.companyName, (map.get(c.companyName) ?? 0) + 1));
+    return Array.from(map.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [cards, activePipeline]);
+
+  // Cards passed to the board — filtered by company when a selection is active
+  const filteredCards = useMemo(
+    () => (filterCompanyName ? cards.filter((c) => c.companyName === filterCompanyName) : cards),
+    [cards, filterCompanyName]
+  );
+
   const handleTabChange = useCallback((_: React.SyntheticEvent, val: KanbanPipeline) => {
     setActivePipeline(val);
+    setFilterCompanyName(null); // reset filter when switching pipelines
   }, []);
 
   const handleCardMoved = useCallback(() => {
@@ -786,10 +805,60 @@ export function TBKanbanView() {
         ))}
       </Tabs>
 
+      {/* Company filter */}
+      <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2.5 }}>
+        <FormControl size="small" sx={{ minWidth: 300 }}>
+          <InputLabel>Filter by company</InputLabel>
+          <Select
+            value={filterCompanyName ?? ''}
+            label="Filter by company"
+            onChange={(e) => setFilterCompanyName(e.target.value || null)}
+            displayEmpty
+          >
+            <MenuItem value="">
+              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
+                <Typography variant="body2">All Companies</Typography>
+                <Chip
+                  size="small"
+                  label={cards.filter((c) => c.pipeline === activePipeline).length}
+                  sx={{ height: 18, fontSize: 10, ml: 1 }}
+                />
+              </Stack>
+            </MenuItem>
+            {pipelineCompanies.map(({ name, count }) => (
+              <MenuItem key={name} value={name}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
+                  <Typography variant="body2" noWrap sx={{ maxWidth: 230 }}>{name}</Typography>
+                  <Chip size="small" label={count} sx={{ height: 18, fontSize: 10, ml: 1, flexShrink: 0 }} />
+                </Stack>
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        {filterCompanyName && (
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<Iconify icon="mingcute:close-line" width={14} />}
+            onClick={() => setFilterCompanyName(null)}
+          >
+            Show All
+          </Button>
+        )}
+
+        {filterCompanyName && (
+          <Typography variant="caption" color="text.secondary">
+            Showing {filteredCards.filter((c) => c.pipeline === activePipeline).length} of{' '}
+            {cards.filter((c) => c.pipeline === activePipeline).length} cases
+          </Typography>
+        )}
+      </Stack>
+
       <KanbanBoard
         pipeline={activePipeline}
         stages={stages}
-        cards={cards}
+        cards={filteredCards}
         canEdit={canEdit}
         onCardMoved={handleCardMoved}
         onStageMoved={handleStageMoved}
