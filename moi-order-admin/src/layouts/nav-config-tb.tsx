@@ -15,7 +15,7 @@ export const tbNavData: NavItem[] = [
     icon: icon('solar:home-angle-bold-duotone'),
   },
   {
-    title: 'Clients Overview',
+    title: 'Companies Overview',
     path: '/tb/clients',
     icon: icon('solar:eye-bold'),
   },
