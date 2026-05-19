@@ -808,12 +808,13 @@ export function TBKanbanView() {
       {/* Company filter */}
       <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2.5 }}>
         <FormControl size="small" sx={{ minWidth: 300 }}>
-          <InputLabel>Filter by company</InputLabel>
+          <InputLabel shrink>Filter by company</InputLabel>
           <Select
+            notched
+            displayEmpty
             value={filterCompanyName ?? ''}
             label="Filter by company"
             onChange={(e) => setFilterCompanyName(e.target.value || null)}
-            displayEmpty
           >
             <MenuItem value="">
               <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
