@@ -136,6 +136,8 @@ export type KanbanCard = {
   companyId?: string;
   directorNames: string[];
   visaExpiryDate?: string;
+  durationDays?: number;
+  createdDate: string;
   urgency: UrgencyLevel;
   notes?: string;
 };
@@ -407,6 +409,8 @@ const INITIAL_KANBAN_CARDS: KanbanCard[] = [
     thaiRegNumber: '0105565001234',
     directorNames: ['นาย สมชาย วงศ์สุวรรณ', 'นาง สุดา พานิชย์'],
     urgency: 'medium',
+    durationDays: 30,
+    createdDate: '2026-05-10',
     notes: 'BOI-registered entity, requires special approval',
   },
   {
@@ -417,6 +421,7 @@ const INITIAL_KANBAN_CARDS: KanbanCard[] = [
     thaiRegNumber: '0105562009876',
     directorNames: ['นาย ประวิทย์ ศรีสมบูรณ์'],
     urgency: 'low',
+    createdDate: '2026-05-08',
     notes: 'Standard registration',
   },
   {
@@ -427,6 +432,8 @@ const INITIAL_KANBAN_CARDS: KanbanCard[] = [
     thaiRegNumber: '0105564007823',
     directorNames: ['นาย ธนวัฒน์ จิรายุ', 'นาง ลดาวัลย์ อินทรัตน์'],
     urgency: 'high',
+    durationDays: 7,
+    createdDate: '2026-05-15',
     notes: 'Urgent — client deadline end of month',
   },
   {
@@ -437,6 +444,7 @@ const INITIAL_KANBAN_CARDS: KanbanCard[] = [
     thaiRegNumber: '0105558012390',
     directorNames: ['นาง รัตนา สิทธิโชค'],
     urgency: 'low',
+    createdDate: '2026-04-20',
     notes: 'All documents received and filed',
   },
   {
@@ -447,6 +455,8 @@ const INITIAL_KANBAN_CARDS: KanbanCard[] = [
     thaiRegNumber: '0105561008765',
     directorNames: ["Mr. James O'Brien", 'Ms. Sarah Lin'],
     visaExpiryDate: '2026-05-31',
+    durationDays: 14,
+    createdDate: '2026-05-17',
     urgency: 'high',
     notes: 'Work permit renewal — expiring soon',
   },
@@ -458,6 +468,8 @@ const INITIAL_KANBAN_CARDS: KanbanCard[] = [
     thaiRegNumber: '0105566003421',
     directorNames: ['Mr. David Chen'],
     visaExpiryDate: '2026-06-15',
+    durationDays: 21,
+    createdDate: '2026-05-12',
     urgency: 'medium',
     notes: 'Non-B visa extension',
   },
@@ -469,6 +481,7 @@ const INITIAL_KANBAN_CARDS: KanbanCard[] = [
     thaiRegNumber: '0105560004512',
     directorNames: ['Mr. Andreas Schmidt', 'Ms. Yuki Tanaka'],
     visaExpiryDate: '2026-07-20',
+    createdDate: '2026-05-14',
     urgency: 'medium',
     notes: 'Work permit extension + type change',
   },
@@ -480,6 +493,7 @@ const INITIAL_KANBAN_CARDS: KanbanCard[] = [
     thaiRegNumber: '0105563011847',
     directorNames: ['Ms. Emma Williams'],
     visaExpiryDate: '2027-01-10',
+    createdDate: '2026-04-28',
     urgency: 'low',
     notes: 'Extension granted — 1 year',
   },
@@ -611,7 +625,11 @@ export function moveKanbanCard(cardId: string, newColumn: KanbanColumn): void {
 }
 
 export function addKanbanCard(card: Omit<KanbanCard, 'id'>): KanbanCard {
-  const newCard: KanbanCard = { ...card, id: `card-${Date.now()}` };
+  const newCard: KanbanCard = {
+    ...card,
+    id: `card-${Date.now()}`,
+    createdDate: card.createdDate || new Date().toISOString().slice(0, 10),
+  };
   tbStore.kanbanCards.push(newCard);
   const pipeline = card.pipeline === 'company_registration' ? 'Company Registration' : 'Visa/Work Permit';
   appendAuditEntry(`Added case "${newCard.companyName}" to ${pipeline} pipeline`, 'kanban');
@@ -661,6 +679,13 @@ export function rejectDocumentBatch(batchId: string): void {
     `Rejected batch "${batch.batchName}" for ${batch.clientName}`,
     'document'
   );
+}
+
+export function editKanbanCard(cardId: string, updates: Omit<KanbanCard, 'id'>): void {
+  const idx = tbStore.kanbanCards.findIndex((c) => c.id === cardId);
+  if (idx === -1) return;
+  tbStore.kanbanCards[idx] = { id: cardId, ...updates };
+  appendAuditEntry(`Edited case "${updates.companyName}"`, 'kanban');
 }
 
 export function reorderKanbanStages(orderedIds: string[]): void {

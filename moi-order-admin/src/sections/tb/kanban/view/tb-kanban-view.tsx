@@ -47,6 +47,7 @@ import { Iconify } from 'src/components/iconify';
 import {
   tbStore,
   addKanbanCard,
+  editKanbanCard,
   addKanbanStage,
   moveKanbanCard,
   deleteKanbanStage,
@@ -72,9 +73,13 @@ const PIPELINE_TABS: { id: KanbanPipeline; label: string }[] = [
 // ----------------------------------------------------------------------
 // Draggable case card
 
-type DraggableCardProps = { card: KanbanCard; canEdit: boolean };
+type DraggableCardProps = {
+  card: KanbanCard;
+  canEdit: boolean;
+  onEditCard: (card: KanbanCard) => void;
+};
 
-function DraggableCard({ card, canEdit }: DraggableCardProps) {
+function DraggableCard({ card, canEdit, onEditCard }: DraggableCardProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: card.id,
     disabled: !canEdit,
@@ -100,9 +105,25 @@ function DraggableCard({ card, canEdit }: DraggableCardProps) {
       {...attributes}
       {...listeners}
     >
-      <Typography variant="body2" fontWeight="fontWeightSemiBold" sx={{ mb: 0.5 }} noWrap>
-        {card.companyName}
-      </Typography>
+      {/* Company name row + edit button */}
+      <Stack direction="row" alignItems="flex-start" justifyContent="space-between" sx={{ mb: 0.5 }}>
+        <Typography variant="body2" fontWeight="fontWeightSemiBold" noWrap sx={{ flex: 1, mr: 0.5 }}>
+          {card.companyName}
+        </Typography>
+        {canEdit && (
+          <Tooltip title="Edit case">
+            <IconButton
+              size="small"
+              sx={{ p: 0.25, mt: -0.25, flexShrink: 0, opacity: 0.5 }}
+              onClick={(e) => { e.stopPropagation(); onEditCard(card); }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+            >
+              <Iconify icon="solar:pen-bold" width={13} />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Stack>
 
       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }} noWrap>
         {card.directorNames.join(' · ')}
@@ -119,16 +140,19 @@ function DraggableCard({ card, canEdit }: DraggableCardProps) {
         </Typography>
       )}
 
-      <Stack direction="row" spacing={0.75} alignItems="center" flexWrap="wrap">
+      <Stack direction="row" spacing={0.75} alignItems="center" flexWrap="wrap" sx={{ mb: 1 }}>
         <Label color={URGENCY_COLOR[card.urgency]}>{card.urgency.toUpperCase()}</Label>
         {card.visaExpiryDate && (
-          <Chip
-            size="small"
-            label={`Visa exp: ${fDate(card.visaExpiryDate)}`}
-            sx={{ height: 20, fontSize: 10 }}
-          />
+          <Chip size="small" label={`Visa: ${fDate(card.visaExpiryDate)}`} sx={{ height: 20, fontSize: 10 }} />
+        )}
+        {card.durationDays != null && (
+          <Chip size="small" label={`${card.durationDays}d`} sx={{ height: 20, fontSize: 10 }} />
         )}
       </Stack>
+
+      <Typography variant="caption" color="text.disabled" sx={{ display: 'block' }}>
+        Created {fDate(card.createdDate)}
+      </Typography>
     </Paper>
   );
 }
@@ -144,10 +168,11 @@ type DroppableColumnProps = {
   isCardOver: boolean;
   onSaveLabel: (stageId: string, label: string) => void;
   onDelete: (stageId: string) => void;
+  onEditCard: (card: KanbanCard) => void;
 };
 
 function DroppableColumn({
-  stage, cards, canEdit, canDelete, isCardOver, onSaveLabel, onDelete,
+  stage, cards, canEdit, canDelete, isCardOver, onSaveLabel, onDelete, onEditCard,
 }: DroppableColumnProps) {
   const {
     setNodeRef, attributes, listeners,
@@ -285,7 +310,7 @@ function DroppableColumn({
       {/* Cases */}
       <Stack spacing={1.5}>
         {cards.map((card) => (
-          <DraggableCard key={card.id} card={card} canEdit={canEdit} />
+          <DraggableCard key={card.id} card={card} canEdit={canEdit} onEditCard={onEditCard} />
         ))}
         {cards.length === 0 && (
           <Typography
@@ -314,11 +339,12 @@ type KanbanBoardProps = {
   onSaveStageLabel: (stageId: string, label: string) => void;
   onDeleteStage: (stageId: string) => void;
   onAddStage: () => void;
+  onEditCard: (card: KanbanCard) => void;
 };
 
 function KanbanBoard({
   pipeline, stages, cards, canEdit,
-  onCardMoved, onStageMoved, onSaveStageLabel, onDeleteStage, onAddStage,
+  onCardMoved, onStageMoved, onSaveStageLabel, onDeleteStage, onAddStage, onEditCard,
 }: KanbanBoardProps) {
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
@@ -377,6 +403,7 @@ function KanbanBoard({
                 isCardOver={cardOverStageId === stage.id}
                 onSaveLabel={onSaveStageLabel}
                 onDelete={onDeleteStage}
+                onEditCard={onEditCard}
               />
             );
           })}
@@ -454,6 +481,8 @@ type AddCaseForm = {
   columnId: string;
   urgency: UrgencyLevel;
   visaExpiryDate: string;
+  durationDays: string;
+  createdDate: string;
   notes: string;
 };
 
@@ -463,32 +492,57 @@ type AddCaseDialogProps = {
   onSubmit: (card: Omit<KanbanCard, 'id'>) => void;
   stages: KanbanStage[];
   defaultPipeline: KanbanPipeline;
+  editCard?: KanbanCard; // when set, dialog is in edit mode
 };
 
-function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline }: AddCaseDialogProps) {
+function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline, editCard }: AddCaseDialogProps) {
+  const isEdit = !!editCard;
+  const today = new Date().toISOString().slice(0, 10);
+
   const [form, setForm] = useState<AddCaseForm>({
     companyId: '',
     pipeline: defaultPipeline,
     columnId: stages[0]?.id ?? '',
     urgency: 'medium',
     visaExpiryDate: '',
+    durationDays: '',
+    createdDate: today,
     notes: '',
   });
   const [errors, setErrors] = useState<Partial<Record<keyof AddCaseForm, string>>>({});
 
   useEffect(() => {
-    if (open) {
+    if (!open) return;
+    if (editCard) {
+      const resolvedId =
+        editCard.companyId ??
+        tbStore.clients.find((c) => c.companyName === editCard.companyName)?.id ??
+        '';
+      setForm({
+        companyId: resolvedId,
+        pipeline: editCard.pipeline,
+        columnId: editCard.column,
+        urgency: editCard.urgency,
+        visaExpiryDate: editCard.visaExpiryDate ?? '',
+        durationDays: editCard.durationDays != null ? String(editCard.durationDays) : '',
+        createdDate: editCard.createdDate,
+        notes: editCard.notes ?? '',
+      });
+    } else {
       setForm({
         companyId: '',
         pipeline: defaultPipeline,
         columnId: stages[0]?.id ?? '',
         urgency: 'medium',
         visaExpiryDate: '',
+        durationDays: '',
+        createdDate: today,
         notes: '',
       });
-      setErrors({});
     }
-  }, [open, defaultPipeline, stages]);
+    setErrors({});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const selectedCompany = tbStore.clients.find((c) => c.id === form.companyId);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -505,7 +559,11 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline }: Add
   const validate = useCallback((): boolean => {
     const newErrors: Partial<Record<keyof AddCaseForm, string>> = {};
     if (!form.companyId) newErrors.companyId = 'Select a company';
-    if (!form.columnId) newErrors.columnId = 'Select an initial stage';
+    if (!form.columnId) newErrors.columnId = 'Select a stage';
+    if (!form.createdDate) newErrors.createdDate = 'Created date is required';
+    if (form.durationDays && (isNaN(Number(form.durationDays)) || Number(form.durationDays) <= 0)) {
+      newErrors.durationDays = 'Enter a positive number of days';
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }, [form]);
@@ -521,15 +579,18 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline }: Add
       directorNames,
       urgency: form.urgency,
       visaExpiryDate: form.visaExpiryDate || undefined,
+      durationDays: form.durationDays ? Number(form.durationDays) : undefined,
+      createdDate: form.createdDate,
       notes: form.notes.trim() || undefined,
     });
   }, [form, validate, selectedCompany, directorNames, onSubmit]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Add Case</DialogTitle>
+      <DialogTitle>{isEdit ? 'Edit Case' : 'Add Case'}</DialogTitle>
       <DialogContent dividers>
         <Stack spacing={3}>
+          {/* Company */}
           <FormControl fullWidth error={!!errors.companyId}>
             <InputLabel>Company *</InputLabel>
             <Select
@@ -560,7 +621,7 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline }: Add
           {directorNames.length > 0 && (
             <Box>
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                Directors (auto-populated from company)
+                Directors (from company)
               </Typography>
               <Stack direction="row" spacing={0.75} flexWrap="wrap">
                 {directorNames.map((name) => (
@@ -570,27 +631,27 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline }: Add
             </Box>
           )}
 
+          {/* Pipeline */}
           <Box>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
               Pipeline *
             </Typography>
             <ToggleButtonGroup
-              exclusive
-              value={form.pipeline}
+              exclusive value={form.pipeline}
               onChange={(_, val) => val && handleChange('pipeline', val)}
-              size="small"
-              fullWidth
+              size="small" fullWidth
             >
               <ToggleButton value="company_registration">Company Registration</ToggleButton>
               <ToggleButton value="visa_work_permit">Visa / Work Permit</ToggleButton>
             </ToggleButtonGroup>
           </Box>
 
+          {/* Stage */}
           <FormControl fullWidth size="small" error={!!errors.columnId}>
-            <InputLabel>Initial Stage *</InputLabel>
+            <InputLabel>{isEdit ? 'Stage *' : 'Initial Stage *'}</InputLabel>
             <Select
               value={form.columnId}
-              label="Initial Stage *"
+              label={isEdit ? 'Stage *' : 'Initial Stage *'}
               onChange={(e) => handleChange('columnId', e.target.value)}
             >
               {stages.map((s) => (
@@ -599,13 +660,13 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline }: Add
             </Select>
           </FormControl>
 
+          {/* Urgency */}
           <Box>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
               Urgency *
             </Typography>
             <ToggleButtonGroup
-              exclusive
-              value={form.urgency}
+              exclusive value={form.urgency}
               onChange={(_, val) => val && handleChange('urgency', val as UrgencyLevel)}
               size="small"
             >
@@ -615,22 +676,41 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline }: Add
             </ToggleButtonGroup>
           </Box>
 
+          {/* Created date + Duration (side by side) */}
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            <TextField
+              fullWidth size="small" type="date"
+              label="Created Date *"
+              value={form.createdDate}
+              onChange={(e) => handleChange('createdDate', e.target.value)}
+              slotProps={{ inputLabel: { shrink: true } }}
+              error={!!errors.createdDate}
+              helperText={errors.createdDate ?? 'Defaults to today'}
+            />
+            <TextField
+              fullWidth size="small" type="number"
+              label="Duration (days)"
+              value={form.durationDays}
+              onChange={(e) => handleChange('durationDays', e.target.value)}
+              slotProps={{ input: { inputProps: { min: 1 } } }}
+              error={!!errors.durationDays}
+              helperText={errors.durationDays ?? 'Leave blank → shows "–"'}
+            />
+          </Stack>
+
+          {/* Visa expiry */}
           <TextField
-            fullWidth
-            size="small"
-            type="date"
+            fullWidth size="small" type="date"
             label="Visa / Permit Expiry Date"
             value={form.visaExpiryDate}
             onChange={(e) => handleChange('visaExpiryDate', e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
-            helperText="Optional — shows as an expiry chip on the case card"
+            helperText="Optional"
           />
 
+          {/* Notes */}
           <TextField
-            fullWidth
-            size="small"
-            multiline
-            rows={2}
+            fullWidth size="small" multiline rows={2}
             label="Notes"
             value={form.notes}
             onChange={(e) => handleChange('notes', e.target.value)}
@@ -641,7 +721,7 @@ function AddCaseDialog({ open, onClose, onSubmit, stages, defaultPipeline }: Add
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose}>Cancel</Button>
         <Button variant="contained" onClick={handleSubmit} disabled={!form.companyId}>
-          Add Case
+          {isEdit ? 'Save Changes' : 'Add Case'}
         </Button>
       </DialogActions>
     </Dialog>
@@ -663,6 +743,7 @@ export function TBKanbanView() {
   const [saving, setSaving] = useState(false);
   const [addCaseOpen, setAddCaseOpen] = useState(false);
   const [addStageOpen, setAddStageOpen] = useState(false);
+  const [editingCard, setEditingCard] = useState<KanbanCard | null>(null);
   const [notification, setNotification] = useState<{ msg: string; severity: 'success' | 'error' | 'info' } | null>(null);
 
   // Unique companies present in the active pipeline, with case counts
@@ -740,6 +821,22 @@ export function TBKanbanView() {
       setNotification({ msg: `Case added to "${stageName}".`, severity: 'success' });
     },
     [stages]
+  );
+
+  const handleOpenEdit = useCallback((card: KanbanCard) => {
+    setEditingCard(card);
+  }, []);
+
+  const handleEditCase = useCallback(
+    (card: Omit<KanbanCard, 'id'>) => {
+      if (!editingCard) return;
+      editKanbanCard(editingCard.id, card);
+      setCards([...tbStore.kanbanCards]);
+      setEditingCard(null);
+      setHasChanges(true);
+      setNotification({ msg: 'Case updated.', severity: 'success' });
+    },
+    [editingCard]
   );
 
   return (
@@ -866,6 +963,7 @@ export function TBKanbanView() {
         onSaveStageLabel={handleSaveStageLabel}
         onDeleteStage={handleDeleteStage}
         onAddStage={() => setAddStageOpen(true)}
+        onEditCard={handleOpenEdit}
       />
 
       <AddStageDialog
@@ -880,6 +978,15 @@ export function TBKanbanView() {
         onSubmit={handleAddCase}
         stages={stages}
         defaultPipeline={activePipeline}
+      />
+
+      <AddCaseDialog
+        open={!!editingCard}
+        onClose={() => setEditingCard(null)}
+        onSubmit={handleEditCase}
+        stages={stages}
+        defaultPipeline={activePipeline}
+        editCard={editingCard ?? undefined}
       />
 
       <Snackbar
