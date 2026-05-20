@@ -912,25 +912,7 @@ export function TBKanbanView({ pipeline, pageTitle, serviceTypes }: TBKanbanView
     return tbStore.individualClients.filter((c) => clientIdSet.has(c.id));
   }, [cards, pipeline, isCR]);
 
-  // The specific card being viewed in filtered mode (needed for stage edit)
-  const filteredCard = useMemo(() => {
-    if (isCR) {
-      if (!filterCompanyName) return null;
-      return cards.find((c) => c.companyName === filterCompanyName && c.pipeline === pipeline && c.serviceType === activeServiceType) ?? null;
-    }
-    if (!filterClientId) return null;
-    return cards.find((c) => c.clientId === filterClientId && c.pipeline === pipeline && c.serviceType === activeServiceType) ?? null;
-  }, [cards, filterCompanyName, filterClientId, pipeline, activeServiceType, isCR]);
-
-  // When filtered to a company, use their card's stages as the board columns
-  const filteredCompanyColumns = useMemo<BoardColumn[] | null>(() => {
-    if (!filteredCard) return null;
-    return filteredCard.cardStages.map((s) => ({ id: s.id, label: s.label }));
-  }, [filteredCard]);
-
-  const isFilteredView = !!filteredCompanyColumns;
-  const boardColumns: BoardColumn[] = filteredCompanyColumns ?? MACRO_STAGES;
-
+  // filteredCards first — used both for board display AND to find filteredCard
   const filteredCards = useMemo(() => {
     let result = cards.filter((c) => c.pipeline === pipeline && c.serviceType === activeServiceType);
     if (filterCompanyName) result = result.filter((c) => c.companyName === filterCompanyName);
@@ -945,6 +927,23 @@ export function TBKanbanView({ pipeline, pageTitle, serviceTypes }: TBKanbanView
   }, [cards, pipeline, activeServiceType, filterCompanyName, filterClientId, filterUrgency, sortByDeadline]);
 
   const hasActiveFilters = filterUrgency !== 'all' || sortByDeadline || !!filterCompanyName || !!filterClientId;
+
+  // filteredCard: derived from filteredCards (already has correct pipeline/serviceType/client filter applied)
+  // This avoids any mismatch between clientId lookup and what's actually visible on the board.
+  const filteredCard = useMemo(() => {
+    const activeFilter = isCR ? filterCompanyName : filterClientId;
+    if (!activeFilter) return null;
+    return filteredCards.find((c) => c.cardStages && c.cardStages.length > 0) ?? null;
+  }, [filteredCards, isCR, filterCompanyName, filterClientId]);
+
+  // Use filteredCard's stages as board columns when a filter is active
+  const filteredCompanyColumns = useMemo<BoardColumn[] | null>(() => {
+    if (!filteredCard) return null;
+    return filteredCard.cardStages.map((s) => ({ id: s.id, label: s.label }));
+  }, [filteredCard]);
+
+  const isFilteredView = !!filteredCompanyColumns;
+  const boardColumns: BoardColumn[] = filteredCompanyColumns ?? MACRO_STAGES;
 
   const handleTabChange = useCallback((_: React.SyntheticEvent, val: string) => {
     setActiveServiceType(val);
