@@ -261,7 +261,7 @@ export function TBClientDetailView() {
             </Button>
           )}
           <Link href={company.dbdUrl} target="_blank" rel="noopener noreferrer" underline="none">
-            <Button variant="outlined" size="small" startIcon={<Iconify icon="solar:share-bold" width={16} />}>
+            <Button variant="outlined" startIcon={<Iconify icon="solar:share-bold" width={16} />}>
               DBD Portal
             </Button>
           </Link>
