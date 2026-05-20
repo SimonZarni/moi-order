@@ -155,44 +155,27 @@ function CardBody({ card, canEdit, onEditCard }: { card: KanbanCard; canEdit: bo
 type DraggableCardProps = { card: KanbanCard; columnId: string; canEdit: boolean; onEditCard: (c: KanbanCard) => void };
 
 function DraggableCard({ card, columnId, canEdit, onEditCard }: DraggableCardProps) {
-  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card.id,
     disabled: !canEdit,
     data: { type: 'card', column: columnId },
   });
   return (
-    // Paper is the sortable container — attributes for accessibility, NO listeners (no touchAction: none)
     <Paper
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       elevation={1}
-      sx={{ p: 2, borderRadius: 1.5, userSelect: 'none', opacity: isDragging ? 0.3 : 1 }}
+      sx={{
+        p: 2, borderRadius: 1.5, userSelect: 'none',
+        opacity: isDragging ? 0.3 : 1,
+        cursor: canEdit ? 'grab' : 'default',
+        touchAction: canEdit ? 'none' : 'auto',
+        '&:active': { cursor: canEdit ? 'grabbing' : 'default' },
+      }}
       {...attributes}
+      {...listeners}
     >
-      <Stack direction="row" alignItems="flex-start" spacing={1}>
-        {/* Drag handle — only this element activates drag / blocks native scroll */}
-        {canEdit && (
-          <Box
-            ref={setActivatorNodeRef}
-            {...listeners}
-            sx={{
-              flexShrink: 0,
-              mt: 0.3,
-              cursor: 'grab',
-              touchAction: 'none',
-              color: 'text.disabled',
-              opacity: 0.45,
-              '&:active': { cursor: 'grabbing' },
-            }}
-          >
-            <Iconify icon="custom:menu-duotone" width={14} />
-          </Box>
-        )}
-        {/* Card content — normal touch-action so the page scrolls through it */}
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <CardBody card={card} canEdit={canEdit} onEditCard={onEditCard} />
-        </Box>
-      </Stack>
+      <CardBody card={card} canEdit={canEdit} onEditCard={onEditCard} />
     </Paper>
   );
 }
