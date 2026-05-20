@@ -40,7 +40,8 @@ import type { StageTemplate } from '../../shared/tb-mock-store';
 
 const PIPELINE_LABELS: Record<StageTemplate['pipeline'], string> = {
   company_registration: 'Company Registration',
-  visa_work_permit: 'Visa / Work Permit',
+  apply_renew: 'Apply & Renew',
+  extension: 'Extension',
   any: 'Any Pipeline',
 };
 
@@ -126,7 +127,8 @@ function TemplateDialog({
             <InputLabel>Pipeline</InputLabel>
             <Select value={form.pipeline} label="Pipeline" onChange={(e) => handleChange('pipeline', e.target.value as StageTemplate['pipeline'])}>
               <MenuItem value="company_registration">Company Registration</MenuItem>
-              <MenuItem value="visa_work_permit">Visa / Work Permit</MenuItem>
+              <MenuItem value="apply_renew">Apply &amp; Renew</MenuItem>
+              <MenuItem value="extension">Extension</MenuItem>
               <MenuItem value="any">Any Pipeline</MenuItem>
             </Select>
           </FormControl>
@@ -207,7 +209,8 @@ export function TBTemplatesView() {
 
   const groups = [
     { label: 'Company Registration', pipeline: 'company_registration' as const },
-    { label: 'Visa / Work Permit', pipeline: 'visa_work_permit' as const },
+    { label: 'Apply & Renew', pipeline: 'apply_renew' as const },
+    { label: 'Extension', pipeline: 'extension' as const },
     { label: 'Any Pipeline', pipeline: 'any' as const },
   ];
 
