@@ -18,6 +18,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm + 4,
     borderRightWidth: 1,
     borderRightColor: colours.dividerDark,
+    zIndex: 10,
   },
   logoContainer: {
     flexDirection: 'row',

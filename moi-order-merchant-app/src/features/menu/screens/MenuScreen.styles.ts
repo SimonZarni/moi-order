@@ -55,6 +55,9 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.card,
     borderRadius: radius.sheet,
     padding: spacing.lg,
+    maxWidth: 480,
+    width: '100%',
+    alignSelf: 'center',
   },
   modalTitle: {
     fontSize: typography.lg,

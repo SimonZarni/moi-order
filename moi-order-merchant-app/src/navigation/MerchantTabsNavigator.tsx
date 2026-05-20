@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Platform, View, StyleSheet } from 'react-native';
+import { Platform, View, Text, Pressable, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
@@ -20,8 +20,11 @@ import { RestaurantScreen } from '../features/restaurant/screens/RestaurantScree
 import { AnalyticsScreen } from '../features/analytics/screens/AnalyticsScreen';
 import { WebSidebar } from '../shared/components/WebSidebar/WebSidebar';
 import { colours } from '../shared/theme/colours';
+import { spacing } from '../shared/theme/spacing';
+import { typography } from '../shared/theme/typography';
 import { WEB_SIDEBAR_WIDTH } from '../shared/constants/config';
 import { useAuthStore } from '../store/authStore';
+import { useResponsive } from '../shared/hooks/useResponsive';
 
 // ── Mobile ─────────────────────────────────────────────────────────────────────
 
@@ -115,12 +118,15 @@ function WebMerchantLayout(): React.JSX.Element {
   const [activeScreen, setActiveScreen] = useState<WebScreen>('Dashboard');
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [chatOrderId, setChatOrderId] = useState<number | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { isDesktop } = useResponsive();
   const logout = useAuthStore((s) => s.logout);
 
   const handleNavigate = useCallback((screen: WebScreen) => {
     setActiveScreen(screen);
     setSelectedOrderId(null);
     setChatOrderId(null);
+    setSidebarOpen(false);
   }, []);
 
   const handleSelectOrder = useCallback((orderId: number) => {
@@ -170,14 +176,43 @@ function WebMerchantLayout(): React.JSX.Element {
     }
   };
 
+  const showSidebar = isDesktop || sidebarOpen;
+
   return (
     <View style={webStyles.layout}>
-      <WebSidebar
-        activeScreen={sidebarActiveScreen}
-        onNavigate={handleNavigate}
-        onLogout={logout}
-      />
-      <View style={webStyles.content}>
+      {showSidebar && (
+        <WebSidebar
+          activeScreen={sidebarActiveScreen}
+          onNavigate={handleNavigate}
+          onLogout={logout}
+        />
+      )}
+
+      {/* Backdrop — tapping it closes the sidebar on mobile */}
+      {!isDesktop && sidebarOpen && (
+        <Pressable
+          style={webStyles.backdrop}
+          onPress={() => setSidebarOpen(false)}
+          accessibilityLabel="Close menu"
+          accessibilityRole="button"
+        />
+      )}
+
+      <View style={[webStyles.content, !isDesktop && webStyles.contentMobile]}>
+        {/* Mobile top bar with hamburger — only shown on narrow viewports */}
+        {!isDesktop && (
+          <View style={webStyles.mobileTopBar}>
+            <Pressable
+              style={webStyles.hamburgerBtn}
+              onPress={() => setSidebarOpen(true)}
+              accessibilityLabel="Open navigation menu"
+              accessibilityRole="button"
+            >
+              <Ionicons name="menu-outline" size={24} color={colours.textOnDark} />
+            </Pressable>
+            <Text style={webStyles.mobileTopBarTitle}>Moi Order</Text>
+          </View>
+        )}
         <View style={webStyles.contentInner}>
           {renderContent()}
         </View>
@@ -206,10 +241,44 @@ const webStyles = StyleSheet.create({
     marginLeft: WEB_SIDEBAR_WIDTH,
     backgroundColor: colours.backgroundLight,
   },
+  // On narrow viewports the sidebar overlays content — no left margin needed
+  contentMobile: {
+    marginLeft: 0,
+  },
   // Constrains content to readable width on very wide monitors
   contentInner: {
     flex: 1,
     maxWidth: 1280,
     alignSelf: 'stretch' as const,
+  },
+  // Semi-transparent backdrop behind mobile sidebar
+  backdrop: {
+    position: 'absolute' as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: colours.overlay,
+    zIndex: 5,
+  },
+  // Top bar shown only on narrow (non-desktop) web viewports
+  mobileTopBar: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    backgroundColor: colours.backgroundDark,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    gap: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.dividerDark,
+  },
+  hamburgerBtn: {
+    padding: spacing.xs,
+  },
+  mobileTopBarTitle: {
+    color: colours.textOnDark,
+    fontSize: typography.md,
+    fontWeight: '700' as const,
+    letterSpacing: -0.3,
   },
 });
