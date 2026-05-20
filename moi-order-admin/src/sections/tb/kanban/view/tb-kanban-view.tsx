@@ -96,7 +96,7 @@ function CardBody({ card, canEdit, onEditCard }: { card: KanbanCard; canEdit: bo
     <>
       <Stack direction="row" alignItems="flex-start" justifyContent="space-between" sx={{ mb: 0.5 }}>
         <Typography variant="body2" fontWeight="fontWeightSemiBold" noWrap sx={{ flex: 1, mr: 0.5 }}>
-          {card.companyName}
+          {card.clientName ?? card.companyName}
         </Typography>
         {canEdit && (
           <Tooltip title="Edit case">
@@ -112,7 +112,9 @@ function CardBody({ card, canEdit, onEditCard }: { card: KanbanCard; canEdit: bo
       </Stack>
 
       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.75 }} noWrap>
-        {card.directorNames.join(' · ')}
+        {card.clientName
+          ? (card.companyName || card.directorNames.join(' · '))
+          : card.directorNames.join(' · ')}
       </Typography>
 
       {/* Current stage indicator */}
@@ -385,6 +387,7 @@ type KanbanBoardProps = {
   cards: KanbanCard[];
   isFilteredView: boolean;
   filterCompanyName: string | null;
+  filterClientId: string | null;
   filteredCard: KanbanCard | null;
   canEdit: boolean;
   onCardMoved: () => void;
@@ -394,7 +397,7 @@ type KanbanBoardProps = {
   onAddStage: (label: string) => void;
 };
 
-function KanbanBoard({ pipeline, columns, cards, isFilteredView, filterCompanyName, filteredCard, canEdit, onCardMoved, onEditCard, onRenameStage, onDeleteStage, onAddStage }: KanbanBoardProps) {
+function KanbanBoard({ pipeline, columns, cards, isFilteredView, filterCompanyName, filterClientId, filteredCard, canEdit, onCardMoved, onEditCard, onRenameStage, onDeleteStage, onAddStage }: KanbanBoardProps) {
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
@@ -465,12 +468,15 @@ function KanbanBoard({ pipeline, columns, cards, isFilteredView, filterCompanyNa
 
   const getColCards = useCallback((colId: string) => {
     if (isFilteredView) {
-      return cards.filter(
-        (c) => c.pipeline === pipeline && c.companyName === filterCompanyName && c.currentCardStageId === colId
-      );
+      return cards.filter((c) => {
+        if (c.pipeline !== pipeline) return false;
+        if (filterCompanyName && c.companyName !== filterCompanyName) return false;
+        if (filterClientId && c.clientId !== filterClientId) return false;
+        return c.currentCardStageId === colId;
+      });
     }
     return cards.filter((c) => c.pipeline === pipeline && c.macroStage === colId);
-  }, [cards, pipeline, isFilteredView, filterCompanyName]);
+  }, [cards, pipeline, isFilteredView, filterCompanyName, filterClientId]);
 
   const displayCols = isFilteredView ? columns : macroOrder;
 
@@ -516,7 +522,8 @@ function KanbanBoard({ pipeline, columns, cards, isFilteredView, filterCompanyNa
 type CustomStage = { id: string; label: string };
 
 type AddCaseForm = {
-  companyId: string;
+  companyId: string;   // company_registration pipeline
+  clientId: string;   // apply_renew / extension pipelines
   serviceType: string;
   templateId: string;
   customStages: CustomStage[];
@@ -542,8 +549,10 @@ function AddCaseDialog({ open, onClose, onSubmit, pipeline, serviceTypes, defaul
   const today = new Date().toISOString().slice(0, 10);
   const [tab, setTab] = useState(0);
 
+  const isCR = pipeline === 'company_registration';
+
   const [form, setForm] = useState<AddCaseForm>({
-    companyId: '', serviceType: defaultServiceType, templateId: '', customStages: [],
+    companyId: '', clientId: '', serviceType: defaultServiceType, templateId: '', customStages: [],
     urgency: 'medium', visaExpiryDate: '', endDate: '', createdDate: today, notes: '',
   });
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
@@ -555,6 +564,7 @@ function AddCaseDialog({ open, onClose, onSubmit, pipeline, serviceTypes, defaul
       const resolvedId = editCard.companyId ?? tbStore.clients.find((c) => c.companyName === editCard.companyName)?.id ?? '';
       setForm({
         companyId: resolvedId,
+        clientId: editCard.clientId ?? '',
         serviceType: editCard.serviceType,
         templateId: editCard.templateId ?? 'custom',
         customStages: editCard.cardStages.map((s) => ({ id: s.id, label: s.label })),
@@ -565,13 +575,14 @@ function AddCaseDialog({ open, onClose, onSubmit, pipeline, serviceTypes, defaul
         notes: editCard.notes ?? '',
       });
     } else {
-      setForm({ companyId: '', serviceType: defaultServiceType, templateId: '', customStages: [], urgency: 'medium', visaExpiryDate: '', endDate: '', createdDate: today, notes: '' });
+      setForm({ companyId: '', clientId: '', serviceType: defaultServiceType, templateId: '', customStages: [], urgency: 'medium', visaExpiryDate: '', endDate: '', createdDate: today, notes: '' });
     }
     setErrors({});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const selectedCompany = tbStore.clients.find((c) => c.id === form.companyId);
+  const selectedClient = tbStore.individualClients.find((c) => c.id === form.clientId);
   const directorNames = useMemo(() => selectedCompany?.directors.map((d) => d.name) ?? [], [selectedCompany]);
 
   const pipelineTemplates = useMemo(
@@ -607,20 +618,23 @@ function AddCaseDialog({ open, onClose, onSubmit, pipeline, serviceTypes, defaul
 
   const validate = useCallback((): boolean => {
     const e: Record<string, string> = {};
-    if (!form.companyId) e.companyId = 'Select a company';
+    if (isCR && !form.companyId) e.companyId = 'Select a company';
+    if (!isCR && !form.clientId) e.clientId = 'Select a client';
     if (!form.templateId) e.templateId = 'Choose a workflow';
     if (form.customStages.length === 0) e.stages = 'Add at least one stage';
     if (form.customStages.some((s) => !s.label.trim())) e.stages = 'All stages must have a name';
     if (!form.createdDate) e.createdDate = 'Required';
     if (form.endDate && form.createdDate && form.endDate <= form.createdDate) e.endDate = 'End date must be after created date';
     setErrors(e);
-    if (e.companyId || e.templateId || e.stages) { setTab(0); return false; }
+    if (e.companyId || e.clientId || e.templateId || e.stages) { setTab(0); return false; }
     if (e.createdDate || e.endDate) { setTab(1); return false; }
     return Object.keys(e).length === 0;
-  }, [form]);
+  }, [form, isCR]);
 
   const handleSubmit = useCallback(() => {
-    if (!validate() || !selectedCompany) return;
+    if (!validate()) return;
+    if (isCR && !selectedCompany) return;
+    if (!isCR && !selectedClient) return;
     const cardStages: CardStage[] = form.customStages.map((s, i) => ({ id: s.id, label: s.label.trim(), order: i }));
     const currentCardStageId = cardStages[0]?.id ?? '';
     onSubmit({
@@ -630,10 +644,14 @@ function AddCaseDialog({ open, onClose, onSubmit, pipeline, serviceTypes, defaul
       cardStages,
       currentCardStageId,
       templateId: form.templateId === 'custom' ? undefined : form.templateId,
-      companyId: form.companyId,
-      companyName: selectedCompany.companyName,
-      thaiRegNumber: selectedCompany.thaiRegNumber,
-      directorNames,
+      // CR fields
+      companyId: isCR ? form.companyId : undefined,
+      companyName: isCR ? (selectedCompany?.companyName ?? '') : (selectedClient?.companyName ?? ''),
+      thaiRegNumber: isCR ? (selectedCompany?.thaiRegNumber ?? '') : '',
+      directorNames: isCR ? directorNames : (selectedClient ? [selectedClient.name] : []),
+      // Client fields (apply_renew / extension)
+      clientId: !isCR ? form.clientId : undefined,
+      clientName: !isCR ? selectedClient?.name : undefined,
       urgency: form.urgency,
       visaExpiryDate: form.visaExpiryDate || undefined,
       endDate: form.endDate || undefined,
@@ -643,7 +661,7 @@ function AddCaseDialog({ open, onClose, onSubmit, pipeline, serviceTypes, defaul
       createdDate: form.createdDate,
       notes: form.notes.trim() || undefined,
     });
-  }, [form, pipeline, validate, selectedCompany, directorNames, onSubmit]);
+  }, [form, isCR, pipeline, validate, selectedCompany, selectedClient, directorNames, onSubmit]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -668,29 +686,57 @@ function AddCaseDialog({ open, onClose, onSubmit, pipeline, serviceTypes, defaul
 
         {tab === 0 && (
           <Stack spacing={3}>
-            {/* Company */}
-            <FormControl fullWidth error={!!errors.companyId}>
-              <InputLabel>Company *</InputLabel>
-              <Select value={form.companyId} label="Company *" onChange={(e) => handleChange('companyId', e.target.value)}>
-                {tbStore.clients.map((c) => (
-                  <MenuItem key={c.id} value={c.id}>
-                    <Box>
-                      <Typography variant="body2" fontWeight="fontWeightMedium">{c.companyName}</Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>{c.thaiRegNumber}</Typography>
-                    </Box>
-                  </MenuItem>
-                ))}
-              </Select>
-              {errors.companyId && <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>{errors.companyId}</Typography>}
-            </FormControl>
-
-            {directorNames.length > 0 && (
-              <Box>
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>Directors (from company)</Typography>
-                <Stack direction="row" spacing={0.75} flexWrap="wrap">
-                  {directorNames.map((name) => <Chip key={name} size="small" label={name} sx={{ mb: 0.75 }} />)}
-                </Stack>
-              </Box>
+            {/* Company (CR) or Client (apply_renew / extension) */}
+            {isCR ? (
+              <>
+                <FormControl fullWidth error={!!errors.companyId}>
+                  <InputLabel>Company *</InputLabel>
+                  <Select value={form.companyId} label="Company *" onChange={(e) => handleChange('companyId', e.target.value)}>
+                    {tbStore.clients.map((c) => (
+                      <MenuItem key={c.id} value={c.id}>
+                        <Box>
+                          <Typography variant="body2" fontWeight="fontWeightMedium">{c.companyName}</Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>{c.thaiRegNumber}</Typography>
+                        </Box>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {errors.companyId && <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>{errors.companyId}</Typography>}
+                </FormControl>
+                {directorNames.length > 0 && (
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>Directors (from company)</Typography>
+                    <Stack direction="row" spacing={0.75} flexWrap="wrap">
+                      {directorNames.map((name) => <Chip key={name} size="small" label={name} sx={{ mb: 0.75 }} />)}
+                    </Stack>
+                  </Box>
+                )}
+              </>
+            ) : (
+              <>
+                <FormControl fullWidth error={!!errors.clientId}>
+                  <InputLabel>Client *</InputLabel>
+                  <Select value={form.clientId} label="Client *" onChange={(e) => handleChange('clientId', e.target.value)}>
+                    {tbStore.individualClients.map((c) => (
+                      <MenuItem key={c.id} value={c.id}>
+                        <Box>
+                          <Typography variant="body2" fontWeight="fontWeightMedium">{c.name}</Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {c.companyName ? `${c.companyName} · ${c.nationality}` : c.nationality}
+                          </Typography>
+                        </Box>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {errors.clientId && <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>{errors.clientId}</Typography>}
+                </FormControl>
+                {selectedClient?.companyName && (
+                  <Box sx={{ p: 1.5, bgcolor: 'background.neutral', borderRadius: 1 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Linked Company</Typography>
+                    <Typography variant="body2">{selectedClient.companyName}</Typography>
+                  </Box>
+                )}
+              </>
             )}
 
             {/* Service type */}
@@ -809,7 +855,7 @@ function AddCaseDialog({ open, onClose, onSubmit, pipeline, serviceTypes, defaul
         <Stack direction="row" spacing={1}>
           {tab > 0 && <Button variant="outlined" onClick={() => setTab(0)}>Back</Button>}
           {tab === 0 ? (
-            <Button variant="contained" onClick={() => setTab(1)} disabled={!form.companyId || !form.templateId || form.customStages.length === 0}>
+            <Button variant="contained" onClick={() => setTab(1)} disabled={!(isCR ? form.companyId : form.clientId) || !form.templateId || form.customStages.length === 0}>
               Next
             </Button>
           ) : (
@@ -836,6 +882,7 @@ export function TBKanbanView({ pipeline, pageTitle, serviceTypes }: TBKanbanView
 
   const [activeServiceType, setActiveServiceType] = useState(serviceTypes[0]?.id ?? '');
   const [filterCompanyName, setFilterCompanyName] = useState<string | null>(null);
+  const [filterClientId, setFilterClientId] = useState<string | null>(null);
   const [filterUrgency, setFilterUrgency] = useState<UrgencyLevel | 'all'>('all');
   const [sortByDeadline, setSortByDeadline] = useState(false);
   const [cards, setCards] = useState<KanbanCard[]>(() => [...tbStore.kanbanCards]);
@@ -847,19 +894,33 @@ export function TBKanbanView({ pipeline, pageTitle, serviceTypes }: TBKanbanView
 
   // Companies in this pipeline + service type (for company filter, CR only)
   // Unique companies across the whole pipeline (all service types) for consistent filter across tabs
+  const isCR = pipeline === 'company_registration';
+
+  // Company list — CR pipeline only
   const pipelineCompanies = useMemo(() => {
+    if (!isCR) return [];
     const map = new Map<string, number>();
-    cards
-      .filter((c) => c.pipeline === pipeline)
-      .forEach((c) => map.set(c.companyName, (map.get(c.companyName) ?? 0) + 1));
+    cards.filter((c) => c.pipeline === pipeline).forEach((c) => { if (c.companyName) map.set(c.companyName, (map.get(c.companyName) ?? 0) + 1); });
     return Array.from(map.entries()).map(([name, count]) => ({ name, count })).sort((a, b) => a.name.localeCompare(b.name));
-  }, [cards, pipeline]);
+  }, [cards, pipeline, isCR]);
+
+  // Client list — apply_renew / extension pipelines
+  const pipelineClients = useMemo(() => {
+    if (isCR) return [];
+    const clientIdSet = new Set<string>();
+    cards.filter((c) => c.pipeline === pipeline).forEach((c) => { if (c.clientId) clientIdSet.add(c.clientId); });
+    return tbStore.individualClients.filter((c) => clientIdSet.has(c.id));
+  }, [cards, pipeline, isCR]);
 
   // The specific card being viewed in filtered mode (needed for stage edit)
-  const filteredCard = useMemo(
-    () => !filterCompanyName ? null : (cards.find((c) => c.companyName === filterCompanyName && c.pipeline === pipeline && c.serviceType === activeServiceType) ?? null),
-    [cards, filterCompanyName, pipeline, activeServiceType]
-  );
+  const filteredCard = useMemo(() => {
+    if (isCR) {
+      if (!filterCompanyName) return null;
+      return cards.find((c) => c.companyName === filterCompanyName && c.pipeline === pipeline && c.serviceType === activeServiceType) ?? null;
+    }
+    if (!filterClientId) return null;
+    return cards.find((c) => c.clientId === filterClientId && c.pipeline === pipeline && c.serviceType === activeServiceType) ?? null;
+  }, [cards, filterCompanyName, filterClientId, pipeline, activeServiceType, isCR]);
 
   // When filtered to a company, use their card's stages as the board columns
   const filteredCompanyColumns = useMemo<BoardColumn[] | null>(() => {
@@ -873,6 +934,7 @@ export function TBKanbanView({ pipeline, pageTitle, serviceTypes }: TBKanbanView
   const filteredCards = useMemo(() => {
     let result = cards.filter((c) => c.pipeline === pipeline && c.serviceType === activeServiceType);
     if (filterCompanyName) result = result.filter((c) => c.companyName === filterCompanyName);
+    if (filterClientId) result = result.filter((c) => c.clientId === filterClientId);
     if (filterUrgency !== 'all') result = result.filter((c) => c.urgency === filterUrgency);
     if (sortByDeadline) result = [...result].sort((a, b) => {
       const da = a.endDate ? new Date(a.endDate).getTime() : Infinity;
@@ -880,19 +942,21 @@ export function TBKanbanView({ pipeline, pageTitle, serviceTypes }: TBKanbanView
       return da - db;
     });
     return result;
-  }, [cards, pipeline, activeServiceType, filterCompanyName, filterUrgency, sortByDeadline]);
+  }, [cards, pipeline, activeServiceType, filterCompanyName, filterClientId, filterUrgency, sortByDeadline]);
 
-  const hasActiveFilters = filterUrgency !== 'all' || sortByDeadline || !!filterCompanyName;
+  const hasActiveFilters = filterUrgency !== 'all' || sortByDeadline || !!filterCompanyName || !!filterClientId;
 
   const handleTabChange = useCallback((_: React.SyntheticEvent, val: string) => {
     setActiveServiceType(val);
     setFilterCompanyName(null);
+    setFilterClientId(null);
     setFilterUrgency('all');
     setSortByDeadline(false);
   }, []);
 
   const handleClearFilters = useCallback(() => {
     setFilterCompanyName(null);
+    setFilterClientId(null);
     setFilterUrgency('all');
     setSortByDeadline(false);
   }, []);
@@ -954,10 +1018,9 @@ export function TBKanbanView({ pipeline, pageTitle, serviceTypes }: TBKanbanView
 
   // Filtered view: show which stage the company's card is currently at
   const filteredCardCurrentStage = useMemo(() => {
-    if (!filterCompanyName || !isFilteredView) return null;
-    const c = cards.find((x) => x.companyName === filterCompanyName && x.pipeline === pipeline && x.serviceType === activeServiceType);
-    return c ? c.cardStages.find((s) => s.id === c.currentCardStageId)?.label : null;
-  }, [cards, filterCompanyName, pipeline, activeServiceType, isFilteredView]);
+    if (!isFilteredView || !filteredCard) return null;
+    return filteredCard.cardStages.find((s) => s.id === filteredCard.currentCardStageId)?.label ?? null;
+  }, [filteredCard, isFilteredView]);
 
   return (
     <DashboardContent maxWidth={false}>
@@ -967,8 +1030,8 @@ export function TBKanbanView({ pipeline, pageTitle, serviceTypes }: TBKanbanView
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             {canEdit
               ? isFilteredView
-                ? `Showing ${filterCompanyName}'s stages · drag cards to advance their progress`
-                : 'Default view shows macro stages · filter by company to see their custom workflow'
+                ? `Showing ${filterCompanyName ?? filterClientId}'s stages · drag cards to advance their progress`
+                : `Default view shows macro stages · filter by ${isCR ? 'company' : 'client'} to see their custom workflow`
               : 'View-only — only Super Admins can manage cases.'}
           </Typography>
         </Box>
@@ -998,26 +1061,52 @@ export function TBKanbanView({ pipeline, pageTitle, serviceTypes }: TBKanbanView
 
       {/* Filter bar */}
       <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ sm: 'center' }} spacing={1.5} flexWrap="wrap" sx={{ py: 2 }}>
-        {/* Company filter — always visible across all tabs */}
-        <FormControl size="small" sx={{ minWidth: 240 }}>
-          <InputLabel shrink>Company</InputLabel>
-          <Select notched displayEmpty value={filterCompanyName ?? ''} label="Company" onChange={(e) => setFilterCompanyName(e.target.value || null)}>
-            <MenuItem value="">
-              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
-                <Typography variant="body2">All Companies</Typography>
-                <Chip size="small" label={filteredCards.length} sx={{ height: 18, fontSize: 10, ml: 1 }} />
-              </Stack>
-            </MenuItem>
-            {pipelineCompanies.map(({ name, count }) => (
-              <MenuItem key={name} value={name}>
+        {/* Company filter (CR) or Client filter (apply_renew / extension) */}
+        {isCR ? (
+          <FormControl size="small" sx={{ minWidth: 240 }}>
+            <InputLabel shrink>Company</InputLabel>
+            <Select notched displayEmpty value={filterCompanyName ?? ''} label="Company" onChange={(e) => setFilterCompanyName(e.target.value || null)}>
+              <MenuItem value="">
                 <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
-                  <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>{name}</Typography>
-                  <Chip size="small" label={count} sx={{ height: 18, fontSize: 10, ml: 1, flexShrink: 0 }} />
+                  <Typography variant="body2">All Companies</Typography>
+                  <Chip size="small" label={filteredCards.length} sx={{ height: 18, fontSize: 10, ml: 1 }} />
                 </Stack>
               </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+              {pipelineCompanies.map(({ name, count }) => (
+                <MenuItem key={name} value={name}>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
+                    <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>{name}</Typography>
+                    <Chip size="small" label={count} sx={{ height: 18, fontSize: 10, ml: 1, flexShrink: 0 }} />
+                  </Stack>
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        ) : (
+          <FormControl size="small" sx={{ minWidth: 260 }}>
+            <InputLabel shrink>Client</InputLabel>
+            <Select notched displayEmpty value={filterClientId ?? ''} label="Client" onChange={(e) => setFilterClientId(e.target.value || null)}>
+              <MenuItem value="">
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
+                  <Typography variant="body2">All Clients</Typography>
+                  <Chip size="small" label={filteredCards.length} sx={{ height: 18, fontSize: 10, ml: 1 }} />
+                </Stack>
+              </MenuItem>
+              {pipelineClients.map((client) => (
+                <MenuItem key={client.id} value={client.id}>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography variant="body2" noWrap>{client.name}</Typography>
+                    {client.companyName && (
+                      <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
+                        {client.companyName}
+                      </Typography>
+                    )}
+                  </Box>
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
 
         {/* Urgency filter */}
         <FormControl size="small" sx={{ minWidth: 140 }}>
@@ -1073,6 +1162,7 @@ export function TBKanbanView({ pipeline, pageTitle, serviceTypes }: TBKanbanView
         cards={filteredCards}
         isFilteredView={isFilteredView}
         filterCompanyName={filterCompanyName}
+        filterClientId={filterClientId}
         filteredCard={filteredCard}
         canEdit={canEdit}
         onCardMoved={handleCardMoved}

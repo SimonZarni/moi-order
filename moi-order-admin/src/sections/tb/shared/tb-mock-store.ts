@@ -194,6 +194,8 @@ export type KanbanCard = {
   thaiRegNumber: string;
   serviceType: string;
   companyId?: string;
+  clientId?: string;   // individual client (apply_renew / extension pipelines)
+  clientName?: string;
   directorNames: string[];
   visaExpiryDate?: string;
   endDate?: string;
@@ -660,6 +662,7 @@ const INITIAL_KANBAN_CARDS: KanbanCard[] = [
     macroStage: 'backlog',
     cardStages: mkStages('ar-001', ['Documents Gathered', 'Labour Dept. Filing', 'Awaiting Permit', 'Permit Collected', 'Completed']),
     currentCardStageId: 'ar-001-s0', templateId: 'tpl-wp-apply',
+    clientId: 'person-001', clientName: "Mr. James O'Brien",
     companyName: 'International Consulting Co., Ltd.', thaiRegNumber: '0105561008765',
     directorNames: ["Mr. James O'Brien", 'Ms. Sarah Lin'],
     visaExpiryDate: '2026-05-31', endDate: '2026-05-31', durationDays: 14, createdDate: '2026-05-17',
@@ -670,6 +673,7 @@ const INITIAL_KANBAN_CARDS: KanbanCard[] = [
     macroStage: 'in_progress',
     cardStages: mkStages('ar-002', ['Documents Gathered', 'Application Filed', 'Immigration Visit', 'Stamp Received', 'Completed']),
     currentCardStageId: 'ar-002-s1', templateId: 'tpl-nonb-visa',
+    clientId: 'person-003', clientName: 'Mr. David Chen',
     companyName: 'Global Software Co., Ltd.', thaiRegNumber: '0105566003421',
     directorNames: ['Mr. David Chen'],
     visaExpiryDate: '2026-06-15', endDate: '2026-06-02', durationDays: 21, createdDate: '2026-05-12',
@@ -681,6 +685,7 @@ const INITIAL_KANBAN_CARDS: KanbanCard[] = [
     macroStage: 'review',
     cardStages: mkStages('ex-001', ['Documents Gathered', 'Labour Dept. Filing', 'Awaiting Permit', 'Permit Collected', 'Completed']),
     currentCardStageId: 'ex-001-s2', templateId: 'tpl-wp-renewal',
+    clientId: 'person-004', clientName: 'Mr. Andreas Schmidt',
     companyName: 'Thai Manufacturing Co., Ltd.', thaiRegNumber: '0105560004512',
     directorNames: ['Mr. Andreas Schmidt', 'Ms. Yuki Tanaka'],
     visaExpiryDate: '2026-07-20', createdDate: '2026-05-14',
@@ -691,6 +696,7 @@ const INITIAL_KANBAN_CARDS: KanbanCard[] = [
     macroStage: 'done',
     cardStages: mkStages('ex-002', ['Documents Gathered', 'Immigration Visit', 'Stamp Received', 'Completed']),
     currentCardStageId: 'ex-002-s3', templateId: 'tpl-nonb-visa',
+    clientId: 'person-006', clientName: 'Ms. Emma Williams',
     companyName: 'Supply Chain Co., Ltd.', thaiRegNumber: '0105563011847',
     directorNames: ['Ms. Emma Williams'],
     visaExpiryDate: '2027-01-10', createdDate: '2026-04-28',
