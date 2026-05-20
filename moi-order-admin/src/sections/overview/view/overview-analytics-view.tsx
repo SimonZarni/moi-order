@@ -128,7 +128,7 @@ export function OverviewAnalyticsView() {
         <Grid size={{ xs: 12, md: 6, lg: 8 }}>
           <AnalyticsWebsiteVisits
             title="Monthly Orders"
-            subheader={ordersChange !== null ? `(${changeSign}${ordersChange}%) compared to last year` : 'No prior year data'}
+            subheader={ordersChange !== null ? `(${changeSign}${ordersChange}%) compared to last month` : 'No prior month data'}
             chart={{
               categories: stats!.monthly_orders.labels,
               series: [

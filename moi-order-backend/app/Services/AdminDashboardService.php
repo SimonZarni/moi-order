@@ -41,9 +41,10 @@ class AdminDashboardService
 
     private function buildSummary(Carbon $now): array
     {
-        $currentYear    = $now->year;
-        $lastYear       = $currentYear - 1;
-        $eightMonthsAgo = $now->copy()->subMonths(7)->startOfMonth();
+        $eightMonthsAgo  = $now->copy()->subMonths(7)->startOfMonth();
+        $thisMonthStart  = $now->copy()->startOfMonth();
+        $lastMonthStart  = $now->copy()->subMonth()->startOfMonth();
+        $lastMonthEnd    = $now->copy()->subMonth()->endOfMonth();
 
         // Batch: submissions + ticket orders by month (last 8 months)
         $subsByMonth    = $this->monthlyCountIndex(ServiceSubmission::class, $eightMonthsAgo, $now);
@@ -62,26 +63,26 @@ class AdminDashboardService
             ->groupByRaw('YEAR(created_at), MONTH(created_at)')
             ->get()->keyBy(fn ($r) => "{$r->yr}-{$r->mo}");
 
-        // Year totals
-        $submissionsThisYear  = ServiceSubmission::whereYear('created_at', $currentYear)->count();
-        $submissionsLastYear  = ServiceSubmission::whereYear('created_at', $lastYear)->count();
-        $ticketOrdersThisYear = TicketOrder::whereYear('created_at', $currentYear)->count();
-        $ticketOrdersLastYear = TicketOrder::whereYear('created_at', $lastYear)->count();
-        $totalOrdersThis      = $submissionsThisYear + $ticketOrdersThisYear;
-        $totalOrdersLast      = $submissionsLastYear + $ticketOrdersLastYear;
+        // Month-over-month totals for change badges
+        $submissionsThisMonth  = ServiceSubmission::whereBetween('created_at', [$thisMonthStart, $now])->count();
+        $submissionsLastMonth  = ServiceSubmission::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])->count();
+        $ticketOrdersThisMonth = TicketOrder::whereBetween('created_at', [$thisMonthStart, $now])->count();
+        $ticketOrdersLastMonth = TicketOrder::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])->count();
+        $totalOrdersThisMonth  = $submissionsThisMonth + $ticketOrdersThisMonth;
+        $totalOrdersLastMonth  = $submissionsLastMonth + $ticketOrdersLastMonth;
 
-        $activeUsers       = User::where('status', 'active')->count();
-        $newUsersThisYear  = User::whereYear('created_at', $currentYear)->count();
-        $newUsersLastYear  = User::whereYear('created_at', $lastYear)->count();
+        $activeUsers          = User::where('status', 'active')->count();
+        $newUsersThisMonth    = User::whereBetween('created_at', [$thisMonthStart, $now])->count();
+        $newUsersLastMonth    = User::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])->count();
 
-        $listedPlaces      = Place::count();
-        $newPlacesThisYear = Place::whereYear('created_at', $currentYear)->count();
-        $newPlacesLastYear = Place::whereYear('created_at', $lastYear)->count();
+        $listedPlaces         = Place::count();
+        $newPlacesThisMonth   = Place::whereBetween('created_at', [$thisMonthStart, $now])->count();
+        $newPlacesLastMonth   = Place::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])->count();
 
-        $revenueThisYear = (int) Payment::where('status', PaymentStatus::Succeeded)
-            ->whereYear('created_at', $currentYear)->sum('amount');
-        $revenueLastYear = (int) Payment::where('status', PaymentStatus::Succeeded)
-            ->whereYear('created_at', $lastYear)->sum('amount');
+        $revenueThisMonth = (int) Payment::where('status', PaymentStatus::Succeeded)
+            ->whereBetween('created_at', [$thisMonthStart, $now])->sum('amount');
+        $revenueLastMonth = (int) Payment::where('status', PaymentStatus::Succeeded)
+            ->whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])->sum('amount');
 
         // 8-month sparklines
         $months = collect(range(7, 0))->map(fn (int $i) => $now->copy()->subMonths($i));
@@ -104,17 +105,17 @@ class AdminDashboardService
         );
 
         return [
-            'total_orders'          => $totalOrdersThis,
-            'total_orders_change'   => $this->pctChange($totalOrdersLast, $totalOrdersThis),
+            'total_orders'          => ServiceSubmission::count() + TicketOrder::count(),
+            'total_orders_change'   => $this->pctChange($totalOrdersLastMonth, $totalOrdersThisMonth),
             'total_orders_monthly'  => $ordersMonthly->values()->toArray(),
             'active_users'          => $activeUsers,
-            'active_users_change'   => $this->pctChange($newUsersLastYear, $newUsersThisYear),
+            'active_users_change'   => $this->pctChange($newUsersLastMonth, $newUsersThisMonth),
             'active_users_monthly'  => $usersMonthly->values()->toArray(),
             'listed_places'         => $listedPlaces,
-            'listed_places_change'  => $this->pctChange($newPlacesLastYear, $newPlacesThisYear),
+            'listed_places_change'  => $this->pctChange($newPlacesLastMonth, $newPlacesThisMonth),
             'listed_places_monthly' => $placesMonthly->values()->toArray(),
-            'total_revenue'         => $revenueThisYear,
-            'revenue_change'        => $this->pctChange($revenueLastYear, $revenueThisYear),
+            'total_revenue'         => $revenueThisMonth,
+            'revenue_change'        => $this->pctChange($revenueLastMonth, $revenueThisMonth),
             'revenue_monthly'       => $revenueMonthly->values()->toArray(),
         ];
     }
