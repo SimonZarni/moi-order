@@ -133,7 +133,13 @@ function CardBody({ card, canEdit, onEditCard }: { card: KanbanCard; canEdit: bo
       <Stack direction="row" spacing={0.75} alignItems="center" flexWrap="wrap" sx={{ mb: 1 }}>
         <Label color={URGENCY_COLOR[card.urgency]}>{card.urgency.toUpperCase()}</Label>
         {card.visaExpiryDate && <Chip size="small" label={`Visa: ${fDate(card.visaExpiryDate)}`} sx={{ height: 20, fontSize: 10 }} />}
-        {card.durationDays != null && <Chip size="small" label={`${card.durationDays}d`} sx={{ height: 20, fontSize: 10 }} />}
+        {card.endDate && (
+          <Chip
+            size="small"
+            label={`Due ${fDate(card.endDate)}`}
+            sx={{ height: 20, fontSize: 10 }}
+          />
+        )}
       </Stack>
 
       <Typography variant="caption" color="text.disabled">Created {fDate(card.createdDate)}</Typography>
@@ -388,7 +394,7 @@ type AddCaseForm = {
   customStages: CustomStage[];
   urgency: UrgencyLevel;
   visaExpiryDate: string;
-  durationDays: string;
+  endDate: string;
   createdDate: string;
   notes: string;
 };
@@ -408,7 +414,7 @@ function AddCaseDialog({ open, onClose, onSubmit, defaultPipeline, editCard }: A
 
   const [form, setForm] = useState<AddCaseForm>({
     companyId: '', pipeline: defaultPipeline, templateId: '', customStages: [],
-    urgency: 'medium', visaExpiryDate: '', durationDays: '', createdDate: today, notes: '',
+    urgency: 'medium', visaExpiryDate: '', endDate: '', createdDate: today, notes: '',
   });
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
 
@@ -424,12 +430,12 @@ function AddCaseDialog({ open, onClose, onSubmit, defaultPipeline, editCard }: A
         customStages: editCard.cardStages.map((s) => ({ id: s.id, label: s.label })),
         urgency: editCard.urgency,
         visaExpiryDate: editCard.visaExpiryDate ?? '',
-        durationDays: editCard.durationDays != null ? String(editCard.durationDays) : '',
+        endDate: editCard.endDate ?? '',
         createdDate: editCard.createdDate,
         notes: editCard.notes ?? '',
       });
     } else {
-      setForm({ companyId: '', pipeline: defaultPipeline, templateId: '', customStages: [], urgency: 'medium', visaExpiryDate: '', durationDays: '', createdDate: today, notes: '' });
+      setForm({ companyId: '', pipeline: defaultPipeline, templateId: '', customStages: [], urgency: 'medium', visaExpiryDate: '', endDate: '', createdDate: today, notes: '' });
     }
     setErrors({});
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -476,10 +482,10 @@ function AddCaseDialog({ open, onClose, onSubmit, defaultPipeline, editCard }: A
     if (form.customStages.length === 0) e.stages = 'Add at least one stage';
     if (form.customStages.some((s) => !s.label.trim())) e.stages = 'All stages must have a name';
     if (!form.createdDate) e.createdDate = 'Required';
-    if (form.durationDays && (isNaN(Number(form.durationDays)) || Number(form.durationDays) <= 0)) e.durationDays = 'Enter a positive number';
+    if (form.endDate && form.createdDate && form.endDate <= form.createdDate) e.endDate = 'End date must be after created date';
     setErrors(e);
     if (e.companyId || e.templateId || e.stages) { setTab(0); return false; }
-    if (e.createdDate || e.durationDays) { setTab(1); return false; }
+    if (e.createdDate || e.endDate) { setTab(1); return false; }
     return Object.keys(e).length === 0;
   }, [form]);
 
@@ -499,7 +505,10 @@ function AddCaseDialog({ open, onClose, onSubmit, defaultPipeline, editCard }: A
       directorNames,
       urgency: form.urgency,
       visaExpiryDate: form.visaExpiryDate || undefined,
-      durationDays: form.durationDays ? Number(form.durationDays) : undefined,
+      endDate: form.endDate || undefined,
+      durationDays: form.endDate && form.createdDate
+        ? Math.ceil((new Date(form.endDate).getTime() - new Date(form.createdDate).getTime()) / 86_400_000)
+        : undefined,
       createdDate: form.createdDate,
       notes: form.notes.trim() || undefined,
     });
@@ -519,7 +528,7 @@ function AddCaseDialog({ open, onClose, onSubmit, defaultPipeline, editCard }: A
         <Tab label={
           <Stack direction="row" spacing={0.5} alignItems="center">
             <span>Details</span>
-            {(errors.createdDate || errors.durationDays) && <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'error.main' }} />}
+            {(errors.createdDate || errors.endDate) && <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'error.main' }} />}
           </Stack>
         } />
       </Tabs>
@@ -654,7 +663,7 @@ function AddCaseDialog({ open, onClose, onSubmit, defaultPipeline, editCard }: A
 
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               <TextField fullWidth size="small" type="date" label="Created Date *" value={form.createdDate} onChange={(e) => handleChange('createdDate', e.target.value)} slotProps={{ inputLabel: { shrink: true } }} error={!!errors.createdDate} helperText={errors.createdDate ?? 'Defaults to today'} />
-              <TextField fullWidth size="small" type="number" label="Duration (days)" value={form.durationDays} onChange={(e) => handleChange('durationDays', e.target.value)} slotProps={{ input: { inputProps: { min: 1 } } }} error={!!errors.durationDays} helperText={errors.durationDays ?? 'Leave blank → shows "–"'} />
+              <TextField fullWidth size="small" type="date" label="End Date" value={form.endDate} onChange={(e) => handleChange('endDate', e.target.value)} slotProps={{ inputLabel: { shrink: true } }} error={!!errors.endDate} helperText={errors.endDate ?? 'Duration auto-calculated from created → end date'} />
             </Stack>
 
             <TextField fullWidth size="small" type="date" label="Visa / Permit Expiry" value={form.visaExpiryDate} onChange={(e) => handleChange('visaExpiryDate', e.target.value)} slotProps={{ inputLabel: { shrink: true } }} helperText="Optional" />
@@ -718,7 +727,11 @@ export function TBKanbanView() {
   const filteredCards = useMemo(() => {
     let result = cards;
     if (filterUrgency !== 'all') result = result.filter((c) => c.urgency === filterUrgency);
-    if (sortByDeadline) result = [...result].sort((a, b) => (a.durationDays ?? Infinity) - (b.durationDays ?? Infinity));
+    if (sortByDeadline) result = [...result].sort((a, b) => {
+      const da = a.endDate ? new Date(a.endDate).getTime() : Infinity;
+      const db = b.endDate ? new Date(b.endDate).getTime() : Infinity;
+      return da - db;
+    });
     return result;
   }, [cards, filterUrgency, sortByDeadline]);
 

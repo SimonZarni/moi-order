@@ -195,7 +195,8 @@ export type KanbanCard = {
   companyId?: string;
   directorNames: string[];
   visaExpiryDate?: string;
-  durationDays?: number;
+  endDate?: string;
+  durationDays?: number; // computed: Math.ceil((endDate - createdDate) / 86400000)
   createdDate: string;
   urgency: UrgencyLevel;
   notes?: string;
@@ -539,7 +540,7 @@ const INITIAL_KANBAN_CARDS: KanbanCard[] = [
     companyName: 'Siam Technology Co., Ltd.',
     thaiRegNumber: '0105565001234',
     directorNames: ['Mr. Somchai Wongsuwarn', 'Mrs. Suda Panich'],
-    urgency: 'medium', durationDays: 30, createdDate: '2026-05-10',
+    urgency: 'medium', endDate: '2026-06-09', durationDays: 30, createdDate: '2026-05-10',
     notes: 'BOI-registered entity, requires special approval',
   },
   {
@@ -565,7 +566,7 @@ const INITIAL_KANBAN_CARDS: KanbanCard[] = [
     companyName: 'Digital Solution Co., Ltd.',
     thaiRegNumber: '0105564007823',
     directorNames: ['Mr. Thanawat Jirayu', 'Mrs. Ladawan Intarat'],
-    urgency: 'high', durationDays: 7, createdDate: '2026-05-15',
+    urgency: 'high', endDate: '2026-05-22', durationDays: 7, createdDate: '2026-05-15',
     notes: 'Urgent — client deadline end of month',
   },
   {
@@ -591,7 +592,7 @@ const INITIAL_KANBAN_CARDS: KanbanCard[] = [
     companyName: 'International Consulting Co., Ltd.',
     thaiRegNumber: '0105561008765',
     directorNames: ["Mr. James O'Brien", 'Ms. Sarah Lin'],
-    visaExpiryDate: '2026-05-31', durationDays: 14, createdDate: '2026-05-17',
+    visaExpiryDate: '2026-05-31', endDate: '2026-05-31', durationDays: 14, createdDate: '2026-05-17',
     urgency: 'high', notes: 'Work permit renewal — expiring soon',
   },
   {
@@ -604,7 +605,7 @@ const INITIAL_KANBAN_CARDS: KanbanCard[] = [
     companyName: 'Global Software Co., Ltd.',
     thaiRegNumber: '0105566003421',
     directorNames: ['Mr. David Chen'],
-    visaExpiryDate: '2026-06-15', durationDays: 21, createdDate: '2026-05-12',
+    visaExpiryDate: '2026-06-15', endDate: '2026-06-02', durationDays: 21, createdDate: '2026-05-12',
     urgency: 'medium', notes: 'Work permit renewal',
   },
   {
