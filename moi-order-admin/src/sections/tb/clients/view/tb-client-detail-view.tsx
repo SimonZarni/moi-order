@@ -26,6 +26,7 @@ import DialogContent from '@mui/material/DialogContent';
 import { useRouter } from 'src/routes/hooks';
 
 import { fDate } from 'src/utils/format-time';
+import { fNumber } from 'src/utils/format-number';
 
 import { useAuth } from 'src/context/auth-context';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -276,6 +277,10 @@ export function TBClientDetailView() {
             <SectionCard title="Company Information">
               <Stack divider={<Divider />}>
                 <InfoRow label="Registration Date" value={fDate(company.registrationDate)} />
+                <InfoRow
+                  label="Registered Capital"
+                  value={company.registeredCapital != null ? `฿${fNumber(company.registeredCapital)}` : '—'}
+                />
                 <InfoRow label="VAT Registered" value={company.vatRegistered ? 'Yes' : 'No'} valueColor={company.vatRegistered ? '#10B981' : undefined} />
                 <InfoRow label="Monthly Accounting" value={company.monthlyAccounting ? 'Active' : 'Inactive'} valueColor={company.monthlyAccounting ? '#10B981' : undefined} />
                 <InfoRow label="DBD Portal" value={<Link href={company.dbdUrl} target="_blank" rel="noopener noreferrer" variant="body2">Open DBD ↗</Link>} />

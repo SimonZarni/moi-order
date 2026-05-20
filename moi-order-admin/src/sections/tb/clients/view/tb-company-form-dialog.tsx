@@ -51,6 +51,7 @@ type FormState = {
   companyName: string;
   thaiRegNumber: string;
   registrationDate: string;
+  registeredCapital: string;
   clientName: string;
   clientPhone: string;
   notes: string;
@@ -73,6 +74,7 @@ const INITIAL_FORM: FormState = {
   companyName: '',
   thaiRegNumber: '',
   registrationDate: '',
+  registeredCapital: '',
   clientName: '',
   clientPhone: '',
   notes: '',
@@ -341,6 +343,7 @@ export function TBCompanyFormDialog({ open, onClose, onSubmit, editCompany }: TB
         companyName: editCompany.companyName,
         thaiRegNumber: editCompany.thaiRegNumber,
         registrationDate: editCompany.registrationDate,
+        registeredCapital: editCompany.registeredCapital != null ? String(editCompany.registeredCapital) : '',
         clientName: editCompany.clientName,
         clientPhone: editCompany.clientPhone,
         notes: editCompany.notes ?? '',
@@ -422,6 +425,7 @@ export function TBCompanyFormDialog({ open, onClose, onSubmit, editCompany }: TB
       companyName: form.companyName.trim(),
       thaiRegNumber: form.thaiRegNumber.trim(),
       registrationDate: form.registrationDate,
+      registeredCapital: form.registeredCapital ? Number(form.registeredCapital.replace(/,/g, '')) : undefined,
       clientName: form.clientName.trim(),
       clientPhone: form.clientPhone.trim(),
       notes: form.notes.trim() || undefined,
@@ -527,6 +531,18 @@ export function TBCompanyFormDialog({ open, onClose, onSubmit, editCompany }: TB
                   error={!!errors.registrationDate}
                   helperText={errors.registrationDate}
                   slotProps={{ inputLabel: { shrink: true } }}
+                />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <TextField
+                  fullWidth
+                  type="number"
+                  label="Registered Capital (THB)"
+                  value={form.registeredCapital}
+                  onChange={(e) => handleFormChange('registeredCapital', e.target.value)}
+                  placeholder="e.g. 1000000"
+                  helperText="Optional — registered share capital in Thai Baht"
+                  slotProps={{ input: { inputProps: { min: 0 } } }}
                 />
               </Grid>
             </Grid>

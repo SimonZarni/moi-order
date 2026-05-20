@@ -97,6 +97,7 @@ export type TBClient = {
   companyName: string;
   thaiRegNumber: string;
   registrationDate: string;
+  registeredCapital?: number; // THB
   clientName: string;
   clientPhone: string;
   directors: Director[];
@@ -420,7 +421,7 @@ const INITIAL_CLIENTS: TBClient[] = [
     id: 'cl-001',
     companyName: 'Siam Technology Co., Ltd.',
     thaiRegNumber: '0105565001234',
-    registrationDate: '2023-03-15',
+    registrationDate: '2023-03-15', registeredCapital: 2_000_000,
     clientName: 'Mr. Somchai Wongsuwarn',
     clientPhone: '+66 81 234 5678',
     directors: [
@@ -449,7 +450,7 @@ const INITIAL_CLIENTS: TBClient[] = [
     id: 'cl-002',
     companyName: 'Innovate Group Co., Ltd.',
     thaiRegNumber: '0105562009876',
-    registrationDate: '2022-07-22',
+    registrationDate: '2022-07-22', registeredCapital: 1_000_000,
     clientName: 'Mrs. Suda Panich',
     clientPhone: '+66 86 345 6789',
     directors: [
@@ -475,7 +476,7 @@ const INITIAL_CLIENTS: TBClient[] = [
     id: 'cl-003',
     companyName: 'Thai Manufacturing Co., Ltd.',
     thaiRegNumber: '0105560004512',
-    registrationDate: '2020-01-10',
+    registrationDate: '2020-01-10', registeredCapital: 5_000_000,
     clientName: 'Mr. Wichai Tantiwech',
     clientPhone: '+66 89 456 7890',
     directors: [
@@ -507,7 +508,7 @@ const INITIAL_CLIENTS: TBClient[] = [
     id: 'cl-004',
     companyName: 'Digital Solution Co., Ltd.',
     thaiRegNumber: '0105564007823',
-    registrationDate: '2024-02-28',
+    registrationDate: '2024-02-28', registeredCapital: 3_000_000,
     clientName: 'Mr. Thanawat Jirayu',
     clientPhone: '+66 90 567 8901',
     directors: [
@@ -533,7 +534,7 @@ const INITIAL_CLIENTS: TBClient[] = [
     id: 'cl-005',
     companyName: 'Asia Trade Co., Ltd.',
     thaiRegNumber: '0105558012390',
-    registrationDate: '2018-11-05',
+    registrationDate: '2018-11-05', registeredCapital: 500_000,
     clientName: 'Mrs. Ratana Sittichoek',
     clientPhone: '+66 82 678 9012',
     directors: [
@@ -559,7 +560,7 @@ const INITIAL_CLIENTS: TBClient[] = [
     id: 'cl-006',
     companyName: 'Supply Chain Co., Ltd.',
     thaiRegNumber: '0105563011847',
-    registrationDate: '2023-09-14',
+    registrationDate: '2023-09-14', registeredCapital: 2_000_000,
     clientName: 'Mr. Prawit Srisomboon',
     clientPhone: '+66 83 789 0123',
     directors: [
@@ -586,7 +587,7 @@ const INITIAL_CLIENTS: TBClient[] = [
     id: 'cl-007',
     companyName: 'International Consulting Co., Ltd.',
     thaiRegNumber: '0105561008765',
-    registrationDate: '2021-06-30',
+    registrationDate: '2021-06-30', registeredCapital: 4_000_000,
     clientName: "Mr. James O'Brien",
     clientPhone: '+66 84 890 1234',
     directors: [
@@ -614,7 +615,7 @@ const INITIAL_CLIENTS: TBClient[] = [
     id: 'cl-008',
     companyName: 'Global Software Co., Ltd.',
     thaiRegNumber: '0105566003421',
-    registrationDate: '2024-08-20',
+    registrationDate: '2024-08-20', registeredCapital: 1_000_000,
     clientName: 'Mr. David Chen',
     clientPhone: '+66 85 901 2345',
     directors: [
