@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
@@ -296,9 +296,11 @@ export type TBCompanyFormDialogProps = {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: Omit<TBClient, 'id' | 'history' | 'dbdUrl'>) => void;
+  editCompany?: TBClient; // when set, dialog is in edit mode
 };
 
-export function TBCompanyFormDialog({ open, onClose, onSubmit }: TBCompanyFormDialogProps) {
+export function TBCompanyFormDialog({ open, onClose, onSubmit, editCompany }: TBCompanyFormDialogProps) {
+  const isEdit = !!editCompany;
   const [tab, setTab] = useState(0);
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [directors, setDirectors] = useState<FormDirector[]>([]);
@@ -331,6 +333,49 @@ export function TBCompanyFormDialog({ open, onClose, onSubmit }: TBCompanyFormDi
   const handleDocSelect = useCallback((category: CompanyDocumentCategory, name: string) => {
     setDocFiles((prev) => ({ ...prev, [category]: name }));
   }, []);
+
+  // Pre-populate form when opening in edit mode
+  useEffect(() => {
+    if (open && editCompany) {
+      setForm({
+        companyName: editCompany.companyName,
+        thaiRegNumber: editCompany.thaiRegNumber,
+        registrationDate: editCompany.registrationDate,
+        clientName: editCompany.clientName,
+        clientPhone: editCompany.clientPhone,
+        notes: editCompany.notes ?? '',
+        taxStatus: editCompany.taxStatus,
+        companyStatus: editCompany.companyStatus,
+        directorVisaStatus: editCompany.directorVisaStatus,
+        vatRegistered: editCompany.vatRegistered,
+        monthlyAccounting: editCompany.monthlyAccounting,
+        clientAppAccess: editCompany.clientAppAccess ?? false,
+        clientEmail: editCompany.clientEmail ?? '',
+        clientPassword: '',
+        clientPasswordConfirm: '',
+      });
+      setDirectors(editCompany.directors.map((d) => ({
+        id: d.id,
+        name: d.name,
+        nationality: d.nationality,
+        position: d.position,
+        hasVisa: !!(d.visaType || d.visaExpiry),
+        visaType: d.visaType ?? '',
+        visaExpiry: d.visaExpiry ?? '',
+        workPermit: d.workPermit ?? false,
+      })));
+      setDocFiles({});
+      setErrors({});
+      setTab(0);
+    } else if (open && !editCompany) {
+      setForm(INITIAL_FORM);
+      setDirectors([]);
+      setDocFiles({});
+      setErrors({});
+      setTab(0);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const validate = useCallback((): boolean => {
     const newErrors: FormErrors = {};
@@ -429,7 +474,7 @@ export function TBCompanyFormDialog({ open, onClose, onSubmit }: TBCompanyFormDi
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ pb: 0 }}>Add Company</DialogTitle>
+      <DialogTitle sx={{ pb: 0 }}>{isEdit ? 'Edit Company' : 'Add Company'}</DialogTitle>
 
       <Tabs
         value={tab}
@@ -708,7 +753,7 @@ export function TBCompanyFormDialog({ open, onClose, onSubmit }: TBCompanyFormDi
             </Button>
           ) : (
             <Button variant="contained" onClick={handleSubmit}>
-              Add Company
+              {isEdit ? 'Save Changes' : 'Add Company'}
             </Button>
           )}
         </Stack>

@@ -801,6 +801,46 @@ function appendAuditEntry(action: string, category: AuditLogEntry['category']) {
   });
 }
 
+export function updateCompany(id: string, updates: Omit<TBClient, 'id' | 'history' | 'dbdUrl'>): void {
+  const company = tbStore.clients.find((c) => c.id === id);
+  if (!company) return;
+  const existingDocs = company.documents;
+  const existingHistory = company.history;
+  Object.assign(company, updates);
+  // Preserve existing docs + merge in any new ones from the form
+  company.documents = [
+    ...existingDocs,
+    ...updates.documents.filter((d) => !existingDocs.find((e) => e.id === d.id)),
+  ];
+  company.history = existingHistory;
+  company.history.unshift({
+    id: `h-${Date.now()}`,
+    date: new Date().toISOString().slice(0, 10),
+    action: 'Company details updated',
+    by: 'Admin',
+  });
+}
+
+export function addCompanyDocument(companyId: string, doc: CompanyDocument): void {
+  const company = tbStore.clients.find((c) => c.id === companyId);
+  if (!company) return;
+  company.documents.push(doc);
+  company.history.unshift({ id: `h-${Date.now()}`, date: new Date().toISOString().slice(0, 10), action: `Document "${doc.fileName}" uploaded`, by: 'Admin' });
+}
+
+export function replaceCompanyDocument(companyId: string, docId: string, newFileName: string): void {
+  const company = tbStore.clients.find((c) => c.id === companyId);
+  if (!company) return;
+  const doc = company.documents.find((d) => d.id === docId);
+  if (doc) { doc.fileName = newFileName; doc.uploadedAt = new Date().toISOString(); }
+}
+
+export function removeCompanyDocument(companyId: string, docId: string): void {
+  const company = tbStore.clients.find((c) => c.id === companyId);
+  if (!company) return;
+  company.documents = company.documents.filter((d) => d.id !== docId);
+}
+
 export function addCompany(client: Omit<TBClient, 'id' | 'history' | 'dbdUrl' | 'clientPasswordSet'> & { clientPasswordSet?: boolean }): TBClient {
   const newClient: TBClient = {
     ...client,
