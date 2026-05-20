@@ -898,6 +898,29 @@ export function editKanbanCard(cardId: string, updates: Omit<KanbanCard, 'id'>):
   appendAuditEntry(`Edited case "${updates.companyName}"`, 'kanban');
 }
 
+export function renameCardStage(cardId: string, stageId: string, label: string): void {
+  const card = tbStore.kanbanCards.find((c) => c.id === cardId);
+  if (!card) return;
+  const stage = card.cardStages.find((s) => s.id === stageId);
+  if (stage) stage.label = label.trim();
+}
+
+export function deleteCardStage(cardId: string, stageId: string): boolean {
+  const card = tbStore.kanbanCards.find((c) => c.id === cardId);
+  if (!card || card.cardStages.length <= 1 || card.currentCardStageId === stageId) return false;
+  card.cardStages = card.cardStages.filter((s) => s.id !== stageId);
+  card.cardStages.forEach((s, i) => { s.order = i; });
+  return true;
+}
+
+export function addCardStage(cardId: string, label: string): CardStage | null {
+  const card = tbStore.kanbanCards.find((c) => c.id === cardId);
+  if (!card) return null;
+  const newStage: CardStage = { id: `${cardId}-s${Date.now()}`, label: label.trim(), order: card.cardStages.length };
+  card.cardStages.push(newStage);
+  return newStage;
+}
+
 export function reorderKanbanCards(activeId: string, overId: string): void {
   const ai = tbStore.kanbanCards.findIndex((c) => c.id === activeId);
   const oi = tbStore.kanbanCards.findIndex((c) => c.id === overId);

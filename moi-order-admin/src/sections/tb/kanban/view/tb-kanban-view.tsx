@@ -1,7 +1,7 @@
 import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core';
 
 import { CSS } from '@dnd-kit/utilities';
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useRef, useMemo, useState, useEffect, useCallback } from 'react';
 import {
   useSensor,
   DndContext,
@@ -55,8 +55,11 @@ import { Iconify } from 'src/components/iconify';
 import {
   tbStore,
   MACRO_STAGES,
+  addCardStage,
   addKanbanCard,
   editKanbanCard,
+  renameCardStage,
+  deleteCardStage,
   reorderKanbanCards,
   moveKanbanCardMacro,
   moveKanbanCardStage,
@@ -184,7 +187,11 @@ type ColumnProps = {
   canEdit: boolean;
   isCardOver: boolean;
   onEditCard: (card: KanbanCard) => void;
-  // stage drag handle props (only in default view)
+  // Stage edit callbacks — only provided in filtered view
+  onRenameStage?: (stageId: string, label: string) => void;
+  onDeleteStage?: (stageId: string) => void;
+  canDeleteStage?: boolean;
+  // Stage drag handle props (only in default view)
   stageHandleAttrs?: ReturnType<typeof useSortable>['attributes'];
   stageHandleListeners?: ReturnType<typeof useSortable>['listeners'];
   stageTransform?: ReturnType<typeof useSortable>['transform'];
@@ -195,9 +202,26 @@ type ColumnProps = {
 
 function KanbanColumn({
   col, cards, canEdit, isCardOver, onEditCard,
+  onRenameStage, onDeleteStage, canDeleteStage,
   stageHandleAttrs, stageHandleListeners, stageTransform, stageTransition, stageIsDragging, setColRef,
 }: ColumnProps) {
   const cardIds = useMemo(() => cards.map((c) => c.id), [cards]);
+  const [editing, setEditing] = useState(false);
+  const [editValue, setEditValue] = useState(col.label);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setEditValue(col.label); }, [col.label]);
+  useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
+
+  const handleSaveRename = useCallback(() => {
+    if (editValue.trim() && onRenameStage) onRenameStage(col.id, editValue.trim());
+    setEditing(false);
+  }, [editValue, onRenameStage, col.id]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleSaveRename();
+    if (e.key === 'Escape') { setEditValue(col.label); setEditing(false); }
+  }, [handleSaveRename, col.label]);
 
   return (
     <Box
@@ -212,7 +236,7 @@ function KanbanColumn({
       }}
     >
       <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mb: 1.5, px: 0.5 }}>
-        {canEdit && stageHandleListeners && (
+        {canEdit && stageHandleListeners && !editing && (
           <Tooltip title="Drag to reorder">
             <Box {...stageHandleAttrs} {...stageHandleListeners}
               sx={{ display: 'flex', alignItems: 'center', cursor: 'grab', color: 'text.disabled', flexShrink: 0, touchAction: 'none', '&:active': { cursor: 'grabbing' } }}
@@ -221,8 +245,53 @@ function KanbanColumn({
             </Box>
           </Tooltip>
         )}
-        <Typography variant="subtitle2" color="text.secondary" sx={{ flexGrow: 1 }}>{col.label}</Typography>
-        <Chip size="small" label={cards.length} sx={{ height: 20, fontSize: 11, bgcolor: 'background.paper' }} />
+
+        {/* Inline rename mode */}
+        {editing ? (
+          <>
+            <TextField
+              inputRef={inputRef}
+              size="small"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              sx={{ flex: 1 }}
+              slotProps={{ input: { sx: { py: 0.5, fontSize: 13, fontWeight: 600 } } }}
+            />
+            <IconButton size="small" color="primary" onClick={handleSaveRename}>
+              <Iconify icon="solar:check-circle-bold" width={16} />
+            </IconButton>
+            <IconButton size="small" onClick={() => { setEditValue(col.label); setEditing(false); }}>
+              <Iconify icon="mingcute:close-line" width={16} />
+            </IconButton>
+          </>
+        ) : (
+          <>
+            <Typography variant="subtitle2" color="text.secondary" sx={{ flexGrow: 1 }}>{col.label}</Typography>
+
+            {/* Rename button — filtered view only */}
+            {canEdit && onRenameStage && (
+              <Tooltip title="Rename stage">
+                <IconButton size="small" onClick={() => setEditing(true)} sx={{ opacity: 0.6 }}>
+                  <Iconify icon="solar:pen-bold" width={13} />
+                </IconButton>
+              </Tooltip>
+            )}
+
+            {/* Delete button — filtered view only */}
+            {canEdit && onDeleteStage && (
+              <Tooltip title={canDeleteStage ? 'Delete stage' : 'Cannot delete the current stage or last stage'}>
+                <span>
+                  <IconButton size="small" disabled={!canDeleteStage} onClick={() => onDeleteStage(col.id)} sx={{ opacity: 0.6 }}>
+                    <Iconify icon="solar:trash-bin-trash-bold" width={13} sx={{ color: canDeleteStage ? 'error.main' : 'text.disabled' }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            )}
+
+            <Chip size="small" label={cards.length} sx={{ height: 20, fontSize: 11, bgcolor: 'background.paper' }} />
+          </>
+        )}
       </Stack>
 
       <SortableContext items={cardIds} strategy={verticalListSortingStrategy}>
@@ -259,10 +328,52 @@ function SortableMacroColumn({ col, ...rest }: { col: BoardColumn } & Omit<Colum
   );
 }
 
-// Droppable wrapper for filtered-view company stage columns (no drag handle, just droppable)
-function DroppableFilteredColumn({ col, ...rest }: { col: BoardColumn } & Omit<ColumnProps, 'stageHandleAttrs' | 'stageHandleListeners' | 'stageTransform' | 'stageTransition' | 'stageIsDragging' | 'setColRef'>) {
+// Droppable wrapper for filtered-view company stage columns
+function DroppableFilteredColumn({
+  col, canDeleteStage, ...rest
+}: { col: BoardColumn; canDeleteStage?: boolean } & Omit<ColumnProps, 'stageHandleAttrs' | 'stageHandleListeners' | 'stageTransform' | 'stageTransition' | 'stageIsDragging' | 'setColRef' | 'canDeleteStage'>) {
   const { setNodeRef } = useDroppable({ id: col.id, data: { type: 'stage' } });
-  return <KanbanColumn col={col} {...rest} setColRef={setNodeRef} />;
+  return <KanbanColumn col={col} {...rest} canDeleteStage={canDeleteStage} setColRef={setNodeRef} />;
+}
+
+// ----------------------------------------------------------------------
+// Inline "Add Stage" button for filtered view
+
+function AddStageInline({ onAdd }: { onAdd: (label: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [label, setLabel] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { if (open) inputRef.current?.focus(); }, [open]);
+
+  const handleConfirm = useCallback(() => {
+    if (label.trim()) { onAdd(label.trim()); setLabel(''); setOpen(false); }
+  }, [label, onAdd]);
+
+  if (!open) {
+    return (
+      <Button variant="outlined" startIcon={<Iconify icon="mingcute:add-line" width={16} />} onClick={() => setOpen(true)} sx={{ whiteSpace: 'nowrap', minWidth: 140 }}>
+        Add Stage
+      </Button>
+    );
+  }
+
+  return (
+    <Stack spacing={1} sx={{ width: 200 }}>
+      <TextField
+        inputRef={inputRef}
+        size="small"
+        value={label}
+        onChange={(e) => setLabel(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter') handleConfirm(); if (e.key === 'Escape') { setOpen(false); setLabel(''); } }}
+        placeholder="Stage name…"
+      />
+      <Stack direction="row" spacing={0.5}>
+        <Button size="small" variant="contained" onClick={handleConfirm} disabled={!label.trim()} sx={{ flex: 1 }}>Add</Button>
+        <Button size="small" onClick={() => { setOpen(false); setLabel(''); }}>Cancel</Button>
+      </Stack>
+    </Stack>
+  );
 }
 
 // ----------------------------------------------------------------------
@@ -274,12 +385,16 @@ type KanbanBoardProps = {
   cards: KanbanCard[];
   isFilteredView: boolean;
   filterCompanyName: string | null;
+  filteredCard: KanbanCard | null;
   canEdit: boolean;
   onCardMoved: () => void;
   onEditCard: (card: KanbanCard) => void;
+  onRenameStage: (stageId: string, label: string) => void;
+  onDeleteStage: (stageId: string) => void;
+  onAddStage: (label: string) => void;
 };
 
-function KanbanBoard({ pipeline, columns, cards, isFilteredView, filterCompanyName, canEdit, onCardMoved, onEditCard }: KanbanBoardProps) {
+function KanbanBoard({ pipeline, columns, cards, isFilteredView, filterCompanyName, filteredCard, canEdit, onCardMoved, onEditCard, onRenameStage, onDeleteStage, onAddStage }: KanbanBoardProps) {
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
@@ -365,12 +480,28 @@ function KanbanBoard({ pipeline, columns, cards, isFilteredView, filterCompanyNa
         <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 1, alignItems: 'flex-start' }}>
           {displayCols.map((col) =>
             isFilteredView ? (
-              // Filtered view: droppable company-stage columns (no drag handle)
-              <DroppableFilteredColumn key={col.id} col={col} cards={getColCards(col.id)} canEdit={canEdit} isCardOver={cardOverColId === col.id} onEditCard={onEditCard} />
+              <DroppableFilteredColumn
+                key={col.id} col={col} cards={getColCards(col.id)}
+                canEdit={canEdit} isCardOver={cardOverColId === col.id}
+                onEditCard={onEditCard}
+                onRenameStage={onRenameStage}
+                onDeleteStage={onDeleteStage}
+                canDeleteStage={
+                  !!filteredCard &&
+                  filteredCard.cardStages.length > 1 &&
+                  filteredCard.currentCardStageId !== col.id
+                }
+              />
             ) : (
-              // Default view: sortable macro columns
               <SortableMacroColumn key={col.id} col={col} cards={getColCards(col.id)} canEdit={canEdit} isCardOver={cardOverColId === col.id} onEditCard={onEditCard} />
             )
+          )}
+
+          {/* Add Stage button — filtered view only */}
+          {isFilteredView && canEdit && (
+            <Box sx={{ flexShrink: 0, pt: 0.5 }}>
+              <AddStageInline onAdd={onAddStage} />
+            </Box>
           )}
         </Box>
       </SortableContext>
@@ -724,12 +855,17 @@ export function TBKanbanView({ pipeline, pageTitle, serviceTypes }: TBKanbanView
     return Array.from(map.entries()).map(([name, count]) => ({ name, count })).sort((a, b) => a.name.localeCompare(b.name));
   }, [cards, pipeline]);
 
+  // The specific card being viewed in filtered mode (needed for stage edit)
+  const filteredCard = useMemo(
+    () => !filterCompanyName ? null : (cards.find((c) => c.companyName === filterCompanyName && c.pipeline === pipeline && c.serviceType === activeServiceType) ?? null),
+    [cards, filterCompanyName, pipeline, activeServiceType]
+  );
+
   // When filtered to a company, use their card's stages as the board columns
   const filteredCompanyColumns = useMemo<BoardColumn[] | null>(() => {
-    if (!filterCompanyName) return null;
-    const companyCard = cards.find((c) => c.companyName === filterCompanyName && c.pipeline === pipeline && c.serviceType === activeServiceType);
-    return companyCard ? companyCard.cardStages.map((s) => ({ id: s.id, label: s.label })) : null;
-  }, [cards, filterCompanyName, pipeline, activeServiceType]);
+    if (!filteredCard) return null;
+    return filteredCard.cardStages.map((s) => ({ id: s.id, label: s.label }));
+  }, [filteredCard]);
 
   const isFilteredView = !!filteredCompanyColumns;
   const boardColumns: BoardColumn[] = filteredCompanyColumns ?? MACRO_STAGES;
@@ -791,6 +927,30 @@ export function TBKanbanView({ pipeline, pageTitle, serviceTypes }: TBKanbanView
     setHasChanges(true);
     setNotification({ msg: 'Case updated.', severity: 'success' });
   }, [editingCard]);
+
+  const handleRenameStage = useCallback((stageId: string, label: string) => {
+    if (!filteredCard) return;
+    renameCardStage(filteredCard.id, stageId, label);
+    setCards([...tbStore.kanbanCards]);
+  }, [filteredCard]);
+
+  const handleDeleteStage = useCallback((stageId: string) => {
+    if (!filteredCard) return;
+    const ok = deleteCardStage(filteredCard.id, stageId);
+    if (ok) {
+      setCards([...tbStore.kanbanCards]);
+      setNotification({ msg: 'Stage deleted.', severity: 'info' });
+    } else {
+      setNotification({ msg: 'Cannot delete the active stage or the last remaining stage.', severity: 'error' });
+    }
+  }, [filteredCard]);
+
+  const handleAddFilteredStage = useCallback((label: string) => {
+    if (!filteredCard) return;
+    addCardStage(filteredCard.id, label);
+    setCards([...tbStore.kanbanCards]);
+    setNotification({ msg: `Stage "${label}" added.`, severity: 'success' });
+  }, [filteredCard]);
 
   // Filtered view: show which stage the company's card is currently at
   const filteredCardCurrentStage = useMemo(() => {
@@ -913,9 +1073,13 @@ export function TBKanbanView({ pipeline, pageTitle, serviceTypes }: TBKanbanView
         cards={filteredCards}
         isFilteredView={isFilteredView}
         filterCompanyName={filterCompanyName}
+        filteredCard={filteredCard}
         canEdit={canEdit}
         onCardMoved={handleCardMoved}
         onEditCard={setEditingCard}
+        onRenameStage={handleRenameStage}
+        onDeleteStage={handleDeleteStage}
+        onAddStage={handleAddFilteredStage}
       />
 
       {/* Dialogs */}
