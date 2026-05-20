@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class RegisterRequest extends FormRequest
@@ -25,7 +26,7 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name'                  => ['required', 'string', 'max:255'],
-            'email'                 => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:users,email'],
+            'email'                 => ['required', 'string', 'email:rfc,dns', 'max:255', Rule::unique('users', 'email')->whereNull('deleted_at')],
             'password'              => ['required', 'string', 'confirmed', Password::min(8)],
             'password_confirmation' => ['required', 'string'],
         ];
