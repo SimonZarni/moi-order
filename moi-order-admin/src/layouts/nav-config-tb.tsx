@@ -26,8 +26,25 @@ export const tbNavData: NavItem[] = [
   },
   {
     title: 'Kanban Pipelines',
-    path: '/tb/kanban',
+    path: '/tb/kanban/company-reg',
     icon: icon('solar:check-circle-bold'),
+    children: [
+      {
+        title: 'Company Registrations',
+        path: '/tb/kanban/company-reg',
+        icon: icon('solar:check-circle-bold'),
+      },
+      {
+        title: 'Apply & Renew',
+        path: '/tb/kanban/apply-renew',
+        icon: icon('solar:restart-bold'),
+      },
+      {
+        title: 'Extension',
+        path: '/tb/kanban/extension',
+        icon: icon('solar:clock-circle-outline'),
+      },
+    ],
   },
   {
     title: 'Document Review Desk',

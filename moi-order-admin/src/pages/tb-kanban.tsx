@@ -1,12 +1,6 @@
-import { TBKanbanView } from 'src/sections/tb/kanban/view/tb-kanban-view';
+import { Navigate } from 'react-router-dom';
 
-// ----------------------------------------------------------------------
-
+// Legacy route — redirect to Company Registrations
 export default function TBKanbanPage() {
-  return (
-    <>
-      <title>Kanban Pipelines — Trusted Brothers</title>
-      <TBKanbanView />
-    </>
-  );
+  return <Navigate to="/tb/kanban/company-reg" replace />;
 }

@@ -77,10 +77,7 @@ const URGENCY_COLOR: Record<UrgencyLevel, 'error' | 'warning' | 'success'> = {
   high: 'error', medium: 'warning', low: 'success',
 };
 
-const PIPELINE_TABS: { id: KanbanPipeline; label: string }[] = [
-  { id: 'company_registration', label: 'Company Registration' },
-  { id: 'visa_work_permit', label: 'Visa / Work Permit Extensions' },
-];
+export type ServiceTypeTab = { id: string; label: string };
 
 const genId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 
@@ -389,7 +386,7 @@ type CustomStage = { id: string; label: string };
 
 type AddCaseForm = {
   companyId: string;
-  pipeline: KanbanPipeline;
+  serviceType: string;
   templateId: string;
   customStages: CustomStage[];
   urgency: UrgencyLevel;
@@ -403,17 +400,19 @@ type AddCaseDialogProps = {
   open: boolean;
   onClose: () => void;
   onSubmit: (card: Omit<KanbanCard, 'id'>) => void;
-  defaultPipeline: KanbanPipeline;
+  pipeline: KanbanPipeline;
+  serviceTypes: ServiceTypeTab[];
+  defaultServiceType: string;
   editCard?: KanbanCard;
 };
 
-function AddCaseDialog({ open, onClose, onSubmit, defaultPipeline, editCard }: AddCaseDialogProps) {
+function AddCaseDialog({ open, onClose, onSubmit, pipeline, serviceTypes, defaultServiceType, editCard }: AddCaseDialogProps) {
   const isEdit = !!editCard;
   const today = new Date().toISOString().slice(0, 10);
   const [tab, setTab] = useState(0);
 
   const [form, setForm] = useState<AddCaseForm>({
-    companyId: '', pipeline: defaultPipeline, templateId: '', customStages: [],
+    companyId: '', serviceType: defaultServiceType, templateId: '', customStages: [],
     urgency: 'medium', visaExpiryDate: '', endDate: '', createdDate: today, notes: '',
   });
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
@@ -425,7 +424,7 @@ function AddCaseDialog({ open, onClose, onSubmit, defaultPipeline, editCard }: A
       const resolvedId = editCard.companyId ?? tbStore.clients.find((c) => c.companyName === editCard.companyName)?.id ?? '';
       setForm({
         companyId: resolvedId,
-        pipeline: editCard.pipeline,
+        serviceType: editCard.serviceType,
         templateId: editCard.templateId ?? 'custom',
         customStages: editCard.cardStages.map((s) => ({ id: s.id, label: s.label })),
         urgency: editCard.urgency,
@@ -435,7 +434,7 @@ function AddCaseDialog({ open, onClose, onSubmit, defaultPipeline, editCard }: A
         notes: editCard.notes ?? '',
       });
     } else {
-      setForm({ companyId: '', pipeline: defaultPipeline, templateId: '', customStages: [], urgency: 'medium', visaExpiryDate: '', endDate: '', createdDate: today, notes: '' });
+      setForm({ companyId: '', serviceType: defaultServiceType, templateId: '', customStages: [], urgency: 'medium', visaExpiryDate: '', endDate: '', createdDate: today, notes: '' });
     }
     setErrors({});
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -445,8 +444,8 @@ function AddCaseDialog({ open, onClose, onSubmit, defaultPipeline, editCard }: A
   const directorNames = useMemo(() => selectedCompany?.directors.map((d) => d.name) ?? [], [selectedCompany]);
 
   const pipelineTemplates = useMemo(
-    () => tbStore.stageTemplates.filter((t) => t.pipeline === form.pipeline || t.pipeline === 'any'),
-    [form.pipeline]
+    () => tbStore.stageTemplates.filter((t) => t.pipeline === pipeline || t.pipeline === 'any'),
+    [pipeline]
   );
 
   const handleChange = useCallback(<K extends keyof AddCaseForm>(field: K, value: AddCaseForm[K]) => {
@@ -494,7 +493,8 @@ function AddCaseDialog({ open, onClose, onSubmit, defaultPipeline, editCard }: A
     const cardStages: CardStage[] = form.customStages.map((s, i) => ({ id: s.id, label: s.label.trim(), order: i }));
     const currentCardStageId = cardStages[0]?.id ?? '';
     onSubmit({
-      pipeline: form.pipeline,
+      pipeline,
+      serviceType: form.serviceType,
       macroStage: getMacroStageFromCardStage(cardStages, currentCardStageId),
       cardStages,
       currentCardStageId,
@@ -512,7 +512,7 @@ function AddCaseDialog({ open, onClose, onSubmit, defaultPipeline, editCard }: A
       createdDate: form.createdDate,
       notes: form.notes.trim() || undefined,
     });
-  }, [form, validate, selectedCompany, directorNames, onSubmit]);
+  }, [form, pipeline, validate, selectedCompany, directorNames, onSubmit]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -562,14 +562,15 @@ function AddCaseDialog({ open, onClose, onSubmit, defaultPipeline, editCard }: A
               </Box>
             )}
 
-            {/* Pipeline */}
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>Pipeline *</Typography>
-              <ToggleButtonGroup exclusive value={form.pipeline} onChange={(_, val) => val && handleChange('pipeline', val)} size="small" fullWidth>
-                <ToggleButton value="company_registration">Company Registration</ToggleButton>
-                <ToggleButton value="visa_work_permit">Visa / Work Permit</ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
+            {/* Service type */}
+            <FormControl fullWidth size="small">
+              <InputLabel>Service Type *</InputLabel>
+              <Select value={form.serviceType} label="Service Type *" onChange={(e) => handleChange('serviceType', e.target.value)}>
+                {serviceTypes.map((st) => (
+                  <MenuItem key={st.id} value={st.id}>{st.label}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
             <Divider />
 
@@ -692,11 +693,17 @@ function AddCaseDialog({ open, onClose, onSubmit, defaultPipeline, editCard }: A
 // ----------------------------------------------------------------------
 // Main view
 
-export function TBKanbanView() {
+type TBKanbanViewProps = {
+  pipeline: KanbanPipeline;
+  pageTitle: string;
+  serviceTypes: ServiceTypeTab[];
+};
+
+export function TBKanbanView({ pipeline, pageTitle, serviceTypes }: TBKanbanViewProps) {
   const { isSuperAdmin } = useAuth();
   const canEdit = isSuperAdmin();
 
-  const [activePipeline, setActivePipeline] = useState<KanbanPipeline>('company_registration');
+  const [activeServiceType, setActiveServiceType] = useState(serviceTypes[0]?.id ?? '');
   const [filterCompanyName, setFilterCompanyName] = useState<string | null>(null);
   const [filterUrgency, setFilterUrgency] = useState<UrgencyLevel | 'all'>('all');
   const [sortByDeadline, setSortByDeadline] = useState(false);
@@ -707,25 +714,28 @@ export function TBKanbanView() {
   const [editingCard, setEditingCard] = useState<KanbanCard | null>(null);
   const [notification, setNotification] = useState<{ msg: string; severity: 'success' | 'error' | 'info' } | null>(null);
 
-  // Companies in the CR pipeline (for company filter)
-  const crCompanies = useMemo(() => {
+  // Companies in this pipeline + service type (for company filter, CR only)
+  const pipelineCompanies = useMemo(() => {
     const map = new Map<string, number>();
-    cards.filter((c) => c.pipeline === 'company_registration').forEach((c) => map.set(c.companyName, (map.get(c.companyName) ?? 0) + 1));
+    cards
+      .filter((c) => c.pipeline === pipeline && c.serviceType === activeServiceType)
+      .forEach((c) => map.set(c.companyName, (map.get(c.companyName) ?? 0) + 1));
     return Array.from(map.entries()).map(([name, count]) => ({ name, count })).sort((a, b) => a.name.localeCompare(b.name));
-  }, [cards]);
+  }, [cards, pipeline, activeServiceType]);
 
   // When filtered to a company, use their card's stages as the board columns
   const filteredCompanyColumns = useMemo<BoardColumn[] | null>(() => {
     if (!filterCompanyName) return null;
-    const companyCard = cards.find((c) => c.companyName === filterCompanyName && c.pipeline === activePipeline);
+    const companyCard = cards.find((c) => c.companyName === filterCompanyName && c.pipeline === pipeline && c.serviceType === activeServiceType);
     return companyCard ? companyCard.cardStages.map((s) => ({ id: s.id, label: s.label })) : null;
-  }, [cards, filterCompanyName, activePipeline]);
+  }, [cards, filterCompanyName, pipeline, activeServiceType]);
 
   const isFilteredView = !!filteredCompanyColumns;
   const boardColumns: BoardColumn[] = filteredCompanyColumns ?? MACRO_STAGES;
 
   const filteredCards = useMemo(() => {
-    let result = cards;
+    let result = cards.filter((c) => c.pipeline === pipeline && c.serviceType === activeServiceType);
+    if (filterCompanyName) result = result.filter((c) => c.companyName === filterCompanyName);
     if (filterUrgency !== 'all') result = result.filter((c) => c.urgency === filterUrgency);
     if (sortByDeadline) result = [...result].sort((a, b) => {
       const da = a.endDate ? new Date(a.endDate).getTime() : Infinity;
@@ -733,13 +743,15 @@ export function TBKanbanView() {
       return da - db;
     });
     return result;
-  }, [cards, filterUrgency, sortByDeadline]);
+  }, [cards, pipeline, activeServiceType, filterCompanyName, filterUrgency, sortByDeadline]);
 
   const hasActiveFilters = filterUrgency !== 'all' || sortByDeadline || !!filterCompanyName;
 
-  const handleTabChange = useCallback((_: React.SyntheticEvent, val: KanbanPipeline) => {
-    setActivePipeline(val);
+  const handleTabChange = useCallback((_: React.SyntheticEvent, val: string) => {
+    setActiveServiceType(val);
     setFilterCompanyName(null);
+    setFilterUrgency('all');
+    setSortByDeadline(false);
   }, []);
 
   const handleClearFilters = useCallback(() => {
@@ -782,15 +794,15 @@ export function TBKanbanView() {
   // Filtered view: show which stage the company's card is currently at
   const filteredCardCurrentStage = useMemo(() => {
     if (!filterCompanyName || !isFilteredView) return null;
-    const c = cards.find((x) => x.companyName === filterCompanyName && x.pipeline === activePipeline);
+    const c = cards.find((x) => x.companyName === filterCompanyName && x.pipeline === pipeline && x.serviceType === activeServiceType);
     return c ? c.cardStages.find((s) => s.id === c.currentCardStageId)?.label : null;
-  }, [cards, filterCompanyName, activePipeline, isFilteredView]);
+  }, [cards, filterCompanyName, pipeline, activeServiceType, isFilteredView]);
 
   return (
     <DashboardContent maxWidth={false}>
       <Stack direction="row" alignItems="flex-start" justifyContent="space-between" sx={{ mb: 3 }}>
         <Box>
-          <Typography variant="h4">Kanban Pipelines</Typography>
+          <Typography variant="h4">{pageTitle}</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             {canEdit
               ? isFilteredView
@@ -811,13 +823,13 @@ export function TBKanbanView() {
 
       {!canEdit && <Alert severity="info" sx={{ mb: 3 }}>Only Super Admins can add or manage cases. View-only mode.</Alert>}
 
-      {/* Pipeline tabs */}
-      <Tabs value={activePipeline} onChange={handleTabChange} sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
-        {PIPELINE_TABS.map((tab) => (
+      {/* Service type tabs */}
+      <Tabs value={activeServiceType} onChange={handleTabChange} sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
+        {serviceTypes.map((tab) => (
           <Tab key={tab.id} value={tab.id} label={
             <Stack direction="row" spacing={0.75} alignItems="center">
               <span>{tab.label}</span>
-              <Chip size="small" label={cards.filter((c) => c.pipeline === tab.id).length} sx={{ height: 18, fontSize: 10 }} />
+              <Chip size="small" label={cards.filter((c) => c.pipeline === pipeline && c.serviceType === tab.id).length} sx={{ height: 18, fontSize: 10 }} />
             </Stack>
           } />
         ))}
@@ -825,18 +837,18 @@ export function TBKanbanView() {
 
       {/* Filter bar */}
       <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ sm: 'center' }} spacing={1.5} flexWrap="wrap" sx={{ py: 2 }}>
-        {/* Company filter — CR only */}
-        {activePipeline === 'company_registration' && (
+        {/* Company filter */}
+        {pipelineCompanies.length > 0 && (
           <FormControl size="small" sx={{ minWidth: 240 }}>
             <InputLabel shrink>Company</InputLabel>
             <Select notched displayEmpty value={filterCompanyName ?? ''} label="Company" onChange={(e) => setFilterCompanyName(e.target.value || null)}>
               <MenuItem value="">
                 <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
                   <Typography variant="body2">All Companies</Typography>
-                  <Chip size="small" label={cards.filter((c) => c.pipeline === 'company_registration').length} sx={{ height: 18, fontSize: 10, ml: 1 }} />
+                  <Chip size="small" label={filteredCards.length} sx={{ height: 18, fontSize: 10, ml: 1 }} />
                 </Stack>
               </MenuItem>
-              {crCompanies.map(({ name, count }) => (
+              {pipelineCompanies.map(({ name, count }) => (
                 <MenuItem key={name} value={name}>
                   <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
                     <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>{name}</Typography>
@@ -897,7 +909,7 @@ export function TBKanbanView() {
 
       {/* Board */}
       <KanbanBoard
-        pipeline={activePipeline}
+        pipeline={pipeline}
         columns={boardColumns}
         cards={filteredCards}
         isFilteredView={isFilteredView}
@@ -908,8 +920,8 @@ export function TBKanbanView() {
       />
 
       {/* Dialogs */}
-      <AddCaseDialog open={addCaseOpen} onClose={() => setAddCaseOpen(false)} onSubmit={handleAddCase} defaultPipeline={activePipeline} />
-      <AddCaseDialog open={!!editingCard} onClose={() => setEditingCard(null)} onSubmit={handleEditCase} defaultPipeline={activePipeline} editCard={editingCard ?? undefined} />
+      <AddCaseDialog open={addCaseOpen} onClose={() => setAddCaseOpen(false)} onSubmit={handleAddCase} pipeline={pipeline} serviceTypes={serviceTypes} defaultServiceType={activeServiceType} />
+      <AddCaseDialog open={!!editingCard} onClose={() => setEditingCard(null)} onSubmit={handleEditCase} pipeline={pipeline} serviceTypes={serviceTypes} defaultServiceType={activeServiceType} editCard={editingCard ?? undefined} />
 
       <Snackbar open={!!notification} autoHideDuration={3500} onClose={() => setNotification(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
         {notification ? <Alert severity={notification.severity} onClose={() => setNotification(null)} sx={{ width: '100%' }}>{notification.msg}</Alert> : undefined}

@@ -151,7 +151,7 @@ const INITIAL_INDIVIDUAL_CLIENTS: TBIndividualClient[] = [
 // ----------------------------------------------------------------------
 // Kanban
 
-export type KanbanPipeline = 'company_registration' | 'visa_work_permit';
+export type KanbanPipeline = 'company_registration' | 'apply_renew' | 'extension';
 export type UrgencyLevel = 'high' | 'medium' | 'low';
 export type MacroStage = 'backlog' | 'in_progress' | 'review' | 'done';
 
@@ -192,6 +192,7 @@ export type KanbanCard = {
   templateId?: string;
   companyName: string;
   thaiRegNumber: string;
+  serviceType: string;
   companyId?: string;
   directorNames: string[];
   visaExpiryDate?: string;
@@ -263,7 +264,7 @@ const INITIAL_STAGE_TEMPLATES: StageTemplate[] = [
   {
     id: 'tpl-nonb-visa',
     name: 'Non-B Visa Extension',
-    pipeline: 'visa_work_permit',
+    pipeline: 'any',
     isDefault: true,
     stages: [
       { id: 'tpl-vis-s0', label: 'Documents Gathered' },
@@ -275,7 +276,7 @@ const INITIAL_STAGE_TEMPLATES: StageTemplate[] = [
   {
     id: 'tpl-wp-renewal',
     name: 'Work Permit Renewal',
-    pipeline: 'visa_work_permit',
+    pipeline: 'any',
     stages: [
       { id: 'tpl-wp-s0', label: 'Documents Gathered' },
       { id: 'tpl-wp-s1', label: 'Labour Dept. Filing' },
@@ -294,6 +295,90 @@ const INITIAL_STAGE_TEMPLATES: StageTemplate[] = [
       { id: 'tpl-tax-s2', label: 'Tax Filing' },
       { id: 'tpl-tax-s3', label: 'Audit Report' },
       { id: 'tpl-tax-s4', label: 'Completed' },
+    ],
+  },
+  // ── Apply & Renew templates ───────────────────────────────────────────
+  {
+    id: 'tpl-wp-apply',
+    name: 'Work Permit (New Application)',
+    pipeline: 'apply_renew',
+    isDefault: true,
+    stages: [
+      { id: 'tpl-wpa-s0', label: 'Documents Gathered' },
+      { id: 'tpl-wpa-s1', label: 'Labour Dept. Filing' },
+      { id: 'tpl-wpa-s2', label: 'Awaiting Permit' },
+      { id: 'tpl-wpa-s3', label: 'Permit Collected' },
+      { id: 'tpl-wpa-s4', label: 'Completed' },
+    ],
+  },
+  {
+    id: 'tpl-passport-apply',
+    name: 'Passport Application',
+    pipeline: 'apply_renew',
+    stages: [
+      { id: 'tpl-ppa-s0', label: 'Documents Prepared' },
+      { id: 'tpl-ppa-s1', label: 'Embassy Appointment' },
+      { id: 'tpl-ppa-s2', label: 'Submitted' },
+      { id: 'tpl-ppa-s3', label: 'Collected' },
+    ],
+  },
+  {
+    id: 'tpl-ci-apply',
+    name: 'Certificate of Incorporation (Apply)',
+    pipeline: 'apply_renew',
+    stages: [
+      { id: 'tpl-cia-s0', label: 'Documents Prepared' },
+      { id: 'tpl-cia-s1', label: 'Submitted to Authority' },
+      { id: 'tpl-cia-s2', label: 'Approved' },
+      { id: 'tpl-cia-s3', label: 'Completed' },
+    ],
+  },
+  // ── Extension templates ───────────────────────────────────────────────
+  {
+    id: 'tpl-visa-ext',
+    name: 'Visa Extension',
+    pipeline: 'extension',
+    isDefault: true,
+    stages: [
+      { id: 'tpl-vex-s0', label: 'Documents Gathered' },
+      { id: 'tpl-vex-s1', label: 'Immigration Visit' },
+      { id: 'tpl-vex-s2', label: 'Stamp Received' },
+      { id: 'tpl-vex-s3', label: 'Completed' },
+    ],
+  },
+  {
+    id: 'tpl-wp-ext',
+    name: 'Work Permit Extension',
+    pipeline: 'extension',
+    stages: [
+      { id: 'tpl-wpe-s0', label: 'Documents Gathered' },
+      { id: 'tpl-wpe-s1', label: 'Labour Dept. Filing' },
+      { id: 'tpl-wpe-s2', label: 'Awaiting Renewal' },
+      { id: 'tpl-wpe-s3', label: 'Permit Collected' },
+      { id: 'tpl-wpe-s4', label: 'Completed' },
+    ],
+  },
+  {
+    id: 'tpl-passport-ext',
+    name: 'Passport Renewal',
+    pipeline: 'extension',
+    stages: [
+      { id: 'tpl-ppe-s0', label: 'Current Passport Check' },
+      { id: 'tpl-ppe-s1', label: 'Documents Prepared' },
+      { id: 'tpl-ppe-s2', label: 'Appointment Booked' },
+      { id: 'tpl-ppe-s3', label: 'Renewed' },
+      { id: 'tpl-ppe-s4', label: 'Collected' },
+    ],
+  },
+  {
+    id: 'tpl-ci-ext',
+    name: 'CI Extension',
+    pipeline: 'extension',
+    stages: [
+      { id: 'tpl-cie-s0', label: 'Documents Prepared' },
+      { id: 'tpl-cie-s1', label: 'Filed to Authority' },
+      { id: 'tpl-cie-s2', label: 'Approved' },
+      { id: 'tpl-cie-s3', label: 'Completed' },
     ],
   },
 ];
@@ -530,109 +615,86 @@ const INITIAL_CLIENTS: TBClient[] = [
 ];
 
 const INITIAL_KANBAN_CARDS: KanbanCard[] = [
+  // ── Company Registration ──────────────────────────────────────────────
   {
-    id: 'cr-001',
-    pipeline: 'company_registration',
+    id: 'cr-001', pipeline: 'company_registration', serviceType: 'registration',
     macroStage: 'backlog',
     cardStages: mkStages('cr-001', ['Documents Collected', 'DBD Submission', 'Awaiting Registration No.', 'Completed']),
-    currentCardStageId: 'cr-001-s0',
-    templateId: 'tpl-std-reg',
-    companyName: 'Siam Technology Co., Ltd.',
-    thaiRegNumber: '0105565001234',
+    currentCardStageId: 'cr-001-s0', templateId: 'tpl-std-reg',
+    companyName: 'Siam Technology Co., Ltd.', thaiRegNumber: '0105565001234',
     directorNames: ['Mr. Somchai Wongsuwarn', 'Mrs. Suda Panich'],
     urgency: 'medium', endDate: '2026-06-09', durationDays: 30, createdDate: '2026-05-10',
     notes: 'BOI-registered entity, requires special approval',
   },
   {
-    id: 'cr-002',
-    pipeline: 'company_registration',
+    id: 'cr-002', pipeline: 'company_registration', serviceType: 'registration',
     macroStage: 'in_progress',
     cardStages: mkStages('cr-002', ['Documents Collected', 'DBD Submission', 'Awaiting Registration No.', 'Completed']),
-    currentCardStageId: 'cr-002-s1',
-    templateId: 'tpl-std-reg',
-    companyName: 'Innovate Group Co., Ltd.',
-    thaiRegNumber: '0105562009876',
+    currentCardStageId: 'cr-002-s1', templateId: 'tpl-std-reg',
+    companyName: 'Innovate Group Co., Ltd.', thaiRegNumber: '0105562009876',
     directorNames: ['Mr. Prawit Srisomboon'],
-    urgency: 'low', createdDate: '2026-05-08',
-    notes: 'Standard registration',
+    urgency: 'low', createdDate: '2026-05-08', notes: 'Standard registration',
   },
   {
-    id: 'cr-003',
-    pipeline: 'company_registration',
+    id: 'cr-003', pipeline: 'company_registration', serviceType: 'registration',
     macroStage: 'review',
     cardStages: mkStages('cr-003', ['Documents Collected', 'BOI Application Filed', 'Ministry Review', 'BOI Approval', 'Completed']),
-    currentCardStageId: 'cr-003-s2',
-    templateId: 'tpl-boi-reg',
-    companyName: 'Digital Solution Co., Ltd.',
-    thaiRegNumber: '0105564007823',
+    currentCardStageId: 'cr-003-s2', templateId: 'tpl-boi-reg',
+    companyName: 'Digital Solution Co., Ltd.', thaiRegNumber: '0105564007823',
     directorNames: ['Mr. Thanawat Jirayu', 'Mrs. Ladawan Intarat'],
     urgency: 'high', endDate: '2026-05-22', durationDays: 7, createdDate: '2026-05-15',
     notes: 'Urgent — client deadline end of month',
   },
   {
-    id: 'cr-004',
-    pipeline: 'company_registration',
+    id: 'cr-004', pipeline: 'company_registration', serviceType: 'registration',
     macroStage: 'done',
     cardStages: mkStages('cr-004', ['Documents Collected', 'DBD Submission', 'Awaiting Registration No.', 'Completed']),
-    currentCardStageId: 'cr-004-s3',
-    templateId: 'tpl-std-reg',
-    companyName: 'Asia Trade Co., Ltd.',
-    thaiRegNumber: '0105558012390',
+    currentCardStageId: 'cr-004-s3', templateId: 'tpl-std-reg',
+    companyName: 'Asia Trade Co., Ltd.', thaiRegNumber: '0105558012390',
     directorNames: ['Mrs. Ratana Sittichoek'],
-    urgency: 'low', createdDate: '2026-04-20',
-    notes: 'All documents received and filed',
+    urgency: 'low', createdDate: '2026-04-20', notes: 'All documents received and filed',
   },
+  // ── Apply & Renew ──────────────────────────────────────────────────────
   {
-    id: 'vw-001',
-    pipeline: 'visa_work_permit',
+    id: 'ar-001', pipeline: 'apply_renew', serviceType: 'work_permit',
     macroStage: 'backlog',
-    cardStages: mkStages('vw-001', ['Documents Gathered', 'Immigration Visit', 'Stamp Received', 'Completed']),
-    currentCardStageId: 'vw-001-s0',
-    templateId: 'tpl-nonb-visa',
-    companyName: 'International Consulting Co., Ltd.',
-    thaiRegNumber: '0105561008765',
+    cardStages: mkStages('ar-001', ['Documents Gathered', 'Labour Dept. Filing', 'Awaiting Permit', 'Permit Collected', 'Completed']),
+    currentCardStageId: 'ar-001-s0', templateId: 'tpl-wp-apply',
+    companyName: 'International Consulting Co., Ltd.', thaiRegNumber: '0105561008765',
     directorNames: ["Mr. James O'Brien", 'Ms. Sarah Lin'],
     visaExpiryDate: '2026-05-31', endDate: '2026-05-31', durationDays: 14, createdDate: '2026-05-17',
-    urgency: 'high', notes: 'Work permit renewal — expiring soon',
+    urgency: 'high', notes: 'New work permit application — expiring soon',
   },
   {
-    id: 'vw-002',
-    pipeline: 'visa_work_permit',
+    id: 'ar-002', pipeline: 'apply_renew', serviceType: 'visa',
     macroStage: 'in_progress',
-    cardStages: mkStages('vw-002', ['Documents Gathered', 'Labour Dept. Filing', 'Awaiting Permit', 'Permit Collected', 'Completed']),
-    currentCardStageId: 'vw-002-s1',
-    templateId: 'tpl-wp-renewal',
-    companyName: 'Global Software Co., Ltd.',
-    thaiRegNumber: '0105566003421',
+    cardStages: mkStages('ar-002', ['Documents Gathered', 'Application Filed', 'Immigration Visit', 'Stamp Received', 'Completed']),
+    currentCardStageId: 'ar-002-s1', templateId: 'tpl-nonb-visa',
+    companyName: 'Global Software Co., Ltd.', thaiRegNumber: '0105566003421',
     directorNames: ['Mr. David Chen'],
     visaExpiryDate: '2026-06-15', endDate: '2026-06-02', durationDays: 21, createdDate: '2026-05-12',
-    urgency: 'medium', notes: 'Work permit renewal',
+    urgency: 'medium', notes: 'Non-B visa application',
   },
+  // ── Extension ─────────────────────────────────────────────────────────
   {
-    id: 'vw-003',
-    pipeline: 'visa_work_permit',
+    id: 'ex-001', pipeline: 'extension', serviceType: 'work_permit',
     macroStage: 'review',
-    cardStages: mkStages('vw-003', ['Documents Gathered', 'Immigration Visit', 'Stamp Received', 'Completed']),
-    currentCardStageId: 'vw-003-s2',
-    templateId: 'tpl-nonb-visa',
-    companyName: 'Thai Manufacturing Co., Ltd.',
-    thaiRegNumber: '0105560004512',
+    cardStages: mkStages('ex-001', ['Documents Gathered', 'Labour Dept. Filing', 'Awaiting Permit', 'Permit Collected', 'Completed']),
+    currentCardStageId: 'ex-001-s2', templateId: 'tpl-wp-renewal',
+    companyName: 'Thai Manufacturing Co., Ltd.', thaiRegNumber: '0105560004512',
     directorNames: ['Mr. Andreas Schmidt', 'Ms. Yuki Tanaka'],
     visaExpiryDate: '2026-07-20', createdDate: '2026-05-14',
     urgency: 'medium', notes: 'Work permit extension + type change',
   },
   {
-    id: 'vw-004',
-    pipeline: 'visa_work_permit',
+    id: 'ex-002', pipeline: 'extension', serviceType: 'visa',
     macroStage: 'done',
-    cardStages: mkStages('vw-004', ['Documents Gathered', 'Immigration Visit', 'Stamp Received', 'Completed']),
-    currentCardStageId: 'vw-004-s3',
-    templateId: 'tpl-nonb-visa',
-    companyName: 'Supply Chain Co., Ltd.',
-    thaiRegNumber: '0105563011847',
+    cardStages: mkStages('ex-002', ['Documents Gathered', 'Immigration Visit', 'Stamp Received', 'Completed']),
+    currentCardStageId: 'ex-002-s3', templateId: 'tpl-nonb-visa',
+    companyName: 'Supply Chain Co., Ltd.', thaiRegNumber: '0105563011847',
     directorNames: ['Ms. Emma Williams'],
     visaExpiryDate: '2027-01-10', createdDate: '2026-04-28',
-    urgency: 'low', notes: 'Extension granted — 1 year',
+    urgency: 'low', notes: 'Visa extension granted — 1 year',
   },
 ];
 
@@ -781,7 +843,8 @@ export function addKanbanCard(card: Omit<KanbanCard, 'id'>): KanbanCard {
     macroStage: getMacroStageFromCardStage(card.cardStages, card.currentCardStageId),
   };
   tbStore.kanbanCards.push(newCard);
-  const pl = card.pipeline === 'company_registration' ? 'Company Registration' : 'Visa/Work Permit';
+  const PL_LABEL: Record<KanbanPipeline, string> = { company_registration: 'Company Registrations', apply_renew: 'Apply & Renew', extension: 'Extension' };
+  const pl = PL_LABEL[card.pipeline] ?? card.pipeline;
   appendAuditEntry(`Added case "${newCard.companyName}" to ${pl} pipeline`, 'kanban');
   return newCard;
 }
