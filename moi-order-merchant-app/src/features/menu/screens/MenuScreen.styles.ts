@@ -76,16 +76,17 @@ export const styles = StyleSheet.create({
   modalActions: {
     flexDirection: 'row',
     gap: spacing.sm,
+    justifyContent: 'flex-end',
+    marginTop: spacing.xs,
   },
   cancelButton: {
-    flex: 1,
     borderWidth: 1,
     borderColor: colours.divider,
     borderRadius: radius.md,
     paddingVertical: spacing.xs + 2,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.lg,
     alignItems: 'center',
-    minHeight: 40,
+    minHeight: 36,
     justifyContent: 'center',
   },
   cancelText: {
@@ -93,13 +94,12 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
   },
   confirmButton: {
-    flex: 1,
     backgroundColor: colours.primary,
     borderRadius: radius.md,
     paddingVertical: spacing.xs + 2,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.lg,
     alignItems: 'center',
-    minHeight: 40,
+    minHeight: 36,
     justifyContent: 'center',
   },
   confirmText: {
