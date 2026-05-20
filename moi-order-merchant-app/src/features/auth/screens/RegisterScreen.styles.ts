@@ -5,6 +5,92 @@ import { typography } from '../../../shared/theme/typography';
 import { radius } from '../../../shared/theme/radius';
 
 export const styles = StyleSheet.create({
+  // ── Web: split-screen layout ───────────────────────────────────────────────
+  screen: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  leftPanel: {
+    width: '42%',
+    backgroundColor: colours.backgroundDark,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.xxl,
+    gap: spacing.md,
+  },
+  brandMark: {
+    width: 56,
+    height: 56,
+    borderRadius: radius.lg,
+    backgroundColor: colours.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+  },
+  brandMarkText: {
+    fontSize: typography.xxl,
+    fontWeight: '800',
+    color: colours.white,
+    letterSpacing: -0.5,
+  },
+  brandName: {
+    fontSize: typography.xxl,
+    fontWeight: '700',
+    color: colours.textOnDark,
+    letterSpacing: -0.5,
+  },
+  brandRole: {
+    fontSize: typography.xs,
+    fontWeight: '600',
+    color: colours.textSubtle,
+    textTransform: 'uppercase',
+    letterSpacing: 1.4,
+  },
+  brandDivider: {
+    width: 40,
+    height: 1,
+    backgroundColor: colours.dividerDark,
+    marginVertical: spacing.xs,
+  },
+  brandTagline: {
+    fontSize: typography.sm,
+    color: colours.textSubtle,
+    textAlign: 'center',
+    lineHeight: 22,
+    maxWidth: 260,
+  },
+  rightPanel: {
+    flex: 1,
+    backgroundColor: colours.backgroundLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  formScroll: {
+    flex: 1,
+    width: '100%',
+  },
+  formCard: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    maxWidth: 420,
+    width: '100%',
+    alignSelf: 'center',
+    padding: spacing.xxl,
+  },
+  formTitle: {
+    fontSize: typography.xxl,
+    fontWeight: '700',
+    color: colours.textOnLight,
+    marginBottom: spacing.xs,
+    letterSpacing: -0.5,
+  },
+  formSubtitle: {
+    fontSize: typography.sm,
+    color: colours.textMuted,
+    marginBottom: spacing.xl,
+  },
+
+  // ── Mobile layout ──────────────────────────────────────────────────────────
   safe: {
     flex: 1,
     backgroundColor: colours.backgroundLight,
@@ -24,6 +110,8 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
     marginBottom: spacing.xl,
   },
+
+  // ── Shared form elements ───────────────────────────────────────────────────
   errorBanner: {
     backgroundColor: colours.error + '1A',
     color: colours.error,

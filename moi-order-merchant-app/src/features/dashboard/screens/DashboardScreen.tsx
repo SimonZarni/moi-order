@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useDashboardScreen } from '../hooks/useDashboardScreen';
@@ -16,13 +16,19 @@ interface DashboardScreenProps {
 export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.JSX.Element {
   const { analytics, recentOrders, isLoading, refetch } = useDashboardScreen();
 
+  const todayLabel = new Date().toLocaleDateString('en-GB', {
+    weekday: 'long', month: 'long', day: 'numeric',
+  });
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.header}>
-            <Skeleton height={28} width={160} borderRadius={6} />
-            <Skeleton height={14} width={120} borderRadius={4} style={{ marginTop: 6 }} />
+          <View style={styles.commandBar}>
+            <View>
+              <Text style={styles.commandBarTitle}>Dashboard</Text>
+              <Text style={styles.commandBarDate}>{todayLabel}</Text>
+            </View>
           </View>
           <View style={styles.statsGrid}>
             <SkeletonCard style={{ flex: 1, minWidth: 148 }} />
@@ -43,9 +49,16 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Dashboard</Text>
-          <Text style={styles.headerSub}>Today's snapshot</Text>
+        <View style={styles.commandBar}>
+          <View>
+            <Text style={styles.commandBarTitle}>Dashboard</Text>
+            <Text style={styles.commandBarDate}>{todayLabel}</Text>
+          </View>
+          {(analytics?.pending_count ?? 0) > 0 && (
+            <View style={styles.pendingPill}>
+              <Text style={styles.pendingPillText}>{analytics?.pending_count} pending</Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.statsGrid}>
@@ -126,7 +139,7 @@ interface StatCardProps {
 
 function StatCard({ label, value, sub, iconName, iconBg, iconColor }: StatCardProps): React.JSX.Element {
   return (
-    <View style={styles.statCard}>
+    <View style={[styles.statCard, { borderLeftColor: iconColor }]}>
       <View style={styles.statIconRow}>
         <View style={[styles.statIconBg, { backgroundColor: iconBg }]}>
           <Ionicons name={iconName} size={16} color={iconColor} />

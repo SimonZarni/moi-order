@@ -17,21 +17,43 @@ export const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
     gap: spacing.md,
   },
-  header: {
-    paddingTop: spacing.xs,
-    paddingBottom: spacing.xs,
+
+  // ── Command bar ────────────────────────────────────────────────────────────
+  commandBar: {
+    backgroundColor: colours.backgroundDark,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md + 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  headerTitle: {
-    fontSize: typography.xxl,
+  commandBarTitle: {
+    fontSize: typography.lg,
     fontWeight: '700',
-    color: colours.textOnLight,
-    letterSpacing: -0.5,
+    color: colours.textOnDark,
+    letterSpacing: -0.3,
   },
-  headerSub: {
-    fontSize: typography.sm,
-    color: colours.textMuted,
+  commandBarDate: {
+    fontSize: typography.xs,
+    color: colours.textSubtle,
     marginTop: 2,
   },
+  pendingPill: {
+    backgroundColor: colours.warning + '33',
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.xs,
+    borderWidth: 1,
+    borderColor: colours.warning + '55',
+  },
+  pendingPillText: {
+    fontSize: typography.xs,
+    fontWeight: '700',
+    color: colours.warning,
+  },
+
+  // ── KPI stat cards ─────────────────────────────────────────────────────────
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -45,6 +67,7 @@ export const styles = StyleSheet.create({
     padding: spacing.md,
     borderWidth: 1,
     borderColor: colours.divider,
+    borderLeftWidth: 3,
   },
   statIconRow: {
     flexDirection: 'row',
@@ -66,7 +89,7 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   statValue: {
-    fontSize: typography.xl,
+    fontSize: typography.display,
     fontWeight: '700',
     color: colours.textOnLight,
     letterSpacing: -0.5,
@@ -76,6 +99,8 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
     marginTop: 2,
   },
+
+  // ── Section cards ──────────────────────────────────────────────────────────
   sectionCard: {
     backgroundColor: colours.surface,
     borderRadius: radius.lg,

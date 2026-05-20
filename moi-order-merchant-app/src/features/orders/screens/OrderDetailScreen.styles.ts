@@ -40,6 +40,9 @@ export const styles = StyleSheet.create({
     padding: spacing.md,
     paddingBottom: spacing.xl,
     gap: spacing.sm,
+    maxWidth: 860,
+    alignSelf: 'center',
+    width: '100%',
   },
   card: {
     backgroundColor: colours.surface,
@@ -162,6 +165,9 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 4,
     alignItems: 'center',
     marginTop: spacing.xs,
+    maxWidth: 400,
+    alignSelf: 'center',
+    width: '100%',
   },
   actionButtonDisabled: {
     opacity: 0.6,
@@ -179,6 +185,9 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colours.error + '33',
+    maxWidth: 400,
+    alignSelf: 'center',
+    width: '100%',
   },
   cancelButtonText: {
     color: colours.error,
@@ -320,6 +329,9 @@ export const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colours.primary,
     marginTop: spacing.xs,
+    maxWidth: 400,
+    alignSelf: 'center',
+    width: '100%',
   },
   chatButtonText: {
     color: colours.primary,

@@ -6,4 +6,6 @@ export const typography = {
   lg: 18,
   xl: 20,
   xxl: 24,
+  display: 28,
+  hero: 36,
 } as const;

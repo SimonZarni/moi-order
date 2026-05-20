@@ -17,6 +17,9 @@ export const styles = StyleSheet.create({
   },
   list: {
     padding: spacing.md,
+    maxWidth: 860,
+    alignSelf: 'center',
+    width: '100%',
   },
   addButton: {
     backgroundColor: colours.primary,
@@ -26,6 +29,9 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.md,
     minHeight: 44,
     justifyContent: 'center',
+    maxWidth: 400,
+    alignSelf: 'center',
+    width: '100%',
   },
   addButtonText: {
     color: colours.white,

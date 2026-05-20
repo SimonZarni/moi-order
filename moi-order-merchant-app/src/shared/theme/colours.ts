@@ -4,6 +4,7 @@ export const colours = {
   primaryDark: '#16a34a',
   primaryLight: '#bbf7d0',
   primaryBg: '#f0fdf4',
+  primaryGlow: '#22c55e1a',
 
   // ── Backgrounds ──────────────────────────────────────────────────────────
   backgroundDark: '#0f1a14',

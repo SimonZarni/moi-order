@@ -17,6 +17,9 @@ export const styles = StyleSheet.create({
   },
   container: {
     paddingBottom: spacing.xl,
+    maxWidth: 860,
+    alignSelf: 'center',
+    width: '100%',
   },
   coverPhotoContainer: {
     width: '100%',
@@ -133,6 +136,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: 44,
     justifyContent: 'center',
+    maxWidth: 400,
   },
   logoutText: {
     color: colours.error,
