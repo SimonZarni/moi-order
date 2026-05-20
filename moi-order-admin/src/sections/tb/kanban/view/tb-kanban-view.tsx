@@ -715,13 +715,14 @@ export function TBKanbanView({ pipeline, pageTitle, serviceTypes }: TBKanbanView
   const [notification, setNotification] = useState<{ msg: string; severity: 'success' | 'error' | 'info' } | null>(null);
 
   // Companies in this pipeline + service type (for company filter, CR only)
+  // Unique companies across the whole pipeline (all service types) for consistent filter across tabs
   const pipelineCompanies = useMemo(() => {
     const map = new Map<string, number>();
     cards
-      .filter((c) => c.pipeline === pipeline && c.serviceType === activeServiceType)
+      .filter((c) => c.pipeline === pipeline)
       .forEach((c) => map.set(c.companyName, (map.get(c.companyName) ?? 0) + 1));
     return Array.from(map.entries()).map(([name, count]) => ({ name, count })).sort((a, b) => a.name.localeCompare(b.name));
-  }, [cards, pipeline, activeServiceType]);
+  }, [cards, pipeline]);
 
   // When filtered to a company, use their card's stages as the board columns
   const filteredCompanyColumns = useMemo<BoardColumn[] | null>(() => {
@@ -837,28 +838,26 @@ export function TBKanbanView({ pipeline, pageTitle, serviceTypes }: TBKanbanView
 
       {/* Filter bar */}
       <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ sm: 'center' }} spacing={1.5} flexWrap="wrap" sx={{ py: 2 }}>
-        {/* Company filter */}
-        {pipelineCompanies.length > 0 && (
-          <FormControl size="small" sx={{ minWidth: 240 }}>
-            <InputLabel shrink>Company</InputLabel>
-            <Select notched displayEmpty value={filterCompanyName ?? ''} label="Company" onChange={(e) => setFilterCompanyName(e.target.value || null)}>
-              <MenuItem value="">
+        {/* Company filter — always visible across all tabs */}
+        <FormControl size="small" sx={{ minWidth: 240 }}>
+          <InputLabel shrink>Company</InputLabel>
+          <Select notched displayEmpty value={filterCompanyName ?? ''} label="Company" onChange={(e) => setFilterCompanyName(e.target.value || null)}>
+            <MenuItem value="">
+              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
+                <Typography variant="body2">All Companies</Typography>
+                <Chip size="small" label={filteredCards.length} sx={{ height: 18, fontSize: 10, ml: 1 }} />
+              </Stack>
+            </MenuItem>
+            {pipelineCompanies.map(({ name, count }) => (
+              <MenuItem key={name} value={name}>
                 <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
-                  <Typography variant="body2">All Companies</Typography>
-                  <Chip size="small" label={filteredCards.length} sx={{ height: 18, fontSize: 10, ml: 1 }} />
+                  <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>{name}</Typography>
+                  <Chip size="small" label={count} sx={{ height: 18, fontSize: 10, ml: 1, flexShrink: 0 }} />
                 </Stack>
               </MenuItem>
-              {pipelineCompanies.map(({ name, count }) => (
-                <MenuItem key={name} value={name}>
-                  <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
-                    <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>{name}</Typography>
-                    <Chip size="small" label={count} sx={{ height: 18, fontSize: 10, ml: 1, flexShrink: 0 }} />
-                  </Stack>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
+            ))}
+          </Select>
+        </FormControl>
 
         {/* Urgency filter */}
         <FormControl size="small" sx={{ minWidth: 140 }}>
