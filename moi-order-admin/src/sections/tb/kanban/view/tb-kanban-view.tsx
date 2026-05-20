@@ -9,6 +9,7 @@ import {
   MouseSensor,
   TouchSensor,
   DragOverlay,
+  useDroppable,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -255,6 +256,12 @@ function SortableMacroColumn({ col, ...rest }: { col: BoardColumn } & Omit<Colum
   );
 }
 
+// Droppable wrapper for filtered-view company stage columns (no drag handle, just droppable)
+function DroppableFilteredColumn({ col, ...rest }: { col: BoardColumn } & Omit<ColumnProps, 'stageHandleAttrs' | 'stageHandleListeners' | 'stageTransform' | 'stageTransition' | 'stageIsDragging' | 'setColRef'>) {
+  const { setNodeRef } = useDroppable({ id: col.id, data: { type: 'stage' } });
+  return <KanbanColumn col={col} {...rest} setColRef={setNodeRef} />;
+}
+
 // ----------------------------------------------------------------------
 // Board
 
@@ -355,8 +362,8 @@ function KanbanBoard({ pipeline, columns, cards, isFilteredView, filterCompanyNa
         <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 1, alignItems: 'flex-start' }}>
           {displayCols.map((col) =>
             isFilteredView ? (
-              // Filtered view: static columns (no stage drag handle)
-              <KanbanColumn key={col.id} col={col} cards={getColCards(col.id)} canEdit={canEdit} isCardOver={cardOverColId === col.id} onEditCard={onEditCard} />
+              // Filtered view: droppable company-stage columns (no drag handle)
+              <DroppableFilteredColumn key={col.id} col={col} cards={getColCards(col.id)} canEdit={canEdit} isCardOver={cardOverColId === col.id} onEditCard={onEditCard} />
             ) : (
               // Default view: sortable macro columns
               <SortableMacroColumn key={col.id} col={col} cards={getColCards(col.id)} canEdit={canEdit} isCardOver={cardOverColId === col.id} onEditCard={onEditCard} />
