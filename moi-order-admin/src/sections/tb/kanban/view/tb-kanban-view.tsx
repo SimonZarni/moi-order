@@ -1050,7 +1050,7 @@ export function TBKanbanView({ pipeline, pageTitle, serviceTypes }: TBKanbanView
 
   return (
     <DashboardContent maxWidth={false}>
-      <Stack direction="row" alignItems="flex-start" justifyContent="space-between" sx={{ mb: 3 }}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ sm: 'flex-start' }} justifyContent="space-between" spacing={{ xs: 1.5, sm: 0 }} sx={{ mb: 3 }}>
         <Box>
           <Typography variant="h4">{pageTitle}</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
