@@ -52,6 +52,7 @@ type FormState = {
   thaiRegNumber: string;
   registrationDate: string;
   registeredCapital: string;
+  dbdUrl: string;
   clientName: string;
   clientPhone: string;
   notes: string;
@@ -75,6 +76,7 @@ const INITIAL_FORM: FormState = {
   thaiRegNumber: '',
   registrationDate: '',
   registeredCapital: '',
+  dbdUrl: '',
   clientName: '',
   clientPhone: '',
   notes: '',
@@ -297,7 +299,7 @@ function DocumentUploadRow({
 export type TBCompanyFormDialogProps = {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: Omit<TBClient, 'id' | 'history' | 'dbdUrl'>) => void;
+  onSubmit: (data: Omit<TBClient, 'id' | 'history'>) => void;
   editCompany?: TBClient; // when set, dialog is in edit mode
 };
 
@@ -344,6 +346,7 @@ export function TBCompanyFormDialog({ open, onClose, onSubmit, editCompany }: TB
         thaiRegNumber: editCompany.thaiRegNumber,
         registrationDate: editCompany.registrationDate,
         registeredCapital: editCompany.registeredCapital != null ? String(editCompany.registeredCapital) : '',
+        dbdUrl: editCompany.dbdUrl ?? '',
         clientName: editCompany.clientName,
         clientPhone: editCompany.clientPhone,
         notes: editCompany.notes ?? '',
@@ -426,6 +429,7 @@ export function TBCompanyFormDialog({ open, onClose, onSubmit, editCompany }: TB
       thaiRegNumber: form.thaiRegNumber.trim(),
       registrationDate: form.registrationDate,
       registeredCapital: form.registeredCapital ? Number(form.registeredCapital.replace(/,/g, '')) : undefined,
+      dbdUrl: form.dbdUrl.trim() || 'https://www.dbd.go.th/dbdekm/applicationRD/apply_search.do',
       clientName: form.clientName.trim(),
       clientPhone: form.clientPhone.trim(),
       notes: form.notes.trim() || undefined,
@@ -543,6 +547,16 @@ export function TBCompanyFormDialog({ open, onClose, onSubmit, editCompany }: TB
                   placeholder="e.g. 1000000"
                   helperText="Optional — registered share capital in Thai Baht"
                   slotProps={{ input: { inputProps: { min: 0 } } }}
+                />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <TextField
+                  fullWidth
+                  label="DBD Portal Link"
+                  value={form.dbdUrl}
+                  onChange={(e) => handleFormChange('dbdUrl', e.target.value)}
+                  placeholder="https://www.dbd.go.th/dbdekm/..."
+                  helperText="URL for the company's DBD Data Warehouse entry"
                 />
               </Grid>
             </Grid>

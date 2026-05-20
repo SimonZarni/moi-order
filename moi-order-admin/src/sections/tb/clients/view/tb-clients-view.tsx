@@ -64,7 +64,7 @@ export function TBClientsView() {
   }, [router]);
 
   const handleAddCompany = useCallback(
-    (data: Omit<TBClient, 'id' | 'history' | 'dbdUrl' | 'clientPasswordSet'> & { clientPasswordSet?: boolean }) => {
+    (data: Omit<TBClient, 'id' | 'history' | 'clientPasswordSet'> & { clientPasswordSet?: boolean }) => {
       const created = addCompany(data);
       setRows([...tbStore.clients]);
       setAddOpen(false);

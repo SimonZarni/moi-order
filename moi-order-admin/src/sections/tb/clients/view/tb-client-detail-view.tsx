@@ -138,7 +138,7 @@ export function TBClientDetailView() {
   // ── Handlers ─────────────────────────────────────────────────────────
 
   const handleEditSubmit = useCallback(
-    (data: Omit<TBClient, 'id' | 'history' | 'dbdUrl'>) => {
+    (data: Omit<TBClient, 'id' | 'history'>) => {
       if (!id) return;
       updateCompany(id, data);
       setVersion((v) => v + 1);

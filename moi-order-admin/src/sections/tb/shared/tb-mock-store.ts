@@ -828,7 +828,7 @@ function appendAuditEntry(action: string, category: AuditLogEntry['category']) {
   });
 }
 
-export function updateCompany(id: string, updates: Omit<TBClient, 'id' | 'history' | 'dbdUrl'>): void {
+export function updateCompany(id: string, updates: Omit<TBClient, 'id' | 'history'>): void {
   const company = tbStore.clients.find((c) => c.id === id);
   if (!company) return;
   const existingDocs = company.documents;
@@ -868,11 +868,11 @@ export function removeCompanyDocument(companyId: string, docId: string): void {
   company.documents = company.documents.filter((d) => d.id !== docId);
 }
 
-export function addCompany(client: Omit<TBClient, 'id' | 'history' | 'dbdUrl' | 'clientPasswordSet'> & { clientPasswordSet?: boolean }): TBClient {
+export function addCompany(client: Omit<TBClient, 'id' | 'history' | 'clientPasswordSet'> & { clientPasswordSet?: boolean }): TBClient {
   const newClient: TBClient = {
     ...client,
     id: `cl-${Date.now()}`,
-    dbdUrl: DBD_URL,
+    dbdUrl: client.dbdUrl || DBD_URL,
     history: [
       {
         id: `h-${Date.now()}`,
