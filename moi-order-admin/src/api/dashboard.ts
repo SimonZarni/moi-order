@@ -2,16 +2,16 @@ import apiClient from './client';
 
 export type DashboardSummary = {
   total_orders: number;
-  total_orders_change: number;
+  total_orders_change: number | null;
   total_orders_monthly: number[];
   active_users: number;
-  active_users_change: number;
+  active_users_change: number | null;
   active_users_monthly: number[];
   listed_places: number;
-  listed_places_change: number;
+  listed_places_change: number | null;
   listed_places_monthly: number[];
   total_revenue: number;
-  revenue_change: number;
+  revenue_change: number | null;
   revenue_monthly: number[];
 };
 

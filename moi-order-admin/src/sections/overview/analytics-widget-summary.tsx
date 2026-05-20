@@ -19,7 +19,7 @@ import { Chart, useChart } from 'src/components/chart';
 type Props = CardProps & {
   title: string;
   total: number;
-  percent: number;
+  percent: number | null;
   color?: PaletteColorKey;
   icon: React.ReactNode;
   chart: {
@@ -66,24 +66,33 @@ export function AnalyticsWidgetSummary({
     ...chart.options,
   });
 
-  const renderTrending = () => (
-    <Box
-      sx={{
-        top: 16,
-        gap: 0.5,
-        right: 16,
-        display: 'flex',
-        position: 'absolute',
-        alignItems: 'center',
-      }}
-    >
-      <Iconify width={20} icon={percent < 0 ? 'eva:trending-down-fill' : 'eva:trending-up-fill'} />
-      <Box component="span" sx={{ typography: 'subtitle2' }}>
-        {percent > 0 && '+'}
-        {fPercent(percent)}
+  const renderTrending = () => {
+    if (percent === null) {
+      return (
+        <Box sx={{ top: 16, right: 16, position: 'absolute' }}>
+          <Box component="span" sx={{ typography: 'subtitle2', opacity: 0.45 }}>New</Box>
+        </Box>
+      );
+    }
+    return (
+      <Box
+        sx={{
+          top: 16,
+          gap: 0.5,
+          right: 16,
+          display: 'flex',
+          position: 'absolute',
+          alignItems: 'center',
+        }}
+      >
+        <Iconify width={20} icon={percent < 0 ? 'eva:trending-down-fill' : 'eva:trending-up-fill'} />
+        <Box component="span" sx={{ typography: 'subtitle2' }}>
+          {percent > 0 && '+'}
+          {fPercent(percent)}
+        </Box>
       </Box>
-    </Box>
-  );
+    );
+  };
 
   return (
     <Card

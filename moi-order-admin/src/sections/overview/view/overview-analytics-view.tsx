@@ -46,7 +46,7 @@ export function OverviewAnalyticsView() {
 
   const summary = stats!.summary;
   const ordersChange = summary.total_orders_change;
-  const changeSign = ordersChange > 0 ? '+' : '';
+  const changeSign = ordersChange !== null && ordersChange > 0 ? '+' : '';
 
   const recentActivity = stats!.recent_activity.map((item) => ({
     id: item.id,
@@ -128,7 +128,7 @@ export function OverviewAnalyticsView() {
         <Grid size={{ xs: 12, md: 6, lg: 8 }}>
           <AnalyticsWebsiteVisits
             title="Monthly Orders"
-            subheader={`(${changeSign}${ordersChange}%) compared to last year`}
+            subheader={ordersChange !== null ? `(${changeSign}${ordersChange}%) compared to last year` : 'No prior year data'}
             chart={{
               categories: stats!.monthly_orders.labels,
               series: [

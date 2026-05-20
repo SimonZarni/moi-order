@@ -353,10 +353,10 @@ class AdminDashboardService
             ->keyBy(fn ($r) => "{$r->yr}-{$r->mo}");
     }
 
-    private function pctChange(int $prev, int $curr): float
+    private function pctChange(int $prev, int $curr): ?float
     {
         if ($prev === 0) {
-            return $curr > 0 ? 100.0 : 0.0;
+            return null;
         }
 
         return round(($curr - $prev) / $prev * 100, 1);
