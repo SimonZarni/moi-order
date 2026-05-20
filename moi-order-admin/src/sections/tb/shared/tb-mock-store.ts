@@ -151,20 +151,45 @@ const INITIAL_INDIVIDUAL_CLIENTS: TBIndividualClient[] = [
 // ----------------------------------------------------------------------
 // Kanban
 
-export type KanbanColumn = string; // dynamic — not a fixed union
 export type KanbanPipeline = 'company_registration' | 'visa_work_permit';
 export type UrgencyLevel = 'high' | 'medium' | 'low';
+export type MacroStage = 'backlog' | 'in_progress' | 'review' | 'done';
 
-export type KanbanStage = {
+export const MACRO_STAGES: { id: MacroStage; label: string }[] = [
+  { id: 'backlog', label: 'Backlog' },
+  { id: 'in_progress', label: 'In Progress' },
+  { id: 'review', label: 'Review' },
+  { id: 'done', label: 'Done' },
+];
+
+export const MACRO_STAGE_LABELS: Record<MacroStage, string> = {
+  backlog: 'Backlog',
+  in_progress: 'In Progress',
+  review: 'Review',
+  done: 'Done',
+};
+
+export type CardStage = {
   id: string;
   label: string;
   order: number;
 };
 
+export type StageTemplate = {
+  id: string;
+  name: string;
+  pipeline: KanbanPipeline | 'any';
+  stages: { id: string; label: string }[];
+  isDefault?: boolean;
+};
+
 export type KanbanCard = {
   id: string;
   pipeline: KanbanPipeline;
-  column: KanbanColumn;
+  macroStage: MacroStage;
+  cardStages: CardStage[];
+  currentCardStageId: string;
+  templateId?: string;
   companyName: string;
   thaiRegNumber: string;
   companyId?: string;
@@ -175,6 +200,15 @@ export type KanbanCard = {
   urgency: UrgencyLevel;
   notes?: string;
 };
+
+export function getMacroStageFromCardStage(cardStages: CardStage[], currentStageId: string): MacroStage {
+  const idx = cardStages.findIndex((s) => s.id === currentStageId);
+  const total = cardStages.length;
+  if (idx <= 0) return 'backlog';
+  if (idx >= total - 1) return 'done';
+  if (total > 3 && idx === total - 2) return 'review';
+  return 'in_progress';
+}
 
 // ----------------------------------------------------------------------
 // Document Batches
@@ -200,12 +234,72 @@ export type AuditLogEntry = {
   category: 'kanban' | 'document' | 'config' | 'company';
 };
 
-const INITIAL_STAGES: KanbanStage[] = [
-  { id: 'backlog', label: 'Backlog', order: 0 },
-  { id: 'processing', label: 'Processing', order: 1 },
-  { id: 'document_review', label: 'Document Review', order: 2 },
-  { id: 'completed', label: 'Completed', order: 3 },
+const INITIAL_STAGE_TEMPLATES: StageTemplate[] = [
+  {
+    id: 'tpl-std-reg',
+    name: 'Standard Company Registration',
+    pipeline: 'company_registration',
+    isDefault: true,
+    stages: [
+      { id: 'tpl-std-s0', label: 'Documents Collected' },
+      { id: 'tpl-std-s1', label: 'DBD Submission' },
+      { id: 'tpl-std-s2', label: 'Awaiting Registration No.' },
+      { id: 'tpl-std-s3', label: 'Completed' },
+    ],
+  },
+  {
+    id: 'tpl-boi-reg',
+    name: 'BOI Registration',
+    pipeline: 'company_registration',
+    stages: [
+      { id: 'tpl-boi-s0', label: 'Documents Collected' },
+      { id: 'tpl-boi-s1', label: 'BOI Application Filed' },
+      { id: 'tpl-boi-s2', label: 'Ministry Review' },
+      { id: 'tpl-boi-s3', label: 'BOI Approval' },
+      { id: 'tpl-boi-s4', label: 'Completed' },
+    ],
+  },
+  {
+    id: 'tpl-nonb-visa',
+    name: 'Non-B Visa Extension',
+    pipeline: 'visa_work_permit',
+    isDefault: true,
+    stages: [
+      { id: 'tpl-vis-s0', label: 'Documents Gathered' },
+      { id: 'tpl-vis-s1', label: 'Immigration Visit' },
+      { id: 'tpl-vis-s2', label: 'Stamp Received' },
+      { id: 'tpl-vis-s3', label: 'Completed' },
+    ],
+  },
+  {
+    id: 'tpl-wp-renewal',
+    name: 'Work Permit Renewal',
+    pipeline: 'visa_work_permit',
+    stages: [
+      { id: 'tpl-wp-s0', label: 'Documents Gathered' },
+      { id: 'tpl-wp-s1', label: 'Labour Dept. Filing' },
+      { id: 'tpl-wp-s2', label: 'Awaiting Permit' },
+      { id: 'tpl-wp-s3', label: 'Permit Collected' },
+      { id: 'tpl-wp-s4', label: 'Completed' },
+    ],
+  },
+  {
+    id: 'tpl-annual-audit',
+    name: 'Annual Tax & Audit',
+    pipeline: 'any',
+    stages: [
+      { id: 'tpl-tax-s0', label: 'Documents Requested' },
+      { id: 'tpl-tax-s1', label: 'Bookkeeping' },
+      { id: 'tpl-tax-s2', label: 'Tax Filing' },
+      { id: 'tpl-tax-s3', label: 'Audit Report' },
+      { id: 'tpl-tax-s4', label: 'Completed' },
+    ],
+  },
 ];
+
+// Helpers to build per-card stage arrays from template stages
+const mkStages = (cardId: string, labels: string[]): CardStage[] =>
+  labels.map((label, i) => ({ id: `${cardId}-s${i}`, label, order: i }));
 
 // ----------------------------------------------------------------------
 // Initial mock data
@@ -438,98 +532,106 @@ const INITIAL_KANBAN_CARDS: KanbanCard[] = [
   {
     id: 'cr-001',
     pipeline: 'company_registration',
-    column: 'backlog',
+    macroStage: 'backlog',
+    cardStages: mkStages('cr-001', ['Documents Collected', 'DBD Submission', 'Awaiting Registration No.', 'Completed']),
+    currentCardStageId: 'cr-001-s0',
+    templateId: 'tpl-std-reg',
     companyName: 'บริษัท เทคโนโลยี สยาม จำกัด',
     thaiRegNumber: '0105565001234',
     directorNames: ['นาย สมชาย วงศ์สุวรรณ', 'นาง สุดา พานิชย์'],
-    urgency: 'medium',
-    durationDays: 30,
-    createdDate: '2026-05-10',
+    urgency: 'medium', durationDays: 30, createdDate: '2026-05-10',
     notes: 'BOI-registered entity, requires special approval',
   },
   {
     id: 'cr-002',
     pipeline: 'company_registration',
-    column: 'processing',
+    macroStage: 'in_progress',
+    cardStages: mkStages('cr-002', ['Documents Collected', 'DBD Submission', 'Awaiting Registration No.', 'Completed']),
+    currentCardStageId: 'cr-002-s1',
+    templateId: 'tpl-std-reg',
     companyName: 'บริษัท อินโนเวท กรุ๊ป จำกัด',
     thaiRegNumber: '0105562009876',
     directorNames: ['นาย ประวิทย์ ศรีสมบูรณ์'],
-    urgency: 'low',
-    createdDate: '2026-05-08',
+    urgency: 'low', createdDate: '2026-05-08',
     notes: 'Standard registration',
   },
   {
     id: 'cr-003',
     pipeline: 'company_registration',
-    column: 'document_review',
+    macroStage: 'review',
+    cardStages: mkStages('cr-003', ['Documents Collected', 'BOI Application Filed', 'Ministry Review', 'BOI Approval', 'Completed']),
+    currentCardStageId: 'cr-003-s2',
+    templateId: 'tpl-boi-reg',
     companyName: 'บริษัท ดิจิทัล โซลูชัน จำกัด',
     thaiRegNumber: '0105564007823',
     directorNames: ['นาย ธนวัฒน์ จิรายุ', 'นาง ลดาวัลย์ อินทรัตน์'],
-    urgency: 'high',
-    durationDays: 7,
-    createdDate: '2026-05-15',
+    urgency: 'high', durationDays: 7, createdDate: '2026-05-15',
     notes: 'Urgent — client deadline end of month',
   },
   {
     id: 'cr-004',
     pipeline: 'company_registration',
-    column: 'completed',
+    macroStage: 'done',
+    cardStages: mkStages('cr-004', ['Documents Collected', 'DBD Submission', 'Awaiting Registration No.', 'Completed']),
+    currentCardStageId: 'cr-004-s3',
+    templateId: 'tpl-std-reg',
     companyName: 'บริษัท เอเชีย เทรด จำกัด',
     thaiRegNumber: '0105558012390',
     directorNames: ['นาง รัตนา สิทธิโชค'],
-    urgency: 'low',
-    createdDate: '2026-04-20',
+    urgency: 'low', createdDate: '2026-04-20',
     notes: 'All documents received and filed',
   },
   {
     id: 'vw-001',
     pipeline: 'visa_work_permit',
-    column: 'backlog',
+    macroStage: 'backlog',
+    cardStages: mkStages('vw-001', ['Documents Gathered', 'Immigration Visit', 'Stamp Received', 'Completed']),
+    currentCardStageId: 'vw-001-s0',
+    templateId: 'tpl-nonb-visa',
     companyName: 'บริษัท อินเตอร์เนชั่นแนล คอนซัลติ้ง จำกัด',
     thaiRegNumber: '0105561008765',
     directorNames: ["Mr. James O'Brien", 'Ms. Sarah Lin'],
-    visaExpiryDate: '2026-05-31',
-    durationDays: 14,
-    createdDate: '2026-05-17',
-    urgency: 'high',
-    notes: 'Work permit renewal — expiring soon',
+    visaExpiryDate: '2026-05-31', durationDays: 14, createdDate: '2026-05-17',
+    urgency: 'high', notes: 'Work permit renewal — expiring soon',
   },
   {
     id: 'vw-002',
     pipeline: 'visa_work_permit',
-    column: 'processing',
+    macroStage: 'in_progress',
+    cardStages: mkStages('vw-002', ['Documents Gathered', 'Labour Dept. Filing', 'Awaiting Permit', 'Permit Collected', 'Completed']),
+    currentCardStageId: 'vw-002-s1',
+    templateId: 'tpl-wp-renewal',
     companyName: 'บริษัท โกลบอล ซอฟแวร์ จำกัด',
     thaiRegNumber: '0105566003421',
     directorNames: ['Mr. David Chen'],
-    visaExpiryDate: '2026-06-15',
-    durationDays: 21,
-    createdDate: '2026-05-12',
-    urgency: 'medium',
-    notes: 'Non-B visa extension',
+    visaExpiryDate: '2026-06-15', durationDays: 21, createdDate: '2026-05-12',
+    urgency: 'medium', notes: 'Work permit renewal',
   },
   {
     id: 'vw-003',
     pipeline: 'visa_work_permit',
-    column: 'document_review',
+    macroStage: 'review',
+    cardStages: mkStages('vw-003', ['Documents Gathered', 'Immigration Visit', 'Stamp Received', 'Completed']),
+    currentCardStageId: 'vw-003-s2',
+    templateId: 'tpl-nonb-visa',
     companyName: 'บริษัท แมนูแฟคเจอริ่ง ไทย จำกัด',
     thaiRegNumber: '0105560004512',
     directorNames: ['Mr. Andreas Schmidt', 'Ms. Yuki Tanaka'],
-    visaExpiryDate: '2026-07-20',
-    createdDate: '2026-05-14',
-    urgency: 'medium',
-    notes: 'Work permit extension + type change',
+    visaExpiryDate: '2026-07-20', createdDate: '2026-05-14',
+    urgency: 'medium', notes: 'Work permit extension + type change',
   },
   {
     id: 'vw-004',
     pipeline: 'visa_work_permit',
-    column: 'completed',
+    macroStage: 'done',
+    cardStages: mkStages('vw-004', ['Documents Gathered', 'Immigration Visit', 'Stamp Received', 'Completed']),
+    currentCardStageId: 'vw-004-s3',
+    templateId: 'tpl-nonb-visa',
     companyName: 'บริษัท ซัพพลาย เชน จำกัด',
     thaiRegNumber: '0105563011847',
     directorNames: ['Ms. Emma Williams'],
-    visaExpiryDate: '2027-01-10',
-    createdDate: '2026-04-28',
-    urgency: 'low',
-    notes: 'Extension granted — 1 year',
+    visaExpiryDate: '2027-01-10', createdDate: '2026-04-28',
+    urgency: 'low', notes: 'Extension granted — 1 year',
   },
 ];
 
@@ -609,7 +711,7 @@ const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
 // Module-level mutable store
 
 export const tbStore = {
-  stages: INITIAL_STAGES as KanbanStage[],
+  stageTemplates: INITIAL_STAGE_TEMPLATES as StageTemplate[],
   clients: INITIAL_CLIENTS as TBClient[],
   individualClients: INITIAL_INDIVIDUAL_CLIENTS as TBIndividualClient[],
   kanbanCards: INITIAL_KANBAN_CARDS as KanbanCard[],
@@ -649,50 +751,55 @@ export function addCompany(client: Omit<TBClient, 'id' | 'history' | 'dbdUrl' | 
   return newClient;
 }
 
-export function moveKanbanCard(cardId: string, newColumn: KanbanColumn): void {
+export function moveKanbanCardMacro(cardId: string, newMacro: MacroStage): void {
   const card = tbStore.kanbanCards.find((c) => c.id === cardId);
-  if (!card || card.column === newColumn) return;
-  const getLabel = (id: string) => tbStore.stages.find((s) => s.id === id)?.label ?? id;
-  const oldLabel = getLabel(card.column);
-  const newLabel = getLabel(newColumn);
-  card.column = newColumn;
-  appendAuditEntry(`Moved "${card.companyName}" from ${oldLabel} to ${newLabel}`, 'kanban');
+  if (!card || card.macroStage === newMacro) return;
+  const old = MACRO_STAGE_LABELS[card.macroStage];
+  card.macroStage = newMacro;
+  appendAuditEntry(`Moved "${card.companyName}" from ${old} to ${MACRO_STAGE_LABELS[newMacro]}`, 'kanban');
+}
+
+export function moveKanbanCardStage(cardId: string, newStageId: string): void {
+  const card = tbStore.kanbanCards.find((c) => c.id === cardId);
+  if (!card || card.currentCardStageId === newStageId) return;
+  const oldStage = card.cardStages.find((s) => s.id === card.currentCardStageId);
+  const newStage = card.cardStages.find((s) => s.id === newStageId);
+  card.currentCardStageId = newStageId;
+  card.macroStage = getMacroStageFromCardStage(card.cardStages, newStageId);
+  if (oldStage && newStage) {
+    appendAuditEntry(`"${card.companyName}": ${oldStage.label} → ${newStage.label}`, 'kanban');
+  }
 }
 
 export function addKanbanCard(card: Omit<KanbanCard, 'id'>): KanbanCard {
+  const id = `card-${Date.now()}`;
   const newCard: KanbanCard = {
     ...card,
-    id: `card-${Date.now()}`,
+    id,
     createdDate: card.createdDate || new Date().toISOString().slice(0, 10),
+    macroStage: getMacroStageFromCardStage(card.cardStages, card.currentCardStageId),
   };
   tbStore.kanbanCards.push(newCard);
-  const pipeline = card.pipeline === 'company_registration' ? 'Company Registration' : 'Visa/Work Permit';
-  appendAuditEntry(`Added case "${newCard.companyName}" to ${pipeline} pipeline`, 'kanban');
+  const pl = card.pipeline === 'company_registration' ? 'Company Registration' : 'Visa/Work Permit';
+  appendAuditEntry(`Added case "${newCard.companyName}" to ${pl} pipeline`, 'kanban');
   return newCard;
 }
 
-export function addKanbanStage(label: string): KanbanStage {
-  const id = `stage_${Date.now()}`;
-  const stage: KanbanStage = { id, label: label.trim(), order: tbStore.stages.length };
-  tbStore.stages.push(stage);
-  appendAuditEntry(`Added pipeline stage "${label}"`, 'kanban');
-  return stage;
+export function addStageTemplate(tpl: Omit<StageTemplate, 'id'>): StageTemplate {
+  const newTpl: StageTemplate = { ...tpl, id: `tpl-${Date.now()}` };
+  tbStore.stageTemplates.push(newTpl);
+  return newTpl;
 }
 
-export function updateKanbanStage(stageId: string, label: string): void {
-  const stage = tbStore.stages.find((s) => s.id === stageId);
-  if (!stage) return;
-  const old = stage.label;
-  stage.label = label.trim();
-  appendAuditEntry(`Renamed stage "${old}" to "${label}"`, 'kanban');
+export function updateStageTemplate(id: string, updates: Partial<Omit<StageTemplate, 'id'>>): void {
+  const tpl = tbStore.stageTemplates.find((t) => t.id === id);
+  if (tpl) Object.assign(tpl, updates);
 }
 
-export function deleteKanbanStage(stageId: string): boolean {
-  const hasCards = tbStore.kanbanCards.some((c) => c.column === stageId);
-  if (hasCards || tbStore.stages.length <= 1) return false;
-  const stage = tbStore.stages.find((s) => s.id === stageId);
-  tbStore.stages = tbStore.stages.filter((s) => s.id !== stageId);
-  if (stage) appendAuditEntry(`Deleted pipeline stage "${stage.label}"`, 'kanban');
+export function deleteStageTemplate(id: string): boolean {
+  const idx = tbStore.stageTemplates.findIndex((t) => t.id === id);
+  if (idx === -1) return false;
+  tbStore.stageTemplates.splice(idx, 1);
   return true;
 }
 
@@ -719,7 +826,11 @@ export function rejectDocumentBatch(batchId: string): void {
 export function editKanbanCard(cardId: string, updates: Omit<KanbanCard, 'id'>): void {
   const idx = tbStore.kanbanCards.findIndex((c) => c.id === cardId);
   if (idx === -1) return;
-  tbStore.kanbanCards[idx] = { id: cardId, ...updates };
+  tbStore.kanbanCards[idx] = {
+    id: cardId,
+    ...updates,
+    macroStage: getMacroStageFromCardStage(updates.cardStages, updates.currentCardStageId),
+  };
   appendAuditEntry(`Edited case "${updates.companyName}"`, 'kanban');
 }
 
@@ -731,16 +842,6 @@ export function reorderKanbanCards(activeId: string, overId: string): void {
   const [removed] = list.splice(ai, 1);
   list.splice(oi, 0, removed);
   tbStore.kanbanCards = list;
-}
-
-export function reorderKanbanStages(orderedIds: string[]): void {
-  const map = new Map(tbStore.stages.map((s) => [s.id, s]));
-  tbStore.stages = orderedIds.map((id, index) => {
-    const stage = map.get(id)!;
-    stage.order = index;
-    return stage;
-  });
-  appendAuditEntry('Reordered pipeline stages', 'kanban');
 }
 
 export function addBodAuditEntry(action: string): void {

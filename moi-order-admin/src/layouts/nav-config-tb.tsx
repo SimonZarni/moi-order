@@ -40,6 +40,11 @@ export const tbNavData: NavItem[] = [
     icon: icon('solar:clock-circle-outline'),
   },
   {
+    title: 'Stage Templates',
+    path: '/tb/templates',
+    icon: icon('solar:settings-bold-duotone'),
+  },
+  {
     title: 'BOD Configuration',
     path: '/tb/bod',
     icon: icon('solar:settings-bold-duotone'),
