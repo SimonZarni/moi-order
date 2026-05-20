@@ -261,7 +261,7 @@ export type AuditLogEntry = {
   timestamp: string;
   action: string;
   actor: string;
-  category: 'kanban' | 'document' | 'config' | 'company';
+  category: 'kanban' | 'document' | 'config' | 'company' | 'todo' | 'client';
 };
 
 const INITIAL_STAGE_TEMPLATES: StageTemplate[] = [
@@ -1007,16 +1007,28 @@ export function reorderKanbanCards(activeId: string, overId: string): void {
 export function addTbTodo(todo: Omit<TbTodo, 'id' | 'createdAt'>): TbTodo {
   const newTodo: TbTodo = { ...todo, id: `todo-${Date.now()}`, createdAt: new Date().toISOString().slice(0, 10) };
   tbStore.todos.unshift(newTodo);
+  appendAuditEntry(`Added task: "${newTodo.title}"`, 'todo');
   return newTodo;
 }
 
 export function toggleTbTodo(id: string): void {
   const todo = tbStore.todos.find((t) => t.id === id);
-  if (todo) todo.done = !todo.done;
+  if (!todo) return;
+  todo.done = !todo.done;
+  appendAuditEntry(`${todo.done ? 'Completed' : 'Reopened'} task: "${todo.title}"`, 'todo');
 }
 
 export function deleteTbTodo(id: string): void {
+  const todo = tbStore.todos.find((t) => t.id === id);
+  if (todo) appendAuditEntry(`Deleted task: "${todo.title}"`, 'todo');
   tbStore.todos = tbStore.todos.filter((t) => t.id !== id);
+}
+
+export function updateIndividualClient(id: string, updates: Partial<Omit<TBIndividualClient, 'id'>>): void {
+  const client = tbStore.individualClients.find((c) => c.id === id);
+  if (!client) return;
+  Object.assign(client, updates);
+  appendAuditEntry(`Updated client "${updates.name ?? client.name}"`, 'client');
 }
 
 export function addBodAuditEntry(action: string): void {

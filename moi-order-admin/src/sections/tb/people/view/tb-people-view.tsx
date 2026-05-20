@@ -28,6 +28,8 @@ import InputAdornment from '@mui/material/InputAdornment';
 import TableContainer from '@mui/material/TableContainer';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
+import { useRouter } from 'src/routes/hooks';
+
 import { fDate } from 'src/utils/format-time';
 
 import { useAuth } from 'src/context/auth-context';
@@ -206,6 +208,7 @@ function AddClientDialog({ open, onClose, onSubmit }: { open: boolean; onClose: 
 // ----------------------------------------------------------------------
 
 export function TBPeopleView() {
+  const router = useRouter();
   const { isSuperAdmin } = useAuth();
   const canEdit = isSuperAdmin();
 
@@ -306,7 +309,7 @@ export function TBPeopleView() {
               {filtered.map((row) => {
                 const vsKey = getVisaStatus(row.visaExpiry);
                 return (
-                  <TableRow key={row.id} hover>
+                  <TableRow key={row.id} hover onClick={() => router.push(`/tb/people/${row.id}`)} sx={{ cursor: 'pointer' }}>
                     <TableCell>
                       <Typography variant="body2" fontWeight="fontWeightMedium">{row.name}</Typography>
                       {row.phone && (

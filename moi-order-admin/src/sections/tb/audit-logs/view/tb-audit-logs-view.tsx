@@ -20,30 +20,42 @@ import type { AuditLogEntry } from '../../shared/tb-mock-store';
 
 // ----------------------------------------------------------------------
 
-type CategoryFilter = 'all' | 'kanban' | 'document' | 'config';
+type CategoryFilter = 'all' | 'kanban' | 'document' | 'config' | 'company' | 'todo' | 'client';
 
 const CATEGORY_COLORS: Record<string, string> = {
   kanban: '#10B981',
   document: '#6366F1',
   config: '#F59E0B',
+  company: '#3B82F6',
+  todo: '#EC4899',
+  client: '#8B5CF6',
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
   kanban: 'Kanban',
   document: 'Document',
   config: 'BOD Config',
+  company: 'Company',
+  todo: 'To-Do',
+  client: 'Client',
 };
 
 const CATEGORY_BG: Record<string, string> = {
   kanban: '#D1FAE5',
   document: '#E0E7FF',
   config: '#FEF3C7',
+  company: '#DBEAFE',
+  todo: '#FCE7F3',
+  client: '#EDE9FE',
 };
 
 const CATEGORY_TEXT: Record<string, string> = {
   kanban: '#065F46',
   document: '#3730A3',
   config: '#92400E',
+  company: '#1E40AF',
+  todo: '#9D174D',
+  client: '#5B21B6',
 };
 
 // ----------------------------------------------------------------------
@@ -145,6 +157,9 @@ export function TBStaffAuditLogsView() {
             <MenuItem value="all">All Categories</MenuItem>
             <MenuItem value="kanban">Kanban</MenuItem>
             <MenuItem value="document">Document</MenuItem>
+            <MenuItem value="company">Company</MenuItem>
+            <MenuItem value="client">Client</MenuItem>
+            <MenuItem value="todo">To-Do</MenuItem>
             <MenuItem value="config">BOD Config</MenuItem>
           </Select>
         </FormControl>
