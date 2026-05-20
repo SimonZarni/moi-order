@@ -110,7 +110,7 @@ export function TBClientDetailView() {
         color="inherit"
         onClick={() => router.push('/tb/clients')}
         startIcon={<Iconify icon="eva:arrow-ios-forward-fill" width={18} sx={{ transform: 'rotate(180deg)' }} />}
-        sx={{ mb: 2, ml: -1 }}
+        sx={{ mb: 2, ml: -1, alignSelf: 'flex-start' }}
       >
         Companies Overview
       </Button>
