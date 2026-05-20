@@ -127,13 +127,17 @@ export type TbTodo = {
   priority: TbTodoPriority;
   createdAt: string;
   dueDate?: string;
+  companyId?: string;
+  companyName?: string;
+  clientId?: string;
+  clientName?: string;
 };
 
 const INITIAL_TODOS: TbTodo[] = [
-  { id: 'todo-1', title: "Follow up on visa renewal — Mr. James O'Brien (expires 31 May)", done: false, priority: 'high', createdAt: '2026-05-19', dueDate: '2026-05-25' },
-  { id: 'todo-2', title: 'Send May 2026 accounting report to Siam Technology Co., Ltd.', done: false, priority: 'medium', createdAt: '2026-05-18' },
-  { id: 'todo-3', title: 'Review Q1 2026 Financial Statements batch from Innovate Group', done: true, priority: 'low', createdAt: '2026-05-15' },
-  { id: 'todo-4', title: 'Book immigration appointment for Mr. David Chen (Non-B extension)', done: false, priority: 'high', createdAt: '2026-05-20', dueDate: '2026-06-01' },
+  { id: 'todo-1', title: "Follow up on visa renewal — expires 31 May", done: false, priority: 'high', createdAt: '2026-05-19', dueDate: '2026-05-25', clientId: 'person-001', clientName: "Mr. James O'Brien" },
+  { id: 'todo-2', title: 'Send May 2026 accounting report', done: false, priority: 'medium', createdAt: '2026-05-18', companyId: 'cl-001', companyName: 'Siam Technology Co., Ltd.' },
+  { id: 'todo-3', title: 'Review Q1 2026 Financial Statements batch', done: true, priority: 'low', createdAt: '2026-05-15', companyId: 'cl-002', companyName: 'Innovate Group Co., Ltd.' },
+  { id: 'todo-4', title: 'Book immigration appointment (Non-B extension)', done: false, priority: 'high', createdAt: '2026-05-20', dueDate: '2026-06-01', clientId: 'person-003', clientName: 'Mr. David Chen' },
 ];
 
 // ----------------------------------------------------------------------
