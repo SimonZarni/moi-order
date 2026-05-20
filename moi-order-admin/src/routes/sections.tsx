@@ -65,6 +65,7 @@ export const TBClientsPage = lazy(() => import('src/pages/tb-clients'));
 export const TBClientDetailPage = lazy(() => import('src/pages/tb-client-detail'));
 export const TBPeoplePage = lazy(() => import('src/pages/tb-people'));
 export const TBTemplatesPage = lazy(() => import('src/pages/tb-templates'));
+export const TBTodoPage = lazy(() => import('src/pages/tb-todo'));
 export const TBKanbanPage = lazy(() => import('src/pages/tb-kanban'));
 export const TBKanbanCompanyRegPage = lazy(() => import('src/pages/tb-kanban-company-reg'));
 export const TBKanbanApplyRenewPage = lazy(() => import('src/pages/tb-kanban-apply-renew'));
@@ -178,6 +179,7 @@ export const routesSection: RouteObject[] = [
       { path: 'tb/clients/:id', element: <TBClientDetailPage /> },
       { path: 'tb/people', element: <TBPeoplePage /> },
       { path: 'tb/templates', element: <TBTemplatesPage /> },
+      { path: 'tb/todo', element: <TBTodoPage /> },
       { path: 'tb/kanban', element: <TBKanbanPage /> },
       { path: 'tb/kanban/company-reg', element: <TBKanbanCompanyRegPage /> },
       { path: 'tb/kanban/apply-renew', element: <TBKanbanApplyRenewPage /> },

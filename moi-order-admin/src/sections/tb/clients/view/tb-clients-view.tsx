@@ -5,7 +5,6 @@ import Link from '@mui/material/Link';
 import Table from '@mui/material/Table';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Switch from '@mui/material/Switch';
 import Tooltip from '@mui/material/Tooltip';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
@@ -58,16 +57,6 @@ export function TBClientsView() {
 
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-  }, []);
-
-  const handleToggleVat = useCallback((e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    setRows((prev) => prev.map((r) => r.id === id ? { ...r, vatRegistered: !r.vatRegistered } : r));
-  }, []);
-
-  const handleToggleMonthly = useCallback((e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    setRows((prev) => prev.map((r) => r.id === id ? { ...r, monthlyAccounting: !r.monthlyAccounting } : r));
   }, []);
 
   const handleRowClick = useCallback((id: string) => {
@@ -182,36 +171,18 @@ export function TBClientsView() {
                     <StatusDots tax={row.taxStatus} company={row.companyStatus} visa={row.directorVisaStatus} />
                   </TableCell>
 
-                  {/* VAT toggle */}
-                  <TableCell align="center" onClick={(e) => e.stopPropagation()}>
-                    <Stack direction="row" alignItems="center" justifyContent="center" spacing={0.5}>
-                      <Switch
-                        size="small"
-                        checked={row.vatRegistered}
-                        onChange={(e) => handleToggleVat(e as unknown as React.MouseEvent, row.id)}
-                        onClick={(e) => e.stopPropagation()}
-                        color="success"
-                      />
-                      <Typography variant="caption" color={row.vatRegistered ? 'success.main' : 'text.disabled'}>
-                        {row.vatRegistered ? 'Yes' : 'No'}
-                      </Typography>
-                    </Stack>
+                  {/* VAT — read-only, edit via company detail */}
+                  <TableCell align="center">
+                    <Typography variant="body2" sx={{ color: row.vatRegistered ? '#10B981' : 'text.disabled', fontWeight: row.vatRegistered ? 600 : 400 }}>
+                      {row.vatRegistered ? 'Yes' : 'No'}
+                    </Typography>
                   </TableCell>
 
-                  {/* Monthly toggle */}
-                  <TableCell align="center" onClick={(e) => e.stopPropagation()}>
-                    <Stack direction="row" alignItems="center" justifyContent="center" spacing={0.5}>
-                      <Switch
-                        size="small"
-                        checked={row.monthlyAccounting}
-                        onChange={(e) => handleToggleMonthly(e as unknown as React.MouseEvent, row.id)}
-                        onClick={(e) => e.stopPropagation()}
-                        color="primary"
-                      />
-                      <Typography variant="caption" color={row.monthlyAccounting ? 'primary.main' : 'text.disabled'}>
-                        {row.monthlyAccounting ? 'On' : 'Off'}
-                      </Typography>
-                    </Stack>
+                  {/* Monthly Accounting — read-only */}
+                  <TableCell align="center">
+                    <Typography variant="body2" sx={{ color: row.monthlyAccounting ? '#10B981' : 'text.disabled', fontWeight: row.monthlyAccounting ? 600 : 400 }}>
+                      {row.monthlyAccounting ? 'Yes' : 'No'}
+                    </Typography>
                   </TableCell>
 
                   {/* DBD link */}

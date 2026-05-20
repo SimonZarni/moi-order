@@ -52,6 +52,11 @@ export const tbNavData: NavItem[] = [
     icon: icon('eva:done-all-fill'),
   },
   {
+    title: 'To-Do List',
+    path: '/tb/todo',
+    icon: icon('solar:check-circle-bold'),
+  },
+  {
     title: 'Staff Audit Logs',
     path: '/tb/audit-logs',
     icon: icon('solar:clock-circle-outline'),

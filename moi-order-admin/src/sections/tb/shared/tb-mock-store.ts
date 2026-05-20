@@ -115,6 +115,27 @@ export type TBClient = {
 };
 
 // ----------------------------------------------------------------------
+// To-Do List
+
+export type TbTodoPriority = 'high' | 'medium' | 'low';
+
+export type TbTodo = {
+  id: string;
+  title: string;
+  done: boolean;
+  priority: TbTodoPriority;
+  createdAt: string;
+  dueDate?: string;
+};
+
+const INITIAL_TODOS: TbTodo[] = [
+  { id: 'todo-1', title: "Follow up on visa renewal — Mr. James O'Brien (expires 31 May)", done: false, priority: 'high', createdAt: '2026-05-19', dueDate: '2026-05-25' },
+  { id: 'todo-2', title: 'Send May 2026 accounting report to Siam Technology Co., Ltd.', done: false, priority: 'medium', createdAt: '2026-05-18' },
+  { id: 'todo-3', title: 'Review Q1 2026 Financial Statements batch from Innovate Group', done: true, priority: 'low', createdAt: '2026-05-15' },
+  { id: 'todo-4', title: 'Book immigration appointment for Mr. David Chen (Non-B extension)', done: false, priority: 'high', createdAt: '2026-05-20', dueDate: '2026-06-01' },
+];
+
+// ----------------------------------------------------------------------
 // Individual Clients (people, for Visa / Work Permit pipeline)
 
 export type ClientType = 'company_linked' | 'visa_only';
@@ -780,6 +801,7 @@ const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
 // Module-level mutable store
 
 export const tbStore = {
+  todos: INITIAL_TODOS as TbTodo[],
   stageTemplates: INITIAL_STAGE_TEMPLATES as StageTemplate[],
   clients: INITIAL_CLIENTS as TBClient[],
   individualClients: INITIAL_INDIVIDUAL_CLIENTS as TBIndividualClient[],
@@ -975,6 +997,21 @@ export function reorderKanbanCards(activeId: string, overId: string): void {
   const [removed] = list.splice(ai, 1);
   list.splice(oi, 0, removed);
   tbStore.kanbanCards = list;
+}
+
+export function addTbTodo(todo: Omit<TbTodo, 'id' | 'createdAt'>): TbTodo {
+  const newTodo: TbTodo = { ...todo, id: `todo-${Date.now()}`, createdAt: new Date().toISOString().slice(0, 10) };
+  tbStore.todos.unshift(newTodo);
+  return newTodo;
+}
+
+export function toggleTbTodo(id: string): void {
+  const todo = tbStore.todos.find((t) => t.id === id);
+  if (todo) todo.done = !todo.done;
+}
+
+export function deleteTbTodo(id: string): void {
+  tbStore.todos = tbStore.todos.filter((t) => t.id !== id);
 }
 
 export function addBodAuditEntry(action: string): void {
