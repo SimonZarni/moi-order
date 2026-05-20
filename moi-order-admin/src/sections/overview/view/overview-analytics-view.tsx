@@ -79,6 +79,8 @@ export function OverviewAnalyticsView() {
             title="Total Orders"
             percent={summary.total_orders_change}
             total={summary.total_orders}
+            current={summary.orders_this_month}
+            previous={summary.orders_last_month}
             icon={<img alt="Total Orders" src="/assets/icons/glass/ic-glass-bag.svg" />}
             chart={{ categories: MONTH_LABELS, series: summary.total_orders_monthly.length ? summary.total_orders_monthly : EMPTY_EIGHT }}
           />
@@ -89,6 +91,8 @@ export function OverviewAnalyticsView() {
             title="Active Users"
             percent={summary.active_users_change}
             total={summary.active_users}
+            current={summary.users_this_month}
+            previous={summary.users_last_month}
             color="secondary"
             icon={<img alt="Active Users" src="/assets/icons/glass/ic-glass-users.svg" />}
             chart={{ categories: MONTH_LABELS, series: summary.active_users_monthly.length ? summary.active_users_monthly : EMPTY_EIGHT }}
@@ -100,6 +104,8 @@ export function OverviewAnalyticsView() {
             title="Listed Places"
             percent={summary.listed_places_change}
             total={summary.listed_places}
+            current={summary.places_this_month}
+            previous={summary.places_last_month}
             color="warning"
             icon={<img alt="Listed Places" src="/assets/icons/glass/ic-glass-buy.svg" />}
             chart={{ categories: MONTH_LABELS, series: summary.listed_places_monthly.length ? summary.listed_places_monthly : EMPTY_EIGHT }}
@@ -111,7 +117,10 @@ export function OverviewAnalyticsView() {
             title="Revenue (THB)"
             percent={summary.revenue_change}
             total={summary.total_revenue}
+            current={summary.total_revenue}
+            previous={summary.revenue_last_month}
             formatTotal={(value) => fNumber(value / 100)}
+            formatCount={(value) => fNumber(value / 100)}
             color="error"
             icon={<img alt="Revenue" src="/assets/icons/glass/ic-glass-message.svg" />}
             chart={{ categories: MONTH_LABELS, series: summary.revenue_monthly.length ? summary.revenue_monthly : EMPTY_EIGHT }}

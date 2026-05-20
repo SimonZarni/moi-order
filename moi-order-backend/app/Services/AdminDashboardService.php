@@ -107,15 +107,22 @@ class AdminDashboardService
         return [
             'total_orders'          => ServiceSubmission::count() + TicketOrder::count(),
             'total_orders_change'   => $this->pctChange($totalOrdersLastMonth, $totalOrdersThisMonth),
+            'orders_this_month'     => $totalOrdersThisMonth,
+            'orders_last_month'     => $totalOrdersLastMonth,
             'total_orders_monthly'  => $ordersMonthly->values()->toArray(),
             'active_users'          => $activeUsers,
             'active_users_change'   => $this->pctChange($newUsersLastMonth, $newUsersThisMonth),
+            'users_this_month'      => $newUsersThisMonth,
+            'users_last_month'      => $newUsersLastMonth,
             'active_users_monthly'  => $usersMonthly->values()->toArray(),
             'listed_places'         => $listedPlaces,
             'listed_places_change'  => $this->pctChange($newPlacesLastMonth, $newPlacesThisMonth),
+            'places_this_month'     => $newPlacesThisMonth,
+            'places_last_month'     => $newPlacesLastMonth,
             'listed_places_monthly' => $placesMonthly->values()->toArray(),
             'total_revenue'         => $revenueThisMonth,
             'revenue_change'        => $this->pctChange($revenueLastMonth, $revenueThisMonth),
+            'revenue_last_month'    => $revenueLastMonth,
             'revenue_monthly'       => $revenueMonthly->values()->toArray(),
         ];
     }

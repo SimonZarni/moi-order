@@ -20,6 +20,9 @@ type Props = CardProps & {
   title: string;
   total: number;
   percent: number | null;
+  current?: number;
+  previous?: number;
+  formatCount?: (value: number) => string;
   color?: PaletteColorKey;
   icon: React.ReactNode;
   chart: {
@@ -37,6 +40,9 @@ export function AnalyticsWidgetSummary({
   total,
   chart,
   percent,
+  current,
+  previous,
+  formatCount = fShortenNumber,
   color = 'primary',
   formatTotal,
   ...other
@@ -81,15 +87,23 @@ export function AnalyticsWidgetSummary({
           gap: 0.5,
           right: 16,
           display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
           position: 'absolute',
-          alignItems: 'center',
         }}
       >
-        <Iconify width={20} icon={percent < 0 ? 'eva:trending-down-fill' : 'eva:trending-up-fill'} />
-        <Box component="span" sx={{ typography: 'subtitle2' }}>
-          {percent > 0 && '+'}
-          {fPercent(percent)}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Iconify width={20} icon={percent < 0 ? 'eva:trending-down-fill' : 'eva:trending-up-fill'} />
+          <Box component="span" sx={{ typography: 'subtitle2' }}>
+            {percent > 0 && '+'}
+            {fPercent(percent)}
+          </Box>
         </Box>
+        {current !== undefined && previous !== undefined && (
+          <Box component="span" sx={{ typography: 'caption', opacity: 0.64 }}>
+            {formatCount(current)} vs {formatCount(previous)}
+          </Box>
+        )}
       </Box>
     );
   };
