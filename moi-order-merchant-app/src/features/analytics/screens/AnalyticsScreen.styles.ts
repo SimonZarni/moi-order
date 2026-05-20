@@ -17,7 +17,12 @@ export const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
     gap: spacing.md,
   },
-  header: {
+
+  // ── Page header row (title + pending chip inline) ──────────────────────────
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
     paddingTop: spacing.xs,
     paddingBottom: spacing.xs,
   },
@@ -28,10 +33,30 @@ export const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   headerSub: {
-    fontSize: typography.sm,
+    fontSize: typography.xs,
     color: colours.textMuted,
     marginTop: 2,
   },
+  // Compact inline chip — replaces the full-width orange block
+  pendingChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colours.warningBg,
+    borderWidth: 1,
+    borderColor: colours.warning + '40',
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: 4,
+    marginTop: 4,
+  },
+  pendingChipText: {
+    fontSize: typography.xs,
+    fontWeight: '700',
+    color: colours.warning,
+  },
+
+  // ── Cards ──────────────────────────────────────────────────────────────────
   card: {
     backgroundColor: colours.surface,
     borderRadius: radius.lg,
@@ -44,17 +69,18 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 4,
     borderBottomWidth: 1,
     borderBottomColor: colours.divider,
-    backgroundColor: colours.surfaceMuted,
   },
   cardTitle: {
-    fontSize: typography.md,
+    fontSize: typography.sm,
     fontWeight: '600',
     color: colours.textOnLight,
   },
+
+  // ── Revenue rows ───────────────────────────────────────────────────────────
   periodRow: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 4,
-    gap: spacing.sm,
+    gap: spacing.xs + 2,
     borderBottomWidth: 1,
     borderBottomColor: colours.divider,
   },
@@ -76,14 +102,17 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.primary,
   },
+  // Thicker bar — 8px instead of 6px, clearly readable
   barTrack: {
-    height: 6,
-    backgroundColor: colours.divider,
+    height: 8,
+    backgroundColor: colours.backgroundLight,
     borderRadius: radius.full,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colours.divider,
   },
   barFill: {
-    height: 6,
+    height: '100%',
     backgroundColor: colours.primary,
     borderRadius: radius.full,
     minWidth: 4,
@@ -92,6 +121,8 @@ export const styles = StyleSheet.create({
     fontSize: typography.xs,
     color: colours.textMuted,
   },
+
+  // ── Orders summary ─────────────────────────────────────────────────────────
   summaryGrid: {
     flexDirection: 'row',
   },
@@ -107,7 +138,7 @@ export const styles = StyleSheet.create({
     borderRightWidth: 0,
   },
   summaryValue: {
-    fontSize: typography.xl,
+    fontSize: typography.xxl,
     fontWeight: '700',
     color: colours.textOnLight,
     letterSpacing: -0.5,
@@ -116,29 +147,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.xs,
     color: colours.textMuted,
     textAlign: 'center',
-  },
-  pendingCard: {
-    backgroundColor: colours.warningBg,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    borderWidth: 1,
-    borderColor: colours.warning + '44',
-  },
-  pendingTextCol: {
-    flex: 1,
-  },
-  pendingCount: {
-    fontSize: typography.xxl,
-    fontWeight: '700',
-    color: colours.warning,
-  },
-  pendingLabel: {
-    fontSize: typography.sm,
-    color: colours.warning,
-    fontWeight: '500',
+    marginTop: 2,
   },
   centered: {
     flex: 1,

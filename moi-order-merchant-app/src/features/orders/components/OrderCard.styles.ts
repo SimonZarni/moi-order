@@ -30,7 +30,8 @@ export const styles = StyleSheet.create({
   statusBadge: {
     paddingHorizontal: spacing.sm,
     paddingVertical: 3,
-    borderRadius: radius.full,
+    borderRadius: radius.sm,
+    borderWidth: 1,
   },
   statusText: {
     fontSize: typography.xxs,
@@ -67,15 +68,31 @@ export const styles = StyleSheet.create({
     fontSize: typography.xxs,
     color: colours.medium,
   },
+
+  // ── Action button ──────────────────────────────────────────────────────────
+  // Mobile: full-width strip
+  actionRow: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
+  },
+  // Desktop: right-aligned
+  actionRowDesktop: {
+    alignItems: 'flex-end',
+  },
   actionButton: {
     backgroundColor: colours.primary,
     borderRadius: radius.md,
     paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
     alignItems: 'center',
     minHeight: 40,
     justifyContent: 'center',
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.md,
+  },
+  // Compact on desktop — shrinks to content width
+  actionButtonDesktop: {
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.xs + 2,
+    minHeight: 34,
   },
   actionButtonText: {
     color: colours.white,

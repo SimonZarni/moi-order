@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { styles } from './OrderCard.styles';
 import { colours } from '../../../shared/theme/colours';
+import { useResponsive } from '../../../shared/hooks/useResponsive';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
 import { formatDateTime } from '../../../shared/utils/formatDate';
 import { ORDER_STATUS } from '../../../types/enums';
@@ -14,12 +15,12 @@ interface OrderAction {
 
 // Every merchant-triggered forward transition in the correct order.
 const ORDER_ACTIONS: Partial<Record<string, OrderAction>> = {
-  [ORDER_STATUS.OrderPlaced]:          { label: 'Accept Order',   nextStatus: ORDER_STATUS.WaitingForPayment },
+  [ORDER_STATUS.OrderPlaced]:          { label: 'Accept Order',    nextStatus: ORDER_STATUS.WaitingForPayment },
   [ORDER_STATUS.PaymentConfirmed]:     { label: 'Start Preparing', nextStatus: ORDER_STATUS.PreparingFood },
-  [ORDER_STATUS.PreparingFood]:        { label: 'Mark Ready',     nextStatus: ORDER_STATUS.WaitingForDelivery },
-  [ORDER_STATUS.WaitingForDelivery]:   { label: 'Mark Picked Up', nextStatus: ORDER_STATUS.DeliveryOnTheWay },
-  [ORDER_STATUS.DeliveryOnTheWay]:     { label: 'Mark Delivered', nextStatus: ORDER_STATUS.Delivered },
-  [ORDER_STATUS.Delivered]:            { label: 'Complete Order',  nextStatus: ORDER_STATUS.Completed },
+  [ORDER_STATUS.PreparingFood]:        { label: 'Mark Ready',      nextStatus: ORDER_STATUS.WaitingForDelivery },
+  [ORDER_STATUS.WaitingForDelivery]:   { label: 'Mark Picked Up',  nextStatus: ORDER_STATUS.DeliveryOnTheWay },
+  [ORDER_STATUS.DeliveryOnTheWay]:     { label: 'Mark Delivered',  nextStatus: ORDER_STATUS.Delivered },
+  [ORDER_STATUS.Delivered]:            { label: 'Complete Order',   nextStatus: ORDER_STATUS.Completed },
   // WaitingForPayment: customer pays via LINE — no merchant action button needed
 };
 
@@ -42,6 +43,7 @@ interface OrderCardProps {
 }
 
 export function OrderCard({ order, onUpdateStatus, onPress }: OrderCardProps): React.JSX.Element {
+  const { isDesktop } = useResponsive();
   const action = ORDER_ACTIONS[order.status];
   const statusColour = STATUS_COLOURS[order.status] ?? colours.medium;
   const itemsSummary = order.items?.map((i) => `${i.quantity}× ${i.name}`).join(', ') ?? '';
@@ -50,12 +52,17 @@ export function OrderCard({ order, onUpdateStatus, onPress }: OrderCardProps): R
     if (action) onUpdateStatus(order.id, action.nextStatus);
   }, [action, order.id, onUpdateStatus]);
 
-  // Card info shared between pressable and non-pressable variants
+  // Unified badge style: coloured bg (18%) + coloured border (40%)
+  const badgeStyle = {
+    backgroundColor: statusColour + '18',
+    borderColor: statusColour + '40',
+  };
+
   const cardInfo = (
     <>
       <View style={styles.header}>
         <Text style={styles.orderNumber}>{order.order_number ?? `#${order.id}`}</Text>
-        <View style={[styles.statusBadge, { backgroundColor: statusColour + '22' }]}>
+        <View style={[styles.statusBadge, badgeStyle]}>
           <Text style={[styles.statusText, { color: statusColour }]}>{order.status_label}</Text>
         </View>
       </View>
@@ -89,14 +96,16 @@ export function OrderCard({ order, onUpdateStatus, onPress }: OrderCardProps): R
 
       {/* Action button is always a sibling, never nested inside another Pressable */}
       {action !== undefined && (
-        <Pressable
-          style={styles.actionButton}
-          onPress={handleAction}
-          accessibilityLabel={`${action.label} for order ${order.order_number ?? order.id}`}
-          accessibilityRole="button"
-        >
-          <Text style={styles.actionButtonText}>{action.label}</Text>
-        </Pressable>
+        <View style={[styles.actionRow, isDesktop && styles.actionRowDesktop]}>
+          <Pressable
+            style={[styles.actionButton, isDesktop && styles.actionButtonDesktop]}
+            onPress={handleAction}
+            accessibilityLabel={`${action.label} for order ${order.order_number ?? order.id}`}
+            accessibilityRole="button"
+          >
+            <Text style={styles.actionButtonText}>{action.label}</Text>
+          </Pressable>
+        </View>
       )}
     </View>
   );

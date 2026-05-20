@@ -24,13 +24,14 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
     return (
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.commandBar}>
-            <View>
-              <Text style={styles.commandBarTitle}>Dashboard</Text>
-              <Text style={styles.commandBarDate}>{todayLabel}</Text>
+          <View style={styles.pageHeader}>
+            <View style={styles.pageTitleBlock}>
+              <Skeleton height={28} width={140} borderRadius={6} />
+              <Skeleton height={12} width={100} borderRadius={4} />
             </View>
           </View>
           <View style={styles.statsGrid}>
+            <SkeletonCard style={{ flex: 1, minWidth: 148 }} />
             <SkeletonCard style={{ flex: 1, minWidth: 148 }} />
             <SkeletonCard style={{ flex: 1, minWidth: 148 }} />
             <SkeletonCard style={{ flex: 1, minWidth: 148 }} />
@@ -49,10 +50,10 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.commandBar}>
-          <View>
-            <Text style={styles.commandBarTitle}>Dashboard</Text>
-            <Text style={styles.commandBarDate}>{todayLabel}</Text>
+        <View style={styles.pageHeader}>
+          <View style={styles.pageTitleBlock}>
+            <Text style={styles.pageTitle}>Dashboard</Text>
+            <Text style={styles.pageDate}>{todayLabel}</Text>
           </View>
           {(analytics?.pending_count ?? 0) > 0 && (
             <View style={styles.pendingPill}>
@@ -67,32 +68,24 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
             value={formatPrice(analytics?.today.revenue_cents ?? 0)}
             sub={`${analytics?.today.order_count ?? 0} orders`}
             iconName="cash-outline"
-            iconBg={colours.primaryBg}
-            iconColor={colours.primaryDark}
           />
           <StatCard
             label="This Week"
             value={formatPrice(analytics?.this_week.revenue_cents ?? 0)}
             sub={`${analytics?.this_week.order_count ?? 0} orders`}
             iconName="calendar-outline"
-            iconBg={colours.infoBg}
-            iconColor={colours.info}
           />
           <StatCard
             label="This Month"
             value={formatPrice(analytics?.this_month.revenue_cents ?? 0)}
             sub={`${analytics?.this_month.order_count ?? 0} orders`}
             iconName="trending-up-outline"
-            iconBg={colours.primaryBg}
-            iconColor={colours.primary}
           />
           <StatCard
             label="Pending"
             value={String(analytics?.pending_count ?? 0)}
             sub="need action"
             iconName="time-outline"
-            iconBg={colours.warningBg}
-            iconColor={colours.warning}
           />
         </View>
 
@@ -133,16 +126,14 @@ interface StatCardProps {
   value: string;
   sub: string;
   iconName: keyof typeof Ionicons.glyphMap;
-  iconBg: string;
-  iconColor: string;
 }
 
-function StatCard({ label, value, sub, iconName, iconBg, iconColor }: StatCardProps): React.JSX.Element {
+function StatCard({ label, value, sub, iconName }: StatCardProps): React.JSX.Element {
   return (
-    <View style={[styles.statCard, { borderLeftColor: iconColor }]}>
+    <View style={styles.statCard}>
       <View style={styles.statIconRow}>
-        <View style={[styles.statIconBg, { backgroundColor: iconBg }]}>
-          <Ionicons name={iconName} size={16} color={iconColor} />
+        <View style={styles.statIconBg}>
+          <Ionicons name={iconName} size={16} color={colours.primary} />
         </View>
         <Text style={styles.statLabel} numberOfLines={1}>{label}</Text>
       </View>

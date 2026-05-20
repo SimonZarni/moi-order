@@ -18,34 +18,35 @@ export const styles = StyleSheet.create({
     gap: spacing.md,
   },
 
-  // ── Command bar ────────────────────────────────────────────────────────────
-  commandBar: {
-    backgroundColor: colours.backgroundDark,
-    borderRadius: radius.lg,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md + 4,
+  // ── Page header (replaces heavy dark commandBar) ───────────────────────────
+  pageHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.xs,
   },
-  commandBarTitle: {
-    fontSize: typography.lg,
+  pageTitleBlock: {
+    gap: 2,
+  },
+  pageTitle: {
+    fontSize: typography.xxl,
     fontWeight: '700',
-    color: colours.textOnDark,
-    letterSpacing: -0.3,
+    color: colours.textOnLight,
+    letterSpacing: -0.5,
   },
-  commandBarDate: {
+  pageDate: {
     fontSize: typography.xs,
-    color: colours.textSubtle,
-    marginTop: 2,
+    color: colours.textMuted,
   },
   pendingPill: {
-    backgroundColor: colours.warning + '33',
+    backgroundColor: colours.warningBg,
     borderRadius: radius.full,
     paddingHorizontal: spacing.sm + 2,
     paddingVertical: spacing.xs,
     borderWidth: 1,
-    borderColor: colours.warning + '55',
+    borderColor: colours.warning + '40',
+    marginTop: 4,
   },
   pendingPillText: {
     fontSize: typography.xs,
@@ -67,7 +68,6 @@ export const styles = StyleSheet.create({
     padding: spacing.md,
     borderWidth: 1,
     borderColor: colours.divider,
-    borderLeftWidth: 3,
   },
   statIconRow: {
     flexDirection: 'row',
@@ -76,16 +76,17 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   statIconBg: {
-    width: 34,
-    height: 34,
+    width: 32,
+    height: 32,
     borderRadius: radius.sm + 2,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: colours.primaryBg,
   },
   statLabel: {
     fontSize: typography.xs,
     color: colours.textMuted,
-    fontWeight: '600',
+    fontWeight: '500',
     flex: 1,
   },
   statValue: {

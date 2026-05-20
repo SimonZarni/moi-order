@@ -34,6 +34,8 @@ export function AnalyticsScreen(): React.JSX.Element {
     );
   }
 
+  const pendingCount = analytics?.pending_count ?? 0;
+
   const periods: PeriodRow[] = [
     { label: 'Today', stats: analytics?.today },
     { label: 'This Week', stats: analytics?.this_week },
@@ -43,20 +45,20 @@ export function AnalyticsScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Analytics</Text>
-          <Text style={styles.headerSub}>Revenue and order performance</Text>
-        </View>
 
-        {(analytics?.pending_count ?? 0) > 0 && (
-          <View style={styles.pendingCard}>
-            <Ionicons name="time-outline" size={32} color={colours.warning} />
-            <View style={styles.pendingTextCol}>
-              <Text style={styles.pendingCount}>{analytics?.pending_count}</Text>
-              <Text style={styles.pendingLabel}>orders pending your action</Text>
-            </View>
+        {/* Page header with inline pending chip */}
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={styles.headerTitle}>Analytics</Text>
+            <Text style={styles.headerSub}>Revenue and order performance</Text>
           </View>
-        )}
+          {pendingCount > 0 && (
+            <View style={styles.pendingChip}>
+              <Ionicons name="time-outline" size={12} color={colours.warning} />
+              <Text style={styles.pendingChipText}>{pendingCount} pending</Text>
+            </View>
+          )}
+        </View>
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
@@ -78,21 +80,12 @@ export function AnalyticsScreen(): React.JSX.Element {
             <Text style={styles.cardTitle}>Orders Summary</Text>
           </View>
           <View style={styles.summaryGrid}>
-            <SummaryItem
-              value={String(analytics?.today.order_count ?? 0)}
-              label="Today"
-            />
-            <SummaryItem
-              value={String(analytics?.this_week.order_count ?? 0)}
-              label="This Week"
-            />
-            <SummaryItem
-              value={String(analytics?.this_month.order_count ?? 0)}
-              label="This Month"
-              isLast
-            />
+            <SummaryItem value={String(analytics?.today.order_count ?? 0)} label="Today" />
+            <SummaryItem value={String(analytics?.this_week.order_count ?? 0)} label="This Week" />
+            <SummaryItem value={String(analytics?.this_month.order_count ?? 0)} label="This Month" isLast />
           </View>
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -106,7 +99,7 @@ interface RevenueRowProps {
 }
 
 function RevenueRow({ label, stats, maxRevenue, isLast }: RevenueRowProps): React.JSX.Element {
-  const fillRatio = ((stats?.revenue_cents ?? 0) / maxRevenue);
+  const fillRatio = (stats?.revenue_cents ?? 0) / maxRevenue;
 
   return (
     <View style={[styles.periodRow, isLast === true && styles.periodLastRow]}>
@@ -122,7 +115,15 @@ function RevenueRow({ label, stats, maxRevenue, isLast }: RevenueRowProps): Reac
   );
 }
 
-function SummaryItem({ value, label, isLast }: { value: string; label: string; isLast?: boolean }): React.JSX.Element {
+function SummaryItem({
+  value,
+  label,
+  isLast,
+}: {
+  value: string;
+  label: string;
+  isLast?: boolean;
+}): React.JSX.Element {
   return (
     <View style={[styles.summaryItem, isLast === true && styles.summaryItemLast]}>
       <Text style={styles.summaryValue}>{value}</Text>

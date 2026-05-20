@@ -65,11 +65,9 @@ export const styles = StyleSheet.create({
     borderBottomColor: colours.divider,
   },
   cardTitle: {
-    fontSize: typography.xs,
-    fontWeight: '700',
+    fontSize: typography.sm,
+    fontWeight: '600',
     color: colours.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
   },
   cardBody: {
     padding: spacing.md,
@@ -178,7 +176,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colours.primary,
     borderRadius: radius.md,
-    paddingVertical: spacing.sm + 4,
+    paddingVertical: spacing.xs + 4,
     alignItems: 'center',
   },
   saveButtonDisabled: {
@@ -193,7 +191,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colours.backgroundLight,
     borderRadius: radius.md,
-    paddingVertical: spacing.sm + 4,
+    paddingVertical: spacing.xs + 4,
     alignItems: 'center',
     borderWidth: 1.5,
     borderColor: colours.divider,

@@ -1,12 +1,15 @@
 import React from 'react';
 import { View, Text, ScrollView, SectionList, Pressable } from 'react-native';
-import { Skeleton } from '../../../shared/components/Skeleton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { Skeleton } from '../../../shared/components/Skeleton';
 import { useOrdersScreen, type StatusFilter } from '../hooks/useOrdersScreen';
 import { OrderCard } from '../components/OrderCard';
 import { styles } from './OrdersScreen.styles';
 import { colours } from '../../../shared/theme/colours';
+import { spacing } from '../../../shared/theme/spacing';
+import { radius } from '../../../shared/theme/radius';
+import { typography } from '../../../shared/theme/typography';
 import type { FoodOrder } from '../../../types/models';
 
 type Section = { title: string; data: FoodOrder[] };
@@ -41,7 +44,12 @@ export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.El
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <View style={styles.filterBar}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statusTabsScroll}>
+        {/* Underline-style tabs */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.statusTabsScroll}
+        >
           {STATUS_TABS.map((tab) => {
             const isActive = statusFilter === tab.key;
             return (
@@ -61,8 +69,13 @@ export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.El
         </ScrollView>
 
         <View style={styles.dateRow}>
-          <Pressable style={styles.dateArrow} onPress={handleDatePrev} accessibilityRole="button" accessibilityLabel="Previous day">
-            <Ionicons name="chevron-back" size={16} color={colours.textMuted} />
+          <Pressable
+            style={styles.dateArrow}
+            onPress={handleDatePrev}
+            accessibilityRole="button"
+            accessibilityLabel="Previous day"
+          >
+            <Ionicons name="chevron-back" size={14} color={colours.textMuted} />
           </Pressable>
           <Text style={styles.dateLabel}>{formatDateLabel(dateFilter)}</Text>
           <Pressable
@@ -72,10 +85,19 @@ export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.El
             accessibilityRole="button"
             accessibilityLabel="Next day"
           >
-            <Ionicons name="chevron-forward" size={16} color={isToday ? colours.divider : colours.textMuted} />
+            <Ionicons
+              name="chevron-forward"
+              size={14}
+              color={isToday ? colours.divider : colours.textMuted}
+            />
           </Pressable>
           {!isToday && (
-            <Pressable style={styles.dateTodayBtn} onPress={handleDateToday} accessibilityRole="button" accessibilityLabel="Go to today">
+            <Pressable
+              style={styles.dateTodayBtn}
+              onPress={handleDateToday}
+              accessibilityRole="button"
+              accessibilityLabel="Go to today"
+            >
               <Text style={styles.dateTodayText}>Today</Text>
             </Pressable>
           )}
@@ -83,9 +105,19 @@ export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.El
       </View>
 
       {isLoading ? (
-        <View style={{ padding: 16, gap: 12 }}>
+        <View style={{ padding: spacing.md, gap: spacing.sm }}>
           {[1, 2, 3, 4, 5].map((i) => (
-            <View key={i} style={{ backgroundColor: '#fff', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#F3F4F6', gap: 8 }}>
+            <View
+              key={i}
+              style={{
+                backgroundColor: colours.surface,
+                borderRadius: radius.lg,
+                padding: spacing.md,
+                borderWidth: 1,
+                borderColor: colours.divider,
+                gap: spacing.sm,
+              }}
+            >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Skeleton height={14} width={120} borderRadius={6} />
                 <Skeleton height={14} width={60} borderRadius={12} />
