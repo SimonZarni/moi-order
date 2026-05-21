@@ -10,9 +10,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import { fNumber } from 'src/utils/format-number';
 
-import { DashboardContent } from 'src/layouts/dashboard';
-
 import { dashboardApi } from 'src/api/dashboard';
+import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
 
