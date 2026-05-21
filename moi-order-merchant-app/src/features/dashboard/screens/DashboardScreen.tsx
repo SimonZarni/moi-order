@@ -14,7 +14,7 @@ interface DashboardScreenProps {
 }
 
 export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.JSX.Element {
-  const { analytics, recentOrders, isLoading, refetch } = useDashboardScreen();
+  const { analytics, recentOrders, isLoading, refetch, handleUpdateStatus } = useDashboardScreen();
 
   const todayLabel = new Date().toLocaleDateString('en-GB', {
     weekday: 'long', month: 'long', day: 'numeric',
@@ -110,7 +110,7 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
               <OrderCard
                 key={order.id}
                 order={order}
-                onUpdateStatus={() => { void refetch(); }}
+                onUpdateStatus={handleUpdateStatus}
                 onPress={onSelectOrder !== undefined ? () => onSelectOrder(order.id) : undefined}
               />
             ))
