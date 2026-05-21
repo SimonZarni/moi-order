@@ -8,32 +8,31 @@ export const styles = StyleSheet.create({
   card: {
     backgroundColor: colours.surface,
     borderBottomWidth: 1,
-    borderBottomColor: colours.divider,
+    borderBottomColor: '#f0f0f0',
   },
-  cardContent: {
+  inner: {
     flexDirection: 'row',
   },
-  // Left colored status strip
-  statusStrip: {
-    width: 4,
-    borderTopLeftRadius: 0,
-    borderBottomLeftRadius: 0,
+  // 6px coloured left strip
+  strip: {
+    width: 6,
   },
-  cardBody: {
+  content: {
     flex: 1,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
-    gap: spacing.xs,
+    gap: 6,
   },
-  topRow: {
+
+  // Row 1
+  row1: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
   },
-  // Customer avatar
   avatar: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
     borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',
@@ -44,37 +43,43 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.5,
   },
-  middleBlock: {
-    flex: 1,
-    gap: 2,
-  },
-  orderNumber: {
+  nameBlock: { flex: 1, gap: 2 },
+  customerName: {
     fontSize: typography.sm,
-    fontWeight: '800',
+    fontWeight: '700',
     color: colours.textOnLight,
-    letterSpacing: -0.2,
   },
-  customer: {
-    fontSize: typography.xs,
-    fontWeight: '500',
+  orderNum: {
+    fontSize: typography.xxs,
     color: colours.textMuted,
+    fontWeight: '600',
   },
-  rightBlock: {
-    alignItems: 'flex-end',
-    gap: 4,
-    flexShrink: 0,
-  },
-  total: {
+  amount: {
     fontSize: typography.md,
-    fontWeight: '800',
+    fontWeight: '900',
     color: colours.textOnLight,
     letterSpacing: -0.3,
+    flexShrink: 0,
+  },
+
+  // Row 2
+  row2: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  items: {
+    flex: 1,
+    fontSize: typography.xs,
+    color: colours.textMuted,
   },
   statusBadge: {
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: radius.full,
     borderWidth: 1,
+    flexShrink: 0,
   },
   statusText: {
     fontSize: typography.xxs,
@@ -82,55 +87,60 @@ export const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  metaRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  items: {
-    fontSize: typography.xs,
-    color: colours.textMuted,
-    flex: 1,
-  },
-  date: {
+
+  // Row 3
+  time: {
     fontSize: typography.xxs,
     color: colours.textMuted,
-    flexShrink: 0,
   },
-  // unused but kept for type compat
-  header: { flexDirection: 'row', justifyContent: 'space-between' },
-  meta: { fontSize: typography.xs, color: colours.textMuted },
-  footer: { flexDirection: 'row', justifyContent: 'space-between' },
 
-  // ── Action button ──────────────────────────────────────────────────────────
-  actionRow: {
+  // Action button
+  actionWrap: {
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.md,
-    paddingTop: 0,
+    paddingTop: spacing.xs,
   },
-  actionRowDesktop: { alignItems: 'flex-end' },
-  actionButton: {
-    backgroundColor: colours.primary,
-    borderRadius: radius.full,
-    paddingVertical: spacing.xs + 2,
-    paddingHorizontal: spacing.md,
+  actionWrapDesktop: { alignItems: 'flex-end' },
+  actionBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 36,
-    shadowColor: colours.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 3,
+    gap: 6,
+    backgroundColor: colours.primary,
+    borderRadius: radius.full,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    minHeight: 40,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  actionButtonDesktop: {
-    paddingHorizontal: spacing.xl,
-    minHeight: 32,
-  },
-  actionButtonText: {
+  actionBtnDesktop: { paddingHorizontal: spacing.xl, minHeight: 36 },
+  actionBtnText: {
     color: colours.white,
     fontSize: typography.xs,
     fontWeight: '800',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
+
+  // legacy compat keys
+  card2: { backgroundColor: colours.surface },
+  cardContent: { flexDirection: 'row' },
+  statusStrip: { width: 6 },
+  cardBody: { flex: 1, padding: spacing.md },
+  topRow: { flexDirection: 'row', alignItems: 'center' },
+  middleBlock: { flex: 1 },
+  rightBlock: { alignItems: 'flex-end' },
+  total: { fontSize: typography.md, fontWeight: '900', color: colours.textOnLight },
+  header: { flexDirection: 'row', justifyContent: 'space-between' },
+  customer: { fontSize: typography.sm, fontWeight: '700', color: colours.textOnLight },
+  meta: { fontSize: typography.xs, color: colours.textMuted },
+  footer: { flexDirection: 'row', justifyContent: 'space-between' },
+  date: { fontSize: typography.xxs, color: colours.textMuted },
+  actionRow: { paddingHorizontal: spacing.md, paddingBottom: spacing.md },
+  actionRowDesktop: { alignItems: 'flex-end' },
+  actionButton: { backgroundColor: colours.primary, borderRadius: radius.full, paddingVertical: spacing.sm, alignItems: 'center' },
+  actionButtonDesktop: { paddingHorizontal: spacing.xl },
+  actionButtonText: { color: colours.white, fontSize: typography.xs, fontWeight: '800' },
 });

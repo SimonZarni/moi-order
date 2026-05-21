@@ -7,18 +7,17 @@ import { useOrdersScreen, type StatusFilter } from '../hooks/useOrdersScreen';
 import { OrderCard } from '../components/OrderCard';
 import { styles } from './OrdersScreen.styles';
 import { colours } from '../../../shared/theme/colours';
-import { radius } from '../../../shared/theme/radius';
 import { spacing } from '../../../shared/theme/spacing';
-import { typography } from '../../../shared/theme/typography';
+import { radius } from '../../../shared/theme/radius';
 import type { FoodOrder } from '../../../types/models';
 
 type Section = { title: string; data: FoodOrder[] };
 
-const STATUS_TABS: { key: StatusFilter; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { key: 'all',         label: 'All',         icon: 'list-outline' },
-  { key: 'new',         label: 'New',         icon: 'flash-outline' },
-  { key: 'in_progress', label: 'In Progress', icon: 'time-outline' },
-  { key: 'done',        label: 'Done',        icon: 'checkmark-circle-outline' },
+const STATUS_TABS: { key: StatusFilter; label: string }[] = [
+  { key: 'all', label: 'All Orders' },
+  { key: 'new', label: 'New' },
+  { key: 'in_progress', label: 'In Progress' },
+  { key: 'done', label: 'Done' },
 ];
 
 function formatDateLabel(dateFilter: string | null): string {
@@ -42,46 +41,52 @@ export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.El
   const isToday = dateFilter === null;
   const totalOrders = sections.reduce((sum, s) => sum + s.data.length, 0);
 
+  const ListHeader = (
+    <View style={styles.listHeaderWrap}>
+      {/* Floating date navigator card */}
+      <View style={styles.dateCard}>
+        <Pressable style={styles.dateArrow} onPress={handleDatePrev} accessibilityRole="button" accessibilityLabel="Previous day">
+          <Ionicons name="chevron-back" size={16} color={colours.primary} />
+        </Pressable>
+        <View style={styles.dateLabelWrap}>
+          <Text style={styles.dateLabel}>{formatDateLabel(dateFilter)}</Text>
+          <Text style={styles.dateOrderCount}>{totalOrders} order{totalOrders !== 1 ? 's' : ''}</Text>
+        </View>
+        <Pressable
+          style={[styles.dateArrow, isToday && styles.dateArrowDisabled]}
+          onPress={handleDateNext}
+          disabled={isToday}
+          accessibilityRole="button"
+          accessibilityLabel="Next day"
+        >
+          <Ionicons name="chevron-forward" size={16} color={isToday ? colours.divider : colours.primary} />
+        </Pressable>
+        {!isToday && (
+          <Pressable style={styles.todayBtn} onPress={handleDateToday} accessibilityRole="button" accessibilityLabel="Go to today">
+            <Text style={styles.todayBtnText}>Today</Text>
+          </Pressable>
+        )}
+      </View>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
-
-      {/* ── Dark header ── */}
+      {/* ── Dark header with tabs ── */}
       <View style={styles.darkHeader}>
-        <View style={styles.darkHeaderTop}>
-          <View>
-            <Text style={styles.darkHeaderTitle}>Orders</Text>
-            <Text style={styles.darkHeaderSub}>{totalOrders} order{totalOrders !== 1 ? 's' : ''} · {formatDateLabel(dateFilter)}</Text>
-          </View>
-          {/* Date navigator */}
-          <View style={styles.dateRow}>
-            <Pressable style={styles.dateArrow} onPress={handleDatePrev} accessibilityRole="button" accessibilityLabel="Previous day">
-              <Ionicons name="chevron-back" size={14} color="rgba(255,255,255,0.7)" />
-            </Pressable>
-            <Pressable style={styles.dateArrow} onPress={handleDateNext} disabled={isToday} accessibilityRole="button" accessibilityLabel="Next day">
-              <Ionicons name="chevron-forward" size={14} color={isToday ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.7)'} />
-            </Pressable>
-            {!isToday && (
-              <Pressable style={styles.dateTodayBtn} onPress={handleDateToday} accessibilityRole="button" accessibilityLabel="Go to today">
-                <Text style={styles.dateTodayText}>Today</Text>
-              </Pressable>
-            )}
-          </View>
-        </View>
-
-        {/* Tab row */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statusTabsScroll}>
+        <Text style={styles.pageTitle}>Orders</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsRow}>
           {STATUS_TABS.map((tab) => {
-            const isActive = statusFilter === tab.key;
+            const active = statusFilter === tab.key;
             return (
               <Pressable
                 key={tab.key}
-                style={[styles.statusTab, isActive && styles.statusTabActive]}
+                style={[styles.tab, active && styles.tabActive]}
                 onPress={() => handleStatusFilterChange(tab.key)}
                 accessibilityRole="button"
                 accessibilityLabel={`Filter by ${tab.label}`}
               >
-                <Ionicons name={tab.icon} size={13} color={isActive ? colours.backgroundDark : 'rgba(255,255,255,0.5)'} />
-                <Text style={[styles.statusTabText, isActive && styles.statusTabTextActive]}>{tab.label}</Text>
+                <Text style={[styles.tabText, active && styles.tabTextActive]}>{tab.label}</Text>
               </Pressable>
             );
           })}
@@ -89,27 +94,33 @@ export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.El
       </View>
 
       {isLoading ? (
-        <View style={{ padding: spacing.md, gap: spacing.sm }}>
+        <ScrollView style={styles.listBody} contentContainerStyle={styles.listBodyContent}>
+          <View style={styles.listHeaderWrap}>
+            <View style={[styles.dateCard, { height: 70 }]} />
+          </View>
           {[1, 2, 3, 4].map((i) => (
-            <View key={i} style={{ backgroundColor: colours.surface, borderRadius: radius.xl, padding: spacing.md, gap: spacing.sm,
-              shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3 }}>
-              <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
-                <Skeleton height={40} width={40} borderRadius={20} />
-                <View style={{ flex: 1, gap: 6 }}>
-                  <Skeleton height={14} width={120} borderRadius={4} />
-                  <Skeleton height={11} width={80} borderRadius={4} />
+            <View key={i} style={styles.skeletonWrap}>
+              <View style={[styles.skeletonStrip, { backgroundColor: i % 2 === 0 ? colours.warning + '55' : colours.primary + '55' }]} />
+              <View style={{ flex: 1, padding: spacing.md, gap: 8 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+                    <Skeleton height={38} width={38} borderRadius={19} />
+                    <View style={{ gap: 5 }}>
+                      <Skeleton height={13} width={110} borderRadius={4} />
+                      <Skeleton height={10} width={70} borderRadius={4} />
+                    </View>
+                  </View>
+                  <Skeleton height={18} width={70} borderRadius={4} />
                 </View>
-                <View style={{ alignItems: 'flex-end', gap: 6 }}>
-                  <Skeleton height={16} width={70} borderRadius={4} />
-                  <Skeleton height={20} width={60} borderRadius={10} />
-                </View>
+                <Skeleton height={10} width="75%" borderRadius={4} />
+                <Skeleton height={10} width="40%" borderRadius={4} />
               </View>
-              <Skeleton height={11} width="70%" borderRadius={4} />
             </View>
           ))}
-        </View>
+        </ScrollView>
       ) : (
         <SectionList<FoodOrder, Section>
+          style={styles.listBody}
           sections={sections}
           keyExtractor={(item) => String(item.id)}
           renderItem={({ item }) => (
@@ -120,16 +131,17 @@ export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.El
             />
           )}
           renderSectionHeader={({ section }) => (
-            <Text style={styles.sectionHeader}>{section.title}</Text>
+            <Text style={styles.sectionLabel}>{section.title}</Text>
           )}
-          contentContainerStyle={styles.list}
+          ListHeaderComponent={ListHeader}
+          contentContainerStyle={styles.listBodyContent}
           ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <View style={styles.emptyIconWrap}>
-                <Ionicons name="receipt-outline" size={28} color={colours.primary} />
+            <View style={styles.emptyWrap}>
+              <View style={styles.emptyIcon}>
+                <Ionicons name="receipt-outline" size={26} color={colours.primary} />
               </View>
               <Text style={styles.emptyTitle}>No orders found</Text>
-              <Text style={styles.empty}>Try a different filter or date</Text>
+              <Text style={styles.emptyBody}>Try a different filter or date</Text>
             </View>
           }
           stickySectionHeadersEnabled={false}

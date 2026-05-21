@@ -10,49 +10,47 @@ import type { PeriodStats } from '../../../types/models';
 
 type Period = 'today' | 'week' | 'month';
 
-const PERIODS: { key: Period; label: string; short: string }[] = [
-  { key: 'today', label: 'Today',      short: 'Today' },
-  { key: 'week',  label: 'This Week',  short: 'Week' },
-  { key: 'month', label: 'This Month', short: 'Month' },
-];
-
 export function AnalyticsScreen(): React.JSX.Element {
   const { analytics, isLoading } = useAnalyticsScreen();
-  const [activePeriod, setActivePeriod] = useState<Period>('today');
+  const [period, setPeriod] = useState<Period>('today');
 
-  const maxRevenue = useMemo(() => {
-    const values = [
-      analytics?.today.revenue_cents ?? 0,
-      analytics?.this_week.revenue_cents ?? 0,
-      analytics?.this_month.revenue_cents ?? 0,
-    ];
-    return Math.max(...values, 1);
-  }, [analytics]);
+  const maxRevenue = useMemo(() => Math.max(
+    analytics?.today.revenue_cents ?? 0,
+    analytics?.this_week.revenue_cents ?? 0,
+    analytics?.this_month.revenue_cents ?? 0,
+    1,
+  ), [analytics]);
 
   if (isLoading) {
     return <View style={styles.centered}><ActivityIndicator size="large" color={colours.primary} /></View>;
   }
 
-  const activeStat: PeriodStats | undefined =
-    activePeriod === 'today'  ? analytics?.today :
-    activePeriod === 'week'   ? analytics?.this_week :
+  const featured: PeriodStats | undefined =
+    period === 'today' ? analytics?.today :
+    period === 'week'  ? analytics?.this_week :
     analytics?.this_month;
 
-  const periodRows = [
+  const rows = [
     { key: 'today' as Period, label: 'Today',      stats: analytics?.today },
     { key: 'week'  as Period, label: 'This Week',  stats: analytics?.this_week },
     { key: 'month' as Period, label: 'This Month', stats: analytics?.this_month },
   ];
 
-  return (
-    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+  const TABS = [
+    { key: 'today' as Period, label: 'Today' },
+    { key: 'week'  as Period, label: 'Week' },
+    { key: 'month' as Period, label: 'Month' },
+  ];
 
-        {/* ── Dark hero ── */}
-        <View style={styles.headerRow}>
-          <View>
+  return (
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent} showsVerticalScrollIndicator={false}>
+
+        {/* ── Dark header ── */}
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.headerEyebrow}>Performance</Text>
             <Text style={styles.headerTitle}>Analytics</Text>
-            <Text style={styles.headerSub}>Revenue & performance</Text>
           </View>
           {(analytics?.pending_count ?? 0) > 0 && (
             <View style={styles.pendingChip}>
@@ -62,78 +60,74 @@ export function AnalyticsScreen(): React.JSX.Element {
           )}
         </View>
 
-        {/* ── Period selector tabs ── */}
-        <View style={styles.periodSelector}>
-          {PERIODS.map((p) => (
+        {/* ── Period tabs (float over header) ── */}
+        <View style={styles.periodTabsCard}>
+          {TABS.map((t) => (
             <Pressable
-              key={p.key}
-              style={[styles.periodTab, activePeriod === p.key && styles.periodTabActive]}
-              onPress={() => setActivePeriod(p.key)}
+              key={t.key}
+              style={[styles.periodTab, period === t.key && styles.periodTabActive]}
+              onPress={() => setPeriod(t.key)}
               accessibilityRole="button"
-              accessibilityLabel={p.label}
             >
-              <Text style={[styles.periodTabText, activePeriod === p.key && styles.periodTabTextActive]}>
-                {p.short}
+              <Text style={[styles.periodTabText, period === t.key && styles.periodTabTextActive]}>
+                {t.label}
               </Text>
             </Pressable>
           ))}
         </View>
 
-        {/* ── Hero metric for selected period ── */}
-        <View style={styles.heroMetricCard}>
-          <Text style={styles.heroMetricLabel}>{PERIODS.find((p) => p.key === activePeriod)?.label} Revenue</Text>
-          <Text style={styles.heroMetricValue}>{formatPrice(activeStat?.revenue_cents ?? 0)}</Text>
-          <View style={styles.heroMetricRow}>
-            <View style={styles.heroMetricItem}>
-              <Ionicons name="receipt-outline" size={14} color={colours.primary} />
-              <Text style={styles.heroMetricItemText}>{activeStat?.order_count ?? 0} orders</Text>
+        {/* ── Big revenue hero ── */}
+        <View style={styles.heroCard}>
+          <Text style={styles.heroLabel}>
+            {TABS.find((t) => t.key === period)?.label} Revenue
+          </Text>
+          <Text style={styles.heroRevenue}>{formatPrice(featured?.revenue_cents ?? 0)}</Text>
+          <View style={styles.heroMeta}>
+            <View style={styles.heroMetaChip}>
+              <Ionicons name="receipt-outline" size={13} color={colours.primary} />
+              <Text style={styles.heroMetaText}>{featured?.order_count ?? 0} orders</Text>
             </View>
           </View>
         </View>
 
-        {/* ── Revenue comparison bars ── */}
+        {/* ── Comparison bars ── */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Revenue Comparison</Text>
+            <Text style={styles.cardTitle}>Revenue Breakdown</Text>
           </View>
-          {periodRows.map(({ key, label, stats }, idx) => {
-            const fillRatio = (stats?.revenue_cents ?? 0) / maxRevenue;
-            const isActive = activePeriod === key;
+          {rows.map(({ key, label, stats }) => {
+            const ratio = (stats?.revenue_cents ?? 0) / maxRevenue;
+            const active = period === key;
             return (
               <Pressable
                 key={key}
-                style={[styles.periodRow, idx === periodRows.length - 1 && styles.periodLastRow]}
-                onPress={() => setActivePeriod(key)}
+                style={[styles.barRow, key === 'month' && styles.barRowLast]}
+                onPress={() => setPeriod(key)}
                 accessibilityRole="button"
               >
-                <View style={styles.periodHeader}>
-                  <Text style={[styles.periodLabel, isActive && styles.periodLabelActive]}>{label}</Text>
-                  <Text style={[styles.periodRevenue, isActive && styles.periodRevenueActive]}>
+                <View style={styles.barRowTop}>
+                  <Text style={[styles.barLabel, active && styles.barLabelActive]}>{label}</Text>
+                  <Text style={[styles.barRevenue, active && styles.barRevenueActive]}>
                     {formatPrice(stats?.revenue_cents ?? 0)}
                   </Text>
                 </View>
                 <View style={styles.barTrack}>
-                  <View style={[styles.barFill, { width: `${Math.round(fillRatio * 100)}%` }, isActive && styles.barFillActive]} />
+                  <View style={[styles.barFill, { width: `${Math.round(ratio * 100)}%` }, active && styles.barFillActive]} />
                 </View>
-                <Text style={styles.periodMeta}>{stats?.order_count ?? 0} orders</Text>
+                <Text style={styles.barMeta}>{stats?.order_count ?? 0} orders</Text>
               </Pressable>
             );
           })}
         </View>
 
-        {/* ── Orders summary ── */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Orders Summary</Text>
-          </View>
-          <View style={styles.summaryGrid}>
-            {periodRows.map(({ key, label, stats }, idx) => (
-              <View key={key} style={[styles.summaryItem, idx === periodRows.length - 1 && styles.summaryItemLast]}>
-                <Text style={styles.summaryValue}>{stats?.order_count ?? 0}</Text>
-                <Text style={styles.summaryLabel}>{label}</Text>
-              </View>
-            ))}
-          </View>
+        {/* ── Order counts grid ── */}
+        <View style={styles.gridCard}>
+          {rows.map(({ key, label, stats }, i) => (
+            <View key={key} style={[styles.gridItem, i < 2 && styles.gridItemBorder]}>
+              <Text style={styles.gridValue}>{stats?.order_count ?? 0}</Text>
+              <Text style={styles.gridLabel}>{label}</Text>
+            </View>
+          ))}
         </View>
 
       </ScrollView>

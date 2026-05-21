@@ -1,10 +1,10 @@
 import React from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useDashboardScreen } from '../hooks/useDashboardScreen';
 import { OrderCard } from '../../orders/components/OrderCard';
-import { Skeleton, SkeletonCard } from '../../../shared/components/Skeleton';
+import { Skeleton } from '../../../shared/components/Skeleton';
 import { styles } from './DashboardScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
@@ -18,137 +18,123 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-  const todayLabel = new Date().toLocaleDateString('en-GB', { weekday: 'long', month: 'long', day: 'numeric' });
+  const dateLabel = new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+  const pending = analytics?.pending_count ?? 0;
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.pageHeader}>
-            <View style={styles.pageTitleBlock}>
-              <Skeleton height={14} width={80} borderRadius={4} />
-              <Skeleton height={30} width={160} borderRadius={6} />
-              <Skeleton height={12} width={120} borderRadius={4} />
+      <SafeAreaView style={styles.safe} edges={['top']}>
+        <View style={styles.header}>
+          <View style={{ gap: 6 }}>
+            <Skeleton height={12} width={90} borderRadius={4} />
+            <Skeleton height={36} width={180} borderRadius={6} />
+            <Skeleton height={12} width={110} borderRadius={4} />
+          </View>
+        </View>
+        <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent}>
+          <View style={[styles.summaryCard, { minHeight: 110 }]}>
+            <Skeleton height={14} width={80} borderRadius={4} />
+            <Skeleton height={40} width={160} borderRadius={6} />
+            <Skeleton height={12} width={100} borderRadius={4} />
+          </View>
+          {[1, 2, 3].map((i) => (
+            <View key={i} style={styles.skeletonCard}>
+              <View style={styles.skeletonStrip} />
+              <View style={{ flex: 1, padding: 14, gap: 8 }}>
+                <Skeleton height={14} width="60%" borderRadius={4} />
+                <Skeleton height={11} width="40%" borderRadius={4} />
+                <Skeleton height={11} width="80%" borderRadius={4} />
+              </View>
             </View>
-          </View>
-          <View style={styles.statsGrid}>
-            {[1, 2, 3, 4].map((i) => <SkeletonCard key={i} style={{ flex: 1, minWidth: 148 }} />)}
-          </View>
-          <SkeletonCard />
-          <SkeletonCard />
+          ))}
         </ScrollView>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-
-        {/* ── Hero header ── */}
-        <View style={styles.pageHeader}>
-          <View style={styles.pageTitleBlock}>
-            <Text style={styles.pageGreeting}>{greeting}</Text>
-            <Text style={styles.pageTitle}>Dashboard</Text>
-            <Text style={styles.pageDate}>{todayLabel}</Text>
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      <ScrollView
+        style={styles.body}
+        contentContainerStyle={styles.bodyContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── Dark gradient header ── */}
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.greeting}>{greeting}</Text>
+            <Text style={styles.headerTitle}>Dashboard</Text>
+            <Text style={styles.headerDate}>{dateLabel}</Text>
           </View>
-          {(analytics?.pending_count ?? 0) > 0 && (
+          {pending > 0 && (
             <View style={styles.pendingPill}>
               <View style={styles.pendingDot} />
-              <Text style={styles.pendingPillText}>{analytics?.pending_count} pending</Text>
+              <Text style={styles.pendingPillText}>{pending} pending</Text>
             </View>
           )}
         </View>
 
-        {/* ── KPI grid ── */}
-        <View style={styles.statsGrid}>
-          <StatCard
-            label="Today"
-            value={formatPrice(analytics?.today.revenue_cents ?? 0)}
-            sub={`${analytics?.today.order_count ?? 0} orders`}
-            iconName="flash-outline"
-            accent={colours.primary}
-          />
-          <StatCard
-            label="This Week"
-            value={formatPrice(analytics?.this_week.revenue_cents ?? 0)}
-            sub={`${analytics?.this_week.order_count ?? 0} orders`}
-            iconName="calendar-outline"
-            accent={colours.info}
-          />
-          <StatCard
-            label="This Month"
-            value={formatPrice(analytics?.this_month.revenue_cents ?? 0)}
-            sub={`${analytics?.this_month.order_count ?? 0} orders`}
-            iconName="trending-up-outline"
-            accent={colours.primaryDark}
-          />
-          <StatCard
-            label="Pending"
-            value={String(analytics?.pending_count ?? 0)}
-            sub="need action"
-            iconName="time-outline"
-            accent={colours.warning}
-            highlight={(analytics?.pending_count ?? 0) > 0}
-          />
+        {/* ── Floating summary card (overlaps header) ── */}
+        <View style={styles.summaryCard}>
+          <View style={styles.summaryMain}>
+            <Text style={styles.summaryLabel}>Today's Revenue</Text>
+            <Text style={styles.summaryRevenue}>{formatPrice(analytics?.today.revenue_cents ?? 0)}</Text>
+            <View style={styles.summaryMeta}>
+              <View style={styles.summaryMetaItem}>
+                <Ionicons name="receipt-outline" size={13} color={colours.primary} />
+                <Text style={styles.summaryMetaText}>{analytics?.today.order_count ?? 0} orders today</Text>
+              </View>
+            </View>
+          </View>
+          <View style={styles.summaryDivider} />
+          <View style={styles.summaryStats}>
+            <SummaryMini label="Week" value={formatPrice(analytics?.this_week.revenue_cents ?? 0)} />
+            <View style={styles.summaryStatsDivider} />
+            <SummaryMini label="Month" value={formatPrice(analytics?.this_month.revenue_cents ?? 0)} />
+          </View>
         </View>
 
         {/* ── Recent orders ── */}
-        <View style={styles.sectionCard}>
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleRow}>
-              <View style={styles.sectionAccent} />
-              <Text style={styles.sectionTitle}>Recent Orders</Text>
-            </View>
-            {recentOrders.length > 0 && (
-              <View style={styles.pendingBadge}>
-                <Text style={styles.pendingBadgeText}>{recentOrders.length} orders</Text>
-              </View>
-            )}
+        <View style={styles.sectionRow}>
+          <View style={styles.sectionLabelRow}>
+            <View style={styles.sectionDot} />
+            <Text style={styles.sectionLabel}>Recent Orders</Text>
           </View>
-          {recentOrders.length === 0 ? (
-            <View style={styles.emptyState}>
-              <View style={styles.emptyIconWrap}>
-                <Ionicons name="receipt-outline" size={28} color={colours.primary} />
-              </View>
-              <Text style={styles.emptyTitle}>No orders yet</Text>
-              <Text style={styles.emptyText}>New orders will appear here</Text>
+          {recentOrders.length > 0 && (
+            <Text style={styles.sectionCount}>{recentOrders.length} orders</Text>
+          )}
+        </View>
+
+        {recentOrders.length === 0 ? (
+          <View style={styles.emptyCard}>
+            <View style={styles.emptyIconWrap}>
+              <Ionicons name="receipt-outline" size={26} color={colours.primary} />
             </View>
-          ) : (
-            recentOrders.map((order) => (
+            <Text style={styles.emptyTitle}>No orders yet</Text>
+            <Text style={styles.emptySubtitle}>New orders will appear here</Text>
+          </View>
+        ) : (
+          <View style={styles.ordersList}>
+            {recentOrders.map((order) => (
               <OrderCard
                 key={order.id}
                 order={order}
                 onUpdateStatus={handleUpdateStatus}
                 onPress={onSelectOrder !== undefined ? () => onSelectOrder(order.id) : undefined}
               />
-            ))
-          )}
-        </View>
-
+            ))}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-interface StatCardProps {
-  label: string;
-  value: string;
-  sub: string;
-  iconName: keyof typeof Ionicons.glyphMap;
-  accent: string;
-  highlight?: boolean;
-}
-
-function StatCard({ label, value, sub, iconName, accent, highlight }: StatCardProps): React.JSX.Element {
+function SummaryMini({ label, value }: { label: string; value: string }): React.JSX.Element {
   return (
-    <View style={[styles.statCard, highlight === true && { borderWidth: 1.5, borderColor: accent + '55' }]}>
-      <View style={[styles.statIconBg, { backgroundColor: accent + '18' }]}>
-        <Ionicons name={iconName} size={18} color={accent} />
-      </View>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-      <Text style={styles.statSub}>{sub}</Text>
+    <View style={styles.summaryMiniItem}>
+      <Text style={styles.summaryMiniLabel}>{label}</Text>
+      <Text style={styles.summaryMiniValue}>{value}</Text>
     </View>
   );
 }

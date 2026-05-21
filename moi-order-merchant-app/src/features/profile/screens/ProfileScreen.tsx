@@ -6,11 +6,30 @@ import { styles } from './ProfileScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { Ionicons } from '@expo/vector-icons';
 
+interface AccountRowProps {
+  icon: keyof typeof Ionicons.glyphMap;
+  iconBg: string;
+  iconColor: string;
+  label: string;
+  value: string;
+}
+
+function AccountRow({ icon, iconBg, iconColor, label, value }: AccountRowProps): React.JSX.Element {
+  return (
+    <View style={styles.accountRow}>
+      <View style={[styles.accountRowIcon, { backgroundColor: iconBg }]}>
+        <Ionicons name={icon} size={16} color={iconColor} />
+      </View>
+      <View style={styles.accountRowText}>
+        <Text style={styles.accountRowLabel}>{label}</Text>
+        <Text style={styles.accountRowValue}>{value}</Text>
+      </View>
+    </View>
+  );
+}
+
 export function ProfileScreen(): React.JSX.Element {
-  const {
-    restaurant, user, isLoading,
-    handleLogout, handleUploadCover, handleUploadLogo,
-  } = useProfileScreen();
+  const { restaurant, user, isLoading, handleLogout, handleUploadCover, handleUploadLogo } = useProfileScreen();
 
   if (isLoading) {
     return <View style={styles.centered}><ActivityIndicator size="large" color={colours.primary} /></View>;
@@ -20,89 +39,69 @@ export function ProfileScreen(): React.JSX.Element {
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
 
-        {/* ── Cover photo hero ── */}
-        <Pressable onPress={handleUploadCover} style={styles.coverPhotoContainer} accessibilityLabel="Change cover photo" accessibilityRole="button">
+        {/* ── Cover photo ── */}
+        <Pressable onPress={handleUploadCover} style={styles.cover} accessibilityLabel="Change cover photo" accessibilityRole="button">
           {restaurant?.cover_photo_url
-            ? <Image source={{ uri: restaurant.cover_photo_url }} style={styles.coverPhoto} />
-            : <View style={styles.coverPhotoPlaceholder}>
-                <Ionicons name="image-outline" size={32} color="rgba(255,255,255,0.3)" />
-                <Text style={styles.uploadHint}>Add cover photo</Text>
-              </View>}
-          <View style={styles.coverEditBadge}>
-            <Ionicons name="camera-outline" size={12} color={colours.white} />
+            ? <Image source={{ uri: restaurant.cover_photo_url }} style={styles.coverImage} />
+            : (
+              <View style={styles.coverPlaceholder}>
+                <Ionicons name="image-outline" size={36} color="rgba(255,255,255,0.25)" />
+                <Text style={styles.coverHint}>Tap to add cover photo</Text>
+              </View>
+            )}
+          <View style={styles.coverEditBtn}>
+            <Ionicons name="camera" size={14} color={colours.white} />
           </View>
         </Pressable>
 
-        {/* ── Logo + restaurant name ── */}
-        <View style={styles.identityRow}>
-          <Pressable onPress={handleUploadLogo} style={styles.logoContainer} accessibilityLabel="Change logo" accessibilityRole="button">
+        {/* ── Logo + info (overlaps cover) ── */}
+        <View style={styles.identityBlock}>
+          <Pressable onPress={handleUploadLogo} style={styles.logoWrap} accessibilityLabel="Change logo" accessibilityRole="button">
             {restaurant?.logo_url
               ? <Image source={{ uri: restaurant.logo_url }} style={styles.logo} />
-              : <View style={styles.logoPlaceholder}>
-                  <Ionicons name="storefront-outline" size={28} color="rgba(255,255,255,0.5)" />
-                </View>}
-            <View style={styles.logoEditBadge}>
-              <Ionicons name="camera-outline" size={10} color={colours.white} />
+              : (
+                <View style={styles.logoPlaceholder}>
+                  <Ionicons name="storefront-outline" size={30} color="rgba(255,255,255,0.5)" />
+                </View>
+              )}
+            <View style={styles.logoCameraBtn}>
+              <Ionicons name="camera" size={11} color={colours.white} />
             </View>
           </Pressable>
 
-          {restaurant && (
-            <View style={styles.restaurantInfo}>
-              <Text style={styles.restaurantName} numberOfLines={1}>{restaurant.name}</Text>
-              {restaurant.address !== null && (
-                <View style={styles.addressRow}>
-                  <Ionicons name="location-outline" size={12} color={colours.textMuted} />
-                  <Text style={styles.address} numberOfLines={1}>{restaurant.address}</Text>
-                </View>
-              )}
-              <View style={styles.statusBadge}>
-                <View style={styles.statusDot} />
-                <Text style={styles.statusText}>{restaurant.status}</Text>
+          <View style={styles.restaurantMeta}>
+            <Text style={styles.restaurantName} numberOfLines={1}>
+              {restaurant?.name ?? 'Your Restaurant'}
+            </Text>
+            {restaurant?.address !== null && restaurant?.address !== undefined && (
+              <View style={styles.addressRow}>
+                <Ionicons name="location-outline" size={11} color={colours.textMuted} />
+                <Text style={styles.addressText} numberOfLines={1}>{restaurant.address}</Text>
               </View>
+            )}
+            <View style={styles.statusPill}>
+              <View style={styles.statusDot} />
+              <Text style={styles.statusText}>{restaurant?.status ?? 'inactive'}</Text>
             </View>
-          )}
+          </View>
         </View>
 
         {restaurant?.description !== null && restaurant?.description !== undefined && (
           <Text style={styles.description}>{restaurant.description}</Text>
         )}
 
-        {/* ── Account section ── */}
-        {user && (
-          <View style={styles.sectionBlock}>
-            <Text style={styles.sectionTitle}>Account</Text>
-            <View style={styles.accountCard}>
-              <View style={styles.accountRow}>
-                <View style={[styles.accountIcon, { backgroundColor: colours.primaryGlow }]}>
-                  <Ionicons name="person-outline" size={16} color={colours.primary} />
-                </View>
-                <View style={styles.accountInfo}>
-                  <Text style={styles.accountLabel}>Name</Text>
-                  <Text style={styles.accountValue}>{user.name}</Text>
-                </View>
-              </View>
-              <View style={styles.rowDivider} />
-              <View style={styles.accountRow}>
-                <View style={[styles.accountIcon, { backgroundColor: colours.infoBg }]}>
-                  <Ionicons name="mail-outline" size={16} color={colours.info} />
-                </View>
-                <View style={styles.accountInfo}>
-                  <Text style={styles.accountLabel}>Email</Text>
-                  <Text style={styles.accountValue}>{user.email ?? '—'}</Text>
-                </View>
-              </View>
+        {/* ── Account info ── */}
+        {user !== null && user !== undefined && (
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>Account</Text>
+            <View style={styles.card}>
+              <AccountRow icon="person-outline" iconBg="#f0fdf4" iconColor={colours.primary} label="Name" value={user.name} />
+              <View style={styles.rowSep} />
+              <AccountRow icon="mail-outline" iconBg="#eff6ff" iconColor={colours.info} label="Email" value={user.email ?? '—'} />
               {user.phone !== null && (
                 <>
-                  <View style={styles.rowDivider} />
-                  <View style={styles.accountRow}>
-                    <View style={[styles.accountIcon, { backgroundColor: colours.successBg }]}>
-                      <Ionicons name="call-outline" size={16} color={colours.success} />
-                    </View>
-                    <View style={styles.accountInfo}>
-                      <Text style={styles.accountLabel}>Phone</Text>
-                      <Text style={styles.accountValue}>{user.phone}</Text>
-                    </View>
-                  </View>
+                  <View style={styles.rowSep} />
+                  <AccountRow icon="call-outline" iconBg="#f0fdf4" iconColor={colours.success} label="Phone" value={user.phone} />
                 </>
               )}
             </View>
@@ -110,10 +109,10 @@ export function ProfileScreen(): React.JSX.Element {
         )}
 
         {/* ── Logout ── */}
-        <View style={styles.sectionBlock}>
-          <Pressable style={styles.logoutButton} onPress={handleLogout} accessibilityLabel="Log out of merchant account" accessibilityRole="button">
-            <Ionicons name="log-out-outline" size={18} color={colours.error} />
-            <Text style={styles.logoutText}>Log Out</Text>
+        <View style={styles.section}>
+          <Pressable style={styles.logoutBtn} onPress={handleLogout} accessibilityLabel="Log out" accessibilityRole="button">
+            <Ionicons name="log-out-outline" size={20} color={colours.error} />
+            <Text style={styles.logoutText}>Sign Out</Text>
           </Pressable>
         </View>
 

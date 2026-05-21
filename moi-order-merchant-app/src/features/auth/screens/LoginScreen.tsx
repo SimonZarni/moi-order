@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TextInput, Pressable, ActivityIndicator, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, Pressable, ActivityIndicator, Platform, ScrollView, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLoginScreen } from '../hooks/useLoginScreen';
@@ -13,19 +13,20 @@ export function LoginScreen(): React.JSX.Element {
     handleSubmit, handleGoToOtp, handleGoToRegister,
   } = useLoginScreen();
 
-  const formFields = (
+  const formContent = (
     <>
       {error !== null && (
         <View style={styles.errorBanner}>
           <Ionicons name="alert-circle-outline" size={16} color={colours.error} />
-          <Text style={styles.errorBannerText}>{error}</Text>
+          <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
-      <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Email</Text>
+
+      <View style={styles.field}>
+        <Text style={styles.fieldLabel}>EMAIL ADDRESS</Text>
         <TextInput
           style={styles.input}
-          placeholder="your@email.com"
+          placeholder="you@email.com"
           placeholderTextColor={colours.textSubtle}
           value={email}
           onChangeText={setEmail}
@@ -35,8 +36,9 @@ export function LoginScreen(): React.JSX.Element {
           accessibilityLabel="Email address"
         />
       </View>
-      <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Password</Text>
+
+      <View style={styles.field}>
+        <Text style={styles.fieldLabel}>PASSWORD</Text>
         <TextInput
           style={styles.input}
           placeholder="••••••••"
@@ -47,75 +49,85 @@ export function LoginScreen(): React.JSX.Element {
           accessibilityLabel="Password"
         />
       </View>
+
       <Pressable
-        style={({ pressed }) => [styles.button, (isLoading || pressed) && styles.buttonDisabled]}
+        style={({ pressed }) => [styles.primaryBtn, (isLoading || pressed) && styles.primaryBtnDisabled]}
         onPress={handleSubmit}
         disabled={isLoading}
-        accessibilityLabel="Sign in to your account"
+        accessibilityLabel="Sign in"
         accessibilityRole="button"
       >
         {isLoading
           ? <ActivityIndicator color={colours.white} />
-          : <Text style={styles.buttonText}>Sign In</Text>}
+          : <Text style={styles.primaryBtnText}>Sign In</Text>}
       </Pressable>
-      <View style={styles.dividerRow}>
-        <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>or</Text>
-        <View style={styles.dividerLine} />
+
+      <View style={styles.orRow}>
+        <View style={styles.orLine} />
+        <Text style={styles.orText}>or</Text>
+        <View style={styles.orLine} />
       </View>
-      <Pressable style={styles.outlineButton} onPress={handleGoToOtp} accessibilityLabel="Use phone OTP login instead" accessibilityRole="button">
+
+      <Pressable
+        style={styles.secondaryBtn}
+        onPress={handleGoToOtp}
+        accessibilityLabel="Use phone OTP instead"
+        accessibilityRole="button"
+      >
         <Ionicons name="phone-portrait-outline" size={16} color={colours.primary} />
-        <Text style={styles.outlineButtonText}>Continue with Phone OTP</Text>
+        <Text style={styles.secondaryBtnText}>Continue with Phone OTP</Text>
       </Pressable>
-      <Pressable onPress={handleGoToRegister} accessibilityLabel="Create a new merchant account" accessibilityRole="button">
-        <Text style={styles.link}>New merchant? <Text style={styles.linkBold}>Create an account</Text></Text>
+
+      <Pressable onPress={handleGoToRegister} accessibilityLabel="Register as merchant" accessibilityRole="button">
+        <Text style={styles.footerLink}>
+          New merchant? <Text style={styles.footerLinkBold}>Create an account →</Text>
+        </Text>
       </Pressable>
     </>
   );
 
+  // ── Web layout ──
   if (Platform.OS === 'web') {
     return (
       <View style={styles.screen}>
         <View style={styles.leftPanel}>
-          <View style={styles.brandMark}>
-            <Text style={styles.brandMarkText}>M</Text>
-          </View>
+          <View style={styles.brandMark}><Text style={styles.brandMarkText}>M</Text></View>
           <Text style={styles.brandName}>moi·order</Text>
           <Text style={styles.brandRole}>Merchant Platform</Text>
           <View style={styles.brandDivider} />
-          <Text style={styles.brandTagline}>
-            Manage orders, menus, and analytics — all in one place.
-          </Text>
+          <Text style={styles.brandTagline}>Manage orders, menus, and analytics — all in one place.</Text>
         </View>
         <View style={styles.rightPanel}>
-          <ScrollView style={styles.formScroll} contentContainerStyle={styles.formCard} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          <ScrollView style={styles.webScroll} contentContainerStyle={styles.webForm} keyboardShouldPersistTaps="handled">
             <Text style={styles.formTitle}>Welcome back</Text>
             <Text style={styles.formSubtitle}>Sign in to your merchant account</Text>
-            {formFields}
+            {formContent}
           </ScrollView>
         </View>
       </View>
     );
   }
 
+  // ── Mobile layout: dark brand panel top + white form sheet bottom ──
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      {/* Brand mark in dark area */}
-      <View style={styles.brandPanel}>
-        <View style={styles.brandMark}>
-          <Text style={styles.brandMarkText}>M</Text>
+    <KeyboardAvoidingView style={styles.safe} behavior="padding">
+      <SafeAreaView style={styles.brandArea} edges={['top']}>
+        <View style={styles.brandAreaContent}>
+          <View style={styles.brandMark}><Text style={styles.brandMarkText}>M</Text></View>
+          <View>
+            <Text style={styles.brandName}>moi·order</Text>
+            <Text style={styles.brandRole}>Merchant Platform</Text>
+          </View>
         </View>
-        <View>
-          <Text style={styles.brandName}>moi·order</Text>
-          <Text style={styles.brandRole}>Merchant Platform</Text>
-        </View>
-      </View>
-      {/* Form sheet */}
-      <ScrollView style={styles.formSheet} contentContainerStyle={styles.formSheetContent} keyboardShouldPersistTaps="handled">
-        <Text style={styles.title}>Welcome back</Text>
-        <Text style={styles.subtitle}>Sign in to your merchant account</Text>
-        {formFields}
+        <Text style={styles.brandTagline}>
+          Manage orders, menus, and analytics — all in one place.
+        </Text>
+      </SafeAreaView>
+      <ScrollView style={styles.sheetScroll} contentContainerStyle={styles.sheetContent} keyboardShouldPersistTaps="handled">
+        <Text style={styles.sheetTitle}>Welcome back</Text>
+        <Text style={styles.sheetSubtitle}>Sign in to your merchant account</Text>
+        {formContent}
       </ScrollView>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
