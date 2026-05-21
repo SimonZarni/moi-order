@@ -12,7 +12,7 @@ export const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.sm + 2,
     gap: spacing.sm,
   },
   rowTapArea: {
@@ -22,19 +22,19 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   photo: {
-    width: 48,
-    height: 48,
-    borderRadius: radius.sm,
-    backgroundColor: colours.backgroundLight,
+    width: 52,
+    height: 52,
+    borderRadius: radius.lg,
+    backgroundColor: colours.surfaceMuted,
   },
   info: {
     flex: 1,
   },
   name: {
     fontSize: typography.sm,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colours.textOnLight,
-    marginBottom: 2,
+    marginBottom: 3,
   },
   priceRow: {
     flexDirection: 'row',
@@ -44,8 +44,8 @@ export const styles = StyleSheet.create({
   },
   price: {
     fontSize: typography.xs,
-    color: colours.textMuted,
-    fontWeight: '600',
+    color: colours.primary,
+    fontWeight: '700',
   },
   originalPrice: {
     fontSize: typography.xxs,
@@ -55,11 +55,11 @@ export const styles = StyleSheet.create({
   modifierCount: {
     fontSize: typography.xxs,
     color: colours.primary,
-    fontWeight: '500',
-    backgroundColor: colours.primary + '15',
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-    borderRadius: radius.sm,
+    fontWeight: '700',
+    backgroundColor: colours.primaryGlow,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: radius.full,
   },
   actions: {
     flexDirection: 'row',
@@ -98,7 +98,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.xxs,
     fontWeight: '700',
   },
-  // Guard warning bar — last item in required system category
+  // Guard warning bar
   guardBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -123,7 +123,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.warning,
     paddingHorizontal: spacing.sm,
     paddingVertical: 6,
-    borderRadius: radius.sm,
+    borderRadius: radius.full,
     minHeight: 36,
     justifyContent: 'center',
     alignItems: 'center',
@@ -145,7 +145,7 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
     fontWeight: '600',
   },
-  // Inline confirmation bar (delete + status picker) — replaces Alert.alert
+  // Inline confirmation bar
   confirmBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -167,7 +167,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.error,
     paddingHorizontal: spacing.sm,
     paddingVertical: 6,
-    borderRadius: radius.sm,
+    borderRadius: radius.full,
     minHeight: 36,
     justifyContent: 'center',
     alignItems: 'center',
@@ -209,10 +209,10 @@ export const styles = StyleSheet.create({
   },
   groupName: {
     fontSize: typography.xs,
-    fontWeight: '700',
+    fontWeight: '800',
     color: colours.textOnLight,
     textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    letterSpacing: 0.5,
   },
   groupMeta: {
     fontSize: typography.xxs,
@@ -222,7 +222,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingLeft: spacing.sm,
-    paddingVertical: 2,
+    paddingVertical: 3,
   },
   optionName: {
     fontSize: typography.xs,
@@ -231,6 +231,6 @@ export const styles = StyleSheet.create({
   optionPrice: {
     fontSize: typography.xs,
     color: colours.primary,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

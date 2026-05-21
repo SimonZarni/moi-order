@@ -7,7 +7,7 @@ import { radius } from '../../../shared/theme/radius';
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colours.backgroundLight,
+    backgroundColor: colours.backgroundDark,
   },
   centered: {
     flex: 1,
@@ -16,62 +16,72 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.backgroundLight,
   },
   container: {
-    paddingBottom: spacing.xl,
+    paddingBottom: spacing.xxl,
     maxWidth: 860,
     alignSelf: 'center',
     width: '100%',
   },
+
+  // ── Dark hero cover ─────────────────────────────────────────────────────────
   coverPhotoContainer: {
     width: '100%',
-    height: 180,
-    backgroundColor: colours.divider,
+    height: 200,
+    backgroundColor: colours.backgroundMid,
   },
   coverPhoto: {
     width: '100%',
-    height: 180,
+    height: 200,
   },
   coverPhotoPlaceholder: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     gap: spacing.sm,
+    backgroundColor: colours.backgroundMid,
   },
   uploadHint: {
     fontSize: typography.xs,
-    color: colours.medium,
+    color: 'rgba(255,255,255,0.35)',
+    fontWeight: '500',
   },
+
+  // ── Logo overlapping hero ───────────────────────────────────────────────────
   logoContainer: {
-    marginTop: -40,
+    marginTop: -44,
     marginLeft: spacing.lg,
     marginBottom: spacing.md,
     alignSelf: 'flex-start',
   },
   logo: {
-    width: 80,
-    height: 80,
-    borderRadius: radius.lg,
+    width: 88,
+    height: 88,
+    borderRadius: radius.xl,
     borderWidth: 3,
-    borderColor: colours.white,
+    borderColor: colours.backgroundDark,
   },
   logoPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: radius.lg,
-    backgroundColor: colours.backgroundLight,
+    width: 88,
+    height: 88,
+    borderRadius: radius.xl,
+    backgroundColor: colours.backgroundMid,
     borderWidth: 3,
-    borderColor: colours.white,
+    borderColor: colours.backgroundDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
+
+  // ── Info section (light bg starts here) ────────────────────────────────────
   section: {
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.lg,
+    backgroundColor: colours.backgroundLight,
   },
   restaurantName: {
     fontSize: typography.xxl,
-    fontWeight: '700',
+    fontWeight: '800',
     color: colours.textOnLight,
     marginBottom: spacing.xs,
+    letterSpacing: -0.5,
   },
   description: {
     fontSize: typography.sm,
@@ -86,35 +96,44 @@ export const styles = StyleSheet.create({
   },
   statusBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: colours.success + '22',
+    backgroundColor: colours.primary + '18',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colours.primary + '44',
   },
   statusText: {
     fontSize: typography.xs,
     fontWeight: '700',
-    color: colours.success,
+    color: colours.primary,
     textTransform: 'capitalize',
   },
+
+  // ── Account card ────────────────────────────────────────────────────────────
   accountSection: {
-    backgroundColor: colours.card,
+    backgroundColor: colours.surface,
     marginHorizontal: spacing.md,
-    borderRadius: radius.lg,
+    borderRadius: radius.xl,
     padding: spacing.md,
     marginBottom: spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
   },
   sectionTitle: {
-    fontSize: typography.sm,
-    fontWeight: '700',
+    fontSize: typography.xxs,
+    fontWeight: '800',
     color: colours.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 0.8,
+    letterSpacing: 1.2,
     marginBottom: spacing.sm,
   },
   accountName: {
     fontSize: typography.md,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colours.textOnLight,
     marginBottom: spacing.xs,
   },
@@ -127,20 +146,23 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     color: colours.textMuted,
   },
+
+  // ── Logout ──────────────────────────────────────────────────────────────────
   logoutButton: {
     marginHorizontal: spacing.md,
-    borderWidth: 1,
-    borderColor: colours.error,
-    borderRadius: radius.md,
+    backgroundColor: colours.surface,
+    borderWidth: 1.5,
+    borderColor: colours.error + '55',
+    borderRadius: radius.full,
     padding: spacing.md,
     alignItems: 'center',
-    minHeight: 44,
+    minHeight: 52,
     justifyContent: 'center',
     maxWidth: 400,
   },
   logoutText: {
     color: colours.error,
     fontSize: typography.md,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

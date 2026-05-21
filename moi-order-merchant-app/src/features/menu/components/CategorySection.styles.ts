@@ -6,18 +6,23 @@ import { radius } from '../../../shared/theme/radius';
 
 export const styles = StyleSheet.create({
   container: {
-    backgroundColor: colours.card,
-    borderRadius: radius.lg,
+    backgroundColor: colours.surface,
+    borderRadius: radius.xl,
     marginBottom: spacing.md,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colours.divider,
+    paddingVertical: spacing.sm + 2,
+    backgroundColor: colours.backgroundDark,
+    borderBottomWidth: 0,
   },
   titleRow: {
     flex: 1,
@@ -29,11 +34,12 @@ export const styles = StyleSheet.create({
   title: {
     fontSize: typography.md,
     fontWeight: '700',
-    color: colours.textOnLight,
+    color: colours.textOnDark,
   },
   count: {
-    fontSize: typography.sm,
-    color: colours.textMuted,
+    fontSize: typography.xs,
+    color: 'rgba(255,255,255,0.4)',
+    fontWeight: '500',
   },
   deleteButton: {
     padding: spacing.sm,
@@ -62,7 +68,7 @@ export const styles = StyleSheet.create({
   addItemText: {
     fontSize: typography.sm,
     color: colours.primary,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   headerActions: {
     flexDirection: 'row',
@@ -82,14 +88,14 @@ export const styles = StyleSheet.create({
   },
   renameInput: {
     flex: 1,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colours.primary,
-    borderRadius: radius.sm,
+    borderRadius: radius.lg,
     paddingHorizontal: spacing.sm,
     paddingVertical: 6,
     fontSize: typography.md,
-    color: colours.textOnLight,
-    backgroundColor: colours.backgroundLight,
+    color: colours.textOnDark,
+    backgroundColor: 'rgba(255,255,255,0.1)',
     minHeight: 36,
   },
   renameAction: {

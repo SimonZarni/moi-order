@@ -7,7 +7,7 @@ import { radius } from '../../../shared/theme/radius';
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colours.backgroundLight,
+    backgroundColor: colours.backgroundDark,
   },
   centered: {
     flex: 1,
@@ -23,17 +23,20 @@ export const styles = StyleSheet.create({
   },
   sectionGroup: {
     backgroundColor: colours.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colours.divider,
+    borderRadius: radius.xl,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
   },
   sectionHeader: {
     fontSize: typography.xxs,
-    fontWeight: '700',
-    color: colours.textSubtle,
+    fontWeight: '800',
+    color: colours.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 1.2,
+    letterSpacing: 1.4,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
     paddingBottom: spacing.xs,
@@ -45,81 +48,79 @@ export const styles = StyleSheet.create({
     marginTop: spacing.xxl,
   },
 
-  // ── Filter bar ─────────────────────────────────────────────────────────────
+  // ── Filter bar (dark, sticks to hero header) ───────────────────────────────
   filterBar: {
-    backgroundColor: colours.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colours.divider,
+    backgroundColor: colours.backgroundDark,
   },
 
-  // Underline-style tabs — industry-standard, replaces pill/chip
+  // Tab row — pill style on dark background
   statusTabsRow: {
     flexDirection: 'row',
     paddingHorizontal: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colours.divider,
+    paddingBottom: spacing.md,
+    gap: spacing.xs,
   },
   statusTabsScroll: {
     flexDirection: 'row',
-    paddingHorizontal: spacing.md,
+    gap: spacing.xs,
   },
   statusTab: {
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs + 2,
     paddingHorizontal: spacing.md,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-    marginBottom: -1,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
   },
   statusTabActive: {
-    borderBottomColor: colours.primary,
+    backgroundColor: colours.primary,
+    borderColor: colours.primary,
   },
   statusTabText: {
-    fontSize: typography.sm,
-    fontWeight: '500',
-    color: colours.textMuted,
+    fontSize: typography.xs,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.5)',
   },
   statusTabTextActive: {
-    color: colours.primary,
+    color: colours.white,
     fontWeight: '700',
   },
 
-  // ── Date row ───────────────────────────────────────────────────────────────
+  // ── Date navigator row ─────────────────────────────────────────────────────
   dateRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs + 2,
+    paddingVertical: spacing.sm,
+    backgroundColor: colours.backgroundMid,
   },
   dateArrow: {
-    width: 28,
-    height: 28,
-    borderRadius: radius.sm,
+    width: 30,
+    height: 30,
+    borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colours.backgroundLight,
-    borderWidth: 1,
-    borderColor: colours.divider,
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
   dateLabel: {
     fontSize: typography.sm,
-    fontWeight: '600',
-    color: colours.textOnLight,
+    fontWeight: '700',
+    color: colours.textOnDark,
     minWidth: 120,
     textAlign: 'center',
   },
   dateTodayBtn: {
     paddingHorizontal: spacing.sm + 2,
-    paddingVertical: 3,
+    paddingVertical: 4,
     borderRadius: radius.full,
-    backgroundColor: colours.primaryBg,
+    backgroundColor: colours.primary + '22',
     borderWidth: 1,
-    borderColor: colours.primary + '40',
+    borderColor: colours.primary + '55',
   },
   dateTodayText: {
-    fontSize: typography.xs,
+    fontSize: typography.xxs,
     fontWeight: '700',
-    color: colours.primaryDark,
+    color: colours.primary,
   },
 });

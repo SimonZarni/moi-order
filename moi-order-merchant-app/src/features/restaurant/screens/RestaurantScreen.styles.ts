@@ -4,17 +4,27 @@ import { spacing } from '../../../shared/theme/spacing';
 import { typography } from '../../../shared/theme/typography';
 import { radius } from '../../../shared/theme/radius';
 
+const floatingCard = {
+  backgroundColor: colours.surface,
+  borderRadius: radius.xl,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.06,
+  shadowRadius: 10,
+  elevation: 3,
+};
+
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colours.backgroundLight,
+    backgroundColor: colours.backgroundDark,
   },
   scroll: {
     flex: 1,
   },
   scrollContent: {
     padding: spacing.md,
-    paddingBottom: spacing.xl,
+    paddingBottom: spacing.xxl,
     gap: spacing.md,
     width: '100%',
   },
@@ -22,14 +32,18 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: spacing.xs,
-    paddingBottom: spacing.xs,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xl + spacing.md,
+    backgroundColor: colours.backgroundDark,
+    marginTop: -spacing.md,
+    marginHorizontal: -spacing.md,
   },
   headerTitle: {
-    fontSize: typography.xxl,
-    fontWeight: '700',
-    color: colours.textOnLight,
-    letterSpacing: -0.5,
+    fontSize: typography.display,
+    fontWeight: '800',
+    color: colours.textOnDark,
+    letterSpacing: -0.8,
   },
   editButton: {
     flexDirection: 'row',
@@ -38,18 +52,20 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs + 2,
     backgroundColor: colours.primary,
-    borderRadius: radius.md,
+    borderRadius: radius.full,
+    shadowColor: colours.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   editButtonText: {
     color: colours.white,
     fontSize: typography.sm,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   card: {
-    backgroundColor: colours.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colours.divider,
+    ...floatingCard,
     overflow: 'hidden',
   },
   cardHeader: {
@@ -58,18 +74,19 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
-    backgroundColor: colours.surfaceMuted,
-    borderBottomWidth: 1,
-    borderBottomColor: colours.divider,
+    backgroundColor: colours.backgroundDark,
+    borderBottomWidth: 0,
   },
   cardTitle: {
-    fontSize: typography.sm,
-    fontWeight: '600',
-    color: colours.textMuted,
+    fontSize: typography.xxs,
+    fontWeight: '800',
+    color: 'rgba(255,255,255,0.5)',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
   },
   cardBody: {
     padding: spacing.md,
-    gap: spacing.xs + 2,
+    gap: spacing.sm,
   },
   divider: {
     height: 1,
@@ -92,6 +109,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.sm,
     color: colours.textOnLight,
+    fontWeight: '500',
   },
   statusWarningBar: {
     flexDirection: 'row',
@@ -121,6 +139,7 @@ export const styles = StyleSheet.create({
     borderRadius: radius.full,
     borderWidth: 1.5,
     borderColor: colours.divider,
+    backgroundColor: colours.surfaceMuted,
   },
   statusChipActive: {
     borderColor: 'transparent',
@@ -134,28 +153,29 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   inputLabel: {
-    fontSize: typography.xs,
-    fontWeight: '600',
+    fontSize: typography.xxs,
+    fontWeight: '700',
     color: colours.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
   },
   input: {
     borderWidth: 1.5,
     borderColor: colours.divider,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.sm + 4,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     fontSize: typography.sm,
     color: colours.textOnLight,
     backgroundColor: colours.surfaceMuted,
+    minHeight: 48,
   },
   inputFocused: {
     borderColor: colours.primary,
     backgroundColor: colours.surface,
   },
   inputMultiline: {
-    minHeight: 72,
+    minHeight: 80,
     textAlignVertical: 'top',
   },
   formBody: {
@@ -173,12 +193,19 @@ export const styles = StyleSheet.create({
   saveButton: {
     flex: 1,
     backgroundColor: colours.primary,
-    borderRadius: radius.md,
-    paddingVertical: spacing.xs + 4,
+    borderRadius: radius.full,
+    paddingVertical: spacing.sm + 2,
     alignItems: 'center',
+    shadowColor: colours.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
   },
   saveButtonDisabled: {
-    opacity: 0.6,
+    opacity: 0.5,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   saveButtonText: {
     color: colours.white,
@@ -187,9 +214,9 @@ export const styles = StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: colours.backgroundLight,
-    borderRadius: radius.md,
-    paddingVertical: spacing.xs + 4,
+    backgroundColor: colours.surface,
+    borderRadius: radius.full,
+    paddingVertical: spacing.sm + 2,
     alignItems: 'center',
     borderWidth: 1.5,
     borderColor: colours.divider,
@@ -216,7 +243,7 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.primary,
     textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    letterSpacing: 0.5,
   },
   deliveryEditRow: {
     gap: spacing.xs,
@@ -235,12 +262,13 @@ export const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 1.5,
     borderColor: colours.primary,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.sm + 4,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs + 2,
     fontSize: typography.sm,
     color: colours.textOnLight,
     backgroundColor: colours.surfaceMuted,
+    minHeight: 44,
   },
   deliveryEditActions: {
     flexDirection: 'row',
@@ -250,7 +278,7 @@ export const styles = StyleSheet.create({
   deliveryEditCancel: {
     flex: 1,
     paddingVertical: spacing.xs + 2,
-    borderRadius: radius.md,
+    borderRadius: radius.full,
     borderWidth: 1.5,
     borderColor: colours.divider,
     alignItems: 'center',
@@ -263,7 +291,7 @@ export const styles = StyleSheet.create({
   deliveryEditSave: {
     flex: 1,
     paddingVertical: spacing.xs + 2,
-    borderRadius: radius.md,
+    borderRadius: radius.full,
     backgroundColor: colours.primary,
     alignItems: 'center',
   },
@@ -279,15 +307,15 @@ export const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   photoPreview: {
-    width: 100,
-    height: 64,
-    borderRadius: radius.md,
+    width: 110,
+    height: 70,
+    borderRadius: radius.lg,
     backgroundColor: colours.surfaceMuted,
   },
   logoPreview: {
-    width: 64,
-    height: 64,
-    borderRadius: radius.md,
+    width: 70,
+    height: 70,
+    borderRadius: radius.xl,
     backgroundColor: colours.surfaceMuted,
   },
   photoActions: {
@@ -298,15 +326,15 @@ export const styles = StyleSheet.create({
   photoBtn: {
     flex: 1,
     paddingVertical: spacing.xs + 2,
-    borderRadius: radius.md,
+    borderRadius: radius.full,
     borderWidth: 1.5,
     borderColor: colours.divider,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 36,
+    minHeight: 38,
   },
   photoBtnDanger: {
-    borderColor: colours.errorBg,
+    borderColor: colours.error + '55',
   },
   photoBtnText: {
     fontSize: typography.xs,
@@ -320,10 +348,11 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
     marginTop: spacing.xs,
     paddingVertical: spacing.sm,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     borderWidth: 1.5,
     borderColor: colours.primary,
     borderStyle: 'dashed',
+    backgroundColor: colours.primaryGlow,
   },
   supportButton: {
     flexDirection: 'row',
@@ -331,14 +360,14 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.xs + 2,
     paddingVertical: spacing.md,
-    borderRadius: radius.lg,
+    borderRadius: radius.full,
     borderWidth: 1.5,
     borderColor: colours.primary,
-    backgroundColor: colours.surface,
+    backgroundColor: colours.primaryGlow,
   },
   supportButtonText: {
     fontSize: typography.sm,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colours.primary,
   },
   kycNote: {
@@ -356,7 +385,7 @@ export const styles = StyleSheet.create({
   kycNoteLink: {
     fontSize: typography.xxs,
     color: colours.primary,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   infoRowWithAction: {
     flexDirection: 'row',
@@ -374,7 +403,7 @@ export const styles = StyleSheet.create({
   toggleLabel: {
     fontSize: typography.sm,
     color: colours.textOnLight,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   // Opening hours
   hoursHeader: {
@@ -389,7 +418,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
+    paddingVertical: spacing.xs + 2,
     borderBottomWidth: 1,
     borderBottomColor: colours.divider,
   },
@@ -401,7 +430,7 @@ export const styles = StyleSheet.create({
   hoursCell: {
     fontSize: typography.xs,
     color: colours.textMuted,
-    fontWeight: '600' as const,
+    fontWeight: '700' as const,
   },
   hoursDayCell: {
     width: 36,
@@ -414,9 +443,9 @@ export const styles = StyleSheet.create({
     width: 48,
   },
   hoursInput: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colours.divider,
-    borderRadius: radius.sm,
+    borderRadius: radius.md,
     paddingHorizontal: 6,
     paddingVertical: 4,
     fontSize: typography.xs,
@@ -425,13 +454,13 @@ export const styles = StyleSheet.create({
     fontWeight: '400',
   },
   hoursInputDisabled: {
-    opacity: 0.35,
+    opacity: 0.3,
   },
   hoursDayLabel: {
     width: 36,
     fontSize: typography.sm,
     color: colours.textOnLight,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   hoursClosed: {
     fontSize: typography.sm,
@@ -441,18 +470,19 @@ export const styles = StyleSheet.create({
   hoursTime: {
     fontSize: typography.sm,
     color: colours.textOnLight,
+    fontWeight: '500',
   },
-  // Modal
+  // Modal (bottom sheet)
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'flex-end',
   },
   modalSheet: {
     backgroundColor: colours.backgroundDark,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-    maxHeight: '85%',
+    borderTopLeftRadius: radius.sheet,
+    borderTopRightRadius: radius.sheet,
+    maxHeight: '90%',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -465,8 +495,9 @@ export const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: typography.lg,
-    fontWeight: '700',
+    fontWeight: '800',
     color: colours.textOnDark,
+    letterSpacing: -0.4,
   },
   modalBody: {
     padding: spacing.lg,
@@ -474,15 +505,15 @@ export const styles = StyleSheet.create({
   },
   modalNote: {
     fontSize: typography.sm,
-    color: colours.textSubtle,
+    color: 'rgba(255,255,255,0.45)',
     lineHeight: 20,
   },
   modalDocNote: {
     fontSize: typography.sm,
-    color: colours.textSubtle,
+    color: 'rgba(255,255,255,0.45)',
     lineHeight: 20,
     backgroundColor: colours.dividerDark,
     padding: spacing.sm,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
   },
 });

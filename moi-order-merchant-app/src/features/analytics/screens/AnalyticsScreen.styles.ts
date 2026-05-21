@@ -4,10 +4,20 @@ import { spacing } from '../../../shared/theme/spacing';
 import { typography } from '../../../shared/theme/typography';
 import { radius } from '../../../shared/theme/radius';
 
+const card = {
+  backgroundColor: colours.surface,
+  borderRadius: radius.xl,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.06,
+  shadowRadius: 10,
+  elevation: 3,
+};
+
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colours.backgroundLight,
+    backgroundColor: colours.backgroundDark,
   },
   scroll: {
     flex: 1,
@@ -18,36 +28,39 @@ export const styles = StyleSheet.create({
     gap: spacing.md,
   },
 
-  // ── Page header row (title + pending chip inline) ──────────────────────────
+  // ── Dark hero header — breaks out of scrollContent padding ─────────────────
   headerRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    paddingTop: spacing.xs,
-    paddingBottom: spacing.xs,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xl + spacing.md,
+    backgroundColor: colours.backgroundDark,
+    marginTop: -spacing.md,
+    marginHorizontal: -spacing.md,
   },
   headerTitle: {
-    fontSize: typography.xxl,
-    fontWeight: '700',
-    color: colours.textOnLight,
-    letterSpacing: -0.5,
+    fontSize: typography.display,
+    fontWeight: '800',
+    color: colours.textOnDark,
+    letterSpacing: -0.8,
   },
   headerSub: {
     fontSize: typography.xs,
-    color: colours.textMuted,
-    marginTop: 2,
+    color: 'rgba(255,255,255,0.45)',
+    marginTop: 4,
   },
-  // Compact inline chip — replaces the full-width orange block
   pendingChip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: colours.warningBg,
+    backgroundColor: colours.warning + '22',
     borderWidth: 1,
-    borderColor: colours.warning + '40',
+    borderColor: colours.warning + '55',
     borderRadius: radius.full,
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: 4,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 5,
     marginTop: 4,
   },
   pendingChipText: {
@@ -56,31 +69,29 @@ export const styles = StyleSheet.create({
     color: colours.warning,
   },
 
-  // ── Cards ──────────────────────────────────────────────────────────────────
+  // ── Cards ───────────────────────────────────────────────────────────────────
   card: {
-    backgroundColor: colours.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colours.divider,
+    ...card,
     overflow: 'hidden',
   },
   cardHeader: {
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 4,
+    paddingVertical: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colours.divider,
   },
   cardTitle: {
     fontSize: typography.sm,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colours.textOnLight,
+    letterSpacing: -0.2,
   },
 
-  // ── Revenue rows ───────────────────────────────────────────────────────────
+  // ── Revenue rows ────────────────────────────────────────────────────────────
   periodRow: {
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 4,
-    gap: spacing.xs + 2,
+    paddingVertical: spacing.md,
+    gap: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colours.divider,
   },
@@ -95,21 +106,19 @@ export const styles = StyleSheet.create({
   periodLabel: {
     fontSize: typography.sm,
     fontWeight: '600',
-    color: colours.textOnLight,
+    color: colours.textMuted,
   },
   periodRevenue: {
-    fontSize: typography.md,
-    fontWeight: '700',
+    fontSize: typography.lg,
+    fontWeight: '800',
     color: colours.primary,
+    letterSpacing: -0.4,
   },
-  // Thicker bar — 8px instead of 6px, clearly readable
   barTrack: {
-    height: 8,
-    backgroundColor: colours.backgroundLight,
+    height: 6,
+    backgroundColor: colours.divider,
     borderRadius: radius.full,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colours.divider,
   },
   barFill: {
     height: '100%',
@@ -122,14 +131,14 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
   },
 
-  // ── Orders summary ─────────────────────────────────────────────────────────
+  // ── Orders summary ──────────────────────────────────────────────────────────
   summaryGrid: {
     flexDirection: 'row',
   },
   summaryItem: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.lg,
     gap: spacing.xs / 2,
     borderRightWidth: 1,
     borderRightColor: colours.divider,
@@ -139,7 +148,7 @@ export const styles = StyleSheet.create({
   },
   summaryValue: {
     fontSize: typography.xxl,
-    fontWeight: '700',
+    fontWeight: '800',
     color: colours.textOnLight,
     letterSpacing: -0.5,
   },
