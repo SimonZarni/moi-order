@@ -17,6 +17,7 @@ use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -35,6 +36,12 @@ class AdminSubmissionController extends Controller
         return AdminSubmissionResource::collection(
             $this->service->index($request)
         );
+    }
+
+    /** GET /api/admin/v1/submissions/export */
+    public function export(AdminSubmissionIndexRequest $request): BinaryFileResponse
+    {
+        return $this->service->export($request);
     }
 
     /** GET /api/admin/v1/submissions/{submission} */

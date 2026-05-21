@@ -50,6 +50,8 @@ type Meta = { current_page: number; last_page: number; per_page: number; total: 
 
 type ListParams = { page?: number; per_page?: number; search?: string; status?: string };
 
+type ExportParams = { search?: string; city?: string; category_id?: number };
+
 export const placesApi = {
   list: (params: ListParams) =>
     apiClient.get<{ data: PlaceData[]; meta: Meta }>('/places', { params }).then((r) => r.data),
@@ -86,4 +88,6 @@ export const placesApi = {
     apiClient
       .get<{ data: ImportBatchData }>(`/places/import/${batchId}`)
       .then((r) => r.data.data),
+  exportExcel: (params: ExportParams) =>
+    apiClient.get<Blob>('/places/export', { params, responseType: 'blob' }).then((r) => r.data),
 };

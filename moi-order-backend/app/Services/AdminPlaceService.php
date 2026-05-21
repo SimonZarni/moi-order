@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Contracts\FileStorageInterface;
 use App\DTOs\AdminStorePlaceDTO;
 use App\DTOs\AdminUpdatePlaceDTO;
+use App\Exports\PlaceExport;
 use App\Http\Requests\Admin\AdminPlaceIndexRequest;
 use App\Http\Requests\Admin\AdminReorderPlaceImagesRequest;
 use App\Http\Requests\Admin\AdminUploadPlaceImagesRequest;
@@ -16,6 +17,8 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Principle: SRP — owns admin CRUD for places + image management.
@@ -49,6 +52,14 @@ class AdminPlaceService
         }
 
         return $query->paginate($request->integer('per_page', 20));
+    }
+
+    public function export(AdminPlaceIndexRequest $request): BinaryFileResponse
+    {
+        return Excel::download(
+            new PlaceExport($request->only(['city', 'category_id', 'search'])),
+            'places-' . now()->format('Y-m-d') . '.xlsx'
+        );
     }
 
     public function show(Place $place): Place

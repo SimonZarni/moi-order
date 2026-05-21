@@ -8,12 +8,15 @@ use App\Contracts\FileStorageInterface;
 use App\DTOs\AdminUpdateSubmissionStatusDTO;
 use App\Enums\SubmissionStatus;
 use App\Exceptions\DomainException;
+use App\Exports\SubmissionExport;
 use App\Http\Requests\Admin\AdminSubmissionIndexRequest;
 use App\Models\ServiceSubmission;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Principle: SRP — owns admin-side submission business logic only.
@@ -79,6 +82,14 @@ class AdminSubmissionService
         }
 
         return $query->paginate($request->integer('per_page', 20));
+    }
+
+    public function export(AdminSubmissionIndexRequest $request): BinaryFileResponse
+    {
+        return Excel::download(
+            new SubmissionExport($request->only(['status', 'service_id', 'user_id', 'date_from', 'date_to', 'search'])),
+            'submissions-' . now()->format('Y-m-d') . '.xlsx'
+        );
     }
 
     /**

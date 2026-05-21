@@ -237,6 +237,17 @@ export function PlacesView() {
   };
 
   // ── Import handlers ─────────────────────────────────────────────────────────
+  const handleExportClick = useCallback(() => {
+    placesApi.exportExcel({ search: filterName.trim() || undefined }).then((blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `places-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  }, [filterName]);
+
   const handleImportClick = () => {
     importInputRef.current?.click();
   };
@@ -289,6 +300,7 @@ export function PlacesView() {
           color="inherit"
           size="small"
           startIcon={<Iconify icon="eva:arrow-ios-downward-fill" width={16} />}
+          onClick={handleExportClick}
         >
           Export Excel
         </Button>

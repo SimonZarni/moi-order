@@ -131,6 +131,8 @@ Route::middleware('ensure.super_admin')->prefix('sessions')->name('admin.session
 Route::prefix('submissions')->name('admin.submissions.')->group(function (): void {
     Route::get('/', [AdminSubmissionController::class, 'index'])->name('index')
         ->middleware('check.permission:submissions.view');
+    Route::get('/export', [AdminSubmissionController::class, 'export'])->name('export')
+        ->middleware('check.permission:submissions.view');
     Route::get('/{submission}', [AdminSubmissionController::class, 'show'])->name('show')
         ->middleware('check.permission:submissions.view');
     Route::patch('/{submission}/status', [AdminSubmissionController::class, 'updateStatus'])->name('updateStatus')
@@ -243,6 +245,7 @@ Route::prefix('places')->name('admin.places.')->group(function (): void {
     Route::post('/import', [AdminPlaceController::class, 'import'])->name('import')
         ->middleware('check.permission:places.create');
     Route::get('/import/{batch}', [AdminPlaceController::class, 'importStatus'])->name('import.status');
+    Route::get('/export', [AdminPlaceController::class, 'export'])->name('export');
     Route::get('/', [AdminPlaceController::class, 'index'])->name('index');
     Route::post('/', [AdminPlaceController::class, 'store'])->name('store')
         ->middleware('check.permission:places.create');

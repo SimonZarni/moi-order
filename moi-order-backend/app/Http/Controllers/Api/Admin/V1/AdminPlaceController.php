@@ -23,6 +23,7 @@ use App\Services\AdminPlaceImportService;
 use App\Services\AdminPlaceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Principle: SRP — HTTP layer only. ≤20 lines/action. One service call per action.
@@ -46,6 +47,12 @@ class AdminPlaceController extends Controller
     public function importStatus(PlaceImportBatch $batch): JsonResponse
     {
         return response()->json(['data' => new AdminPlaceImportBatchResource($batch)]);
+    }
+
+    /** GET /api/admin/v1/places/export */
+    public function export(AdminPlaceIndexRequest $request): BinaryFileResponse
+    {
+        return $this->service->export($request);
     }
 
     /** GET /api/admin/v1/places */

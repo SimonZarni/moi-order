@@ -49,6 +49,8 @@ type ListParams = {
   service_id?: number | string;
 };
 
+type ExportParams = Omit<ListParams, 'page' | 'per_page'>;
+
 export const submissionsApi = {
   list: (params: ListParams) =>
     apiClient
@@ -77,4 +79,6 @@ export const submissionsApi = {
     apiClient
       .post<{ data: SubmissionDetailData }>(`/submissions/${id}/confirm-payment`)
       .then((r) => r.data.data),
+  export: (params: ExportParams) =>
+    apiClient.get<Blob>('/submissions/export', { params, responseType: 'blob' }).then((r) => r.data),
 };

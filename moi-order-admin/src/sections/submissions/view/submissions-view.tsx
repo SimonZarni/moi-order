@@ -8,6 +8,7 @@ import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Table from '@mui/material/Table';
 import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import TableRow from '@mui/material/TableRow';
@@ -117,6 +118,21 @@ export function SubmissionsView() {
     fetchSubmissions();
   }, [fetchSubmissions]);
 
+  const handleExport = useCallback(() => {
+    submissionsApi.export({
+      status: filterStatus !== 'all' ? filterStatus : undefined,
+      service_id: filterService !== 'all' ? filterService : undefined,
+      search: filterName.trim() || undefined,
+    }).then((blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `submissions-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  }, [filterStatus, filterService, filterName]);
+
   const handleStatusChange = (id: number, status: SubmissionStatus) => {
     setSubmissions((prev) => prev.map((s) => (s.id === id ? { ...s, status } : s)));
     submissionsApi.updateStatus(id, status).catch(() => fetchSubmissions());
@@ -136,12 +152,15 @@ export function SubmissionsView() {
   return (
     <DashboardContent>
       <Box sx={{ mb: 5, display: 'flex', alignItems: 'center' }}>
-        <Box>
+        <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h4">Service Submissions</Typography>
           <Typography variant="body2" color="text.secondary">
             Manage user-submitted service requests
           </Typography>
         </Box>
+        <Button variant="outlined" startIcon={<Iconify icon="solar:share-bold" />} onClick={handleExport}>
+          Export Excel
+        </Button>
       </Box>
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
