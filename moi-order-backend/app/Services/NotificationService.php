@@ -69,6 +69,10 @@ class NotificationService
 
     public function deleteAll(User $user): void
     {
-        $user->notifications()->delete();
+        // Only delete user-facing notifications. Admin-only rows belong to the
+        // admin dashboard view and must not be wiped by a mobile "clear all".
+        $user->notifications()
+            ->whereNotIn(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(`data`, '$.notification_type'))"), self::ADMIN_ONLY_TYPES)
+            ->delete();
     }
 }

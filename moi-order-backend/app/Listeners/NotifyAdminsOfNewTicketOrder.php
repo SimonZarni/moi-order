@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Events\TicketOrderCreated;
-use App\Events\UserNotificationReceived;
+use App\Events\AdminNotificationReceived;
 use App\Models\User;
 use App\Notifications\Admin\NewTicketOrderNotification;
 
@@ -22,7 +22,7 @@ class NotifyAdminsOfNewTicketOrder
 
         User::where('is_admin', true)->each(function (User $admin) use ($order): void {
             $admin->notify(new NewTicketOrderNotification($order));
-            event(new UserNotificationReceived($admin));
+            event(new AdminNotificationReceived($admin));
         });
     }
 }

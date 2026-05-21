@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Events\TicketOrderPaymentProcessed;
-use App\Events\UserNotificationReceived;
+use App\Events\AdminNotificationReceived;
 use App\Models\User;
 use App\Notifications\Admin\NewPaymentNotification;
 use Illuminate\Support\Facades\DB;
@@ -35,7 +35,7 @@ class NotifyAdminsOfTicketPayment
                     'user_name'       => $userName,
                     'object_name'     => $ticketName,
                 ]));
-                event(new UserNotificationReceived($admin));
+                event(new AdminNotificationReceived($admin));
             });
         });
     }

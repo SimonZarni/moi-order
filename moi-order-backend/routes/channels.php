@@ -9,10 +9,18 @@ use Illuminate\Support\Facades\Broadcast;
  * Principle: Security — private channels verified server-side before any event is delivered.
  */
 
-// In-app notification bell (UserNotificationReceived broadcasts here).
+// In-app notification bell — user-facing (UserNotificationReceived broadcasts here).
 // Channel uses uuid so the name matches what UserResource/AdminUserResource expose as "id".
 Broadcast::channel('App.Models.User.{uuid}', function ($user, string $uuid): bool {
     return $user->uuid === $uuid;
+});
+
+// Admin notification bell — admin-only (AdminNotificationReceived broadcasts here).
+// Separate channel so mobile app clients subscribed to App.Models.User.{uuid} never
+// receive signals for admin-only notifications, even for dual-role users.
+// Extra is_admin guard prevents a non-admin user who knows a UUID from subscribing.
+Broadcast::channel('App.Admin.User.{uuid}', function ($user, string $uuid): bool {
+    return $user->uuid === $uuid && $user->is_admin === true;
 });
 
 // Food-order status updates (FoodOrderStatusUpdated broadcasts here).

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Events\ServiceSubmissionCreated;
-use App\Events\UserNotificationReceived;
+use App\Events\AdminNotificationReceived;
 use App\Models\User;
 use App\Notifications\Admin\NewSubmissionNotification;
 
@@ -24,7 +24,7 @@ class NotifyAdminsOfNewSubmission
 
         User::where('is_admin', true)->each(function (User $admin) use ($submission): void {
             $admin->notify(new NewSubmissionNotification($submission));
-            event(new UserNotificationReceived($admin));
+            event(new AdminNotificationReceived($admin));
         });
     }
 }

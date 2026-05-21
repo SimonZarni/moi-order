@@ -101,7 +101,7 @@ export function NotificationsProvider({ children }: Props) {
       },
     });
 
-    const channelName = `private-App.Models.User.${admin.id}`;
+    const channelName = `private-App.Admin.User.${admin.id}`;
     const channel = pusher.subscribe(channelName);
 
     channel.bind('notification.created', () => {

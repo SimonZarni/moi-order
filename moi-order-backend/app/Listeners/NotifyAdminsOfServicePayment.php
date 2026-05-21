@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Events\SubmissionPaymentProcessed;
-use App\Events\UserNotificationReceived;
+use App\Events\AdminNotificationReceived;
 use App\Models\User;
 use App\Notifications\Admin\NewPaymentNotification;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +43,7 @@ class NotifyAdminsOfServicePayment
                     'user_name'     => $userName,
                     'object_name'   => $serviceName,
                 ]));
-                event(new UserNotificationReceived($admin));
+                event(new AdminNotificationReceived($admin));
             });
         });
     }
