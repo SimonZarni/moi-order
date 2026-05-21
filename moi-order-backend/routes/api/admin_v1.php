@@ -60,7 +60,8 @@ Route::get('/ping', static function () {
 })->name('admin.ping');
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
-Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+Route::get('/dashboard',        [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+Route::get('/dashboard/export', [AdminDashboardController::class, 'export'])->name('admin.dashboard.export');
 
 // ── Notifications (admin bell) ────────────────────────────────────────────────
 Route::prefix('notifications')->name('admin.notifications.')->group(function (): void {

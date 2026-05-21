@@ -1,12 +1,20 @@
+import { useCallback } from 'react';
+
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { fNumber } from 'src/utils/format-number';
 
 import { DashboardContent } from 'src/layouts/dashboard';
+
+import { dashboardApi } from 'src/api/dashboard';
+
+import { Iconify } from 'src/components/iconify';
 
 import { AnalyticsNews } from '../analytics-news';
 import { AnalyticsCurrentVisits } from '../analytics-current-visits';
@@ -25,6 +33,17 @@ const MONTH_LABELS = getLastEightMonthLabels();
 
 export function OverviewAnalyticsView() {
   const { stats, isLoading, error } = useDashboardStats();
+
+  const handleExport = useCallback(() => {
+    dashboardApi.export().then((blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `overview-report-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  }, []);
 
   if (isLoading) {
     return (
@@ -69,9 +88,18 @@ export function OverviewAnalyticsView() {
 
   return (
     <DashboardContent maxWidth="xl">
-      <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-        Welcome back 👋 Moi Order Dashboard
-      </Typography>
+      <Stack direction="row" alignItems="center" sx={{ mb: { xs: 3, md: 5 } }}>
+        <Typography variant="h4" sx={{ flexGrow: 1 }}>
+          Welcome back 👋 Moi Order Dashboard
+        </Typography>
+        <Button
+          variant="outlined"
+          startIcon={<Iconify icon="solar:share-bold" />}
+          onClick={handleExport}
+        >
+          Export Report
+        </Button>
+      </Stack>
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>

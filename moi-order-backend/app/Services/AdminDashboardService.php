@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Enums\PaymentStatus;
 use App\Enums\SubmissionStatus;
+use App\Exports\DashboardExport;
 use App\Models\Payment;
 use App\Models\Place;
 use App\Models\ServiceSubmission;
@@ -14,6 +15,8 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Principle: SRP — computes all admin dashboard aggregate data; no HTTP concerns.
@@ -35,6 +38,22 @@ class AdminDashboardService
             'payment_timeline'            => $this->buildPaymentTimeline(),
             'pending_submissions_count'   => ServiceSubmission::where('status', SubmissionStatus::Processing)->count(),
         ];
+    }
+
+    public function export(): BinaryFileResponse
+    {
+        $now = Carbon::now();
+
+        return Excel::download(
+            new DashboardExport([
+                'summary'                     => $this->buildSummary($now),
+                'monthly_orders'              => $this->buildMonthlyOrders($now),
+                'orders_by_service'           => $this->buildOrdersByService(),
+                'top_services_comparison'     => $this->buildTopServicesComparison($now),
+                'submission_status_breakdown' => $this->buildStatusBreakdown($now),
+            ]),
+            'overview-report-' . $now->format('Y-m-d') . '.xlsx'
+        );
     }
 
     // ─── Summary (4 KPI cards + sparklines) ──────────────────────────────────

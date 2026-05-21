@@ -73,4 +73,6 @@ export type DashboardStats = {
 export const dashboardApi = {
   get: () =>
     apiClient.get<{ data: DashboardStats }>('/dashboard').then((r) => r.data.data),
+  export: () =>
+    apiClient.get<Blob>('/dashboard/export', { responseType: 'blob' }).then((r) => r.data),
 };
