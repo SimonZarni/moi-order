@@ -17,8 +17,6 @@ export const styles = StyleSheet.create({
   },
   list: {
     padding: spacing.md,
-    maxWidth: 860,
-    alignSelf: 'center',
     width: '100%',
   },
   addButton: {

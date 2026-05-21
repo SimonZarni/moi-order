@@ -16,8 +16,6 @@ export const styles = StyleSheet.create({
     padding: spacing.md,
     paddingBottom: spacing.xl,
     gap: spacing.md,
-    maxWidth: 860,
-    alignSelf: 'center',
     width: '100%',
   },
   header: {
