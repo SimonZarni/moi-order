@@ -42,6 +42,7 @@ export interface UseUsersViewResult {
   handleActivate: (id: number) => void;
   handleRestore: (id: number) => void;
   handleDelete: (id: number, name: string) => void;
+  handleExport: () => void;
 }
 
 // ----------------------------------------------------------------------
@@ -198,6 +199,17 @@ export function useUsersView(): UseUsersViewResult {
     [router]
   );
 
+  const handleExport = useCallback(() => {
+    usersApi.export({ search: filterName.trim() || undefined }).then((blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `users-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  }, [filterName]);
+
   // ── Return ────────────────────────────────────────────────────────────────────
 
   return {
@@ -225,5 +237,6 @@ export function useUsersView(): UseUsersViewResult {
     handleActivate,
     handleRestore,
     handleDelete,
+    handleExport,
   };
 }

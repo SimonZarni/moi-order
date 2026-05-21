@@ -7,11 +7,14 @@ namespace App\Http\Controllers\Api\Admin\V1;
 use App\Contracts\FileStorageInterface;
 use App\Enums\FoodOrderStatus;
 use App\Events\FoodOrderStatusUpdated;
+use App\Exports\FoodOrderExport;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\FoodOrderResource;
 use App\Models\FoodOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * SRP — HTTP layer only. Admin food order management.
@@ -78,6 +81,15 @@ class AdminFoodOrderController extends Controller
                 'total'        => $orders->total(),
             ],
         ]);
+    }
+
+    /** GET /api/admin/v1/food-orders/export */
+    public function export(Request $request): BinaryFileResponse
+    {
+        return Excel::download(
+            new FoodOrderExport($request->only(['status', 'restaurant_id', 'search'])),
+            'food-orders-' . now()->format('Y-m-d') . '.xlsx'
+        );
     }
 
     public function show(FoodOrder $foodOrder): JsonResponse

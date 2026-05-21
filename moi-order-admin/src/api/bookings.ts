@@ -50,6 +50,8 @@ type Meta = { current_page: number; last_page: number; per_page: number; total: 
 
 type ListParams = { page?: number; per_page?: number; status?: string; search?: string };
 
+type ExportParams = Pick<ListParams, 'status' | 'search'>;
+
 export type BookingStats = {
   total: number;
   pending: number;
@@ -88,4 +90,6 @@ export const bookingsApi = {
     apiClient
       .get(`/ticket-orders/${id}/eticket`, { responseType: 'blob' })
       .then((r) => ({ blob: r.data as Blob, contentType: r.headers['content-type'] as string })),
+  export: (params: ExportParams) =>
+    apiClient.get<Blob>('/ticket-orders/export', { params, responseType: 'blob' }).then((r) => r.data),
 };

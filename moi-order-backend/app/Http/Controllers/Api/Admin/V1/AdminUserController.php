@@ -21,6 +21,7 @@ use App\Services\AdminUserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Principle: SRP — HTTP layer only. ≤20 lines/action. One service call per action.
@@ -33,6 +34,12 @@ class AdminUserController extends Controller
     public function index(AdminUserIndexRequest $request): AnonymousResourceCollection
     {
         return AdminUserResource::collection($this->service->index($request));
+    }
+
+    /** GET /api/admin/v1/users/export */
+    public function export(AdminUserIndexRequest $request): BinaryFileResponse
+    {
+        return $this->service->export($request);
     }
 
     /** POST /api/admin/v1/users */

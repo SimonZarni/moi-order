@@ -117,9 +117,13 @@ type Meta = { current_page: number; last_page: number; per_page: number; total: 
 
 type ListParams = { page?: number; per_page?: number; search?: string };
 
+type ExportParams = { search?: string; date_from?: string; date_to?: string };
+
 export const usersApi = {
   list: (params: ListParams) =>
     apiClient.get<{ data: UserData[]; meta: Meta }>('/users', { params }).then((r) => r.data),
+  export: (params: ExportParams) =>
+    apiClient.get<Blob>('/users/export', { params, responseType: 'blob' }).then((r) => r.data),
   get: (id: number | string) =>
     apiClient.get<{ data: UserDetailData }>(`/users/${id}`).then((r) => r.data.data),
   toggleAdmin: (id: number | string) =>

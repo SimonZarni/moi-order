@@ -136,13 +136,19 @@ export function UsersView() {
     handleActivate,
     handleRestore,
     handleDelete,
+    handleExport,
   } = useUsersView();
 
   return (
     <DashboardContent>
       <Box sx={{ mb: 5, display: 'flex', alignItems: 'center' }}>
         <Typography variant="h4" sx={{ flexGrow: 1 }}>App Users</Typography>
-        <Typography variant="body2" color="text.secondary">{total} total users</Typography>
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Typography variant="body2" color="text.secondary">{total} total users</Typography>
+          <Button variant="outlined" startIcon={<Iconify icon="solar:share-bold" />} onClick={handleExport}>
+            Export Excel
+          </Button>
+        </Stack>
       </Box>
 
       <Card>

@@ -11,6 +11,7 @@ use App\Models\Payment;
 use App\Services\AdminPaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Principle: SRP — HTTP layer only. Read-only; no mutation actions.
@@ -23,6 +24,12 @@ class AdminPaymentController extends Controller
     public function index(AdminPaymentIndexRequest $request): AnonymousResourceCollection
     {
         return AdminPaymentResource::collection($this->service->index($request));
+    }
+
+    /** GET /api/admin/v1/payments/export */
+    public function export(AdminPaymentIndexRequest $request): BinaryFileResponse
+    {
+        return $this->service->export($request);
     }
 
     /** GET /api/admin/v1/payments/stats */

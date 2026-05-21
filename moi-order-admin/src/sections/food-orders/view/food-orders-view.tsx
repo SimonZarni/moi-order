@@ -4,7 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import TableRow from '@mui/material/TableRow';
@@ -64,6 +66,20 @@ export function FoodOrdersView() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterSearch, setFilterSearch] = useState('');
 
+  const handleExport = useCallback(() => {
+    foodOrdersApi.export({
+      status: filterStatus !== 'all' ? filterStatus : undefined,
+      search: filterSearch.trim() || undefined,
+    }).then((blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `food-orders-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  }, [filterStatus, filterSearch]);
+
   const fetchOrders = useCallback(() => {
     setLoading(true);
     foodOrdersApi
@@ -91,6 +107,11 @@ export function FoodOrdersView() {
         <Typography variant="h4" sx={{ flexGrow: 1 }}>
           Food Orders
         </Typography>
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Button variant="outlined" startIcon={<Iconify icon="solar:share-bold" />} onClick={handleExport}>
+            Export Excel
+          </Button>
+        </Stack>
       </Box>
 
       <Card>

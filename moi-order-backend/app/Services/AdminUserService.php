@@ -8,10 +8,13 @@ use App\DTOs\AdminCreateUserDTO;
 use App\DTOs\AdminUpdateUserDTO;
 use App\Enums\UserStatusEnum;
 use App\Exceptions\DomainException;
+use App\Exports\UserExport;
 use App\Http\Requests\Admin\AdminUserIndexRequest;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Principle: SRP — owns admin user management logic only.
@@ -42,6 +45,14 @@ class AdminUserService
         }
 
         return $query->paginate($request->integer('per_page', 20));
+    }
+
+    public function export(AdminUserIndexRequest $request): BinaryFileResponse
+    {
+        return Excel::download(
+            new UserExport($request->only(['search', 'date_from', 'date_to'])),
+            'users-' . now()->format('Y-m-d') . '.xlsx'
+        );
     }
 
     public function show(User $user): User

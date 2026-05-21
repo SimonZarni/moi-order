@@ -27,6 +27,8 @@ type ListParams = {
   date_to?: string;
 };
 
+type ExportParams = Omit<ListParams, 'page' | 'per_page'>;
+
 export type PaymentStats = {
   total_revenue: number;
   succeeded_count: number;
@@ -47,4 +49,6 @@ export const paymentsApi = {
     apiClient.post<{ data: PaymentData }>(`/payments/${id}/confirm`).then((r) => r.data.data),
   regenerate: (id: number | string) =>
     apiClient.post<{ data: PaymentData }>(`/payments/${id}/regenerate`).then((r) => r.data.data),
+  export: (params: ExportParams) =>
+    apiClient.get<Blob>('/payments/export', { params, responseType: 'blob' }).then((r) => r.data),
 };

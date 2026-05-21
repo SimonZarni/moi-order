@@ -37,6 +37,7 @@ export interface UsePaymentsViewResult {
   updateParams: (updates: Record<string, string>) => void;
   navigateToPayment: (id: number) => void;
   handleToggleAutoPayment: () => void;
+  handleExport: () => void;
 }
 
 // ----------------------------------------------------------------------
@@ -116,6 +117,20 @@ export function usePaymentsView(): UsePaymentsViewResult {
     [toggleAutoPaymentMutation]
   );
 
+  const handleExport = useCallback(() => {
+    paymentsApi.export({
+      status: filterStatus !== 'all' ? filterStatus : undefined,
+      search: filterSearch.trim() || undefined,
+    }).then((blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `payments-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  }, [filterStatus, filterSearch]);
+
   return {
     payments: listData?.data ?? [],
     stats: statsData ?? null,
@@ -131,5 +146,6 @@ export function usePaymentsView(): UsePaymentsViewResult {
     updateParams,
     navigateToPayment,
     handleToggleAutoPayment,
+    handleExport,
   };
 }

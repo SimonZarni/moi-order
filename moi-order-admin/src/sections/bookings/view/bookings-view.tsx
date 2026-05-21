@@ -65,6 +65,20 @@ export function BookingsView() {
     bookingsApi.stats().then(setStats).catch(() => {});
   }, []);
 
+  const handleExport = useCallback(() => {
+    bookingsApi.export({
+      status: filterStatus !== 'all' ? filterStatus : undefined,
+      search: filterSearch.trim() || undefined,
+    }).then((blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ticket-orders-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  }, [filterStatus, filterSearch]);
+
   const fetchBookings = useCallback(() => {
     setLoading(true);
     bookingsApi
@@ -94,8 +108,8 @@ export function BookingsView() {
         <Typography variant="h4" sx={{ flexGrow: 1 }}>
           Bookings
         </Typography>
-        <Button variant="outlined" color="primary" startIcon={<Iconify icon="solar:share-bold" />}>
-          Export
+        <Button variant="outlined" color="primary" startIcon={<Iconify icon="solar:share-bold" />} onClick={handleExport}>
+          Export Excel
         </Button>
       </Box>
 

@@ -187,10 +187,11 @@ Route::prefix('service-categories')->name('admin.service-categories.')->group(fu
 
 // ── Users ─────────────────────────────────────────────────────────────────────
 Route::prefix('users')->name('admin.users.')->group(function (): void {
-    Route::get('/',       [AdminUserController::class, 'index'])->name('index');
-    Route::post('/',      [AdminUserController::class, 'store'])->name('store')
+    Route::get('/',        [AdminUserController::class, 'index'])->name('index');
+    Route::get('/export',  [AdminUserController::class, 'export'])->name('export');
+    Route::post('/',       [AdminUserController::class, 'store'])->name('store')
         ->middleware('check.permission:users.manage');
-    Route::get('/{user}', [AdminUserController::class, 'show'])->name('show');
+    Route::get('/{user}',  [AdminUserController::class, 'show'])->name('show');
     Route::put('/{user}', [AdminUserController::class, 'update'])->name('update')
         ->middleware('check.permission:users.manage');
     Route::delete('/{user}', [AdminUserController::class, 'destroy'])->name('destroy')
@@ -226,6 +227,8 @@ Route::prefix('payments')->name('admin.payments.')->group(function (): void {
     Route::get('/', [AdminPaymentController::class, 'index'])->name('index')
         ->middleware('check.permission:payments.view');
     Route::get('/stats', [AdminPaymentController::class, 'stats'])->name('stats')
+        ->middleware('check.permission:payments.view');
+    Route::get('/export', [AdminPaymentController::class, 'export'])->name('export')
         ->middleware('check.permission:payments.view');
     Route::get('/{payment}', [AdminPaymentController::class, 'show'])->name('show')
         ->middleware('check.permission:payments.view');
@@ -307,9 +310,10 @@ Route::put('/payment-settings',  [AdminPaymentSettingController::class, 'update'
     ->middleware('ensure.super_admin');
 
 Route::prefix('ticket-orders')->name('admin.ticket-orders.')->group(function (): void {
-    Route::get('/stats',                          [AdminTicketOrderController::class, 'stats'])->name('stats');
-    Route::get('/',                               [AdminTicketOrderController::class, 'index'])->name('index');
-    Route::get('/{ticketOrder}',                  [AdminTicketOrderController::class, 'show'])->name('show');
+    Route::get('/stats',  [AdminTicketOrderController::class, 'stats'])->name('stats');
+    Route::get('/export', [AdminTicketOrderController::class, 'export'])->name('export');
+    Route::get('/',       [AdminTicketOrderController::class, 'index'])->name('index');
+    Route::get('/{ticketOrder}', [AdminTicketOrderController::class, 'show'])->name('show');
     Route::post('/{ticketOrder}/confirm-payment', [AdminTicketOrderController::class, 'confirmPayment'])->name('confirmPayment')
         ->middleware('check.permission:payments.manage');
     Route::post('/{ticketOrder}/eticket',         [AdminTicketOrderController::class, 'uploadEticket'])->name('eticket.store')
@@ -358,7 +362,8 @@ Route::prefix('restaurants')->name('admin.restaurants.')->group(function (): voi
 
 // ── Food Orders ───────────────────────────────────────────────────────────────
 Route::prefix('food-orders')->name('admin.food-orders.')->group(function (): void {
-    Route::get('/',            [AdminFoodOrderController::class, 'index'])->name('index');
+    Route::get('/',         [AdminFoodOrderController::class, 'index'])->name('index');
+    Route::get('/export',   [AdminFoodOrderController::class, 'export'])->name('export');
     Route::get('/{foodOrder}', [AdminFoodOrderController::class, 'show'])->name('show');
     Route::post('/{foodOrder}/confirm-payment', [AdminFoodOrderController::class, 'confirmPayment'])->name('confirm-payment');
     Route::get('/{foodOrderId}/chat',  [\App\Http\Controllers\Api\Admin\V1\AdminOrderChatController::class, 'index'])->name('chat.index');

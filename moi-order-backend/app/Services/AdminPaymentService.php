@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\PaymentStatus;
+use App\Exports\PaymentExport;
 use App\Http\Requests\Admin\AdminPaymentIndexRequest;
 use App\Models\Payment;
 use App\Models\ServiceSubmission;
@@ -13,6 +14,8 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Principle: SRP — admin payment read/regenerate logic only.
@@ -142,6 +145,14 @@ class AdminPaymentService
         ]);
 
         return $newPayment->load($this->withPayable());
+    }
+
+    public function export(AdminPaymentIndexRequest $request): BinaryFileResponse
+    {
+        return Excel::download(
+            new PaymentExport($request->only(['status', 'date_from', 'date_to', 'search'])),
+            'payments-' . now()->format('Y-m-d') . '.xlsx'
+        );
     }
 
     /** Aggregate totals across ALL payments — not scoped to current page. */

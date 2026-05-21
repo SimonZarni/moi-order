@@ -56,6 +56,8 @@ type ListParams = {
   search?: string;
 };
 
+type ExportParams = Omit<ListParams, 'page' | 'per_page'>;
+
 export const foodOrdersApi = {
   list: (params: ListParams) =>
     apiClient
@@ -69,4 +71,6 @@ export const foodOrdersApi = {
     apiClient
       .post<{ data: FoodOrderDetail }>(`/food-orders/${id}/confirm-payment`)
       .then((r) => r.data.data),
+  export: (params: ExportParams) =>
+    apiClient.get<Blob>('/food-orders/export', { params, responseType: 'blob' }).then((r) => r.data),
 };

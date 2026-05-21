@@ -65,6 +65,7 @@ export function PaymentsView() {
     updateParams,
     navigateToPayment,
     handleToggleAutoPayment,
+    handleExport,
   } = usePaymentsView();
 
   return (
@@ -84,8 +85,8 @@ export function PaymentsView() {
               sx={{ fontWeight: 600, cursor: 'pointer' }}
             />
           )}
-          <Button variant="outlined" startIcon={<Iconify icon="solar:share-bold" />}>
-            Export
+          <Button variant="outlined" startIcon={<Iconify icon="solar:share-bold" />} onClick={handleExport}>
+            Export Excel
           </Button>
         </Stack>
       </Box>

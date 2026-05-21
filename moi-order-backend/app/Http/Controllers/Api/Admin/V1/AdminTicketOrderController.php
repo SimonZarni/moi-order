@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Admin\V1;
 
+use App\Exports\TicketOrderExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UploadEticketRequest;
 use App\Http\Resources\TicketOrderResource;
@@ -16,6 +17,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -51,6 +54,15 @@ class AdminTicketOrderController extends Controller
                 'failed'        => (int) $counts->get('payment_failed', 0),
             ],
         ]);
+    }
+
+    /** GET /api/admin/v1/ticket-orders/export */
+    public function export(Request $request): BinaryFileResponse
+    {
+        return Excel::download(
+            new TicketOrderExport($request->only(['status', 'search'])),
+            'ticket-orders-' . now()->format('Y-m-d') . '.xlsx'
+        );
     }
 
     public function index(Request $request): JsonResponse
