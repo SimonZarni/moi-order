@@ -7,59 +7,62 @@ import { radius } from '../../../shared/theme/radius';
 export const styles = StyleSheet.create({
   card: {
     backgroundColor: colours.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
   },
   cardContent: {
+    flexDirection: 'row',
+  },
+  // Left colored status strip
+  statusStrip: {
+    width: 4,
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
+  },
+  cardBody: {
+    flex: 1,
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
+    paddingVertical: spacing.md,
     gap: spacing.xs,
   },
-  header: {
+  topRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 2,
+    gap: spacing.sm,
+  },
+  // Customer avatar
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  avatarText: {
+    fontSize: typography.xs,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  middleBlock: {
+    flex: 1,
+    gap: 2,
   },
   orderNumber: {
-    fontSize: typography.md,
+    fontSize: typography.sm,
     fontWeight: '800',
     color: colours.textOnLight,
-    letterSpacing: -0.3,
-  },
-  statusBadge: {
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: 4,
-    borderRadius: radius.full,
-    borderWidth: 1,
-  },
-  statusText: {
-    fontSize: typography.xxs,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
+    letterSpacing: -0.2,
   },
   customer: {
-    fontSize: typography.sm,
-    fontWeight: '700',
-    color: colours.textOnLight,
-  },
-  meta: {
     fontSize: typography.xs,
+    fontWeight: '500',
     color: colours.textMuted,
   },
-  items: {
-    fontSize: typography.xs,
-    color: colours.textMuted,
-    lineHeight: 18,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: spacing.xs,
-    paddingTop: spacing.xs,
-    borderTopWidth: 1,
-    borderTopColor: colours.divider,
+  rightBlock: {
+    alignItems: 'flex-end',
+    gap: 4,
+    flexShrink: 0,
   },
   total: {
     fontSize: typography.md,
@@ -67,38 +70,67 @@ export const styles = StyleSheet.create({
     color: colours.textOnLight,
     letterSpacing: -0.3,
   },
+  statusBadge: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    borderRadius: radius.full,
+    borderWidth: 1,
+  },
+  statusText: {
+    fontSize: typography.xxs,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  items: {
+    fontSize: typography.xs,
+    color: colours.textMuted,
+    flex: 1,
+  },
   date: {
     fontSize: typography.xxs,
     color: colours.textMuted,
+    flexShrink: 0,
   },
+  // unused but kept for type compat
+  header: { flexDirection: 'row', justifyContent: 'space-between' },
+  meta: { fontSize: typography.xs, color: colours.textMuted },
+  footer: { flexDirection: 'row', justifyContent: 'space-between' },
 
   // ── Action button ──────────────────────────────────────────────────────────
   actionRow: {
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.md,
-    paddingTop: spacing.xs,
+    paddingTop: 0,
   },
-  actionRowDesktop: {
-    alignItems: 'flex-end',
-  },
+  actionRowDesktop: { alignItems: 'flex-end' },
   actionButton: {
     backgroundColor: colours.primary,
     borderRadius: radius.full,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs + 2,
     paddingHorizontal: spacing.md,
     alignItems: 'center',
-    minHeight: 40,
     justifyContent: 'center',
+    minHeight: 36,
+    shadowColor: colours.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
   },
   actionButtonDesktop: {
     paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.xs + 2,
-    minHeight: 36,
+    minHeight: 32,
   },
   actionButtonText: {
     color: colours.white,
-    fontSize: typography.sm,
-    fontWeight: '700',
-    letterSpacing: 0.2,
+    fontSize: typography.xs,
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
 });

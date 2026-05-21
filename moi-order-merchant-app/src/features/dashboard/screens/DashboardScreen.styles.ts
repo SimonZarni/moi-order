@@ -4,122 +4,112 @@ import { spacing } from '../../../shared/theme/spacing';
 import { typography } from '../../../shared/theme/typography';
 import { radius } from '../../../shared/theme/radius';
 
-const card = {
-  backgroundColor: colours.surface,
-  borderRadius: radius.xl,
+const shadow = {
   shadowColor: '#000',
   shadowOffset: { width: 0, height: 2 },
   shadowOpacity: 0.07,
-  shadowRadius: 12,
+  shadowRadius: 10,
   elevation: 3,
 };
 
 export const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: colours.backgroundDark,
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: spacing.md,
-    paddingBottom: spacing.xl,
-    gap: spacing.md,
-  },
+  safe: { flex: 1, backgroundColor: colours.backgroundDark },
+  scroll: { flex: 1 },
+  scrollContent: { paddingBottom: spacing.xl },
 
-  // ── Dark hero header — breaks out of scrollContent padding ─────────────────
+  // ── Hero header ─────────────────────────────────────────────────────────────
   pageHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
-    paddingBottom: spacing.xl + spacing.md,
+    paddingBottom: spacing.xxl,
     backgroundColor: colours.backgroundDark,
-    marginTop: -spacing.md,
-    marginHorizontal: -spacing.md,
   },
-  pageTitleBlock: {
-    gap: 4,
+  pageTitleBlock: { gap: 2 },
+  pageGreeting: {
+    fontSize: typography.xs,
+    fontWeight: '600',
+    color: colours.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
   },
   pageTitle: {
-    fontSize: typography.display,
-    fontWeight: '800',
+    fontSize: typography.hero,
+    fontWeight: '900',
     color: colours.textOnDark,
-    letterSpacing: -0.8,
+    letterSpacing: -1.2,
+    lineHeight: 40,
   },
-  pageDate: {
-    fontSize: typography.xs,
-    color: 'rgba(255,255,255,0.45)',
-    fontWeight: '500',
-  },
+  pageDate: { fontSize: typography.xs, color: 'rgba(255,255,255,0.4)', marginTop: 2 },
   pendingPill: {
-    backgroundColor: colours.warning + '22',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: colours.warning + '20',
     borderRadius: radius.full,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
+    paddingVertical: spacing.xs + 2,
     borderWidth: 1,
     borderColor: colours.warning + '55',
     marginTop: 4,
   },
-  pendingPillText: {
-    fontSize: typography.xs,
-    fontWeight: '700',
-    color: colours.warning,
+  pendingDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colours.warning,
   },
+  pendingPillText: { fontSize: typography.xs, fontWeight: '700', color: colours.warning },
 
-  // ── KPI stat grid ───────────────────────────────────────────────────────────
+  // ── KPI grid (overlaps hero) ─────────────────────────────────────────────────
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
     marginTop: -spacing.lg,
+    paddingHorizontal: spacing.md,
   },
   statCard: {
     flex: 1,
     minWidth: 148,
-    ...card,
+    backgroundColor: colours.surface,
+    borderRadius: radius.xl,
     padding: spacing.md,
-  },
-  statIconRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: spacing.xs,
-    marginBottom: spacing.sm,
+    ...shadow,
   },
   statIconBg: {
-    width: 34,
-    height: 34,
-    borderRadius: radius.md,
+    width: 40,
+    height: 40,
+    borderRadius: radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colours.primaryGlow,
-  },
-  statLabel: {
-    fontSize: typography.xxs,
-    color: colours.textMuted,
-    fontWeight: '600',
-    flex: 1,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
+    marginBottom: spacing.xs,
   },
   statValue: {
     fontSize: typography.xxl,
-    fontWeight: '800',
+    fontWeight: '900',
     color: colours.textOnLight,
-    letterSpacing: -0.5,
+    letterSpacing: -0.8,
+    lineHeight: 28,
   },
-  statSub: {
+  statLabel: {
     fontSize: typography.xs,
-    color: colours.textMuted,
-    marginTop: 2,
+    fontWeight: '700',
+    color: colours.textOnLight,
   },
+  statSub: { fontSize: typography.xxs, color: colours.textMuted },
 
-  // ── Section card ────────────────────────────────────────────────────────────
+  // ── Section card ─────────────────────────────────────────────────────────────
   sectionCard: {
-    ...card,
+    backgroundColor: colours.surface,
+    borderRadius: radius.xl,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.md,
     overflow: 'hidden',
+    ...shadow,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -130,43 +120,51 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colours.divider,
   },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  sectionAccent: {
+    width: 3,
+    height: 18,
+    borderRadius: radius.full,
+    backgroundColor: colours.primary,
+  },
   sectionTitle: {
     fontSize: typography.md,
-    fontWeight: '700',
+    fontWeight: '800',
     color: colours.textOnLight,
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
   },
   pendingBadge: {
-    backgroundColor: colours.warning + '18',
+    backgroundColor: colours.primaryBg,
     borderRadius: radius.full,
     paddingHorizontal: spacing.sm + 2,
     paddingVertical: 3,
     borderWidth: 1,
-    borderColor: colours.warning + '40',
+    borderColor: colours.primary + '40',
   },
-  pendingBadgeText: {
-    fontSize: typography.xxs,
-    color: colours.warning,
-    fontWeight: '700',
-  },
+  pendingBadgeText: { fontSize: typography.xxs, color: colours.primary, fontWeight: '700' },
   emptyState: {
     padding: spacing.xxl,
     alignItems: 'center',
     gap: spacing.sm,
   },
-  emptyText: {
-    fontSize: typography.sm,
-    color: colours.textMuted,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
+  emptyIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: radius.full,
+    backgroundColor: colours.primaryGlow,
     alignItems: 'center',
-    backgroundColor: colours.backgroundLight,
-    gap: spacing.sm,
+    justifyContent: 'center',
+    marginBottom: spacing.xs,
   },
-  loadingText: {
-    fontSize: typography.sm,
-    color: colours.textMuted,
-  },
+  emptyTitle: { fontSize: typography.md, fontWeight: '700', color: colours.textOnLight },
+  emptyText: { fontSize: typography.sm, color: colours.textMuted },
+
+  // kept for backwards compat
+  pageTitleLegacy: { fontSize: typography.display, fontWeight: '800', color: colours.textOnDark },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colours.backgroundLight },
+  loadingText: { fontSize: typography.sm, color: colours.textMuted },
 });

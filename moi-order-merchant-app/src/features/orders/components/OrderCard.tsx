@@ -13,15 +13,13 @@ interface OrderAction {
   nextStatus: string;
 }
 
-// Every merchant-triggered forward transition in the correct order.
 const ORDER_ACTIONS: Partial<Record<string, OrderAction>> = {
-  [ORDER_STATUS.OrderPlaced]:          { label: 'Accept Order',    nextStatus: ORDER_STATUS.WaitingForPayment },
-  [ORDER_STATUS.PaymentConfirmed]:     { label: 'Start Preparing', nextStatus: ORDER_STATUS.PreparingFood },
-  [ORDER_STATUS.PreparingFood]:        { label: 'Mark Ready',      nextStatus: ORDER_STATUS.WaitingForDelivery },
-  [ORDER_STATUS.WaitingForDelivery]:   { label: 'Mark Picked Up',  nextStatus: ORDER_STATUS.DeliveryOnTheWay },
-  [ORDER_STATUS.DeliveryOnTheWay]:     { label: 'Mark Delivered',  nextStatus: ORDER_STATUS.Delivered },
-  [ORDER_STATUS.Delivered]:            { label: 'Complete Order',   nextStatus: ORDER_STATUS.Completed },
-  // WaitingForPayment: customer pays via LINE — no merchant action button needed
+  [ORDER_STATUS.OrderPlaced]:          { label: 'Accept',       nextStatus: ORDER_STATUS.WaitingForPayment },
+  [ORDER_STATUS.PaymentConfirmed]:     { label: 'Start Prep',   nextStatus: ORDER_STATUS.PreparingFood },
+  [ORDER_STATUS.PreparingFood]:        { label: 'Mark Ready',   nextStatus: ORDER_STATUS.WaitingForDelivery },
+  [ORDER_STATUS.WaitingForDelivery]:   { label: 'Picked Up',    nextStatus: ORDER_STATUS.DeliveryOnTheWay },
+  [ORDER_STATUS.DeliveryOnTheWay]:     { label: 'Delivered',    nextStatus: ORDER_STATUS.Delivered },
+  [ORDER_STATUS.Delivered]:            { label: 'Complete',     nextStatus: ORDER_STATUS.Completed },
 };
 
 const STATUS_COLOURS: Record<string, string> = {
@@ -46,55 +44,58 @@ export function OrderCard({ order, onUpdateStatus, onPress }: OrderCardProps): R
   const { isDesktop } = useResponsive();
   const action = ORDER_ACTIONS[order.status];
   const statusColour = STATUS_COLOURS[order.status] ?? colours.medium;
-  const itemsSummary = order.items?.map((i) => `${i.quantity}× ${i.name}`).join(', ') ?? '';
+  const itemCount = order.items?.length ?? 0;
+  const initials = (order.user.name ?? '?').slice(0, 2).toUpperCase();
 
   const handleAction = useCallback(() => {
     if (action) onUpdateStatus(order.id, action.nextStatus);
   }, [action, order.id, onUpdateStatus]);
 
-  // Unified badge style: coloured bg (18%) + coloured border (40%)
-  const badgeStyle = {
-    backgroundColor: statusColour + '18',
-    borderColor: statusColour + '40',
-  };
+  const inner = (
+    <View style={styles.cardContent}>
+      {/* Left status strip */}
+      <View style={[styles.statusStrip, { backgroundColor: statusColour }]} />
 
-  const cardInfo = (
-    <>
-      <View style={styles.header}>
-        <Text style={styles.orderNumber}>{order.order_number ?? `#${order.id}`}</Text>
-        <View style={[styles.statusBadge, badgeStyle]}>
-          <Text style={[styles.statusText, { color: statusColour }]}>{order.status_label}</Text>
+      <View style={styles.cardBody}>
+        <View style={styles.topRow}>
+          {/* Avatar */}
+          <View style={[styles.avatar, { backgroundColor: statusColour + '22' }]}>
+            <Text style={[styles.avatarText, { color: statusColour }]}>{initials}</Text>
+          </View>
+
+          <View style={styles.middleBlock}>
+            <Text style={styles.orderNumber}>{order.order_number ?? `#${order.id}`}</Text>
+            <Text style={styles.customer}>{order.user.name}</Text>
+          </View>
+
+          <View style={styles.rightBlock}>
+            <Text style={styles.total}>{formatPrice(order.total_cents)}</Text>
+            <View style={[styles.statusBadge, { backgroundColor: statusColour + '18', borderColor: statusColour + '40' }]}>
+              <Text style={[styles.statusText, { color: statusColour }]}>{order.status_label}</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.metaRow}>
+          <Text style={styles.items} numberOfLines={1}>
+            {itemCount} item{itemCount !== 1 ? 's' : ''}{order.items?.length ? ` · ${order.items.map((i) => i.name).slice(0, 2).join(', ')}${itemCount > 2 ? '…' : ''}` : ''}
+          </Text>
+          <Text style={styles.date}>{formatDateTime(order.created_at)}</Text>
         </View>
       </View>
-      <Text style={styles.customer}>{order.user.name}</Text>
-      {order.user.phone !== null && (
-        <Text style={styles.meta}>{order.user.phone}</Text>
-      )}
-      <Text style={styles.items} numberOfLines={2}>{itemsSummary}</Text>
-      <View style={styles.footer}>
-        <Text style={styles.total}>{formatPrice(order.total_cents)}</Text>
-        <Text style={styles.date}>{formatDateTime(order.created_at)}</Text>
-      </View>
-    </>
+    </View>
   );
 
   return (
-    // Outer View — never a Pressable, so the action button inside is never a nested <button>
     <View style={styles.card}>
       {onPress !== undefined ? (
-        <Pressable
-          style={styles.cardContent}
-          onPress={onPress}
-          accessibilityLabel={`View order ${order.order_number ?? order.id}`}
-          accessibilityRole="button"
-        >
-          {cardInfo}
+        <Pressable onPress={onPress} accessibilityLabel={`View order ${order.order_number ?? order.id}`} accessibilityRole="button">
+          {inner}
         </Pressable>
       ) : (
-        <View style={styles.cardContent}>{cardInfo}</View>
+        inner
       )}
 
-      {/* Action button is always a sibling, never nested inside another Pressable */}
       {action !== undefined && (
         <View style={[styles.actionRow, isDesktop && styles.actionRowDesktop]}>
           <Pressable
