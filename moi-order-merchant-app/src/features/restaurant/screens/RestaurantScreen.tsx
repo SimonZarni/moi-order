@@ -101,7 +101,7 @@ export function RestaurantScreen(): React.JSX.Element {
           {!isEditing && restaurant !== null && (
             <Pressable style={styles.editButton} onPress={handleStartEdit}
               accessibilityLabel="Edit description" accessibilityRole="button">
-              <Ionicons name="pencil-outline" size={14} color={colours.white} />
+              <Ionicons name="pencil-outline" size={14} color={colours.backgroundDark} />
               <Text style={styles.editButtonText}>Edit Description</Text>
             </Pressable>
           )}
@@ -330,7 +330,7 @@ export function RestaurantScreen(): React.JSX.Element {
                       <Switch
                         value={!h.is_closed}
                         onValueChange={(v) => handleHourToggle(h.day_of_week, !v)}
-                        trackColor={{ false: colours.divider, true: colours.primary + '66' }}
+                        trackColor={{ false: colours.surfaceMuted, true: colours.primary + '66' }}
                         thumbColor={!h.is_closed ? colours.primary : colours.medium}
                         accessibilityLabel={`Toggle open for ${DAY_SHORT[h.day_of_week]}`}
                       />
@@ -385,7 +385,7 @@ export function RestaurantScreen(): React.JSX.Element {
                 <Switch
                   value={restaurant.is_delivery_available}
                   onValueChange={handleToggleDelivery}
-                  trackColor={{ false: colours.divider, true: colours.primary + '66' }}
+                  trackColor={{ false: colours.surfaceMuted, true: colours.primary + '66' }}
                   thumbColor={restaurant.is_delivery_available ? colours.primary : colours.medium}
                   accessibilityLabel="Toggle delivery"
                 />
@@ -396,7 +396,7 @@ export function RestaurantScreen(): React.JSX.Element {
                 <Switch
                   value={restaurant.is_pickup_available}
                   onValueChange={handleTogglePickup}
-                  trackColor={{ false: colours.divider, true: colours.primary + '66' }}
+                  trackColor={{ false: colours.surfaceMuted, true: colours.primary + '66' }}
                   thumbColor={restaurant.is_pickup_available ? colours.primary : colours.medium}
                   accessibilityLabel="Toggle pickup"
                 />

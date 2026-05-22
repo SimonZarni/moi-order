@@ -40,15 +40,18 @@ export const styles = StyleSheet.create({
   pendingText: { fontSize: typography.xs, fontWeight: '700', color: colours.warning },
 
   // ── Filter tabs ───────────────────────────────────────────────────────────────
+  // tabsWrapper constrains the horizontal ScrollView height on web
+  tabsWrapper: {
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
+    backgroundColor: colours.surface,
+  },
   tabsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm + 2,
     gap: spacing.xs,
-    borderBottomWidth: 1,
-    borderBottomColor: colours.divider,
-    backgroundColor: colours.surface,
   },
   tab: {
     alignSelf: 'center',

@@ -132,7 +132,7 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
             accessibilityLabel="Go back to orders"
             accessibilityRole="button"
           >
-            <Ionicons name="arrow-back" size={20} color={colours.textOnDark} />
+            <Ionicons name="arrow-back" size={20} color={colours.textOnLight} />
           </Pressable>
         )}
         <Text style={styles.topBarTitle}>

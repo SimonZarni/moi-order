@@ -5,8 +5,8 @@ import { typography } from '../../../shared/theme/typography';
 import { radius } from '../../../shared/theme/radius';
 
 export const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colours.backgroundDark },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colours.backgroundDark, gap: spacing.sm },
+  safe: { flex: 1, backgroundColor: colours.surface },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colours.surface, gap: spacing.sm },
   errorText: { fontSize: typography.sm, color: colours.error },
 
   // ── Top bar ──────────────────────────────────────────────────────────────────
@@ -15,9 +15,9 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.surface,
     borderBottomWidth: 1,
-    borderBottomColor: colours.dividerDark,
+    borderBottomColor: colours.divider,
     gap: spacing.sm,
   },
   backButton: {
@@ -26,11 +26,11 @@ export const styles = StyleSheet.create({
     borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colours.backgroundMid,
+    backgroundColor: colours.surfaceMuted,
     borderWidth: 1,
-    borderColor: colours.dividerDark,
+    borderColor: colours.divider,
   },
-  topBarTitle: { flex: 1, fontSize: typography.md, fontWeight: '700', color: colours.textOnDark },
+  topBarTitle: { flex: 1, fontSize: typography.md, fontWeight: '700', color: colours.textOnLight },
   statusBadge: { paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.full },
   statusText: { fontSize: typography.xxs, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
 
@@ -47,23 +47,23 @@ export const styles = StyleSheet.create({
 
   // ── Cards ─────────────────────────────────────────────────────────────────────
   card: {
-    backgroundColor: colours.backgroundMid,
+    backgroundColor: colours.surface,
     borderRadius: radius.xl,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: colours.dividerDark,
+    borderColor: colours.divider,
   },
   cardHeader: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.surfaceMuted,
     borderBottomWidth: 1,
-    borderBottomColor: colours.dividerDark,
+    borderBottomColor: colours.divider,
   },
   cardTitle: {
     fontSize: typography.xxs,
     fontWeight: '700',
-    color: 'rgba(255,255,255,0.45)',
+    color: colours.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 1.2,
   },
@@ -71,21 +71,21 @@ export const styles = StyleSheet.create({
 
   // ── Info rows ─────────────────────────────────────────────────────────────────
   orderHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  orderNumber: { fontSize: typography.lg, fontWeight: '800', color: colours.textOnDark, letterSpacing: -0.3 },
-  divider: { height: 1, backgroundColor: colours.dividerDark },
+  orderNumber: { fontSize: typography.lg, fontWeight: '800', color: colours.textOnLight, letterSpacing: -0.3 },
+  divider: { height: 1, backgroundColor: colours.divider },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: spacing.sm },
-  label: { fontSize: typography.sm, color: 'rgba(255,255,255,0.4)', flexShrink: 0 },
-  value: { fontSize: typography.sm, fontWeight: '500', color: colours.textOnDark, flex: 1, textAlign: 'right' },
+  label: { fontSize: typography.sm, color: colours.textMuted, flexShrink: 0 },
+  value: { fontSize: typography.sm, fontWeight: '500', color: colours.textOnLight, flex: 1, textAlign: 'right' },
 
   // ── Items ─────────────────────────────────────────────────────────────────────
   itemRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingVertical: spacing.xs + 2, gap: spacing.sm },
   itemNameCol: { flex: 1, gap: 2 },
-  itemName: { fontSize: typography.sm, fontWeight: '600', color: colours.textOnDark },
-  itemQty: { fontSize: typography.xs, color: 'rgba(255,255,255,0.4)' },
-  itemNotes: { fontSize: typography.xs, color: 'rgba(255,255,255,0.3)', fontStyle: 'italic' },
-  itemPrice: { fontSize: typography.sm, fontWeight: '700', color: colours.textOnDark },
-  totalRow: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: spacing.sm, marginTop: spacing.xs, borderTopWidth: 1.5, borderTopColor: colours.dividerDark },
-  totalLabel: { fontSize: typography.md, fontWeight: '800', color: colours.textOnDark },
+  itemName: { fontSize: typography.sm, fontWeight: '600', color: colours.textOnLight },
+  itemQty: { fontSize: typography.xs, color: colours.textMuted },
+  itemNotes: { fontSize: typography.xs, color: colours.textSubtle, fontStyle: 'italic' },
+  itemPrice: { fontSize: typography.sm, fontWeight: '700', color: colours.textOnLight },
+  totalRow: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: spacing.sm, marginTop: spacing.xs, borderTopWidth: 1.5, borderTopColor: colours.divider },
+  totalLabel: { fontSize: typography.md, fontWeight: '800', color: colours.textOnLight },
   totalValue: { fontSize: typography.md, fontWeight: '800', color: colours.primary },
 
   // ── Actions ───────────────────────────────────────────────────────────────────
@@ -101,7 +101,7 @@ export const styles = StyleSheet.create({
   actionButtonDisabled: { opacity: 0.5 },
   actionButtonText: { color: colours.backgroundDark, fontSize: typography.md, fontWeight: '800', letterSpacing: 0.3 },
   cancelButton: {
-    backgroundColor: colours.backgroundMid,
+    backgroundColor: colours.surface,
     borderRadius: radius.full,
     paddingVertical: spacing.sm + 4,
     alignItems: 'center',
@@ -117,7 +117,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.xs,
-    backgroundColor: colours.primary + '18',
+    backgroundColor: colours.primaryBg,
     borderRadius: radius.full,
     paddingVertical: spacing.sm + 4,
     borderWidth: 1.5,
@@ -131,7 +131,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    backgroundColor: colours.warning + '18',
+    backgroundColor: colours.warningBg,
     borderRadius: radius.lg,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
@@ -140,7 +140,7 @@ export const styles = StyleSheet.create({
   },
   infoNoteText: { flex: 1, fontSize: typography.sm, color: colours.warning, fontWeight: '500' },
 
-  // ── Cancel modal ──────────────────────────────────────────────────────────────
+  // ── Cancel modal (keep dark) ──────────────────────────────────────────────────
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'flex-end' },
   modalCard: {
     backgroundColor: colours.backgroundMid,

@@ -70,7 +70,7 @@ export function OrderChatContent({ orderId, onBack }: ContentProps): React.JSX.E
           accessibilityLabel="Go back"
           accessibilityRole="button"
         >
-          <Ionicons name="arrow-back" size={20} color={colours.textOnDark} />
+          <Ionicons name="arrow-back" size={20} color={colours.textOnLight} />
         </Pressable>
         <View style={styles.headerInfo}>
           <Text style={styles.topBarTitle}>Chat with Customer</Text>
@@ -89,7 +89,7 @@ export function OrderChatContent({ orderId, onBack }: ContentProps): React.JSX.E
           </Pressable>
         ) : messages.length === 0 ? (
           <Pressable style={styles.emptyWrap} onPress={Keyboard.dismiss}>
-            <Ionicons name="chatbubbles-outline" size={44} color={colours.medium} />
+            <Ionicons name="chatbubbles-outline" size={44} color={colours.textSubtle} />
             <Text style={styles.emptyText}>No messages yet.</Text>
           </Pressable>
         ) : (

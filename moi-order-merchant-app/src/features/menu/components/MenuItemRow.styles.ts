@@ -7,7 +7,7 @@ import { radius } from '../../../shared/theme/radius';
 export const styles = StyleSheet.create({
   wrapper: {
     borderBottomWidth: 1,
-    borderBottomColor: colours.dividerDark,
+    borderBottomColor: colours.divider,
   },
   row: {
     flexDirection: 'row',
@@ -26,13 +26,13 @@ export const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: radius.md,
-    backgroundColor: colours.dividerDark,
+    backgroundColor: colours.surfaceMuted,
   },
   info: { flex: 1 },
   name: {
     fontSize: typography.sm,
     fontWeight: '700',
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     marginBottom: 3,
   },
   priceRow: {
@@ -43,12 +43,12 @@ export const styles = StyleSheet.create({
   },
   price: {
     fontSize: typography.xs,
-    color: 'rgba(255,255,255,0.5)',
+    color: colours.textMuted,
     fontWeight: '600',
   },
   originalPrice: {
     fontSize: typography.xxs,
-    color: 'rgba(255,255,255,0.3)',
+    color: colours.textSubtle,
     textDecorationLine: 'line-through',
   },
   modifierCount: {
@@ -84,7 +84,7 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     borderRadius: radius.full,
     borderWidth: 1,
-    borderColor: colours.primary + '55',
+    borderColor: colours.divider,
     minHeight: 44,
     justifyContent: 'center',
   },
@@ -117,14 +117,14 @@ export const styles = StyleSheet.create({
   guardEdit: { backgroundColor: colours.warning, paddingHorizontal: spacing.sm, paddingVertical: 6, borderRadius: radius.full, minHeight: 36, justifyContent: 'center', alignItems: 'center' },
   guardEditText: { fontSize: typography.xs, color: colours.white, fontWeight: '700' },
   guardCancel: { paddingHorizontal: spacing.sm, paddingVertical: 6, minHeight: 36, justifyContent: 'center', alignItems: 'center' },
-  guardCancelText: { fontSize: typography.xs, color: 'rgba(255,255,255,0.4)', fontWeight: '600' },
+  guardCancelText: { fontSize: typography.xs, color: colours.textMuted, fontWeight: '600' },
   // Confirm bar
   confirmBar: {
     flexDirection: 'row',
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: spacing.xs,
-    backgroundColor: colours.error + '18',
+    backgroundColor: colours.error + '10',
     borderTopWidth: 1,
     borderTopColor: colours.error + '33',
     paddingHorizontal: spacing.md,
@@ -134,14 +134,14 @@ export const styles = StyleSheet.create({
   confirmYes: { backgroundColor: colours.error, paddingHorizontal: spacing.sm, paddingVertical: 6, borderRadius: radius.full, minHeight: 36, justifyContent: 'center', alignItems: 'center' },
   confirmYesText: { fontSize: typography.xs, color: colours.white, fontWeight: '700' },
   confirmNo: { paddingHorizontal: spacing.sm, paddingVertical: 6, minHeight: 36, justifyContent: 'center', alignItems: 'center' },
-  confirmNoText: { fontSize: typography.xs, color: 'rgba(255,255,255,0.4)', fontWeight: '600' },
+  confirmNoText: { fontSize: typography.xs, color: colours.textMuted, fontWeight: '600' },
   // Accordion
-  accordion: { backgroundColor: colours.backgroundDark, borderTopWidth: 1, borderTopColor: colours.dividerDark, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, gap: spacing.sm },
+  accordion: { backgroundColor: colours.backgroundLight, borderTopWidth: 1, borderTopColor: colours.divider, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, gap: spacing.sm },
   groupBlock: { gap: 4 },
   groupHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 },
-  groupName: { fontSize: typography.xs, fontWeight: '800', color: colours.textOnDark, textTransform: 'uppercase', letterSpacing: 0.5 },
-  groupMeta: { fontSize: typography.xxs, color: 'rgba(255,255,255,0.35)' },
+  groupName: { fontSize: typography.xs, fontWeight: '800', color: colours.textOnLight, textTransform: 'uppercase', letterSpacing: 0.5 },
+  groupMeta: { fontSize: typography.xxs, color: colours.textMuted },
   optionRow: { flexDirection: 'row', justifyContent: 'space-between', paddingLeft: spacing.sm, paddingVertical: 3 },
-  optionName: { fontSize: typography.xs, color: 'rgba(255,255,255,0.6)' },
+  optionName: { fontSize: typography.xs, color: colours.textMuted },
   optionPrice: { fontSize: typography.xs, color: colours.primary, fontWeight: '700' },
 });

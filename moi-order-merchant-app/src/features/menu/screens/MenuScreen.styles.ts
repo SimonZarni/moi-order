@@ -5,8 +5,8 @@ import { typography } from '../../../shared/theme/typography';
 import { radius } from '../../../shared/theme/radius';
 
 export const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colours.backgroundDark },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colours.backgroundDark },
+  safe: { flex: 1, backgroundColor: colours.surface },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colours.surface },
   // ── Page header ──────────────────────────────────────────────────────────────
   pageHeader: {
     flexDirection: 'row',
@@ -16,12 +16,13 @@ export const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colours.dividerDark,
+    borderBottomColor: colours.divider,
+    backgroundColor: colours.surface,
   },
   pageTitle: {
     fontSize: typography.display,
     fontWeight: '800',
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     letterSpacing: -0.8,
   },
   addButton: {
@@ -37,9 +38,9 @@ export const styles = StyleSheet.create({
   },
   addButtonText: { color: colours.backgroundDark, fontSize: typography.sm, fontWeight: '700' },
   list: { padding: spacing.lg, width: '100%' },
-  empty: { textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: typography.md, marginTop: spacing.xxl },
+  empty: { textAlign: 'center', color: colours.textSubtle, fontSize: typography.md, marginTop: spacing.xxl },
 
-  // ── Modal (dark) ──────────────────────────────────────────────────────────────
+  // ── Modal (keep dark — overlays work well dark) ────────────────────────────────
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
   modalCard: {
     backgroundColor: colours.backgroundMid,

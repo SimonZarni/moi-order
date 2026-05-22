@@ -82,7 +82,7 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
       </View>
       {recentOrders.length === 0 ? (
         <View style={styles.emptyOrders}>
-          <Ionicons name="receipt-outline" size={28} color="rgba(255,255,255,0.2)" />
+          <Ionicons name="receipt-outline" size={28} color={colours.textSubtle} />
           <Text style={styles.emptyText}>No recent orders</Text>
         </View>
       ) : (
@@ -90,6 +90,7 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
           <OrderCard
             key={order.id}
             order={order}
+            variant="light"
             onUpdateStatus={handleUpdateStatus}
             onPress={onSelectOrder !== undefined ? () => onSelectOrder(order.id) : undefined}
           />
