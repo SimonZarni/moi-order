@@ -20,9 +20,9 @@ const TABS: { key: StatusFilter; label: string }[] = [
 ];
 
 const SECTION_DOTS: Record<string, string> = {
-  'New Orders':                colours.warning,
-  'In Progress':               colours.primary,
-  'Completed & Cancelled':     'rgba(255,255,255,0.3)',
+  'New Orders':              colours.warning,
+  'In Progress':             colours.primary,
+  'Completed & Cancelled':   colours.textSubtle,
 };
 
 function formatDateLabel(d: string | null): string {
@@ -48,32 +48,29 @@ export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.El
   const pending = sections.find((s) => s.title === 'New Orders')?.data.length ?? 0;
 
   const header = (
-    <>
-      {/* Date navigator */}
-      <View style={styles.dateNav}>
-        <Pressable style={styles.dateArrow} onPress={handleDatePrev} accessibilityRole="button" accessibilityLabel="Previous day">
-          <Ionicons name="chevron-back" size={14} color="rgba(255,255,255,0.5)" />
-        </Pressable>
-        <View style={styles.dateCenter}>
-          <Text style={styles.dateLabel}>{formatDateLabel(dateFilter)}</Text>
-          <Text style={styles.dateCount}>{totalOrders} orders this period</Text>
-        </View>
-        <Pressable
-          style={[styles.dateArrow, isToday && { opacity: 0.3 }]}
-          onPress={handleDateNext}
-          disabled={isToday}
-          accessibilityRole="button"
-          accessibilityLabel="Next day"
-        >
-          <Ionicons name="chevron-forward" size={14} color="rgba(255,255,255,0.5)" />
-        </Pressable>
-        {!isToday && (
-          <Pressable style={styles.todayBtn} onPress={handleDateToday} accessibilityRole="button" accessibilityLabel="Today">
-            <Text style={styles.todayBtnText}>Today</Text>
-          </Pressable>
-        )}
+    <View style={styles.dateNav}>
+      <Pressable style={styles.dateArrow} onPress={handleDatePrev} accessibilityRole="button" accessibilityLabel="Previous day">
+        <Ionicons name="chevron-back" size={14} color={colours.textMuted} />
+      </Pressable>
+      <View style={styles.dateCenter}>
+        <Text style={styles.dateLabel}>{formatDateLabel(dateFilter)}</Text>
+        <Text style={styles.dateCount}>{totalOrders} orders this period</Text>
       </View>
-    </>
+      <Pressable
+        style={[styles.dateArrow, isToday && { opacity: 0.3 }]}
+        onPress={handleDateNext}
+        disabled={isToday}
+        accessibilityRole="button"
+        accessibilityLabel="Next day"
+      >
+        <Ionicons name="chevron-forward" size={14} color={colours.textMuted} />
+      </Pressable>
+      {!isToday && (
+        <Pressable style={styles.todayBtn} onPress={handleDateToday} accessibilityRole="button" accessibilityLabel="Today">
+          <Text style={styles.todayBtnText}>Today</Text>
+        </Pressable>
+      )}
+    </View>
   );
 
   return (
@@ -90,7 +87,11 @@ export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.El
       </View>
 
       {/* Filter tabs */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsRow}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabsRow}
+      >
         {TABS.map((tab) => {
           const active = statusFilter === tab.key;
           return (
@@ -139,6 +140,7 @@ export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.El
           renderItem={({ item }) => (
             <OrderCard
               order={item}
+              variant="light"
               onUpdateStatus={handleUpdateStatus}
               onPress={onSelectOrder !== undefined ? () => onSelectOrder(item.id) : undefined}
             />
@@ -154,7 +156,7 @@ export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.El
           ListEmptyComponent={
             <View style={styles.emptyWrap}>
               <View style={styles.emptyIcon}>
-                <Ionicons name="receipt-outline" size={26} color="rgba(255,255,255,0.3)" />
+                <Ionicons name="receipt-outline" size={26} color={colours.textSubtle} />
               </View>
               <Text style={styles.emptyTitle}>No orders found</Text>
               <Text style={styles.emptyBody}>Try a different filter or date</Text>

@@ -16,12 +16,12 @@ interface OrderAction {
 }
 
 const ORDER_ACTIONS: Partial<Record<string, OrderAction>> = {
-  [ORDER_STATUS.OrderPlaced]:          { label: 'Accept Order',   icon: 'checkmark-circle-outline', nextStatus: ORDER_STATUS.WaitingForPayment },
-  [ORDER_STATUS.PaymentConfirmed]:     { label: 'Start Preparing',icon: 'flame-outline',             nextStatus: ORDER_STATUS.PreparingFood },
-  [ORDER_STATUS.PreparingFood]:        { label: 'Mark Ready',     icon: 'bag-check-outline',         nextStatus: ORDER_STATUS.WaitingForDelivery },
-  [ORDER_STATUS.WaitingForDelivery]:   { label: 'Rider Picked Up',icon: 'bicycle-outline',           nextStatus: ORDER_STATUS.DeliveryOnTheWay },
-  [ORDER_STATUS.DeliveryOnTheWay]:     { label: 'Mark Delivered', icon: 'location-outline',          nextStatus: ORDER_STATUS.Delivered },
-  [ORDER_STATUS.Delivered]:            { label: 'Complete Order', icon: 'checkmark-done-outline',    nextStatus: ORDER_STATUS.Completed },
+  [ORDER_STATUS.OrderPlaced]:          { label: 'Accept Order',    icon: 'checkmark-circle-outline', nextStatus: ORDER_STATUS.WaitingForPayment },
+  [ORDER_STATUS.PaymentConfirmed]:     { label: 'Start Preparing', icon: 'flame-outline',             nextStatus: ORDER_STATUS.PreparingFood },
+  [ORDER_STATUS.PreparingFood]:        { label: 'Mark Ready',      icon: 'bag-check-outline',         nextStatus: ORDER_STATUS.WaitingForDelivery },
+  [ORDER_STATUS.WaitingForDelivery]:   { label: 'Rider Picked Up', icon: 'bicycle-outline',           nextStatus: ORDER_STATUS.DeliveryOnTheWay },
+  [ORDER_STATUS.DeliveryOnTheWay]:     { label: 'Mark Delivered',  icon: 'location-outline',          nextStatus: ORDER_STATUS.Delivered },
+  [ORDER_STATUS.Delivered]:            { label: 'Complete Order',  icon: 'checkmark-done-outline',    nextStatus: ORDER_STATUS.Completed },
 };
 
 const STATUS_COLOURS: Record<string, string> = {
@@ -40,10 +40,12 @@ interface OrderCardProps {
   order: FoodOrder;
   onUpdateStatus: (orderId: number, newStatus: string) => void;
   onPress?: () => void;
+  variant?: 'light' | 'dark';
 }
 
-export function OrderCard({ order, onUpdateStatus, onPress }: OrderCardProps): React.JSX.Element {
+export function OrderCard({ order, onUpdateStatus, onPress, variant = 'dark' }: OrderCardProps): React.JSX.Element {
   const { isDesktop } = useResponsive();
+  const isLight = variant === 'light';
   const action = ORDER_ACTIONS[order.status];
   const statusColour = STATUS_COLOURS[order.status] ?? colours.medium;
   const initials = (order.user.name ?? '?').slice(0, 2).toUpperCase();
@@ -54,9 +56,14 @@ export function OrderCard({ order, onUpdateStatus, onPress }: OrderCardProps): R
     if (action) onUpdateStatus(order.id, action.nextStatus);
   }, [action, order.id, onUpdateStatus]);
 
+  const textPrimary = isLight ? colours.textOnLight : colours.textOnDark;
+  const textMuted = isLight ? colours.textMuted : 'rgba(255,255,255,0.4)';
+  const textSubtle = isLight ? colours.textSubtle : 'rgba(255,255,255,0.3)';
+  const borderColour = isLight ? colours.divider : colours.dividerDark;
+
   const content = (
-    <View style={styles.inner}>
-      {/* 6px status colour strip */}
+    <View style={[styles.inner]}>
+      {/* 4px status colour strip */}
       <View style={[styles.strip, { backgroundColor: statusColour }]} />
 
       <View style={styles.content}>
@@ -66,15 +73,15 @@ export function OrderCard({ order, onUpdateStatus, onPress }: OrderCardProps): R
             <Text style={[styles.avatarText, { color: statusColour }]}>{initials}</Text>
           </View>
           <View style={styles.nameBlock}>
-            <Text style={styles.customerName}>{order.user.name}</Text>
-            <Text style={styles.orderNum}>{order.order_number ?? `#${order.id}`}</Text>
+            <Text style={[styles.customerName, { color: textPrimary }]}>{order.user.name}</Text>
+            <Text style={[styles.orderNum, { color: textMuted }]}>{order.order_number ?? `#${order.id}`}</Text>
           </View>
-          <Text style={styles.amount}>{formatPrice(order.total_cents)}</Text>
+          <Text style={[styles.amount, { color: textPrimary }]}>{formatPrice(order.total_cents)}</Text>
         </View>
 
         {/* Row 2: items + status badge */}
         <View style={styles.row2}>
-          <Text style={styles.items} numberOfLines={1}>
+          <Text style={[styles.items, { color: textMuted }]} numberOfLines={1}>
             {itemNames}{extraItems > 0 ? ` +${extraItems} more` : ''}
           </Text>
           <View style={[styles.statusBadge, { backgroundColor: statusColour + '18', borderColor: statusColour + '44' }]}>
@@ -83,13 +90,13 @@ export function OrderCard({ order, onUpdateStatus, onPress }: OrderCardProps): R
         </View>
 
         {/* Row 3: time */}
-        <Text style={styles.time}>{formatDateTime(order.created_at)}</Text>
+        <Text style={[styles.time, { color: textSubtle }]}>{formatDateTime(order.created_at)}</Text>
       </View>
     </View>
   );
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { borderBottomColor: borderColour }]}>
       {onPress !== undefined ? (
         <Pressable onPress={onPress} accessibilityLabel={`View order ${order.order_number ?? order.id}`} accessibilityRole="button">
           {content}
@@ -106,7 +113,7 @@ export function OrderCard({ order, onUpdateStatus, onPress }: OrderCardProps): R
             accessibilityLabel={`${action.label} for order ${order.order_number ?? order.id}`}
             accessibilityRole="button"
           >
-            <Ionicons name={action.icon} size={15} color={colours.white} />
+            <Ionicons name={action.icon} size={15} color={colours.backgroundDark} />
             <Text style={styles.actionBtnText}>{action.label}</Text>
           </Pressable>
         </View>
