@@ -133,7 +133,7 @@ export function Step2Documents({
         accessibilityRole="button"
       >
         {isLoading
-          ? <ActivityIndicator color={colours.white} />
+          ? <ActivityIndicator color={colours.backgroundDark} />
           : <Text style={styles.submitButtonText}>Submit Application</Text>}
       </Pressable>
     </ScrollView>

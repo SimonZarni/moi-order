@@ -217,7 +217,7 @@ export function RestaurantScreen(): React.JSX.Element {
                   value={phoneInput}
                   onChangeText={handlePhoneChange}
                   placeholder="+66 xx xxx xxxx"
-                  placeholderTextColor={colours.medium}
+                  placeholderTextColor="rgba(255,255,255,0.3)"
                   keyboardType="phone-pad"
                   accessibilityLabel="Phone number"
                 />
@@ -253,7 +253,7 @@ export function RestaurantScreen(): React.JSX.Element {
                   value={descriptionForm.description}
                   onChangeText={handleDescriptionChange}
                   placeholder="Tell customers about your restaurant"
-                  placeholderTextColor={colours.medium}
+                  placeholderTextColor="rgba(255,255,255,0.3)"
                   multiline
                   numberOfLines={3}
                   accessibilityLabel="Restaurant description"
@@ -313,7 +313,7 @@ export function RestaurantScreen(): React.JSX.Element {
                       value={h.opens_at ?? ''}
                       onChangeText={(v) => handleHourChange(h.day_of_week, 'opens_at', v)}
                       placeholder="09:00"
-                      placeholderTextColor={colours.medium}
+                      placeholderTextColor="rgba(255,255,255,0.3)"
                       editable={!h.is_closed}
                       accessibilityLabel={`Opening time for ${DAY_SHORT[h.day_of_week]}`}
                     />
@@ -322,7 +322,7 @@ export function RestaurantScreen(): React.JSX.Element {
                       value={h.closes_at ?? ''}
                       onChangeText={(v) => handleHourChange(h.day_of_week, 'closes_at', v)}
                       placeholder="22:00"
-                      placeholderTextColor={colours.medium}
+                      placeholderTextColor="rgba(255,255,255,0.3)"
                       editable={!h.is_closed}
                       accessibilityLabel={`Closing time for ${DAY_SHORT[h.day_of_week]}`}
                     />
@@ -412,7 +412,7 @@ export function RestaurantScreen(): React.JSX.Element {
                       onChangeText={handleMinOrderChange}
                       keyboardType="number-pad"
                       placeholder="0"
-                      placeholderTextColor={colours.medium}
+                      placeholderTextColor="rgba(255,255,255,0.3)"
                       accessibilityLabel="Minimum order amount"
                     />
                     <Text style={styles.deliveryEditCurrency}>฿</Text>
@@ -465,7 +465,7 @@ export function RestaurantScreen(): React.JSX.Element {
                   value={resubmitForm.business_name}
                   onChangeText={(v) => handleResubmitFieldChange('business_name', v)}
                   placeholder="Restaurant name"
-                  placeholderTextColor={colours.medium}
+                  placeholderTextColor="rgba(255,255,255,0.3)"
                   accessibilityLabel="New restaurant name"
                 />
                 <Text style={styles.inputLabel}>New Address</Text>
@@ -474,7 +474,7 @@ export function RestaurantScreen(): React.JSX.Element {
                   value={resubmitForm.business_address}
                   onChangeText={(v) => handleResubmitFieldChange('business_address', v)}
                   placeholder="Full business address"
-                  placeholderTextColor={colours.medium}
+                  placeholderTextColor="rgba(255,255,255,0.3)"
                   multiline
                   accessibilityLabel="New address"
                 />

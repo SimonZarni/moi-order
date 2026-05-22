@@ -45,7 +45,7 @@ export function Step1BusinessInfo({
       <TextInput
         style={styles.input}
         placeholder="Your restaurant name"
-        placeholderTextColor={colours.medium}
+        placeholderTextColor="rgba(255,255,255,0.3)"
         value={businessName}
         onChangeText={setBusinessName}
         accessibilityLabel="Business name"
@@ -72,7 +72,7 @@ export function Step1BusinessInfo({
       <TextInput
         style={[styles.input, styles.textArea]}
         placeholder="Full address of your business"
-        placeholderTextColor={colours.medium}
+        placeholderTextColor="rgba(255,255,255,0.3)"
         value={businessAddress}
         onChangeText={setBusinessAddress}
         multiline
@@ -84,7 +84,7 @@ export function Step1BusinessInfo({
       <TextInput
         style={styles.input}
         placeholder="e.g. +959 123 456 789"
-        placeholderTextColor={colours.medium}
+        placeholderTextColor="rgba(255,255,255,0.3)"
         value={businessPhone}
         onChangeText={setBusinessPhone}
         keyboardType="phone-pad"
@@ -100,7 +100,7 @@ export function Step1BusinessInfo({
         accessibilityRole="button"
       >
         {isLoading
-          ? <ActivityIndicator color={colours.white} />
+          ? <ActivityIndicator color={colours.backgroundDark} />
           : <Text style={styles.buttonText}>Continue</Text>}
       </Pressable>
     </ScrollView>

@@ -126,7 +126,7 @@ export function OrderChatContent({ orderId, onBack }: ContentProps): React.JSX.E
           <TextInput
             style={styles.textInput}
             placeholder="Type a message…"
-            placeholderTextColor={colours.textMuted}
+            placeholderTextColor="rgba(255,255,255,0.3)"
             value={text}
             onChangeText={handleTextChange}
             multiline

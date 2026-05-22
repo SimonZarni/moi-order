@@ -132,7 +132,7 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
             accessibilityLabel="Go back to orders"
             accessibilityRole="button"
           >
-            <Ionicons name="arrow-back" size={20} color={colours.textOnLight} />
+            <Ionicons name="arrow-back" size={20} color={colours.textOnDark} />
           </Pressable>
         )}
         <Text style={styles.topBarTitle}>
@@ -312,7 +312,7 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
                 value={cancelDescription}
                 onChangeText={handleCancelDescriptionChange}
                 placeholder="Describe the reason in more detail…"
-                placeholderTextColor={colours.textMuted}
+                placeholderTextColor="rgba(255,255,255,0.3)"
                 multiline
                 maxLength={500}
                 accessibilityLabel="Cancel description"

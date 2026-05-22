@@ -58,7 +58,7 @@ export function LoginScreen(): React.JSX.Element {
         accessibilityRole="button"
       >
         {isLoading
-          ? <ActivityIndicator color={colours.white} />
+          ? <ActivityIndicator color={colours.backgroundDark} />
           : <Text style={styles.primaryBtnText}>Sign In</Text>}
       </Pressable>
 

@@ -4,25 +4,19 @@ import { spacing } from '../../../shared/theme/spacing';
 import { typography } from '../../../shared/theme/typography';
 import { radius } from '../../../shared/theme/radius';
 
-const shadow = {
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.08,
-  shadowRadius: 16,
-  elevation: 4,
-};
-
 export const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colours.backgroundDark },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f2f4f3' },
-  container: { paddingBottom: spacing.xxl, maxWidth: 860, alignSelf: 'center', width: '100%', backgroundColor: '#f2f4f3' },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colours.backgroundDark },
+  container: { paddingBottom: spacing.xxl, maxWidth: 860, alignSelf: 'center', width: '100%' },
 
   // ── Cover ────────────────────────────────────────────────────────────────────
   cover: {
-    height: 220,
+    height: 200,
     backgroundColor: colours.backgroundMid,
     position: 'relative',
     overflow: 'hidden',
+    borderBottomWidth: 1,
+    borderBottomColor: colours.dividerDark,
   },
   coverImage: { width: '100%', height: '100%' },
   coverPlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
@@ -37,6 +31,8 @@ export const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.55)',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
   },
 
   // ── Identity block ───────────────────────────────────────────────────────────
@@ -45,7 +41,7 @@ export const styles = StyleSheet.create({
     alignItems: 'flex-end',
     gap: spacing.md,
     paddingHorizontal: spacing.lg,
-    marginTop: -50,
+    marginTop: -48,
     marginBottom: spacing.md,
   },
   logoWrap: { position: 'relative', flexShrink: 0 },
@@ -54,7 +50,7 @@ export const styles = StyleSheet.create({
     height: 96,
     borderRadius: 20,
     borderWidth: 4,
-    borderColor: '#f2f4f3',
+    borderColor: colours.backgroundDark,
   },
   logoPlaceholder: {
     width: 96,
@@ -62,7 +58,7 @@ export const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: colours.backgroundMid,
     borderWidth: 4,
-    borderColor: '#f2f4f3',
+    borderColor: colours.backgroundDark,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -77,7 +73,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#f2f4f3',
+    borderColor: colours.backgroundDark,
   },
   restaurantMeta: {
     flex: 1,
@@ -87,11 +83,11 @@ export const styles = StyleSheet.create({
   restaurantName: {
     fontSize: typography.xl,
     fontWeight: '900',
-    color: colours.textOnLight,
+    color: colours.textOnDark,
     letterSpacing: -0.5,
   },
   addressRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  addressText: { fontSize: typography.xs, color: colours.textMuted, flex: 1 },
+  addressText: { fontSize: typography.xs, color: 'rgba(255,255,255,0.4)', flex: 1 },
   statusPill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -109,7 +105,7 @@ export const styles = StyleSheet.create({
 
   description: {
     fontSize: typography.sm,
-    color: colours.textMuted,
+    color: 'rgba(255,255,255,0.4)',
     lineHeight: 20,
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.md,
@@ -120,7 +116,7 @@ export const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: typography.xxs,
     fontWeight: '800',
-    color: colours.textMuted,
+    color: 'rgba(255,255,255,0.35)',
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     paddingHorizontal: spacing.xs,
@@ -129,10 +125,11 @@ export const styles = StyleSheet.create({
 
   // ── Account card ─────────────────────────────────────────────────────────────
   card: {
-    backgroundColor: colours.white,
+    backgroundColor: colours.backgroundMid,
     borderRadius: 20,
     overflow: 'hidden',
-    ...shadow,
+    borderWidth: 1,
+    borderColor: colours.dividerDark,
   },
   accountRow: {
     flexDirection: 'row',
@@ -152,7 +149,7 @@ export const styles = StyleSheet.create({
   accountRowLabel: {
     fontSize: typography.xxs,
     fontWeight: '700',
-    color: colours.textMuted,
+    color: 'rgba(255,255,255,0.35)',
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 2,
@@ -160,9 +157,9 @@ export const styles = StyleSheet.create({
   accountRowValue: {
     fontSize: typography.sm,
     fontWeight: '600',
-    color: colours.textOnLight,
+    color: colours.textOnDark,
   },
-  rowSep: { height: 1, backgroundColor: '#f5f5f5', marginLeft: 38 + spacing.md * 2 },
+  rowSep: { height: 1, backgroundColor: colours.dividerDark, marginLeft: 38 + spacing.md * 2 },
 
   // ── Logout ───────────────────────────────────────────────────────────────────
   logoutBtn: {
@@ -170,34 +167,33 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
-    backgroundColor: colours.white,
+    backgroundColor: colours.backgroundMid,
     borderRadius: 20,
     paddingVertical: spacing.md,
     minHeight: 56,
     borderWidth: 1.5,
     borderColor: colours.error + '33',
-    ...shadow,
   },
   logoutText: { color: colours.error, fontSize: typography.md, fontWeight: '800' },
 
-  // legacy compat
-  coverPhotoContainer: { width: '100%', height: 220, backgroundColor: colours.backgroundMid },
-  coverPhoto: { width: '100%', height: 220 },
+  // legacy compat (unused but kept to avoid TS errors if referenced elsewhere)
+  coverPhotoContainer: { width: '100%', height: 200, backgroundColor: colours.backgroundMid },
+  coverPhoto: { width: '100%', height: 200 },
   coverPhotoPlaceholder: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   uploadHint: { fontSize: typography.xs, color: 'rgba(255,255,255,0.3)' },
   logoContainer: { position: 'relative' },
-  logo2: { width: 88, height: 88, borderRadius: radius.xl, borderWidth: 3, borderColor: '#f2f4f3' },
-  logoPlaceholder2: { width: 88, height: 88, borderRadius: radius.xl, backgroundColor: colours.backgroundMid, borderWidth: 3, borderColor: '#f2f4f3', alignItems: 'center', justifyContent: 'center' },
+  logo2: { width: 88, height: 88, borderRadius: radius.xl, borderWidth: 3, borderColor: colours.backgroundDark },
+  logoPlaceholder2: { width: 88, height: 88, borderRadius: radius.xl, backgroundColor: colours.backgroundMid, borderWidth: 3, borderColor: colours.backgroundDark, alignItems: 'center', justifyContent: 'center' },
   logoEditBadge: { position: 'absolute', bottom: 4, right: 4, width: 22, height: 22, borderRadius: radius.full, backgroundColor: colours.primary, alignItems: 'center', justifyContent: 'center' },
   restaurantInfo: { flex: 1, gap: 4 },
-  restaurantName2: { fontSize: typography.xl, fontWeight: '800', color: colours.textOnLight },
-  address: { fontSize: typography.xs, color: colours.textMuted },
+  restaurantName2: { fontSize: typography.xl, fontWeight: '800', color: colours.textOnDark },
+  address: { fontSize: typography.xs, color: 'rgba(255,255,255,0.4)' },
   statusBadge: { alignSelf: 'flex-start', backgroundColor: colours.primary + '18', paddingHorizontal: spacing.md, paddingVertical: 3, borderRadius: radius.full },
-  accountSection: { backgroundColor: colours.white, marginHorizontal: spacing.md, borderRadius: 20, padding: spacing.md, marginBottom: spacing.md },
-  sectionTitle: { fontSize: typography.xxs, fontWeight: '800', color: colours.textMuted, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: spacing.sm },
-  accountName: { fontSize: typography.md, fontWeight: '700', color: colours.textOnLight },
-  accountEmail: { fontSize: typography.sm, color: colours.textMuted },
-  accountPhone: { fontSize: typography.sm, color: colours.textMuted },
-  logoutButton: { marginHorizontal: spacing.md, backgroundColor: colours.white, borderWidth: 1.5, borderColor: colours.error + '44', borderRadius: 20, padding: spacing.md, alignItems: 'center', minHeight: 54 },
+  accountSection: { backgroundColor: colours.backgroundMid, marginHorizontal: spacing.md, borderRadius: 20, padding: spacing.md, marginBottom: spacing.md, borderWidth: 1, borderColor: colours.dividerDark },
+  sectionTitle: { fontSize: typography.xxs, fontWeight: '800', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: spacing.sm },
+  accountName: { fontSize: typography.md, fontWeight: '700', color: colours.textOnDark },
+  accountEmail: { fontSize: typography.sm, color: 'rgba(255,255,255,0.4)' },
+  accountPhone: { fontSize: typography.sm, color: 'rgba(255,255,255,0.4)' },
+  logoutButton: { marginHorizontal: spacing.md, backgroundColor: colours.backgroundMid, borderWidth: 1.5, borderColor: colours.error + '44', borderRadius: 20, padding: spacing.md, alignItems: 'center', minHeight: 54 },
   logoutText2: { color: colours.error, fontSize: typography.md, fontWeight: '700' },
 });

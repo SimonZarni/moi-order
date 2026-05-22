@@ -4,48 +4,41 @@ import { spacing } from '../../../shared/theme/spacing';
 import { typography } from '../../../shared/theme/typography';
 import { radius } from '../../../shared/theme/radius';
 
-const cardShadow = {
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.1,
-  shadowRadius: 16,
-  elevation: 5,
-};
-
 export const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colours.backgroundDark },
-  body: { flex: 1, backgroundColor: '#f2f4f3' },
-  bodyContent: { paddingBottom: spacing.xxl },
+  scroll: { flex: 1 },
+  scrollContent: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xxl },
 
-  // ── Dark header ──────────────────────────────────────────────────────────────
-  header: {
-    backgroundColor: colours.backgroundDark,
+  // ── Top bar ──────────────────────────────────────────────────────────────────
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
-    paddingBottom: 64,           // extra space so summary card floats over it
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    paddingBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.dividerDark,
   },
-  headerLeft: { gap: 4 },
-  greeting: {
-    fontSize: typography.xs,
-    fontWeight: '700',
-    color: colours.primary,
-    textTransform: 'uppercase',
-    letterSpacing: 1.4,
-  },
-  headerTitle: {
-    fontSize: 38,
-    fontWeight: '900',
-    color: colours.textOnDark,
-    letterSpacing: -1.5,
-    lineHeight: 42,
-  },
-  headerDate: {
+  topBarGreeting: {
     fontSize: typography.xs,
     color: 'rgba(255,255,255,0.4)',
     fontWeight: '500',
+    marginBottom: 2,
+  },
+  topBarTitle: {
+    fontSize: typography.display,
+    fontWeight: '800',
+    color: colours.textOnDark,
+    letterSpacing: -0.8,
+  },
+  topBarRight: {
+    alignItems: 'flex-end',
+    gap: spacing.xs,
+  },
+  topBarDate: {
+    fontSize: typography.xs,
+    color: 'rgba(255,255,255,0.4)',
   },
   pendingPill: {
     flexDirection: 'row',
@@ -54,130 +47,200 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.warning + '22',
     borderRadius: radius.full,
     paddingHorizontal: spacing.md,
-    paddingVertical: 6,
+    paddingVertical: 5,
     borderWidth: 1,
     borderColor: colours.warning + '55',
-    marginTop: 4,
   },
   pendingDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colours.warning },
-  pendingPillText: { fontSize: typography.xs, fontWeight: '700', color: colours.warning },
+  pendingText: { fontSize: typography.xs, fontWeight: '700', color: colours.warning },
 
-  // ── Floating summary card ────────────────────────────────────────────────────
-  summaryCard: {
-    backgroundColor: colours.surface,
-    borderRadius: 20,
-    marginHorizontal: spacing.md,
-    marginTop: -44,
-    ...cardShadow,
-    overflow: 'hidden',
-  },
-  summaryMain: {
+  // ── Revenue card ─────────────────────────────────────────────────────────────
+  revenueCard: {
+    backgroundColor: colours.backgroundMid,
+    borderRadius: radius.xl,
     padding: spacing.lg,
-    gap: 4,
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: colours.dividerDark,
+    minHeight: 160,
   },
-  summaryLabel: {
+  revenueLeft: {
+    flex: 1,
+    gap: 4,
+    justifyContent: 'center',
+  },
+  revenueLabel: {
     fontSize: typography.xs,
     fontWeight: '700',
-    color: colours.textMuted,
+    color: 'rgba(255,255,255,0.4)',
     textTransform: 'uppercase',
     letterSpacing: 1,
+    marginBottom: spacing.xs,
   },
-  summaryRevenue: {
+  revenueAmount: {
     fontSize: 44,
-    fontWeight: '900',
-    color: colours.textOnLight,
-    letterSpacing: -2,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.35)',
+    letterSpacing: -1.5,
     lineHeight: 50,
   },
-  summaryMeta: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.xs },
-  summaryMetaItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  summaryMetaText: { fontSize: typography.xs, color: colours.textMuted, fontWeight: '500' },
-  summaryDivider: { height: 1, backgroundColor: '#f0f0f0' },
-  summaryStats: { flexDirection: 'row' },
-  summaryMiniItem: { flex: 1, alignItems: 'center', paddingVertical: spacing.md, gap: 2 },
-  summaryStatsDivider: { width: 1, backgroundColor: '#f0f0f0' },
-  summaryMiniLabel: { fontSize: typography.xxs, fontWeight: '700', color: colours.textMuted, textTransform: 'uppercase', letterSpacing: 0.8 },
-  summaryMiniValue: { fontSize: typography.lg, fontWeight: '800', color: colours.textOnLight, letterSpacing: -0.5 },
+  revenueOrders: {
+    fontSize: typography.xs,
+    color: 'rgba(255,255,255,0.3)',
+    marginTop: 4,
+  },
+  revenueRight: {
+    gap: spacing.md,
+    justifyContent: 'center',
+    paddingLeft: spacing.lg,
+    borderLeftWidth: 1,
+    borderLeftColor: colours.dividerDark,
+    minWidth: 140,
+  },
+  revenueMiniBlock: { gap: 2 },
+  revenueMiniLabel: {
+    fontSize: typography.xxs,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.35)',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  revenueMiniValue: {
+    fontSize: typography.xl,
+    fontWeight: '700',
+    color: colours.primary,
+    letterSpacing: -0.5,
+  },
 
-  // ── Section header ───────────────────────────────────────────────────────────
-  sectionRow: {
+  // ── Bottom 2-col grid ────────────────────────────────────────────────────────
+  bottomGrid: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    alignItems: 'flex-start',
+  },
+  bottomLeft: { flex: 1.6 },
+  bottomRight: { flex: 1, gap: spacing.md },
+
+  // ── Orders card ───────────────────────────────────────────────────────────────
+  ordersCard: {
+    backgroundColor: colours.backgroundMid,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colours.dividerDark,
+    overflow: 'hidden',
+  },
+  ordersCardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.sm,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.dividerDark,
   },
-  sectionLabelRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  sectionDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colours.primary },
-  sectionLabel: { fontSize: typography.md, fontWeight: '800', color: colours.textOnLight, letterSpacing: -0.3 },
-  sectionCount: { fontSize: typography.xs, color: colours.textMuted, fontWeight: '500' },
-
-  // ── Orders list ──────────────────────────────────────────────────────────────
-  ordersList: {
-    marginHorizontal: spacing.md,
-    borderRadius: 20,
-    overflow: 'hidden',
-    ...cardShadow,
+  cardSectionTitle: {
+    fontSize: typography.xxs,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.45)',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
   },
-
-  // ── Empty state ──────────────────────────────────────────────────────────────
-  emptyCard: {
-    backgroundColor: colours.surface,
-    borderRadius: 20,
-    marginHorizontal: spacing.md,
+  viewAllLink: {
+    fontSize: typography.xs,
+    color: colours.primary,
+    fontWeight: '600',
+  },
+  emptyOrders: {
     padding: spacing.xxl,
     alignItems: 'center',
     gap: spacing.sm,
-    ...cardShadow,
   },
-  emptyIconWrap: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colours.primaryGlow,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.xs,
-  },
-  emptyTitle: { fontSize: typography.md, fontWeight: '700', color: colours.textOnLight },
-  emptySubtitle: { fontSize: typography.sm, color: colours.textMuted },
+  emptyText: { fontSize: typography.sm, color: 'rgba(255,255,255,0.25)' },
 
-  // ── Skeleton ─────────────────────────────────────────────────────────────────
-  skeletonCard: {
-    flexDirection: 'row',
-    backgroundColor: colours.surface,
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.sm,
-    borderRadius: 16,
-    overflow: 'hidden',
-    ...cardShadow,
+  // ── Stats card ────────────────────────────────────────────────────────────────
+  statsCard: {
+    backgroundColor: colours.backgroundMid,
+    borderRadius: radius.xl,
+    padding: spacing.md,
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colours.dividerDark,
   },
-  skeletonStrip: { width: 6, backgroundColor: '#e5e7eb' },
+  statRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.xs,
+  },
+  statLabel: { fontSize: typography.sm, color: 'rgba(255,255,255,0.5)' },
+  statValue: { fontSize: typography.sm, fontWeight: '700', color: colours.textOnDark },
+  statValueGreen: { color: colours.primary },
+  statDivider: { height: 1, backgroundColor: colours.dividerDark },
+
+  // ── Activity card ─────────────────────────────────────────────────────────────
+  activityCard: {
+    backgroundColor: colours.backgroundMid,
+    borderRadius: radius.xl,
+    padding: spacing.md,
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colours.dividerDark,
+  },
+  activityRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  activityDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginTop: 4,
+    flexShrink: 0,
+  },
+  activityInfo: { flex: 1, gap: 2 },
+  activityText: { fontSize: typography.xs, color: 'rgba(255,255,255,0.7)', fontWeight: '500' },
+  activityTime: { fontSize: typography.xxs, color: 'rgba(255,255,255,0.3)' },
+  activityEmpty: { fontSize: typography.xs, color: 'rgba(255,255,255,0.3)', paddingVertical: spacing.xs },
 
   // legacy compat
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  statCard: { flex: 1, minWidth: 148, backgroundColor: colours.surface, borderRadius: radius.xl, padding: spacing.md },
+  statCard: { flex: 1, minWidth: 148, backgroundColor: colours.backgroundMid, borderRadius: radius.xl, padding: spacing.md },
   statIconBg: { width: 34, height: 34, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
-  statValue: { fontSize: typography.xxl, fontWeight: '900', color: colours.textOnLight },
-  statLabel: { fontSize: typography.xs, fontWeight: '700', color: colours.textOnLight },
+  statValueLg: { fontSize: typography.xxl, fontWeight: '900', color: colours.textOnLight },
+  statLabelSm: { fontSize: typography.xs, fontWeight: '700', color: colours.textOnLight },
   statSub: { fontSize: typography.xxs, color: colours.textMuted },
   statIconRow: { flexDirection: 'row', alignItems: 'center' },
-  pageHeader: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: 64, backgroundColor: colours.backgroundDark },
+  pageHeader: { padding: spacing.md },
   pageTitleBlock: { gap: 4 },
-  pageTitle: { fontSize: 38, fontWeight: '900', color: colours.textOnDark },
+  pageTitle: { fontSize: typography.display, fontWeight: '800', color: colours.textOnDark },
   pageDate: { fontSize: typography.xs, color: 'rgba(255,255,255,0.4)' },
-  sectionCard: { backgroundColor: colours.surface, borderRadius: 20, marginHorizontal: spacing.md, overflow: 'hidden' },
+  sectionCard: { backgroundColor: colours.backgroundMid, borderRadius: radius.xl, overflow: 'hidden' },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: spacing.md },
-  sectionTitle: { fontSize: typography.md, fontWeight: '800', color: colours.textOnLight },
+  sectionTitle: { fontSize: typography.md, fontWeight: '800', color: colours.textOnDark },
   pendingBadge: { backgroundColor: colours.primaryBg, borderRadius: radius.full, paddingHorizontal: spacing.sm, paddingVertical: 3 },
   pendingBadgeText: { fontSize: typography.xxs, color: colours.primary, fontWeight: '700' },
   emptyState: { padding: spacing.xxl, alignItems: 'center', gap: spacing.sm },
-  emptyText: { fontSize: typography.sm, color: colours.textMuted },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f2f4f3' },
+  pendingPillLegacy: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colours.warning + '22', borderRadius: radius.full, paddingHorizontal: spacing.md, paddingVertical: 6, borderWidth: 1, borderColor: colours.warning + '55' },
+  pendingPillText: { fontSize: typography.xs, fontWeight: '700', color: colours.warning },
+  pendingDotLegacy: { width: 7, height: 7, borderRadius: 4, backgroundColor: colours.warning },
+  summaryCard: { backgroundColor: colours.backgroundMid, borderRadius: radius.xl, padding: spacing.lg, flexDirection: 'row', borderWidth: 1, borderColor: colours.dividerDark },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colours.backgroundDark },
   loadingText: { fontSize: typography.sm, color: colours.textMuted },
+  sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  sectionLabelRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  sectionDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colours.primary },
+  sectionLabel: { fontSize: typography.md, fontWeight: '800', color: colours.textOnDark },
+  sectionCount: { fontSize: typography.xs, color: 'rgba(255,255,255,0.4)' },
+  ordersList: { backgroundColor: colours.backgroundMid, borderRadius: radius.xl, overflow: 'hidden' },
+  emptyCard: { backgroundColor: colours.backgroundMid, borderRadius: radius.xl, padding: spacing.xxl, alignItems: 'center', gap: spacing.sm },
+  emptyIconWrap: { width: 56, height: 56, borderRadius: 28, backgroundColor: colours.primaryGlow, alignItems: 'center', justifyContent: 'center' },
+  emptyTitle: { fontSize: typography.md, fontWeight: '700', color: colours.textOnDark },
+  emptySubtitle: { fontSize: typography.sm, color: 'rgba(255,255,255,0.4)' },
+  skeletonCard: { flexDirection: 'row', backgroundColor: colours.backgroundMid, borderRadius: 16, overflow: 'hidden' },
+  skeletonStrip: { width: 6 },
   pageGreeting: { fontSize: typography.xs, fontWeight: '700', color: colours.primary },
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   sectionAccent: { width: 3, height: 18, borderRadius: radius.full, backgroundColor: colours.primary },
-  pendingDotLegacy: { width: 6, height: 6, borderRadius: 3, backgroundColor: colours.warning },
 });

@@ -75,7 +75,7 @@ export function ProfileScreen(): React.JSX.Element {
             </Text>
             {restaurant?.address !== null && restaurant?.address !== undefined && (
               <View style={styles.addressRow}>
-                <Ionicons name="location-outline" size={11} color={colours.textMuted} />
+                <Ionicons name="location-outline" size={11} color="rgba(255,255,255,0.4)" />
                 <Text style={styles.addressText} numberOfLines={1}>{restaurant.address}</Text>
               </View>
             )}
@@ -95,13 +95,13 @@ export function ProfileScreen(): React.JSX.Element {
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Account</Text>
             <View style={styles.card}>
-              <AccountRow icon="person-outline" iconBg="#f0fdf4" iconColor={colours.primary} label="Name" value={user.name} />
+              <AccountRow icon="person-outline" iconBg={colours.primary + '22'} iconColor={colours.primary} label="Name" value={user.name} />
               <View style={styles.rowSep} />
-              <AccountRow icon="mail-outline" iconBg="#eff6ff" iconColor={colours.info} label="Email" value={user.email ?? '—'} />
+              <AccountRow icon="mail-outline" iconBg={colours.info + '22'} iconColor={colours.info} label="Email" value={user.email ?? '—'} />
               {user.phone !== null && (
                 <>
                   <View style={styles.rowSep} />
-                  <AccountRow icon="call-outline" iconBg="#f0fdf4" iconColor={colours.success} label="Phone" value={user.phone} />
+                  <AccountRow icon="call-outline" iconBg={colours.success + '22'} iconColor={colours.success} label="Phone" value={user.phone} />
                 </>
               )}
             </View>

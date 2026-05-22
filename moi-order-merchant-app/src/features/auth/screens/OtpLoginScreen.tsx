@@ -44,7 +44,7 @@ export function OtpLoginScreen(): React.JSX.Element {
             accessibilityLabel="Send OTP"
             accessibilityRole="button"
           >
-            {isLoading ? <ActivityIndicator color={colours.white} /> : <Text style={styles.primaryBtnText}>Send OTP Code</Text>}
+            {isLoading ? <ActivityIndicator color={colours.backgroundDark} /> : <Text style={styles.primaryBtnText}>Send OTP Code</Text>}
           </Pressable>
         </>
       )}
@@ -53,7 +53,7 @@ export function OtpLoginScreen(): React.JSX.Element {
         <>
           <View style={styles.otpInfo}>
             <Ionicons name="checkmark-circle" size={16} color={colours.primary} />
-            <Text style={styles.otpInfoText}>Code sent to <Text style={{ fontWeight: '700', color: colours.textOnLight }}>{phoneNumber}</Text></Text>
+            <Text style={styles.otpInfoText}>Code sent to <Text style={{ fontWeight: '700', color: colours.textOnDark }}>{phoneNumber}</Text></Text>
           </View>
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>ENTER {OTP_PIN_LENGTH}-DIGIT CODE</Text>
@@ -75,7 +75,7 @@ export function OtpLoginScreen(): React.JSX.Element {
             accessibilityLabel="Verify and sign in"
             accessibilityRole="button"
           >
-            {isLoading ? <ActivityIndicator color={colours.white} /> : <Text style={styles.primaryBtnText}>Verify & Sign In</Text>}
+            {isLoading ? <ActivityIndicator color={colours.backgroundDark} /> : <Text style={styles.primaryBtnText}>Verify & Sign In</Text>}
           </Pressable>
         </>
       )}
@@ -107,7 +107,7 @@ export function OtpLoginScreen(): React.JSX.Element {
     <KeyboardAvoidingView style={styles.safe} behavior="padding">
       <SafeAreaView style={styles.brandArea} edges={['top']}>
         <View style={styles.brandAreaContent}>
-          <View style={[styles.brandIcon, { backgroundColor: step === 'phone' ? colours.primary + '22' : colours.primaryGlow }]}>
+          <View style={[styles.brandIcon, { backgroundColor: colours.primary + '22' }]}>
             <Ionicons
               name={step === 'phone' ? 'phone-portrait-outline' : 'keypad-outline'}
               size={24}

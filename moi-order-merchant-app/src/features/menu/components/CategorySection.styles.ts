@@ -6,23 +6,22 @@ import { radius } from '../../../shared/theme/radius';
 
 export const styles = StyleSheet.create({
   container: {
-    backgroundColor: colours.surface,
-    borderRadius: radius.xl,
-    marginBottom: spacing.md,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 3,
+    marginBottom: spacing.lg,
   },
+  // ── Category header ───────────────────────────────────────────────────────────
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
-    backgroundColor: colours.backgroundDark,
-    borderBottomWidth: 0,
+    paddingVertical: spacing.sm,
+    gap: spacing.sm,
+  },
+  categoryAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.md,
+    backgroundColor: colours.dividerDark,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   titleRow: {
     flex: 1,
@@ -32,14 +31,20 @@ export const styles = StyleSheet.create({
     minHeight: 44,
   },
   title: {
-    fontSize: typography.md,
-    fontWeight: '700',
-    color: colours.textOnDark,
+    fontSize: typography.xs,
+    fontWeight: '800',
+    color: 'rgba(255,255,255,0.6)',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   count: {
-    fontSize: typography.xs,
-    color: 'rgba(255,255,255,0.4)',
-    fontWeight: '500',
+    fontSize: typography.xxs,
+    color: 'rgba(255,255,255,0.35)',
+    backgroundColor: colours.dividerDark,
+    borderRadius: radius.full,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    fontWeight: '600',
   },
   deleteButton: {
     padding: spacing.sm,
@@ -47,14 +52,27 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  // ── Items container ───────────────────────────────────────────────────────────
   items: {
-    paddingHorizontal: spacing.md,
+    backgroundColor: colours.backgroundMid,
+    borderRadius: radius.xl,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colours.dividerDark,
   },
   empty: {
+    borderWidth: 1,
+    borderColor: colours.dividerDark,
+    borderStyle: 'dashed',
+    borderRadius: radius.xl,
+    padding: spacing.xl,
+    alignItems: 'center',
+  },
+  emptyText: {
     fontSize: typography.sm,
-    color: colours.medium,
-    paddingVertical: spacing.md,
+    color: 'rgba(255,255,255,0.25)',
     textAlign: 'center',
+    lineHeight: 20,
   },
   addItemButton: {
     flexDirection: 'row',
@@ -68,7 +86,7 @@ export const styles = StyleSheet.create({
   addItemText: {
     fontSize: typography.sm,
     color: colours.primary,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   headerActions: {
     flexDirection: 'row',
@@ -88,14 +106,14 @@ export const styles = StyleSheet.create({
   },
   renameInput: {
     flex: 1,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: colours.primary,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     paddingHorizontal: spacing.sm,
     paddingVertical: 6,
-    fontSize: typography.md,
+    fontSize: typography.sm,
     color: colours.textOnDark,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: colours.backgroundDark,
     minHeight: 36,
   },
   renameAction: {

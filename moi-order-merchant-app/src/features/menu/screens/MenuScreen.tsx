@@ -82,7 +82,16 @@ export function MenuScreen(): React.JSX.Element {
   }
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      {/* Page header */}
+      <View style={styles.pageHeader}>
+        <Text style={styles.pageTitle}>Menu</Text>
+        <Pressable style={styles.addButton} onPress={() => setShowAddCategoryModal(true)}
+          accessibilityLabel="Add a new menu category" accessibilityRole="button">
+          <Text style={styles.addButtonText}>Add Category</Text>
+        </Pressable>
+      </View>
+
       <FlatList<MenuCategory>
         data={categories}
         keyExtractor={(item) => String(item.id)}
@@ -100,20 +109,14 @@ export function MenuScreen(): React.JSX.Element {
         )}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
-          <>
-            {hasMissingSystemCategories && (
-              <View style={styles.warnBanner} accessibilityRole="alert">
-                <Ionicons name="warning-outline" size={16} color={colours.warning} />
-                <Text style={styles.warnText}>
-                  Your menu won't be visible to customers until Popular Picks and Recommendations each have at least 1 item.
-                </Text>
-              </View>
-            )}
-            <Pressable style={styles.addButton} onPress={() => setShowAddCategoryModal(true)}
-              accessibilityLabel="Add a new menu category" accessibilityRole="button">
-              <Text style={styles.addButtonText}>+ Add Category</Text>
-            </Pressable>
-          </>
+          hasMissingSystemCategories ? (
+            <View style={styles.warnBanner} accessibilityRole="alert">
+              <Ionicons name="warning-outline" size={16} color={colours.warning} />
+              <Text style={styles.warnText}>
+                Your menu won't be visible to customers until Popular Picks and Recommendations each have at least 1 item.
+              </Text>
+            </View>
+          ) : null
         }
         ListEmptyComponent={<Text style={styles.empty}>No categories yet. Add one to get started.</Text>}
       />
@@ -123,7 +126,7 @@ export function MenuScreen(): React.JSX.Element {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>New Category</Text>
-            <TextInput style={styles.modalInput} placeholder="Category name" placeholderTextColor={colours.medium}
+            <TextInput style={styles.modalInput} placeholder="Category name" placeholderTextColor="rgba(255,255,255,0.3)"
               value={newCategoryName} onChangeText={setNewCategoryName} accessibilityLabel="Category name" />
             <View style={styles.modalActions}>
               <Pressable style={styles.cancelButton} onPress={() => setShowAddCategoryModal(false)}
@@ -225,11 +228,11 @@ function ItemFormContent({
       <Text style={styles.modalTitle}>{title}</Text>
 
       <TextInput style={styles.modalInput} placeholder="Item name *"
-        placeholderTextColor={colours.medium} value={form.name}
+        placeholderTextColor="rgba(255,255,255,0.3)" value={form.name}
         onChangeText={(v) => onFieldChange('name', v)} accessibilityLabel="Item name" />
 
       <TextInput style={[styles.modalInput, { minHeight: 60, textAlignVertical: 'top' }]}
-        placeholder="Description (optional)" placeholderTextColor={colours.medium}
+        placeholder="Description (optional)" placeholderTextColor="rgba(255,255,255,0.3)"
         value={form.description}
         onChangeText={(v) => onFieldChange('description', v)}
         multiline accessibilityLabel="Item description" />
@@ -238,14 +241,14 @@ function ItemFormContent({
         <View style={{ flex: 1 }}>
           <Text style={styles.priceLabel}>Price *</Text>
           <TextInput style={styles.modalInput} placeholder="100.00"
-            placeholderTextColor={colours.medium} value={form.price}
+            placeholderTextColor="rgba(255,255,255,0.3)" value={form.price}
             onChangeText={(v) => onFieldChange('price', v)}
             keyboardType="decimal-pad" accessibilityLabel="Item price" />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.priceLabel}>Original Price (before discount)</Text>
           <TextInput style={styles.modalInput} placeholder="Optional"
-            placeholderTextColor={colours.medium} value={form.original_price}
+            placeholderTextColor="rgba(255,255,255,0.3)" value={form.original_price}
             onChangeText={(v) => onFieldChange('original_price', v)}
             keyboardType="decimal-pad" accessibilityLabel="Original price before discount" />
         </View>
@@ -281,7 +284,7 @@ function ItemFormContent({
             <TextInput
               style={[styles.modalInput, { flex: 1, marginBottom: 0 }]}
               placeholder="Group name (e.g. Protein)"
-              placeholderTextColor={colours.medium}
+              placeholderTextColor="rgba(255,255,255,0.3)"
               value={group.name}
               onChangeText={(v) => onOptionGroupChange(gi, 'name', v)}
               accessibilityLabel={`Option group ${gi + 1} name`}
@@ -330,7 +333,7 @@ function ItemFormContent({
               <TextInput
                 style={[styles.modalInput, { flex: 2, marginBottom: 0 }]}
                 placeholder="Option name"
-                placeholderTextColor={colours.medium}
+                placeholderTextColor="rgba(255,255,255,0.3)"
                 value={opt.name}
                 onChangeText={(v) => onOptionChange(gi, oi, 'name', v)}
                 accessibilityLabel={`Option ${oi + 1} name`}
@@ -338,7 +341,7 @@ function ItemFormContent({
               <TextInput
                 style={[styles.modalInput, { flex: 1, marginBottom: 0, marginLeft: 6 }]}
                 placeholder="+0"
-                placeholderTextColor={colours.medium}
+                placeholderTextColor="rgba(255,255,255,0.3)"
                 value={opt.additional_price_cents === 0 ? '' : String(opt.additional_price_cents / 100)}
                 onChangeText={(v) => onOptionChange(gi, oi, 'additional_price_cents', Math.round(parseFloat(v || '0') * 100))}
                 keyboardType="decimal-pad"
@@ -371,7 +374,7 @@ function ItemFormContent({
           accessibilityLabel={submitLabel} accessibilityRole="button"
         >
           {isSaving
-            ? <ActivityIndicator size="small" color={colours.white} />
+            ? <ActivityIndicator size="small" color={colours.backgroundDark} />
             : <Text style={styles.confirmText}>{submitLabel}</Text>
           }
         </Pressable>

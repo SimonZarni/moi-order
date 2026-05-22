@@ -14,14 +14,14 @@ export function RegisterScreen(): React.JSX.Element {
   const formFields = (
     <>
       {error !== null && <Text style={styles.errorBanner}>{error}</Text>}
-      <TextInput style={styles.input} placeholder="Full name" placeholderTextColor={colours.medium}
+      <TextInput style={styles.input} placeholder="Full name" placeholderTextColor="rgba(255,255,255,0.3)"
         value={name} onChangeText={setName} accessibilityLabel="Full name" />
       {fieldErrors.name !== undefined && <Text style={styles.fieldError}>{fieldErrors.name}</Text>}
-      <TextInput style={styles.input} placeholder="Email address" placeholderTextColor={colours.medium}
+      <TextInput style={styles.input} placeholder="Email address" placeholderTextColor="rgba(255,255,255,0.3)"
         value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none"
         accessibilityLabel="Email address" />
       {fieldErrors.email !== undefined && <Text style={styles.fieldError}>{fieldErrors.email}</Text>}
-      <TextInput style={styles.input} placeholder="Password" placeholderTextColor={colours.medium}
+      <TextInput style={styles.input} placeholder="Password" placeholderTextColor="rgba(255,255,255,0.3)"
         value={password} onChangeText={setPassword} secureTextEntry accessibilityLabel="Password" />
       <Text style={styles.inputHint}>Min 8 characters · uppercase · lowercase · number</Text>
       {fieldErrors.password !== undefined && <Text style={styles.fieldError}>{fieldErrors.password}</Text>}
@@ -31,7 +31,7 @@ export function RegisterScreen(): React.JSX.Element {
         accessibilityLabel="Create merchant account" accessibilityRole="button"
       >
         {isLoading
-          ? <ActivityIndicator color={colours.white} />
+          ? <ActivityIndicator color={colours.backgroundDark} />
           : <Text style={styles.buttonText}>Create Account</Text>}
       </Pressable>
       <Text style={styles.note}>

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, Text, Pressable, Image } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './WebSidebar.styles';
 import { colours } from '../../theme/colours';
@@ -10,92 +10,95 @@ interface NavItem {
   icon: keyof typeof Ionicons.glyphMap;
   activeIcon: keyof typeof Ionicons.glyphMap;
   screen: WebScreen;
+  section: 'MAIN' | 'MANAGE' | 'INSIGHTS';
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard', icon: 'grid-outline', activeIcon: 'grid', screen: 'Dashboard' },
-  { label: 'Orders', icon: 'receipt-outline', activeIcon: 'receipt', screen: 'Orders' },
-  { label: 'Menu', icon: 'restaurant-outline', activeIcon: 'restaurant', screen: 'Menu' },
-  { label: 'Restaurant', icon: 'storefront-outline', activeIcon: 'storefront', screen: 'Restaurant' },
-  { label: 'Analytics', icon: 'bar-chart-outline', activeIcon: 'bar-chart', screen: 'Analytics' },
+  { label: 'Dashboard',  icon: 'grid-outline',       activeIcon: 'grid',       screen: 'Dashboard',  section: 'MAIN' },
+  { label: 'Orders',     icon: 'receipt-outline',     activeIcon: 'receipt',    screen: 'Orders',     section: 'MAIN' },
+  { label: 'Menu',       icon: 'restaurant-outline',  activeIcon: 'restaurant', screen: 'Menu',       section: 'MANAGE' },
+  { label: 'Restaurant', icon: 'storefront-outline',  activeIcon: 'storefront', screen: 'Restaurant', section: 'MANAGE' },
+  { label: 'Analytics',  icon: 'bar-chart-outline',   activeIcon: 'bar-chart',  screen: 'Analytics',  section: 'INSIGHTS' },
 ];
 
 interface WebSidebarProps {
   activeScreen: WebScreen;
   onNavigate: (screen: WebScreen) => void;
   onLogout: () => void;
+  pendingCount?: number;
 }
 
-export function WebSidebar({
-  activeScreen,
-  onNavigate,
-  onLogout,
-}: WebSidebarProps): React.JSX.Element {
+export function WebSidebar({ activeScreen, onNavigate, onLogout, pendingCount = 0 }: WebSidebarProps): React.JSX.Element {
   const handleNavPress = useCallback(
     (screen: WebScreen) => () => onNavigate(screen),
     [onNavigate],
   );
 
+  const sections: Array<'MAIN' | 'MANAGE' | 'INSIGHTS'> = ['MAIN', 'MANAGE', 'INSIGHTS'];
+
   return (
     <View style={styles.sidebar}>
+      {/* Logo */}
       <View style={styles.logoContainer}>
-        <Image
-          source={require('../../../../assets/icon.png')}
-          style={styles.logoMark}
-          resizeMode="cover"
-        />
+        <View style={styles.logoMark}>
+          <Text style={styles.logoMarkText}>MO</Text>
+        </View>
         <View>
           <Text style={styles.logoText}>Moi Order</Text>
           <Text style={styles.logoSubText}>Merchant Portal</Text>
         </View>
       </View>
 
-      <View style={styles.divider} />
-
       <View style={styles.navItems}>
-        {NAV_ITEMS.map((item) => {
-          const isActive = activeScreen === item.screen;
+        {sections.map((section) => {
+          const items = NAV_ITEMS.filter((item) => item.section === section);
           return (
-            <Pressable
-              key={item.screen}
-              style={({ pressed }) => [
-                styles.navItem,
-                isActive && styles.navItemActive,
-                pressed && !isActive && styles.navItemPressed,
-              ]}
-              onPress={handleNavPress(item.screen)}
-              accessibilityLabel={`Navigate to ${item.label}`}
-              accessibilityRole="button"
-            >
-              {isActive && <View style={styles.activeIndicator} />}
-              <Ionicons
-                name={isActive ? item.activeIcon : item.icon}
-                size={20}
-                color={isActive ? colours.primary : colours.textSubtle}
-                style={styles.navIcon}
-              />
-              <Text style={[styles.navLabel, isActive && styles.navLabelActive]}>
-                {item.label}
-              </Text>
-            </Pressable>
+            <View key={section}>
+              <Text style={styles.sectionHeader}>{section}</Text>
+              {items.map((item) => {
+                const isActive = activeScreen === item.screen;
+                const badge = item.screen === 'Dashboard' && pendingCount > 0 ? pendingCount : 0;
+                return (
+                  <Pressable
+                    key={item.screen}
+                    style={({ pressed }) => [
+                      styles.navItem,
+                      isActive && styles.navItemActive,
+                      pressed && !isActive && styles.navItemPressed,
+                    ]}
+                    onPress={handleNavPress(item.screen)}
+                    accessibilityLabel={`Navigate to ${item.label}`}
+                    accessibilityRole="button"
+                  >
+                    <Ionicons
+                      name={isActive ? item.activeIcon : item.icon}
+                      size={16}
+                      color={isActive ? colours.primary : 'rgba(255,255,255,0.45)'}
+                    />
+                    <Text style={[styles.navLabel, isActive && styles.navLabelActive]}>
+                      {item.label}
+                    </Text>
+                    {badge > 0 && (
+                      <View style={styles.navBadge}>
+                        <Text style={styles.navBadgeText}>{badge}</Text>
+                      </View>
+                    )}
+                  </Pressable>
+                );
+              })}
+            </View>
           );
         })}
       </View>
 
       <View style={styles.bottomSection}>
-        <View style={styles.divider} />
         <Pressable
           style={({ pressed }) => [styles.navItem, pressed && styles.navItemPressed]}
           onPress={onLogout}
-          accessibilityLabel="Log out of merchant account"
+          accessibilityLabel="Log out"
           accessibilityRole="button"
         >
-          <Ionicons
-            name="log-out-outline"
-            size={20}
-            color={colours.error}
-            style={styles.navIcon}
-          />
+          <Ionicons name="log-out-outline" size={16} color="rgba(255,255,255,0.4)" />
           <Text style={styles.logoutLabel}>Log Out</Text>
         </Pressable>
       </View>

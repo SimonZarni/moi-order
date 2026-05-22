@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: radius.full,
-    backgroundColor: colours.primaryGlow,
+    backgroundColor: colours.primary + '18',
     borderWidth: 2,
     borderColor: colours.primary + '44',
     alignItems: 'center',
@@ -25,21 +25,21 @@ export const styles = StyleSheet.create({
   title: {
     fontSize: typography.xxl,
     fontWeight: '800',
-    color: colours.textOnLight,
+    color: colours.textOnDark,
     textAlign: 'center',
     marginBottom: spacing.md,
     letterSpacing: -0.5,
   },
   body: {
     fontSize: typography.md,
-    color: colours.textMuted,
+    color: 'rgba(255,255,255,0.4)',
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: spacing.lg,
   },
   infoBox: {
     flexDirection: 'row',
-    backgroundColor: colours.primaryGlow,
+    backgroundColor: colours.primary + '18',
     borderRadius: radius.xl,
     padding: spacing.md,
     gap: spacing.sm,
@@ -52,13 +52,13 @@ export const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontSize: typography.sm,
-    color: colours.primaryDark,
+    color: 'rgba(255,255,255,0.6)',
     lineHeight: 20,
     fontWeight: '500',
   },
   logoutButton: {
     borderWidth: 1.5,
-    borderColor: colours.divider,
+    borderColor: colours.dividerDark,
     borderRadius: radius.full,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.xl,
@@ -68,7 +68,7 @@ export const styles = StyleSheet.create({
   },
   logoutText: {
     fontSize: typography.md,
-    color: colours.textMuted,
+    color: 'rgba(255,255,255,0.4)',
     fontWeight: '600',
   },
 });
