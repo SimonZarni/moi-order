@@ -67,11 +67,17 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.surface,
     borderBottomWidth: 1,
     borderBottomColor: colours.divider,
+    // Fixed height stops the horizontal ScrollView from stretching pills to
+    // fill the container on Expo Web (items flex-stretch by default on web).
+    height: 44,
+    justifyContent: 'center',
   },
   tabsContent: {
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs + 1,
     gap: spacing.xs,
+    // Critical for web: prevents pill items from stretching to the ScrollView height.
+    alignItems: 'center',
+    height: 44,
   },
   tab: {
     flexDirection: 'row',
@@ -83,6 +89,8 @@ export const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colours.divider,
     backgroundColor: colours.surface,
+    // Belt-and-suspenders: don't grow taller than needed even if parent stretches.
+    alignSelf: 'center',
   },
   tabActive: {
     borderColor: colours.primary,
