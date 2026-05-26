@@ -7,7 +7,7 @@ import { radius } from '../../../shared/theme/radius';
 export const styles = StyleSheet.create({
   // ── Card container ────────────────────────────────────────────────────────
   card: {
-    flex: 1,
+    // No flex:1 — width is controlled by the percentage-width gridItem wrapper in MenuScreen.
     backgroundColor: colours.surface,
     borderRadius: radius.lg,
     borderWidth: 1,

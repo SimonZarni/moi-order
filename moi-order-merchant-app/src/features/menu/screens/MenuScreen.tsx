@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  View, Text, FlatList, Pressable, ActivityIndicator, Modal,
+  View, Text, Pressable, ActivityIndicator, Modal,
   TextInput, ScrollView, Switch, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -36,24 +36,33 @@ export function MenuScreen(): React.JSX.Element {
   } = useMenuScreen();
 
   const { width } = useWindowDimensions();
-  // Responsive columns: sidebar ~220 px is already baked into the content area.
-  // On a typical 1440 px desktop the content pane is ≈1220 px wide → 5 cols
-  // gives ≈220 px cards; image at 4:3 → ≈165 px tall — compact POS feel.
+
+  // Responsive column count — content pane is roughly window-width minus sidebar (~220 px).
+  // Using flexWrap (not FlatList numColumns) so percentages map directly to CSS grid.
   const numColumns =
-    width >= 1400 ? 5 :
-    width >= 1050 ? 4 :
-    width >= 700  ? 3 : 2;
+    width >= 1400 ? 6 :
+    width >= 1100 ? 5 :
+    width >= 800  ? 4 :
+    width >= 560  ? 3 : 2;
+
+  // Each item width as a CSS percentage string — React Native Web supports this.
+  const itemWidthPct = `${Math.floor(100 / numColumns)}%` as `${number}%`;
 
   const activeCategory = selectedCategoryId !== 'all'
     ? categories.find((c) => c.id === selectedCategoryId) ?? null
     : null;
 
   if (isLoading) {
-    return <View style={styles.centered}><ActivityIndicator size="large" color={colours.primary} /></View>;
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={colours.primary} />
+      </View>
+    );
   }
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <View style={styles.header}>
         <Text style={styles.pageTitle}>Menu</Text>
@@ -63,14 +72,14 @@ export function MenuScreen(): React.JSX.Element {
           accessibilityLabel="Add a new menu category"
           accessibilityRole="button"
         >
-          <Ionicons name="folder-open-outline" size={14} color={colours.backgroundDark} />
+          <Ionicons name="folder-open-outline" size={13} color={colours.backgroundDark} />
           <Text style={styles.addCategoryBtnText}>Add Category</Text>
         </Pressable>
       </View>
 
       {/* ── Search bar ──────────────────────────────────────────────────── */}
       <View style={styles.searchWrap}>
-        <Ionicons name="search-outline" size={16} color={colours.textSubtle} style={styles.searchIcon} />
+        <Ionicons name="search-outline" size={15} color={colours.textSubtle} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search items…"
@@ -81,8 +90,12 @@ export function MenuScreen(): React.JSX.Element {
           accessibilityLabel="Search menu items"
         />
         {searchQuery.length > 0 && (
-          <Pressable onPress={() => handleSearchChange('')} accessibilityRole="button" accessibilityLabel="Clear search">
-            <Ionicons name="close-circle" size={16} color={colours.textSubtle} />
+          <Pressable
+            onPress={() => handleSearchChange('')}
+            accessibilityRole="button"
+            accessibilityLabel="Clear search"
+          >
+            <Ionicons name="close-circle" size={15} color={colours.textSubtle} />
           </Pressable>
         )}
       </View>
@@ -114,43 +127,48 @@ export function MenuScreen(): React.JSX.Element {
       {/* ── System category warning banner ──────────────────────────────── */}
       {hasMissingSystemCategories && (
         <View style={styles.warnBanner} accessibilityRole="alert">
-          <Ionicons name="warning-outline" size={14} color={colours.warning} />
+          <Ionicons name="warning-outline" size={13} color={colours.warning} />
           <Text style={styles.warnText}>
             Menu hidden from customers — Popular Picks & Recommendations each need at least 1 item.
           </Text>
         </View>
       )}
 
-      {/* ── Items grid ──────────────────────────────────────────────────── */}
-      <FlatList<MenuItem>
-        key={String(numColumns)}
-        data={filteredItems}
-        numColumns={numColumns}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => (
-          <MenuItemCard
-            item={item}
-            isGuarded={guardedItemIds.has(item.id)}
-            onToggleStatus={handleToggleItemStatus}
-            onDelete={handleDeleteItem}
-            onEdit={handleOpenEditItem}
-          />
-        )}
+      {/* ── Items grid — flexWrap ScrollView (reliable on Expo Web) ─────── */}
+      <ScrollView
+        style={styles.scroll}
         contentContainerStyle={styles.grid}
-        columnWrapperStyle={numColumns > 1 ? styles.columnWrapper : undefined}
-        ListEmptyComponent={
+        showsVerticalScrollIndicator={false}
+      >
+        {filteredItems.length === 0 ? (
           <View style={styles.emptyState}>
-            <Ionicons name="restaurant-outline" size={48} color={colours.textSubtle} />
+            <Ionicons name="restaurant-outline" size={40} color={colours.textSubtle} />
             <Text style={styles.emptyTitle}>
               {searchQuery ? 'No items match your search' : 'No items yet'}
             </Text>
             <Text style={styles.emptySubtitle}>
-              {searchQuery ? 'Try a different keyword' : 'Select a category below and add your first item'}
+              {searchQuery
+                ? 'Try a different keyword'
+                : 'Select a category below and add your first item'}
             </Text>
           </View>
-        }
-        showsVerticalScrollIndicator={false}
-      />
+        ) : (
+          <View style={styles.gridWrap}>
+            {filteredItems.map((item) => (
+              // Inline width so React Native Web maps it to a CSS percentage directly
+              <View key={item.id} style={[styles.gridItem, { width: itemWidthPct }]}>
+                <MenuItemCard
+                  item={item}
+                  isGuarded={guardedItemIds.has(item.id)}
+                  onToggleStatus={handleToggleItemStatus}
+                  onDelete={handleDeleteItem}
+                  onEdit={handleOpenEditItem}
+                />
+              </View>
+            ))}
+          </View>
+        )}
+      </ScrollView>
 
       {/* ── Floating "Add Item" button — only when a category is selected ── */}
       {activeCategory !== null && (
@@ -160,7 +178,7 @@ export function MenuScreen(): React.JSX.Element {
           accessibilityLabel={`Add item to ${activeCategory.name}`}
           accessibilityRole="button"
         >
-          <Ionicons name="add" size={22} color={colours.backgroundDark} />
+          <Ionicons name="add" size={18} color={colours.backgroundDark} />
           <Text style={styles.fabText}>Add Item</Text>
         </Pressable>
       )}
@@ -182,12 +200,20 @@ export function MenuScreen(): React.JSX.Element {
               accessibilityLabel="Category name"
             />
             <View style={styles.modalActions}>
-              <Pressable style={styles.cancelButton} onPress={() => setShowAddCategoryModal(false)}
-                accessibilityLabel="Cancel" accessibilityRole="button">
+              <Pressable
+                style={styles.cancelButton}
+                onPress={() => setShowAddCategoryModal(false)}
+                accessibilityLabel="Cancel"
+                accessibilityRole="button"
+              >
                 <Text style={styles.cancelText}>Cancel</Text>
               </Pressable>
-              <Pressable style={styles.confirmButton} onPress={handleConfirmAddCategory}
-                accessibilityLabel="Add category" accessibilityRole="button">
+              <Pressable
+                style={styles.confirmButton}
+                onPress={handleConfirmAddCategory}
+                accessibilityLabel="Add category"
+                accessibilityRole="button"
+              >
                 <Text style={styles.confirmText}>Add</Text>
               </Pressable>
             </View>
@@ -198,7 +224,11 @@ export function MenuScreen(): React.JSX.Element {
       {/* ── Add menu item modal ──────────────────────────────────────────── */}
       <Modal visible={addItemCategoryId !== null} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <ScrollView style={styles.modalScrollView} contentContainerStyle={styles.modalCard} keyboardShouldPersistTaps="handled">
+          <ScrollView
+            style={styles.modalScrollView}
+            contentContainerStyle={styles.modalCard}
+            keyboardShouldPersistTaps="handled"
+          >
             <ItemFormContent
               title="New Menu Item"
               form={addItemForm}
@@ -222,7 +252,11 @@ export function MenuScreen(): React.JSX.Element {
       {/* ── Edit menu item modal ─────────────────────────────────────────── */}
       <Modal visible={editItemId !== null} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <ScrollView style={styles.modalScrollView} contentContainerStyle={styles.modalCard} keyboardShouldPersistTaps="handled">
+          <ScrollView
+            style={styles.modalScrollView}
+            contentContainerStyle={styles.modalCard}
+            keyboardShouldPersistTaps="handled"
+          >
             <ItemFormContent
               title="Edit Menu Item"
               form={editItemForm}
@@ -243,6 +277,7 @@ export function MenuScreen(): React.JSX.Element {
           </ScrollView>
         </View>
       </Modal>
+
     </SafeAreaView>
   );
 }
@@ -307,32 +342,49 @@ function ItemFormContent({
     <>
       <Text style={styles.modalTitle}>{title}</Text>
 
-      <TextInput style={styles.modalInput} placeholder="Item name *"
-        placeholderTextColor="rgba(255,255,255,0.3)" value={form.name}
-        onChangeText={(v) => onFieldChange('name', v)} accessibilityLabel="Item name" />
+      <TextInput
+        style={styles.modalInput}
+        placeholder="Item name *"
+        placeholderTextColor="rgba(255,255,255,0.3)"
+        value={form.name}
+        onChangeText={(v) => onFieldChange('name', v)}
+        accessibilityLabel="Item name"
+      />
 
       <TextInput
         style={[styles.modalInput, { minHeight: 60, textAlignVertical: 'top' }]}
-        placeholder="Description (optional)" placeholderTextColor="rgba(255,255,255,0.3)"
+        placeholder="Description (optional)"
+        placeholderTextColor="rgba(255,255,255,0.3)"
         value={form.description}
         onChangeText={(v) => onFieldChange('description', v)}
-        multiline accessibilityLabel="Item description"
+        multiline
+        accessibilityLabel="Item description"
       />
 
       <View style={styles.priceRow}>
         <View style={{ flex: 1 }}>
           <Text style={styles.priceLabel}>Price *</Text>
-          <TextInput style={styles.modalInput} placeholder="100.00"
-            placeholderTextColor="rgba(255,255,255,0.3)" value={form.price}
+          <TextInput
+            style={styles.modalInput}
+            placeholder="100.00"
+            placeholderTextColor="rgba(255,255,255,0.3)"
+            value={form.price}
             onChangeText={(v) => onFieldChange('price', v)}
-            keyboardType="decimal-pad" accessibilityLabel="Item price" />
+            keyboardType="decimal-pad"
+            accessibilityLabel="Item price"
+          />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.priceLabel}>Original Price (before discount)</Text>
-          <TextInput style={styles.modalInput} placeholder="Optional"
-            placeholderTextColor="rgba(255,255,255,0.3)" value={form.original_price}
+          <TextInput
+            style={styles.modalInput}
+            placeholder="Optional"
+            placeholderTextColor="rgba(255,255,255,0.3)"
+            value={form.original_price}
             onChangeText={(v) => onFieldChange('original_price', v)}
-            keyboardType="decimal-pad" accessibilityLabel="Original price before discount" />
+            keyboardType="decimal-pad"
+            accessibilityLabel="Original price before discount"
+          />
         </View>
       </View>
 
@@ -351,13 +403,19 @@ function ItemFormContent({
       <View style={styles.sectionDivider} />
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Options / Modifiers</Text>
-        <Pressable style={styles.addSmallBtn} onPress={onAddOptionGroup}
-          accessibilityRole="button" accessibilityLabel="Add option group">
-          <Ionicons name="add-circle-outline" size={16} color={colours.primary} />
+        <Pressable
+          style={styles.addSmallBtn}
+          onPress={onAddOptionGroup}
+          accessibilityRole="button"
+          accessibilityLabel="Add option group"
+        >
+          <Ionicons name="add-circle-outline" size={14} color={colours.primary} />
           <Text style={styles.addSmallBtnText}>Add Group</Text>
         </Pressable>
       </View>
-      <Text style={styles.sectionHint}>e.g. Group: "Protein" → Options: Pork (+15 ฿), Beef (+20 ฿)</Text>
+      <Text style={styles.sectionHint}>
+        e.g. Group: "Protein" → Options: Pork (+15 ฿), Beef (+20 ฿)
+      </Text>
 
       {form.option_groups.map((group, gi) => (
         <View key={gi} style={styles.optionGroupCard}>
@@ -370,9 +428,13 @@ function ItemFormContent({
               onChangeText={(v) => onOptionGroupChange(gi, 'name', v)}
               accessibilityLabel={`Option group ${gi + 1} name`}
             />
-            <Pressable onPress={() => onRemoveOptionGroup(gi)}
-              style={{ padding: 8 }} accessibilityRole="button" accessibilityLabel="Remove group">
-              <Ionicons name="trash-outline" size={16} color={colours.error} />
+            <Pressable
+              onPress={() => onRemoveOptionGroup(gi)}
+              style={{ padding: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel="Remove group"
+            >
+              <Ionicons name="trash-outline" size={15} color={colours.error} />
             </Pressable>
           </View>
 
@@ -430,28 +492,43 @@ function ItemFormContent({
                 keyboardType="decimal-pad"
                 accessibilityLabel={`Option ${oi + 1} additional price`}
               />
-              <Pressable onPress={() => onRemoveOption(gi, oi)}
-                style={{ padding: 8 }} accessibilityRole="button" accessibilityLabel="Remove option">
-                <Ionicons name="close-circle-outline" size={16} color={colours.error} />
+              <Pressable
+                onPress={() => onRemoveOption(gi, oi)}
+                style={{ padding: 8 }}
+                accessibilityRole="button"
+                accessibilityLabel="Remove option"
+              >
+                <Ionicons name="close-circle-outline" size={15} color={colours.error} />
               </Pressable>
             </View>
           ))}
 
-          <Pressable style={styles.addOptionBtn} onPress={() => onAddOption(gi)}
-            accessibilityRole="button" accessibilityLabel="Add option">
-            <Ionicons name="add-outline" size={14} color={colours.primary} />
+          <Pressable
+            style={styles.addOptionBtn}
+            onPress={() => onAddOption(gi)}
+            accessibilityRole="button"
+            accessibilityLabel="Add option"
+          >
+            <Ionicons name="add-outline" size={13} color={colours.primary} />
             <Text style={styles.addOptionBtnText}>Add Option</Text>
           </Pressable>
         </View>
       ))}
 
       <View style={styles.modalActions}>
-        <Pressable style={styles.cancelButton} onPress={onCancel}
-          accessibilityLabel="Cancel" accessibilityRole="button">
+        <Pressable
+          style={styles.cancelButton}
+          onPress={onCancel}
+          accessibilityLabel="Cancel"
+          accessibilityRole="button"
+        >
           <Text style={styles.cancelText}>Cancel</Text>
         </Pressable>
         <Pressable
-          style={[styles.confirmButton, (isSaving || !form.name.trim() || !form.price.trim()) && { opacity: 0.5 }]}
+          style={[
+            styles.confirmButton,
+            (isSaving || !form.name.trim() || !form.price.trim()) && { opacity: 0.5 },
+          ]}
           onPress={onSubmit}
           disabled={isSaving || !form.name.trim() || !form.price.trim()}
           accessibilityLabel={submitLabel}
@@ -487,8 +564,10 @@ function PhotoPreview({ newPhoto, existingUrl, onPickPhoto }: PhotoPreviewProps)
         accessibilityRole="button"
         accessibilityLabel="Add photo"
       >
-        <Ionicons name="image-outline" size={16} color={colours.primary} />
-        <Text style={[styles.cancelText, { color: colours.primary, marginLeft: 6 }]}>Add Photo (optional)</Text>
+        <Ionicons name="image-outline" size={15} color={colours.primary} />
+        <Text style={[styles.cancelText, { color: colours.primary, marginLeft: 6 }]}>
+          Add Photo (optional)
+        </Text>
       </Pressable>
     );
   }
@@ -496,9 +575,13 @@ function PhotoPreview({ newPhoto, existingUrl, onPickPhoto }: PhotoPreviewProps)
   return (
     <View style={styles.photoPreviewWrap}>
       {loadError ? (
-        <Pressable style={[styles.photoPreview, styles.photoErrorState]} onPress={onPickPhoto}
-          accessibilityRole="button" accessibilityLabel="Photo unavailable, tap to upload new">
-          <Ionicons name="image-outline" size={32} color={colours.medium} />
+        <Pressable
+          style={[styles.photoPreview, styles.photoErrorState]}
+          onPress={onPickPhoto}
+          accessibilityRole="button"
+          accessibilityLabel="Photo unavailable, tap to upload new"
+        >
+          <Ionicons name="image-outline" size={28} color={colours.medium} />
           <Text style={styles.photoErrorText}>Tap to upload photo</Text>
         </Pressable>
       ) : (
@@ -516,9 +599,13 @@ function PhotoPreview({ newPhoto, existingUrl, onPickPhoto }: PhotoPreviewProps)
         </View>
       )}
       {!loadError && (
-        <Pressable style={styles.photoChangeBtn} onPress={onPickPhoto}
-          accessibilityRole="button" accessibilityLabel="Change photo">
-          <Ionicons name="image-outline" size={16} color={colours.primary} />
+        <Pressable
+          style={styles.photoChangeBtn}
+          onPress={onPickPhoto}
+          accessibilityRole="button"
+          accessibilityLabel="Change photo"
+        >
+          <Ionicons name="image-outline" size={14} color={colours.primary} />
           <Text style={styles.photoChangeBtnText}>Change Photo</Text>
         </Pressable>
       )}
