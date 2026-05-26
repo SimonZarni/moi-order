@@ -63,20 +63,22 @@ export const styles = StyleSheet.create({
   },
 
   // ── Category tabs ─────────────────────────────────────────────────────────
-  tabs: {
+  // Outer View enforces height. ScrollView ignores height on its own style on
+  // Expo Web because it is rendered as a flex container that grows to fill space.
+  tabsOuter: {
+    height: 44,
     backgroundColor: colours.surface,
     borderBottomWidth: 1,
     borderBottomColor: colours.divider,
-    // Fixed height stops the horizontal ScrollView from stretching pills to
-    // fill the container on Expo Web (items flex-stretch by default on web).
-    height: 44,
-    justifyContent: 'center',
+  },
+  // ScrollView fills the outer View via flex: 1.
+  tabs: {
+    flex: 1,
   },
   tabsContent: {
     paddingHorizontal: spacing.md,
     gap: spacing.xs,
-    // Critical for web: prevents pill items from stretching to the ScrollView height.
-    alignItems: 'center',
+    alignItems: 'center',  // stops pills stretching to full container height on web
     height: 44,
   },
   tab: {
@@ -89,7 +91,6 @@ export const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colours.divider,
     backgroundColor: colours.surface,
-    // Belt-and-suspenders: don't grow taller than needed even if parent stretches.
     alignSelf: 'center',
   },
   tabActive: {

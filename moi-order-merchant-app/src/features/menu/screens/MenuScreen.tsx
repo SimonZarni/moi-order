@@ -101,6 +101,8 @@ export function MenuScreen(): React.JSX.Element {
       </View>
 
       {/* ── Category tabs ────────────────────────────────────────────────── */}
+      {/* Outer View enforces height — ScrollView ignores height on its own style prop on Expo Web */}
+      <View style={styles.tabsOuter}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -123,6 +125,7 @@ export function MenuScreen(): React.JSX.Element {
           />
         ))}
       </ScrollView>
+      </View>
 
       {/* ── System category warning banner ──────────────────────────────── */}
       {hasMissingSystemCategories && (
