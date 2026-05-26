@@ -10,6 +10,9 @@ export const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
   },
+  screenColumn: {
+    flexDirection: 'column',
+  },
   leftPanel: {
     width: '42%',
     backgroundColor: colours.backgroundDark,
@@ -17,6 +20,16 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: spacing.xxl,
     gap: spacing.md,
+  },
+  leftPanelMobile: {
+    width: '100%',
+    backgroundColor: colours.backgroundDark,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.lg,
+    gap: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.dividerDark,
   },
   brandMark: {
     width: 64,
@@ -70,6 +83,10 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  rightPanelFull: {
+    width: '100%',
+    justifyContent: 'flex-start',
+  },
   formScroll: {
     flex: 1,
     width: '100%',
@@ -81,6 +98,12 @@ export const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
     padding: spacing.xxl,
+  },
+  formCardMobile: {
+    maxWidth: 600,
+    padding: spacing.lg,
+    paddingTop: spacing.xl,
+    justifyContent: 'flex-start',
   },
   formTitle: {
     fontSize: typography.xxl,

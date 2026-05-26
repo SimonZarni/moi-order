@@ -18,10 +18,14 @@ export const styles = StyleSheet.create({
   container: { flex: 1, padding: spacing.lg, justifyContent: 'center' },
 
   screen: { flex: 1, flexDirection: 'row' },
+  screenColumn: { flexDirection: 'column' },
   leftPanel: { width: '42%', backgroundColor: colours.backgroundDark, alignItems: 'center', justifyContent: 'center', padding: spacing.xxl, gap: spacing.md, borderRightWidth: 1, borderRightColor: colours.dividerDark },
+  leftPanelMobile: { width: '100%', backgroundColor: colours.backgroundDark, flexDirection: 'row', alignItems: 'center', padding: spacing.lg, gap: spacing.md, borderBottomWidth: 1, borderBottomColor: colours.dividerDark },
   rightPanel: { flex: 1, backgroundColor: colours.backgroundDark, alignItems: 'center', justifyContent: 'center' },
+  rightPanelFull: { width: '100%', justifyContent: 'flex-start' },
   webScroll: { flex: 1, width: '100%' },
   webForm: { flexGrow: 1, justifyContent: 'center', maxWidth: 440, width: '100%', alignSelf: 'center', padding: spacing.xxl },
+  webFormMobile: { maxWidth: 600, padding: spacing.lg, paddingTop: spacing.xl, justifyContent: 'flex-start' },
   formTitle: { fontSize: typography.xxl, fontWeight: '800', color: colours.textOnDark, marginBottom: spacing.xs, letterSpacing: -0.5 },
   formSubtitle: { fontSize: typography.sm, color: 'rgba(255,255,255,0.4)', marginBottom: spacing.xl },
 

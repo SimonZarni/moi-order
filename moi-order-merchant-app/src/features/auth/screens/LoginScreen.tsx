@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TextInput, Pressable, ActivityIndicator, Platform, ScrollView, KeyboardAvoidingView } from 'react-native';
+import { View, Text, TextInput, Pressable, ActivityIndicator, Platform, ScrollView, KeyboardAvoidingView, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLoginScreen } from '../hooks/useLoginScreen';
@@ -12,6 +12,9 @@ export function LoginScreen(): React.JSX.Element {
     setEmail, setPassword,
     handleSubmit, handleGoToOtp, handleGoToRegister,
   } = useLoginScreen();
+
+  const { width } = useWindowDimensions();
+  const isMobileWeb = Platform.OS === 'web' && width < 768;
 
   const formContent = (
     <>
@@ -89,16 +92,30 @@ export function LoginScreen(): React.JSX.Element {
   // ── Web layout ──
   if (Platform.OS === 'web') {
     return (
-      <View style={styles.screen}>
-        <View style={styles.leftPanel}>
-          <View style={styles.brandMark}><Text style={styles.brandMarkText}>M</Text></View>
-          <Text style={styles.brandName}>moi·order</Text>
-          <Text style={styles.brandRole}>Merchant Platform</Text>
-          <View style={styles.brandDivider} />
-          <Text style={styles.brandTagline}>Manage orders, menus, and analytics — all in one place.</Text>
-        </View>
-        <View style={styles.rightPanel}>
-          <ScrollView style={styles.webScroll} contentContainerStyle={styles.webForm} keyboardShouldPersistTaps="handled">
+      <View style={[styles.screen, isMobileWeb && styles.screenColumn]}>
+        {isMobileWeb ? (
+          <View style={styles.leftPanelMobile}>
+            <View style={styles.brandMark}><Text style={styles.brandMarkText}>M</Text></View>
+            <View>
+              <Text style={styles.brandName}>moi·order</Text>
+              <Text style={styles.brandRole}>Merchant Platform</Text>
+            </View>
+          </View>
+        ) : (
+          <View style={styles.leftPanel}>
+            <View style={styles.brandMark}><Text style={styles.brandMarkText}>M</Text></View>
+            <Text style={styles.brandName}>moi·order</Text>
+            <Text style={styles.brandRole}>Merchant Platform</Text>
+            <View style={styles.brandDivider} />
+            <Text style={styles.brandTagline}>Manage orders, menus, and analytics — all in one place.</Text>
+          </View>
+        )}
+        <View style={[styles.rightPanel, isMobileWeb && styles.rightPanelFull]}>
+          <ScrollView
+            style={styles.webScroll}
+            contentContainerStyle={[styles.webForm, isMobileWeb && styles.webFormMobile]}
+            keyboardShouldPersistTaps="handled"
+          >
             <Text style={styles.formTitle}>Welcome back</Text>
             <Text style={styles.formSubtitle}>Sign in to your merchant account</Text>
             {formContent}

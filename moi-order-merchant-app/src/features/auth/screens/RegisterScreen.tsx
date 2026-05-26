@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TextInput, Pressable, ActivityIndicator, ScrollView, Platform } from 'react-native';
+import { View, Text, TextInput, Pressable, ActivityIndicator, ScrollView, Platform, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRegisterScreen } from '../hooks/useRegisterScreen';
 import { styles } from './RegisterScreen.styles';
@@ -10,6 +10,9 @@ export function RegisterScreen(): React.JSX.Element {
     name, email, password, isLoading, error, fieldErrors,
     setName, setEmail, setPassword, handleSubmit,
   } = useRegisterScreen();
+
+  const { width } = useWindowDimensions();
+  const isMobileWeb = Platform.OS === 'web' && width < 768;
 
   const formFields = (
     <>
@@ -42,22 +45,34 @@ export function RegisterScreen(): React.JSX.Element {
 
   if (Platform.OS === 'web') {
     return (
-      <View style={styles.screen}>
-        <View style={styles.leftPanel}>
-          <View style={styles.brandMark}>
-            <Text style={styles.brandMarkText}>M</Text>
+      <View style={[styles.screen, isMobileWeb && styles.screenColumn]}>
+        {isMobileWeb ? (
+          <View style={styles.leftPanelMobile}>
+            <View style={styles.brandMark}>
+              <Text style={styles.brandMarkText}>M</Text>
+            </View>
+            <View>
+              <Text style={styles.brandName}>moi·order</Text>
+              <Text style={styles.brandRole}>Merchant Platform</Text>
+            </View>
           </View>
-          <Text style={styles.brandName}>moi·order</Text>
-          <Text style={styles.brandRole}>Merchant Platform</Text>
-          <View style={styles.brandDivider} />
-          <Text style={styles.brandTagline}>
-            Manage orders, menus, and analytics — all in one place.
-          </Text>
-        </View>
-        <View style={styles.rightPanel}>
+        ) : (
+          <View style={styles.leftPanel}>
+            <View style={styles.brandMark}>
+              <Text style={styles.brandMarkText}>M</Text>
+            </View>
+            <Text style={styles.brandName}>moi·order</Text>
+            <Text style={styles.brandRole}>Merchant Platform</Text>
+            <View style={styles.brandDivider} />
+            <Text style={styles.brandTagline}>
+              Manage orders, menus, and analytics — all in one place.
+            </Text>
+          </View>
+        )}
+        <View style={[styles.rightPanel, isMobileWeb && styles.rightPanelFull]}>
           <ScrollView
             style={styles.formScroll}
-            contentContainerStyle={styles.formCard}
+            contentContainerStyle={[styles.formCard, isMobileWeb && styles.formCardMobile]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
