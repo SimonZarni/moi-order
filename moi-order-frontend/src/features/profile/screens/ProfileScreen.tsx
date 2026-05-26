@@ -37,14 +37,14 @@ function getInitials(name: string): string {
 export function ProfileScreen(): React.JSX.Element {
   const {
     user, isLoading, isRefreshing,
-    name, dateOfBirth, profileErrors, isDirty, isSavingProfile, showDatePicker, isEditingProfile,
+    name, dateOfBirth, lineHandle, profileErrors, isDirty, isSavingProfile, showDatePicker, isEditingProfile,
     displayEmail, displayPhone,
     needsEmailCompletion, isPlaceholderEmail, hasPassword,
     currentPassword, newPassword, confirmPassword, passwordErrors,
     isPasswordSectionOpen, isChangingPassword,
     locale, handleSetLocale,
     handleToggleEditProfile,
-    handleNameChange, handleDateFieldPress, handleDatePickerChange, handleSaveProfile, handleRefresh,
+    handleNameChange, handleLineHandleChange, handleDateFieldPress, handleDatePickerChange, handleSaveProfile, handleRefresh,
     handleTogglePasswordSection,
     handleCurrentPasswordChange, handleNewPasswordChange, handleConfirmPasswordChange,
     handleChangePassword,
@@ -261,6 +261,27 @@ export function ProfileScreen(): React.JSX.Element {
                   />
                 )}
 
+                {/* LINE ID input (optional — user can leave blank to keep or clear) */}
+                <View style={[styles.inputRow, { marginTop: 4 }]}>
+                  <View style={[styles.iconBadge, styles.iconBadgeTeal]}>
+                    <Ionicons name="chatbubble-ellipses-outline" size={16} color={colours.tertiary} />
+                  </View>
+                  <TextInput
+                    style={[styles.inputField, profileErrors.lineHandle !== null && styles.inputError]}
+                    value={lineHandle}
+                    onChangeText={handleLineHandleChange}
+                    placeholder="LINE ID (e.g. chrisline)"
+                    placeholderTextColor={colours.textMuted}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    returnKeyType="done"
+                    accessibilityLabel="LINE ID"
+                  />
+                </View>
+                {profileErrors.lineHandle !== null && (
+                  <Text style={styles.errorText}>{profileErrors.lineHandle}</Text>
+                )}
+
                 {isDirty && (
                   <Pressable
                     style={styles.saveBtn}
@@ -324,6 +345,16 @@ export function ProfileScreen(): React.JSX.Element {
                   </View>
                   <Text style={[styles.infoValue, dateOfBirth === null && styles.infoPlaceholder]}>
                     {dateOfBirth !== null ? formatDate(dateOfBirth.toISOString()) : 'Not set'}
+                  </Text>
+                </View>
+
+                {/* Read-only LINE ID row */}
+                <View style={styles.infoRow}>
+                  <View style={[styles.iconBadge, styles.iconBadgeTeal]}>
+                    <Ionicons name="chatbubble-ellipses-outline" size={16} color={colours.tertiary} />
+                  </View>
+                  <Text style={[styles.infoValue, user?.line_handle === null && styles.infoPlaceholder]}>
+                    {user?.line_handle ? `@${user.line_handle}` : 'LINE ID not set'}
                   </Text>
                 </View>
               </>

@@ -607,7 +607,7 @@ export function UserDetailView() {
             <ChannelBadge label="Phone"  connected={channels.phone.connected}  value={channels.phone.value} />
             <ChannelBadge label="Google" connected={channels.google.connected} />
             <ChannelBadge label="Apple"  connected={channels.apple.connected}  />
-            <ChannelBadge label="LINE"   connected={channels.line.connected}   />
+            <ChannelBadge label="LINE"   connected={channels.line.connected}   value={channels.line.value} />
           </Box>
         </Card>
       )}

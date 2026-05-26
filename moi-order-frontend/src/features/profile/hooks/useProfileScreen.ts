@@ -38,6 +38,7 @@ export interface UseProfileScreenResult {
   // Profile form
   name: string;
   dateOfBirth: Date | null;
+  lineHandle: string;
   profileErrors: ReturnType<typeof useProfileForm>['errors'];
   isDirty: boolean;
   isSavingProfile: boolean;
@@ -57,8 +58,9 @@ export interface UseProfileScreenResult {
   isChangingPassword: boolean;
   // Handlers — profile
   handleToggleEditProfile: () => void;
-  handleNameChange: (text: string) => void;
-  handleDateFieldPress: () => void;
+  handleNameChange:       (text: string) => void;
+  handleLineHandleChange: (text: string) => void;
+  handleDateFieldPress:   () => void;
   handleDatePickerChange: (event: DateTimePickerEvent, date?: Date) => void;
   handleSaveProfile: () => void;
   handleRefresh: () => void;
@@ -173,12 +175,16 @@ export function useProfileScreen(): UseProfileScreenResult {
         ].join('-')
       : null;
 
+    // Normalise: strip leading "@", treat blank as null (clearing the handle).
+    const lineHandleValue = profileForm.lineHandle.replace(/^@/, '').trim() || null;
+
     updateMutation.mutate(
       {
         name:        profileForm.name.trim(),
         email:       user?.email ?? '',
         phoneNumber: user?.phone_number ?? null,
         dateOfBirth: dobStr,
+        lineHandle:  lineHandleValue,
       },
       {
         onSuccess: () => setIsEditingProfile(false),
@@ -352,8 +358,9 @@ export function useProfileScreen(): UseProfileScreenResult {
     handleTriggerReminder,
     name:          profileForm.name,
     dateOfBirth:   profileForm.dateOfBirth,
+    lineHandle:    profileForm.lineHandle,
     profileErrors: profileForm.errors,
-    isDirty:        profileForm.isDirty,
+    isDirty:       profileForm.isDirty,
     isSavingProfile: updateMutation.isPending,
     showDatePicker,
     isEditingProfile,
@@ -369,7 +376,8 @@ export function useProfileScreen(): UseProfileScreenResult {
     isPasswordSectionOpen,
     isChangingPassword:     changePasswordMutation.isPending,
     handleToggleEditProfile,
-    handleNameChange:    profileForm.handleNameChange,
+    handleNameChange:       profileForm.handleNameChange,
+    handleLineHandleChange: profileForm.handleLineHandleChange,
     handleDateFieldPress,
     handleDatePickerChange,
     handleSaveProfile,

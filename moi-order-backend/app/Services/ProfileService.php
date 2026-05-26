@@ -62,12 +62,20 @@ class ProfileService
             ? $this->normalizeThaiPhoneNumber($dto->phoneNumber)
             : null;
 
-        $user->update([
+        $updates = [
             'name'          => $dto->name,
             'email'         => $dto->email,
             'phone_number'  => $phoneNumber,
             'date_of_birth' => $dto->dateOfBirth,
-        ]);
+        ];
+
+        // Only write line_handle when explicitly submitted — protects older app versions
+        // that don't send the field from accidentally clearing a previously saved handle.
+        if ($dto->lineHandleSubmitted) {
+            $updates['line_handle'] = $dto->lineHandle;
+        }
+
+        $user->update($updates);
 
         return $user->fresh();
     }

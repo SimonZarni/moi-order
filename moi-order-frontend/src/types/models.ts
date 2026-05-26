@@ -55,6 +55,7 @@ export interface User {
   has_google: boolean;
   has_apple: boolean;
   has_line: boolean;
+  line_handle: string | null;    // user-entered LINE ID (e.g. "chrisline"), null if not set
   date_of_birth: string | null;  // ISO date "YYYY-MM-DD"
   role: string;
   is_privileged: boolean;

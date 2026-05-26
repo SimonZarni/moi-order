@@ -13,7 +13,7 @@ export interface UseProfileDataResult {
   isRefreshing: boolean;
   isError: boolean;
   refetch: () => void;
-  updateMutation: ReturnType<typeof useMutation<User, ApiError, { name: string; email: string; phoneNumber: string | null; dateOfBirth: string | null }>>;
+  updateMutation: ReturnType<typeof useMutation<User, ApiError, { name: string; email: string; phoneNumber: string | null; dateOfBirth: string | null; lineHandle: string | null }>>;
   changePasswordMutation: ReturnType<typeof useMutation<void, ApiError, { currentPassword: string; newPassword: string; confirmPassword: string }>>;
   deleteAccountMutation: ReturnType<typeof useMutation<void, ApiError, void>>;
   simulatedDateMutation: ReturnType<typeof useMutation<User, ApiError, { date: string | null }>>;
@@ -30,8 +30,8 @@ export function useProfileData(): UseProfileDataResult {
     staleTime: CACHE_TTL.USER_DATA,
   });
 
-  const updateMutation = useMutation<User, ApiError, { name: string; email: string; phoneNumber: string | null; dateOfBirth: string | null }>({
-    mutationFn: ({ name, email, phoneNumber, dateOfBirth }) => updateProfile(name, email, phoneNumber, dateOfBirth),
+  const updateMutation = useMutation<User, ApiError, { name: string; email: string; phoneNumber: string | null; dateOfBirth: string | null; lineHandle: string | null }>({
+    mutationFn: ({ name, email, phoneNumber, dateOfBirth, lineHandle }) => updateProfile(name, email, phoneNumber, dateOfBirth, lineHandle),
     onSuccess: (updatedUser) => {
       queryClient.setQueryData(QUERY_KEYS.PROFILE.ME, updatedUser);
       updateUser(updatedUser);

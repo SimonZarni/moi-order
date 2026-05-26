@@ -5,77 +5,43 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useCallback } from 'react';
-import { Platform } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import { useWindowDimensions } from 'react-native';
 import { useMenuScreen } from '../hooks/useMenuScreen';
-import { CategorySection } from '../components/CategorySection';
+import { MenuItemCard } from '../components/MenuItemCard';
 import { styles } from './MenuScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { spacing } from '../../../shared/theme/spacing';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
-import type { MenuCategory, MenuItem } from '../../../types/models';
+import type { MenuItem } from '../../../types/models';
 import type { AddItemForm } from '../hooks/useMenuScreen';
 
 export function MenuScreen(): React.JSX.Element {
   const {
-    categories, isLoading, hasMissingSystemCategories, restaurantStatus,
-    showAddCategoryModal, addItemCategoryId, addItemForm, isAddingItem,
-    handleAddCategory, handleDeleteCategory,
+    categories, filteredItems, guardedItemIds, isLoading, hasMissingSystemCategories,
+    selectedCategoryId, searchQuery, handleSelectCategory, handleSearchChange,
+    showAddCategoryModal, newCategoryName, setShowAddCategoryModal,
+    handleNewCategoryNameChange, handleConfirmAddCategory,
     handleToggleItemStatus, handleDeleteItem,
-    setShowAddCategoryModal,
+    addItemCategoryId, addItemForm, isAddingItem,
     handleOpenAddItem, handleCloseAddItem,
-    handleAddItemFieldChange, handleAddItemPhotoChange,
-    handleAddOptionGroup, handleRemoveOptionGroup,
-    handleOptionGroupChange, handleAddOption, handleRemoveOption, handleOptionChange,
-    handleAddItemSubmit,
+    handleAddItemFieldChange, handleAddItemPhotoChange, handlePickAddPhoto,
+    handleAddOptionGroup, handleRemoveOptionGroup, handleOptionGroupChange,
+    handleAddOption, handleRemoveOption, handleOptionChange, handleAddItemSubmit,
     editItemId, editItemForm, editItemExistingPhotoUrl, isEditingItem,
     handleOpenEditItem, handleCloseEditItem,
-    handleEditItemFieldChange, handleEditItemPhotoChange,
-    handleEditAddOptionGroup, handleEditRemoveOptionGroup,
-    handleEditOptionGroupChange, handleEditAddOption, handleEditRemoveOption, handleEditOptionChange,
-    handleEditItemSubmit,
-    handleRenameCategory,
+    handleEditItemFieldChange, handleEditItemPhotoChange, handlePickEditPhoto,
+    handleEditAddOptionGroup, handleEditRemoveOptionGroup, handleEditOptionGroupChange,
+    handleEditAddOption, handleEditRemoveOption, handleEditOptionChange, handleEditItemSubmit,
   } = useMenuScreen();
 
-  const [newCategoryName, setNewCategoryName] = useState('');
+  const { width } = useWindowDimensions();
+  // 3 columns on wide screens (tablet/web), 2 on mobile
+  const numColumns = width >= 600 ? 3 : 2;
 
-  const handleConfirmAddCategory = useCallback(async () => {
-    if (!newCategoryName.trim()) return;
-    await handleAddCategory(newCategoryName.trim());
-    setNewCategoryName('');
-  }, [newCategoryName, handleAddCategory]);
-
-  const handlePickPhoto = useCallback(async (onPick: (photo: AddItemForm['photo']) => void) => {
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'images', quality: 0.8 });
-    if (result.canceled || result.assets.length === 0) return;
-    const asset = result.assets[0];
-    if (!asset) return;
-
-    let mimeType = asset.mimeType ?? 'image/jpeg';
-    let uri = asset.uri;
-    let fileName = asset.fileName ?? `item.${mimeType.split('/')[1] ?? 'jpg'}`;
-
-    // Chrome/Firefox cannot render or upload HEIC — convert to JPEG on web
-    if (Platform.OS === 'web' && (mimeType === 'image/heic' || mimeType === 'image/heif')) {
-      try {
-        const heic2any = (await import('heic2any')).default;
-        const srcBlob = await fetch(uri).then((r) => r.blob());
-        const result2 = await heic2any({ blob: srcBlob, toType: 'image/jpeg', quality: 0.85 });
-        const jpegBlob = Array.isArray(result2) ? result2[0] : result2;
-        uri = URL.createObjectURL(jpegBlob);
-        mimeType = 'image/jpeg';
-        fileName = fileName.replace(/\.(heic|heif)$/i, '.jpg');
-      } catch {
-        // Safari can render HEIC natively — safe to proceed as-is if conversion fails
-      }
-    }
-
-    onPick({ uri, name: fileName, type: mimeType });
-  }, []);
-
-  const handlePickAddPhoto = useCallback(() => handlePickPhoto(handleAddItemPhotoChange), [handlePickPhoto, handleAddItemPhotoChange]);
-  const handlePickEditPhoto = useCallback(() => handlePickPhoto(handleEditItemPhotoChange), [handlePickPhoto, handleEditItemPhotoChange]);
+  const activeCategory = selectedCategoryId !== 'all'
+    ? categories.find((c) => c.id === selectedCategoryId) ?? null
+    : null;
 
   if (isLoading) {
     return <View style={styles.centered}><ActivityIndicator size="large" color={colours.primary} /></View>;
@@ -83,51 +49,133 @@ export function MenuScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      {/* Page header */}
-      <View style={styles.pageHeader}>
+      {/* ── Header ──────────────────────────────────────────────────────── */}
+      <View style={styles.header}>
         <Text style={styles.pageTitle}>Menu</Text>
-        <Pressable style={styles.addButton} onPress={() => setShowAddCategoryModal(true)}
-          accessibilityLabel="Add a new menu category" accessibilityRole="button">
-          <Text style={styles.addButtonText}>Add Category</Text>
+        <Pressable
+          style={styles.addCategoryBtn}
+          onPress={() => setShowAddCategoryModal(true)}
+          accessibilityLabel="Add a new menu category"
+          accessibilityRole="button"
+        >
+          <Ionicons name="folder-open-outline" size={14} color={colours.backgroundDark} />
+          <Text style={styles.addCategoryBtnText}>Add Category</Text>
         </Pressable>
       </View>
 
-      <FlatList<MenuCategory>
-        data={categories}
+      {/* ── Search bar ──────────────────────────────────────────────────── */}
+      <View style={styles.searchWrap}>
+        <Ionicons name="search-outline" size={16} color={colours.textSubtle} style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search items…"
+          placeholderTextColor={colours.textSubtle}
+          value={searchQuery}
+          onChangeText={handleSearchChange}
+          returnKeyType="search"
+          accessibilityLabel="Search menu items"
+        />
+        {searchQuery.length > 0 && (
+          <Pressable onPress={() => handleSearchChange('')} accessibilityRole="button" accessibilityLabel="Clear search">
+            <Ionicons name="close-circle" size={16} color={colours.textSubtle} />
+          </Pressable>
+        )}
+      </View>
+
+      {/* ── Category tabs ────────────────────────────────────────────────── */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabsContent}
+        style={styles.tabs}
+      >
+        <CategoryTab
+          label="All"
+          count={categories.reduce((sum, c) => sum + c.items.length, 0)}
+          isActive={selectedCategoryId === 'all'}
+          onPress={() => handleSelectCategory('all')}
+        />
+        {categories.map((cat) => (
+          <CategoryTab
+            key={cat.id}
+            label={cat.name}
+            count={cat.items.length}
+            isActive={selectedCategoryId === cat.id}
+            onPress={() => handleSelectCategory(cat.id)}
+          />
+        ))}
+      </ScrollView>
+
+      {/* ── System category warning banner ──────────────────────────────── */}
+      {hasMissingSystemCategories && (
+        <View style={styles.warnBanner} accessibilityRole="alert">
+          <Ionicons name="warning-outline" size={14} color={colours.warning} />
+          <Text style={styles.warnText}>
+            Menu hidden from customers — Popular Picks & Recommendations each need at least 1 item.
+          </Text>
+        </View>
+      )}
+
+      {/* ── Items grid ──────────────────────────────────────────────────── */}
+      <FlatList<MenuItem>
+        key={String(numColumns)}
+        data={filteredItems}
+        numColumns={numColumns}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
-          <CategorySection
-            category={item}
-            restaurantStatus={restaurantStatus}
-            onDeleteCategory={handleDeleteCategory}
-            onRenameCategory={handleRenameCategory}
-            onToggleItemStatus={handleToggleItemStatus}
-            onDeleteItem={handleDeleteItem}
-            onAddItem={handleOpenAddItem}
-            onEditItem={handleOpenEditItem}
+          <MenuItemCard
+            item={item}
+            isGuarded={guardedItemIds.has(item.id)}
+            onToggleStatus={handleToggleItemStatus}
+            onDelete={handleDeleteItem}
+            onEdit={handleOpenEditItem}
           />
         )}
-        contentContainerStyle={styles.list}
-        ListHeaderComponent={
-          hasMissingSystemCategories ? (
-            <View style={styles.warnBanner} accessibilityRole="alert">
-              <Ionicons name="warning-outline" size={16} color={colours.warning} />
-              <Text style={styles.warnText}>
-                Your menu won't be visible to customers until Popular Picks and Recommendations each have at least 1 item.
-              </Text>
-            </View>
-          ) : null
+        contentContainerStyle={styles.grid}
+        columnWrapperStyle={numColumns > 1 ? styles.columnWrapper : undefined}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Ionicons name="restaurant-outline" size={48} color={colours.textSubtle} />
+            <Text style={styles.emptyTitle}>
+              {searchQuery ? 'No items match your search' : 'No items yet'}
+            </Text>
+            <Text style={styles.emptySubtitle}>
+              {searchQuery ? 'Try a different keyword' : 'Select a category below and add your first item'}
+            </Text>
+          </View>
         }
-        ListEmptyComponent={<Text style={styles.empty}>No categories yet. Add one to get started.</Text>}
+        showsVerticalScrollIndicator={false}
       />
 
-      {/* Add category modal */}
+      {/* ── Floating "Add Item" button — only when a category is selected ── */}
+      {activeCategory !== null && (
+        <Pressable
+          style={styles.fab}
+          onPress={() => handleOpenAddItem(activeCategory.id)}
+          accessibilityLabel={`Add item to ${activeCategory.name}`}
+          accessibilityRole="button"
+        >
+          <Ionicons name="add" size={22} color={colours.backgroundDark} />
+          <Text style={styles.fabText}>Add Item</Text>
+        </Pressable>
+      )}
+
+      {/* ── Add category modal ───────────────────────────────────────────── */}
       <Modal visible={showAddCategoryModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>New Category</Text>
-            <TextInput style={styles.modalInput} placeholder="Category name" placeholderTextColor="rgba(255,255,255,0.3)"
-              value={newCategoryName} onChangeText={setNewCategoryName} accessibilityLabel="Category name" />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Category name"
+              placeholderTextColor="rgba(255,255,255,0.3)"
+              value={newCategoryName}
+              onChangeText={handleNewCategoryNameChange}
+              autoFocus
+              returnKeyType="done"
+              onSubmitEditing={handleConfirmAddCategory}
+              accessibilityLabel="Category name"
+            />
             <View style={styles.modalActions}>
               <Pressable style={styles.cancelButton} onPress={() => setShowAddCategoryModal(false)}
                 accessibilityLabel="Cancel" accessibilityRole="button">
@@ -142,7 +190,7 @@ export function MenuScreen(): React.JSX.Element {
         </View>
       </Modal>
 
-      {/* Add menu item modal */}
+      {/* ── Add menu item modal ──────────────────────────────────────────── */}
       <Modal visible={addItemCategoryId !== null} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <ScrollView style={styles.modalScrollView} contentContainerStyle={styles.modalCard} keyboardShouldPersistTaps="handled">
@@ -166,7 +214,7 @@ export function MenuScreen(): React.JSX.Element {
         </View>
       </Modal>
 
-      {/* Edit menu item modal */}
+      {/* ── Edit menu item modal ─────────────────────────────────────────── */}
       <Modal visible={editItemId !== null} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <ScrollView style={styles.modalScrollView} contentContainerStyle={styles.modalCard} keyboardShouldPersistTaps="handled">
@@ -191,6 +239,32 @@ export function MenuScreen(): React.JSX.Element {
         </View>
       </Modal>
     </SafeAreaView>
+  );
+}
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+interface CategoryTabProps {
+  label: string;
+  count: number;
+  isActive: boolean;
+  onPress: () => void;
+}
+
+function CategoryTab({ label, count, isActive, onPress }: CategoryTabProps): React.JSX.Element {
+  return (
+    <Pressable
+      style={[styles.tab, isActive && styles.tabActive]}
+      onPress={onPress}
+      accessibilityRole="tab"
+      accessibilityState={{ selected: isActive }}
+      accessibilityLabel={`${label} category, ${count} items`}
+    >
+      <Text style={[styles.tabText, isActive && styles.tabTextActive]}>{label}</Text>
+      <View style={[styles.tabCount, isActive && styles.tabCountActive]}>
+        <Text style={[styles.tabCountText, isActive && styles.tabCountTextActive]}>{count}</Text>
+      </View>
+    </Pressable>
   );
 }
 
@@ -219,9 +293,10 @@ function ItemFormContent({
   onAddOption, onRemoveOption, onOptionChange,
   onCancel, onSubmit, submitLabel,
 }: ItemFormContentProps): React.JSX.Element {
-  const discountAmount = form.original_price.trim() && form.price.trim()
-    ? Math.max(0, parseFloat(form.original_price) - parseFloat(form.price))
-    : 0;
+  const discountAmount =
+    form.original_price.trim() && form.price.trim()
+      ? Math.max(0, parseFloat(form.original_price) - parseFloat(form.price))
+      : 0;
 
   return (
     <>
@@ -231,11 +306,13 @@ function ItemFormContent({
         placeholderTextColor="rgba(255,255,255,0.3)" value={form.name}
         onChangeText={(v) => onFieldChange('name', v)} accessibilityLabel="Item name" />
 
-      <TextInput style={[styles.modalInput, { minHeight: 60, textAlignVertical: 'top' }]}
+      <TextInput
+        style={[styles.modalInput, { minHeight: 60, textAlignVertical: 'top' }]}
         placeholder="Description (optional)" placeholderTextColor="rgba(255,255,255,0.3)"
         value={form.description}
         onChangeText={(v) => onFieldChange('description', v)}
-        multiline accessibilityLabel="Item description" />
+        multiline accessibilityLabel="Item description"
+      />
 
       <View style={styles.priceRow}>
         <View style={{ flex: 1 }}>
@@ -253,6 +330,7 @@ function ItemFormContent({
             keyboardType="decimal-pad" accessibilityLabel="Original price before discount" />
         </View>
       </View>
+
       {discountAmount > 0 && (
         <Text style={styles.discountBadge}>
           ✓ Discount: {formatPrice(Math.round(discountAmount * 100))} off
@@ -274,9 +352,7 @@ function ItemFormContent({
           <Text style={styles.addSmallBtnText}>Add Group</Text>
         </Pressable>
       </View>
-      <Text style={styles.sectionHint}>
-        e.g. Group: "Protein" → Options: Pork (+15 ฿), Beef (+20 ฿)
-      </Text>
+      <Text style={styles.sectionHint}>e.g. Group: "Protein" → Options: Pork (+15 ฿), Beef (+20 ฿)</Text>
 
       {form.option_groups.map((group, gi) => (
         <View key={gi} style={styles.optionGroupCard}>
@@ -307,7 +383,7 @@ function ItemFormContent({
               />
             </View>
             <View style={styles.toggleRowSmall}>
-              <Text style={styles.toggleLabelSmall}>Min choose</Text>
+              <Text style={styles.toggleLabelSmall}>Min</Text>
               <TextInput
                 style={styles.smallNumInput}
                 value={String(group.min_selections)}
@@ -317,7 +393,7 @@ function ItemFormContent({
               />
             </View>
             <View style={styles.toggleRowSmall}>
-              <Text style={styles.toggleLabelSmall}>Max choose</Text>
+              <Text style={styles.toggleLabelSmall}>Max</Text>
               <TextInput
                 style={styles.smallNumInput}
                 value={String(group.max_selections)}
@@ -343,7 +419,9 @@ function ItemFormContent({
                 placeholder="+0"
                 placeholderTextColor="rgba(255,255,255,0.3)"
                 value={opt.additional_price_cents === 0 ? '' : String(opt.additional_price_cents / 100)}
-                onChangeText={(v) => onOptionChange(gi, oi, 'additional_price_cents', Math.round(parseFloat(v || '0') * 100))}
+                onChangeText={(v) =>
+                  onOptionChange(gi, oi, 'additional_price_cents', Math.round(parseFloat(v || '0') * 100))
+                }
                 keyboardType="decimal-pad"
                 accessibilityLabel={`Option ${oi + 1} additional price`}
               />
@@ -371,7 +449,8 @@ function ItemFormContent({
           style={[styles.confirmButton, (isSaving || !form.name.trim() || !form.price.trim()) && { opacity: 0.5 }]}
           onPress={onSubmit}
           disabled={isSaving || !form.name.trim() || !form.price.trim()}
-          accessibilityLabel={submitLabel} accessibilityRole="button"
+          accessibilityLabel={submitLabel}
+          accessibilityRole="button"
         >
           {isSaving
             ? <ActivityIndicator size="small" color={colours.backgroundDark} />
@@ -393,16 +472,18 @@ function PhotoPreview({ newPhoto, existingUrl, onPickPhoto }: PhotoPreviewProps)
   const [loadError, setLoadError] = useState(false);
   const uri = newPhoto !== null ? newPhoto.uri : existingUrl;
   const isNew = newPhoto !== null;
+  const handleError = useCallback(() => setLoadError(true), []);
 
   if (uri === null) {
     return (
       <Pressable
         style={[styles.cancelButton, { borderColor: colours.primary, marginBottom: spacing.sm }]}
-        onPress={onPickPhoto} accessibilityRole="button" accessibilityLabel="Add photo">
+        onPress={onPickPhoto}
+        accessibilityRole="button"
+        accessibilityLabel="Add photo"
+      >
         <Ionicons name="image-outline" size={16} color={colours.primary} />
-        <Text style={[styles.cancelText, { color: colours.primary, marginLeft: 6 }]}>
-          Add Photo (optional)
-        </Text>
+        <Text style={[styles.cancelText, { color: colours.primary, marginLeft: 6 }]}>Add Photo (optional)</Text>
       </Pressable>
     );
   }
@@ -421,7 +502,7 @@ function PhotoPreview({ newPhoto, existingUrl, onPickPhoto }: PhotoPreviewProps)
           style={styles.photoPreview}
           resizeMode="cover"
           accessibilityLabel="Item photo preview"
-          onError={() => setLoadError(true)}
+          onError={handleError}
         />
       )}
       {isNew && !loadError && (
@@ -430,13 +511,11 @@ function PhotoPreview({ newPhoto, existingUrl, onPickPhoto }: PhotoPreviewProps)
         </View>
       )}
       {!loadError && (
-        <View style={[styles.photoActions, { marginTop: spacing.xs }]}>
-          <Pressable style={styles.photoChangeBtn} onPress={onPickPhoto}
-            accessibilityRole="button" accessibilityLabel="Change photo">
-            <Ionicons name="image-outline" size={16} color={colours.primary} />
-            <Text style={styles.photoChangeBtnText}>Change Photo</Text>
-          </Pressable>
-        </View>
+        <Pressable style={styles.photoChangeBtn} onPress={onPickPhoto}
+          accessibilityRole="button" accessibilityLabel="Change photo">
+          <Ionicons name="image-outline" size={16} color={colours.primary} />
+          <Text style={styles.photoChangeBtnText}>Change Photo</Text>
+        </Pressable>
       )}
     </View>
   );

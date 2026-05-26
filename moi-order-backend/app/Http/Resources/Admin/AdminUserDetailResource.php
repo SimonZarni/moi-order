@@ -40,7 +40,7 @@ class AdminUserDetailResource extends JsonResource
                 'phone'  => ['connected' => $this->phone_number !== null, 'value' => $this->phone_number],
                 'google' => ['connected' => $this->google_id !== null],
                 'apple'  => ['connected' => $this->apple_id !== null],
-                'line'   => ['connected' => $this->line_id !== null],
+                'line'   => ['connected' => $this->line_id !== null, 'value' => $this->line_handle],
             ],
             'documents'          => $this->when(
                 $this->relationLoaded('documents'),

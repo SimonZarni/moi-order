@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, type Dispatch, type SetStateAction } from 'react';
 import { Platform } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import {
   getMenuCategories,
@@ -41,24 +42,39 @@ export interface AddItemForm {
 }
 
 interface UseMenuScreenResult {
+  // Data
   categories: MenuCategory[];
+  filteredItems: MenuItem[];
+  guardedItemIds: Set<number>;
   isLoading: boolean;
   isError: boolean;
   hasMissingSystemCategories: boolean;
   restaurantStatus: RestaurantStatus | null;
+  // Tab + search
+  selectedCategoryId: number | 'all';
+  searchQuery: string;
+  handleSelectCategory: (id: number | 'all') => void;
+  handleSearchChange: (query: string) => void;
+  // Add category modal
   showAddCategoryModal: boolean;
-  addItemCategoryId: number | null;
-  addItemForm: AddItemForm;
-  isAddingItem: boolean;
-  handleAddCategory: (name: string) => Promise<void>;
+  newCategoryName: string;
+  setShowAddCategoryModal: (v: boolean) => void;
+  handleNewCategoryNameChange: (v: string) => void;
+  handleConfirmAddCategory: () => void;
+  // Item mutations
   handleDeleteCategory: (id: number) => void;
   handleToggleItemStatus: (itemId: number, status: MenuItemStatus) => void;
   handleDeleteItem: (id: number) => void;
-  setShowAddCategoryModal: (v: boolean) => void;
+  handleRenameCategory: (id: number, newName: string) => void;
+  // Add item modal
+  addItemCategoryId: number | null;
+  addItemForm: AddItemForm;
+  isAddingItem: boolean;
   handleOpenAddItem: (categoryId: number) => void;
   handleCloseAddItem: () => void;
   handleAddItemFieldChange: (field: 'name' | 'description' | 'price' | 'original_price', value: string) => void;
   handleAddItemPhotoChange: (photo: AddItemForm['photo']) => void;
+  handlePickAddPhoto: () => void;
   handleAddOptionGroup: () => void;
   handleRemoveOptionGroup: (index: number) => void;
   handleOptionGroupChange: (groupIndex: number, field: 'name' | 'is_required' | 'min_selections' | 'max_selections', value: string | boolean | number) => void;
@@ -66,7 +82,7 @@ interface UseMenuScreenResult {
   handleRemoveOption: (groupIndex: number, optIndex: number) => void;
   handleOptionChange: (groupIndex: number, optIndex: number, field: 'name' | 'additional_price_cents', value: string | number) => void;
   handleAddItemSubmit: () => void;
-  // Edit item
+  // Edit item modal
   editItemId: number | null;
   editItemForm: AddItemForm;
   editItemExistingPhotoUrl: string | null;
@@ -75,6 +91,7 @@ interface UseMenuScreenResult {
   handleCloseEditItem: () => void;
   handleEditItemFieldChange: (field: 'name' | 'description' | 'price' | 'original_price', value: string) => void;
   handleEditItemPhotoChange: (photo: AddItemForm['photo']) => void;
+  handlePickEditPhoto: () => void;
   handleEditAddOptionGroup: () => void;
   handleEditRemoveOptionGroup: (index: number) => void;
   handleEditOptionGroupChange: (groupIndex: number, field: 'name' | 'is_required' | 'min_selections' | 'max_selections', value: string | boolean | number) => void;
@@ -82,13 +99,14 @@ interface UseMenuScreenResult {
   handleEditRemoveOption: (groupIndex: number, optIndex: number) => void;
   handleEditOptionChange: (groupIndex: number, optIndex: number, field: 'name' | 'additional_price_cents', value: string | number) => void;
   handleEditItemSubmit: () => void;
-  // Rename category
-  handleRenameCategory: (id: number, newName: string) => void;
 }
 
 const EMPTY_FORM: AddItemForm = {
   name: '', description: '', price: '', original_price: '', photo: null, option_groups: [],
 };
+
+const SYSTEM_SORT: Record<string, number> = { popular_picks: 0, promotions: 1, recommendations: 2 };
+const REQUIRED_SYSTEM_TYPES = ['popular_picks', 'recommendations'] as const;
 
 async function buildItemFormData(form: AddItemForm): Promise<FormData> {
   const fd = new FormData();
@@ -121,9 +139,7 @@ async function buildItemFormData(form: AddItemForm): Promise<FormData> {
   return fd;
 }
 
-function makeOptionGroupHandlers(
-  setForm: Dispatch<SetStateAction<AddItemForm>>,
-) {
+function makeOptionGroupHandlers(setForm: Dispatch<SetStateAction<AddItemForm>>) {
   const addOptionGroup = () =>
     setForm((prev) => ({
       ...prev,
@@ -136,7 +152,11 @@ function makeOptionGroupHandlers(
   const removeOptionGroup = (index: number) =>
     setForm((prev) => ({ ...prev, option_groups: prev.option_groups.filter((_, i) => i !== index) }));
 
-  const changeOptionGroup = (groupIndex: number, field: 'name' | 'is_required' | 'min_selections' | 'max_selections', value: string | boolean | number) =>
+  const changeOptionGroup = (
+    groupIndex: number,
+    field: 'name' | 'is_required' | 'min_selections' | 'max_selections',
+    value: string | boolean | number,
+  ) =>
     setForm((prev) => {
       const groups = [...prev.option_groups];
       groups[groupIndex] = { ...groups[groupIndex], [field]: value };
@@ -146,18 +166,29 @@ function makeOptionGroupHandlers(
   const addOption = (groupIndex: number) =>
     setForm((prev) => {
       const groups = [...prev.option_groups];
-      groups[groupIndex] = { ...groups[groupIndex], options: [...groups[groupIndex].options, { name: '', additional_price_cents: 0 }] };
+      groups[groupIndex] = {
+        ...groups[groupIndex],
+        options: [...groups[groupIndex].options, { name: '', additional_price_cents: 0 }],
+      };
       return { ...prev, option_groups: groups };
     });
 
   const removeOption = (groupIndex: number, optIndex: number) =>
     setForm((prev) => {
       const groups = [...prev.option_groups];
-      groups[groupIndex] = { ...groups[groupIndex], options: groups[groupIndex].options.filter((_, i) => i !== optIndex) };
+      groups[groupIndex] = {
+        ...groups[groupIndex],
+        options: groups[groupIndex].options.filter((_, i) => i !== optIndex),
+      };
       return { ...prev, option_groups: groups };
     });
 
-  const changeOption = (groupIndex: number, optIndex: number, field: 'name' | 'additional_price_cents', value: string | number) =>
+  const changeOption = (
+    groupIndex: number,
+    optIndex: number,
+    field: 'name' | 'additional_price_cents',
+    value: string | number,
+  ) =>
     setForm((prev) => {
       const groups = [...prev.option_groups];
       const opts = [...groups[groupIndex].options];
@@ -169,15 +200,53 @@ function makeOptionGroupHandlers(
   return { addOptionGroup, removeOptionGroup, changeOptionGroup, addOption, removeOption, changeOption };
 }
 
+// Shared photo picker — handles HEIC→JPEG conversion on web
+async function pickPhoto(): Promise<AddItemForm['photo'] | null> {
+  const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'images', quality: 0.8 });
+  if (result.canceled || result.assets.length === 0) return null;
+  const asset = result.assets[0];
+  if (!asset) return null;
+
+  let mimeType = asset.mimeType ?? 'image/jpeg';
+  let uri = asset.uri;
+  let fileName = asset.fileName ?? `item.${mimeType.split('/')[1] ?? 'jpg'}`;
+
+  // Chrome/Firefox cannot render or upload HEIC — convert to JPEG on web
+  if (Platform.OS === 'web' && (mimeType === 'image/heic' || mimeType === 'image/heif')) {
+    try {
+      const heic2any = (await import('heic2any')).default;
+      const srcBlob = await fetch(uri).then((r) => r.blob());
+      const converted = await heic2any({ blob: srcBlob, toType: 'image/jpeg', quality: 0.85 });
+      const jpegBlob = Array.isArray(converted) ? converted[0] : converted;
+      uri = URL.createObjectURL(jpegBlob);
+      mimeType = 'image/jpeg';
+      fileName = fileName.replace(/\.(heic|heif)$/i, '.jpg');
+    } catch {
+      // Safari handles HEIC natively — safe to proceed as-is if conversion fails
+    }
+  }
+  return { uri, name: fileName, type: mimeType };
+}
+
 export function useMenuScreen(): UseMenuScreenResult {
   const queryClient = useQueryClient();
+
+  // ── Tab + search ──────────────────────────────────────────────────────────
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // ── Add category modal ────────────────────────────────────────────────────
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+
+  // ── Item modals ───────────────────────────────────────────────────────────
   const [addItemCategoryId, setAddItemCategoryId] = useState<number | null>(null);
   const [addItemForm, setAddItemForm] = useState<AddItemForm>(EMPTY_FORM);
   const [editItemId, setEditItemId] = useState<number | null>(null);
   const [editItemForm, setEditItemForm] = useState<AddItemForm>(EMPTY_FORM);
   const [editItemExistingPhotoUrl, setEditItemExistingPhotoUrl] = useState<string | null>(null);
 
+  // ── Queries ───────────────────────────────────────────────────────────────
   const { data, isLoading, isError } = useQuery({
     queryKey: QUERY_KEYS.MENU_CATEGORIES,
     queryFn: getMenuCategories,
@@ -185,7 +254,6 @@ export function useMenuScreen(): UseMenuScreenResult {
     placeholderData: keepPreviousData,
   });
 
-  // Read restaurant status from cache (populated by RestaurantScreen); no extra network request.
   const { data: restaurantData } = useQuery({
     queryKey: QUERY_KEYS.RESTAURANT,
     queryFn: getRestaurant,
@@ -193,9 +261,7 @@ export function useMenuScreen(): UseMenuScreenResult {
   });
   const restaurantStatus = restaurantData?.restaurant?.status ?? null;
 
-  const SYSTEM_SORT: Record<string, number> = { popular_picks: 0, promotions: 1, recommendations: 2 };
-  const REQUIRED_SYSTEM_TYPES = ['popular_picks', 'recommendations'] as const;
-
+  // ── Derived data ──────────────────────────────────────────────────────────
   const categories = useMemo(() => {
     const all = data ?? [];
     return [...all].sort((a, b) => {
@@ -206,13 +272,40 @@ export function useMenuScreen(): UseMenuScreenResult {
   }, [data]);
 
   const hasMissingSystemCategories = useMemo(
-    () => REQUIRED_SYSTEM_TYPES.some((type) => {
-      const cat = categories.find((c) => c.is_system && c.category_type === type);
-      return cat === undefined || cat.items.length === 0;
-    }),
+    () =>
+      REQUIRED_SYSTEM_TYPES.some((type) => {
+        const cat = categories.find((c) => c.is_system && c.category_type === type);
+        return cat === undefined || cat.items.length === 0;
+      }),
     [categories],
   );
 
+  // Items shown in the grid — filtered by selected category tab + search query
+  const filteredItems = useMemo<MenuItem[]>(() => {
+    const base =
+      selectedCategoryId === 'all'
+        ? categories.flatMap((c) => c.items)
+        : (categories.find((c) => c.id === selectedCategoryId)?.items ?? []);
+    if (!searchQuery.trim()) return base;
+    const q = searchQuery.trim().toLowerCase();
+    return base.filter((item) => item.name.toLowerCase().includes(q));
+  }, [categories, selectedCategoryId, searchQuery]);
+
+  // Item IDs that cannot be deleted (last item in a required system category while restaurant is open)
+  const guardedItemIds = useMemo<Set<number>>(() => {
+    const guarded = new Set<number>();
+    if (restaurantStatus === RESTAURANT_STATUS.Closed) return guarded;
+    for (const cat of categories) {
+      const isRequired =
+        cat.is_system && REQUIRED_SYSTEM_TYPES.includes(cat.category_type as 'popular_picks' | 'recommendations');
+      if (isRequired && cat.items.length === 1 && cat.items[0]) {
+        guarded.add(cat.items[0].id);
+      }
+    }
+    return guarded;
+  }, [categories, restaurantStatus]);
+
+  // ── Mutations ─────────────────────────────────────────────────────────────
   const invalidateMenu = useCallback(
     () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MENU_CATEGORIES }),
     [queryClient],
@@ -257,8 +350,6 @@ export function useMenuScreen(): UseMenuScreenResult {
     mutationFn: async ({ id, form }: { id: number; form: AddItemForm }) =>
       updateMenuItem(id, await buildItemFormData(form)),
     onSuccess: (updatedItem) => {
-      // Patch the cache immediately so re-opening the edit modal sees the new photo_url
-      // without waiting for the background refetch to complete.
       queryClient.setQueryData<MenuCategory[]>(QUERY_KEYS.MENU_CATEGORIES, (old) => {
         if (!old) return old;
         return old.map((cat) => ({
@@ -273,53 +364,93 @@ export function useMenuScreen(): UseMenuScreenResult {
     },
   });
 
-  // --- Add form handlers ---
-  const addHandlers = makeOptionGroupHandlers(setAddItemForm);
+  // ── Tab + search handlers ─────────────────────────────────────────────────
+  const handleSelectCategory = useCallback((id: number | 'all') => {
+    setSelectedCategoryId(id);
+    setSearchQuery('');
+  }, []);
 
-  const handleAddCategory = useCallback(async (name: string): Promise<void> => {
-    mutateAddCategory(name);
+  const handleSearchChange = useCallback((q: string) => setSearchQuery(q), []);
+
+  // ── Add category handlers ─────────────────────────────────────────────────
+  const handleNewCategoryNameChange = useCallback((v: string) => setNewCategoryName(v), []);
+
+  const handleConfirmAddCategory = useCallback(() => {
+    if (!newCategoryName.trim()) return;
+    mutateAddCategory(newCategoryName.trim());
+    setNewCategoryName('');
     setShowAddCategoryModal(false);
-  }, [mutateAddCategory]);
+  }, [newCategoryName, mutateAddCategory]);
 
   const handleDeleteCategory = useCallback((id: number) => { mutateDeleteCategory(id); }, [mutateDeleteCategory]);
-  const handleToggleItemStatus = useCallback((itemId: number, status: MenuItemStatus) => { mutateToggleStatus({ id: itemId, status }); }, [mutateToggleStatus]);
 
-  const handleDeleteItem = useCallback((id: number) => {
-    const category = categories.find((c) => c.items.some((i) => i.id === id));
-    const isRequiredSystem = category?.is_system === true
-      && (category?.category_type === 'popular_picks' || category?.category_type === 'recommendations');
-    const isLastItem = (category?.items.length ?? 0) === 1;
-    const restaurantIsClosed = restaurantStatus === RESTAURANT_STATUS.Closed;
+  const handleRenameCategory = useCallback(
+    (id: number, name: string) => { mutateUpdateCategory({ id, name }); },
+    [mutateUpdateCategory],
+  );
 
-    // Safety guard — MenuItemRow's inline warning should have already blocked this path.
-    if (isRequiredSystem && isLastItem && !restaurantIsClosed) return;
+  // ── Item status + delete handlers ─────────────────────────────────────────
+  const handleToggleItemStatus = useCallback(
+    (itemId: number, status: MenuItemStatus) => { mutateToggleStatus({ id: itemId, status }); },
+    [mutateToggleStatus],
+  );
 
-    mutateDeleteItem(id);
-  }, [categories, restaurantStatus, mutateDeleteItem]);
+  const handleDeleteItem = useCallback(
+    (id: number) => {
+      // Guard enforced by guardedItemIds — MenuItemCard should not call this for guarded items
+      if (guardedItemIds.has(id)) return;
+      mutateDeleteItem(id);
+    },
+    [guardedItemIds, mutateDeleteItem],
+  );
+
+  // ── Add item handlers ─────────────────────────────────────────────────────
+  const addHandlers = makeOptionGroupHandlers(setAddItemForm);
 
   const handleOpenAddItem = useCallback((categoryId: number) => {
     setAddItemForm(EMPTY_FORM);
     setAddItemCategoryId(categoryId);
   }, []);
+
   const handleCloseAddItem = useCallback(() => setAddItemCategoryId(null), []);
+
   const handleAddItemFieldChange = useCallback(
     (field: 'name' | 'description' | 'price' | 'original_price', value: string) =>
       setAddItemForm((prev) => ({ ...prev, [field]: value })),
     [],
   );
-  const handleAddItemPhotoChange = useCallback((photo: AddItemForm['photo']) => setAddItemForm((prev) => ({ ...prev, photo })), []);
+
+  const handleAddItemPhotoChange = useCallback(
+    (photo: AddItemForm['photo']) => setAddItemForm((prev) => ({ ...prev, photo })),
+    [],
+  );
+
+  const handlePickAddPhoto = useCallback(async () => {
+    const photo = await pickPhoto();
+    if (photo) handleAddItemPhotoChange(photo);
+  }, [handleAddItemPhotoChange]);
+
   const handleAddOptionGroup = useCallback(() => addHandlers.addOptionGroup(), []);
   const handleRemoveOptionGroup = useCallback((i: number) => addHandlers.removeOptionGroup(i), []);
-  const handleOptionGroupChange = useCallback((gi: number, field: 'name' | 'is_required' | 'min_selections' | 'max_selections', value: string | boolean | number) => addHandlers.changeOptionGroup(gi, field, value), []);
+  const handleOptionGroupChange = useCallback(
+    (gi: number, field: 'name' | 'is_required' | 'min_selections' | 'max_selections', value: string | boolean | number) =>
+      addHandlers.changeOptionGroup(gi, field, value),
+    [],
+  );
   const handleAddOption = useCallback((gi: number) => addHandlers.addOption(gi), []);
   const handleRemoveOption = useCallback((gi: number, oi: number) => addHandlers.removeOption(gi, oi), []);
-  const handleOptionChange = useCallback((gi: number, oi: number, field: 'name' | 'additional_price_cents', value: string | number) => addHandlers.changeOption(gi, oi, field, value), []);
+  const handleOptionChange = useCallback(
+    (gi: number, oi: number, field: 'name' | 'additional_price_cents', value: string | number) =>
+      addHandlers.changeOption(gi, oi, field, value),
+    [],
+  );
+
   const handleAddItemSubmit = useCallback(() => {
     if (addItemCategoryId === null || !addItemForm.name.trim() || !addItemForm.price.trim()) return;
     mutateAddItem({ categoryId: addItemCategoryId, form: addItemForm });
   }, [addItemCategoryId, addItemForm, mutateAddItem]);
 
-  // --- Edit item handlers ---
+  // ── Edit item handlers ────────────────────────────────────────────────────
   const editHandlers = makeOptionGroupHandlers(setEditItemForm);
 
   const handleOpenEditItem = useCallback((item: MenuItem) => {
@@ -340,48 +471,64 @@ export function useMenuScreen(): UseMenuScreenResult {
     setEditItemExistingPhotoUrl(item.photo_url);
     setEditItemId(item.id);
   }, []);
+
   const handleCloseEditItem = useCallback(() => {
     setEditItemId(null);
     setEditItemExistingPhotoUrl(null);
   }, []);
+
   const handleEditItemFieldChange = useCallback(
     (field: 'name' | 'description' | 'price' | 'original_price', value: string) =>
       setEditItemForm((prev) => ({ ...prev, [field]: value })),
     [],
   );
-  const handleEditItemPhotoChange = useCallback((photo: AddItemForm['photo']) => setEditItemForm((prev) => ({ ...prev, photo })), []);
+
+  const handleEditItemPhotoChange = useCallback(
+    (photo: AddItemForm['photo']) => setEditItemForm((prev) => ({ ...prev, photo })),
+    [],
+  );
+
+  const handlePickEditPhoto = useCallback(async () => {
+    const photo = await pickPhoto();
+    if (photo) handleEditItemPhotoChange(photo);
+  }, [handleEditItemPhotoChange]);
+
   const handleEditAddOptionGroup = useCallback(() => editHandlers.addOptionGroup(), []);
   const handleEditRemoveOptionGroup = useCallback((i: number) => editHandlers.removeOptionGroup(i), []);
-  const handleEditOptionGroupChange = useCallback((gi: number, field: 'name' | 'is_required' | 'min_selections' | 'max_selections', value: string | boolean | number) => editHandlers.changeOptionGroup(gi, field, value), []);
+  const handleEditOptionGroupChange = useCallback(
+    (gi: number, field: 'name' | 'is_required' | 'min_selections' | 'max_selections', value: string | boolean | number) =>
+      editHandlers.changeOptionGroup(gi, field, value),
+    [],
+  );
   const handleEditAddOption = useCallback((gi: number) => editHandlers.addOption(gi), []);
   const handleEditRemoveOption = useCallback((gi: number, oi: number) => editHandlers.removeOption(gi, oi), []);
-  const handleEditOptionChange = useCallback((gi: number, oi: number, field: 'name' | 'additional_price_cents', value: string | number) => editHandlers.changeOption(gi, oi, field, value), []);
+  const handleEditOptionChange = useCallback(
+    (gi: number, oi: number, field: 'name' | 'additional_price_cents', value: string | number) =>
+      editHandlers.changeOption(gi, oi, field, value),
+    [],
+  );
+
   const handleEditItemSubmit = useCallback(() => {
     if (editItemId === null || !editItemForm.name.trim() || !editItemForm.price.trim()) return;
     mutateUpdateItem({ id: editItemId, form: editItemForm });
   }, [editItemId, editItemForm, mutateUpdateItem]);
 
-  const handleRenameCategory = useCallback(
-    (id: number, newName: string) => { mutateUpdateCategory({ id, name: newName }); },
-    [mutateUpdateCategory],
-  );
-
   return {
-    categories, isLoading, isError, hasMissingSystemCategories, restaurantStatus,
-    showAddCategoryModal, addItemCategoryId, addItemForm, isAddingItem,
-    handleAddCategory, handleDeleteCategory, handleToggleItemStatus, handleDeleteItem,
-    setShowAddCategoryModal,
+    categories, filteredItems, guardedItemIds, isLoading, isError,
+    hasMissingSystemCategories, restaurantStatus,
+    selectedCategoryId, searchQuery, handleSelectCategory, handleSearchChange,
+    showAddCategoryModal, newCategoryName, setShowAddCategoryModal,
+    handleNewCategoryNameChange, handleConfirmAddCategory,
+    handleDeleteCategory, handleToggleItemStatus, handleDeleteItem, handleRenameCategory,
+    addItemCategoryId, addItemForm, isAddingItem,
     handleOpenAddItem, handleCloseAddItem,
-    handleAddItemFieldChange, handleAddItemPhotoChange,
+    handleAddItemFieldChange, handleAddItemPhotoChange, handlePickAddPhoto,
     handleAddOptionGroup, handleRemoveOptionGroup, handleOptionGroupChange,
-    handleAddOption, handleRemoveOption, handleOptionChange,
-    handleAddItemSubmit,
+    handleAddOption, handleRemoveOption, handleOptionChange, handleAddItemSubmit,
     editItemId, editItemForm, editItemExistingPhotoUrl, isEditingItem,
     handleOpenEditItem, handleCloseEditItem,
-    handleEditItemFieldChange, handleEditItemPhotoChange,
+    handleEditItemFieldChange, handleEditItemPhotoChange, handlePickEditPhoto,
     handleEditAddOptionGroup, handleEditRemoveOptionGroup, handleEditOptionGroupChange,
-    handleEditAddOption, handleEditRemoveOption, handleEditOptionChange,
-    handleEditItemSubmit,
-    handleRenameCategory,
+    handleEditAddOption, handleEditRemoveOption, handleEditOptionChange, handleEditItemSubmit,
   };
 }

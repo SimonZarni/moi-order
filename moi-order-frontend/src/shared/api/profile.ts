@@ -25,12 +25,16 @@ export async function updateProfile(
   email: string,
   phoneNumber: string | null,
   dateOfBirth: string | null,
+  lineHandle: string | null,
 ): Promise<User> {
   const response = await apiClient.put<ApiResponse<User>>('/api/v1/profile', {
     name,
     email,
-    phone_number: phoneNumber,
+    phone_number:  phoneNumber,
     date_of_birth: dateOfBirth,
+    // Always send line_handle — backend distinguishes "key present + null" (clear)
+    // from "key absent" (preserve). Sending null here clears the stored handle.
+    line_handle: lineHandle,
   });
   return response.data.data;
 }

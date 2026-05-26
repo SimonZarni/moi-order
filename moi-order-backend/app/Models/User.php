@@ -53,6 +53,7 @@ class User extends Authenticatable
         'google_id',
         'apple_id',
         'line_id',
+        'line_handle',
         'profile_picture_path',
         'last_active_at',
         'user_role',
