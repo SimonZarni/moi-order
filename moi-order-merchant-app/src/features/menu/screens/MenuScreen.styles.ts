@@ -142,11 +142,12 @@ export const styles = StyleSheet.create({
 
   // ── Items grid ────────────────────────────────────────────────────────────
   grid: {
-    padding: spacing.md,
+    padding: spacing.sm,
     paddingBottom: spacing.xxl + spacing.lg, // extra room for FAB
   },
   columnWrapper: {
-    gap: 0, // gaps handled by card marginHorizontal
+    gap: 0,         // gaps handled by card's marginHorizontal
+    marginBottom: 0,
   },
 
   // ── Empty state ───────────────────────────────────────────────────────────

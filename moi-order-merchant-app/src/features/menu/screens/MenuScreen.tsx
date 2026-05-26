@@ -36,8 +36,13 @@ export function MenuScreen(): React.JSX.Element {
   } = useMenuScreen();
 
   const { width } = useWindowDimensions();
-  // 3 columns on wide screens (tablet/web), 2 on mobile
-  const numColumns = width >= 600 ? 3 : 2;
+  // Responsive columns: sidebar ~220 px is already baked into the content area.
+  // On a typical 1440 px desktop the content pane is ≈1220 px wide → 5 cols
+  // gives ≈220 px cards; image at 4:3 → ≈165 px tall — compact POS feel.
+  const numColumns =
+    width >= 1400 ? 5 :
+    width >= 1050 ? 4 :
+    width >= 700  ? 3 : 2;
 
   const activeCategory = selectedCategoryId !== 'all'
     ? categories.find((c) => c.id === selectedCategoryId) ?? null

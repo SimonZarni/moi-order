@@ -123,7 +123,7 @@ export function MenuItemCard({
               accessibilityLabel={`Edit ${item.name}`}
               accessibilityRole="button"
             >
-              <Ionicons name="pencil-outline" size={14} color={colours.primary} />
+              <Ionicons name="pencil-outline" size={11} color={colours.primary} />
             </Pressable>
             <Pressable
               style={[styles.iconBtn, styles.iconBtnDanger]}
@@ -131,7 +131,7 @@ export function MenuItemCard({
               accessibilityLabel={`Delete ${item.name}`}
               accessibilityRole="button"
             >
-              <Ionicons name="trash-outline" size={14} color={colours.error} />
+              <Ionicons name="trash-outline" size={11} color={colours.error} />
             </Pressable>
           </View>
         </View>
