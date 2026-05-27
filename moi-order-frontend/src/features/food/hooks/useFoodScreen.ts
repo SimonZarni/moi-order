@@ -18,6 +18,7 @@ export interface UseFoodScreenResult extends UseRestaurantListDataResult {
   handleRestaurantPress: (restaurant: Restaurant) => void;
   handleMapPress:      () => void;
   handleCartPress:     () => void;
+  handleBack:          () => void;
 }
 
 export function useFoodScreen(): UseFoodScreenResult {
@@ -55,6 +56,7 @@ export function useFoodScreen(): UseFoodScreenResult {
 
   const handleMapPress  = useCallback(() => navigation.navigate('RestaurantMap'), [navigation]);
   const handleCartPress = useCallback(() => navigation.navigate('CartOrders'),    [navigation]);
+  const handleBack      = useCallback(() => navigation.goBack(),                  [navigation]);
 
   return {
     ...listData,
@@ -66,5 +68,6 @@ export function useFoodScreen(): UseFoodScreenResult {
     handleRestaurantPress,
     handleMapPress,
     handleCartPress,
+    handleBack,
   };
 }

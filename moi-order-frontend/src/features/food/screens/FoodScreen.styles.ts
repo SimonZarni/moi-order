@@ -29,6 +29,11 @@ export const styles = StyleSheet.create({
     color: colours.textOnDark,
     letterSpacing: -0.5,
   },
+  heroLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
   heroActions: {
     flexDirection: 'row',
     alignItems: 'center',

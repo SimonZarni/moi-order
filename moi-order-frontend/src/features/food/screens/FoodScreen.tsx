@@ -14,14 +14,19 @@ export function FoodScreen(): React.JSX.Element {
     hasNextPage, fetchNextPage, cartItemCount,
     searchText, activeCategory,
     setSearchText, setActiveCategory,
-    handleRestaurantPress, handleMapPress, handleCartPress,
+    handleRestaurantPress, handleMapPress, handleCartPress, handleBack,
   } = useFoodScreen();
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.hero}>
         <View style={styles.heroRow}>
-          <Text style={styles.heroTitle}>Restaurants</Text>
+          <View style={styles.heroLeft}>
+            <Pressable style={styles.iconBtn} onPress={handleBack} accessibilityRole="button" accessibilityLabel="Go back">
+              <Ionicons name="arrow-back" size={20} color={colours.textOnDark} />
+            </Pressable>
+            <Text style={styles.heroTitle}>Restaurants</Text>
+          </View>
           <View style={styles.heroActions}>
             <Pressable style={styles.iconBtn} onPress={handleMapPress} accessibilityRole="button" accessibilityLabel="View map">
               <Ionicons name="map-outline" size={20} color={colours.textOnDark} />
