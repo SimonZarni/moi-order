@@ -1,3 +1,5 @@
+import type { UserActivityLog } from 'src/types';
+
 import apiClient from './client';
 
 export type UserStatus = 'active' | 'suspended' | 'banned';
@@ -141,6 +143,10 @@ export const usersApi = {
     apiClient.patch<{ data: UserData }>(`/users/${id}/ban`).then((r) => r.data.data),
   activate: (id: number | string) =>
     apiClient.patch<{ data: UserData }>(`/users/${id}/activate`).then((r) => r.data.data),
+  activityLog: (id: number | string, page = 1) =>
+    apiClient
+      .get<{ data: UserActivityLog[]; meta: Meta }>(`/users/${id}/activity-log`, { params: { page, per_page: 50 } })
+      .then((r) => r.data),
   documents: {
     list: (userId: number | string) =>
       apiClient.get<{ data: UserDocument[] }>(`/users/${userId}/documents`).then((r) => r.data.data),

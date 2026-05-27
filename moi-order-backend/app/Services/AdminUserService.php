@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\UserActivityLogInterface;
 use App\DTOs\AdminCreateUserDTO;
 use App\DTOs\AdminUpdateUserDTO;
+use App\Enums\UserActivityEvent;
 use App\Enums\UserStatusEnum;
 use App\Exceptions\DomainException;
 use App\Exports\UserExport;
@@ -13,6 +15,7 @@ use App\Http\Requests\Admin\AdminUserIndexRequest;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -22,6 +25,9 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
  */
 class AdminUserService
 {
+    public function __construct(
+        private readonly UserActivityLogInterface $activityLog,
+    ) {}
     public function index(AdminUserIndexRequest $request): LengthAwarePaginator
     {
         $query = User::withTrashed()
@@ -140,6 +146,12 @@ class AdminUserService
         $user->tokens()->delete();
         $user->suspend($until);
 
+        $this->activityLog->record($user->fresh(), UserActivityEvent::AccountSuspended, [
+            'by_admin_id'   => $actor->id,
+            'by_admin_name' => $actor->name,
+            'until'         => $until?->toDateString(),
+        ]);
+
         return $user->fresh();
     }
 
@@ -160,12 +172,24 @@ class AdminUserService
         $user->tokens()->delete();
         $user->ban();
 
+        $this->activityLog->record($user->fresh(), UserActivityEvent::AccountBanned, [
+            'by_admin_id'   => $actor->id,
+            'by_admin_name' => $actor->name,
+        ]);
+
         return $user->fresh();
     }
 
     public function activate(User $user): User
     {
         $user->activate();
+
+        /** @var User|null $admin */
+        $admin = Request::user();
+        $this->activityLog->record($user->fresh(), UserActivityEvent::AccountActivated, [
+            'by_admin_id'   => $admin?->id,
+            'by_admin_name' => $admin?->name,
+        ]);
 
         return $user->fresh();
     }

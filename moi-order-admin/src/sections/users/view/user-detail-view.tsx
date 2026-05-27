@@ -46,6 +46,8 @@ import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 
+import { UserActivityTab } from './user-activity-tab';
+
 // ----------------------------------------------------------------------
 
 const DOCUMENT_TYPES = [
@@ -578,6 +580,7 @@ export function UserDetailView() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} sx={{ mb: 3 }}>
+        <Tab label="Activity" />
         <Tab label="Connected Accounts" />
         <Tab label={`Ticket Orders (${user.recent_ticket_orders.length})`} />
         <Tab label={`Food Orders (${user.recent_food_orders.length})`} />
@@ -597,8 +600,15 @@ export function UserDetailView() {
         } />
       </Tabs>
 
-      {/* Tab 0: Connected accounts */}
+      {/* Tab 0: Activity timeline */}
       {activeTab === 0 && (
+        <Card sx={{ p: 3 }}>
+          <UserActivityTab userId={user.id} user={user} />
+        </Card>
+      )}
+
+      {/* Tab 1: Connected accounts */}
+      {activeTab === 1 && (
         <Card>
           <CardHeader title="Connected Accounts" subheader="Authentication methods linked to this account" />
           <Divider />
@@ -612,8 +622,8 @@ export function UserDetailView() {
         </Card>
       )}
 
-      {/* Tab 1: Ticket orders */}
-      {activeTab === 1 && (
+      {/* Tab 2: Ticket orders */}
+      {activeTab === 2 && (
         <Card>
           <CardHeader title="Ticket Orders" />
           <Scrollbar>
@@ -657,8 +667,8 @@ export function UserDetailView() {
         </Card>
       )}
 
-      {/* Tab 2: Food orders */}
-      {activeTab === 2 && (
+      {/* Tab 3: Food orders */}
+      {activeTab === 3 && (
         <Card>
           <CardHeader title="Food Orders" />
           <Scrollbar>
@@ -704,8 +714,8 @@ export function UserDetailView() {
         </Card>
       )}
 
-      {/* Tab 3: Service submissions */}
-      {activeTab === 3 && (
+      {/* Tab 4: Service submissions */}
+      {activeTab === 4 && (
         <Card>
           <CardHeader title="Service Submissions" />
           <Scrollbar>
@@ -756,8 +766,8 @@ export function UserDetailView() {
         </Card>
       )}
 
-      {/* Tab 4: Documents — 3 categories */}
-      {activeTab === 4 && (
+      {/* Tab 5: Documents — 3 categories */}
+      {activeTab === 5 && (
         <Card>
           <CardHeader
             title="Documents"

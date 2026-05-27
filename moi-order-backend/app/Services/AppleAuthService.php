@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\UserActivityLogInterface;
 use App\DTOs\AppleAuthDTO;
+use App\Enums\UserActivityEvent;
 use App\Exceptions\DomainException;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
@@ -20,6 +22,10 @@ class AppleAuthService
 {
     private const APPLE_ISSUER = 'https://appleid.apple.com';
     private const JWKS_CACHE_KEY = 'apple-auth:jwks';
+
+    public function __construct(
+        private readonly UserActivityLogInterface $activityLog,
+    ) {}
 
     /**
      * @return array{user: User, token: string}
@@ -84,6 +90,8 @@ class AppleAuthService
         }
 
         $currentUser->update($updates);
+
+        $this->activityLog->record($currentUser->fresh(), UserActivityEvent::AppleLinked);
 
         return $currentUser->fresh();
     }

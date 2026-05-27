@@ -10,8 +10,10 @@ use App\Contracts\FileStorageInterface;
 use App\Contracts\GooglePlacesInterface;
 use App\Contracts\PaymentGatewayInterface;
 use App\Contracts\PushNotificationInterface;
+use App\Contracts\UserActivityLogInterface;
 use App\Contracts\WebPushInterface;
 use App\Services\AuditLogService;
+use App\Services\UserActivityLogService;
 use App\Services\GooglePlacesService;
 use App\Services\WebPushService;
 use App\Services\ClaudeOcrService;
@@ -43,6 +45,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // DIP: bind audit log contract — singleton so the same instance handles all writes per request.
         $this->app->singleton(AuditLogInterface::class, AuditLogService::class);
+
+        // DIP: bind user activity log contract — singleton for consistent request context per write.
+        $this->app->singleton(UserActivityLogInterface::class, UserActivityLogService::class);
 
         // DIP: bind Google Places adapter — key injected from config so it never touches mobile.
         $this->app->bind(GooglePlacesInterface::class, function (): GooglePlacesService {

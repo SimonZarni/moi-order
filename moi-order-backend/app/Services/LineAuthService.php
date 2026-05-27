@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\UserActivityLogInterface;
 use App\DTOs\LineAuthDTO;
+use App\Enums\UserActivityEvent;
 use App\Exceptions\DomainException;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
@@ -18,6 +20,10 @@ class LineAuthService
 {
     private const VERIFY_URL = 'https://api.line.me/oauth2/v2.1/verify';
     private const TOKEN_ERROR = 'LINE sign-in failed. Please try again.';
+
+    public function __construct(
+        private readonly UserActivityLogInterface $activityLog,
+    ) {}
 
     /**
      * @return array{user: User, token: string}
@@ -90,6 +96,8 @@ class LineAuthService
         }
 
         $currentUser->update($updates);
+
+        $this->activityLog->record($currentUser->fresh(), UserActivityEvent::LineLinked);
 
         return $currentUser->fresh();
     }

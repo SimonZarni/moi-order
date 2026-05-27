@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\UserActivityLogInterface;
 use App\DTOs\GoogleAuthDTO;
+use App\Enums\UserActivityEvent;
 use App\Exceptions\DomainException;
 use App\Models\User;
 use Google\Client as GoogleClient;
@@ -21,7 +23,8 @@ use Illuminate\Validation\ValidationException;
 class GoogleAuthService
 {
     public function __construct(
-        private readonly GoogleClient $googleClient,
+        private readonly GoogleClient            $googleClient,
+        private readonly UserActivityLogInterface $activityLog,
     ) {}
 
     /**
@@ -87,6 +90,8 @@ class GoogleAuthService
         }
 
         $currentUser->update($updates);
+
+        $this->activityLog->record($currentUser->fresh(), UserActivityEvent::GoogleLinked);
 
         return $currentUser->fresh();
     }

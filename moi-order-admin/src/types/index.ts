@@ -363,6 +363,22 @@ export type SupportTicket = {
 };
 
 // ----------------------------------------------------------------------
+// User Activity Log
+
+export type UserActivityCategory = 'auth' | 'security' | 'social' | 'account';
+
+export type UserActivityLog = {
+  id: number;
+  event: string;
+  event_label: string;
+  category: UserActivityCategory;
+  metadata: Record<string, string | number | null>;
+  ip_address: string | null;
+  user_agent: string | null;
+  created_at: string;
+};
+
+// ----------------------------------------------------------------------
 // Roles & Permissions
 
 export type AdminRoleSlug = 'super_admin' | 'admin';

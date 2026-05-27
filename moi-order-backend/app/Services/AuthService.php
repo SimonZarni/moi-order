@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\UserActivityLogInterface;
 use App\DTOs\LoginDTO;
 use App\DTOs\RegisterDTO;
+use App\Enums\UserActivityEvent;
 use App\Exceptions\DomainException;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -20,6 +22,9 @@ use Illuminate\Validation\ValidationException;
  */
 class AuthService
 {
+    public function __construct(
+        private readonly UserActivityLogInterface $activityLog,
+    ) {}
     /**
      * Returns the auth method for a given email so the client can route
      * the user to the correct sign-in step without exposing a password field
@@ -77,6 +82,7 @@ class AuthService
         }
 
         if (! Hash::check($dto->password, $user->password)) {
+            $this->activityLog->record($user, UserActivityEvent::LoginFailed, ['method' => 'email']);
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
@@ -91,6 +97,8 @@ class AuthService
         }
 
         $token = $user->createToken('user-auth', ['user'], now()->addDays(30))->plainTextToken;
+
+        $this->activityLog->record($user, UserActivityEvent::LoginSuccess, ['method' => 'email']);
 
         return ['user' => $user, 'token' => $token];
     }

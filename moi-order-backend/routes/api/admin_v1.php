@@ -38,6 +38,7 @@ use App\Http\Controllers\Api\Admin\V1\AdminTicketOrderController;
 use App\Http\Controllers\Api\Admin\V1\AdminTicketVariantController;
 use App\Http\Controllers\Api\Admin\V1\AdminUserController;
 use App\Http\Controllers\Api\Admin\V1\AdminPushSubscriptionController;
+use App\Http\Controllers\Api\Admin\V1\AdminSearchController;
 use App\Http\Controllers\Api\Admin\V1\AdminUserDocumentController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,6 +47,9 @@ use Illuminate\Support\Facades\Route;
 | Admin Authenticated Routes — requires auth:sanctum + admin.auth
 |--------------------------------------------------------------------------
 */
+
+// ── Global Search ─────────────────────────────────────────────────────────────
+Route::get('/search', AdminSearchController::class)->name('admin.search');
 
 // ── Audit Log ─────────────────────────────────────────────────────────────────
 Route::prefix('audit-logs')->name('admin.audit-logs.')->group(function (): void {
@@ -212,6 +216,8 @@ Route::prefix('users')->name('admin.users.')->group(function (): void {
         ->middleware('check.permission:users.manage');
     Route::patch('/{user}/role', [AdminUserController::class, 'updateRole'])->name('update-role')
         ->middleware('check.permission:users.manage');
+
+    Route::get('/{user}/activity-log', [AdminUserController::class, 'activityLog'])->name('activity-log');
 
     // User document sub-routes
     Route::get('/{user}/documents',                    [AdminUserDocumentController::class, 'index'])->name('documents.index');

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Admin\V1;
 
+use App\Contracts\UserActivityLogInterface;
 use App\DTOs\AdminCreateUserDTO;
 use App\DTOs\AdminUpdateUserDTO;
 use App\Enums\UserRole;
@@ -16,6 +17,7 @@ use App\Http\Requests\Admin\AdminUserIndexRequest;
 use Carbon\Carbon;
 use App\Http\Resources\Admin\AdminUserResource;
 use App\Http\Resources\Admin\AdminUserDetailResource;
+use App\Http\Resources\Admin\UserActivityLogResource;
 use App\Models\User;
 use App\Services\AdminUserService;
 use Illuminate\Http\JsonResponse;
@@ -28,7 +30,10 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
  */
 class AdminUserController extends Controller
 {
-    public function __construct(private readonly AdminUserService $service) {}
+    public function __construct(
+        private readonly AdminUserService        $service,
+        private readonly UserActivityLogInterface $activityLog,
+    ) {}
 
     /** GET /api/admin/v1/users */
     public function index(AdminUserIndexRequest $request): AnonymousResourceCollection
@@ -127,5 +132,13 @@ class AdminUserController extends Controller
         $user->grantRole(UserRole::from($request->string('role')->toString()));
 
         return response()->json(['data' => new AdminUserResource($user->fresh())]);
+    }
+
+    /** GET /api/admin/v1/users/{user}/activity-log */
+    public function activityLog(Request $request, User $user): AnonymousResourceCollection
+    {
+        $logs = $this->activityLog->forUser($user, $request->integer('per_page', 50));
+
+        return UserActivityLogResource::collection($logs);
     }
 }

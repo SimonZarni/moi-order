@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\FileStorageInterface;
+use App\Contracts\UserActivityLogInterface;
 use App\DTOs\ChangePasswordDTO;
 use App\DTOs\UpdateEmailDTO;
 use App\DTOs\UpdatePhoneDTO;
@@ -12,6 +13,7 @@ use App\DTOs\UpdateProfileDTO;
 use App\DTOs\VerifyEmailOtpDTO;
 use App\Enums\DocumentType;
 use App\Enums\EmailOtpPurpose;
+use App\Enums\UserActivityEvent;
 use App\Exceptions\DomainException;
 use App\Models\Document;
 use App\Models\User;
@@ -29,9 +31,10 @@ use Illuminate\Validation\ValidationException;
 class ProfileService
 {
     public function __construct(
-        private readonly FileStorageInterface $fileStorage,
-        private readonly OtpAuthService       $otpAuthService,
-        private readonly EmailOtpService      $emailOtpService,
+        private readonly FileStorageInterface    $fileStorage,
+        private readonly OtpAuthService          $otpAuthService,
+        private readonly EmailOtpService         $emailOtpService,
+        private readonly UserActivityLogInterface $activityLog,
     ) {}
 
     public function uploadProfilePicture(User $user, UploadedFile $file): User
@@ -87,6 +90,8 @@ class ProfileService
         // Revoke all other active tokens — any session on another device must re-authenticate.
         $currentTokenId = $user->currentAccessToken()->id;
         $user->tokens()->where('id', '!=', $currentTokenId)->delete();
+
+        $this->activityLog->record($user, UserActivityEvent::PasswordChanged);
     }
 
     public function unlinkProvider(User $user, string $provider): User
@@ -127,6 +132,13 @@ class ProfileService
 
         $user->update($updates);
 
+        $event = match ($provider) {
+            'google' => UserActivityEvent::GoogleUnlinked,
+            'apple'  => UserActivityEvent::AppleUnlinked,
+            'line'   => UserActivityEvent::LineUnlinked,
+        };
+        $this->activityLog->record($user->fresh(), $event);
+
         return $user->fresh();
     }
 
@@ -140,6 +152,8 @@ class ProfileService
         );
 
         $user->update(['phone_number' => $phoneNumber]);
+
+        $this->activityLog->record($user->fresh(), UserActivityEvent::PhoneChanged);
 
         return $user->fresh();
     }
@@ -155,7 +169,13 @@ class ProfileService
         $verifiedToken = $this->emailOtpService->verify($verifyDto);
         $this->emailOtpService->consumeVerifiedToken($dto->email, $verifiedToken, EmailOtpPurpose::EmailUpdate);
 
+        $oldEmail = $user->email;
         $user->update(['email' => $dto->email]);
+
+        $this->activityLog->record($user->fresh(), UserActivityEvent::EmailChanged, [
+            'old_email' => $oldEmail,
+            'new_email' => $dto->email,
+        ]);
 
         return $user->fresh();
     }
@@ -224,6 +244,9 @@ class ProfileService
 
     public function deleteAccount(User $user): void
     {
+        // Log before anonymising so the event is still attributable.
+        $this->activityLog->record($user, UserActivityEvent::AccountDeleted);
+
         DB::transaction(function () use ($user): void {
             // Anonymise PII before soft-deleting so the data cannot be recovered
             // even if soft-delete rows are later inspected.
