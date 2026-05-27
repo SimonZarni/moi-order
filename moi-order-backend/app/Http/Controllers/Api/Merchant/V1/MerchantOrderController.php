@@ -56,6 +56,21 @@ class MerchantOrderController extends Controller
         ]);
     }
 
+    /** POST /api/merchant/v1/orders/{id}/confirm-payment */
+    public function confirmPayment(Request $request, string $id): JsonResponse
+    {
+        $restaurant = $request->user()->restaurant()->firstOrFail();
+        $order      = $restaurant->foodOrders()->with(['items', 'user'])->where('uuid', $id)->firstOrFail();
+
+        if ($order->status !== FoodOrderStatus::WaitingForPayment) {
+            throw new \App\Exceptions\DomainException('order.not_waiting_for_payment', 409);
+        }
+
+        $updated = $this->orderService->updateStatus($order, FoodOrderStatus::PaymentConfirmed);
+
+        return response()->json(['data' => new FoodOrderResource($updated, $this->storage)]);
+    }
+
     /** PUT /api/merchant/v1/orders/{id}/status */
     public function updateStatus(UpdateFoodOrderStatusRequest $request, string $id): JsonResponse
     {

@@ -73,9 +73,9 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
   const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
 
   const {
-    order, isLoading, isError, isUpdating,
+    order, isLoading, isError, isUpdating, isConfirmingPayment,
     cancelModalVisible, cancelReason, cancelDescription,
-    handleUpdateStatus, handleCancelPress, handleCancelModalClose,
+    handleUpdateStatus, handleConfirmPayment, handleCancelPress, handleCancelModalClose,
     handleCancelReasonChange, handleCancelDescriptionChange, handleCancelConfirm,
   } = useOrderDetailScreen(orderId);
 
@@ -232,6 +232,23 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
             <Ionicons name="time-outline" size={16} color={colours.warning} />
             <Text style={styles.infoNoteText}>{waitingNote}</Text>
           </View>
+        )}
+
+        {order.status === ORDER_STATUS.WaitingForPayment && (
+          <Pressable
+            style={({ pressed }) => [
+              styles.actionButton,
+              (isConfirmingPayment || pressed) && styles.actionButtonDisabled,
+            ]}
+            onPress={handleConfirmPayment}
+            disabled={isConfirmingPayment}
+            accessibilityLabel="Confirm payment received"
+            accessibilityRole="button"
+          >
+            <Text style={styles.actionButtonText}>
+              {isConfirmingPayment ? 'Confirming…' : 'Confirm Payment'}
+            </Text>
+          </Pressable>
         )}
 
         {canChat && (

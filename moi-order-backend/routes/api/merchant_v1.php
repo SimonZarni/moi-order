@@ -34,10 +34,11 @@ Route::delete('/menu/items/{id}', [MenuItemController::class, 'destroy']);
 Route::get('/analytics', [MerchantAnalyticsController::class, 'index']);
 
 // ── Orders ────────────────────────────────────────────────────────────────────
-Route::get('/orders',                [MerchantOrderController::class, 'index']);
-Route::get('/orders/{id}',           [MerchantOrderController::class, 'show']);
-Route::put('/orders/{id}/status',    [MerchantOrderController::class, 'updateStatus']);
-Route::patch('/orders/{id}/status',  [MerchantOrderController::class, 'updateStatus']);
+Route::get('/orders',                        [MerchantOrderController::class, 'index']);
+Route::get('/orders/{id}',                   [MerchantOrderController::class, 'show']);
+Route::post('/orders/{id}/confirm-payment',  [MerchantOrderController::class, 'confirmPayment']);
+Route::put('/orders/{id}/status',            [MerchantOrderController::class, 'updateStatus']);
+Route::patch('/orders/{id}/status',          [MerchantOrderController::class, 'updateStatus']);
 
 // ── Order chat ────────────────────────────────────────────────────────────────
 Route::get('/orders/{id}/chat',   [MerchantOrderChatController::class, 'index']);

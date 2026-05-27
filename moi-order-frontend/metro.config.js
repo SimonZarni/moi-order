@@ -10,4 +10,12 @@ config.resolver.extraNodeModules = {
   '@react-native-community/netinfo': require.resolve('./netinfo-mock.js'),
 };
 
+// sp-react-native-in-app-updates has no web build — swap it for a no-op stub on web.
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (platform === 'web' && moduleName === 'sp-react-native-in-app-updates') {
+    return { filePath: require.resolve('./in-app-updates-stub.js'), type: 'sourceFile' };
+  }
+  return context.resolveRequest(context, moduleName, platform);
+};
+
 module.exports = config;
