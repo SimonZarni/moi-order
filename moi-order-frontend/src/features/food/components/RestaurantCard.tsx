@@ -21,54 +21,52 @@ const STATUS_BADGE_STYLE = {
 
 export function RestaurantCard({ restaurant, onPress }: Props): React.JSX.Element {
   const badge = STATUS_BADGE_STYLE[restaurant.status];
+  const thumbUri = restaurant.cover_photo_url ?? restaurant.logo_url;
 
   return (
     <Pressable
-      style={styles.card}
+      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
       onPress={() => onPress(restaurant)}
       accessibilityRole="button"
       accessibilityLabel={`${restaurant.name}, ${badge.label}`}
     >
       <Image
-        source={restaurant.cover_photo_url ? { uri: restaurant.cover_photo_url } : null}
-        style={styles.cover}
+        source={thumbUri ? { uri: thumbUri } : null}
+        style={styles.thumb}
         contentFit="cover"
         transition={200}
         placeholder={{ blurhash: 'LGF5?xYk^6#M@-5c,1J5@[or[Q6.' }}
       />
-      <View style={styles.body}>
-        <View style={styles.headerRow}>
-          {restaurant.logo_url !== null && (
-            <Image source={{ uri: restaurant.logo_url }} style={styles.logo} contentFit="cover" />
-          )}
-          <View style={styles.nameBlock}>
-            <Text style={styles.name} numberOfLines={1}>{restaurant.name}</Text>
-            {restaurant.address !== null && (
-              <Text style={styles.address} numberOfLines={1}>{restaurant.address}</Text>
-            )}
-          </View>
+
+      <View style={styles.info}>
+        <View style={styles.nameRow}>
+          <Text style={styles.name} numberOfLines={1}>{restaurant.name}</Text>
           <View style={[styles.statusBadge, badge.badge]}>
             <Text style={[styles.statusText, badge.text]}>{badge.label}</Text>
           </View>
         </View>
 
-        <View style={styles.footerRow}>
-          {restaurant.min_order_cents > 0 && (
-            <View style={styles.metaItem}>
-              <Ionicons name="bag-outline" size={12} color={colours.medium} />
-              <Text style={styles.metaText}>Min {formatPrice(restaurant.min_order_cents / 100)}</Text>
-            </View>
-          )}
+        {restaurant.address !== null && (
+          <Text style={styles.address} numberOfLines={1}>{restaurant.address}</Text>
+        )}
+
+        <View style={styles.metaRow}>
           {restaurant.is_delivery_available && (
-            <View style={styles.metaItem}>
-              <Ionicons name="bicycle-outline" size={12} color={colours.medium} />
+            <View style={styles.metaChip}>
+              <Ionicons name="bicycle-outline" size={11} color={colours.tertiary} />
               <Text style={styles.metaText}>Delivery</Text>
             </View>
           )}
           {restaurant.is_pickup_available && (
-            <View style={styles.metaItem}>
-              <Ionicons name="storefront-outline" size={12} color={colours.medium} />
+            <View style={styles.metaChip}>
+              <Ionicons name="storefront-outline" size={11} color={colours.tertiary} />
               <Text style={styles.metaText}>Pickup</Text>
+            </View>
+          )}
+          {restaurant.min_order_cents > 0 && (
+            <View style={styles.metaChip}>
+              <Ionicons name="bag-outline" size={11} color={colours.tertiary} />
+              <Text style={styles.metaText}>Min {formatPrice(restaurant.min_order_cents / 100)}</Text>
             </View>
           )}
         </View>

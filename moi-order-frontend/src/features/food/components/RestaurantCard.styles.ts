@@ -7,51 +7,73 @@ import { typography } from '@/shared/theme/typography';
 
 export const styles = StyleSheet.create({
   card: {
-    backgroundColor: colours.card,
-    borderRadius: radius.xl,
-    overflow: 'hidden',
-    marginBottom: spacing.sm,
-    ...shadows.light,
-  },
-  cover: {
-    width: '100%',
-    height: 140,
-    backgroundColor: colours.infoBg,
-  },
-  body: {
-    padding: spacing.md,
-  },
-  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.xs,
+    backgroundColor: colours.card,
+    borderRadius: radius.xl,
+    padding: spacing.sm,
+    marginBottom: spacing.sm,
+    gap: spacing.sm,
+    ...shadows.light,
   },
-  logo: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.md,
+  cardPressed: {
+    opacity: 0.85,
+  },
+  thumb: {
+    width: 80,
+    height: 80,
+    borderRadius: radius.lg,
     backgroundColor: colours.infoBg,
-    marginRight: spacing.sm,
+    flexShrink: 0,
   },
-  nameBlock: {
+  info: {
     flex: 1,
+    justifyContent: 'center',
+    gap: 3,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.xs,
   },
   name: {
+    flex: 1,
     fontSize: typography.md,
     fontWeight: '700',
     color: colours.textOnLight,
-    lineHeight: 22,
+    lineHeight: 20,
   },
   address: {
     fontSize: typography.xs,
-    color: colours.medium,
+    color: colours.textMuted,
     lineHeight: 16,
-    marginTop: 1,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+    marginTop: 2,
+  },
+  metaChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: colours.infoBg,
+    borderRadius: radius.full,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+  },
+  metaText: {
+    fontSize: typography.xxs,
+    fontWeight: '600',
+    color: colours.tertiary,
   },
   statusBadge: {
     paddingHorizontal: spacing.sm,
     paddingVertical: 3,
     borderRadius: radius.full,
+    flexShrink: 0,
   },
   statusBadgeOpen:   { backgroundColor: '#dcfce7' },
   statusBadgeClosed: { backgroundColor: colours.infoBg },
@@ -64,19 +86,4 @@ export const styles = StyleSheet.create({
   statusTextOpen:   { color: '#16a34a' },
   statusTextClosed: { color: colours.textMuted },
   statusTextPaused: { color: '#a16207' },
-  footerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    marginTop: spacing.xs,
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  metaText: {
-    fontSize: typography.xs,
-    color: colours.medium,
-  },
 });

@@ -118,7 +118,7 @@ export const styles = StyleSheet.create({
   },
   list: {
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
+    paddingTop: spacing.sm,
     paddingBottom: TAB_BAR_CLEARANCE + spacing.lg,
   },
   emptyState: {
