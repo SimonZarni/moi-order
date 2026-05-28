@@ -236,7 +236,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
       if (menuData) {
         const emptyRequired = REQUIRED_MENU_TYPES.filter((type) => {
           const cat = menuData.find((c) => c.is_system && c.category_type === type);
-          return !cat || cat.items.length === 0;
+          return !cat || (cat.items ?? []).length === 0;
         });
         if (emptyRequired.length > 0) {
           const labels = emptyRequired.map((t) => REQUIRED_MENU_LABELS[t]).join(' and ');
