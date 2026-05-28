@@ -10,15 +10,17 @@ export const FOOD_CATEGORIES = ['All', 'Thai', 'Japanese', 'Burger', 'Coffee', '
 export type FoodCategory = (typeof FOOD_CATEGORIES)[number];
 
 export interface UseFoodScreenResult extends UseRestaurantListDataResult {
-  cartItemCount:       number;
-  searchText:          string;
-  activeCategory:      FoodCategory;
-  setSearchText:       (t: string) => void;
-  setActiveCategory:   (c: FoodCategory) => void;
+  cartItemCount:         number;
+  searchText:            string;
+  activeCategory:        FoodCategory;
+  setSearchText:         (t: string) => void;
+  setActiveCategory:     (c: FoodCategory) => void;
   handleRestaurantPress: (restaurant: Restaurant) => void;
-  handleMapPress:      () => void;
-  handleCartPress:     () => void;
-  handleBack:          () => void;
+  handleMapPress:        () => void;
+  handleAddressPress:    () => void;
+  handleOrdersPress:     () => void;
+  handleCartPress:       () => void;
+  handleBack:            () => void;
 }
 
 export function useFoodScreen(): UseFoodScreenResult {
@@ -54,19 +56,23 @@ export function useFoodScreen(): UseFoodScreenResult {
     [navigation],
   );
 
-  const handleMapPress  = useCallback(() => navigation.navigate('RestaurantMap'), [navigation]);
-  const handleCartPress = useCallback(() => navigation.navigate('CartOrders'),    [navigation]);
-  const handleBack      = useCallback(() => navigation.goBack(),                  [navigation]);
+  const handleMapPress     = useCallback(() => navigation.navigate('RestaurantMap'),             [navigation]);
+  const handleAddressPress = useCallback(() => navigation.navigate('AddressList', { mode: 'manage' }), [navigation]);
+  const handleOrdersPress  = useCallback(() => navigation.navigate('FoodOrders'),               [navigation]);
+  const handleCartPress    = useCallback(() => navigation.navigate('Cart'),                     [navigation]);
+  const handleBack         = useCallback(() => navigation.goBack(),                             [navigation]);
 
   return {
     ...listData,
-    cartItemCount:       cartCount,
+    cartItemCount:     cartCount,
     searchText,
     activeCategory,
     setSearchText,
     setActiveCategory,
     handleRestaurantPress,
     handleMapPress,
+    handleAddressPress,
+    handleOrdersPress,
     handleCartPress,
     handleBack,
   };

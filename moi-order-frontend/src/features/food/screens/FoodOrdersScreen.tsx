@@ -1,64 +1,29 @@
 import React from 'react';
-import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { FoodOrder } from '@/types/models';
 import { formatPrice } from '@/shared/utils/formatCurrency';
 import { formatDateTime } from '@/shared/utils/formatDate';
-import { CartItem } from '@/shared/store/cartStore';
 import { BackButton } from '@/shared/components/BackButton/BackButton';
-import { useCartOrdersScreen } from '../hooks/useCartOrdersScreen';
-import { ORDER_STATUS_COLOURS, styles } from './CartOrdersScreen.styles';
+import { useFoodOrdersScreen } from '../hooks/useFoodOrdersScreen';
+import { ORDER_STATUS_COLOURS, styles } from './FoodOrdersScreen.styles';
 
-export function CartOrdersScreen(): React.JSX.Element {
+export function FoodOrdersScreen(): React.JSX.Element {
   const {
-    cartItems, restaurantName, cartTotalCents,
-    handleCheckout, handleClearCart,
     orders, isOrdersLoading, isOrdersError,
     handleOrderPress, handleBack,
-  } = useCartOrdersScreen();
+  } = useFoodOrdersScreen();
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.header}>
         <BackButton onPress={handleBack} />
-        <Text style={styles.headerTitle}>Cart & Orders</Text>
+        <Text style={styles.headerTitle}>My Orders</Text>
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {cartItems.length > 0 && (
-          <>
-            <Text style={styles.sectionLabel}>Your Cart</Text>
-            {restaurantName.length > 0 && (
-              <Text style={styles.cartRestaurant}>{restaurantName}</Text>
-            )}
-            <View style={styles.card}>
-              {cartItems.map((item: CartItem) => (
-                <View key={item.cartKey} style={styles.cartItemRow}>
-                  <Text style={styles.cartItemName} numberOfLines={1}>{item.name}</Text>
-                  <Text style={styles.cartItemQty}>×{item.quantity}</Text>
-                  <Text style={styles.cartItemPrice}>
-                    {formatPrice(((item.basePriceCents + item.additionalPriceCents) * item.quantity) / 100)}
-                  </Text>
-                </View>
-              ))}
-              <View style={styles.subtotalRow}>
-                <Text style={styles.subtotalLabel}>Subtotal</Text>
-                <Text style={styles.subtotalValue}>{formatPrice(cartTotalCents / 100)}</Text>
-              </View>
-            </View>
-            <Pressable style={styles.checkoutBtn} onPress={handleCheckout} accessibilityRole="button" accessibilityLabel="Proceed to checkout">
-              <Text style={styles.checkoutBtnText}>Proceed to Checkout</Text>
-            </Pressable>
-            <Pressable style={styles.clearBtn} onPress={handleClearCart} accessibilityRole="button" accessibilityLabel="Clear cart">
-              <Text style={styles.clearBtnText}>Clear Cart</Text>
-            </Pressable>
-          </>
-        )}
-
-        <Text style={styles.sectionLabel}>Recent Orders</Text>
-
         {isOrdersLoading && (
           <View style={styles.stateBox}>
             <ActivityIndicator color={colours.primary} />
@@ -71,15 +36,22 @@ export function CartOrdersScreen(): React.JSX.Element {
         )}
         {!isOrdersLoading && !isOrdersError && orders.length === 0 && (
           <View style={styles.stateBox}>
+            <Ionicons name="receipt-outline" size={48} color={colours.textMuted} />
             <Text style={styles.stateText}>No orders yet</Text>
           </View>
         )}
-        {!isOrdersLoading && (
+        {!isOrdersLoading && orders.length > 0 && (
           <View style={styles.card}>
             {orders.map((order: FoodOrder) => {
               const statusColour = ORDER_STATUS_COLOURS[order.status] ?? { bg: colours.infoBg, text: colours.textMuted };
               return (
-                <Pressable key={order.id} style={styles.orderRow} onPress={() => handleOrderPress(order)} accessibilityRole="button" accessibilityLabel={`View order ${order.order_number ?? order.id}`}>
+                <Pressable
+                  key={order.id}
+                  style={styles.orderRow}
+                  onPress={() => handleOrderPress(order)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`View order ${order.order_number ?? order.id}`}
+                >
                   <View style={styles.orderMeta}>
                     <Text style={styles.orderNumber}>
                       {order.order_number != null ? order.order_number : `#${order.id}`}

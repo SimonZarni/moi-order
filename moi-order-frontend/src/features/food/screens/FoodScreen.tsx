@@ -14,7 +14,7 @@ export function FoodScreen(): React.JSX.Element {
     hasNextPage, fetchNextPage, cartItemCount,
     searchText, activeCategory,
     setSearchText, setActiveCategory,
-    handleRestaurantPress, handleMapPress, handleCartPress, handleBack,
+    handleRestaurantPress, handleMapPress, handleAddressPress, handleOrdersPress, handleCartPress, handleBack,
   } = useFoodScreen();
 
   return (
@@ -28,11 +28,17 @@ export function FoodScreen(): React.JSX.Element {
             <Text style={styles.heroTitle}>Restaurants</Text>
           </View>
           <View style={styles.heroActions}>
+            <Pressable style={styles.iconBtn} onPress={handleAddressPress} accessibilityRole="button" accessibilityLabel="Saved addresses">
+              <Ionicons name="location-outline" size={18} color={colours.textOnDark} />
+            </Pressable>
             <Pressable style={styles.iconBtn} onPress={handleMapPress} accessibilityRole="button" accessibilityLabel="View map">
-              <Ionicons name="map-outline" size={20} color={colours.textOnDark} />
+              <Ionicons name="navigate-outline" size={18} color={colours.textOnDark} />
+            </Pressable>
+            <Pressable style={styles.iconBtn} onPress={handleOrdersPress} accessibilityRole="button" accessibilityLabel="My orders">
+              <Ionicons name="receipt-outline" size={18} color={colours.textOnDark} />
             </Pressable>
             <Pressable style={styles.iconBtn} onPress={handleCartPress} accessibilityRole="button" accessibilityLabel="View cart">
-              <Ionicons name="bag-outline" size={20} color={colours.textOnDark} />
+              <Ionicons name="cart-outline" size={18} color={colours.textOnDark} />
               {cartItemCount > 0 && (
                 <View style={styles.cartBadge}>
                   <Text style={styles.cartBadgeText}>{cartItemCount > 9 ? '9+' : cartItemCount}</Text>
