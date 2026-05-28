@@ -33,15 +33,11 @@ export const styles = StyleSheet.create({
     height: 40,
     borderRadius: radius.md,
     backgroundColor: colours.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
+    overflow: 'hidden',   // clips the image to the rounded corners
   },
-  logoMarkText: {
-    fontSize: typography.md,
-    fontWeight: '900',
-    color: colours.white,
-    letterSpacing: -0.5,
+  logoImage: {
+    width: '100%',
+    height: '100%',
   },
   logoText: {
     color: colours.textOnDark,

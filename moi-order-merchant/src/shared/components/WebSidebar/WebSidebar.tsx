@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './WebSidebar.styles';
 import { colours } from '../../theme/colours';
@@ -41,7 +41,13 @@ export function WebSidebar({ activeScreen, onNavigate, onLogout, pendingCount = 
       {/* Logo */}
       <View style={styles.logoContainer}>
         <View style={styles.logoMark}>
-          <Text style={styles.logoMarkText}>MO</Text>
+          <Image
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
+            source={require('../../../../assets/icon.png')}
+            style={styles.logoImage}
+            resizeMode="cover"
+            accessibilityLabel="Moi Order logo"
+          />
         </View>
         <View>
           <Text style={styles.logoText}>Moi Order</Text>
