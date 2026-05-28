@@ -4,8 +4,9 @@
 // iOS requires install + activate + fetch handlers for a valid PWA service worker.
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => { event.waitUntil(self.clients.claim()); });
-// Pass all requests through — no caching needed for an always-online admin dashboard.
-self.addEventListener('fetch', (event) => { event.respondWith(fetch(event.request)); });
+// Empty fetch handler — satisfies iOS PWA requirements without intercepting requests.
+// The browser handles all fetches natively; no caching needed for an always-online dashboard.
+self.addEventListener('fetch', () => {});
 
 self.addEventListener('push', (event) => {
   if (!event.data) return;
