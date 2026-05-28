@@ -4,7 +4,7 @@ import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { useAuthStore } from '@/shared/store/authStore';
 import { FoodOrder } from '@/types/models';
 
-export function useFoodActiveOrder(): FoodOrder | null {
+export function useFoodActiveOrder(): FoodOrder[] {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
 
   const { data } = useQuery({
@@ -15,5 +15,5 @@ export function useFoodActiveOrder(): FoodOrder | null {
     staleTime:       10_000,
   });
 
-  return data ?? null;
+  return data ?? [];
 }

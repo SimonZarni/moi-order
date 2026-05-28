@@ -37,6 +37,13 @@ export const styles = StyleSheet.create({
     borderWidth:      1,
     borderColor:      'rgba(255,255,255,0.08)',
   },
+  arrowBtn: {
+    paddingHorizontal: spacing.xs,
+    paddingVertical:   spacing.xs,
+    minWidth:          32,
+    alignItems:        'center',
+    justifyContent:    'center',
+  },
   dot: {
     width:        10,
     height:       10,
