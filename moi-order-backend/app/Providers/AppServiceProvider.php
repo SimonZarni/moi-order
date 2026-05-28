@@ -69,10 +69,16 @@ class AppServiceProvider extends ServiceProvider
         //   the storage.local Closure route is skipped when routes are cached,
         //   causing temporaryUrl() to throw InvalidArgumentException → 500.
         $this->app->bind(FileStorageInterface::class, function () {
-            $diskName = config('filesystems.default', 'local');
+            $diskName   = config('filesystems.default', 'local');
+            $diskDriver = config("filesystems.disks.{$diskName}.driver", 'local');
+            // Only use the R2 public CDN URL when actually writing to an S3-compatible disk.
+            // When FILESYSTEM_DISK=local, files live on disk — pointing URLs at R2 returns 404.
+            $publicBaseUrl = $diskDriver === 's3'
+                ? config('filesystems.r2_public_url', '')
+                : '';
             return new FileStorageService(
                 Storage::disk($diskName),
-                config('filesystems.r2_public_url', ''),
+                $publicBaseUrl,
             );
         });
 
