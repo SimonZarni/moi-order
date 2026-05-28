@@ -25,7 +25,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.moiorder.com https://moi-order-production.up.railway.app wss://*.pusher.com https://*.pusher.com; font-src 'self' data:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://pub-3ddc81f1f8794ab29871eda2c72d21e3.r2.dev https:; connect-src 'self' https://api.moiorder.com https://moi-order-production.up.railway.app https://pub-3ddc81f1f8794ab29871eda2c72d21e3.r2.dev wss://*.pusher.com https://*.pusher.com; font-src 'self' data:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';"
         }
       ]
     },
