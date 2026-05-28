@@ -93,6 +93,7 @@ import { AddressListScreen } from '@/features/address/screens/AddressListScreen'
 import { AddEditAddressScreen } from '@/features/address/screens/AddEditAddressScreen';
 import { MapPickerScreen } from '@/features/address/screens/MapPickerScreen';
 import { MaintenanceScreen } from '@/features/maintenance/screens/MaintenanceScreen';
+import { FloatingOrderStatusBar } from '@/shared/components/FloatingOrderStatusBar/FloatingOrderStatusBar';
 import { navigationRef } from '@/shared/navigation/navigationRef';
 
 import { useNotificationsData } from '@/features/notifications/hooks/useNotificationsData';
@@ -404,6 +405,7 @@ export default function App(): React.JSX.Element {
               <AppShell />
             </BottomSheetModalProvider>
           </NavigationContainer>
+          <FloatingOrderStatusBar />
         </QueryClientProvider>
         {/* Inside SafeAreaProvider (for safe area insets) but outside
             NavigationContainer — places the tab bar in a separate hardware

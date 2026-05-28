@@ -55,6 +55,7 @@ export const QUERY_KEYS = {
     LIST:   ['food-orders', 'list'] as const,
     DETAIL: (id: string) => ['food-orders', 'detail', id] as const,
     CHAT:   (id: string) => ['food-orders', 'chat', id] as const,
+    ACTIVE: ['food-orders', 'active'] as const,
   },
   HOME_CARDS: {
     LIST: ['home-cards', 'list'] as const,

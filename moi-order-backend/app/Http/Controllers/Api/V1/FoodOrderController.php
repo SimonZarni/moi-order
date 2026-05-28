@@ -13,6 +13,7 @@ use App\Http\Requests\Api\StoreFoodOrderRequest;
 use App\Http\Requests\CancelFoodOrderRequest;
 use App\Http\Requests\DeleteFoodOrderRequest;
 use App\Http\Resources\FoodOrderResource;
+use App\Enums\FoodOrderStatus;
 use App\Models\FoodOrder;
 use App\Services\FoodOrderService;
 use Illuminate\Http\JsonResponse;
@@ -40,6 +41,22 @@ class FoodOrderController extends Controller
                 'per_page'     => $orders->perPage(),
                 'total'        => $orders->total(),
             ],
+        ]);
+    }
+
+    /** GET /api/v1/food-orders/active — latest non-terminal order for the auth user */
+    public function active(Request $request): JsonResponse
+    {
+        $order = FoodOrder::forUser($request->user()->id)
+            ->whereNotIn('status', [
+                FoodOrderStatus::Completed->value,
+                FoodOrderStatus::Cancelled->value,
+            ])
+            ->latest()
+            ->first();
+
+        return response()->json([
+            'data' => $order ? new FoodOrderResource($order, $this->storage) : null,
         ]);
     }
 

@@ -2,12 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useQueryClient } from '@tanstack/react-query';
 import * as Crypto from 'expo-crypto';
 import { RootStackParamList } from '@/types/navigation';
 import { FOOD_PAYMENT_METHOD, FoodPaymentMethod } from '@/types/enums';
 import { UserAddress } from '@/types/models';
 import { CartItem, useCartStore } from '@/shared/store/cartStore';
 import { useAddresses } from '@/features/address/hooks/useAddresses';
+import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { usePlaceFoodOrder } from './useFoodOrdersData';
 
 type Nav   = NativeStackNavigationProp<RootStackParamList>;
@@ -66,6 +68,7 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
 
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId) ?? null;
 
+  const queryClient = useQueryClient();
   const { mutate: placeOrder, isPending: isPlacing } = usePlaceFoodOrder();
 
   const handleBack    = useCallback(() => navigation.goBack(), [navigation]);
@@ -102,6 +105,7 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
       {
         onSuccess: (order) => {
           clearCart();
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOOD_ORDERS.ACTIVE });
           navigation.replace('FoodOrderDetail', { orderId: order.id });
         },
         onError: () => {

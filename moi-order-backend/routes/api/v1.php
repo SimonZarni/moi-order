@@ -106,6 +106,7 @@ Route::post('/addresses/{id}/set-default',  [UserAddressController::class, 'setD
 // Food orders
 Route::get('/food-orders',                [FoodOrderController::class, 'index']);
 Route::post('/food-orders',               [FoodOrderController::class, 'store']);
+Route::get('/food-orders/active',         [FoodOrderController::class, 'active']);
 Route::get('/food-orders/{id}',           [FoodOrderController::class, 'show']);
 Route::post('/food-orders/{id}/cancel',   [FoodOrderController::class, 'cancel']);
 Route::delete('/food-orders/{id}',        [FoodOrderController::class, 'destroy']);

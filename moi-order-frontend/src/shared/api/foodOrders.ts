@@ -23,6 +23,11 @@ export interface CompleteFoodOrderInput {
   review?: string | null;
 }
 
+export async function fetchActiveOrder(): Promise<FoodOrder | null> {
+  const res = await apiClient.get<ApiResponse<FoodOrder | null>>('/api/v1/food-orders/active');
+  return res.data.data;
+}
+
 export async function fetchFoodOrders(page = 1): Promise<PaginatedResponse<FoodOrder>> {
   const res = await apiClient.get<PaginatedResponse<FoodOrder>>('/api/v1/food-orders', {
     params: { page },
