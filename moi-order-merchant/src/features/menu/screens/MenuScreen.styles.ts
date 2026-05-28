@@ -147,7 +147,7 @@ export const styles = StyleSheet.create({
   // ── Grid container — flexWrap so CSS percentage widths distribute columns ─
   // This is more reliable on Expo Web than FlatList numColumns.
   grid: {
-    padding: spacing.xs + 2,
+    padding: spacing.sm,
     paddingBottom: spacing.xxl + spacing.xl, // room for FAB
   },
   gridWrap: {
@@ -157,7 +157,7 @@ export const styles = StyleSheet.create({
   // Each item gets an inline width={itemWidthPct} from MenuScreen; this
   // just adds uniform padding around each cell.
   gridItem: {
-    padding: 4,
+    padding: 6,
   },
 
   // ── Empty state ───────────────────────────────────────────────────────────

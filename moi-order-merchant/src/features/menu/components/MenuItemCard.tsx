@@ -94,6 +94,10 @@ export function MenuItemCard({
       <View style={styles.body}>
         <Text style={styles.name} numberOfLines={2}>{item.name}</Text>
 
+        {item.description !== null && item.description.trim().length > 0 && (
+          <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
+        )}
+
         <View style={styles.priceRow}>
           <Text style={styles.price}>{formatPrice(item.price_cents)}</Text>
           {hasDiscount && (
@@ -123,7 +127,7 @@ export function MenuItemCard({
               accessibilityLabel={`Edit ${item.name}`}
               accessibilityRole="button"
             >
-              <Ionicons name="pencil-outline" size={11} color={colours.primary} />
+              <Ionicons name="pencil-outline" size={16} color={colours.primary} />
             </Pressable>
             <Pressable
               style={[styles.iconBtn, styles.iconBtnDanger]}
@@ -131,7 +135,7 @@ export function MenuItemCard({
               accessibilityLabel={`Delete ${item.name}`}
               accessibilityRole="button"
             >
-              <Ionicons name="trash-outline" size={11} color={colours.error} />
+              <Ionicons name="trash-outline" size={16} color={colours.error} />
             </Pressable>
           </View>
         </View>

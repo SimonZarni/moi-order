@@ -38,12 +38,11 @@ export function MenuScreen(): React.JSX.Element {
   const { width } = useWindowDimensions();
 
   // Responsive column count — content pane is roughly window-width minus sidebar (~220 px).
+  // Fewer, wider columns give each card room to show name, description, and price comfortably.
   // Using flexWrap (not FlatList numColumns) so percentages map directly to CSS grid.
   const numColumns =
-    width >= 1400 ? 6 :
-    width >= 1100 ? 5 :
-    width >= 800  ? 4 :
-    width >= 560  ? 3 : 2;
+    width >= 1400 ? 4 :
+    width >= 900  ? 3 : 2;
 
   // Each item width as a CSS percentage string — React Native Web supports this.
   const itemWidthPct = `${Math.floor(100 / numColumns)}%` as `${number}%`;
