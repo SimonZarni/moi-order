@@ -5,6 +5,8 @@ import { typography } from '@/shared/theme/typography';
 
 export const TAB_BAR_CLEARANCE     = 100;
 export const TAB_BAR_BOTTOM_OFFSET = 14;
+// blurWrap paddingVertical(6×2) + tab paddingVertical(8×2) + icon(20) + gap(3) + label(16)
+export const TAB_BAR_HEIGHT        = 67;
 
 export const styles = StyleSheet.create({
   // Outer shell — shadow host only; no overflow:hidden so elevation/shadow renders

@@ -1,14 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { navigationRef } from '@/shared/navigation/navigationRef';
 import { useFoodActiveOrder } from '@/shared/hooks/useFoodActiveOrder';
+import { TAB_BAR_BOTTOM_OFFSET, TAB_BAR_HEIGHT } from '@/shared/components/FloatingTabBar/FloatingTabBar.styles';
 import { STATUS_DOT_COLOURS, styles } from './FloatingOrderStatusBar.styles';
 
 export function FloatingOrderStatusBar(): React.JSX.Element | null {
   const activeOrder = useFoodActiveOrder();
-  const slideY = useRef(new Animated.Value(120)).current;
+  const insets      = useSafeAreaInsets();
+  const slideY      = useRef(new Animated.Value(120)).current;
   const [isOnHome, setIsOnHome] = useState(false);
+
+  // Flush above the tab bar with correct safe area offset on all devices.
+  const barBottom = TAB_BAR_BOTTOM_OFFSET + insets.bottom + TAB_BAR_HEIGHT;
 
   // Slide in when order appears, slide out when it disappears.
   useEffect(() => {
@@ -50,7 +56,7 @@ export function FloatingOrderStatusBar(): React.JSX.Element | null {
   }
 
   return (
-    <Animated.View style={[styles.container, { transform: [{ translateY: slideY }] }]}>
+    <Animated.View style={[styles.container, { bottom: barBottom, transform: [{ translateY: slideY }] }]}>
       <Pressable
         style={styles.bar}
         onPress={handlePress}

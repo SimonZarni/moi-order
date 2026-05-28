@@ -2,7 +2,6 @@ import { StyleSheet } from 'react-native';
 import { radius } from '@/shared/theme/radius';
 import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
-import { TAB_BAR_CLEARANCE } from '@/shared/components/FloatingTabBar/FloatingTabBar.styles';
 
 export const STATUS_DOT_COLOURS: Record<string, string> = {
   order_placed:          '#f59e0b',
@@ -14,14 +13,12 @@ export const STATUS_DOT_COLOURS: Record<string, string> = {
   delivered:             '#10b981',
 };
 
-export const BAR_BOTTOM = TAB_BAR_CLEARANCE + 8;
-
 export const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     left:     spacing.md,
     right:    spacing.md,
-    bottom:   BAR_BOTTOM,
+    // bottom is set dynamically in the component to account for safe area insets
     zIndex:   999,
   },
   bar: {
