@@ -44,20 +44,20 @@ class FoodOrderController extends Controller
         ]);
     }
 
-    /** GET /api/v1/food-orders/active — latest non-terminal order for the auth user */
+    /** GET /api/v1/food-orders/active — all non-terminal orders for the auth user */
     public function active(Request $request): JsonResponse
     {
-        $order = FoodOrder::forUser($request->user()->id)
+        $orders = FoodOrder::forUser($request->user()->id)
             ->with('restaurant')
             ->whereNotIn('status', [
                 FoodOrderStatus::Completed->value,
                 FoodOrderStatus::Cancelled->value,
             ])
             ->latest()
-            ->first();
+            ->get();
 
         return response()->json([
-            'data' => $order ? new FoodOrderResource($order, $this->storage) : null,
+            'data' => $orders->map(fn ($o) => new FoodOrderResource($o, $this->storage))->values(),
         ]);
     }
 
