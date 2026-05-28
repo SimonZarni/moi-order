@@ -8,7 +8,7 @@ import { STATUS_DOT_COLOURS, styles } from './FloatingOrderStatusBar.styles';
 export function FloatingOrderStatusBar(): React.JSX.Element | null {
   const activeOrder = useFoodActiveOrder();
   const slideY = useRef(new Animated.Value(120)).current;
-  const [isOnOrderDetail, setIsOnOrderDetail] = useState(false);
+  const [isOnHome, setIsOnHome] = useState(false);
 
   // Slide in when order appears, slide out when it disappears.
   useEffect(() => {
@@ -28,19 +28,19 @@ export function FloatingOrderStatusBar(): React.JSX.Element | null {
     }
   }, [activeOrder, slideY]);
 
-  // Hide when the user is already viewing the active order's detail screen.
+  // Only show on the Home tab screen.
   useEffect(() => {
     function check(): void {
       if (!navigationRef.isReady()) return;
       const route = navigationRef.getCurrentRoute();
-      setIsOnOrderDetail(route?.name === 'FoodOrderDetail');
+      setIsOnHome(route?.name === 'Home');
     }
     check();
     const unsub = navigationRef.addListener('state', check);
     return unsub;
   }, []);
 
-  if (activeOrder === null || isOnOrderDetail) return null;
+  if (activeOrder === null || !isOnHome) return null;
 
   const dotColour = STATUS_DOT_COLOURS[activeOrder.status] ?? '#9ca3af';
 
