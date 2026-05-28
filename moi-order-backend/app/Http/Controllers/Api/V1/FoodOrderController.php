@@ -48,6 +48,7 @@ class FoodOrderController extends Controller
     public function active(Request $request): JsonResponse
     {
         $order = FoodOrder::forUser($request->user()->id)
+            ->with('restaurant')
             ->whereNotIn('status', [
                 FoodOrderStatus::Completed->value,
                 FoodOrderStatus::Cancelled->value,
