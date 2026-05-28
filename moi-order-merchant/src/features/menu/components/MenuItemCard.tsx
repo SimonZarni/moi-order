@@ -92,12 +92,16 @@ export function MenuItemCard({
 
       {/* ── Body ──────────────────────────────────────────────────────────── */}
       <View style={styles.body}>
-        <Text style={styles.name} numberOfLines={2}>{item.name}</Text>
+        {/* Top group — name + description float to top */}
+        <View style={styles.bodyTop}>
+          <Text style={styles.name} numberOfLines={2}>{item.name}</Text>
+          {item.description !== null && item.description.trim().length > 0 && (
+            <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
+          )}
+        </View>
 
-        {item.description !== null && item.description.trim().length > 0 && (
-          <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
-        )}
-
+        {/* Bottom group — price + actions always sit at bottom */}
+        <View>
         <View style={styles.priceRow}>
           <Text style={styles.price}>{formatPrice(item.price_cents)}</Text>
           {hasDiscount && (
@@ -139,6 +143,7 @@ export function MenuItemCard({
             </Pressable>
           </View>
         </View>
+        </View>{/* end bottom group */}
       </View>
 
       {/* ── Inline: delete confirmation ────────────────────────────────────── */}

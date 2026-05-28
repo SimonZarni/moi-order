@@ -7,7 +7,10 @@ import { radius } from '../../../shared/theme/radius';
 export const styles = StyleSheet.create({
   // ── Card container ────────────────────────────────────────────────────────
   card: {
-    // No flex:1 — width is controlled by the percentage-width gridItem wrapper in MenuScreen.
+    // flex:1 fills the gridItem wrapper so all cards in the same row share the
+    // same height (driven by the tallest card). Width is still controlled by
+    // the percentage-width gridItem in MenuScreen.
+    flex: 1,
     backgroundColor: colours.surface,
     borderRadius: radius.xl,
     borderWidth: 1,
@@ -70,8 +73,15 @@ export const styles = StyleSheet.create({
   },
 
   // ── Body ──────────────────────────────────────────────────────────────────
+  // flex:1 + space-between: name/description stick to the top,
+  // price row + footer stick to the bottom regardless of card height.
   body: {
+    flex: 1,
     padding: spacing.md,
+    justifyContent: 'space-between',
+  },
+  // Groups name + description at the top of the flex body
+  bodyTop: {
     gap: spacing.xs,
   },
   name: {

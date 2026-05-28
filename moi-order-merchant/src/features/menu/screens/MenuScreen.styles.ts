@@ -153,6 +153,9 @@ export const styles = StyleSheet.create({
   gridWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    // stretch makes every gridItem in the same row grow to match the tallest,
+    // so all cards in a row share an identical height automatically.
+    alignItems: 'stretch',
   },
   // Each item gets an inline width={itemWidthPct} from MenuScreen; this
   // just adds uniform padding around each cell.
