@@ -7,6 +7,7 @@ export interface PlaceFoodOrderInput {
   restaurant_id: number;
   payment_method: FoodPaymentMethod;
   idempotency_key: string;
+  delivery_address_id: number | null;
   delivery_address: string | null;
   customer_notes: string | null;
   items: Array<{

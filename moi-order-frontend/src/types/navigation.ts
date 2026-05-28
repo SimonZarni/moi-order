@@ -106,7 +106,17 @@ export type RootStackParamList = {
   MenuItemDetail: { restaurantId: number; menuItemId: number };
   RestaurantMap: undefined;
   CartOrders: undefined;
-  Checkout: undefined;
+  Checkout: { selectedAddressId?: number } | undefined;
   FoodOrderDetail: { orderId: string };
   OrderChat: { orderId: string; orderNumber: string | null; restaurantName: string | null };
+
+  // ── Address management ────────────────────────────────────────────────────
+  AddressList: { mode: 'select' | 'manage' };
+  AddEditAddress: {
+    addressId?: number;
+    pickedLat?: number;
+    pickedLng?: number;
+    pickedAddress?: string;
+  };
+  MapPicker: { initialLat?: number; initialLng?: number; initialAddress?: string };
 };

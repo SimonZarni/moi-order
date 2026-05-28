@@ -278,6 +278,22 @@ export interface Document {
   updated_at: string;
 }
 
+// ── User addresses ─────────────────────────────────────────────────────────
+
+export interface UserAddress {
+  id: number;
+  label: 'home' | 'work' | 'other';
+  label_display: string;
+  address: string;
+  building: string | null;
+  floor: string | null;
+  landmark: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  is_default: boolean;
+  created_at: string;
+}
+
 // ── Food ordering ──────────────────────────────────────────────────────────
 
 export interface OpeningHour {

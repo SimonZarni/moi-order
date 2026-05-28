@@ -6,8 +6,15 @@ import { colours } from '@/shared/theme/colours';
 import { FOOD_PAYMENT_METHOD, FoodPaymentMethod } from '@/types/enums';
 import { formatPrice } from '@/shared/utils/formatCurrency';
 import { BackButton } from '@/shared/components/BackButton/BackButton';
+import { UserAddress } from '@/types/models';
 import { useCheckoutScreen } from '../hooks/useCheckoutScreen';
 import { styles } from './CheckoutScreen.styles';
+
+const LABEL_ICON: Record<string, React.ComponentProps<typeof Ionicons>['name']> = {
+  home:  'home-outline',
+  work:  'briefcase-outline',
+  other: 'location-outline',
+};
 
 const LINE_GREEN = '#00B900';
 
@@ -16,13 +23,48 @@ const PAYMENT_OPTIONS: Array<{ value: FoodPaymentMethod; label: string; iconName
   { value: FOOD_PAYMENT_METHOD.LinePay, label: 'LINE Pay', iconName: 'chatbubble-ellipses', iconColor: LINE_GREEN },
 ];
 
+function AddressSection({ address, onPress }: { address: UserAddress | null; onPress: () => void }): React.JSX.Element {
+  if (address === null) {
+    return (
+      <Pressable style={styles.addressEmpty} onPress={onPress} accessibilityRole="button" accessibilityLabel="Add delivery address">
+        <Ionicons name="location-outline" size={20} color={colours.textMuted} />
+        <Text style={styles.addressEmptyText}>Tap to add delivery address</Text>
+        <Ionicons name="chevron-forward" size={16} color={colours.textMuted} />
+      </Pressable>
+    );
+  }
+
+  const icon = LABEL_ICON[address.label] ?? 'location-outline';
+  const lines = [address.building, address.floor, address.landmark].filter(Boolean);
+
+  return (
+    <Pressable style={styles.addressCard} onPress={onPress} accessibilityRole="button" accessibilityLabel={`Change delivery address — ${address.address}`}>
+      <View style={styles.addressIconWrap}>
+        <Ionicons name={icon} size={18} color={colours.primary} />
+      </View>
+      <View style={styles.addressBody}>
+        <View style={styles.addressTopRow}>
+          <View style={styles.addressLabelChip}>
+            <Text style={styles.addressLabelText}>{address.label_display.toUpperCase()}</Text>
+          </View>
+        </View>
+        <Text style={styles.addressText} numberOfLines={2}>{address.address}</Text>
+        {lines.length > 0 && (
+          <Text style={styles.addressSecondary} numberOfLines={1}>{lines.join(', ')}</Text>
+        )}
+      </View>
+      <Text style={styles.changeBtn}>Change</Text>
+    </Pressable>
+  );
+}
+
 export function CheckoutScreen(): React.JSX.Element {
   const {
     items, restaurantName, subtotalCents,
-    paymentMethod, notes, isPlacing,
+    paymentMethod, notes, selectedAddress, isPlacing,
     setPaymentMethod, setNotes,
     handleIncrement, handleDecrement,
-    handleBack, handlePlaceOrder,
+    handleBack, handleChangeAddress, handlePlaceOrder,
   } = useCheckoutScreen();
 
   return (
@@ -75,6 +117,9 @@ export function CheckoutScreen(): React.JSX.Element {
             <Text style={styles.totalValue}>{formatPrice(subtotalCents / 100)}</Text>
           </View>
         </View>
+
+        <Text style={styles.sectionTitle}>Delivery Address</Text>
+        <AddressSection address={selectedAddress} onPress={handleChangeAddress} />
 
         <Text style={styles.sectionTitle}>Payment Method</Text>
         <View style={styles.card}>

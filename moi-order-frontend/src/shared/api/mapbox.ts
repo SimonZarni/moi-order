@@ -21,6 +21,20 @@ export interface BothDirections {
   walking: DirectionsResult | null;
 }
 
+export async function reverseGeocodeApi(lng: number, lat: number): Promise<string | null> {
+  const params = new URLSearchParams({ access_token: MAPBOX_TOKEN, language: 'en' });
+  try {
+    const res = await fetch(
+      `https://api.mapbox.com/search/geocode/v6/reverse?longitude=${lng}&latitude=${lat}&${params.toString()}`,
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return (data.features?.[0]?.properties?.full_address as string) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function geocodeQueryApi(
   query: string,
   proximity?: [number, number],

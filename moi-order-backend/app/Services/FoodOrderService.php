@@ -13,6 +13,7 @@ use App\Models\FoodOrder;
 use App\Models\MenuItem;
 use App\Models\MenuItemOptionGroup;
 use App\Models\Restaurant;
+use App\Models\UserAddress;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
@@ -134,6 +135,21 @@ class FoodOrderService
                 ]);
             }
 
+            // Resolve delivery address snapshot from saved address (user-scoped security check).
+            $deliveryAddress = $dto->deliveryAddress;
+            $deliveryLat     = $dto->deliveryLat;
+            $deliveryLng     = $dto->deliveryLng;
+
+            if ($dto->deliveryAddressId !== null) {
+                $saved = UserAddress::where('user_id', $dto->userId)
+                    ->where('id', $dto->deliveryAddressId)
+                    ->firstOrFail();
+
+                $deliveryAddress = $saved->formatted();
+                $deliveryLat     = $saved->latitude;
+                $deliveryLng     = $saved->longitude;
+            }
+
             $order = FoodOrder::create([
                 'user_id'          => $dto->userId,
                 'restaurant_id'    => $restaurant->id,
@@ -141,9 +157,9 @@ class FoodOrderService
                 'payment_method'   => $dto->paymentMethod,
                 'subtotal_cents'   => $subtotal,
                 'total_cents'      => $subtotal, // delivery fee phase 2
-                'delivery_address' => $dto->deliveryAddress,
-                'delivery_lat'     => $dto->deliveryLat,
-                'delivery_lng'     => $dto->deliveryLng,
+                'delivery_address' => $deliveryAddress,
+                'delivery_lat'     => $deliveryLat,
+                'delivery_lng'     => $deliveryLng,
                 'customer_notes'   => $dto->customerNotes,
                 'idempotency_key'  => $dto->idempotencyKey,
             ]);

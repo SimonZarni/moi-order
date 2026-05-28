@@ -88,6 +88,9 @@ import { CartOrdersScreen } from '@/features/food/screens/CartOrdersScreen';
 import { CheckoutScreen } from '@/features/food/screens/CheckoutScreen';
 import { FoodOrderDetailScreen } from '@/features/food/screens/FoodOrderDetailScreen';
 import { OrderChatScreen } from '@/features/food/screens/OrderChatScreen';
+import { AddressListScreen } from '@/features/address/screens/AddressListScreen';
+import { AddEditAddressScreen } from '@/features/address/screens/AddEditAddressScreen';
+import { MapPickerScreen } from '@/features/address/screens/MapPickerScreen';
 import { MaintenanceScreen } from '@/features/maintenance/screens/MaintenanceScreen';
 import { navigationRef } from '@/shared/navigation/navigationRef';
 
@@ -294,6 +297,9 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="Checkout"                      component={CheckoutScreen} />
       <Stack.Screen name="FoodOrderDetail"               component={FoodOrderDetailScreen} />
       <Stack.Screen name="OrderChat"                     component={OrderChatScreen} />
+      <Stack.Screen name="AddressList"                   component={AddressListScreen} />
+      <Stack.Screen name="AddEditAddress"                component={AddEditAddressScreen} />
+      <Stack.Screen name="MapPicker"                     component={MapPickerScreen} options={{ animation: 'slide_from_bottom', gestureEnabled: false }} />
       <Stack.Screen name="Maintenance"                   component={MaintenanceScreen} options={{ animation: 'fade', gestureEnabled: false }} />
     </Stack.Navigator>
     <NoticeModal isVisible={noticeVisible} onClose={dismissNotice} />

@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\DynamicSubmissionController;
 use App\Http\Controllers\Api\V1\FavoritePlaceController;
 use App\Http\Controllers\Api\V1\FoodOrderController;
 use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\UserAddressController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\SubmissionController;
@@ -94,6 +95,13 @@ Route::get('/verification/status', VerificationStatusController::class);
 // Device tokens — push notification registration
 Route::post('/device-tokens',   [DeviceTokenController::class, 'store']);
 Route::delete('/device-tokens', [DeviceTokenController::class, 'destroy']);
+
+// User delivery addresses
+Route::get('/addresses',                    [UserAddressController::class, 'index']);
+Route::post('/addresses',                   [UserAddressController::class, 'store']);
+Route::put('/addresses/{id}',               [UserAddressController::class, 'update']);
+Route::delete('/addresses/{id}',            [UserAddressController::class, 'destroy']);
+Route::post('/addresses/{id}/set-default',  [UserAddressController::class, 'setDefault']);
 
 // Food orders
 Route::get('/food-orders',                [FoodOrderController::class, 'index']);
