@@ -1,53 +1,78 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, Pressable } from 'react-native';
+import React from 'react';
+import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAnalyticsScreen } from '../hooks/useAnalyticsScreen';
+import { BarChart, type BarChartBar } from '../components/BarChart';
 import { styles } from './AnalyticsScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
 
-type Period = 'today' | 'week' | 'month';
-
-const TABS: { key: Period; label: string }[] = [
-  { key: 'today', label: 'Today' },
-  { key: 'week',  label: 'This Week' },
-  { key: 'month', label: 'This Month' },
-];
-
 export function AnalyticsScreen(): React.JSX.Element {
   const { analytics, isLoading } = useAnalyticsScreen();
-  const [period, setPeriod] = useState<Period>('today');
-
-  const maxRevenue = useMemo(() => Math.max(
-    analytics?.today.revenue_cents ?? 0,
-    analytics?.this_week.revenue_cents ?? 0,
-    analytics?.this_month.revenue_cents ?? 0,
-    1,
-  ), [analytics]);
-
-  const pending = analytics?.pending_count ?? 0;
-
-  const avgOrderValue = analytics?.this_month.order_count
-    ? Math.round((analytics.this_month.revenue_cents ?? 0) / analytics.this_month.order_count)
-    : 0;
 
   if (isLoading) {
     return <View style={styles.centered}><ActivityIndicator size="large" color={colours.primary} /></View>;
   }
 
-  const featured = period === 'today' ? analytics?.today : period === 'week' ? analytics?.this_week : analytics?.this_month;
-  const featuredLabel = TABS.find((t) => t.key === period)?.label ?? 'Today';
-  const hasData = (featured?.revenue_cents ?? 0) > 0;
+  const today     = analytics?.today;
+  const week      = analytics?.this_week;
+  const month     = analytics?.this_month;
+  const pending   = analytics?.pending_count ?? 0;
 
-  const rows = [
-    { key: 'today' as Period, label: 'Today',      stats: analytics?.today },
-    { key: 'week'  as Period, label: 'This Week',  stats: analytics?.this_week },
-    { key: 'month' as Period, label: 'This Month', stats: analytics?.this_month },
+  const avgOrderCents = (month?.order_count ?? 0) > 0
+    ? Math.round((month?.revenue_cents ?? 0) / (month?.order_count ?? 1))
+    : 0;
+
+  const revenueBars: BarChartBar[] = [
+    {
+      label:      'Today',
+      sublabel:   `${today?.order_count ?? 0} orders`,
+      value:      today?.revenue_cents ?? 0,
+      valueLabel: formatPrice(today?.revenue_cents ?? 0),
+      colour:     colours.primary + 'AA',
+    },
+    {
+      label:      'This Week',
+      sublabel:   `${week?.order_count ?? 0} orders`,
+      value:      week?.revenue_cents ?? 0,
+      valueLabel: formatPrice(week?.revenue_cents ?? 0),
+      colour:     colours.primary + 'CC',
+    },
+    {
+      label:      'This Month',
+      sublabel:   `${month?.order_count ?? 0} orders`,
+      value:      month?.revenue_cents ?? 0,
+      valueLabel: formatPrice(month?.revenue_cents ?? 0),
+      colour:     colours.primary,
+    },
+  ];
+
+  const orderBars: BarChartBar[] = [
+    {
+      label:      'Today',
+      sublabel:   formatPrice(today?.revenue_cents ?? 0),
+      value:      today?.order_count ?? 0,
+      valueLabel: String(today?.order_count ?? 0),
+      colour:     colours.success + 'AA',
+    },
+    {
+      label:      'This Week',
+      sublabel:   formatPrice(week?.revenue_cents ?? 0),
+      value:      week?.order_count ?? 0,
+      valueLabel: String(week?.order_count ?? 0),
+      colour:     colours.success + 'CC',
+    },
+    {
+      label:      'This Month',
+      sublabel:   formatPrice(month?.revenue_cents ?? 0),
+      value:      month?.order_count ?? 0,
+      valueLabel: String(month?.order_count ?? 0),
+      colour:     colours.success,
+    },
   ];
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      {/* Page header */}
       <View style={styles.pageHeader}>
         <View>
           <Text style={styles.eyebrow}>PERFORMANCE</Text>
@@ -62,95 +87,119 @@ export function AnalyticsScreen(): React.JSX.Element {
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Period tabs */}
-        <View style={styles.tabsRow}>
-          {TABS.map((t) => (
-            <Pressable
-              key={t.key}
-              style={[styles.tab, period === t.key && styles.tabActive]}
-              onPress={() => setPeriod(t.key)}
-              accessibilityRole="button"
-            >
-              <Text style={[styles.tabText, period === t.key && styles.tabTextActive]}>{t.label}</Text>
-            </Pressable>
-          ))}
+
+        {/* ── KPI row ──────────────────────────────────────────────────────── */}
+        <View style={styles.kpiRow}>
+          <StatCard
+            label="Today's Revenue"
+            value={formatPrice(today?.revenue_cents ?? 0)}
+            sub={`${today?.order_count ?? 0} orders`}
+            accent={colours.primary}
+          />
+          <StatCard
+            label="This Month"
+            value={formatPrice(month?.revenue_cents ?? 0)}
+            sub={`${month?.order_count ?? 0} orders`}
+            accent={colours.primary}
+            highlight
+          />
+          <StatCard
+            label="Avg Order Value"
+            value={formatPrice(avgOrderCents)}
+            sub="this month"
+            accent={colours.success}
+          />
+          {pending > 0 && (
+            <StatCard
+              label="Pending Now"
+              value={String(pending)}
+              sub="need attention"
+              accent={colours.warning}
+            />
+          )}
         </View>
 
-        {/* Featured revenue card */}
-        <View style={styles.featuredCard}>
-          <View style={styles.featuredHeader}>
-            <Text style={styles.featuredLabel}>{featuredLabel.toUpperCase()}'S REVENUE</Text>
-            {!hasData && (
-              <View style={styles.noDataChip}>
-                <Text style={styles.noDataChipText}>No data yet</Text>
-              </View>
-            )}
+        {/* ── Revenue chart ─────────────────────────────────────────────────── */}
+        <View style={styles.chartCard}>
+          <View style={styles.chartHeader}>
+            <View style={[styles.chartDot, { backgroundColor: colours.primary }]} />
+            <Text style={styles.chartTitle}>Revenue</Text>
+            <Text style={styles.chartSub}>Today / Week / Month</Text>
           </View>
-          <Text style={[styles.featuredAmount, !hasData && styles.featuredAmountMuted]}>
-            {formatPrice(featured?.revenue_cents ?? 0)}
-          </Text>
-          <Text style={styles.featuredOrders}>{featured?.order_count ?? 0} orders</Text>
+          <BarChart
+            bars={revenueBars}
+            trackHeight={130}
+            emptyMessage="No revenue data yet"
+          />
         </View>
 
-        {/* 4 mini stat cards */}
-        <View style={styles.miniGrid}>
-          <View style={styles.miniCard}>
-            <Text style={styles.miniLabel}>TODAY</Text>
-            <Text style={styles.miniValue}>{formatPrice(analytics?.today.revenue_cents ?? 0)}</Text>
-            <Text style={styles.miniSub}>{analytics?.today.order_count ?? 0} orders</Text>
+        {/* ── Orders chart ──────────────────────────────────────────────────── */}
+        <View style={styles.chartCard}>
+          <View style={styles.chartHeader}>
+            <View style={[styles.chartDot, { backgroundColor: colours.success }]} />
+            <Text style={styles.chartTitle}>Order Volume</Text>
+            <Text style={styles.chartSub}>Today / Week / Month</Text>
           </View>
-          <View style={styles.miniCard}>
-            <Text style={styles.miniLabel}>THIS WEEK</Text>
-            <Text style={styles.miniValue}>{formatPrice(analytics?.this_week.revenue_cents ?? 0)}</Text>
-            <Text style={styles.miniSub}>{analytics?.this_week.order_count ?? 0} orders</Text>
-          </View>
-          <View style={[styles.miniCard, (analytics?.this_month.revenue_cents ?? 0) > 0 && styles.miniCardActive]}>
-            <Text style={styles.miniLabel}>THIS MONTH</Text>
-            <Text style={[styles.miniValue, (analytics?.this_month.revenue_cents ?? 0) > 0 && styles.miniValueActive]}>
-              {formatPrice(analytics?.this_month.revenue_cents ?? 0)}
-            </Text>
-            {(analytics?.this_month.revenue_cents ?? 0) > 0 && <Text style={styles.miniActiveTag}>Active</Text>}
-            {(analytics?.this_month.revenue_cents ?? 0) === 0 && <Text style={styles.miniSub}>{analytics?.this_month.order_count ?? 0} orders</Text>}
-          </View>
-          <View style={styles.miniCard}>
-            <Text style={styles.miniLabel}>AVG ORDER VALUE</Text>
-            <Text style={[styles.miniValue, avgOrderValue > 0 && styles.miniValueActive]}>
-              {formatPrice(avgOrderValue)}
-            </Text>
-            <Text style={styles.miniSub}>{analytics?.this_month.order_count ?? 0} orders total</Text>
-          </View>
+          <BarChart
+            bars={orderBars}
+            trackHeight={130}
+            emptyMessage="No orders yet"
+          />
         </View>
 
-        {/* Revenue breakdown */}
-        <View style={styles.breakdownCard}>
-          <View style={styles.breakdownHeader}>
-            <Text style={styles.breakdownTitle}>REVENUE BREAKDOWN</Text>
-            <Text style={styles.breakdownMonth}>
-              {new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
-            </Text>
+        {/* ── Period comparison table ───────────────────────────────────────── */}
+        <View style={styles.tableCard}>
+          <View style={styles.tableHeader}>
+            <Text style={styles.tableTitle}>Period Comparison</Text>
           </View>
-          {rows.map(({ key, label, stats }, idx) => {
-            const ratio = (stats?.revenue_cents ?? 0) / maxRevenue;
-            const hasValue = (stats?.revenue_cents ?? 0) > 0;
-            return (
-              <View key={key} style={[styles.breakdownRow, idx < rows.length - 1 && styles.breakdownRowBorder]}>
-                <View style={styles.breakdownRowTop}>
-                  <Text style={styles.breakdownLabel}>{label}</Text>
-                  <Text style={[styles.breakdownAmount, hasValue && styles.breakdownAmountActive]}>
-                    {formatPrice(stats?.revenue_cents ?? 0)}
-                  </Text>
-                </View>
-                <View style={styles.breakdownBar}>
-                  {hasValue && (
-                    <View style={[styles.breakdownBarFill, { width: `${Math.round(ratio * 100)}%` }]} />
-                  )}
-                </View>
-                <Text style={styles.breakdownMeta}>{stats?.order_count ?? 0} orders</Text>
-              </View>
-            );
-          })}
+          <TableRow label="Period" valueA="Revenue" valueB="Orders" isHead />
+          <TableRow label="Today"      valueA={formatPrice(today?.revenue_cents ?? 0)}  valueB={String(today?.order_count ?? 0)} />
+          <TableRow label="This Week"  valueA={formatPrice(week?.revenue_cents ?? 0)}   valueB={String(week?.order_count ?? 0)} />
+          <TableRow label="This Month" valueA={formatPrice(month?.revenue_cents ?? 0)}  valueB={String(month?.order_count ?? 0)} isLast />
         </View>
+
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+interface StatCardProps {
+  label: string;
+  value: string;
+  sub: string;
+  accent: string;
+  highlight?: boolean;
+}
+
+function StatCard({ label, value, sub, accent, highlight = false }: StatCardProps): React.JSX.Element {
+  return (
+    <View style={[styles.statCard, highlight && styles.statCardHighlight]}>
+      <View style={[styles.statAccent, { backgroundColor: accent + '22', borderColor: accent + '44' }]}>
+        <View style={[styles.statAccentDot, { backgroundColor: accent }]} />
+      </View>
+      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={[styles.statValue, { color: highlight ? accent : colours.textOnLight }]}>{value}</Text>
+      <Text style={styles.statSub}>{sub}</Text>
+    </View>
+  );
+}
+
+interface TableRowProps {
+  label: string;
+  valueA: string;
+  valueB: string;
+  isHead?: boolean;
+  isLast?: boolean;
+}
+
+function TableRow({ label, valueA, valueB, isHead = false, isLast = false }: TableRowProps): React.JSX.Element {
+  return (
+    <View style={[styles.tableRow, !isLast && styles.tableRowBorder, isHead && styles.tableRowHead]}>
+      <Text style={[styles.tableCell, styles.tableCellLabel, isHead && styles.tableCellHead]}>{label}</Text>
+      <Text style={[styles.tableCell, isHead && styles.tableCellHead]}>{valueA}</Text>
+      <Text style={[styles.tableCell, styles.tableCellRight, isHead && styles.tableCellHead]}>{valueB}</Text>
+    </View>
   );
 }

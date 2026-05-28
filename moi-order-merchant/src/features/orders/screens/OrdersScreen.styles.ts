@@ -19,6 +19,11 @@ export const styles = StyleSheet.create({
     borderBottomColor: colours.divider,
     backgroundColor: colours.surface,
   },
+  pageHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
   pageTitle: {
     fontSize: typography.display,
     fontWeight: '800',
@@ -38,6 +43,100 @@ export const styles = StyleSheet.create({
   },
   pendingDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colours.warning },
   pendingText: { fontSize: typography.xs, fontWeight: '700', color: colours.warning },
+  exportBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: colours.primary,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 7,
+  },
+  exportBtnText: {
+    fontSize: typography.xs,
+    fontWeight: '700',
+    color: colours.backgroundDark,
+  },
+
+  // ── Date preset pills ─────────────────────────────────────────────────────────
+  presetRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xs,
+  },
+  presetPill: {
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: 5,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    backgroundColor: colours.surface,
+  },
+  presetPillActive: {
+    borderColor: colours.primary,
+    backgroundColor: colours.primaryBg,
+  },
+  presetPillText: {
+    fontSize: typography.xs,
+    fontWeight: '600',
+    color: colours.textMuted,
+  },
+  presetPillTextActive: {
+    color: colours.primaryDark,
+    fontWeight: '700',
+  },
+
+  // ── Range label (shown instead of day nav for last7 / last30) ─────────────────
+  rangeLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.xs,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colours.backgroundLight,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colours.divider,
+  },
+  rangeLabelText: {
+    fontSize: typography.sm,
+    fontWeight: '600',
+    color: colours.textMuted,
+  },
+
+  // ── Search bar ────────────────────────────────────────────────────────────────
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colours.surface,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.sm,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    paddingHorizontal: spacing.md,
+    height: 38,
+  },
+  searchIcon: { marginRight: spacing.xs },
+  searchInput: {
+    flex: 1,
+    fontSize: typography.sm,
+    color: colours.textOnLight,
+    paddingVertical: 0,
+  },
+
+  // ── Section count badge ───────────────────────────────────────────────────────
+  sectionCount: {
+    fontSize: typography.xxs,
+    fontWeight: '700',
+    color: colours.textSubtle,
+    marginLeft: 2,
+  },
 
   // ── Filter tabs ───────────────────────────────────────────────────────────────
   // tabsWrapper constrains the horizontal ScrollView height on web

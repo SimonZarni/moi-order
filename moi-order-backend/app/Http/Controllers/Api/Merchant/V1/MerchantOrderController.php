@@ -30,7 +30,8 @@ class MerchantOrderController extends Controller
             return response()->json(['data' => [], 'meta' => ['current_page' => 1, 'last_page' => 1, 'per_page' => 20, 'total' => 0]]);
         }
 
-        $orders = $this->orderService->listForRestaurant($restaurant->id);
+        $filters = $request->only(['date', 'date_from', 'date_to']);
+        $orders  = $this->orderService->listForRestaurant($restaurant->id, $filters);
 
         return response()->json([
             'data' => collect($orders->items())

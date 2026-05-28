@@ -5,12 +5,12 @@ import { typography } from '../../../shared/theme/typography';
 import { radius } from '../../../shared/theme/radius';
 
 export const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colours.surface },
-  scroll: { flex: 1 },
-  scrollContent: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xxl },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colours.surface },
+  safe:     { flex: 1, backgroundColor: colours.backgroundLight },
+  scroll:   { flex: 1 },
+  scrollContent: { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xxl },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colours.backgroundLight },
 
-  // ── Page header ──────────────────────────────────────────────────────────────
+  // ── Page header ───────────────────────────────────────────────────────────
   pageHeader: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -50,190 +50,148 @@ export const styles = StyleSheet.create({
   pendingDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colours.warning },
   pendingText: { fontSize: typography.xs, fontWeight: '700', color: colours.warning },
 
-  // ── Period tabs ───────────────────────────────────────────────────────────────
-  tabsRow: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-  },
-  tab: {
-    paddingVertical: spacing.xs + 2,
-    paddingHorizontal: spacing.md,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colours.divider,
-  },
-  tabActive: {
-    backgroundColor: colours.primary,
-    borderColor: colours.primary,
-  },
-  tabText: { fontSize: typography.xs, fontWeight: '600', color: colours.textMuted },
-  tabTextActive: { color: colours.backgroundDark, fontWeight: '800' },
-
-  // ── Featured card ─────────────────────────────────────────────────────────────
-  featuredCard: {
-    backgroundColor: colours.surfaceMuted,
-    borderRadius: radius.xl,
-    padding: spacing.lg,
-    gap: 4,
-    borderWidth: 1,
-    borderColor: colours.divider,
-    minHeight: 140,
-  },
-  featuredHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.xs,
-  },
-  featuredLabel: {
-    fontSize: typography.xxs,
-    fontWeight: '700',
-    color: colours.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  noDataChip: {
-    borderWidth: 1,
-    borderColor: colours.primary + '55',
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: 3,
-  },
-  noDataChipText: { fontSize: typography.xxs, color: colours.primary, fontWeight: '600' },
-  featuredAmount: {
-    fontSize: 48,
-    fontWeight: '700',
-    color: colours.textOnLight,
-    letterSpacing: -2,
-    lineHeight: 54,
-  },
-  featuredAmountMuted: { color: colours.textSubtle },
-  featuredOrders: { fontSize: typography.xs, color: colours.textSubtle },
-
-  // ── Mini stats grid ───────────────────────────────────────────────────────────
-  miniGrid: {
+  // ── KPI stat cards row ────────────────────────────────────────────────────
+  kpiRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
   },
-  miniCard: {
+  statCard: {
     flex: 1,
     minWidth: 140,
     backgroundColor: colours.surface,
     borderRadius: radius.xl,
     padding: spacing.md,
-    gap: 2,
     borderWidth: 1,
     borderColor: colours.divider,
+    gap: 3,
   },
-  miniCardActive: {
+  statCardHighlight: {
     borderColor: colours.primary + '55',
     backgroundColor: colours.primaryBg,
   },
-  miniLabel: {
+  statAccent: {
+    width: 28,
+    height: 28,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.xs,
+  },
+  statAccentDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  statLabel: {
     fontSize: typography.xxs,
     fontWeight: '700',
     color: colours.textSubtle,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
-    marginBottom: 4,
   },
-  miniValue: {
+  statValue: {
     fontSize: typography.xl,
-    fontWeight: '700',
-    color: colours.textMuted,
+    fontWeight: '800',
     letterSpacing: -0.5,
+    color: colours.textOnLight,
   },
-  miniValueActive: { color: colours.primary },
-  miniSub: { fontSize: typography.xxs, color: colours.textSubtle, marginTop: 2 },
-  miniActiveTag: { fontSize: typography.xxs, color: colours.primary, fontWeight: '600', marginTop: 2 },
+  statSub: {
+    fontSize: typography.xxs,
+    color: colours.textSubtle,
+    marginTop: 1,
+  },
 
-  // ── Revenue breakdown card ────────────────────────────────────────────────────
-  breakdownCard: {
+  // ── Chart card ────────────────────────────────────────────────────────────
+  chartCard: {
+    backgroundColor: colours.surface,
+    borderRadius: radius.xl,
+    padding: spacing.lg,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    // Shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  chartHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.lg,
+  },
+  chartDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  chartTitle: {
+    fontSize: typography.md,
+    fontWeight: '800',
+    color: colours.textOnLight,
+    letterSpacing: -0.3,
+  },
+  chartSub: {
+    fontSize: typography.xxs,
+    color: colours.textSubtle,
+    marginLeft: 2,
+  },
+
+  // ── Period comparison table ───────────────────────────────────────────────
+  tableCard: {
     backgroundColor: colours.surface,
     borderRadius: radius.xl,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: colours.divider,
   },
-  breakdownHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  tableHeader: {
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm + 2,
     borderBottomWidth: 1,
     borderBottomColor: colours.divider,
+    backgroundColor: colours.surfaceMuted,
   },
-  breakdownTitle: {
-    fontSize: typography.xxs,
+  tableTitle: {
+    fontSize: typography.xs,
     fontWeight: '700',
     color: colours.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 1.2,
+    letterSpacing: 1,
   },
-  breakdownMonth: { fontSize: typography.xs, color: colours.textSubtle },
-  breakdownRow: {
+  tableRow: {
+    flexDirection: 'row',
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    gap: 4,
+    paddingVertical: spacing.sm + 2,
   },
-  breakdownRowBorder: {
+  tableRowBorder: {
     borderBottomWidth: 1,
     borderBottomColor: colours.divider,
   },
-  breakdownRowTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  tableRowHead: {
+    backgroundColor: colours.backgroundLight,
   },
-  breakdownLabel: {
-    fontSize: typography.md,
-    fontWeight: '700',
+  tableCell: {
+    flex: 1,
+    fontSize: typography.sm,
     color: colours.textOnLight,
+    fontWeight: '500',
   },
-  breakdownAmount: {
-    fontSize: typography.md,
+  tableCellLabel: {
     fontWeight: '700',
     color: colours.textMuted,
-    letterSpacing: -0.3,
   },
-  breakdownAmountActive: { color: colours.primary },
-  breakdownBar: {
-    height: 4,
-    backgroundColor: colours.divider,
-    borderRadius: radius.full,
-    overflow: 'hidden',
-    marginTop: 4,
+  tableCellRight: {
+    textAlign: 'right',
   },
-  breakdownBarFill: {
-    height: '100%',
-    backgroundColor: colours.primary,
-    borderRadius: radius.full,
+  tableCellHead: {
+    fontSize: typography.xxs,
+    fontWeight: '700',
+    color: colours.textSubtle,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
   },
-  breakdownMeta: { fontSize: typography.xs, color: colours.textSubtle },
-
-  // legacy compat
-  headerRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
-  headerTitle: { fontSize: typography.display, fontWeight: '800', color: colours.textOnLight },
-  headerSub: { fontSize: typography.xs, color: colours.textMuted },
-  card: { backgroundColor: colours.surface, borderRadius: radius.xl, overflow: 'hidden', borderWidth: 1, borderColor: colours.divider },
-  cardHeader: { paddingHorizontal: spacing.md, paddingVertical: spacing.md, borderBottomWidth: 1, borderBottomColor: colours.divider },
-  cardTitle: { fontSize: typography.sm, fontWeight: '700', color: colours.textOnLight },
-  periodRow: { paddingHorizontal: spacing.md, paddingVertical: spacing.md, gap: 8 },
-  periodLastRow: { borderBottomWidth: 0 },
-  periodHeader: { flexDirection: 'row', justifyContent: 'space-between' },
-  periodLabel: { fontSize: typography.sm, fontWeight: '600', color: colours.textMuted },
-  periodRevenue: { fontSize: typography.md, fontWeight: '800', color: colours.primary },
-  periodMeta: { fontSize: typography.xs, color: colours.textSubtle },
-  summaryGrid: { flexDirection: 'row' },
-  summaryItem: { flex: 1, alignItems: 'center', paddingVertical: spacing.lg },
-  summaryItemLast: { borderRightWidth: 0 },
-  summaryValue: { fontSize: typography.xxl, fontWeight: '900', color: colours.textOnLight },
-  summaryLabel: { fontSize: typography.xs, color: colours.textMuted, textAlign: 'center' },
-  barTrack: { height: 6, backgroundColor: colours.divider, borderRadius: radius.full, overflow: 'hidden' },
-  barFill: { height: '100%', backgroundColor: colours.primary, borderRadius: radius.full },
-  barFillActive: { backgroundColor: colours.primary },
-  pendingChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colours.warning + '18', borderRadius: radius.full, paddingHorizontal: spacing.md, paddingVertical: 6, borderWidth: 1, borderColor: colours.warning + '55' },
-  pendingChipText: { fontSize: typography.xs, fontWeight: '700', color: colours.warning },
 });

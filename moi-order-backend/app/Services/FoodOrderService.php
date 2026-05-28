@@ -243,11 +243,29 @@ class FoodOrderService
             ->paginate($perPage);
     }
 
-    public function listForRestaurant(int $restaurantId, int $perPage = 30): LengthAwarePaginator
-    {
-        return FoodOrder::forRestaurant($restaurantId)
+    /**
+     * @param array{date?: string, date_from?: string, date_to?: string} $filters
+     */
+    public function listForRestaurant(
+        int   $restaurantId,
+        array $filters  = [],
+        int   $perPage  = 30,
+    ): LengthAwarePaginator {
+        $query = FoodOrder::forRestaurant($restaurantId)
             ->with(['items', 'user'])
-            ->latest()
-            ->paginate($perPage);
+            ->latest();
+
+        if (! empty($filters['date'])) {
+            // Single-day filter
+            $query->whereDate('created_at', $filters['date']);
+        } elseif (! empty($filters['date_from']) && ! empty($filters['date_to'])) {
+            // Date range filter — inclusive both ends
+            $query->whereBetween('created_at', [
+                $filters['date_from'] . ' 00:00:00',
+                $filters['date_to']   . ' 23:59:59',
+            ]);
+        }
+
+        return $query->paginate($perPage);
     }
 }

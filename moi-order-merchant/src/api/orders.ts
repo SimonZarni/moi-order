@@ -2,9 +2,11 @@ import type { FoodOrder, PaginatedResponse } from '../types/models';
 import { apiClient } from './client';
 
 export interface OrdersParams {
-  status?: string;
-  date?: string;
-  page?: number;
+  status?:    string;
+  date?:      string;   // single-day  YYYY-MM-DD
+  date_from?: string;   // range start YYYY-MM-DD
+  date_to?:   string;   // range end   YYYY-MM-DD
+  page?:      number;
 }
 
 export async function getOrders(
