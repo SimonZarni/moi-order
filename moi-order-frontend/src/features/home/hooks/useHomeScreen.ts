@@ -12,6 +12,7 @@ import { HomeCard, User } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 
 import { useHomeCards } from './useHomeCards';
+import { useFoodActiveOrder } from '@/shared/hooks/useFoodActiveOrder';
 
 export interface UseHomeScreenResult {
   user: User | null;
@@ -19,6 +20,7 @@ export interface UseHomeScreenResult {
   isRefreshing: boolean;
   cards: HomeCard[];
   isLoadingCards: boolean;
+  activeOrderCount: number;
   airportServiceTypeId: number | null;
   airportServiceId: number | null;
   airportServiceName: string | null;
@@ -43,6 +45,7 @@ export function useHomeScreen(): UseHomeScreenResult {
   } = useAirportFastTrackCard();
 
   const { cards, isLoading: isLoadingCards, refetch: refetchCards } = useHomeCards();
+  const activeOrders = useFoodActiveOrder();
 
   const handleRefresh = useCallback((): void => {
     refetch();
@@ -81,6 +84,7 @@ export function useHomeScreen(): UseHomeScreenResult {
     isRefreshing,
     cards,
     isLoadingCards,
+    activeOrderCount: activeOrders.length,
     airportServiceTypeId,
     airportServiceId,
     airportServiceName,

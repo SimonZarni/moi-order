@@ -84,6 +84,26 @@ export const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
 
+  orderBadge: {
+    position: 'absolute',
+    top: spacing.md,
+    right: spacing.md,
+    backgroundColor: '#f59e0b',
+    borderRadius: radius.full,
+    minWidth: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 5,
+  },
+
+  orderBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#fff',
+    lineHeight: 14,
+  },
+
   skeletonCardWrap: {
     flex: 1,
     borderRadius: radius.xl,

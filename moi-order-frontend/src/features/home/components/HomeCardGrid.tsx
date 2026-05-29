@@ -16,6 +16,7 @@ import { styles } from './HomeCardGrid.styles';
 
 export interface HomeCardGridProps {
   cards: HomeCard[];
+  activeOrderCount: number;
   airportServiceTypeId: number | null;
   airportServiceId: number | null;
   airportServiceName: string | null;
@@ -26,6 +27,7 @@ export interface HomeCardGridProps {
 
 export function HomeCardGrid({
   cards,
+  activeOrderCount,
   airportServiceTypeId,
   airportServiceId,
   airportServiceName,
@@ -77,9 +79,11 @@ export function HomeCardGrid({
 
       items.push(
         <View key={`row-${i}`} style={styles.gridRow}>
-          <SingleCard card={card} locale={locale} onPress={handlePress} />
+          <SingleCard card={card} locale={locale} onPress={handlePress}
+            orderCount={card.navigation_screen === 'Food' ? activeOrderCount : 0} />
           {pairedCard !== null
-            ? <SingleCard card={pairedCard} locale={locale} onPress={handlePress} />
+            ? <SingleCard card={pairedCard} locale={locale} onPress={handlePress}
+                orderCount={pairedCard.navigation_screen === 'Food' ? activeOrderCount : 0} />
             : <View style={{ flex: 1 }} />
           }
         </View>
@@ -97,10 +101,11 @@ export function HomeCardGrid({
 interface SingleCardProps {
   card: HomeCard;
   locale: string;
+  orderCount: number;
   onPress: (card: HomeCard) => void;
 }
 
-function SingleCard({ card, locale, onPress }: SingleCardProps): React.JSX.Element {
+function SingleCard({ card, locale, orderCount, onPress }: SingleCardProps): React.JSX.Element {
   const title    = locale === 'mm' ? card.title_mm    : card.title_en;
   const tag      = locale === 'mm' ? card.tag_mm      : card.tag_en;
   const subtitle = locale === 'mm' ? (card.subtitle_mm ?? card.subtitle_en) : card.subtitle_en;
@@ -118,6 +123,11 @@ function SingleCard({ card, locale, onPress }: SingleCardProps): React.JSX.Eleme
       {card.is_coming_soon && (
         <View style={styles.soonPill}>
           <Text style={styles.soonText}>SOON</Text>
+        </View>
+      )}
+      {orderCount > 0 && (
+        <View style={styles.orderBadge}>
+          <Text style={styles.orderBadgeText}>{orderCount}</Text>
         </View>
       )}
       <View style={styles.cardIcon}>

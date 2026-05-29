@@ -18,6 +18,7 @@ export function HomeScreen(): React.JSX.Element {
     isRefreshing,
     cards,
     isLoadingCards,
+    activeOrderCount,
     airportServiceTypeId,
     airportServiceId,
     airportServiceName,
@@ -84,6 +85,7 @@ export function HomeScreen(): React.JSX.Element {
           ) : (
             <HomeCardGrid
               cards={cards}
+              activeOrderCount={activeOrderCount}
               airportServiceTypeId={airportServiceTypeId}
               airportServiceId={airportServiceId}
               airportServiceName={airportServiceName}
