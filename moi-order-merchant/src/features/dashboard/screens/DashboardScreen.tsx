@@ -185,18 +185,20 @@ export function DashboardScreen({ onSelectOrder, onBellPress }: DashboardScreenP
         </View>
         <View style={styles.topBarRight}>
           <Text style={styles.topBarDate}>{dateLabel}</Text>
-          {pending > 0 && (
-            <View style={styles.pendingPill}>
-              <View style={styles.pendingDot} />
-              <Text style={styles.pendingText}>{pending} pending</Text>
-            </View>
-          )}
-          {onBellPress !== undefined && (
-            <NotificationBell
-              onPress={onBellPress}
-              iconColour={colours.textMuted}
-            />
-          )}
+          <View style={styles.topBarActions}>
+            {pending > 0 && (
+              <View style={styles.pendingPill}>
+                <View style={styles.pendingDot} />
+                <Text style={styles.pendingText}>{pending} pending</Text>
+              </View>
+            )}
+            {onBellPress !== undefined && (
+              <NotificationBell
+                onPress={onBellPress}
+                iconColour={colours.textMuted}
+              />
+            )}
+          </View>
         </View>
       </View>
 

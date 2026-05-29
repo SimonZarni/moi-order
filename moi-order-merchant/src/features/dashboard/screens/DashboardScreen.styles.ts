@@ -37,6 +37,11 @@ export const styles = StyleSheet.create({
     alignItems: 'flex-end',
     gap: spacing.xs,
   },
+  topBarActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
   topBarDate: {
     fontSize: typography.xs,
     color: colours.textMuted,

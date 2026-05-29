@@ -49,6 +49,8 @@ export function usePushNotifications(): void {
   const responseListenerRef = useRef<Notifications.Subscription | null>(null);
 
   useEffect(() => {
+    // Push notification APIs are native-only — expo-notifications has no web support.
+    if (Platform.OS === 'web') return;
     if (userId === null) return;
 
     void registerForPush();
