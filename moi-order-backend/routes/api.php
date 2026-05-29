@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\Webhook\StripeWebhookController;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -56,6 +57,14 @@ Route::prefix('merchant/v1')->middleware(['auth:sanctum', 'abilities:merchant', 
 Route::prefix('merchant/v1')->middleware(['auth:sanctum', 'abilities:merchant', 'merchant.auth', 'user.not_suspended', 'throttle:api'])->group(
     base_path('routes/api/merchant_v1.php')
 );
+
+// Merchant WebSocket channel auth — Pusher/Reverb calls this to verify private-channel subscriptions.
+// Endpoint: POST /api/merchant/v1/broadcasting/auth
+// See routes/channels.php for per-channel authorization logic.
+Broadcast::routes([
+    'prefix'     => 'api/merchant/v1',
+    'middleware' => ['auth:sanctum', 'abilities:merchant', 'merchant.auth', 'user.not_suspended'],
+]);
 
 // Stripe webhook — no auth:sanctum; Stripe-Signature header IS the authentication.
 // intentionally public

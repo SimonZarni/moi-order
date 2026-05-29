@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Principle: SRP — HTTP layer only; SQL aggregates delegated to private helper.
+ * Principle: SRP — HTTP layer only; SQL aggregates delegated to private helpers.
  * Principle: Security — all queries scoped to the authenticated merchant's restaurant.
  */
 class MerchantAnalyticsController extends Controller
@@ -49,6 +49,35 @@ class MerchantAnalyticsController extends Controller
                     ->count(),
             ],
         ]);
+    }
+
+    /**
+     * GET /api/merchant/v1/analytics/chart?period=today|week|month
+     *
+     * Returns time-series data for the chart: hourly (today) or daily (week/month).
+     * Each point: { label, revenue_cents, order_count }.
+     */
+    public function chart(Request $request): JsonResponse
+    {
+        $restaurant = $request->user()->restaurant()->first();
+
+        if ($restaurant === null) {
+            return response()->json(['data' => ['period' => 'today', 'points' => []]]);
+        }
+
+        $period   = in_array($request->query('period'), ['today', 'week', 'month'], true)
+            ? $request->query('period')
+            : 'today';
+        $rid      = $restaurant->id;
+        $excluded = [FoodOrderStatus::Cancelled->value];
+
+        $points = match ($period) {
+            'week'  => $this->weeklyPoints($rid, $excluded),
+            'month' => $this->monthlyPoints($rid, $excluded),
+            default => $this->hourlyPoints($rid, $excluded),
+        };
+
+        return response()->json(['data' => ['period' => $period, 'points' => $points]]);
     }
 
     /**
@@ -108,6 +137,90 @@ class MerchantAnalyticsController extends Controller
                 'top_customers' => $topCustomers,
             ],
         ]);
+    }
+
+    // ── Private helpers ───────────────────────────────────────────────────────
+
+    /** Hourly breakdown for today (24 points, hour 0–23). */
+    /** @param string[] $excluded */
+    private function hourlyPoints(int $restaurantId, array $excluded): array
+    {
+        $date = now()->format('Y-m-d');
+
+        $rows = FoodOrder::forRestaurant($restaurantId)
+            ->whereNotIn('status', $excluded)
+            ->whereDate('created_at', $date)
+            ->selectRaw('HOUR(created_at) AS hr,
+                         COUNT(*) AS order_count,
+                         COALESCE(SUM(total_cents), 0) AS revenue_cents')
+            ->groupBy('hr')
+            ->get()
+            ->keyBy('hr');
+
+        return collect(range(0, 23))->map(function (int $hour) use ($rows): array {
+            $row = $rows->get($hour);
+            return [
+                'label'         => sprintf('%02d:00', $hour),
+                'revenue_cents' => (int) ($row?->revenue_cents ?? 0),
+                'order_count'   => (int) ($row?->order_count   ?? 0),
+            ];
+        })->values()->all();
+    }
+
+    /** Daily breakdown for the last 7 days (7 points). */
+    /** @param string[] $excluded */
+    private function weeklyPoints(int $restaurantId, array $excluded): array
+    {
+        $from = now()->subDays(6)->startOfDay();
+
+        $rows = FoodOrder::forRestaurant($restaurantId)
+            ->whereNotIn('status', $excluded)
+            ->where('created_at', '>=', $from)
+            ->selectRaw('DATE(created_at) AS day,
+                         COUNT(*) AS order_count,
+                         COALESCE(SUM(total_cents), 0) AS revenue_cents')
+            ->groupBy('day')
+            ->get()
+            ->keyBy('day');
+
+        return collect(range(0, 6))->map(function (int $i) use ($rows, $from): array {
+            $day = $from->copy()->addDays($i);
+            $key = $day->format('Y-m-d');
+            $row = $rows->get($key);
+            return [
+                'label'         => $day->format('D'),   // Mon, Tue, …
+                'revenue_cents' => (int) ($row?->revenue_cents ?? 0),
+                'order_count'   => (int) ($row?->order_count   ?? 0),
+            ];
+        })->values()->all();
+    }
+
+    /** Daily breakdown for the last 30 days (30 points). */
+    /** @param string[] $excluded */
+    private function monthlyPoints(int $restaurantId, array $excluded): array
+    {
+        $from = now()->subDays(29)->startOfDay();
+
+        $rows = FoodOrder::forRestaurant($restaurantId)
+            ->whereNotIn('status', $excluded)
+            ->where('created_at', '>=', $from)
+            ->selectRaw('DATE(created_at) AS day,
+                         COUNT(*) AS order_count,
+                         COALESCE(SUM(total_cents), 0) AS revenue_cents')
+            ->groupBy('day')
+            ->get()
+            ->keyBy('day');
+
+        return collect(range(0, 29))->map(function (int $i) use ($rows, $from): array {
+            $day = $from->copy()->addDays($i);
+            $key = $day->format('Y-m-d');
+            $row = $rows->get($key);
+            return [
+                'label'         => $day->format('j M'),  // 1 May, 2 May, …
+                'revenue_cents' => (int) ($row?->revenue_cents ?? 0),
+                'order_count'   => (int) ($row?->order_count   ?? 0),
+            ];
+        })->values()->all();
     }
 
     /** @param string[] $excluded */

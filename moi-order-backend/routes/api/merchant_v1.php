@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\Merchant\V1\KycController;
 use App\Http\Controllers\Api\V1\DeviceTokenController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantAnalyticsController;
+use App\Http\Controllers\Api\Merchant\V1\MerchantNotificationController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantOrderChatController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantOrderController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantRestaurantController;
@@ -31,8 +32,9 @@ Route::patch('/menu/items/{id}',  [MenuItemController::class, 'update']);
 Route::delete('/menu/items/{id}', [MenuItemController::class, 'destroy']);
 
 // ── Analytics ─────────────────────────────────────────────────────────────────
-Route::get('/analytics',      [MerchantAnalyticsController::class, 'index']);
-Route::get('/analytics/tops', [MerchantAnalyticsController::class, 'tops']);
+Route::get('/analytics',       [MerchantAnalyticsController::class, 'index']);
+Route::get('/analytics/chart', [MerchantAnalyticsController::class, 'chart']);
+Route::get('/analytics/tops',  [MerchantAnalyticsController::class, 'tops']);
 
 // ── Orders ────────────────────────────────────────────────────────────────────
 Route::get('/orders',                        [MerchantOrderController::class, 'index']);
@@ -44,6 +46,12 @@ Route::patch('/orders/{id}/status',          [MerchantOrderController::class, 'u
 // ── Order chat ────────────────────────────────────────────────────────────────
 Route::get('/orders/{id}/chat',   [MerchantOrderChatController::class, 'index']);
 Route::post('/orders/{id}/chat',  [MerchantOrderChatController::class, 'store']);
+
+// ── In-app notifications ──────────────────────────────────────────────────────
+Route::get('/notifications',              [MerchantNotificationController::class, 'index']);
+Route::get('/notifications/unread-count', [MerchantNotificationController::class, 'unreadCount']);
+Route::post('/notifications/read-all',    [MerchantNotificationController::class, 'markAllRead']);
+Route::post('/notifications/{id}/read',   [MerchantNotificationController::class, 'markRead']);
 
 // ── KYC resubmission (name/address change) ────────────────────────────────────
 Route::post('/kyc/resubmit',                             [KycController::class, 'resubmit']);
