@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useDashboardScreen } from '../hooks/useDashboardScreen';
 import { OrderCard } from '../../orders/components/OrderCard';
+import { NotificationBell } from '../../notifications/components/NotificationBell';
 import { Skeleton } from '../../../shared/components/Skeleton';
 import { styles } from './DashboardScreen.styles';
 import { colours } from '../../../shared/theme/colours';
@@ -21,9 +22,11 @@ const TOP_PERIOD_TABS: { key: TopPeriod; label: string }[] = [
 
 interface DashboardScreenProps {
   onSelectOrder?: (orderId: number) => void;
+  /** Called when the notification bell is pressed (mobile nav or web sidebar navigate). */
+  onBellPress?: () => void;
 }
 
-export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.JSX.Element {
+export function DashboardScreen({ onSelectOrder, onBellPress }: DashboardScreenProps): React.JSX.Element {
   const {
     analytics, recentOrders, topData, topPeriod,
     isLoading, handleUpdateStatus, handleTopPeriodChange,
@@ -187,6 +190,12 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
               <View style={styles.pendingDot} />
               <Text style={styles.pendingText}>{pending} pending</Text>
             </View>
+          )}
+          {onBellPress !== undefined && (
+            <NotificationBell
+              onPress={onBellPress}
+              iconColour={colours.textMuted}
+            />
           )}
         </View>
       </View>

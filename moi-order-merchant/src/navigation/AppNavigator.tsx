@@ -13,6 +13,7 @@ import { AuthNavigator } from './AuthNavigator';
 import { KycNavigator } from './KycNavigator';
 import { MerchantTabsNavigator } from './MerchantTabsNavigator';
 import { usePushNotifications } from '../features/notifications/hooks/usePushNotifications';
+import { useMerchantWebSocket } from '../shared/hooks/useMerchantWebSocket';
 import { KYC_STATUS } from '../types/enums';
 import type { RootStackParamList } from '../types/navigation';
 
@@ -20,6 +21,15 @@ const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 function PushNotificationManager(): null {
   usePushNotifications();
+  return null;
+}
+
+/**
+ * Holds the Pusher WebSocket connection for the lifetime of the authenticated session.
+ * Principle: SRP — manages connection lifecycle only; renders nothing.
+ */
+function WebSocketManager(): null {
+  useMerchantWebSocket();
   return null;
 }
 
@@ -68,6 +78,7 @@ export function AppNavigator(): React.JSX.Element {
   return (
     <NavigationContainer>
       {!!token && !needsKyc && <PushNotificationManager />}
+      {!!token && !needsKyc && <WebSocketManager />}
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
         {!token ? (
           <RootStack.Screen name="Auth" component={AuthNavigator} />

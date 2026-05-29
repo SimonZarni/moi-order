@@ -1,3 +1,5 @@
+import type { AnalyticsPeriod } from '../../types/models';
+
 export const QUERY_KEYS = {
   ME: ['me'] as const,
   KYC_APPLICATION: ['kyc', 'application'] as const,
@@ -7,5 +9,11 @@ export const QUERY_KEYS = {
   RESTAURANT: ['restaurant'] as const,
   ANALYTICS: ['analytics'] as const,
   TOP_DATA: (period: string) => ['analytics', 'tops', period] as const,
+  ANALYTICS_CHART: (period: Exclude<AnalyticsPeriod, 'all'>) =>
+    ['analytics', 'chart', period] as const,
   ORDER_CHAT: (orderId: number) => ['orders', orderId, 'chat'] as const,
+  NOTIFICATIONS: {
+    LIST: ['notifications'] as const,
+    UNREAD_COUNT: ['notifications', 'unread-count'] as const,
+  },
 } as const;

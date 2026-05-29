@@ -18,6 +18,8 @@ import { OrderChatContent, OrderChatScreen } from '../features/chat/screens/Orde
 import { MenuScreen } from '../features/menu/screens/MenuScreen';
 import { RestaurantScreen } from '../features/restaurant/screens/RestaurantScreen';
 import { AnalyticsScreen } from '../features/analytics/screens/AnalyticsScreen';
+import { NotificationsScreen } from '../features/notifications/screens/NotificationsScreen';
+import { NotificationBell } from '../features/notifications/components/NotificationBell';
 import { WebSidebar } from '../shared/components/WebSidebar/WebSidebar';
 import { colours } from '../shared/theme/colours';
 import { spacing } from '../shared/theme/spacing';
@@ -34,10 +36,11 @@ const MobileStack = createNativeStackNavigator<MerchantStackParamList>();
 type TabName = keyof MerchantTabParamList;
 
 const TAB_ICONS: Record<TabName, { focused: keyof typeof Ionicons.glyphMap; unfocused: keyof typeof Ionicons.glyphMap }> = {
-  Dashboard:  { focused: 'grid',       unfocused: 'grid-outline' },
-  Orders:     { focused: 'receipt',    unfocused: 'receipt-outline' },
-  Menu:       { focused: 'restaurant', unfocused: 'restaurant-outline' },
-  Restaurant: { focused: 'storefront', unfocused: 'storefront-outline' },
+  Dashboard:     { focused: 'grid',              unfocused: 'grid-outline' },
+  Orders:        { focused: 'receipt',           unfocused: 'receipt-outline' },
+  Menu:          { focused: 'restaurant',        unfocused: 'restaurant-outline' },
+  Restaurant:    { focused: 'storefront',        unfocused: 'storefront-outline' },
+  Notifications: { focused: 'notifications',     unfocused: 'notifications-outline' },
 };
 
 function DashboardTab(): React.JSX.Element {
@@ -46,6 +49,8 @@ function DashboardTab(): React.JSX.Element {
     (orderId: number) => navigation.navigate('OrderDetail', { orderId }),
     [navigation],
   );
+  // On mobile, the bell navigates to the Notifications tab via the tab navigator.
+  // We pass undefined so the bell doesn't render (the tab badge already shows count).
   return <DashboardScreen onSelectOrder={handleSelectOrder} />;
 }
 
@@ -82,10 +87,18 @@ function MobileTabNavigator(): React.JSX.Element {
         },
       })}
     >
-      <Tab.Screen name="Dashboard"  component={DashboardTab}    options={{ title: 'Dashboard' }} />
-      <Tab.Screen name="Orders"     component={OrdersTab}       options={{ title: 'Orders' }} />
-      <Tab.Screen name="Menu"       component={MenuScreen}      options={{ title: 'Menu' }} />
-      <Tab.Screen name="Restaurant" component={RestaurantScreen} options={{ title: 'Restaurant' }} />
+      <Tab.Screen name="Dashboard"     component={DashboardTab}        options={{ title: 'Dashboard' }} />
+      <Tab.Screen name="Orders"        component={OrdersTab}           options={{ title: 'Orders' }} />
+      <Tab.Screen name="Menu"          component={MenuScreen}          options={{ title: 'Menu' }} />
+      <Tab.Screen name="Restaurant"    component={RestaurantScreen}    options={{ title: 'Restaurant' }} />
+      <Tab.Screen
+        name="Notifications"
+        component={NotificationsScreen}
+        options={{
+          title: 'Inbox',
+          tabBarBadge: undefined,   // badge driven by NotificationBell internally
+        }}
+      />
     </Tab.Navigator>
   );
 }
@@ -164,7 +177,12 @@ function WebMerchantLayout(): React.JSX.Element {
     }
     switch (activeScreen) {
       case 'Dashboard':
-        return <DashboardScreen onSelectOrder={handleSelectOrder} />;
+        return (
+          <DashboardScreen
+            onSelectOrder={handleSelectOrder}
+            onBellPress={() => handleNavigate('Notifications')}
+          />
+        );
       case 'Orders':
         return <OrdersScreen onSelectOrder={handleSelectOrder} />;
       case 'Menu':
@@ -173,6 +191,8 @@ function WebMerchantLayout(): React.JSX.Element {
         return <RestaurantScreen />;
       case 'Analytics':
         return <AnalyticsScreen />;
+      case 'Notifications':
+        return <NotificationsScreen />;
     }
   };
 
@@ -199,7 +219,7 @@ function WebMerchantLayout(): React.JSX.Element {
       )}
 
       <View style={[webStyles.content, !isDesktop && webStyles.contentMobile]}>
-        {/* Mobile top bar with hamburger — only shown on narrow viewports */}
+        {/* Mobile top bar with hamburger + bell — only shown on narrow viewports */}
         {!isDesktop && (
           <View style={webStyles.mobileTopBar}>
             <Pressable
@@ -211,6 +231,12 @@ function WebMerchantLayout(): React.JSX.Element {
               <Ionicons name="menu-outline" size={24} color={colours.textOnDark} />
             </Pressable>
             <Text style={webStyles.mobileTopBarTitle}>Moi Order</Text>
+            <View style={{ marginLeft: 'auto' as unknown as number }}>
+              <NotificationBell
+                onPress={() => handleNavigate('Notifications')}
+                iconColour={colours.textOnDark}
+              />
+            </View>
           </View>
         )}
         <View style={webStyles.contentInner}>
@@ -241,17 +267,14 @@ const webStyles = StyleSheet.create({
     marginLeft: WEB_SIDEBAR_WIDTH,
     backgroundColor: colours.backgroundLight,
   },
-  // On narrow viewports the sidebar overlays content — no left margin needed
   contentMobile: {
     marginLeft: 0,
   },
-  // Constrains content to readable width on very wide monitors
   contentInner: {
     flex: 1,
     maxWidth: 1280,
     alignSelf: 'stretch' as const,
   },
-  // Semi-transparent backdrop behind mobile sidebar
   backdrop: {
     position: 'absolute' as const,
     top: 0,
@@ -261,7 +284,6 @@ const webStyles = StyleSheet.create({
     backgroundColor: colours.overlay,
     zIndex: 5,
   },
-  // Top bar shown only on narrow (non-desktop) web viewports
   mobileTopBar: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,

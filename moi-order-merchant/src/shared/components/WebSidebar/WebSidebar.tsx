@@ -3,6 +3,7 @@ import { View, Text, Pressable, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './WebSidebar.styles';
 import { colours } from '../../theme/colours';
+import { NotificationBell } from '../../../features/notifications/components/NotificationBell';
 import type { WebScreen } from '../../../types/navigation';
 
 interface NavItem {
@@ -14,11 +15,12 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard',  icon: 'grid-outline',       activeIcon: 'grid',       screen: 'Dashboard',  section: 'MAIN' },
-  { label: 'Orders',     icon: 'receipt-outline',     activeIcon: 'receipt',    screen: 'Orders',     section: 'MAIN' },
-  { label: 'Menu',       icon: 'restaurant-outline',  activeIcon: 'restaurant', screen: 'Menu',       section: 'MANAGE' },
-  { label: 'Restaurant', icon: 'storefront-outline',  activeIcon: 'storefront', screen: 'Restaurant', section: 'MANAGE' },
-  { label: 'Analytics',  icon: 'bar-chart-outline',   activeIcon: 'bar-chart',  screen: 'Analytics',  section: 'INSIGHTS' },
+  { label: 'Dashboard',     icon: 'grid-outline',          activeIcon: 'grid',              screen: 'Dashboard',     section: 'MAIN' },
+  { label: 'Orders',        icon: 'receipt-outline',        activeIcon: 'receipt',           screen: 'Orders',        section: 'MAIN' },
+  { label: 'Notifications', icon: 'notifications-outline',  activeIcon: 'notifications',     screen: 'Notifications', section: 'MAIN' },
+  { label: 'Menu',          icon: 'restaurant-outline',     activeIcon: 'restaurant',        screen: 'Menu',          section: 'MANAGE' },
+  { label: 'Restaurant',    icon: 'storefront-outline',     activeIcon: 'storefront',        screen: 'Restaurant',    section: 'MANAGE' },
+  { label: 'Analytics',     icon: 'bar-chart-outline',      activeIcon: 'bar-chart',         screen: 'Analytics',     section: 'INSIGHTS' },
 ];
 
 interface WebSidebarProps {
@@ -38,7 +40,7 @@ export function WebSidebar({ activeScreen, onNavigate, onLogout, pendingCount = 
 
   return (
     <View style={styles.sidebar}>
-      {/* Logo */}
+      {/* Logo + notification bell row */}
       <View style={styles.logoContainer}>
         <View style={styles.logoMark}>
           <Image
@@ -49,10 +51,15 @@ export function WebSidebar({ activeScreen, onNavigate, onLogout, pendingCount = 
             accessibilityLabel="Moi Order logo"
           />
         </View>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={styles.logoText}>Moi Order</Text>
           <Text style={styles.logoSubText}>Merchant Portal</Text>
         </View>
+        {/* Bell in the sidebar header — navigates to Notifications screen */}
+        <NotificationBell
+          onPress={handleNavPress('Notifications')}
+          iconColour="rgba(255,255,255,0.55)"
+        />
       </View>
 
       <View style={styles.navItems}>

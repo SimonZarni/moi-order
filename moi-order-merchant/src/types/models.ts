@@ -169,6 +169,37 @@ export interface TopData {
   top_customers: TopCustomer[];
 }
 
+// ── Analytics chart (time-series) ─────────────────────────────────────────────
+
+export interface AnalyticsChartPoint {
+  label: string;
+  revenue_cents: number;
+  order_count: number;
+}
+
+export type AnalyticsPeriod = 'all' | 'today' | 'week' | 'month';
+
+export interface AnalyticsChartData {
+  period: 'today' | 'week' | 'month';
+  points: AnalyticsChartPoint[];
+}
+
+// ── Merchant in-app notifications ─────────────────────────────────────────────
+
+export type MerchantNotificationType = 'new_order' | 'order_status' | 'system';
+
+export interface MerchantNotification {
+  id: number;
+  type: MerchantNotificationType;
+  title: string;
+  body: string;
+  order_id: number | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+// ── Pagination ────────────────────────────────────────────────────────────────
+
 export interface PaginationMeta {
   current_page: number;
   last_page: number;

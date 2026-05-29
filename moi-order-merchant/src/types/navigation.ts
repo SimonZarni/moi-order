@@ -14,6 +14,7 @@ export type MerchantTabParamList = {
   Orders: undefined;
   Menu: undefined;
   Restaurant: undefined;
+  Notifications: undefined;
 };
 
 export type MerchantStackParamList = {
@@ -28,4 +29,10 @@ export type RootStackParamList = {
   Merchant: undefined;
 };
 
-export type WebScreen = 'Dashboard' | 'Orders' | 'Menu' | 'Restaurant' | 'Analytics';
+export type WebScreen =
+  | 'Dashboard'
+  | 'Orders'
+  | 'Menu'
+  | 'Restaurant'
+  | 'Analytics'
+  | 'Notifications';
