@@ -108,11 +108,19 @@ class AuthService
      */
     public function register(RegisterDTO $dto): array
     {
-        $user = User::create([
-            'name'     => $dto->name,
-            'email'    => $dto->email,
-            'password' => $dto->password,
-        ]);
+        $existing = User::withTrashed()->where('email', $dto->email)->first();
+
+        if ($existing?->trashed()) {
+            $existing->restore();
+            $existing->update(['name' => $dto->name, 'password' => $dto->password]);
+            $user = $existing->fresh();
+        } else {
+            $user = User::create([
+                'name'     => $dto->name,
+                'email'    => $dto->email,
+                'password' => $dto->password,
+            ]);
+        }
 
         $token = $user->createToken('user-auth', ['user'], now()->addDays(30))->plainTextToken;
 
