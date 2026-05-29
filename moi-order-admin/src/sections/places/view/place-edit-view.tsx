@@ -63,19 +63,44 @@ export function PlaceEditView() {
   const [searchParams] = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const idsParam = searchParams.get('ids');
-  const idxParam = searchParams.get('idx');
-  const navIds = idsParam ? idsParam.split(',').map(Number) : [];
-  const navIdx = idxParam !== null ? Number(idxParam) : -1;
-  const prevId = navIdx > 0 ? navIds[navIdx - 1] : null;
-  const nextId = navIdx >= 0 && navIdx < navIds.length - 1 ? navIds[navIdx + 1] : null;
+  const overallIdx = searchParams.get('idx') !== null ? Number(searchParams.get('idx')) : -1;
+  const navTotal   = searchParams.get('total') !== null ? Number(searchParams.get('total')) : -1;
+  const navSearch  = searchParams.get('search') ?? undefined;
+  const navStatus  = searchParams.get('status') ?? undefined;
 
-  const navigateTo = useCallback(
-    (targetId: number, targetIdx: number) => {
-      const qs = idsParam ? `?ids=${idsParam}&idx=${targetIdx}` : '';
-      router.push(`/places/${targetId}/edit${qs}`);
+  const hasPrev = overallIdx > 0;
+  const hasNext = overallIdx >= 0 && overallIdx < navTotal - 1;
+
+  const [navLoading, setNavLoading] = useState<'prev' | 'next' | null>(null);
+
+  const NAV_PER_PAGE = 100;
+
+  const navigateToAdjacent = useCallback(
+    async (direction: 'prev' | 'next') => {
+      const targetIdx = direction === 'prev' ? overallIdx - 1 : overallIdx + 1;
+      setNavLoading(direction);
+      try {
+        const targetPage = Math.floor(targetIdx / NAV_PER_PAGE) + 1;
+        const posInPage  = targetIdx % NAV_PER_PAGE;
+        const { data } = await placesApi.list({
+          page: targetPage,
+          per_page: NAV_PER_PAGE,
+          search: navSearch,
+          status: navStatus,
+        });
+        const target = data[posInPage];
+        if (!target) return;
+        const params = new URLSearchParams();
+        params.set('idx', String(targetIdx));
+        params.set('total', String(navTotal));
+        if (navSearch) params.set('search', navSearch);
+        if (navStatus) params.set('status', navStatus);
+        router.push(`/places/${target.id}/edit?${params.toString()}`);
+      } finally {
+        setNavLoading(null);
+      }
     },
-    [idsParam, router]
+    [overallIdx, navTotal, navSearch, navStatus, router]
   );
 
   const [form, setForm] = useState<FormState | null>(null);
@@ -212,19 +237,22 @@ export function PlaceEditView() {
           <Typography variant="h4">Edit Place</Typography>
           <Typography variant="body2" color="text.secondary">ID: {id}</Typography>
         </Box>
-        {navIds.length > 0 && (
+        {overallIdx >= 0 && navTotal > 0 && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Typography variant="caption" color="text.secondary" sx={{ mr: 0.5 }}>
-              {navIdx + 1} / {navIds.length}
+              {overallIdx + 1} / {navTotal}
             </Typography>
             <Tooltip title="Previous place">
               <span>
                 <IconButton
                   size="small"
-                  disabled={prevId === null}
-                  onClick={() => prevId !== null && navigateTo(prevId, navIdx - 1)}
+                  disabled={!hasPrev || navLoading !== null}
+                  onClick={() => navigateToAdjacent('prev')}
                 >
-                  <Iconify icon="eva:arrow-ios-forward-fill" width={18} sx={{ transform: 'rotate(180deg)' }} />
+                  {navLoading === 'prev'
+                    ? <CircularProgress size={14} />
+                    : <Iconify icon="eva:arrow-ios-forward-fill" width={18} sx={{ transform: 'rotate(180deg)' }} />
+                  }
                 </IconButton>
               </span>
             </Tooltip>
@@ -232,10 +260,13 @@ export function PlaceEditView() {
               <span>
                 <IconButton
                   size="small"
-                  disabled={nextId === null}
-                  onClick={() => nextId !== null && navigateTo(nextId, navIdx + 1)}
+                  disabled={!hasNext || navLoading !== null}
+                  onClick={() => navigateToAdjacent('next')}
                 >
-                  <Iconify icon="eva:arrow-ios-forward-fill" width={18} />
+                  {navLoading === 'next'
+                    ? <CircularProgress size={14} />
+                    : <Iconify icon="eva:arrow-ios-forward-fill" width={18} />
+                  }
                 </IconButton>
               </span>
             </Tooltip>

@@ -170,11 +170,16 @@ export function PlacesView() {
 
   const handleEditPlace = useCallback(
     (placeId: number) => {
-      const idx = places.findIndex((p) => p.id === placeId);
-      const ids = places.map((p) => p.id).join(',');
-      router.push(`/places/${placeId}/edit?ids=${ids}&idx=${idx}`);
+      const localIdx = places.findIndex((p) => p.id === placeId);
+      const overallIdx = page * rowsPerPage + localIdx;
+      const params = new URLSearchParams();
+      params.set('idx', String(overallIdx));
+      params.set('total', String(total));
+      if (filterName) params.set('search', filterName);
+      if (filterStatus !== 'all') params.set('status', filterStatus);
+      router.push(`/places/${placeId}/edit?${params.toString()}`);
     },
-    [places, router]
+    [places, router, page, rowsPerPage, total, filterName, filterStatus]
   );
 
   const fetchPlaces = useCallback(() => {
