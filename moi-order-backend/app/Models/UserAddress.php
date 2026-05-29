@@ -21,6 +21,7 @@ class UserAddress extends Model
         'building',
         'floor',
         'landmark',
+        'province',
         'latitude',
         'longitude',
         'is_default',
@@ -46,6 +47,7 @@ class UserAddress extends Model
             $this->building,
             $this->floor,
             $this->landmark,
+            $this->province,
         ]);
 
         return implode(', ', $parts);

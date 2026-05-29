@@ -7,6 +7,7 @@ const DEFAULT_VALUES: AddressFormValues = {
   building:  '',
   floor:     '',
   landmark:  '',
+  province:  '',
   latitude:  null,
   longitude: null,
   isDefault: false,

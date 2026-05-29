@@ -4,9 +4,10 @@ import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { Restaurant } from '@/types/models';
 
 export interface UseRestaurantDetailDataResult {
-  restaurant: Restaurant | undefined;
-  isLoading: boolean;
-  isError: boolean;
+  restaurant:  Restaurant | undefined;
+  isLoading:   boolean;
+  isError:     boolean;
+  refetch:     () => void;
 }
 
 export function useRestaurantDetailData(id: number): UseRestaurantDetailDataResult {
@@ -20,5 +21,6 @@ export function useRestaurantDetailData(id: number): UseRestaurantDetailDataResu
     restaurant: query.data,
     isLoading:  query.isLoading,
     isError:    query.isError,
+    refetch:    query.refetch,
   };
 }

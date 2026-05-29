@@ -20,6 +20,7 @@ class UserAddressResource extends JsonResource
             'building'      => $this->building,
             'floor'         => $this->floor,
             'landmark'      => $this->landmark,
+            'province'      => $this->province,
             'latitude'      => $this->latitude,
             'longitude'     => $this->longitude,
             'is_default'    => $this->is_default,

@@ -288,6 +288,7 @@ export interface UserAddress {
   building: string | null;
   floor: string | null;
   landmark: string | null;
+  province: string | null;
   latitude: number | null;
   longitude: number | null;
   is_default: boolean;

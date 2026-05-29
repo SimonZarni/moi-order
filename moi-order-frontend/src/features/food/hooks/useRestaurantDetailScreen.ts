@@ -22,7 +22,9 @@ export interface UseRestaurantDetailScreenResult {
   cartItemCount:    number;
   cartTotalCents:   number;
   getQuantity:      (menuItemId: number) => number;
+  isRefreshing:         boolean;
   handleBack:           () => void;
+  handleRefresh:        () => void;
   handleTabPress:       (index: number) => void;
   handleTabBarLayout:   (height: number) => void;
   handleSectionLayout:  (index: number, y: number) => void;
@@ -60,7 +62,8 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
   const { restaurantId } = useRoute<DetailRoute>().params;
   const s              = useStrings();
 
-  const { restaurant, isLoading, isError } = useRestaurantDetailData(restaurantId);
+  const { restaurant, isLoading, isError, refetch } = useRestaurantDetailData(restaurantId);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const addItem   = useCartStore((s) => s.addItem);
   const increment = useCartStore((s) => s.increment);
@@ -113,8 +116,13 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
     setActiveTabIndex(index);
   }, []);
 
-  const handleBack      = useCallback(() => navigation.goBack(), [navigation]);
+  const handleBack    = useCallback(() => navigation.goBack(), [navigation]);
   const handleCartPress = useCallback(() => navigation.navigate('Checkout'), [navigation]);
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try { await refetch(); } finally { setIsRefreshing(false); }
+  }, [refetch]);
 
   const handleItemPress = useCallback(
     (item: MenuItem): void => {
@@ -157,7 +165,9 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
     cartItemCount:  cartCount,
     cartTotalCents: cartTotal,
     getQuantity:    getQty,
+    isRefreshing,
     handleBack,
+    handleRefresh,
     handleTabPress,
     handleTabBarLayout,
     handleSectionLayout,

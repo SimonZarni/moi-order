@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,7 +24,8 @@ export function RestaurantDetailScreen(): React.JSX.Element {
   const {
     restaurant, isLoading, isError, sortedCategories, activeTabIndex, scrollRef,
     cartItemCount, cartTotalCents, getQuantity,
-    handleBack, handleTabPress, handleTabBarLayout, handleSectionLayout,
+    isRefreshing, handleBack, handleRefresh,
+    handleTabPress, handleTabBarLayout, handleSectionLayout,
     handleScroll, handleAddItem, handleRemoveItem, handleItemPress, handleCartPress,
   } = useRestaurantDetailScreen();
 
@@ -50,7 +51,22 @@ export function RestaurantDetailScreen(): React.JSX.Element {
       <Pressable style={[styles.backBtn, { top: insets.top + 8 }]} onPress={handleBack} accessibilityRole="button" accessibilityLabel="Go back">
         <Ionicons name="chevron-back" size={22} color={colours.white} />
       </Pressable>
-      <ScrollView ref={scrollRef} stickyHeaderIndices={[1]} onScroll={handleScroll} scrollEventThrottle={16} showsVerticalScrollIndicator={false} style={styles.scroll}>
+      <ScrollView
+        ref={scrollRef}
+        stickyHeaderIndices={[1]}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+        style={styles.scroll}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            tintColor={colours.primary}
+            colors={[colours.primary]}
+          />
+        }
+      >
         <View>
           <Image source={restaurant.cover_photo_url ? { uri: restaurant.cover_photo_url } : null} style={styles.cover} contentFit="cover" transition={200} />
           <View style={styles.infoBlock}>

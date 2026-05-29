@@ -55,7 +55,7 @@ export function AddEditAddressScreen(): React.JSX.Element {
           style={[styles.input, Boolean(errors.address) && styles.inputError]}
           value={values.address}
           onChangeText={(v) => setField('address', v)}
-          placeholder="e.g. 45 Pyay Road, Kamayut"
+          placeholder="เช่น 123 ถนนสุขุมวิท แขวงคลองเตย"
           placeholderTextColor={colours.textMuted}
           maxLength={500}
           accessibilityLabel="Street address"
@@ -71,8 +71,8 @@ export function AddEditAddressScreen(): React.JSX.Element {
           accessibilityRole="button"
           accessibilityLabel="Pin on map for accurate location"
         >
-          <Ionicons name="map-outline" size={18} color={colours.primary} />
-          <Text style={styles.mapBtnText}>Pin on map for accuracy</Text>
+          <Ionicons name="location-outline" size={18} color={colours.primary} />
+          <Text style={styles.mapBtnText}>Pin location on map</Text>
           <Ionicons name="chevron-forward" size={16} color={colours.textMuted} />
         </Pressable>
 
@@ -116,10 +116,22 @@ export function AddEditAddressScreen(): React.JSX.Element {
           style={styles.input}
           value={values.landmark}
           onChangeText={(v) => setField('landmark', v)}
-          placeholder="e.g. Near 7-Eleven"
+          placeholder="เช่น ใกล้ 7-Eleven"
           placeholderTextColor={colours.textMuted}
           maxLength={255}
           accessibilityLabel="Landmark"
+        />
+
+        {/* Province */}
+        <Text style={styles.sectionLabel}>PROVINCE / CITY</Text>
+        <TextInput
+          style={styles.input}
+          value={values.province}
+          onChangeText={(v) => setField('province', v)}
+          placeholder="เช่น กรุงเทพมหานคร, เชียงใหม่"
+          placeholderTextColor={colours.textMuted}
+          maxLength={100}
+          accessibilityLabel="Province or city"
         />
 
         {/* Default toggle */}

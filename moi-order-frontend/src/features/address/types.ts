@@ -4,6 +4,7 @@ export interface AddressFormValues {
   building: string;
   floor: string;
   landmark: string;
+  province: string;
   latitude: number | null;
   longitude: number | null;
   isDefault: boolean;
