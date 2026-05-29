@@ -28,6 +28,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  keyboardAvoid: { flex: 1 },
   scroll: { flex: 1, backgroundColor: colours.backgroundLight },
   content: { padding: spacing.md, gap: spacing.md },
   card: {
