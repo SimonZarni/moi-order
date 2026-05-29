@@ -204,4 +204,43 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 18,
   },
+
+  // ── OTP step ──────────────────────────────────────────────────────────────
+  otpInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    backgroundColor: colours.primary + '18',
+    borderWidth: 1,
+    borderColor: colours.primary + '44',
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  otpInfoText: {
+    fontSize: typography.sm,
+    color: 'rgba(255,255,255,0.6)',
+    flex: 1,
+  },
+  pinInput: {
+    textAlign: 'center',
+    fontSize: typography.xl,
+    fontWeight: '700',
+    letterSpacing: 8,
+  },
+  resendRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing.sm,
+  },
+  linkBtn: {
+    fontSize: typography.sm,
+    color: colours.primary,
+    fontWeight: '600',
+  },
+  linkBtnMuted: {
+    fontSize: typography.sm,
+    color: 'rgba(255,255,255,0.35)',
+  },
 });

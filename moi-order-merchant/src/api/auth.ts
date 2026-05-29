@@ -51,14 +51,48 @@ export async function verifyOtp(
   return response.data.data;
 }
 
-export async function registerMerchant(
+export interface RegisterOtpResponse {
+  expires_in: number;
+  resend_after: number;
+}
+
+export interface RegisterVerifyOtpResponse {
+  verified_token: string;
+  expires_in: number;
+}
+
+export async function requestRegisterOtp(
   name: string,
   email: string,
   password: string,
+): Promise<RegisterOtpResponse> {
+  const response = await apiClient.post<{ data: RegisterOtpResponse }>(
+    '/auth/email/send-otp',
+    { name, email, password },
+  );
+  return response.data.data;
+}
+
+export async function verifyRegisterOtp(
+  email: string,
+  otp: string,
+): Promise<RegisterVerifyOtpResponse> {
+  const response = await apiClient.post<{ data: RegisterVerifyOtpResponse }>(
+    '/auth/email/verify-otp',
+    { email, otp },
+  );
+  return response.data.data;
+}
+
+export async function completeRegisterWithOtp(
+  name: string,
+  email: string,
+  password: string,
+  verifiedToken: string,
 ): Promise<AuthResponse> {
   const response = await apiClient.post<{ data: AuthResponse }>(
-    '/auth/register',
-    { name, email, password },
+    '/auth/email/register',
+    { name, email, password, verified_token: verifiedToken },
   );
   return response.data.data;
 }
