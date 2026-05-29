@@ -31,7 +31,8 @@ Route::patch('/menu/items/{id}',  [MenuItemController::class, 'update']);
 Route::delete('/menu/items/{id}', [MenuItemController::class, 'destroy']);
 
 // ── Analytics ─────────────────────────────────────────────────────────────────
-Route::get('/analytics', [MerchantAnalyticsController::class, 'index']);
+Route::get('/analytics',      [MerchantAnalyticsController::class, 'index']);
+Route::get('/analytics/tops', [MerchantAnalyticsController::class, 'tops']);
 
 // ── Orders ────────────────────────────────────────────────────────────────────
 Route::get('/orders',                        [MerchantOrderController::class, 'index']);

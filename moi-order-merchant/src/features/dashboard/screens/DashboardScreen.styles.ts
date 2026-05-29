@@ -113,6 +113,147 @@ export const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
 
+  // ── Top Sales / Top Customers section ────────────────────────────────────────
+  topSection: {
+    gap: spacing.sm,
+  },
+  topSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  topSectionTitle: {
+    fontSize: typography.md,
+    fontWeight: '800',
+    color: colours.textOnLight,
+    letterSpacing: -0.3,
+  },
+  // Period tab pills — Today / This Week / This Month
+  periodTabs: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  periodTab: {
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: 4,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    backgroundColor: colours.surface,
+  },
+  periodTabActive: {
+    borderColor: colours.primary,
+    backgroundColor: colours.primaryBg,
+  },
+  periodTabText: {
+    fontSize: typography.xxs,
+    fontWeight: '600',
+    color: colours.textMuted,
+  },
+  periodTabTextActive: {
+    color: colours.primaryDark,
+    fontWeight: '700',
+  },
+  // Two cards row — side by side on desktop, stacked on mobile
+  topCardsRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  topCardsRowStack: {
+    flexDirection: 'column',
+  },
+  // Individual top card
+  topCard: {
+    flex: 1,
+    backgroundColor: colours.surface,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    overflow: 'hidden',
+  },
+  topCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
+  },
+  topCardIcon: {
+    width: 26,
+    height: 26,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  topCardTitle: {
+    fontSize: typography.sm,
+    fontWeight: '700',
+    color: colours.textOnLight,
+  },
+  topCardEmpty: {
+    padding: spacing.lg,
+    alignItems: 'center',
+  },
+  topCardEmptyText: {
+    fontSize: typography.xs,
+    color: colours.textSubtle,
+  },
+  // Row inside the top card
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    gap: spacing.sm,
+  },
+  topRowBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
+  },
+  topRank: {
+    width: 22,
+    height: 22,
+    borderRadius: radius.full,
+    backgroundColor: colours.surfaceMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  topRankGold: {
+    backgroundColor: '#F59E0B22',
+  },
+  topRankText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: colours.textMuted,
+  },
+  topRankTextGold: {
+    color: '#D97706',
+  },
+  topRowInfo: {
+    flex: 1,
+    gap: 1,
+  },
+  topRowName: {
+    fontSize: typography.xs,
+    fontWeight: '600',
+    color: colours.textOnLight,
+  },
+  topRowSub: {
+    fontSize: typography.xxs,
+    color: colours.textSubtle,
+  },
+  topRowValue: {
+    fontSize: typography.xs,
+    fontWeight: '700',
+    color: colours.primary,
+    flexShrink: 0,
+  },
+
   // ── Bottom 2-col grid ────────────────────────────────────────────────────────
   bottomGrid: {
     flexDirection: 'row',

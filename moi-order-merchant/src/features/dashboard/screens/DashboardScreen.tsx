@@ -10,16 +10,27 @@ import { colours } from '../../../shared/theme/colours';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
 import { formatDate } from '../../../shared/utils/formatDate';
 import { useResponsive } from '../../../shared/hooks/useResponsive';
+import type { TopPeriod } from '../../../api/analytics';
+import type { TopItem, TopCustomer } from '../../../types/models';
+
+const TOP_PERIOD_TABS: { key: TopPeriod; label: string }[] = [
+  { key: 'today', label: 'Today' },
+  { key: 'week',  label: 'This Week' },
+  { key: 'month', label: 'This Month' },
+];
 
 interface DashboardScreenProps {
   onSelectOrder?: (orderId: number) => void;
 }
 
 export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.JSX.Element {
-  const { analytics, recentOrders, isLoading, refetch, handleUpdateStatus } = useDashboardScreen();
+  const {
+    analytics, recentOrders, topData, topPeriod,
+    isLoading, handleUpdateStatus, handleTopPeriodChange,
+  } = useDashboardScreen();
   const { isDesktop } = useResponsive();
 
-  const hour = new Date().getHours();
+  const hour     = new Date().getHours();
   const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
   const dateLabel = new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
   const pending = analytics?.pending_count ?? 0;
@@ -48,6 +59,7 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
     );
   }
 
+  // ── Revenue card ─────────────────────────────────────────────────────────────
   const revenueCard = (
     <View style={styles.revenueCard}>
       <View style={styles.revenueLeft}>
@@ -68,17 +80,42 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
     </View>
   );
 
+  // ── Top Sales + Top Customers (shared period tabs) ────────────────────────────
+  const topSection = (
+    <View style={styles.topSection}>
+      {/* Shared period tab row */}
+      <View style={styles.topSectionHeader}>
+        <Text style={styles.topSectionTitle}>Performance</Text>
+        <View style={styles.periodTabs}>
+          {TOP_PERIOD_TABS.map((t) => (
+            <Pressable
+              key={t.key}
+              style={[styles.periodTab, topPeriod === t.key && styles.periodTabActive]}
+              onPress={() => handleTopPeriodChange(t.key)}
+              accessibilityRole="button"
+              accessibilityLabel={t.label}
+            >
+              <Text style={[styles.periodTabText, topPeriod === t.key && styles.periodTabTextActive]}>
+                {t.label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </View>
+
+      {/* Two cards side-by-side on desktop, stacked on mobile */}
+      <View style={[styles.topCardsRow, !isDesktop && styles.topCardsRowStack]}>
+        <TopSalesCard items={topData?.top_items ?? []} />
+        <TopCustomersCard customers={topData?.top_customers ?? []} />
+      </View>
+    </View>
+  );
+
+  // ── Recent Orders card ────────────────────────────────────────────────────────
   const ordersCard = (
     <View style={styles.ordersCard}>
       <View style={styles.ordersCardHeader}>
         <Text style={styles.cardSectionTitle}>RECENT ORDERS</Text>
-        <Pressable
-          onPress={() => {}}
-          accessibilityRole="button"
-          accessibilityLabel="View all orders"
-        >
-          <Text style={styles.viewAllLink}>View all →</Text>
-        </Pressable>
       </View>
       {recentOrders.length === 0 ? (
         <View style={styles.emptyOrders}>
@@ -99,6 +136,7 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
     </View>
   );
 
+  // ── Quick stats card ──────────────────────────────────────────────────────────
   const statsCard = (
     <View style={styles.statsCard}>
       <Text style={styles.cardSectionTitle}>QUICK STATS</Text>
@@ -114,6 +152,7 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
     </View>
   );
 
+  // ── Activity card ─────────────────────────────────────────────────────────────
   const activityCard = (
     <View style={styles.activityCard}>
       <Text style={styles.cardSectionTitle}>ACTIVITY</Text>
@@ -154,6 +193,7 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {revenueCard}
+        {topSection}
 
         {isDesktop ? (
           <View style={styles.bottomGrid}>
@@ -172,5 +212,71 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
         )}
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function TopSalesCard({ items }: { items: TopItem[] }): React.JSX.Element {
+  return (
+    <View style={styles.topCard}>
+      <View style={styles.topCardHeader}>
+        <View style={[styles.topCardIcon, { backgroundColor: colours.primary + '20' }]}>
+          <Ionicons name="flame-outline" size={14} color={colours.primary} />
+        </View>
+        <Text style={styles.topCardTitle}>Top Sales</Text>
+      </View>
+
+      {items.length === 0 ? (
+        <View style={styles.topCardEmpty}>
+          <Text style={styles.topCardEmptyText}>No data for this period</Text>
+        </View>
+      ) : (
+        items.map((item, i) => (
+          <View key={item.name} style={[styles.topRow, i < items.length - 1 && styles.topRowBorder]}>
+            <View style={styles.topRank}>
+              <Text style={styles.topRankText}>{i + 1}</Text>
+            </View>
+            <View style={styles.topRowInfo}>
+              <Text style={styles.topRowName} numberOfLines={1}>{item.name}</Text>
+              <Text style={styles.topRowSub}>{item.total_quantity} sold</Text>
+            </View>
+            <Text style={styles.topRowValue}>{formatPrice(item.revenue_cents)}</Text>
+          </View>
+        ))
+      )}
+    </View>
+  );
+}
+
+function TopCustomersCard({ customers }: { customers: TopCustomer[] }): React.JSX.Element {
+  return (
+    <View style={styles.topCard}>
+      <View style={styles.topCardHeader}>
+        <View style={[styles.topCardIcon, { backgroundColor: colours.success + '20' }]}>
+          <Ionicons name="people-outline" size={14} color={colours.success} />
+        </View>
+        <Text style={styles.topCardTitle}>Top Customers</Text>
+      </View>
+
+      {customers.length === 0 ? (
+        <View style={styles.topCardEmpty}>
+          <Text style={styles.topCardEmptyText}>No data for this period</Text>
+        </View>
+      ) : (
+        customers.map((customer, i) => (
+          <View key={customer.name + i} style={[styles.topRow, i < customers.length - 1 && styles.topRowBorder]}>
+            <View style={[styles.topRank, i === 0 && styles.topRankGold]}>
+              <Text style={[styles.topRankText, i === 0 && styles.topRankTextGold]}>{i + 1}</Text>
+            </View>
+            <View style={styles.topRowInfo}>
+              <Text style={styles.topRowName} numberOfLines={1}>{customer.name}</Text>
+              <Text style={styles.topRowSub}>{customer.order_count} {customer.order_count === 1 ? 'order' : 'orders'}</Text>
+            </View>
+            <Text style={styles.topRowValue}>{formatPrice(customer.total_cents)}</Text>
+          </View>
+        ))
+      )}
+    </View>
   );
 }

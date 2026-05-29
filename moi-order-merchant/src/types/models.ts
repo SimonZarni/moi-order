@@ -152,6 +152,23 @@ export interface AnalyticsData {
   pending_count: number;
 }
 
+export interface TopItem {
+  name: string;
+  total_quantity: number;
+  revenue_cents: number;
+}
+
+export interface TopCustomer {
+  name: string;
+  order_count: number;
+  total_cents: number;
+}
+
+export interface TopData {
+  top_items: TopItem[];
+  top_customers: TopCustomer[];
+}
+
 export interface PaginationMeta {
   current_page: number;
   last_page: number;

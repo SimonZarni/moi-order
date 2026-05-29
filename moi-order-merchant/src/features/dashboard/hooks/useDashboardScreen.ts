@@ -1,22 +1,26 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getAnalytics } from '../../../api/analytics';
+import { getAnalytics, getTopData, type TopPeriod } from '../../../api/analytics';
 import { getOrders, updateOrderStatus } from '../../../api/orders';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { CACHE_TTL, GC_TIME, QUERY_RETRY } from '../../../shared/constants/config';
-import type { AnalyticsData, FoodOrder } from '../../../types/models';
+import type { AnalyticsData, FoodOrder, TopData } from '../../../types/models';
 
 interface UseDashboardScreenResult {
   analytics: AnalyticsData | undefined;
   recentOrders: FoodOrder[];
+  topData: TopData | undefined;
+  topPeriod: TopPeriod;
   isLoading: boolean;
   isError: boolean;
   refetch: () => void;
   handleUpdateStatus: (orderId: number, newStatus: string) => void;
+  handleTopPeriodChange: (period: TopPeriod) => void;
 }
 
 export function useDashboardScreen(): UseDashboardScreenResult {
   const queryClient = useQueryClient();
+  const [topPeriod, setTopPeriod] = useState<TopPeriod>('today');
 
   const {
     data: analyticsData,
@@ -25,10 +29,10 @@ export function useDashboardScreen(): UseDashboardScreenResult {
     refetch: refetchAnalytics,
   } = useQuery({
     queryKey: QUERY_KEYS.ANALYTICS,
-    queryFn: getAnalytics,
+    queryFn:  getAnalytics,
     staleTime: CACHE_TTL.ANALYTICS,
-    gcTime: GC_TIME.DEFAULT,
-    retry: QUERY_RETRY,
+    gcTime:    GC_TIME.DEFAULT,
+    retry:     QUERY_RETRY,
   });
 
   const {
@@ -38,10 +42,18 @@ export function useDashboardScreen(): UseDashboardScreenResult {
     refetch: refetchOrders,
   } = useQuery({
     queryKey: QUERY_KEYS.ORDERS(),
-    queryFn: () => getOrders(),
+    queryFn:  () => getOrders(),
     staleTime: CACHE_TTL.ORDERS,
-    gcTime: GC_TIME.DEFAULT,
-    retry: QUERY_RETRY,
+    gcTime:    GC_TIME.DEFAULT,
+    retry:     QUERY_RETRY,
+  });
+
+  const { data: topData, refetch: refetchTop } = useQuery({
+    queryKey: QUERY_KEYS.TOP_DATA(topPeriod),
+    queryFn:  () => getTopData(topPeriod),
+    staleTime: CACHE_TTL.ANALYTICS,
+    gcTime:    GC_TIME.DEFAULT,
+    retry:     QUERY_RETRY,
   });
 
   const { mutate: mutateStatus } = useMutation({
@@ -50,6 +62,7 @@ export function useDashboardScreen(): UseDashboardScreenResult {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS() });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ANALYTICS });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TOP_DATA(topPeriod) });
     },
   });
 
@@ -58,10 +71,11 @@ export function useDashboardScreen(): UseDashboardScreenResult {
     [ordersData],
   );
 
-  const refetch = () => {
+  const refetch = useCallback(() => {
     void refetchAnalytics();
     void refetchOrders();
-  };
+    void refetchTop();
+  }, [refetchAnalytics, refetchOrders, refetchTop]);
 
   const handleUpdateStatus = useCallback(
     (orderId: number, newStatus: string) => {
@@ -70,12 +84,19 @@ export function useDashboardScreen(): UseDashboardScreenResult {
     [mutateStatus],
   );
 
+  const handleTopPeriodChange = useCallback((period: TopPeriod) => {
+    setTopPeriod(period);
+  }, []);
+
   return {
     analytics: analyticsData,
     recentOrders,
+    topData,
+    topPeriod,
     isLoading: isAnalyticsLoading || isOrdersLoading,
-    isError: isAnalyticsError || isOrdersError,
+    isError:   isAnalyticsError   || isOrdersError,
     refetch,
     handleUpdateStatus,
+    handleTopPeriodChange,
   };
 }
