@@ -19,6 +19,16 @@ export const styles = StyleSheet.create({
     height: 40,
   },
 
+  // Solid background for the status-bar safe-area zone — matches other page headers.
+  // Renders as a colour block exactly (safe-area-inset-top) pixels tall.
+  statusBarBg: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: colours.backgroundDark,
+  },
+
   // Overlay header + search: spans full screen so suggestions FlatList is never clipped.
   // pointerEvents="box-none" on the SafeAreaView lets map touches pass through.
   overlay: {
@@ -34,7 +44,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     gap: spacing.sm,
-    backgroundColor: colours.backgroundDark + 'ee',
+    backgroundColor: colours.backgroundDark, // solid — matches status bar
   },
   backBtn: {
     width: 40,
@@ -77,7 +87,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.card,
     borderRadius: radius.lg,
     marginTop: spacing.xs,
-    maxHeight: 220,
+    maxHeight: 260,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -103,6 +113,20 @@ export const styles = StyleSheet.create({
   suggestionAddress: {
     fontSize: typography.xs,
     color: colours.textMuted,
+  },
+  // Google Places source badge
+  googleBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#4285F4',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  googleBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: colours.white,
   },
 
   // KeyboardAvoidingView wrapper — absolutely positioned so it floats above the map.
@@ -132,7 +156,10 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 4,
+    minWidth: 220,
+    justifyContent: 'center',
   },
+  locationBtnDisabled: { opacity: 0.6 },
   locationBtnText: {
     fontSize: typography.sm,
     fontWeight: '600',

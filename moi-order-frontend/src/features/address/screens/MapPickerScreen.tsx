@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import MapboxGL from '@rnmapbox/maps';
 import { colours } from '@/shared/theme/colours';
-import { GeocodingResult } from '@/shared/api/mapbox';
+import { MapPickerSuggestionItem } from '../types';
 import { useMapPickerScreen } from '../hooks/useMapPickerScreen';
 import { styles } from './MapPickerScreen.styles';
 
@@ -14,10 +14,35 @@ const MAPBOX_STYLE = process.env['EXPO_PUBLIC_MAPBOX_STYLE'] ?? 'mapbox://styles
 // Must be called before any MapboxGL component renders — same pattern as PlacesMapScreen.
 MapboxGL.setAccessToken(MAPBOX_TOKEN);
 
+function SuggestionRow({ item, onPress }: { item: MapPickerSuggestionItem; onPress: () => void }): React.JSX.Element {
+  const name    = item.source === 'mapbox' ? item.data.name        : item.data.name;
+  const subtext = item.source === 'mapbox' ? item.data.full_address : item.data.address;
+
+  return (
+    <Pressable
+      style={styles.suggestionRow}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={subtext || name}
+    >
+      {item.source === 'google' ? (
+        <View style={styles.googleBadge}><Text style={styles.googleBadgeText}>G</Text></View>
+      ) : (
+        <Ionicons name="location-outline" size={16} color={colours.textMuted} />
+      )}
+      <View style={styles.suggestionText}>
+        <Text style={styles.suggestionName} numberOfLines={1}>{name}</Text>
+        {!!subtext && <Text style={styles.suggestionAddress} numberOfLines={1}>{subtext}</Text>}
+      </View>
+    </Pressable>
+  );
+}
+
 export function MapPickerScreen(): React.JSX.Element {
   const {
-    cameraRef, center, resolvedAddress, isGeocoding,
-    searchQuery, suggestions, isSearching, showSuggestions,
+    cameraRef, resolvedAddress, isGeocoding,
+    searchQuery, allSuggestions, isSearching, showSuggestions,
+    isLocating, isSelectingPlace,
     handleCameraChanged, handleCurrentLocation,
     handleSearchChange, handleSuggestionSelect,
     handleConfirm, handleBack,
@@ -48,7 +73,10 @@ export function MapPickerScreen(): React.JSX.Element {
         <Ionicons name="location" size={40} color={colours.primary} />
       </View>
 
-      {/* Overlay: header + search bar — full screen so suggestions aren't clipped.
+      {/* Solid status-bar background — gives the green navbar above "Confirm Location" */}
+      <SafeAreaView edges={['top']} style={styles.statusBarBg} pointerEvents="none" />
+
+      {/* Overlay: header + search bar — full screen so suggestions FlatList is never clipped.
           pointerEvents="box-none" keeps map touches working under this overlay. */}
       <SafeAreaView edges={['top']} style={styles.overlay} pointerEvents="box-none">
         <View style={styles.header} pointerEvents="auto">
@@ -58,7 +86,7 @@ export function MapPickerScreen(): React.JSX.Element {
           <Text style={styles.headerTitle}>Confirm Location</Text>
         </View>
 
-        {/* Search bar */}
+        {/* Search bar + combined Google + Mapbox suggestions */}
         <View style={styles.searchWrap} pointerEvents="auto">
           <View style={styles.searchBar}>
             <Ionicons name="search" size={18} color={colours.textMuted} />
@@ -66,40 +94,34 @@ export function MapPickerScreen(): React.JSX.Element {
               style={styles.searchInput}
               value={searchQuery}
               onChangeText={handleSearchChange}
-              placeholder="Search address…"
+              placeholder="Search any place in Thailand…"
               placeholderTextColor={colours.textMuted}
               accessibilityLabel="Search address"
               returnKeyType="search"
             />
-            {isSearching && <ActivityIndicator size="small" color={colours.textMuted} />}
+            {(isSearching || isSelectingPlace) && (
+              <ActivityIndicator size="small" color={colours.textMuted} />
+            )}
           </View>
 
           {showSuggestions && (
-            <FlatList<GeocodingResult>
-              data={suggestions}
-              keyExtractor={(item) => item.id}
+            <FlatList<MapPickerSuggestionItem>
+              data={allSuggestions}
+              keyExtractor={(item) => item.key}
               style={styles.suggestions}
               keyboardShouldPersistTaps="handled"
               renderItem={({ item }) => (
-                <Pressable
-                  style={styles.suggestionRow}
-                  onPress={() => handleSuggestionSelect(item)}
-                  accessibilityRole="button"
-                  accessibilityLabel={item.full_address}
-                >
-                  <Ionicons name="location-outline" size={16} color={colours.textMuted} />
-                  <View style={styles.suggestionText}>
-                    <Text style={styles.suggestionName} numberOfLines={1}>{item.name}</Text>
-                    <Text style={styles.suggestionAddress} numberOfLines={1}>{item.full_address}</Text>
-                  </View>
-                </Pressable>
+                <SuggestionRow
+                  item={item}
+                  onPress={() => { void handleSuggestionSelect(item); }}
+                />
               )}
             />
           )}
         </View>
       </SafeAreaView>
 
-      {/* Bottom panel — KeyboardAvoidingView lifts it above keyboard when search is focused */}
+      {/* Bottom panel — KeyboardAvoidingView lifts confirm card above keyboard */}
       <KeyboardAvoidingView
         style={styles.bottomPanelWrap}
         behavior={Platform.OS === 'ios' ? 'position' : 'height'}
@@ -107,13 +129,19 @@ export function MapPickerScreen(): React.JSX.Element {
       >
         <SafeAreaView edges={['bottom']} style={styles.bottomPanel}>
           <Pressable
-            style={styles.locationBtn}
+            style={[styles.locationBtn, isLocating && styles.locationBtnDisabled]}
             onPress={handleCurrentLocation}
+            disabled={isLocating}
             accessibilityRole="button"
             accessibilityLabel="Use my current location"
           >
-            <Ionicons name="locate" size={18} color={colours.primary} />
-            <Text style={styles.locationBtnText}>Use my current location</Text>
+            {isLocating
+              ? <ActivityIndicator size="small" color={colours.primary} />
+              : <Ionicons name="locate" size={18} color={colours.primary} />
+            }
+            <Text style={styles.locationBtnText}>
+              {isLocating ? 'Locating…' : 'Use my current location'}
+            </Text>
           </Pressable>
 
           <View style={styles.addressCard}>

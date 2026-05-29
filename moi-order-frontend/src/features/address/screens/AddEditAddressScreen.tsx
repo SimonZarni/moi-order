@@ -55,7 +55,7 @@ export function AddEditAddressScreen(): React.JSX.Element {
           </View>
 
           {/* Contact name */}
-          <Text style={styles.sectionLabel}>CONTACT NAME</Text>
+          <Text style={styles.sectionLabel}>CONTACT NAME <Text style={styles.required}>*</Text></Text>
           <TextInput
             style={[styles.input, Boolean(errors.contactName) && styles.inputError]}
             value={values.contactName}
@@ -71,7 +71,7 @@ export function AddEditAddressScreen(): React.JSX.Element {
           )}
 
           {/* Contact phone */}
-          <Text style={styles.sectionLabel}>CONTACT PHONE</Text>
+          <Text style={styles.sectionLabel}>CONTACT PHONE <Text style={styles.required}>*</Text></Text>
           <TextInput
             style={[styles.input, Boolean(errors.contactPhone) && styles.inputError]}
             value={values.contactPhone}
@@ -160,9 +160,9 @@ export function AddEditAddressScreen(): React.JSX.Element {
           />
 
           {/* Province */}
-          <Text style={styles.sectionLabel}>PROVINCE / CITY</Text>
+          <Text style={styles.sectionLabel}>PROVINCE / CITY <Text style={styles.required}>*</Text></Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, Boolean(errors.province) && styles.inputError]}
             value={values.province}
             onChangeText={(v) => setField('province', v)}
             placeholder="เช่น กรุงเทพมหานคร, เชียงใหม่"
@@ -170,6 +170,9 @@ export function AddEditAddressScreen(): React.JSX.Element {
             maxLength={100}
             accessibilityLabel="Province or city"
           />
+          {errors.province !== undefined && (
+            <Text style={styles.errorText}>{errors.province}</Text>
+          )}
 
           {/* Default toggle */}
           <Pressable

@@ -53,16 +53,20 @@ export function useAddressForm(initial?: Partial<AddressFormValues>): UseAddress
 
   const validate = (): boolean => {
     const next: AddressFormErrors = {};
-    if (!values.address.trim()) next.address = 'Street address is required.';
+    if (!values.contactName.trim())  next.contactName  = 'Contact name is required.';
+    if (!values.contactPhone.trim()) next.contactPhone = 'Contact phone is required.';
+    if (!values.address.trim())      next.address      = 'Street address is required.';
+    if (!values.province.trim())     next.province     = 'Province / city is required.';
     setErrors(next);
     return Object.keys(next).length === 0;
   };
 
   const applyApiError = (apiErrors: Record<string, string[]>): void => {
     const next: AddressFormErrors = {};
-    if (apiErrors['address']?.[0])       next.address       = apiErrors['address'][0];
-    if (apiErrors['contact_name']?.[0])  next.contactName   = apiErrors['contact_name'][0];
-    if (apiErrors['contact_phone']?.[0]) next.contactPhone  = apiErrors['contact_phone'][0];
+    if (apiErrors['address']?.[0])       next.address      = apiErrors['address'][0];
+    if (apiErrors['contact_name']?.[0])  next.contactName  = apiErrors['contact_name'][0];
+    if (apiErrors['contact_phone']?.[0]) next.contactPhone = apiErrors['contact_phone'][0];
+    if (apiErrors['province']?.[0])      next.province     = apiErrors['province'][0];
     setErrors(next);
   };
 

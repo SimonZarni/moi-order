@@ -1,3 +1,6 @@
+import type { GeocodingResult } from '@/shared/api/mapbox';
+import type { GooglePlaceSuggestion } from '@/shared/api/googlePlaces';
+
 export interface AddressFormValues {
   label: 'home' | 'work' | 'other';
   address: string;
@@ -16,4 +19,11 @@ export interface AddressFormErrors {
   address?: string;
   contactName?: string;
   contactPhone?: string;
+  province?: string;
 }
+
+// ── MapPicker search suggestions ───────────────────────────────────────────────
+
+export type MapPickerSuggestionItem =
+  | { key: string; source: 'mapbox'; data: GeocodingResult }
+  | { key: string; source: 'google'; data: GooglePlaceSuggestion };

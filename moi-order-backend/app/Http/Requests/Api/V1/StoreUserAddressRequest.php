@@ -33,9 +33,9 @@ class StoreUserAddressRequest extends FormRequest
             'building'   => ['nullable', 'string', 'max:255'],
             'floor'      => ['nullable', 'string', 'max:100'],
             'landmark'   => ['nullable', 'string', 'max:255'],
-            'province'       => ['nullable', 'string', 'max:100'],
-            'contact_name'   => ['nullable', 'string', 'max:255'],
-            'contact_phone'  => ['nullable', 'string', 'max:50'],
+            'province'       => ['required', 'string', 'max:100'],
+            'contact_name'   => ['required', 'string', 'max:255'],
+            'contact_phone'  => ['required', 'string', 'max:50'],
             'latitude'       => ['nullable', 'numeric', 'between:-90,90'],
             'longitude'  => ['nullable', 'numeric', 'between:-180,180'],
             'is_default' => ['boolean'],
@@ -46,9 +46,12 @@ class StoreUserAddressRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'address.required' => 'Street address is required.',
-            'address.max'      => 'Address must not exceed 500 characters.',
-            'label.required'   => 'Label is required.',
+            'address.required'      => 'Street address is required.',
+            'address.max'           => 'Address must not exceed 500 characters.',
+            'label.required'        => 'Label is required.',
+            'contact_name.required' => 'Contact name is required.',
+            'contact_phone.required'=> 'Contact phone is required.',
+            'province.required'     => 'Province or city is required.',
         ];
     }
 
