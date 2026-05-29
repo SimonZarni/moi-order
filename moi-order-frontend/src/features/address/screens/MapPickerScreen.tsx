@@ -8,7 +8,11 @@ import { GeocodingResult } from '@/shared/api/mapbox';
 import { useMapPickerScreen } from '../hooks/useMapPickerScreen';
 import { styles } from './MapPickerScreen.styles';
 
+const MAPBOX_TOKEN = process.env['EXPO_PUBLIC_MAPBOX_TOKEN'] ?? '';
 const MAPBOX_STYLE = process.env['EXPO_PUBLIC_MAPBOX_STYLE'] ?? 'mapbox://styles/mapbox/streets-v12';
+
+// Must be called before any MapboxGL component renders — same pattern as PlacesMapScreen.
+MapboxGL.setAccessToken(MAPBOX_TOKEN);
 
 export function MapPickerScreen(): React.JSX.Element {
   const {
