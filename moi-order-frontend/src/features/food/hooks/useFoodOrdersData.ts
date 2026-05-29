@@ -3,6 +3,7 @@ import { fetchFoodOrders, fetchFoodOrderDetail, placeFoodOrder, PlaceFoodOrderIn
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { FoodOrder } from '@/types/models';
 import { FOOD_ORDER_STATUS } from '@/types/enums';
+import { useAuthStore } from '@/shared/store/authStore';
 
 export interface UseFoodOrdersDataResult {
   orders: FoodOrder[];
@@ -12,9 +13,12 @@ export interface UseFoodOrdersDataResult {
 }
 
 export function useFoodOrdersData(): UseFoodOrdersDataResult {
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+
   const query = useQuery({
     queryKey: QUERY_KEYS.FOOD_ORDERS.LIST,
     queryFn:  () => fetchFoodOrders(),
+    enabled:  isLoggedIn,
   });
 
   return {

@@ -24,8 +24,11 @@ export interface CompleteFoodOrderInput {
 }
 
 export async function fetchActiveOrder(): Promise<FoodOrder[]> {
-  const res = await apiClient.get<ApiResponse<FoodOrder[]>>('/api/v1/food-orders/active');
-  return res.data.data ?? [];
+  const res = await apiClient.get<{ data: FoodOrder[] | FoodOrder | null }>('/api/v1/food-orders/active');
+  const data = res.data.data;
+  if (Array.isArray(data)) return data;      // new server format
+  if (data == null) return [];               // no active order
+  return [data];                             // old server format: single object
 }
 
 export async function fetchFoodOrders(page = 1): Promise<PaginatedResponse<FoodOrder>> {
