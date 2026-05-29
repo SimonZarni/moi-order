@@ -27,7 +27,8 @@ export const styles = StyleSheet.create({
     color: colours.textOnDark,
     flex: 1,
   },
-  scroll:   { flex: 1, backgroundColor: colours.backgroundLight },
+  keyboardAvoid: { flex: 1 },
+  scroll:        { flex: 1, backgroundColor: colours.backgroundLight },
   content:  { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xxl },
   sectionLabel: {
     fontSize: typography.xxs,

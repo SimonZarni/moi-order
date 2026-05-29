@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import MapboxGL from '@rnmapbox/maps';
@@ -33,11 +33,12 @@ export function MapPickerScreen(): React.JSX.Element {
         logoEnabled={false}
         onCameraChanged={handleCameraChanged}
       >
+        {/* Camera is fully uncontrolled — positioned imperatively via setCamera()
+            to avoid animation conflicts with user panning. See useMapPickerScreen. */}
         <MapboxGL.Camera
           ref={cameraRef}
-          centerCoordinate={center}
-          zoomLevel={15}
-          animationMode="none"
+          animationMode="flyTo"
+          animationDuration={500}
         />
         <MapboxGL.UserLocation visible />
       </MapboxGL.MapView>
@@ -47,9 +48,10 @@ export function MapPickerScreen(): React.JSX.Element {
         <Ionicons name="location" size={40} color={colours.primary} />
       </View>
 
-      {/* Overlay: header + search bar (sits on top of the map) */}
-      <SafeAreaView edges={['top']} style={styles.overlay}>
-        <View style={styles.header}>
+      {/* Overlay: header + search bar — full screen so suggestions aren't clipped.
+          pointerEvents="box-none" keeps map touches working under this overlay. */}
+      <SafeAreaView edges={['top']} style={styles.overlay} pointerEvents="box-none">
+        <View style={styles.header} pointerEvents="auto">
           <Pressable style={styles.backBtn} onPress={handleBack} accessibilityRole="button" accessibilityLabel="Go back">
             <Ionicons name="chevron-back" size={22} color={colours.textOnDark} />
           </Pressable>
@@ -57,7 +59,7 @@ export function MapPickerScreen(): React.JSX.Element {
         </View>
 
         {/* Search bar */}
-        <View style={styles.searchWrap}>
+        <View style={styles.searchWrap} pointerEvents="auto">
           <View style={styles.searchBar}>
             <Ionicons name="search" size={18} color={colours.textMuted} />
             <TextInput
@@ -97,37 +99,43 @@ export function MapPickerScreen(): React.JSX.Element {
         </View>
       </SafeAreaView>
 
-      {/* Bottom panel: current location + address + confirm */}
-      <SafeAreaView edges={['bottom']} style={styles.bottomPanel}>
-        <Pressable
-          style={styles.locationBtn}
-          onPress={handleCurrentLocation}
-          accessibilityRole="button"
-          accessibilityLabel="Use my current location"
-        >
-          <Ionicons name="locate" size={18} color={colours.primary} />
-          <Text style={styles.locationBtnText}>Use my current location</Text>
-        </Pressable>
-
-        <View style={styles.addressCard}>
-          {isGeocoding ? (
-            <ActivityIndicator size="small" color={colours.primary} />
-          ) : (
-            <Text style={styles.addressText} numberOfLines={2}>
-              {resolvedAddress || 'Move the map to set your delivery point'}
-            </Text>
-          )}
+      {/* Bottom panel — KeyboardAvoidingView lifts it above keyboard when search is focused */}
+      <KeyboardAvoidingView
+        style={styles.bottomPanelWrap}
+        behavior={Platform.OS === 'ios' ? 'position' : 'height'}
+        pointerEvents="box-none"
+      >
+        <SafeAreaView edges={['bottom']} style={styles.bottomPanel}>
           <Pressable
-            style={[styles.confirmBtn, (isGeocoding || !resolvedAddress) && styles.confirmBtnDisabled]}
-            onPress={handleConfirm}
-            disabled={isGeocoding || !resolvedAddress}
+            style={styles.locationBtn}
+            onPress={handleCurrentLocation}
             accessibilityRole="button"
-            accessibilityLabel="Confirm this location"
+            accessibilityLabel="Use my current location"
           >
-            <Text style={styles.confirmBtnText}>Confirm Location</Text>
+            <Ionicons name="locate" size={18} color={colours.primary} />
+            <Text style={styles.locationBtnText}>Use my current location</Text>
           </Pressable>
-        </View>
-      </SafeAreaView>
+
+          <View style={styles.addressCard}>
+            {isGeocoding ? (
+              <ActivityIndicator size="small" color={colours.primary} />
+            ) : (
+              <Text style={styles.addressText} numberOfLines={2}>
+                {resolvedAddress || 'Move the map to set your delivery point'}
+              </Text>
+            )}
+            <Pressable
+              style={[styles.confirmBtn, (isGeocoding || !resolvedAddress) && styles.confirmBtnDisabled]}
+              onPress={handleConfirm}
+              disabled={isGeocoding || !resolvedAddress}
+              accessibilityRole="button"
+              accessibilityLabel="Confirm this location"
+            >
+              <Text style={styles.confirmBtnText}>Confirm Location</Text>
+            </Pressable>
+          </View>
+        </SafeAreaView>
+      </KeyboardAvoidingView>
     </View>
   );
 }

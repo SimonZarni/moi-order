@@ -37,15 +37,17 @@ export function useAddEditAddressScreen(): UseAddEditAddressScreenResult {
   const form = useAddressForm(
     existing
       ? {
-          label:     existing.label,
-          address:   existing.address,
-          building:  existing.building ?? '',
-          floor:     existing.floor ?? '',
-          landmark:  existing.landmark ?? '',
-          province:  existing.province ?? '',
-          latitude:  existing.latitude,
-          longitude: existing.longitude,
-          isDefault: existing.is_default,
+          label:        existing.label,
+          address:      existing.address,
+          building:     existing.building ?? '',
+          floor:        existing.floor ?? '',
+          landmark:     existing.landmark ?? '',
+          province:     existing.province ?? '',
+          contactName:  existing.contact_name ?? '',
+          contactPhone: existing.contact_phone ?? '',
+          latitude:     existing.latitude,
+          longitude:    existing.longitude,
+          isDefault:    existing.is_default,
         }
       : undefined,
   );
@@ -72,15 +74,17 @@ export function useAddEditAddressScreen(): UseAddEditAddressScreenResult {
     if (!form.validate()) return;
 
     const payload = {
-      label:      form.values.label,
-      address:    form.values.address.trim(),
-      building:   form.values.building.trim()  || null,
-      floor:      form.values.floor.trim()     || null,
-      landmark:   form.values.landmark.trim()  || null,
-      province:   form.values.province.trim()  || null,
-      latitude:   form.values.latitude,
-      longitude:  form.values.longitude,
-      is_default: form.values.isDefault,
+      label:          form.values.label,
+      address:        form.values.address.trim(),
+      building:       form.values.building.trim()      || null,
+      floor:          form.values.floor.trim()         || null,
+      landmark:       form.values.landmark.trim()      || null,
+      province:       form.values.province.trim()      || null,
+      contact_name:   form.values.contactName.trim()   || null,
+      contact_phone:  form.values.contactPhone.trim()  || null,
+      latitude:       form.values.latitude,
+      longitude:      form.values.longitude,
+      is_default:     form.values.isDefault,
     };
 
     if (addressId !== undefined) {

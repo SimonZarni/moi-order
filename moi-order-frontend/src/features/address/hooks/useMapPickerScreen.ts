@@ -13,6 +13,8 @@ type Nav   = NativeStackNavigationProp<RootStackParamList>;
 type Route = RouteProp<RootStackParamList, 'MapPicker'>;
 
 const DEFAULT_CENTER: [number, number] = [100.5018, 13.7563]; // Bangkok
+const INITIAL_ZOOM = 13;
+const CURRENT_LOCATION_ZOOM = 15;
 const REVERSE_GEOCODE_DEBOUNCE_MS = 600;
 
 export interface UseMapPickerScreenResult {
@@ -41,7 +43,7 @@ export function useMapPickerScreen(): UseMapPickerScreenResult {
     ? [initialLng, initialLat]
     : DEFAULT_CENTER;
 
-  const cameraRef = useRef<CameraRef>(null);
+  const cameraRef       = useRef<CameraRef>(null);
   const debounceRef     = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchDebounce  = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -52,6 +54,20 @@ export function useMapPickerScreen(): UseMapPickerScreenResult {
   const [suggestions, setSuggestions]         = useState<GeocodingResult[]>([]);
   const [isSearching, setIsSearching]         = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Set initial camera position imperatively after mount so Camera component
+  // is not a controlled component — avoids animation conflicts with user panning.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      cameraRef.current?.setCamera({
+        centerCoordinate: startCenter,
+        zoomLevel: INITIAL_ZOOM,
+        animationDuration: 0,
+      });
+    }, 50);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Reverse geocode when the map stops moving (debounced).
   const handleCameraChanged = useCallback(
@@ -71,7 +87,7 @@ export function useMapPickerScreen(): UseMapPickerScreenResult {
     [],
   );
 
-  // Autocomplete search with debounce.
+  // Autocomplete search with debounce + error guard.
   const handleSearchChange = useCallback((text: string) => {
     setSearchQuery(text);
     if (searchDebounce.current) clearTimeout(searchDebounce.current);
@@ -84,10 +100,16 @@ export function useMapPickerScreen(): UseMapPickerScreenResult {
 
     searchDebounce.current = setTimeout(async () => {
       setIsSearching(true);
-      const results = await geocodeQueryApi(text, center);
-      setSuggestions(results);
-      setShowSuggestions(results.length > 0);
-      setIsSearching(false);
+      try {
+        const results = await geocodeQueryApi(text, center);
+        setSuggestions(results);
+        setShowSuggestions(results.length > 0);
+      } catch {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      } finally {
+        setIsSearching(false);
+      }
     }, 400);
   }, [center]);
 
@@ -99,7 +121,11 @@ export function useMapPickerScreen(): UseMapPickerScreenResult {
     setSearchQuery('');
     setSuggestions([]);
     setShowSuggestions(false);
-    cameraRef.current?.setCamera({ centerCoordinate: newCenter, zoomLevel: 16, animationDuration: 400 });
+    cameraRef.current?.setCamera({
+      centerCoordinate: newCenter,
+      zoomLevel: 15,
+      animationDuration: 500,
+    });
   }, []);
 
   const handleCurrentLocation = useCallback(async () => {
@@ -108,7 +134,11 @@ export function useMapPickerScreen(): UseMapPickerScreenResult {
     const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
     const newCenter: [number, number] = [loc.coords.longitude, loc.coords.latitude];
     setCenter(newCenter);
-    cameraRef.current?.setCamera({ centerCoordinate: newCenter, zoomLevel: 17, animationDuration: 400 });
+    cameraRef.current?.setCamera({
+      centerCoordinate: newCenter,
+      zoomLevel: CURRENT_LOCATION_ZOOM,
+      animationDuration: 500,
+    });
   }, []);
 
   const handleBack    = useCallback(() => navigation.goBack(), [navigation]);

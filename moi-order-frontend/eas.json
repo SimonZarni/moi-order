@@ -3,6 +3,12 @@
     "version": ">= 16.0.0"
   },
   "build": {
+    "simulator": {
+      "channel": "production",
+      "ios": {
+        "simulator": true
+      }
+    },
     "development": {
       "developmentClient": true,
       "distribution": "internal",

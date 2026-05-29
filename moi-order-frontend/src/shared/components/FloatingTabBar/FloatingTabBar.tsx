@@ -42,17 +42,17 @@ import { getStrings } from '@/shared/i18n';
 // TAB_LABELS kept for the 'en'|'mm' accessor pattern at lines below.
 // Thai is handled via getStrings fallthrough.
 const TAB_LABELS: Record<string, { en: string; mm: string; th: string }> = {
-  Home:    { en: 'Home',    mm: 'ပင်မ',        th: 'หน้าหลัก'    },
-  Map:     { en: 'Map',     mm: 'မြေပုံ',      th: 'แผนที่'      },
-  Orders:  { en: 'Orders',  mm: 'အော်ဒါများ',  th: 'คำสั่งซื้อ'  },
-  Profile: { en: 'Profile', mm: 'ပရိုဖိုင်',   th: 'โปรไฟล์'    },
+  Home:    { en: 'Home',    mm: 'ပင်မ',        th: 'หน้าหลัก'   },
+  Map:     { en: 'Shops',   mm: 'ဆိုင်များ',   th: 'ร้านค้า'    },
+  Orders:  { en: 'Orders',  mm: 'အော်ဒါများ',  th: 'คำสั่งซื้อ' },
+  Profile: { en: 'Profile', mm: 'ပရိုဖိုင်',   th: 'โปรไฟล์'   },
 };
 
 const TABS: TabItem[] = [
-  { route: 'Home',    icon: 'home',   label: 'Home'    },
-  { route: 'Map',     icon: 'map',    label: 'Map'     },
-  { route: 'Orders',  icon: 'list',   label: 'Orders'  },
-  { route: 'Profile', icon: 'person', label: 'Profile' },
+  { route: 'Home',    icon: 'home',              label: 'Home'    },
+  { route: 'Map',     icon: 'storefront-outline', label: 'Shops'   },
+  { route: 'Orders',  icon: 'list',              label: 'Orders'  },
+  { route: 'Profile', icon: 'person',            label: 'Profile' },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

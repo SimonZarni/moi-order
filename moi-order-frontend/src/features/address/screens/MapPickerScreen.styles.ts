@@ -19,12 +19,14 @@ export const styles = StyleSheet.create({
     height: 40,
   },
 
-  // Overlay header + search (transparent background so map is visible)
+  // Overlay header + search: spans full screen so suggestions FlatList is never clipped.
+  // pointerEvents="box-none" on the SafeAreaView lets map touches pass through.
   overlay: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
+    bottom: 0,
   },
   header: {
     flexDirection: 'row',
@@ -103,12 +105,15 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
   },
 
-  // Bottom panel
-  bottomPanel: {
+  // KeyboardAvoidingView wrapper — absolutely positioned so it floats above the map.
+  bottomPanelWrap: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
+  },
+  // Bottom panel
+  bottomPanel: {
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.md,
     gap: spacing.sm,

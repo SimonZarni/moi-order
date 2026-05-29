@@ -5,6 +5,8 @@ export interface AddressFormValues {
   floor: string;
   landmark: string;
   province: string;
+  contactName: string;
+  contactPhone: string;
   latitude: number | null;
   longitude: number | null;
   isDefault: boolean;
@@ -12,4 +14,6 @@ export interface AddressFormValues {
 
 export interface AddressFormErrors {
   address?: string;
+  contactName?: string;
+  contactPhone?: string;
 }

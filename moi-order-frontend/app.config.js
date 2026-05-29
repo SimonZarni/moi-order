@@ -93,6 +93,7 @@ module.exports = {
       bundleIdentifier: "com.moiorder.app",
       appleTeamId: "3TULJRMNLT",
       usesAppleSignIn: true,
+      buildNumber: "2",
     },
     android: {
       package: "com.moiorder.app",

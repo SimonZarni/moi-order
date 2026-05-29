@@ -30,9 +30,11 @@ class UserAddressService
                 'address'    => $data['address'],
                 'building'   => $data['building'] ?? null,
                 'floor'      => $data['floor'] ?? null,
-                'landmark'   => $data['landmark'] ?? null,
-                'province'   => $data['province'] ?? null,
-                'latitude'   => isset($data['latitude']) ? (float) $data['latitude'] : null,
+                'landmark'       => $data['landmark'] ?? null,
+                'province'       => $data['province'] ?? null,
+                'contact_name'   => $data['contact_name'] ?? null,
+                'contact_phone'  => $data['contact_phone'] ?? null,
+                'latitude'       => isset($data['latitude']) ? (float) $data['latitude'] : null,
                 'longitude'  => isset($data['longitude']) ? (float) $data['longitude'] : null,
                 'is_default' => false,
             ]);
@@ -60,7 +62,9 @@ class UserAddressService
             if (array_key_exists('building', $data)) $updates['building'] = $data['building'];
             if (array_key_exists('floor', $data))    $updates['floor']    = $data['floor'];
             if (array_key_exists('landmark', $data)) $updates['landmark'] = $data['landmark'];
-            if (array_key_exists('province', $data)) $updates['province'] = $data['province'];
+            if (array_key_exists('province', $data))       $updates['province']       = $data['province'];
+            if (array_key_exists('contact_name', $data))   $updates['contact_name']   = $data['contact_name'];
+            if (array_key_exists('contact_phone', $data))  $updates['contact_phone']  = $data['contact_phone'];
             if (array_key_exists('latitude', $data)) {
                 $updates['latitude'] = $data['latitude'] !== null ? (float) $data['latitude'] : null;
             }

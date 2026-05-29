@@ -22,6 +22,8 @@ class UserAddress extends Model
         'floor',
         'landmark',
         'province',
+        'contact_name',
+        'contact_phone',
         'latitude',
         'longitude',
         'is_default',

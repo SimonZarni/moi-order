@@ -17,7 +17,7 @@ class StoreUserAddressRequest extends FormRequest
 
     public function prepareForValidation(): void
     {
-        foreach (['address', 'building', 'floor', 'landmark', 'province'] as $field) {
+        foreach (['address', 'building', 'floor', 'landmark', 'province', 'contact_name', 'contact_phone'] as $field) {
             if ($this->has($field) && $this->input($field) !== null) {
                 $this->merge([$field => strip_tags(trim((string) $this->input($field)))]);
             }
@@ -33,8 +33,10 @@ class StoreUserAddressRequest extends FormRequest
             'building'   => ['nullable', 'string', 'max:255'],
             'floor'      => ['nullable', 'string', 'max:100'],
             'landmark'   => ['nullable', 'string', 'max:255'],
-            'province'   => ['nullable', 'string', 'max:100'],
-            'latitude'   => ['nullable', 'numeric', 'between:-90,90'],
+            'province'       => ['nullable', 'string', 'max:100'],
+            'contact_name'   => ['nullable', 'string', 'max:255'],
+            'contact_phone'  => ['nullable', 'string', 'max:50'],
+            'latitude'       => ['nullable', 'numeric', 'between:-90,90'],
             'longitude'  => ['nullable', 'numeric', 'between:-180,180'],
             'is_default' => ['boolean'],
         ];

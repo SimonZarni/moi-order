@@ -2,15 +2,17 @@ import { useState } from 'react';
 import { AddressFormErrors, AddressFormValues } from '../types';
 
 const DEFAULT_VALUES: AddressFormValues = {
-  label:     'home',
-  address:   '',
-  building:  '',
-  floor:     '',
-  landmark:  '',
-  province:  '',
-  latitude:  null,
-  longitude: null,
-  isDefault: false,
+  label:        'home',
+  address:      '',
+  building:     '',
+  floor:        '',
+  landmark:     '',
+  province:     '',
+  contactName:  '',
+  contactPhone: '',
+  latitude:     null,
+  longitude:    null,
+  isDefault:    false,
 };
 
 export interface UseAddressFormResult {
@@ -58,7 +60,9 @@ export function useAddressForm(initial?: Partial<AddressFormValues>): UseAddress
 
   const applyApiError = (apiErrors: Record<string, string[]>): void => {
     const next: AddressFormErrors = {};
-    if (apiErrors['address']?.[0]) next.address = apiErrors['address'][0];
+    if (apiErrors['address']?.[0])       next.address       = apiErrors['address'][0];
+    if (apiErrors['contact_name']?.[0])  next.contactName   = apiErrors['contact_name'][0];
+    if (apiErrors['contact_phone']?.[0]) next.contactPhone  = apiErrors['contact_phone'][0];
     setErrors(next);
   };
 
