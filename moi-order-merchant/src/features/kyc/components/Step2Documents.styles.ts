@@ -69,7 +69,7 @@ export const styles = StyleSheet.create({
   },
   preview: {
     width: '100%',
-    aspectRatio: 4 / 3,
+    height: 120,
     borderRadius: radius.lg,
     marginBottom: spacing.sm,
     backgroundColor: colours.backgroundDark,
