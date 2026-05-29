@@ -74,7 +74,7 @@ class AdminSubmissionController extends Controller
 
         $submission->update(['payment_authorized' => true]);
 
-        $submission->loadMissing(['user', 'serviceType.service']);
+        $submission->loadMissing(['user', 'serviceType.service', 'payment']);
 
         if ($submission->user) {
             $name = $submission->serviceType?->service?->name ?? 'Service Order #'.$submission->id;

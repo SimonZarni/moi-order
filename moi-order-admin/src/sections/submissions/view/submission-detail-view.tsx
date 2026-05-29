@@ -175,7 +175,8 @@ export function SubmissionDetailView() {
     setConfirmingOrder(true);
     submissionsApi
       .confirmPayment(id)
-      .then((updated) => setSubmission((prev) => prev ? { ...prev, ...updated } : prev))
+      .then(() => submissionsApi.get(id))
+      .then((data) => setSubmission(data))
       .catch(() => {})
       .finally(() => setConfirmingOrder(false));
   };

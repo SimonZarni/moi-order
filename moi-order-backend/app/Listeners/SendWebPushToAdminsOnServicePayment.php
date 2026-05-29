@@ -30,9 +30,13 @@ class SendWebPushToAdminsOnServicePayment implements ShouldQueue
     {
         $submission  = $event->submission->loadMissing(['user', 'serviceType.service']);
         $userName    = $submission->user?->name ?? 'A user';
-        $serviceName = $submission->serviceType?->service?->name
-            ?? $submission->serviceType?->name
-            ?? 'a service';
+        $serviceName = $submission->serviceType?->service?->name_mm
+            ?: $submission->serviceType?->name_mm
+            ?: $submission->serviceType?->service?->name_en
+            ?: $submission->serviceType?->name_en
+            ?: $submission->serviceType?->service?->name
+            ?: $submission->serviceType?->name
+            ?: 'a service';
 
         User::where('is_admin', true)->each(function (User $admin) use ($submission, $userName, $serviceName): void {
             $this->webPush->sendToUser(

@@ -29,9 +29,13 @@ class NotifyAdminsOfServicePayment
     {
         $submission = $event->submission->loadMissing(['user', 'serviceType.service']);
 
-        $serviceName = $submission->serviceType->service->name
-            ?? $submission->serviceType->name
-            ?? 'a service';
+        $serviceName = $submission->serviceType->service->name_mm
+            ?: $submission->serviceType->name_mm
+            ?: $submission->serviceType->service->name_en
+            ?: $submission->serviceType->name_en
+            ?: $submission->serviceType->service->name
+            ?: $submission->serviceType->name
+            ?: 'a service';
 
         $userName = $submission->user->name ?? 'A user';
         $body     = "{$userName} paid for {$serviceName}";
