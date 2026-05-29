@@ -61,6 +61,7 @@ export function SubmissionDetailView() {
   const [confirming, setConfirming] = useState(false);
   const [confirmError, setConfirmError] = useState('');
   const [confirmingOrder, setConfirmingOrder] = useState(false);
+  const [confirmOrderError, setConfirmOrderError] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -173,11 +174,12 @@ export function SubmissionDetailView() {
   const handleConfirmOrder = () => {
     if (!id) return;
     setConfirmingOrder(true);
+    setConfirmOrderError('');
     submissionsApi
       .confirmPayment(id)
       .then(() => submissionsApi.get(id))
       .then((data) => setSubmission(data))
-      .catch(() => {})
+      .catch(() => setConfirmOrderError('Could not confirm order. Please try again.'))
       .finally(() => setConfirmingOrder(false));
   };
 
@@ -372,6 +374,9 @@ export function SubmissionDetailView() {
                       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                         Auto-payment is disabled. The customer cannot pay until you confirm this order.
                       </Typography>
+                      {confirmOrderError && (
+                        <Alert severity="error" sx={{ mb: 1, py: 0.5 }}>{confirmOrderError}</Alert>
+                      )}
                       <Button
                         fullWidth
                         variant="contained"
