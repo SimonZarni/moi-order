@@ -18,7 +18,8 @@ import type { MerchantStackParamList } from '../../../types/navigation';
 
 const IS_EXPO_GO = Constants.appOwnership === 'expo';
 
-if (!IS_EXPO_GO) {
+// expo-notifications has no web support — guard all module-level side effects.
+if (!IS_EXPO_GO && Platform.OS !== 'web') {
   if (Platform.OS === 'android') {
     Notifications.setNotificationChannelAsync('default', {
       name: 'Default',
