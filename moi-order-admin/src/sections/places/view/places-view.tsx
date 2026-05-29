@@ -168,6 +168,15 @@ export function PlacesView() {
   const [importBatch, setImportBatch] = useState<ImportBatchData | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
 
+  const handleEditPlace = useCallback(
+    (placeId: number) => {
+      const idx = places.findIndex((p) => p.id === placeId);
+      const ids = places.map((p) => p.id).join(',');
+      router.push(`/places/${placeId}/edit?ids=${ids}&idx=${idx}`);
+    },
+    [places, router]
+  );
+
   const fetchPlaces = useCallback(() => {
     setLoading(true);
     placesApi
@@ -437,7 +446,7 @@ export function PlacesView() {
                               cursor: 'pointer',
                               '&:hover': { color: 'primary.main', textDecoration: 'underline' },
                             } : undefined}
-                            onClick={canUpdate ? () => router.push(`/places/${row.id}/edit`) : undefined}
+                            onClick={canUpdate ? () => handleEditPlace(row.id) : undefined}
                           >
                             {row.name_my}
                           </Typography>
@@ -470,7 +479,7 @@ export function PlacesView() {
                         </TableCell>
                         <TableCell align="right">
                           {canUpdate && (
-                            <IconButton size="small" onClick={() => router.push(`/places/${row.id}/edit`)}>
+                            <IconButton size="small" onClick={() => handleEditPlace(row.id)}>
                               <Iconify icon="solar:pen-bold" width={16} />
                             </IconButton>
                           )}

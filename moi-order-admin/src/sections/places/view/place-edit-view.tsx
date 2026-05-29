@@ -2,7 +2,7 @@ import type { PlaceTag } from 'src/types';
 import type { Theme } from '@mui/material/styles';
 import type { SelectChangeEvent } from '@mui/material/Select';
 
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useRef, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
@@ -14,6 +14,7 @@ import Alert from '@mui/material/Alert';
 import Select from '@mui/material/Select';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
+import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -59,7 +60,23 @@ type FormState = {
 export function PlaceEditView() {
   const { id } = useParams();
   const router = useRouter();
+  const [searchParams] = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const idsParam = searchParams.get('ids');
+  const idxParam = searchParams.get('idx');
+  const navIds = idsParam ? idsParam.split(',').map(Number) : [];
+  const navIdx = idxParam !== null ? Number(idxParam) : -1;
+  const prevId = navIdx > 0 ? navIds[navIdx - 1] : null;
+  const nextId = navIdx >= 0 && navIdx < navIds.length - 1 ? navIds[navIdx + 1] : null;
+
+  const navigateTo = useCallback(
+    (targetId: number, targetIdx: number) => {
+      const qs = idsParam ? `?ids=${idsParam}&idx=${targetIdx}` : '';
+      router.push(`/places/${targetId}/edit${qs}`);
+    },
+    [idsParam, router]
+  );
 
   const [form, setForm] = useState<FormState | null>(null);
   const [categories, setCategories] = useState<CategoryData[]>([]);
@@ -186,13 +203,44 @@ export function PlaceEditView() {
   return (
     <DashboardContent>
       <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <IconButton onClick={() => router.back()}>
-          <Iconify icon="eva:arrow-ios-forward-fill" width={20} sx={{ transform: 'rotate(180deg)' }} />
-        </IconButton>
+        <Tooltip title="Back to list">
+          <IconButton onClick={() => router.back()}>
+            <Iconify icon="eva:arrow-ios-forward-fill" width={20} sx={{ transform: 'rotate(180deg)' }} />
+          </IconButton>
+        </Tooltip>
         <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h4">Edit Place</Typography>
           <Typography variant="body2" color="text.secondary">ID: {id}</Typography>
         </Box>
+        {navIds.length > 0 && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mr: 0.5 }}>
+              {navIdx + 1} / {navIds.length}
+            </Typography>
+            <Tooltip title="Previous place">
+              <span>
+                <IconButton
+                  size="small"
+                  disabled={prevId === null}
+                  onClick={() => prevId !== null && navigateTo(prevId, navIdx - 1)}
+                >
+                  <Iconify icon="eva:arrow-ios-forward-fill" width={18} sx={{ transform: 'rotate(180deg)' }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Tooltip title="Next place">
+              <span>
+                <IconButton
+                  size="small"
+                  disabled={nextId === null}
+                  onClick={() => nextId !== null && navigateTo(nextId, navIdx + 1)}
+                >
+                  <Iconify icon="eva:arrow-ios-forward-fill" width={18} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Box>
+        )}
         <Button
           variant="contained"
           color="primary"
