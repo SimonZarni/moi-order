@@ -8,6 +8,9 @@ export interface CreateAddressInput {
   building?: string | null;
   floor?: string | null;
   landmark?: string | null;
+  province?: string | null;
+  contact_name?: string | null;
+  contact_phone?: string | null;
   latitude?: number | null;
   longitude?: number | null;
   is_default?: boolean;

@@ -14,7 +14,7 @@ export interface UseAddressesResult {
   addresses: import('@/types/models').UserAddress[];
   isLoading: boolean;
   isError: boolean;
-  handleCreate: (input: CreateAddressInput, callbacks?: { onSuccess?: () => void; onError?: () => void }) => void;
+  handleCreate: (input: CreateAddressInput, callbacks?: { onSuccess?: () => void; onError?: (err: unknown) => void }) => void;
   handleUpdate: (id: number, input: UpdateAddressInput, callbacks?: { onSuccess?: () => void; onError?: (err: unknown) => void }) => void;
   handleDelete: (id: number, callbacks?: { onSuccess?: () => void }) => void;
   handleSetDefault: (id: number) => void;
