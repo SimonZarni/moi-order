@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\Admin\V1\AdminCategoryController;
 use App\Http\Controllers\Api\Admin\V1\AdminPaymentController;
 use App\Http\Controllers\Api\Admin\V1\AdminPaymentSettingController;
 use App\Http\Controllers\Api\Admin\V1\AdminEmergencyContactController;
+use App\Http\Controllers\Api\Admin\V1\AdminGooglePlaceController;
 use App\Http\Controllers\Api\Admin\V1\AdminPlaceController;
 use App\Http\Controllers\Api\Admin\V1\AdminRestaurantController;
 use App\Http\Controllers\Api\Admin\V1\AdminRoleController;
@@ -267,6 +268,18 @@ Route::prefix('places')->name('admin.places.')->group(function (): void {
     Route::delete('/{place}/images/{image}', [AdminPlaceController::class, 'deleteImage'])->name('images.destroy')
         ->middleware('check.permission:places.update');
     Route::patch('/{place}/images/reorder', [AdminPlaceController::class, 'reorderImages'])->name('images.reorder')
+        ->middleware('check.permission:places.update');
+
+    // ── Google Place ID management ────────────────────────────────────────────
+    Route::post('/search-google', [AdminGooglePlaceController::class, 'searchGoogle'])->name('google.search');
+    Route::patch('/{place}/google-place-id', [AdminGooglePlaceController::class, 'saveGooglePlaceId'])->name('google.save-id')
+        ->middleware('check.permission:places.update');
+
+    // ── Google Photos (admin-only staging) ────────────────────────────────────
+    Route::get('/{place}/google-photos', [AdminGooglePlaceController::class, 'getGooglePhotos'])->name('google.photos.index');
+    Route::post('/{place}/google-photos/fetch', [AdminGooglePlaceController::class, 'fetchGooglePhotos'])->name('google.photos.fetch')
+        ->middleware('check.permission:places.update');
+    Route::post('/{place}/google-photos/{photo}/add-to-gallery', [AdminGooglePlaceController::class, 'addToGallery'])->name('google.photos.add-gallery')
         ->middleware('check.permission:places.update');
 });
 

@@ -93,6 +93,16 @@ class FileStorageService implements FileStorageInterface
         $this->disk->delete($path);
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function storeRaw(string $contents, string $path): string
+    {
+        $this->disk->put(ltrim($path, '/'), $contents);
+
+        return ltrim($path, '/');
+    }
+
     // ─── Private ─────────────────────────────────────────────────────────────
 
     /**

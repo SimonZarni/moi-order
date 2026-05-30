@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\GoogleMatchStatus;
 use App\Traits\HasAuditLog;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -34,13 +35,16 @@ class Place extends Model
         'contact_phone',
         'website',
         'google_map_url',
+        'google_place_id',
+        'google_match_status',
     ];
 
     protected function casts(): array
     {
         return [
-            'latitude'  => 'float',
-            'longitude' => 'float',
+            'latitude'            => 'float',
+            'longitude'           => 'float',
+            'google_match_status' => GoogleMatchStatus::class,
         ];
     }
 
@@ -68,6 +72,15 @@ class Place extends Model
     public function coverImage(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(PlaceImage::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Google-sourced photos staged for admin review.
+     * Source of truth for the admin Google Photos panel.
+     */
+    public function googlePhotos(): HasMany
+    {
+        return $this->hasMany(PlacePhoto::class)->where('source', 'google')->orderBy('display_order');
     }
 
     public function favoritedByUsers(): BelongsToMany

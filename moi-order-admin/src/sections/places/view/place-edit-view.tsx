@@ -1,6 +1,7 @@
 import type { PlaceTag } from 'src/types';
 import type { Theme } from '@mui/material/styles';
 import type { SelectChangeEvent } from '@mui/material/Select';
+import type { GoogleMatchStatus, GooglePlaceResult, PlacePhotoData } from 'src/api/places';
 
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useRef, useState, useEffect, useCallback } from 'react';
@@ -11,10 +12,12 @@ import Grid from '@mui/material/Grid';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
+import Paper from '@mui/material/Paper';
 import Select from '@mui/material/Select';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
+import Divider from '@mui/material/Divider';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -33,7 +36,17 @@ import { placesApi } from 'src/api/places';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { categoriesApi, type CategoryData } from 'src/api/categories';
 
+import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
+
+// ── Google Match Status badge ─────────────────────────────────────────────────
+
+function GoogleStatusBadge({ status }: { status: GoogleMatchStatus | null }) {
+  if (!status) return <Label color="default">Not Connected</Label>;
+  if (status === 'auto_matched') return <Label color="warning">Auto Matched</Label>;
+  if (status === 'needs_manual') return <Label color="error">Not Found</Label>;
+  return <Label color="success">✅ Verified</Label>;
+}
 
 // ----------------------------------------------------------------------
 
@@ -114,6 +127,21 @@ export function PlaceEditView() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
 
+  // ── Google Place ID state ──────────────────────────────────────────────────
+  const [googlePlaceId, setGooglePlaceId] = useState('');
+  const [googleMatchStatus, setGoogleMatchStatus] = useState<GoogleMatchStatus | null>(null);
+  const [googleSearchResults, setGoogleSearchResults] = useState<GooglePlaceResult[]>([]);
+  const [isSearchingGoogle, setIsSearchingGoogle] = useState(false);
+  const [isSavingGoogleId, setIsSavingGoogleId] = useState(false);
+  const [showGoogleDropdown, setShowGoogleDropdown] = useState(false);
+  const [googleIdSaved, setGoogleIdSaved] = useState(false);
+
+  // ── Google Photos state ────────────────────────────────────────────────────
+  const [googlePhotos, setGooglePhotos] = useState<PlacePhotoData[]>([]);
+  const [isFetchingPhotos, setIsFetchingPhotos] = useState(false);
+  const [addedToGallery, setAddedToGallery] = useState<Set<number>>(new Set());
+  const [addingPhotoId, setAddingPhotoId] = useState<number | null>(null);
+
   useEffect(() => {
     if (!id) return;
     setLoading(true);
@@ -126,6 +154,8 @@ export function PlaceEditView() {
         setCategories(cats);
         setTags(tagList);
         setImages(place.images ?? []);
+        setGooglePlaceId(place.google_place_id ?? '');
+        setGoogleMatchStatus(place.google_match_status ?? null);
         setForm({
           name_my: place.name_my ?? '',
           name_en: place.name_en ?? '',
@@ -143,6 +173,13 @@ export function PlaceEditView() {
           website: place.website ?? '',
           google_map_url: place.google_map_url ?? '',
         });
+        // Load any previously fetched Google photos
+        if (place.google_place_id) {
+          placesApi.getGooglePhotos(id!).then((photos) => {
+            setGooglePhotos(photos);
+            setAddedToGallery(new Set(photos.filter((p) => p.is_selected).map((p) => p.id)));
+          }).catch(() => {});
+        }
       })
       .catch(() => setError('Failed to load place.'))
       .finally(() => setLoading(false));
@@ -206,6 +243,70 @@ export function PlaceEditView() {
       .catch(() => setError('Failed to delete image.'))
       .finally(() => setDeletingImageId(null));
   };
+
+  // ── Google Place ID handlers ───────────────────────────────────────────────
+
+  const handleSearchGoogle = useCallback(() => {
+    if (!form || !id) return;
+    setIsSearchingGoogle(true);
+    setShowGoogleDropdown(false);
+    placesApi
+      .searchGoogle(form.name_en || form.name_my, form.city)
+      .then((results) => {
+        setGoogleSearchResults(results);
+        setShowGoogleDropdown(true);
+      })
+      .catch(() => setError('Google search failed. Check API key.'))
+      .finally(() => setIsSearchingGoogle(false));
+  }, [form, id]);
+
+  const handleSelectGoogleResult = useCallback((result: GooglePlaceResult) => {
+    setGooglePlaceId(result.id);
+    setShowGoogleDropdown(false);
+    setGoogleIdSaved(false);
+  }, []);
+
+  const handleSaveGooglePlaceId = useCallback(() => {
+    if (!id || !googlePlaceId) return;
+    setIsSavingGoogleId(true);
+    placesApi
+      .saveGooglePlaceId(id, googlePlaceId)
+      .then((data) => {
+        setGoogleMatchStatus(data.google_match_status);
+        setGoogleIdSaved(true);
+      })
+      .catch(() => setError('Failed to save Google Place ID.'))
+      .finally(() => setIsSavingGoogleId(false));
+  }, [id, googlePlaceId]);
+
+  // ── Google Photos handlers ─────────────────────────────────────────────────
+
+  const handleFetchGooglePhotos = useCallback(() => {
+    if (!id) return;
+    setIsFetchingPhotos(true);
+    setError('');
+    placesApi
+      .fetchGooglePhotos(id)
+      .then((photos) => {
+        setGooglePhotos(photos);
+        setAddedToGallery(new Set(photos.filter((p) => p.is_selected).map((p) => p.id)));
+      })
+      .catch(() => setError('Failed to fetch Google photos. Make sure the Google Place ID is saved.'))
+      .finally(() => setIsFetchingPhotos(false));
+  }, [id]);
+
+  const handleAddToGallery = useCallback((photo: PlacePhotoData) => {
+    if (!id) return;
+    setAddingPhotoId(photo.id);
+    placesApi
+      .addToGallery(id, photo.id)
+      .then((newImage) => {
+        setImages((prev) => [...prev, newImage]);
+        setAddedToGallery((prev) => new Set([...prev, photo.id]));
+      })
+      .catch(() => setError('Failed to add photo to gallery.'))
+      .finally(() => setAddingPhotoId(null));
+  }, [id]);
 
   if (loading) {
     return (
@@ -519,6 +620,81 @@ export function PlaceEditView() {
                 </Grid>
               </CardContent>
             </Card>
+            {/* ── Google Place ID ── */}
+            <Card>
+              <CardHeader title="Google Place ID" />
+              <CardContent>
+                <Stack spacing={2}>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <GoogleStatusBadge status={googleMatchStatus} />
+                    {googleIdSaved && <Label color="success">Saved ✓</Label>}
+                  </Stack>
+
+                  <Stack direction="row" spacing={1}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Google Place ID"
+                      placeholder="ChIJ…"
+                      value={googlePlaceId}
+                      onChange={(e) => { setGooglePlaceId(e.target.value); setGoogleIdSaved(false); }}
+                    />
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      disabled={isSearchingGoogle || !form}
+                      onClick={handleSearchGoogle}
+                      sx={{ whiteSpace: 'nowrap', minWidth: 130 }}
+                      startIcon={isSearchingGoogle ? <CircularProgress size={12} /> : <Iconify icon="eva:search-fill" width={14} />}
+                    >
+                      {isSearchingGoogle ? 'Searching…' : 'Search Google'}
+                    </Button>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      disabled={!googlePlaceId || isSavingGoogleId}
+                      onClick={handleSaveGooglePlaceId}
+                      sx={{ whiteSpace: 'nowrap', minWidth: 120 }}
+                      startIcon={isSavingGoogleId ? <CircularProgress size={12} color="inherit" /> : <Iconify icon="eva:checkmark-fill" width={14} />}
+                    >
+                      {isSavingGoogleId ? 'Saving…' : 'Save & Verify'}
+                    </Button>
+                  </Stack>
+
+                  {/* Search results dropdown */}
+                  {showGoogleDropdown && googleSearchResults.length > 0 && (
+                    <Paper variant="outlined" sx={{ p: 1 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>
+                        Select the correct place:
+                      </Typography>
+                      <Stack spacing={0.5} sx={{ mt: 0.5 }}>
+                        {googleSearchResults.map((result) => (
+                          <Box
+                            key={result.id}
+                            sx={{
+                              px: 1.5, py: 1,
+                              borderRadius: 1,
+                              cursor: 'pointer',
+                              '&:hover': { bgcolor: 'action.hover' },
+                            }}
+                            onClick={() => handleSelectGoogleResult(result)}
+                          >
+                            <Typography variant="body2" fontWeight={600}>{result.displayName}</Typography>
+                            <Typography variant="caption" color="text.secondary">{result.formattedAddress}</Typography>
+                            <Typography variant="caption" color="text.disabled" display="block" sx={{ fontSize: 10 }}>
+                              ID: {result.id}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Stack>
+                    </Paper>
+                  )}
+                  {showGoogleDropdown && googleSearchResults.length === 0 && (
+                    <Alert severity="warning">No Google Places results found. Try adjusting the place name or city.</Alert>
+                  )}
+                </Stack>
+              </CardContent>
+            </Card>
           </Stack>
         </Grid>
 
@@ -610,6 +786,121 @@ export function PlaceEditView() {
                   </Box>
                 </Grid>
               </Grid>
+            </CardContent>
+          </Card>
+          {/* ── Google Photos ── */}
+          <Card>
+            <CardHeader
+              title="Google Photos"
+              subheader="Fetch photos from Google, then add your favourites to the gallery above."
+              action={
+                <Tooltip title={!googlePlaceId ? 'Set a Google Place ID first' : ''}>
+                  <span>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      disabled={isFetchingPhotos || !googlePlaceId}
+                      onClick={handleFetchGooglePhotos}
+                      startIcon={
+                        isFetchingPhotos
+                          ? <CircularProgress size={12} />
+                          : <Iconify icon="solar:restart-bold" width={14} />
+                      }
+                    >
+                      {isFetchingPhotos ? 'Fetching…' : googlePhotos.length > 0 ? 'Refresh' : 'Fetch from Google'}
+                    </Button>
+                  </span>
+                </Tooltip>
+              }
+            />
+            <CardContent>
+              {!googlePlaceId && (
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                  Please set a Google Place ID first.
+                </Typography>
+              )}
+
+              {googlePlaceId && isFetchingPhotos && (
+                <Stack alignItems="center" spacing={1} sx={{ py: 3 }}>
+                  <CircularProgress size={28} />
+                  <Typography variant="body2" color="text.secondary">
+                    Fetching photos from Google…
+                  </Typography>
+                </Stack>
+              )}
+
+              {googlePlaceId && !isFetchingPhotos && googlePhotos.length === 0 && (
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                  No photos fetched yet. Click "Fetch from Google" to start.
+                </Typography>
+              )}
+
+              {googlePhotos.length > 0 && !isFetchingPhotos && (
+                <>
+                  <Divider sx={{ mb: 2 }} />
+                  <Grid container spacing={1}>
+                    {googlePhotos.map((photo) => {
+                      const isAdded = addedToGallery.has(photo.id);
+                      const isAdding = addingPhotoId === photo.id;
+
+                      return (
+                        <Grid key={photo.id} size={{ xs: 4 }}>
+                          <Box
+                            sx={{
+                              position: 'relative',
+                              borderRadius: 1,
+                              overflow: 'hidden',
+                              border: isAdded ? '2px solid' : '2px solid transparent',
+                              borderColor: isAdded ? 'success.main' : 'transparent',
+                            }}
+                          >
+                            <Avatar
+                              src={photo.photo_url}
+                              variant="rounded"
+                              sx={{ width: '100%', height: 80, borderRadius: 0 }}
+                            />
+                            {photo.author_name && (
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  display: 'block',
+                                  px: 0.5,
+                                  py: 0.25,
+                                  fontSize: 9,
+                                  color: 'text.secondary',
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  bgcolor: 'background.paper',
+                                }}
+                              >
+                                {photo.author_name}
+                              </Typography>
+                            )}
+                            <Button
+                              fullWidth
+                              size="small"
+                              variant={isAdded ? 'contained' : 'outlined'}
+                              color={isAdded ? 'success' : 'primary'}
+                              disabled={isAdded || isAdding}
+                              onClick={() => handleAddToGallery(photo)}
+                              sx={{ borderRadius: 0, fontSize: 10, py: 0.25 }}
+                            >
+                              {isAdding ? (
+                                <CircularProgress size={10} color="inherit" />
+                              ) : isAdded ? (
+                                'Added ✓'
+                              ) : (
+                                '+ Gallery'
+                              )}
+                            </Button>
+                          </Box>
+                        </Grid>
+                      );
+                    })}
+                  </Grid>
+                </>
+              )}
             </CardContent>
           </Card>
         </Grid>

@@ -2,6 +2,26 @@ import apiClient from './client';
 
 export type PlaceStatus = 'active' | 'inactive' | 'pending';
 
+export type GoogleMatchStatus = 'auto_matched' | 'needs_manual' | 'verified';
+
+export type GooglePlaceResult = {
+  id: string;
+  displayName: string;
+  formattedAddress: string;
+};
+
+export type PlacePhotoData = {
+  id: number;
+  photo_url: string;
+  google_photo_name: string | null;
+  display_order: number;
+  source: 'google' | 'manual';
+  is_selected: boolean;
+  width_px: number | null;
+  height_px: number | null;
+  author_name: string | null;
+};
+
 export type ImportBatchData = {
   id: number;
   status: 'pending' | 'processing' | 'completed' | 'failed';
@@ -38,6 +58,8 @@ export type PlaceData = {
   contact_phone: string | null;
   website: string | null;
   google_map_url: string | null;
+  google_place_id: string | null;
+  google_match_status: GoogleMatchStatus | null;
   cover_image: string | null;
   rating?: number;
   review_count?: number;
@@ -90,4 +112,36 @@ export const placesApi = {
       .then((r) => r.data.data),
   exportExcel: (params: ExportParams) =>
     apiClient.get<Blob>('/places/export', { params, responseType: 'blob' }).then((r) => r.data),
+
+  // ── Google Place ID ──────────────────────────────────────────────────────────
+  searchGoogle: (name: string, city: string) =>
+    apiClient
+      .post<{ data: GooglePlaceResult[] }>('/places/search-google', { name, city })
+      .then((r) => r.data.data),
+
+  saveGooglePlaceId: (id: number | string, googlePlaceId: string) =>
+    apiClient
+      .patch<{ data: { google_place_id: string; google_match_status: GoogleMatchStatus } }>(
+        `/places/${id}/google-place-id`,
+        { google_place_id: googlePlaceId }
+      )
+      .then((r) => r.data.data),
+
+  // ── Google Photos ────────────────────────────────────────────────────────────
+  getGooglePhotos: (id: number | string) =>
+    apiClient
+      .get<{ data: PlacePhotoData[] }>(`/places/${id}/google-photos`)
+      .then((r) => r.data.data),
+
+  fetchGooglePhotos: (id: number | string) =>
+    apiClient
+      .post<{ data: PlacePhotoData[] }>(`/places/${id}/google-photos/fetch`)
+      .then((r) => r.data.data),
+
+  addToGallery: (id: number | string, photoId: number) =>
+    apiClient
+      .post<{ data: { id: number; url: string; sort_order: number } }>(
+        `/places/${id}/google-photos/${photoId}/add-to-gallery`
+      )
+      .then((r) => r.data.data),
 };

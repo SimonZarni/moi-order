@@ -41,4 +41,13 @@ interface FileStorageInterface
      * Delete the file at the given stored path.
      */
     public function delete(string $path): void;
+
+    /**
+     * Store raw byte content to a caller-specified path (no UploadedFile required).
+     * Used for programmatic downloads (e.g. Google photo bytes fetched server-side).
+     * The caller is responsible for UUID-naming the path to avoid collisions.
+     *
+     * Returns the stored path (same value as $path).
+     */
+    public function storeRaw(string $contents, string $path): string;
 }

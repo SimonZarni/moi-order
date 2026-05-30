@@ -96,6 +96,14 @@ class AppServiceProvider extends ServiceProvider
             )
         );
 
+        $this->app->bind(
+            \App\Services\AdminGooglePhotoService::class,
+            fn ($app) => new \App\Services\AdminGooglePhotoService(
+                $app->make(GooglePlacesInterface::class),
+                $app->make(FileStorageInterface::class),
+            )
+        );
+
         $this->app->bind(\App\Services\AdminPlaceImportService::class);
 
         $this->app->bind(\Google\Client::class, function (): \Google\Client {
