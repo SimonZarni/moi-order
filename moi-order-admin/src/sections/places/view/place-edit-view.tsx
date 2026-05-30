@@ -16,8 +16,10 @@ import Paper from '@mui/material/Paper';
 import Select from '@mui/material/Select';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
+import Dialog from '@mui/material/Dialog';
 import Tooltip from '@mui/material/Tooltip';
 import Divider from '@mui/material/Divider';
+import DialogContent from '@mui/material/DialogContent';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -141,6 +143,8 @@ export function PlaceEditView() {
   const [isFetchingPhotos, setIsFetchingPhotos] = useState(false);
   const [addedToGallery, setAddedToGallery] = useState<Set<number>>(new Set());
   const [addingPhotoId, setAddingPhotoId] = useState<number | null>(null);
+  const [removingPhotoId, setRemovingPhotoId] = useState<number | null>(null);
+  const [viewingIndex, setViewingIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -306,6 +310,19 @@ export function PlaceEditView() {
       })
       .catch(() => setError('Failed to add photo to gallery.'))
       .finally(() => setAddingPhotoId(null));
+  }, [id]);
+
+  const handleRemoveFromGallery = useCallback((photo: PlacePhotoData) => {
+    if (!id) return;
+    setRemovingPhotoId(photo.id);
+    placesApi
+      .removeFromGallery(id, photo.id)
+      .then(() => {
+        setImages((prev) => prev.filter((img) => img.url !== photo.photo_url));
+        setAddedToGallery((prev) => { const n = new Set(prev); n.delete(photo.id); return n; });
+      })
+      .catch(() => setError('Failed to remove photo from gallery.'))
+      .finally(() => setRemovingPhotoId(null));
   }, [id]);
 
   if (loading) {
@@ -838,67 +855,146 @@ export function PlaceEditView() {
               {googlePhotos.length > 0 && !isFetchingPhotos && (
                 <>
                   <Divider sx={{ mb: 2 }} />
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                    Click any photo to view full size and add to gallery.
+                  </Typography>
                   <Grid container spacing={1}>
-                    {googlePhotos.map((photo) => {
+                    {googlePhotos.map((photo, index) => {
                       const isAdded = addedToGallery.has(photo.id);
-                      const isAdding = addingPhotoId === photo.id;
 
                       return (
                         <Grid key={photo.id} size={{ xs: 4 }}>
                           <Box
+                            onClick={() => setViewingIndex(index)}
                             sx={{
                               position: 'relative',
                               borderRadius: 1,
                               overflow: 'hidden',
-                              border: isAdded ? '2px solid' : '2px solid transparent',
+                              cursor: 'pointer',
+                              border: '2px solid',
                               borderColor: isAdded ? 'success.main' : 'transparent',
+                              '&:hover': { opacity: 0.85 },
                             }}
                           >
                             <Avatar
                               src={photo.photo_url}
                               variant="rounded"
-                              sx={{ width: '100%', height: 80, borderRadius: 0 }}
+                              sx={{ width: '100%', height: 90, borderRadius: 0 }}
                             />
-                            {photo.author_name && (
-                              <Typography
-                                variant="caption"
-                                sx={{
-                                  display: 'block',
-                                  px: 0.5,
-                                  py: 0.25,
-                                  fontSize: 9,
-                                  color: 'text.secondary',
-                                  whiteSpace: 'nowrap',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  bgcolor: 'background.paper',
-                                }}
-                              >
-                                {photo.author_name}
-                              </Typography>
+                            {/* Green checkmark badge on added photos */}
+                            {isAdded && (
+                              <Box sx={{
+                                position: 'absolute', top: 4, right: 4,
+                                bgcolor: 'success.main', borderRadius: '50%',
+                                width: 20, height: 20,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              }}>
+                                <Iconify icon="eva:checkmark-fill" width={12} sx={{ color: 'white' }} />
+                              </Box>
                             )}
-                            <Button
-                              fullWidth
-                              size="small"
-                              variant={isAdded ? 'contained' : 'outlined'}
-                              color={isAdded ? 'success' : 'primary'}
-                              disabled={isAdded || isAdding}
-                              onClick={() => handleAddToGallery(photo)}
-                              sx={{ borderRadius: 0, fontSize: 10, py: 0.25 }}
-                            >
-                              {isAdding ? (
-                                <CircularProgress size={10} color="inherit" />
-                              ) : isAdded ? (
-                                'Added ✓'
-                              ) : (
-                                '+ Gallery'
-                              )}
-                            </Button>
                           </Box>
                         </Grid>
                       );
                     })}
                   </Grid>
+
+                  {/* ── Lightbox ── */}
+                  {viewingIndex !== null && (
+                    <Dialog
+                      open
+                      onClose={() => setViewingIndex(null)}
+                      maxWidth="md"
+                      fullWidth
+                      PaperProps={{ sx: { bgcolor: '#111', borderRadius: 2 } }}
+                    >
+                      <DialogContent sx={{ p: 0, position: 'relative' }}>
+
+                        {/* Close */}
+                        <IconButton
+                          onClick={() => setViewingIndex(null)}
+                          size="small"
+                          sx={{ position: 'absolute', top: 8, right: 8, zIndex: 10, bgcolor: 'rgba(0,0,0,0.6)', color: 'white', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}
+                        >
+                          <Iconify icon="mingcute:close-line" width={18} />
+                        </IconButton>
+
+                        {/* Prev */}
+                        {viewingIndex > 0 && (
+                          <IconButton
+                            onClick={() => setViewingIndex((v) => (v ?? 1) - 1)}
+                            sx={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', zIndex: 10, bgcolor: 'rgba(0,0,0,0.5)', color: 'white', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}
+                          >
+                            <Iconify icon="eva:arrow-ios-forward-fill" sx={{ transform: 'rotate(180deg)' }} />
+                          </IconButton>
+                        )}
+
+                        {/* Next */}
+                        {viewingIndex < googlePhotos.length - 1 && (
+                          <IconButton
+                            onClick={() => setViewingIndex((v) => (v ?? 0) + 1)}
+                            sx={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', zIndex: 10, bgcolor: 'rgba(0,0,0,0.5)', color: 'white', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}
+                          >
+                            <Iconify icon="eva:arrow-ios-forward-fill" />
+                          </IconButton>
+                        )}
+
+                        {/* Full image */}
+                        <Box
+                          component="img"
+                          src={googlePhotos[viewingIndex].photo_url}
+                          alt=""
+                          sx={{ width: '100%', maxHeight: 520, objectFit: 'contain', display: 'block' }}
+                        />
+
+                        {/* Bottom bar */}
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          spacing={1}
+                          sx={{ px: 2, py: 1.5, bgcolor: 'rgba(0,0,0,0.75)' }}
+                        >
+                          <Stack sx={{ flex: 1 }}>
+                            {googlePhotos[viewingIndex].author_name && (
+                              <Typography variant="caption" sx={{ color: 'grey.300' }}>
+                                📷 {googlePhotos[viewingIndex].author_name}
+                              </Typography>
+                            )}
+                            <Typography variant="caption" sx={{ color: 'grey.500' }}>
+                              {viewingIndex + 1} / {googlePhotos.length}
+                            </Typography>
+                          </Stack>
+
+                          {addedToGallery.has(googlePhotos[viewingIndex].id) ? (
+                            <Button
+                              variant="contained"
+                              color="error"
+                              size="small"
+                              disabled={removingPhotoId === googlePhotos[viewingIndex].id}
+                              startIcon={removingPhotoId === googlePhotos[viewingIndex].id
+                                ? <CircularProgress size={12} color="inherit" />
+                                : <Iconify icon="mingcute:close-line" width={14} />}
+                              onClick={() => handleRemoveFromGallery(googlePhotos[viewingIndex])}
+                            >
+                              Remove from Gallery
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="contained"
+                              color="success"
+                              size="small"
+                              disabled={addingPhotoId === googlePhotos[viewingIndex].id}
+                              startIcon={addingPhotoId === googlePhotos[viewingIndex].id
+                                ? <CircularProgress size={12} color="inherit" />
+                                : <Iconify icon="eva:checkmark-fill" width={14} />}
+                              onClick={() => handleAddToGallery(googlePhotos[viewingIndex])}
+                            >
+                              Add to Gallery
+                            </Button>
+                          )}
+                        </Stack>
+                      </DialogContent>
+                    </Dialog>
+                  )}
                 </>
               )}
             </CardContent>

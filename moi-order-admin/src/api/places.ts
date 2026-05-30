@@ -144,4 +144,7 @@ export const placesApi = {
         `/places/${id}/google-photos/${photoId}/add-to-gallery`
       )
       .then((r) => r.data.data),
+
+  removeFromGallery: (id: number | string, photoId: number) =>
+    apiClient.post(`/places/${id}/google-photos/${photoId}/remove-from-gallery`),
 };

@@ -281,6 +281,8 @@ Route::prefix('places')->name('admin.places.')->group(function (): void {
         ->middleware('check.permission:places.update');
     Route::post('/{place}/google-photos/{photo}/add-to-gallery', [AdminGooglePlaceController::class, 'addToGallery'])->name('google.photos.add-gallery')
         ->middleware('check.permission:places.update');
+    Route::post('/{place}/google-photos/{photo}/remove-from-gallery', [AdminGooglePlaceController::class, 'removeFromGallery'])->name('google.photos.remove-gallery')
+        ->middleware('check.permission:places.update');
 });
 
 // ── Emergency Contacts + Photos ───────────────────────────────────────────────

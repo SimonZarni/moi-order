@@ -101,6 +101,27 @@ class AdminGooglePhotoService
     }
 
     /**
+     * Remove a Google photo from the place's real gallery.
+     * Deletes the place_images row whose path matches the photo URL
+     * and marks the place_photos record as deselected.
+     *
+     * @throws \InvalidArgumentException when the photo doesn't belong to the place.
+     */
+    public function removeFromGallery(Place $place, PlacePhoto $photo): void
+    {
+        if ($photo->place_id !== $place->id) {
+            throw new \InvalidArgumentException('Photo does not belong to this place.');
+        }
+
+        DB::transaction(function () use ($place, $photo): void {
+            // Find the place_images entry by the stored URL path (added via addToGallery).
+            $place->images()->where('path', $photo->photo_url)->delete();
+
+            $photo->update(['is_selected' => false]);
+        });
+    }
+
+    /**
      * Copy a Google photo into the place's real gallery (place_images table).
      * Marks the place_photos record as selected so the admin UI reflects "Added ✓".
      *

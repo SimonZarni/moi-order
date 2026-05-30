@@ -83,4 +83,12 @@ class AdminGooglePlaceController extends Controller
 
         return response()->json(['data' => new PlaceImageResource($image)], 201);
     }
+
+    /** POST /api/admin/v1/places/{place}/google-photos/{photo}/remove-from-gallery */
+    public function removeFromGallery(Place $place, PlacePhoto $photo): JsonResponse
+    {
+        $this->photoService->removeFromGallery($place, $photo);
+
+        return response()->json(null, 204);
+    }
 }
