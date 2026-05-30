@@ -115,19 +115,24 @@ class AdminPaymentService
      */
     public function regenerate(Payment $payment): Payment
     {
-        if ($payment->status !== PaymentStatus::Pending) {
+        // Succeeded is the only status we must never regenerate — double-charge protection.
+        if ($payment->status === PaymentStatus::Succeeded) {
             throw new \DomainException('payment.not_regeneratable', 409);
         }
 
-        // Null expires_at (legacy rows): treat as expired after 1 hour — mirrors
-        // the same logic in PaymentService::findPendingPayment().
-        $isExpired = $payment->expires_at !== null
-            ? $payment->expires_at->isPast()
-            : $payment->created_at->lt(now()->subHour());
+        // For still-pending payments the QR must actually be expired before we
+        // replace it — prevents regenerating a live QR the user is about to scan.
+        if ($payment->status === PaymentStatus::Pending) {
+            $isExpired = $payment->expires_at !== null
+                ? $payment->expires_at->isPast()
+                : $payment->created_at->lt(now()->subHour());
 
-        if (! $isExpired) {
-            throw new \DomainException('payment.qr_not_expired', 409);
+            if (! $isExpired) {
+                throw new \DomainException('payment.qr_not_expired', 409);
+            }
         }
+        // Failed payments (Stripe marked them after QR expiry) skip the expiry
+        // check — the terminal state already proves no live QR exists.
 
         $payment->loadMissing('payable');
 

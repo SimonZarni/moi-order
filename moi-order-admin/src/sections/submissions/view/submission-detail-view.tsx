@@ -419,6 +419,28 @@ export function SubmissionDetailView() {
                     )}
                   </Stack>
 
+                  {submission.payment.status === 'failed' && canManagePayments && (
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                        The QR code expired and payment was marked failed by Stripe. Regenerate to create a fresh QR for the customer.
+                      </Typography>
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        color="warning"
+                        disabled={regenerating}
+                        onClick={handleRegenerateQr}
+                        startIcon={
+                          regenerating
+                            ? <CircularProgress size={14} color="inherit" />
+                            : <Iconify icon="solar:restart-bold" width={16} />
+                        }
+                      >
+                        {regenerating ? 'Generating…' : 'Regenerate QR Code'}
+                      </Button>
+                    </Box>
+                  )}
+
                   {submission.payment.status === 'pending' && submission.payment.qr_image_url && (() => {
                     const isExpired = submission.payment.expires_at !== null &&
                       new Date(submission.payment.expires_at) < new Date();
