@@ -1,7 +1,7 @@
 import type { PlaceTag } from 'src/types';
 import type { Theme } from '@mui/material/styles';
 import type { SelectChangeEvent } from '@mui/material/Select';
-import type { GoogleMatchStatus, GooglePlaceResult, PlacePhotoData } from 'src/api/places';
+import type { PlacePhotoData, GoogleMatchStatus, GooglePlaceResult } from 'src/api/places';
 
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useRef, useState, useEffect, useCallback } from 'react';
@@ -831,7 +831,7 @@ export function PlaceEditView() {
 
               {googlePlaceId && !isFetchingPhotos && googlePhotos.length === 0 && (
                 <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
-                  No photos fetched yet. Click "Fetch from Google" to start.
+                  No photos fetched yet. Click &lsquo;Fetch from Google&rsquo; to start.
                 </Typography>
               )}
 
