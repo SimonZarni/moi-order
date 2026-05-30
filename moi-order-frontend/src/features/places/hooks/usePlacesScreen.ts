@@ -65,7 +65,8 @@ export function usePlacesScreen(): UsePlacesScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const queryClient = useQueryClient();
 
-  const placesListRef = useRef<FlatList<Place>>(null);
+  const placesListRef    = useRef<FlatList<Place>>(null);
+  const returningFromDetailRef = useRef(false);
 
   const [query, setQuery] = useState('');
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -78,6 +79,11 @@ export function usePlacesScreen(): UsePlacesScreenResult {
 
   useFocusEffect(
     useCallback(() => {
+      if (returningFromDetailRef.current) {
+        returningFromDetailRef.current = false;
+      } else {
+        placesListRef.current?.scrollToOffset({ offset: 0, animated: false });
+      }
       return () => { setQuery(''); };
     }, [])
   );
@@ -243,6 +249,7 @@ export function usePlacesScreen(): UsePlacesScreenResult {
       queryFn:  () => fetchPlaceDetail(placeId),
       staleTime: CACHE_TTL.USER_DATA,
     });
+    returningFromDetailRef.current = true;
     navigation.navigate('PlaceDetail', { placeId });
   }, [navigation, queryClient]);
 
