@@ -78,7 +78,6 @@ export function usePlacesScreen(): UsePlacesScreenResult {
 
   useFocusEffect(
     useCallback(() => {
-      placesListRef.current?.scrollToOffset({ offset: 0, animated: false });
       return () => { setQuery(''); };
     }, [])
   );
