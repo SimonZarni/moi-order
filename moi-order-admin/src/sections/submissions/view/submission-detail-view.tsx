@@ -177,7 +177,6 @@ export function SubmissionDetailView() {
     setConfirmOrderError('');
     submissionsApi
       .confirmPayment(id)
-      .then(() => submissionsApi.get(id))
       .then((data) => setSubmission(data))
       .catch(() => setConfirmOrderError('Could not confirm order. Please try again.'))
       .finally(() => setConfirmingOrder(false));

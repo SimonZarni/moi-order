@@ -6,6 +6,8 @@ namespace App\Notifications;
 
 use App\Channels\ExpoPushChannel;
 use App\DTOs\ExpoPushMessage;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
 /**
@@ -13,8 +15,9 @@ use Illuminate\Notifications\Notification;
  * Sent via database (in-app bell) + ExpoPushChannel (OS banner).
  * Locale is read from notifiable->locale (stored when user changes language in-app).
  */
-class PaymentReadyNotification extends Notification
+class PaymentReadyNotification extends Notification implements ShouldQueue
 {
+    use Queueable;
     private const TITLES = [
         'en' => 'Order Confirmed',
         'mm' => 'အော်ဒါ အတည်ပြုပြီး',
