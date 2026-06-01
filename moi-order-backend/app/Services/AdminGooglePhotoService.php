@@ -40,6 +40,14 @@ class AdminGooglePhotoService
             throw new \DomainException('place.no_google_place_id');
         }
 
+        // Preserve which google_photo_names were already added to the gallery so
+        // is_selected survives the delete+re-create cycle below.
+        $previouslySelected = $place->googlePhotos()
+            ->where('is_selected', true)
+            ->pluck('google_photo_name')
+            ->flip() // keyed by name for O(1) lookup
+            ->all();
+
         // Wipe previous Google photos for this place (idempotent re-fetch).
         // R2 objects at the old paths become orphaned — acceptable; storage cost is negligible.
         $place->googlePhotos()->delete();
@@ -51,9 +59,12 @@ class AdminGooglePhotoService
             return collect();
         }
 
+        // Sort by name for a stable, deterministic display order across refreshes.
+        usort($googlePhotos, fn (array $a, array $b): int => strcmp($a['name'], $b['name']));
+
         $saved = collect();
 
-        DB::transaction(function () use ($place, $googlePhotos, &$saved): void {
+        DB::transaction(function () use ($place, $googlePhotos, $previouslySelected, &$saved): void {
             foreach ($googlePhotos as $index => $gPhoto) {
                 try {
                     // Download image bytes from Google's signed photoUri.
@@ -79,7 +90,7 @@ class AdminGooglePhotoService
                         'google_photo_name' => $gPhoto['name'],
                         'display_order'     => $index,
                         'source'            => 'google',
-                        'is_selected'       => false,
+                        'is_selected'       => array_key_exists($gPhoto['name'], $previouslySelected),
                         'width_px'          => $gPhoto['widthPx'],
                         'height_px'         => $gPhoto['heightPx'],
                         'author_name'       => $gPhoto['authorName'],
