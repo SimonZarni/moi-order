@@ -20,7 +20,7 @@ class AdminStorePlaceRequest extends FormRequest
             'name_en'           => ['required', 'string', 'max:255'],
             'name_th'           => ['sometimes', 'nullable', 'string', 'max:255'],
             'short_description' => ['sometimes', 'nullable', 'string', 'max:500'],
-            'long_description'  => ['sometimes', 'nullable', 'string', 'max:5000'],
+            'long_description'  => ['sometimes', 'nullable', 'string', 'max:10000'],
             'address'           => ['sometimes', 'nullable', 'string', 'max:500'],
             'city'              => ['sometimes', 'nullable', 'string', 'max:100'],
             'latitude'          => ['sometimes', 'nullable', 'numeric', 'between:-90,90'],

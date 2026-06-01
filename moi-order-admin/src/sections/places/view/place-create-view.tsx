@@ -339,10 +339,10 @@ export function PlaceCreateView() {
                     label="Long Description"
                     multiline
                     rows={5}
-                    inputProps={{ maxLength: 5000 }}
+                    inputProps={{ maxLength: 10000 }}
                     value={form.long_description}
                     onChange={(e) => update('long_description', e.target.value)}
-                    helperText={`${form.long_description.length}/5000`}
+                    helperText={`${form.long_description.length}/10000`}
                   />
                 </Stack>
               </CardContent>
