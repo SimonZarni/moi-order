@@ -159,7 +159,8 @@ export function PlacesView() {
     [setSearchParams]
   );
   const [selected, setSelected] = useState<number[]>([]);
-
+  const [jumpValue, setJumpValue] = useState('');
+  const [jumpLoading, setJumpLoading] = useState(false);
 
   // ── Import state ────────────────────────────────────────────────────────────
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -181,6 +182,30 @@ export function PlacesView() {
     },
     [places, router, page, rowsPerPage, total, filterName, filterStatus]
   );
+
+  const handleJump = useCallback(async () => {
+    const n = Number(jumpValue);
+    if (!n || n < 1 || n > total) return;
+    setJumpLoading(true);
+    try {
+      const { data, meta } = await placesApi.list({
+        page: n,
+        per_page: 1,
+        search: filterName || undefined,
+        status: filterStatus !== 'all' ? filterStatus : undefined,
+      });
+      if (!data[0]) return;
+      const params = new URLSearchParams();
+      params.set('idx', String(n - 1));
+      params.set('total', String(meta.total));
+      if (filterName) params.set('search', filterName);
+      if (filterStatus !== 'all') params.set('status', filterStatus);
+      router.push(`/places/${data[0].id}/edit?${params.toString()}`);
+    } finally {
+      setJumpLoading(false);
+      setJumpValue('');
+    }
+  }, [jumpValue, total, filterName, filterStatus, router]);
 
   const fetchPlaces = useCallback(() => {
     setLoading(true);
@@ -399,6 +424,36 @@ export function PlacesView() {
           <Typography variant="body2" sx={{ ml: 'auto', color: 'text.secondary' }}>
             {total} results
           </Typography>
+          {total > 0 && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography variant="caption" color="text.secondary" noWrap>Go to:</Typography>
+              <OutlinedInput
+                value={jumpValue}
+                onChange={(e) => setJumpValue(e.target.value.replace(/\D/g, ''))}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleJump(); }}
+                placeholder="#"
+                inputProps={{ inputMode: 'numeric', style: { textAlign: 'center', padding: '4px 6px' } }}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <Typography variant="caption" color="text.secondary">/{total}</Typography>
+                    <IconButton
+                      size="small"
+                      edge="end"
+                      disabled={jumpLoading || !jumpValue || Number(jumpValue) < 1 || Number(jumpValue) > total}
+                      onClick={handleJump}
+                      sx={{ ml: 0.25 }}
+                    >
+                      {jumpLoading
+                        ? <CircularProgress size={12} />
+                        : <Iconify icon="eva:arrow-ios-forward-fill" width={14} />
+                      }
+                    </IconButton>
+                  </InputAdornment>
+                }
+                sx={{ width: 150, height: 40 }}
+              />
+            </Box>
+          )}
         </Box>
 
         <Scrollbar>

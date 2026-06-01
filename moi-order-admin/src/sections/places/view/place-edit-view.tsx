@@ -86,7 +86,8 @@ export function PlaceEditView() {
   const hasPrev = overallIdx > 0;
   const hasNext = overallIdx >= 0 && overallIdx < navTotal - 1;
 
-  const [navLoading, setNavLoading] = useState<'prev' | 'next' | null>(null);
+  const [navLoading, setNavLoading] = useState<'prev' | 'next' | 'jump' | null>(null);
+  const [jumpValue, setJumpValue] = useState(overallIdx >= 0 ? String(overallIdx + 1) : '');
 
   const NAV_PER_PAGE = 100;
 
@@ -117,6 +118,34 @@ export function PlaceEditView() {
     },
     [overallIdx, navTotal, navSearch, navStatus, router]
   );
+
+  const handleJump = useCallback(async () => {
+    const n = Number(jumpValue);
+    if (!n || n < 1 || n > navTotal) return;
+    const targetIdx = n - 1;
+    if (targetIdx === overallIdx) return;
+    setNavLoading('jump');
+    try {
+      const targetPage = Math.floor(targetIdx / NAV_PER_PAGE) + 1;
+      const posInPage  = targetIdx % NAV_PER_PAGE;
+      const { data } = await placesApi.list({
+        page: targetPage,
+        per_page: NAV_PER_PAGE,
+        search: navSearch,
+        status: navStatus,
+      });
+      const target = data[posInPage];
+      if (!target) return;
+      const params = new URLSearchParams();
+      params.set('idx', String(targetIdx));
+      params.set('total', String(navTotal));
+      if (navSearch) params.set('search', navSearch);
+      if (navStatus) params.set('status', navStatus);
+      router.push(`/places/${target.id}/edit?${params.toString()}`);
+    } finally {
+      setNavLoading(null);
+    }
+  }, [jumpValue, navTotal, overallIdx, navSearch, navStatus, router]);
 
   const [form, setForm] = useState<FormState | null>(null);
   const [categories, setCategories] = useState<CategoryData[]>([]);
@@ -357,9 +386,6 @@ export function PlaceEditView() {
         </Box>
         {overallIdx >= 0 && navTotal > 0 && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ mr: 0.5 }}>
-              {overallIdx + 1} / {navTotal}
-            </Typography>
             <Tooltip title="Previous place">
               <span>
                 <IconButton
@@ -374,6 +400,19 @@ export function PlaceEditView() {
                 </IconButton>
               </span>
             </Tooltip>
+            <Tooltip title="Press Enter to jump to this place number">
+              <OutlinedInput
+                value={jumpValue}
+                onChange={(e) => setJumpValue(e.target.value.replace(/\D/g, ''))}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleJump(); }}
+                inputProps={{ inputMode: 'numeric', style: { textAlign: 'center', padding: '2px 4px', fontSize: 12 } }}
+                disabled={navLoading !== null}
+                sx={{ width: 52, height: 28 }}
+              />
+            </Tooltip>
+            <Typography variant="caption" color="text.secondary" sx={{ mx: 0.25 }}>
+              / {navTotal}
+            </Typography>
             <Tooltip title="Next place">
               <span>
                 <IconButton
