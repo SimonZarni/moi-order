@@ -60,9 +60,9 @@ export function HomeCardGroup({
         <CardIcon iconKey={card.icon_key} iconType={card.icon_type} iconUrl={card.icon_url} />
       </View>
 
-      <Text style={[styles.cardTag, { color: card.accent_color }, isMM && styles.mmCardTag]}>{tag}</Text>
-      <Text style={[styles.cardTitle, isMM && styles.mmCardTitle]}>{title}</Text>
-      {subtitle ? <Text style={[styles.cardSubtitle, isMM && styles.mmCardSubtitle]}>{subtitle}</Text> : null}
+      <Text style={[styles.cardTag, { color: card.accent_color }, isMM && styles.mmCardTag]} allowFontScaling={!isMM}>{tag}</Text>
+      <Text style={[styles.cardTitle, isMM && styles.mmCardTitle]} allowFontScaling={!isMM}>{title}</Text>
+      {subtitle ? <Text style={[styles.cardSubtitle, isMM && styles.mmCardSubtitle]} allowFontScaling={!isMM}>{subtitle}</Text> : null}
 
       {/* Tile row — one tile per child service */}
       <View style={styles.tileRow}>
@@ -87,6 +87,7 @@ export function HomeCardGroup({
                 style={[styles.tileLabel, { color: child.accent_color }, isMM && styles.mmTileLabel]}
                 numberOfLines={2}
                 ellipsizeMode="tail"
+                allowFontScaling={!isMM}
               >
                 {childTitle}
               </Text>

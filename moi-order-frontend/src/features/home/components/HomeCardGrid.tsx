@@ -119,9 +119,9 @@ function SingleCard({ card, locale, orderCount, onPress }: SingleCardProps): Rea
       accessibilityLabel={title}
       accessibilityRole="button"
     >
-      <Text style={[styles.cardTag, { color: card.accent_color }, isMM && styles.mmCardTag]}>{tag}</Text>
-      <Text style={[styles.cardTitle, isMM && styles.mmCardTitle]}>{title}</Text>
-      {subtitle ? <Text style={[styles.cardSubtitle, isMM && styles.mmCardSubtitle]}>{subtitle}</Text> : null}
+      <Text style={[styles.cardTag, { color: card.accent_color }, isMM && styles.mmCardTag]} allowFontScaling={!isMM}>{tag}</Text>
+      <Text style={[styles.cardTitle, isMM && styles.mmCardTitle]} allowFontScaling={!isMM}>{title}</Text>
+      {subtitle ? <Text style={[styles.cardSubtitle, isMM && styles.mmCardSubtitle]} allowFontScaling={!isMM}>{subtitle}</Text> : null}
       {card.is_coming_soon && (
         <View style={styles.soonPill}>
           <Text style={styles.soonText}>SOON</Text>
