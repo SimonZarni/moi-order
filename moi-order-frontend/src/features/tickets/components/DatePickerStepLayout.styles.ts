@@ -97,14 +97,14 @@ export const styles = StyleSheet.create({
     elevation: 2,
   },
 
-  // ── Day grid (3-column wrap) ──────────────────────────────────────────────
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  // ── Day grid (5-column wrap) ──────────────────────────────────────────────
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
 
   tile: {
-    width: '30%',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.sm,
-    borderRadius: radius.xl,
+    width: '18%',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: 4,
+    borderRadius: radius.lg,
     alignItems: 'center',
     backgroundColor: P.tileBg,
     borderWidth: 2,
@@ -143,7 +143,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 1, textTransform: 'uppercase', marginBottom: 2,
   },
   dayNum: {
-    fontSize: typography.xl, fontWeight: '900', color: P.textDark,
+    fontSize: typography.lg, fontWeight: '900', color: P.textDark,
   },
   dayMonth: {
     fontSize: typography.xs, color: P.textMuted,
