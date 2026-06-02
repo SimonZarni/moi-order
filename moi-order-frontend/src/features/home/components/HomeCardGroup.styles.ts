@@ -97,4 +97,26 @@ export const styles = StyleSheet.create({
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
+
+  // ── Myanmar (mm) locale overrides ─────────────────────────────────────────
+  // Any letterSpacing > 0 splits Myanmar glyph clusters (base + stacked diacritics).
+  mmCardTag: {
+    letterSpacing: 0,
+    lineHeight: 18,       // typography.xxs (9) × 2.0
+  },
+  mmCardTitle: {
+    letterSpacing: 0,
+    lineHeight: 32,       // typography.lg (17) × 1.9
+    writingDirection: 'ltr',
+  },
+  mmCardSubtitle: {
+    letterSpacing: 0,
+    lineHeight: 22,       // typography.xs (11) × 2.0
+    writingDirection: 'ltr',
+  },
+  mmTileLabel: {
+    letterSpacing: 0,
+    lineHeight: 18,       // typography.xxs (9) × 2.0
+    writingDirection: 'ltr',
+  },
 });

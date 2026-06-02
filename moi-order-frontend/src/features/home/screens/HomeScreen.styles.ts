@@ -161,6 +161,13 @@ export const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.07)",
   },
 
+  // Myanmar (mm) locale override — sectionLabel has letterSpacing:2 which
+  // splits Myanmar glyph clusters; zero it out for Burmese locale.
+  mmSectionLabel: {
+    letterSpacing: 0,
+    lineHeight: 22,  // typography.xs (11) × 2.0
+  },
+
   // ── 2×2 Grid ──────────────────────────────────────────────────────────────
   gridRow: {
     flexDirection: "row",

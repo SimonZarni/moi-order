@@ -109,4 +109,22 @@ export const styles = StyleSheet.create({
     borderRadius: radius.xl,
     overflow: 'hidden',
   },
+
+  // ── Myanmar (mm) locale overrides ─────────────────────────────────────────
+  // Myanmar script glyph clusters break when letterSpacing > 0. lineHeight must
+  // be ≥ 1.8× fontSize to accommodate stacked vowel diacritics above/below base.
+  mmCardTag: {
+    letterSpacing: 0,
+    lineHeight: 18,       // typography.xxs (9) × 2.0 — extra room for above-base vowels
+  },
+  mmCardTitle: {
+    letterSpacing: 0,
+    lineHeight: 32,       // typography.lg (17) × 1.9
+    writingDirection: 'ltr',
+  },
+  mmCardSubtitle: {
+    letterSpacing: 0,
+    lineHeight: 22,       // typography.xs (11) × 2.0
+    writingDirection: 'ltr',
+  },
 });

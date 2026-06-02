@@ -31,6 +31,8 @@ export function HomeScreen(): React.JSX.Element {
   const { locale } = useLocale();
   const t = getHomeStrings(locale);
   const s = useStrings();
+  // Myanmar script breaks on any letterSpacing > 0.
+  const isMM = locale === 'mm';
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -76,7 +78,7 @@ export function HomeScreen(): React.JSX.Element {
         {/* ── Body ── */}
         <View style={styles.body}>
           <View style={styles.sectionLabelRow}>
-            <Text style={styles.sectionLabel}>{t.ourServices}</Text>
+            <Text style={[styles.sectionLabel, isMM && styles.mmSectionLabel]}>{t.ourServices}</Text>
             <View style={styles.sectionLine} />
           </View>
 

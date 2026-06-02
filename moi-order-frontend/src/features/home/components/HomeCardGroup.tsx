@@ -50,6 +50,8 @@ export function HomeCardGroup({
   const title    = locale === 'mm' ? card.title_mm    : card.title_en;
   const subtitle = locale === 'mm' ? (card.subtitle_mm ?? card.subtitle_en) : card.subtitle_en;
   const tag      = locale === 'mm' ? card.tag_mm      : card.tag_en;
+  // Myanmar syllable clusters break with any letterSpacing > 0.
+  const isMM = locale === 'mm';
 
   return (
     <View style={[styles.card, { borderTopColor: card.accent_color }]}>
@@ -58,9 +60,9 @@ export function HomeCardGroup({
         <CardIcon iconKey={card.icon_key} iconType={card.icon_type} iconUrl={card.icon_url} />
       </View>
 
-      <Text style={[styles.cardTag, { color: card.accent_color }]}>{tag}</Text>
-      <Text style={styles.cardTitle}>{title}</Text>
-      {subtitle ? <Text style={styles.cardSubtitle}>{subtitle}</Text> : null}
+      <Text style={[styles.cardTag, { color: card.accent_color }, isMM && styles.mmCardTag]}>{tag}</Text>
+      <Text style={[styles.cardTitle, isMM && styles.mmCardTitle]}>{title}</Text>
+      {subtitle ? <Text style={[styles.cardSubtitle, isMM && styles.mmCardSubtitle]}>{subtitle}</Text> : null}
 
       {/* Tile row — one tile per child service */}
       <View style={styles.tileRow}>
@@ -81,7 +83,11 @@ export function HomeCardGroup({
                   iconUrl={child.icon_url}
                 />
               </View>
-              <Text style={[styles.tileLabel, { color: child.accent_color }]} numberOfLines={2}>
+              <Text
+                style={[styles.tileLabel, { color: child.accent_color }, isMM && styles.mmTileLabel]}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
                 {childTitle}
               </Text>
               {child.is_coming_soon && (
