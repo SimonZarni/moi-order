@@ -305,6 +305,7 @@ export function AttractionDetailView() {
                   onClick={() => coverInputRef.current?.click()}
                 >
                   <Avatar
+                    key={coverPreview ?? attraction.cover_image_url ?? 'no-cover'}
                     src={coverPreview ?? attraction.cover_image_url ?? undefined}
                     variant="square"
                     sx={{ width: '100%', height: '100%', borderRadius: 1.5 }}
