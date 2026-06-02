@@ -15,6 +15,7 @@ enum FoodOrderStatus: string
     case Delivered            = 'delivered';
     case Completed            = 'completed';
     case Cancelled            = 'cancelled';
+    case Expired              = 'expired';   // order_placed / waiting_for_payment > 30 min with no admin response
 
     public function label(): string
     {
@@ -28,19 +29,20 @@ enum FoodOrderStatus: string
             self::Delivered          => 'Delivered',
             self::Completed          => 'Completed',
             self::Cancelled          => 'Cancelled',
+            self::Expired            => 'Expired',
         };
     }
 
     public function isTerminal(): bool
     {
-        return in_array($this, [self::Completed, self::Cancelled], true);
+        return in_array($this, [self::Completed, self::Cancelled, self::Expired], true);
     }
 
     public function phase(): int
     {
         return match($this) {
             self::OrderPlaced, self::WaitingForPayment,
-            self::PaymentConfirmed                      => 1,
+            self::PaymentConfirmed, self::Expired       => 1,
             default                                     => 2,
         };
     }
@@ -49,15 +51,16 @@ enum FoodOrderStatus: string
     public function allowedTransitions(): array
     {
         return match($this) {
-            self::OrderPlaced        => [self::WaitingForPayment,  self::Cancelled],
-            self::WaitingForPayment  => [self::PaymentConfirmed,   self::Cancelled],
+            self::OrderPlaced        => [self::WaitingForPayment,  self::Cancelled, self::Expired],
+            self::WaitingForPayment  => [self::PaymentConfirmed,   self::Cancelled, self::Expired],
             self::PaymentConfirmed   => [self::PreparingFood,      self::Cancelled],
             self::PreparingFood      => [self::WaitingForDelivery, self::Cancelled],
             self::WaitingForDelivery => [self::DeliveryOnTheWay,   self::Cancelled],
             self::DeliveryOnTheWay   => [self::Delivered,          self::Cancelled],
             self::Delivered          => [self::Completed],
             self::Completed,
-            self::Cancelled          => [],
+            self::Cancelled,
+            self::Expired            => [],
         };
     }
 

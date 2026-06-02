@@ -105,8 +105,9 @@ export type RootStackParamList = {
   RestaurantDetail: { restaurantId: number };
   MenuItemDetail: { restaurantId: number; menuItemId: number };
   RestaurantMap: undefined;
-  Cart: undefined;
-  FoodOrders: undefined;
+  Cart: undefined;           // kept for backward compat; prefer CartAndOrders
+  FoodOrders: undefined;     // kept for backward compat; prefer CartAndOrders
+  CartAndOrders: undefined;  // combined cart + orders view (new entry point from FoodScreen)
   Checkout: { selectedAddressId?: number } | undefined;
   FoodOrderDetail: { orderId: string };
   OrderChat: { orderId: string; orderNumber: string | null; restaurantName: string | null };

@@ -32,6 +32,10 @@ export const GOOGLE_IOS_CLIENT_ID =
   process.env['EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID'] ??
   '661538209777-o33avjo80379ui26kj2clbn4snla6j2g.apps.googleusercontent.com';
 
+// How long before a pending (order_placed) order is considered timed-out by the restaurant.
+// The backend auto-expires at 30 min; we show a warning banner at 15 min.
+export const ORDER_PAYMENT_TIMEOUT_MS = 15 * 60 * 1_000; // 15 minutes
+
 export const CACHE_TTL = {
   USER_DATA:       5  * 60 * 1000,
   REFERENCE_DATA:  24 * 60 * 60 * 1000,

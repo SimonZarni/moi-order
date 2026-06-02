@@ -86,6 +86,7 @@ import { MenuItemDetailScreen } from '@/features/food/screens/MenuItemDetailScre
 import { RestaurantMapScreen } from '@/features/food/screens/RestaurantMapScreen';
 import { CartScreen } from '@/features/food/screens/CartScreen';
 import { FoodOrdersScreen } from '@/features/food/screens/FoodOrdersScreen';
+import { CartAndOrdersScreen } from '@/features/food/screens/CartAndOrdersScreen';
 import { CheckoutScreen } from '@/features/food/screens/CheckoutScreen';
 import { FoodOrderDetailScreen } from '@/features/food/screens/FoodOrderDetailScreen';
 import { OrderChatScreen } from '@/features/food/screens/OrderChatScreen';
@@ -297,6 +298,7 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="RestaurantMap"                 component={RestaurantMapScreen} options={{ animation: 'slide_from_bottom' }} />
       <Stack.Screen name="Cart"                           component={CartScreen} />
       <Stack.Screen name="FoodOrders"                    component={FoodOrdersScreen} />
+      <Stack.Screen name="CartAndOrders"                 component={CartAndOrdersScreen} />
       <Stack.Screen name="Checkout"                      component={CheckoutScreen} />
       <Stack.Screen name="FoodOrderDetail"               component={FoodOrderDetailScreen} />
       <Stack.Screen name="OrderChat"                     component={OrderChatScreen} />

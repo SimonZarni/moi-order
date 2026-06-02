@@ -89,6 +89,45 @@ export const styles = StyleSheet.create({
     padding: spacing.md,
   },
   cancelledText: { fontSize: typography.sm, color: '#b91c1c', fontWeight: '600', textAlign: 'center' },
+  expiredCard: {
+    backgroundColor: '#fde8d8',
+    borderRadius: radius.xl,
+    padding: spacing.md,
+  },
+  expiredText: { fontSize: typography.sm, color: '#c2410c', fontWeight: '600', textAlign: 'center' },
+  // Payment timeout warning banner
+  timeoutBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.xs,
+    backgroundColor: '#fffbeb',
+    borderRadius: radius.xl,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: '#fcd34d',
+  },
+  timeoutText: {
+    flex: 1,
+    fontSize: typography.sm,
+    color: '#92400e',
+    lineHeight: 20,
+  },
+  // Order Again button
+  orderAgainBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    backgroundColor: colours.primary,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.md,
+    marginTop: spacing.xs,
+  },
+  orderAgainBtnText: {
+    fontSize: typography.md,
+    fontWeight: '700',
+    color: colours.white,
+  },
   // Invoice
   invoiceBtn: {
     flexDirection: 'row',

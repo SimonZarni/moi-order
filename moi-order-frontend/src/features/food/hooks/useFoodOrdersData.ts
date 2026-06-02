@@ -6,7 +6,9 @@ import { FOOD_ORDER_STATUS } from '@/types/enums';
 import { useAuthStore } from '@/shared/store/authStore';
 
 const isTerminalStatus = (status: string) =>
-  status === FOOD_ORDER_STATUS.Completed || status === FOOD_ORDER_STATUS.Cancelled;
+  status === FOOD_ORDER_STATUS.Completed ||
+  status === FOOD_ORDER_STATUS.Cancelled  ||
+  status === FOOD_ORDER_STATUS.Expired;
 
 const hasActiveInList = (data?: PaginatedResponse<FoodOrder>) =>
   data?.data.some((o) => !isTerminalStatus(o.status)) ?? false;

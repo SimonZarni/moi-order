@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Alert, Linking } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { RootStackParamList } from '@/types/navigation';
 import { FoodOrder } from '@/types/models';
 import { FOOD_ORDER_STATUS } from '@/types/enums';
-import { LINE_OA_URL } from '@/shared/constants/config';
+import { LINE_OA_URL, ORDER_PAYMENT_TIMEOUT_MS } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { completeFoodOrder } from '@/shared/api/foodOrders';
 import { useFoodOrderDetailData } from './useFoodOrdersData';
@@ -17,6 +17,7 @@ export interface UseFoodOrderDetailScreenResult {
   order: FoodOrder | undefined;
   isLoading: boolean;
   isError: boolean;
+  isPaymentTimedOut: boolean;
   invoiceVisible: boolean;
   completeModalVisible: boolean;
   isCompleting: boolean;
@@ -34,6 +35,7 @@ export interface UseFoodOrderDetailScreenResult {
   handleRatingChange: (r: number) => void;
   handleReviewChange: (t: string) => void;
   handleCallRestaurant: () => void;
+  handleOrderAgain: () => void;
 }
 
 export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
@@ -105,10 +107,24 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
     );
   }, [order]);
 
+  // Show a warning banner when the restaurant hasn't responded for 15+ minutes.
+  // The backend auto-expires at 30 min; this gives users early visibility.
+  const isPaymentTimedOut = useMemo(() => {
+    if (!order || order.status !== FOOD_ORDER_STATUS.OrderPlaced) return false;
+    return Date.now() - new Date(order.created_at).getTime() > ORDER_PAYMENT_TIMEOUT_MS;
+  }, [order]);
+
+  // Navigate back to the restaurant so the user can re-place the order.
+  const handleOrderAgain = useCallback(() => {
+    if (!order) return;
+    navigation.navigate('RestaurantDetail', { restaurantId: order.restaurant_id });
+  }, [order, navigation]);
+
   return {
     order,
     isLoading,
     isError,
+    isPaymentTimedOut,
     invoiceVisible,
     completeModalVisible,
     isCompleting,
@@ -126,5 +142,6 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
     handleRatingChange,
     handleReviewChange,
     handleCallRestaurant,
+    handleOrderAgain,
   };
 }

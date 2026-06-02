@@ -69,6 +69,7 @@ export const FOOD_ORDER_STATUS = {
   Delivered:            'delivered',
   Completed:            'completed',
   Cancelled:            'cancelled',
+  Expired:              'expired',
 } as const;
 
 export type FoodOrderStatus = (typeof FOOD_ORDER_STATUS)[keyof typeof FOOD_ORDER_STATUS];

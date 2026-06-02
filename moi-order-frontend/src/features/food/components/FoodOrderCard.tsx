@@ -22,6 +22,7 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }>
   [FOOD_ORDER_STATUS.Delivered]:          { bg: '#dcfce7', color: '#15803d', label: 'Delivered'             },
   [FOOD_ORDER_STATUS.Completed]:          { bg: colours.infoBg, color: colours.medium, label: 'Completed'   },
   [FOOD_ORDER_STATUS.Cancelled]:          { bg: '#fee2e2', color: '#b91c1c', label: 'Cancelled'             },
+  [FOOD_ORDER_STATUS.Expired]:            { bg: '#fde8d8', color: '#c2410c', label: 'Expired'               },
 };
 
 const FALLBACK_STYLE: { bg: string; color: string; label: string } = {

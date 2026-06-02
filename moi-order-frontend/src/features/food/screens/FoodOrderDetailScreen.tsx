@@ -16,13 +16,14 @@ import { styles } from './FoodOrderDetailScreen.styles';
 export function FoodOrderDetailScreen(): React.JSX.Element {
   const {
     order, isLoading,
+    isPaymentTimedOut,
     invoiceVisible, handleInvoiceOpen, handleInvoiceClose,
     completeModalVisible, isCompleting,
     rating, review,
     handleBack, handlePromptPayPress, handleChatPress,
     handleSlideComplete, handleCompleteConfirm, handleCompleteCancel,
     handleRatingChange, handleReviewChange,
-    handleCallRestaurant,
+    handleCallRestaurant, handleOrderAgain,
   } = useFoodOrderDetailScreen();
 
   if (isLoading || !order) {
@@ -39,10 +40,12 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
     );
   }
 
-  const canViewInvoice    = order.payment_confirmed_at !== null || order.status === FOOD_ORDER_STATUS.Completed;
-  const canComplete       = order.status === FOOD_ORDER_STATUS.Delivered;
-  const isCompleted       = order.status === FOOD_ORDER_STATUS.Completed;
-  const isCancelled       = order.status === FOOD_ORDER_STATUS.Cancelled;
+  const canViewInvoice     = order.payment_confirmed_at !== null || order.status === FOOD_ORDER_STATUS.Completed;
+  const canComplete        = order.status === FOOD_ORDER_STATUS.Delivered;
+  const isCompleted        = order.status === FOOD_ORDER_STATUS.Completed;
+  const isCancelled        = order.status === FOOD_ORDER_STATUS.Cancelled;
+  const isExpired          = order.status === FOOD_ORDER_STATUS.Expired;
+  const isTerminal         = isCompleted || isCancelled || isExpired;
   const hasRestaurantPhone = order.restaurant_phone != null;
 
   return (
@@ -60,9 +63,23 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+        {/* Payment timeout banner — restaurant hasn't responded for 15+ minutes */}
+        {isPaymentTimedOut && (
+          <View style={styles.timeoutBanner}>
+            <Ionicons name="time-outline" size={16} color="#92400e" />
+            <Text style={styles.timeoutText}>
+              The restaurant hasn&apos;t confirmed yet. You can order again below.
+            </Text>
+          </View>
+        )}
+
         {isCancelled ? (
           <View style={styles.cancelledCard}>
             <Text style={styles.cancelledText}>This order has been cancelled.</Text>
+          </View>
+        ) : isExpired ? (
+          <View style={styles.expiredCard}>
+            <Text style={styles.expiredText}>This order expired — the restaurant did not respond in time.</Text>
           </View>
         ) : (
           <OrderProgressBar
@@ -91,6 +108,14 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
           <Pressable style={styles.invoiceBtn} onPress={handleInvoiceOpen} accessibilityRole="button" accessibilityLabel="View full invoice">
             <Ionicons name="receipt-outline" size={16} color={colours.primary} />
             <Text style={styles.invoiceBtnText}>View Invoice</Text>
+          </Pressable>
+        )}
+
+        {/* Order Again — shown for completed, cancelled, and expired orders */}
+        {isTerminal && (
+          <Pressable style={styles.orderAgainBtn} onPress={handleOrderAgain} accessibilityRole="button" accessibilityLabel="Order again from this restaurant">
+            <Ionicons name="refresh-outline" size={16} color={colours.white} />
+            <Text style={styles.orderAgainBtnText}>Order Again</Text>
           </Pressable>
         )}
 

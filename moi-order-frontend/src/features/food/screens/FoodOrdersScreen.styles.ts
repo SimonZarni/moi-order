@@ -14,6 +14,7 @@ export const ORDER_STATUS_COLOURS: Record<string, { bg: string; text: string }> 
   delivered:             { bg: '#d1fae5', text: '#10b981' },
   completed:             { bg: '#f3f4f6', text: '#6b7280' },
   cancelled:             { bg: '#fee2e2', text: '#ef4444' },
+  expired:               { bg: '#fde8d8', text: '#c2410c' },
 };
 
 export const styles = StyleSheet.create({

@@ -87,6 +87,7 @@ class FoodOrder extends Model
             FoodOrderStatus::Delivered          => ['delivered_at'         => now()],
             FoodOrderStatus::Completed          => ['completed_at'         => now()],
             FoodOrderStatus::Cancelled          => ['cancelled_at'         => now()],
+            FoodOrderStatus::Expired            => ['cancelled_at'         => now()],
             default                             => [],
         };
 
@@ -117,6 +118,7 @@ class FoodOrder extends Model
         $query->whereNotIn('status', [
             FoodOrderStatus::Completed->value,
             FoodOrderStatus::Cancelled->value,
+            FoodOrderStatus::Expired->value,
         ]);
     }
 

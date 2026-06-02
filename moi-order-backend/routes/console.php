@@ -9,6 +9,14 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+// Expire food orders that have been pending (no restaurant response) for 30+ minutes.
+Schedule::command('food-orders:expire-pending')
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        \Illuminate\Support\Facades\Log::error('food-orders:expire-pending failed');
+    });
+
 // Auto-complete delivered food orders after 10 minutes.
 Schedule::command('food-orders:auto-complete')
     ->everyMinute()

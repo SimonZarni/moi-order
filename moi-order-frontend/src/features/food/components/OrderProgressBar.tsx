@@ -21,6 +21,7 @@ const STATUS_INDEX: Record<FoodOrderStatus, number> = {
   [FOOD_ORDER_STATUS.Delivered]:          6,
   [FOOD_ORDER_STATUS.Completed]:          8,
   [FOOD_ORDER_STATUS.Cancelled]:          8,
+  [FOOD_ORDER_STATUS.Expired]:            0, // never reaches phase 2; screen shows expiredCard instead
 };
 
 // ─── Step definitions ─────────────────────────────────────────────────────────
