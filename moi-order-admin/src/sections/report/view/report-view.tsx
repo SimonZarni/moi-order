@@ -329,7 +329,7 @@ function ServiceTypeForm({ initial, documentTypes, onSave, onCancel, apiError }:
           <TextField fullWidth size="small" label="Type Name" value={name} onChange={(e) => setName(e.target.value)} />
         </Grid>
         <Grid size={{ xs: 6, sm: 3 }}>
-          <TextField fullWidth size="small" label="Price (THB)" type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} />
+          <TextField fullWidth size="small" label="Price (THB)" type="number" value={price || ''} onChange={(e) => setPrice(Number(e.target.value))} />
         </Grid>
         <Grid size={{ xs: 6, sm: 4 }}>
           <FormControlLabel sx={{ mt: 0.5 }} control={<Checkbox checked={isActive} onChange={(e) => setIsActive(e.target.checked)} size="small" />} label="Active" />

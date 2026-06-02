@@ -399,7 +399,7 @@ function ServiceTypeForm({ initial, documentTypes, onSave, onCancel, saving, api
           <TextField
             fullWidth size="small" label="Price (THB)" type="number"
             slotProps={{ htmlInput: { min: 0 } }}
-            value={price}
+            value={price || ''}
             onChange={(e) => setPrice(Number(e.target.value))}
           />
         </Grid>
