@@ -304,12 +304,18 @@ export function AttractionDetailView() {
                   }}
                   onClick={() => coverInputRef.current?.click()}
                 >
-                  <Avatar
-                    key={coverPreview ?? attraction.cover_image_url ?? 'no-cover'}
-                    src={coverPreview ?? attraction.cover_image_url ?? undefined}
-                    variant="square"
-                    sx={{ width: '100%', height: '100%', borderRadius: 1.5 }}
-                  />
+                  {(coverPreview ?? attraction.cover_image_url) ? (
+                    <Box
+                      component="img"
+                      src={coverPreview ?? attraction.cover_image_url ?? undefined}
+                      alt="Cover photo"
+                      sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                  ) : (
+                    <Stack alignItems="center" justifyContent="center" sx={{ height: '100%' }}>
+                      <Iconify icon="solar:gallery-bold" width={48} sx={{ color: 'text.disabled', opacity: 0.5 }} />
+                    </Stack>
+                  )}
                   <Stack
                     className="cover-overlay"
                     alignItems="center" justifyContent="center" spacing={0.5}
