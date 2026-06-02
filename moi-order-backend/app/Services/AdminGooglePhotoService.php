@@ -40,17 +40,12 @@ class AdminGooglePhotoService
             throw new \DomainException('place.no_google_place_id');
         }
 
-        // Preserve which google_photo_names were already added to the gallery so
-        // is_selected survives the delete+re-create cycle below.
-        $previouslySelected = $place->googlePhotos()
-            ->where('is_selected', true)
-            ->pluck('google_photo_name')
-            ->flip() // keyed by name for O(1) lookup
-            ->all();
-
-        // Wipe previous Google photos for this place (idempotent re-fetch).
-        // R2 objects at the old paths become orphaned — acceptable; storage cost is negligible.
-        $place->googlePhotos()->delete();
+        // Index existing records by google_photo_name so we can skip re-downloading
+        // photos that are already stored in R2. This makes refresh near-instant when
+        // Google returns the same set of photos (the common case).
+        $existingByName = $place->googlePhotos()
+            ->get()
+            ->keyBy('google_photo_name');
 
         // Fetch photo metadata + media URIs from Google (two-step inside the service).
         $googlePhotos = $this->googlePlaces->fetchPlacePhotos($place->google_place_id, 10);
@@ -62,12 +57,26 @@ class AdminGooglePhotoService
         // Sort by name for a stable, deterministic display order across refreshes.
         usort($googlePhotos, fn (array $a, array $b): int => strcmp($a['name'], $b['name']));
 
+        $returnedNames = array_column($googlePhotos, 'name');
+
         $saved = collect();
 
-        DB::transaction(function () use ($place, $googlePhotos, $previouslySelected, &$saved): void {
+        DB::transaction(function () use ($place, $googlePhotos, $existingByName, $returnedNames, &$saved): void {
+            // Remove any records for photos no longer returned by Google.
+            $place->googlePhotos()->whereNotIn('google_photo_name', $returnedNames)->delete();
+
             foreach ($googlePhotos as $index => $gPhoto) {
+                $existing = $existingByName->get($gPhoto['name']);
+
+                if ($existing) {
+                    // Already in R2 — just keep it and correct its display_order.
+                    $existing->update(['display_order' => $index]);
+                    $saved->push($existing->fresh());
+                    continue;
+                }
+
+                // New photo from Google — download bytes and store to R2.
                 try {
-                    // Download image bytes from Google's signed photoUri.
                     $response = Http::timeout(15)->get($gPhoto['photoUri']);
 
                     if (! $response->successful()) {
@@ -79,7 +88,6 @@ class AdminGooglePhotoService
                         continue;
                     }
 
-                    // Store to R2 under a UUID-named path so re-fetches don't collide.
                     $path = "places/{$place->id}/google/" . Str::uuid()->toString() . '.jpg';
                     $this->storage->storeRaw($response->body(), $path);
                     $publicUrl = $this->storage->publicUrl($path);
@@ -90,7 +98,7 @@ class AdminGooglePhotoService
                         'google_photo_name' => $gPhoto['name'],
                         'display_order'     => $index,
                         'source'            => 'google',
-                        'is_selected'       => array_key_exists($gPhoto['name'], $previouslySelected),
+                        'is_selected'       => false,
                         'width_px'          => $gPhoto['widthPx'],
                         'height_px'         => $gPhoto['heightPx'],
                         'author_name'       => $gPhoto['authorName'],
@@ -98,7 +106,6 @@ class AdminGooglePhotoService
 
                     $saved->push($photo);
                 } catch (\Throwable $e) {
-                    // Log but continue — partial success is better than aborting everything.
                     Log::error('AdminGooglePhotoService: exception on photo download/store', [
                         'place_id' => $place->id,
                         'name'     => $gPhoto['name'],

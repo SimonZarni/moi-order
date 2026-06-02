@@ -317,6 +317,8 @@ export function PlaceEditView() {
   const handleFetchGooglePhotos = useCallback(() => {
     if (!id) return;
     setIsFetchingPhotos(true);
+    setGooglePhotos([]);
+    setAddedToGallery(new Set());
     setError('');
     placesApi
       .fetchGooglePhotos(id)
