@@ -52,8 +52,11 @@ export const styles = StyleSheet.create({
   },
 
   // ── Body ─────────────────────────────────────────────────────────────────
-  body:           { paddingHorizontal: spacing.lg, paddingTop: spacing.xl, paddingBottom: spacing.xl },
-  bodyWithFooter: { paddingBottom: 120 }, // room for the fixed footer on day step
+  body: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl,
+    paddingBottom: 120,   // room for the fixed footer
+  },
 
   sectionRow: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
@@ -65,7 +68,36 @@ export const styles = StyleSheet.create({
   },
   sectionLine: { flex: 1, height: 1, backgroundColor: 'rgba(0,0,0,0.07)' },
 
-  // ── Grid & tiles ─────────────────────────────────────────────────────────
+  // ── Divider between month and day sections ────────────────────────────────
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(0,0,0,0.07)',
+    marginVertical: spacing.xl,
+  },
+
+  // ── Month row (3 equal tiles side by side) ────────────────────────────────
+  monthRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  monthTile: {
+    flex: 1,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xs,
+    borderRadius: radius.xl,
+    alignItems: 'center',
+    backgroundColor: P.tileBg,
+    borderWidth: 2,
+    borderColor: 'rgba(0,0,0,0.04)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+
+  // ── Day grid (3-column wrap) ──────────────────────────────────────────────
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 
   tile: {
@@ -83,6 +115,8 @@ export const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+
+  // Shared selected state — applied to month tiles and day tiles.
   tileSelected: {
     backgroundColor: P.selectedBg,
     borderColor: P.gold,
@@ -91,7 +125,7 @@ export const styles = StyleSheet.create({
   // Selected text — applied to any text inside a selected tile.
   goldText: { color: P.gold },
 
-  // ── Month tile ────────────────────────────────────────────────────────────
+  // ── Month tile text ───────────────────────────────────────────────────────
   monthNum: {
     fontSize: typography.xxs, fontWeight: '700', color: P.textMuted,
     letterSpacing: 1, marginBottom: 2,
@@ -103,7 +137,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.xxs, color: P.textMuted, marginTop: 2,
   },
 
-  // ── Day tile ──────────────────────────────────────────────────────────────
+  // ── Day tile text ─────────────────────────────────────────────────────────
   dayLabel: {
     fontSize: typography.xxs, fontWeight: '700', color: P.textMuted,
     letterSpacing: 1, textTransform: 'uppercase', marginBottom: 2,
@@ -129,7 +163,7 @@ export const styles = StyleSheet.create({
   },
   errorText: { fontSize: typography.sm, color: '#dc2626', fontWeight: '600' },
 
-  // ── Purchase footer (day step only) ───────────────────────────────────────
+  // ── Purchase footer ───────────────────────────────────────────────────────
   footer: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
     backgroundColor: P.tileBg,

@@ -12,8 +12,6 @@ import { DateOption, MonthOption, SelectionItem } from '../types';
 
 type RouteParams = RouteProp<RootStackParamList, 'TicketDateSelection'>;
 
-export type DatePickerStep = 'month' | 'day';
-
 // ─── Dynamic month generation (next 3 months from today) ──────────────────────
 
 function buildNextThreeMonths(): MonthOption[] {
@@ -22,16 +20,15 @@ function buildNextThreeMonths(): MonthOption[] {
   for (let i = 0; i < 3; i++) {
     const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
     options.push({
-      value:    d.getMonth() + 1,                                          // 1–12
+      value:    d.getMonth() + 1,
       year:     d.getFullYear(),
-      abbrev:   d.toLocaleDateString('en-GB', { month: 'short' }),         // "Jun"
-      fullName: d.toLocaleDateString('en-GB', { month: 'long'  }),         // "June"
+      abbrev:   d.toLocaleDateString('en-GB', { month: 'short' }),
+      fullName: d.toLocaleDateString('en-GB', { month: 'long'  }),
     });
   }
   return options;
 }
 
-// Computed once per app session — months don't change within a session.
 export const PICKER_MONTHS: MonthOption[] = buildNextThreeMonths();
 
 // ─── Day generation ────────────────────────────────────────────────────────────
@@ -40,7 +37,6 @@ function buildDayOptions(year: number, month: number): DateOption[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // new Date(year, month, 0) gives the last day of the chosen month (month is 1-indexed).
   const daysInMonth = new Date(year, month, 0).getDate();
   const options: DateOption[] = [];
 
@@ -60,7 +56,6 @@ function buildDayOptions(year: number, month: number): DateOption[] {
 // ─── Hook ──────────────────────────────────────────────────────────────────────
 
 export interface UseTicketDateSelectionScreenResult {
-  step:          DatePickerStep;
   months:        MonthOption[];
   days:          DateOption[];
   selectedMonth: MonthOption | null;
@@ -84,15 +79,16 @@ export function useTicketDateSelectionScreen(): UseTicketDateSelectionScreenResu
     [selectionsJson],
   );
 
-  const [step,          setStep]          = useState<DatePickerStep>('month');
   const [selectedMonth, setSelectedMonth] = useState<MonthOption | null>(null);
   const [selectedDate,  setSelectedDate]  = useState<string | null>(null);
 
+  // Auto-select the current month on first render.
+  const [initialized] = useState<MonthOption>(() => PICKER_MONTHS[0]!);
+  const resolvedMonth = selectedMonth ?? initialized;
+
   const days = useMemo(
-    () => selectedMonth !== null
-      ? buildDayOptions(selectedMonth.year, selectedMonth.value)
-      : [],
-    [selectedMonth],
+    () => buildDayOptions(resolvedMonth.year, resolvedMonth.value),
+    [resolvedMonth],
   );
 
   const { mutate: submitOrder, isPending: isSubmitting, error: submitError } = useMutation<
@@ -114,33 +110,28 @@ export function useTicketDateSelectionScreen(): UseTicketDateSelectionScreenResu
 
   const handleSelectMonth = useCallback((month: MonthOption): void => {
     setSelectedMonth(month);
-    setSelectedDate(null);   // reset dependent state
-    setStep('day');
+    setSelectedDate(null);  // reset day when month changes
   }, []);
 
   const handleSelectDay = useCallback((date: string): void => {
     setSelectedDate(date);
-    // Stay on day step — user confirms with Purchase button.
   }, []);
 
   const handlePurchase = useCallback((): void => {
     if (canPurchase) submitOrder();
   }, [canPurchase, submitOrder]);
 
-  // Back behaviour: day → month → previous screen.
   const handleBack = useCallback((): void => {
-    if (step === 'month') { navigation.goBack(); return; }
-    setStep('month');
-  }, [step, navigation]);
+    navigation.goBack();
+  }, [navigation]);
 
   return {
-    step,
-    months: PICKER_MONTHS,
+    months:        PICKER_MONTHS,
     days,
-    selectedMonth,
+    selectedMonth: resolvedMonth,
     selectedDate,
     isSubmitting,
-    submitError:  submitError ?? null,
+    submitError:   submitError ?? null,
     canPurchase,
     handleSelectMonth,
     handleSelectDay,

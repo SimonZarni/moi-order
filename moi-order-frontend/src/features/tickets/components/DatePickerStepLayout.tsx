@@ -5,13 +5,11 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { ApiError } from '@/types/models';
 import { DateOption, MonthOption } from '../types';
-import { DatePickerStep } from '../hooks/useTicketDateSelectionScreen';
 import { styles } from './DatePickerStepLayout.styles';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface Props {
-  step:          DatePickerStep;
   months:        MonthOption[];
   days:          DateOption[];
   selectedMonth: MonthOption | null;
@@ -25,30 +23,17 @@ interface Props {
   onBack:        () => void;
 }
 
-// ─── Step metadata ────────────────────────────────────────────────────────────
-
-const STEP_TITLE: Record<DatePickerStep, string> = {
-  month: 'Which month?',
-  day:   'When are you visiting?',
-};
-
-const STEP_SECTION: Record<DatePickerStep, string> = {
-  month: 'CHOOSE A MONTH',
-  day:   'CHOOSE A DAY',
-};
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function DatePickerStepLayout({
-  step, months, days,
+  months, days,
   selectedMonth, selectedDate,
   isSubmitting, submitError, canPurchase,
   onSelectMonth, onSelectDay, onPurchase, onBack,
 }: Props): React.JSX.Element {
-  const heroSubtitle =
-    step === 'month'
-      ? 'Pick a month to visit'
-      : `${selectedMonth?.fullName ?? ''} ${selectedMonth?.year ?? ''}`;
+  const heroSubtitle = selectedMonth !== null
+    ? `${selectedMonth.fullName} ${selectedMonth.year}`
+    : 'Pick a month and day for your visit';
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -60,31 +45,31 @@ export function DatePickerStepLayout({
           <Ionicons name="chevron-back" size={22} color="rgba(255,255,255,0.85)" />
         </Pressable>
         <Text style={styles.eyebrow}>SELECT DATE</Text>
-        <Text style={styles.heroTitle}>{STEP_TITLE[step]}</Text>
+        <Text style={styles.heroTitle}>When are you visiting?</Text>
         <Text style={styles.heroSub}>{heroSubtitle}</Text>
       </View>
 
       {/* ── Scrollable body ── */}
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={[styles.body, step === 'day' && styles.bodyWithFooter]}
+        contentContainerStyle={styles.body}
         showsVerticalScrollIndicator={false}
       >
+        {/* ── Month section ── */}
         <View style={styles.sectionRow}>
-          <Text style={styles.sectionLabel}>{STEP_SECTION[step]}</Text>
+          <Text style={styles.sectionLabel}>CHOOSE A MONTH</Text>
           <View style={styles.sectionLine} />
         </View>
 
-        <View style={styles.grid}>
-
-          {step === 'month' && months.map((month) => {
+        <View style={styles.monthRow}>
+          {months.map((month) => {
             const sel = selectedMonth !== null
               && month.value === selectedMonth.value
               && month.year  === selectedMonth.year;
             return (
               <Pressable
                 key={`${month.year}-${month.value}`}
-                style={[styles.tile, sel && styles.tileSelected]}
+                style={[styles.monthTile, sel && styles.tileSelected]}
                 onPress={() => onSelectMonth(month)}
                 accessibilityRole="button"
                 accessibilityLabel={`Select ${month.fullName} ${month.year}`}
@@ -97,8 +82,19 @@ export function DatePickerStepLayout({
               </Pressable>
             );
           })}
+        </View>
 
-          {step === 'day' && days.map((option) => {
+        {/* ── Divider ── */}
+        <View style={styles.divider} />
+
+        {/* ── Day section ── */}
+        <View style={styles.sectionRow}>
+          <Text style={styles.sectionLabel}>CHOOSE A DAY</Text>
+          <View style={styles.sectionLine} />
+        </View>
+
+        <View style={styles.grid}>
+          {days.map((option) => {
             const parts = option.label.split(' ');
             const sel   = option.date === selectedDate;
             return (
@@ -120,7 +116,6 @@ export function DatePickerStepLayout({
               </Pressable>
             );
           })}
-
         </View>
 
         {submitError !== null && (
@@ -130,23 +125,21 @@ export function DatePickerStepLayout({
         )}
       </ScrollView>
 
-      {/* ── Purchase footer — day step only ── */}
-      {step === 'day' && (
-        <View style={styles.footer}>
-          <Pressable
-            style={[styles.purchaseBtn, !canPurchase && styles.purchaseBtnDisabled]}
-            onPress={onPurchase}
-            disabled={!canPurchase}
-            accessibilityRole="button"
-            accessibilityLabel="Purchase tickets"
-          >
-            {isSubmitting
-              ? <ActivityIndicator color="#ffffff" />
-              : <Text style={styles.purchaseBtnText}>Purchase</Text>
-            }
-          </Pressable>
-        </View>
-      )}
+      {/* ── Purchase footer ── */}
+      <View style={styles.footer}>
+        <Pressable
+          style={[styles.purchaseBtn, !canPurchase && styles.purchaseBtnDisabled]}
+          onPress={onPurchase}
+          disabled={!canPurchase}
+          accessibilityRole="button"
+          accessibilityLabel="Purchase tickets"
+        >
+          {isSubmitting
+            ? <ActivityIndicator color="#ffffff" />
+            : <Text style={styles.purchaseBtnText}>Purchase</Text>
+          }
+        </Pressable>
+      </View>
 
     </SafeAreaView>
   );
