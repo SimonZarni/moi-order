@@ -144,12 +144,12 @@ export const navData: NavItem[] = [
   //   path: '/content',
   //   icon: icon('solar:pen-bold'),
   // },
-  {
-    title: 'Support',
-    path: '/support',
-    icon: icon('solar:chat-round-dots-bold'),
-    superAdminOnly: true,
-  },
+  // {
+  //   title: 'Support',
+  //   path: '/support',
+  //   icon: icon('solar:chat-round-dots-bold'),
+  //   superAdminOnly: true,
+  // },
   {
     title: 'Roles & Permissions',
     path: '/roles',
