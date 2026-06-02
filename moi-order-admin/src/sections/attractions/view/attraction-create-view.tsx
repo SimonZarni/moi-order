@@ -361,7 +361,7 @@ export function AttractionCreateView() {
                           <TextField
                             fullWidth size="small" label="Adult ฿" type="number"
                             slotProps={{ htmlInput: { min: 1 } }}
-                            value={v.adult_price}
+                            value={v.adult_price || ''}
                             error={v.adult_price < 1}
                             helperText={v.adult_price < 1 ? 'Min 1 THB' : ''}
                             onChange={(e) => updateVariant(v.tempId, 'adult_price', Number(e.target.value))}
