@@ -62,8 +62,7 @@ export function AttractionDetailView() {
   const [images, setImages]               = useState<TicketImageData[]>([]);
   const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
   const [deletingId, setDeletingId]       = useState<number | null>(null);
-  const [coverFile, setCoverFile]         = useState<File | null>(null);
-  const [coverPreview, setCoverPreview]   = useState<string | null>(null);
+  const [uploadingCover, setUploadingCover] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -87,11 +86,10 @@ export function AttractionDetailView() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // Revoke all pending object URLs on unmount
+  // Revoke pending gallery object URLs on unmount
   useEffect(
     () => () => {
       pendingImages.forEach((p) => URL.revokeObjectURL(p.preview));
-      if (coverPreview) URL.revokeObjectURL(coverPreview);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     },
     []
@@ -101,15 +99,21 @@ export function AttractionDetailView() {
     setInfoForm((prev) => prev && { ...prev, [field]: value });
   };
 
-  // ── Cover image ──────────────────────────────────────────────────────────
+  // ── Cover image — uploads immediately on select ───────────────────────────
 
   const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !id) return;
     e.target.value = '';
-    if (coverPreview) URL.revokeObjectURL(coverPreview);
-    setCoverFile(file);
-    setCoverPreview(URL.createObjectURL(file));
+    setUploadingCover(true);
+    const fd = new FormData();
+    fd.append('_method', 'PUT');
+    fd.append('cover_image', file);
+    attractionsApi
+      .updateCover(Number(id), fd)
+      .then((updated) => setAttraction(updated))
+      .catch(() => setSaveError('Failed to upload cover image.'))
+      .finally(() => setUploadingCover(false));
   };
 
   // ── Gallery images — local preview, uploaded on Save ─────────────────────
@@ -178,19 +182,7 @@ export function AttractionDetailView() {
       });
       setAttraction(updated);
 
-      // 2. Replace cover image if a new one was chosen
-      if (coverFile) {
-        const fd = new FormData();
-        fd.append('_method', 'PUT');
-        fd.append('cover_image', coverFile);
-        const withCover = await attractionsApi.updateCover(Number(id), fd);
-        setAttraction(withCover);
-        if (coverPreview) URL.revokeObjectURL(coverPreview);
-        setCoverFile(null);
-        setCoverPreview(null);
-      }
-
-      // 3. Upload any pending gallery images
+      // 2. Upload any pending gallery images
       if (pendingImages.length > 0) {
         const files = pendingImages.map((p) => p.file);
         const uploaded = await attractionsApi.uploadImages(Number(id), files);
@@ -254,7 +246,7 @@ export function AttractionDetailView() {
   }
 
   const totalPhotoCount = images.length + pendingImages.length;
-  const hasPendingChanges = !!coverFile || pendingImages.length > 0;
+  const hasPendingChanges = pendingImages.length > 0;
 
   return (
     <DashboardContent>
@@ -304,10 +296,10 @@ export function AttractionDetailView() {
                   }}
                   onClick={() => coverInputRef.current?.click()}
                 >
-                  {(coverPreview ?? attraction.cover_image_url) ? (
+                  {attraction.cover_image_url ? (
                     <Box
                       component="img"
-                      src={coverPreview ?? attraction.cover_image_url ?? undefined}
+                      src={attraction.cover_image_url}
                       alt="Cover photo"
                       sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     />
@@ -316,17 +308,25 @@ export function AttractionDetailView() {
                       <Iconify icon="solar:gallery-bold" width={48} sx={{ color: 'text.disabled', opacity: 0.5 }} />
                     </Stack>
                   )}
-                  <Stack
-                    className="cover-overlay"
-                    alignItems="center" justifyContent="center" spacing={0.5}
-                    sx={{
-                      position: 'absolute', inset: 0, bgcolor: 'rgba(0,0,0,0.45)',
-                      opacity: 0, transition: 'opacity 0.2s', borderRadius: 1.5,
-                    }}
-                  >
-                    <Iconify icon="solar:pen-bold" width={22} sx={{ color: 'common.white' }} />
-                    <Typography variant="caption" sx={{ color: 'common.white' }}>Change cover</Typography>
-                  </Stack>
+                  {uploadingCover ? (
+                    <Stack alignItems="center" justifyContent="center"
+                      sx={{ position: 'absolute', inset: 0, bgcolor: 'rgba(0,0,0,0.5)', borderRadius: 1.5 }}
+                    >
+                      <CircularProgress size={28} sx={{ color: 'common.white' }} />
+                    </Stack>
+                  ) : (
+                    <Stack
+                      className="cover-overlay"
+                      alignItems="center" justifyContent="center" spacing={0.5}
+                      sx={{
+                        position: 'absolute', inset: 0, bgcolor: 'rgba(0,0,0,0.45)',
+                        opacity: 0, transition: 'opacity 0.2s', borderRadius: 1.5,
+                      }}
+                    >
+                      <Iconify icon="solar:pen-bold" width={22} sx={{ color: 'common.white' }} />
+                      <Typography variant="caption" sx={{ color: 'common.white' }}>Change cover</Typography>
+                    </Stack>
+                  )}
                 </Box>
                 <input
                   ref={coverInputRef}
@@ -340,7 +340,7 @@ export function AttractionDetailView() {
                   startIcon={<Iconify icon="mingcute:add-line" width={14} />}
                   onClick={() => coverInputRef.current?.click()}
                 >
-                  {coverFile ? 'Change Cover' : 'Replace Cover'}
+                  Replace Cover
                 </Button>
               </CardContent>
             </Card>
