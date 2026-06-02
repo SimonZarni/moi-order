@@ -1,5 +1,5 @@
 import React from 'react';
-import { Linking, Pressable, ScrollView, Text, View } from 'react-native';
+import { Linking, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colours } from '@/shared/theme/colours';
@@ -17,9 +17,9 @@ import { styles } from './TicketDetailScreen.styles';
 export function TicketDetailScreen(): React.JSX.Element {
   const insets = useSafeAreaInsets();
   const {
-    ticket, isLoading, isError, selections,
+    ticket, isLoading, isRefreshing, isError, selections,
     totalItems, totalPrice, canProceed,
-    handleIncrement, handleDecrement, handlePayNow, handleBack,
+    handleIncrement, handleDecrement, handleRefresh, handlePayNow, handleBack,
   } = useTicketDetailScreen();
 
   if (isLoading || ticket === undefined) {
@@ -43,7 +43,12 @@ export function TicketDetailScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={colours.primary} />}
+      >
         <TicketGallery
           images={[
             ...(ticket.cover_image_url != null ? [ticket.cover_image_url] : []),

@@ -8,16 +8,17 @@ import { Ticket } from '@/types/models';
 export interface UseTicketDetailResult {
   ticket: Ticket | undefined;
   isLoading: boolean;
+  isRefreshing: boolean;
   isError: boolean;
   refetch: () => void;
 }
 
 export function useTicketDetail(ticketId: number): UseTicketDetailResult {
-  const { data: ticket, isLoading, isError, refetch } = useQuery({
+  const { data: ticket, isLoading, isRefetching, isError, refetch } = useQuery({
     queryKey: QUERY_KEYS.TICKETS.DETAIL(ticketId),
     queryFn:  () => fetchTicket(ticketId),
     staleTime: CACHE_TTL.USER_DATA,
   });
 
-  return { ticket, isLoading, isError, refetch };
+  return { ticket, isLoading, isRefreshing: isRefetching && !isLoading, isError, refetch };
 }

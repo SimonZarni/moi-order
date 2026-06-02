@@ -12,6 +12,7 @@ type RouteParams = RouteProp<RootStackParamList, 'TicketDetail'>;
 export interface UseTicketDetailScreenResult {
   ticket: ReturnType<typeof useTicketDetail>['ticket'];
   isLoading: boolean;
+  isRefreshing: boolean;
   isError: boolean;
   selections: PersonTypeSelections;
   totalItems: number;
@@ -19,6 +20,7 @@ export interface UseTicketDetailScreenResult {
   canProceed: boolean;
   handleIncrement: (variantId: number, personType: 'adult' | 'child') => void;
   handleDecrement: (variantId: number, personType: 'adult' | 'child') => void;
+  handleRefresh: () => void;
   handlePayNow: () => void;
   handleBack: () => void;
 }
@@ -30,7 +32,7 @@ export function useTicketDetailScreen(): UseTicketDetailScreenResult {
   const route = useRoute<RouteParams>();
   const { ticketId } = route.params;
 
-  const { ticket, isLoading, isError } = useTicketDetail(ticketId);
+  const { ticket, isLoading, isRefreshing, isError, refetch } = useTicketDetail(ticketId);
 
   const [selections, setSelections] = useState<PersonTypeSelections>({});
 
@@ -93,11 +95,12 @@ export function useTicketDetailScreen(): UseTicketDetailScreenResult {
     });
   }, [navigation, ticketId, selections, ticket?.variants]);
 
-  const handleBack = useCallback((): void => { navigation.goBack(); }, [navigation]);
+  const handleRefresh = useCallback((): void => { refetch(); }, [refetch]);
+  const handleBack    = useCallback((): void => { navigation.goBack(); }, [navigation]);
 
   return {
-    ticket, isLoading, isError, selections,
+    ticket, isLoading, isRefreshing, isError, selections,
     totalItems, totalPrice, canProceed,
-    handleIncrement, handleDecrement, handlePayNow, handleBack,
+    handleIncrement, handleDecrement, handleRefresh, handlePayNow, handleBack,
   };
 }
