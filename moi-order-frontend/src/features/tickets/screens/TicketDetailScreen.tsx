@@ -61,6 +61,7 @@ export function TicketDetailScreen(): React.JSX.Element {
         <View style={styles.infoBlock}>
           <Text style={styles.ticketName}>{ticket.name}</Text>
           <Text style={styles.highlight}>{ticket.highlight_description}</Text>
+          <View style={styles.highlightDivider} />
           <Text style={styles.description}>{ticket.description}</Text>
           <View style={styles.addressRow}>
             <Ionicons name="location-outline" size={14} color={colours.textMuted} />
