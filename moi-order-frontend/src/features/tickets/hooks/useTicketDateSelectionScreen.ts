@@ -12,34 +12,27 @@ import { DateOption, MonthOption, SelectionItem } from '../types';
 
 type RouteParams = RouteProp<RootStackParamList, 'TicketDateSelection'>;
 
-export type DatePickerStep = 'year' | 'month' | 'day';
+export type DatePickerStep = 'month' | 'day';
 
-// ─── Static data ──────────────────────────────────────────────────────────────
+// ─── Dynamic month generation (next 3 months from today) ──────────────────────
 
-const CURRENT_YEAR = new Date().getFullYear();
+function buildNextThreeMonths(): MonthOption[] {
+  const today = new Date();
+  const options: MonthOption[] = [];
+  for (let i = 0; i < 3; i++) {
+    const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+    options.push({
+      value:    d.getMonth() + 1,                                          // 1–12
+      year:     d.getFullYear(),
+      abbrev:   d.toLocaleDateString('en-GB', { month: 'short' }),         // "Jun"
+      fullName: d.toLocaleDateString('en-GB', { month: 'long'  }),         // "June"
+    });
+  }
+  return options;
+}
 
-export const PICKER_YEARS: number[] = [
-  CURRENT_YEAR - 2,
-  CURRENT_YEAR - 1,
-  CURRENT_YEAR,
-  CURRENT_YEAR + 1,
-  CURRENT_YEAR + 2,
-];
-
-export const PICKER_MONTHS: MonthOption[] = [
-  { value: 1,  abbrev: 'Jan', fullName: 'January'   },
-  { value: 2,  abbrev: 'Feb', fullName: 'February'  },
-  { value: 3,  abbrev: 'Mar', fullName: 'March'     },
-  { value: 4,  abbrev: 'Apr', fullName: 'April'     },
-  { value: 5,  abbrev: 'May', fullName: 'May'       },
-  { value: 6,  abbrev: 'Jun', fullName: 'June'      },
-  { value: 7,  abbrev: 'Jul', fullName: 'July'      },
-  { value: 8,  abbrev: 'Aug', fullName: 'August'    },
-  { value: 9,  abbrev: 'Sep', fullName: 'September' },
-  { value: 10, abbrev: 'Oct', fullName: 'October'   },
-  { value: 11, abbrev: 'Nov', fullName: 'November'  },
-  { value: 12, abbrev: 'Dec', fullName: 'December'  },
-];
+// Computed once per app session — months don't change within a session.
+export const PICKER_MONTHS: MonthOption[] = buildNextThreeMonths();
 
 // ─── Day generation ────────────────────────────────────────────────────────────
 
@@ -47,7 +40,7 @@ function buildDayOptions(year: number, month: number): DateOption[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // new Date(year, month, 0) gives the last day of the chosen month (month is 1-indexed here).
+  // new Date(year, month, 0) gives the last day of the chosen month (month is 1-indexed).
   const daysInMonth = new Date(year, month, 0).getDate();
   const options: DateOption[] = [];
 
@@ -68,18 +61,15 @@ function buildDayOptions(year: number, month: number): DateOption[] {
 
 export interface UseTicketDateSelectionScreenResult {
   step:          DatePickerStep;
-  years:         number[];
   months:        MonthOption[];
   days:          DateOption[];
-  selectedYear:  number | null;
-  selectedMonth: number | null;
+  selectedMonth: MonthOption | null;
   selectedDate:  string | null;
   isSubmitting:  boolean;
   submitError:   ApiError | null;
   canPurchase:   boolean;
-  handleSelectYear:  (year: number)  => void;
-  handleSelectMonth: (month: number) => void;
-  handleSelectDay:   (date: string)  => void;
+  handleSelectMonth: (month: MonthOption) => void;
+  handleSelectDay:   (date: string)       => void;
   handlePurchase:    () => void;
   handleBack:        () => void;
 }
@@ -94,16 +84,15 @@ export function useTicketDateSelectionScreen(): UseTicketDateSelectionScreenResu
     [selectionsJson],
   );
 
-  const [step,          setStep]          = useState<DatePickerStep>('year');
-  const [selectedYear,  setSelectedYear]  = useState<number | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [step,          setStep]          = useState<DatePickerStep>('month');
+  const [selectedMonth, setSelectedMonth] = useState<MonthOption | null>(null);
   const [selectedDate,  setSelectedDate]  = useState<string | null>(null);
 
   const days = useMemo(
-    () => (selectedYear !== null && selectedMonth !== null
-      ? buildDayOptions(selectedYear, selectedMonth)
-      : []),
-    [selectedYear, selectedMonth],
+    () => selectedMonth !== null
+      ? buildDayOptions(selectedMonth.year, selectedMonth.value)
+      : [],
+    [selectedMonth],
   );
 
   const { mutate: submitOrder, isPending: isSubmitting, error: submitError } = useMutation<
@@ -123,16 +112,9 @@ export function useTicketDateSelectionScreen(): UseTicketDateSelectionScreenResu
 
   const canPurchase = selectedDate !== null && !isSubmitting;
 
-  const handleSelectYear = useCallback((year: number): void => {
-    setSelectedYear(year);
-    setSelectedMonth(null);   // reset dependent state
-    setSelectedDate(null);
-    setStep('month');
-  }, []);
-
-  const handleSelectMonth = useCallback((month: number): void => {
+  const handleSelectMonth = useCallback((month: MonthOption): void => {
     setSelectedMonth(month);
-    setSelectedDate(null);    // reset dependent state
+    setSelectedDate(null);   // reset dependent state
     setStep('day');
   }, []);
 
@@ -145,25 +127,21 @@ export function useTicketDateSelectionScreen(): UseTicketDateSelectionScreenResu
     if (canPurchase) submitOrder();
   }, [canPurchase, submitOrder]);
 
-  // Back behaviour: day → month → year → previous screen.
+  // Back behaviour: day → month → previous screen.
   const handleBack = useCallback((): void => {
-    if (step === 'year')  { navigation.goBack(); return; }
-    if (step === 'month') { setStep('year');      return; }
+    if (step === 'month') { navigation.goBack(); return; }
     setStep('month');
   }, [step, navigation]);
 
   return {
     step,
-    years:  PICKER_YEARS,
     months: PICKER_MONTHS,
     days,
-    selectedYear,
     selectedMonth,
     selectedDate,
     isSubmitting,
     submitError:  submitError ?? null,
     canPurchase,
-    handleSelectYear,
     handleSelectMonth,
     handleSelectDay,
     handlePurchase,

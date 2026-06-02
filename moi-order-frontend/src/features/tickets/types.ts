@@ -11,6 +11,7 @@ export interface DateOption {
 /** Month metadata for the month-picker grid. */
 export interface MonthOption {
   value:    number;  // 1–12
+  year:     number;  // calendar year — needed for Dec→Jan rollover
   abbrev:   string;  // "Jan"
   fullName: string;  // "January"
 }

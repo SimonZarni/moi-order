@@ -9,7 +9,7 @@ use Illuminate\Validation\Rule;
 
 /**
  * Principle: SRP — validates one operation: creating a ticket order.
- * Security: visit_date max is today+2 years — enforced server-side, not just on the client.
+ * Security: visit_date max is today+3 months — enforced server-side, not just on the client.
  *   items.*.ticket_variant_id must exist and be active — prevents ordering inactive variants.
  */
 class CreateTicketOrderRequest extends FormRequest
@@ -23,7 +23,7 @@ class CreateTicketOrderRequest extends FormRequest
     {
         return [
             'ticket_id'      => ['required', 'integer', Rule::exists('tickets', 'id')->whereNull('deleted_at')],
-            'visit_date'     => ['required', 'date_format:Y-m-d', 'after_or_equal:today', 'before_or_equal:' . now()->addDays(730)->toDateString()],
+            'visit_date'     => ['required', 'date_format:Y-m-d', 'after_or_equal:today', 'before_or_equal:' . now()->addMonths(3)->toDateString()],
             'idempotency_key' => ['required', 'string', 'uuid'],
             'items'          => ['required', 'array', 'min:1'],
             'items.*.ticket_variant_id' => [
@@ -42,7 +42,7 @@ class CreateTicketOrderRequest extends FormRequest
     {
         return [
             'visit_date.after_or_equal'  => 'Visit date cannot be in the past.',
-            'visit_date.before_or_equal' => 'Visit date cannot be more than 2 years from today.',
+            'visit_date.before_or_equal' => 'Visit date cannot be more than 3 months from today.',
             'items.min'                  => 'At least one ticket variant must be selected.',
             'items.*.quantity.max'       => 'Maximum 15 tickets per variant.',
             'items.*.person_type.in'     => 'Person type must be adult, child, or general.',

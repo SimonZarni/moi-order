@@ -91,11 +91,6 @@ export const styles = StyleSheet.create({
   // Selected text — applied to any text inside a selected tile.
   goldText: { color: P.gold },
 
-  // ── Year tile ─────────────────────────────────────────────────────────────
-  yearNum: {
-    fontSize: typography.xl, fontWeight: '900', color: P.textDark,
-  },
-
   // ── Month tile ────────────────────────────────────────────────────────────
   monthNum: {
     fontSize: typography.xxs, fontWeight: '700', color: P.textMuted,
@@ -103,6 +98,9 @@ export const styles = StyleSheet.create({
   },
   monthName: {
     fontSize: typography.lg, fontWeight: '800', color: P.textDark,
+  },
+  monthYear: {
+    fontSize: typography.xxs, color: P.textMuted, marginTop: 2,
   },
 
   // ── Day tile ──────────────────────────────────────────────────────────────

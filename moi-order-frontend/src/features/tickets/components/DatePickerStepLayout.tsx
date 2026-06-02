@@ -5,25 +5,22 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { ApiError } from '@/types/models';
 import { DateOption, MonthOption } from '../types';
-import { DatePickerStep, PICKER_MONTHS } from '../hooks/useTicketDateSelectionScreen';
+import { DatePickerStep } from '../hooks/useTicketDateSelectionScreen';
 import { styles } from './DatePickerStepLayout.styles';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface Props {
   step:          DatePickerStep;
-  years:         number[];
   months:        MonthOption[];
   days:          DateOption[];
-  selectedYear:  number | null;
-  selectedMonth: number | null;
+  selectedMonth: MonthOption | null;
   selectedDate:  string | null;
   isSubmitting:  boolean;
   submitError:   ApiError | null;
   canPurchase:   boolean;
-  onSelectYear:  (year: number)  => void;
-  onSelectMonth: (month: number) => void;
-  onSelectDay:   (date: string)  => void;
+  onSelectMonth: (month: MonthOption) => void;
+  onSelectDay:   (date: string)       => void;
   onPurchase:    () => void;
   onBack:        () => void;
 }
@@ -31,13 +28,11 @@ interface Props {
 // ─── Step metadata ────────────────────────────────────────────────────────────
 
 const STEP_TITLE: Record<DatePickerStep, string> = {
-  year:  'Which year?',
   month: 'Which month?',
   day:   'When are you visiting?',
 };
 
 const STEP_SECTION: Record<DatePickerStep, string> = {
-  year:  'CHOOSE A YEAR',
   month: 'CHOOSE A MONTH',
   day:   'CHOOSE A DAY',
 };
@@ -45,15 +40,15 @@ const STEP_SECTION: Record<DatePickerStep, string> = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function DatePickerStepLayout({
-  step, years, months, days,
-  selectedYear, selectedMonth, selectedDate,
+  step, months, days,
+  selectedMonth, selectedDate,
   isSubmitting, submitError, canPurchase,
-  onSelectYear, onSelectMonth, onSelectDay, onPurchase, onBack,
+  onSelectMonth, onSelectDay, onPurchase, onBack,
 }: Props): React.JSX.Element {
   const heroSubtitle =
-    step === 'year'  ? 'Pick the year of your visit' :
-    step === 'month' ? String(selectedYear ?? '') :
-    `${PICKER_MONTHS.find((m) => m.value === selectedMonth)?.fullName ?? ''} ${selectedYear ?? ''}`;
+    step === 'month'
+      ? 'Pick a month to visit'
+      : `${selectedMonth?.fullName ?? ''} ${selectedMonth?.year ?? ''}`;
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -82,35 +77,23 @@ export function DatePickerStepLayout({
 
         <View style={styles.grid}>
 
-          {step === 'year' && years.map((year) => {
-            const sel = year === selectedYear;
-            return (
-              <Pressable
-                key={year}
-                style={[styles.tile, sel && styles.tileSelected]}
-                onPress={() => onSelectYear(year)}
-                accessibilityRole="button"
-                accessibilityLabel={`Select year ${year}`}
-              >
-                <Text style={[styles.yearNum, sel && styles.goldText]}>{year}</Text>
-              </Pressable>
-            );
-          })}
-
           {step === 'month' && months.map((month) => {
-            const sel = month.value === selectedMonth;
+            const sel = selectedMonth !== null
+              && month.value === selectedMonth.value
+              && month.year  === selectedMonth.year;
             return (
               <Pressable
-                key={month.value}
+                key={`${month.year}-${month.value}`}
                 style={[styles.tile, sel && styles.tileSelected]}
-                onPress={() => onSelectMonth(month.value)}
+                onPress={() => onSelectMonth(month)}
                 accessibilityRole="button"
-                accessibilityLabel={`Select ${month.fullName}`}
+                accessibilityLabel={`Select ${month.fullName} ${month.year}`}
               >
-                <Text style={[styles.monthNum, sel && styles.goldText]}>
+                <Text style={[styles.monthNum,  sel && styles.goldText]}>
                   {String(month.value).padStart(2, '0')}
                 </Text>
                 <Text style={[styles.monthName, sel && styles.goldText]}>{month.abbrev}</Text>
+                <Text style={[styles.monthYear, sel && styles.goldText]}>{month.year}</Text>
               </Pressable>
             );
           })}
