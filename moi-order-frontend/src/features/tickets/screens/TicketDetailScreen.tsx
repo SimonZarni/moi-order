@@ -8,6 +8,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { formatPrice } from '@/shared/utils/formatCurrency';
 import { useTicketDetailScreen } from '@/features/tickets/hooks/useTicketDetailScreen';
 import { TicketGallery } from '@/features/tickets/components/TicketGallery';
+import { TicketVariantCard } from '@/features/tickets/components/TicketVariantCard';
 import { BackButton } from '@/shared/components/BackButton/BackButton';
 import { TicketDetailSkeleton } from '@/features/tickets/components/TicketDetailSkeleton';
 import { TicketVariant } from '@/types/models';
@@ -86,36 +87,13 @@ export function TicketDetailScreen(): React.JSX.Element {
         </View>
 
         {(ticket.variants ?? []).map((variant: TicketVariant) => (
-          <View key={variant.id} style={styles.variantCard}>
-            <View style={styles.variantInfo}>
-              <Text style={styles.variantName}>{variant.name}</Text>
-              {variant.description !== null && (
-                <Text style={styles.variantDesc} numberOfLines={2}>{variant.description}</Text>
-              )}
-              <Text style={styles.variantPrice}>{formatPrice(variant.price)}</Text>
-            </View>
-            <View style={styles.qtyControl}>
-              <Pressable
-                style={[styles.qtyBtn, (selections[variant.id] ?? 0) === 0 && styles.qtyBtnDisabled]}
-                onPress={() => handleDecrement(variant.id)}
-                accessibilityLabel={`Decrease quantity for ${variant.name}`}
-                accessibilityRole="button"
-                disabled={(selections[variant.id] ?? 0) === 0}
-              >
-                <Text style={styles.qtyBtnText}>−</Text>
-              </Pressable>
-              <Text style={styles.qtyValue}>{selections[variant.id] ?? 0}</Text>
-              <Pressable
-                style={[styles.qtyBtn, (selections[variant.id] ?? 0) >= 15 && styles.qtyBtnDisabled]}
-                onPress={() => handleIncrement(variant.id)}
-                accessibilityLabel={`Increase quantity for ${variant.name}`}
-                accessibilityRole="button"
-                disabled={(selections[variant.id] ?? 0) >= 15}
-              >
-                <Text style={styles.qtyBtnText}>+</Text>
-              </Pressable>
-            </View>
-          </View>
+          <TicketVariantCard
+            key={variant.id}
+            variant={variant}
+            selection={selections[variant.id]}
+            onIncrement={handleIncrement}
+            onDecrement={handleDecrement}
+          />
         ))}
       </ScrollView>
 

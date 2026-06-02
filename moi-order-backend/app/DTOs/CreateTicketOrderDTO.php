@@ -20,8 +20,9 @@ readonly class CreateTicketOrderDTO
     {
         $items = array_map(
             fn (array $item) => new TicketOrderItemInputDTO(
-                variantId: (int) $item['ticket_variant_id'],
-                quantity:  (int) $item['quantity'],
+                variantId:  (int) $item['ticket_variant_id'],
+                quantity:   (int) $item['quantity'],
+                personType: (string) $item['person_type'],
             ),
             $request->validated('items'),
         );

@@ -21,7 +21,8 @@ class TicketVariant extends Model
         'ticket_id',
         'name',
         'description',
-        'price',
+        'adult_price',
+        'child_price',
         'is_active',
         'sort_order',
     ];
@@ -29,9 +30,10 @@ class TicketVariant extends Model
     protected function casts(): array
     {
         return [
-            'price'      => 'integer',
-            'is_active'  => 'boolean',
-            'sort_order' => 'integer',
+            'adult_price' => 'integer',
+            'child_price' => 'integer',
+            'is_active'   => 'boolean',
+            'sort_order'  => 'integer',
         ];
     }
 

@@ -7,7 +7,8 @@ namespace App\DTOs;
 readonly class TicketOrderItemInputDTO
 {
     public function __construct(
-        public int $variantId,
-        public int $quantity,
+        public int    $variantId,
+        public int    $quantity,
+        public string $personType,
     ) {}
 }

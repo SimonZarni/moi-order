@@ -182,7 +182,8 @@ export interface TicketVariant {
   id: number;
   name: string;
   description: string | null;
-  price: number; // whole THB
+  adult_price: number;        // whole THB
+  child_price: number | null; // null = same pricing for all ages
   sort_order: number;
 }
 
@@ -214,6 +215,7 @@ export interface TicketOrderItem {
   id: number;
   quantity: number;
   price_snapshot: number; // whole THB
+  person_type: string;    // 'adult' | 'child' | 'general'
   subtotal: number;       // whole THB
   variant?: {
     id: number;

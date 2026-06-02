@@ -33,7 +33,8 @@ class CreateTicketOrderRequest extends FormRequest
                     ->where('is_active', true)
                     ->whereNull('deleted_at'),
             ],
-            'items.*.quantity' => ['required', 'integer', 'min:1', 'max:15'],
+            'items.*.quantity'    => ['required', 'integer', 'min:1', 'max:15'],
+            'items.*.person_type' => ['required', 'string', Rule::in(['adult', 'child', 'general'])],
         ];
     }
 
@@ -44,6 +45,7 @@ class CreateTicketOrderRequest extends FormRequest
             'visit_date.before_or_equal' => 'Visit date cannot be more than 7 days from today.',
             'items.min'                  => 'At least one ticket variant must be selected.',
             'items.*.quantity.max'       => 'Maximum 15 tickets per variant.',
+            'items.*.person_type.in'     => 'Person type must be adult, child, or general.',
         ];
     }
 
@@ -55,15 +57,16 @@ class CreateTicketOrderRequest extends FormRequest
             'idempotency_key'            => 'idempotency key',
             'items.*.ticket_variant_id'  => 'variant',
             'items.*.quantity'           => 'quantity',
+            'items.*.person_type'        => 'person type',
         ];
     }
 
     protected function prepareForValidation(): void
     {
-        // Deduplicate items by variant ID — keep the last occurrence if user sends duplicates.
+        // Deduplicate by variant+person_type — same variant can appear as adult and child.
         if ($this->has('items') && is_array($this->items)) {
             $deduped = collect($this->items)
-                ->keyBy('ticket_variant_id')
+                ->keyBy(fn (array $i) => ($i['ticket_variant_id'] ?? '') . '|' . ($i['person_type'] ?? ''))
                 ->values()
                 ->all();
             $this->merge(['items' => $deduped]);

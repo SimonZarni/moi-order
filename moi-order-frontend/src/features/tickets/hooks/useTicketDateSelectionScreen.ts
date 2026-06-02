@@ -8,7 +8,7 @@ import { createTicketOrder } from '@/shared/api/ticketOrders';
 import { RootStackParamList } from '@/types/navigation';
 import { navigateAfterTicketOrder } from '@/shared/utils/navigateAfterOrder';
 import { ApiError, TicketOrder } from '@/types/models';
-import { VariantSelections } from '../types';
+import { SelectionItem } from '../types';
 
 type RouteParams = RouteProp<RootStackParamList, 'TicketDateSelection'>;
 
@@ -53,8 +53,8 @@ export function useTicketDateSelectionScreen(): UseTicketDateSelectionScreenResu
   const route = useRoute<RouteParams>();
   const { ticketId, selectionsJson } = route.params;
 
-  const selections: VariantSelections = useMemo(
-    () => JSON.parse(selectionsJson) as VariantSelections,
+  const items: SelectionItem[] = useMemo(
+    () => JSON.parse(selectionsJson) as SelectionItem[],
     [selectionsJson],
   );
 
@@ -69,10 +69,7 @@ export function useTicketDateSelectionScreen(): UseTicketDateSelectionScreenResu
       ticket_id:       ticketId,
       visit_date:      selectedDate!,
       idempotency_key: Crypto.randomUUID(),
-      items: Object.entries(selections).map(([variantId, quantity]) => ({
-        ticket_variant_id: Number(variantId),
-        quantity,
-      })),
+      items,
     }),
     onSuccess: (order) => {
       navigateAfterTicketOrder(navigation, order);

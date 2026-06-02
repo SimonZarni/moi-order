@@ -15,7 +15,8 @@ class TicketVariantResource extends JsonResource
             'id'          => $this->id,
             'name'        => $this->name,
             'description' => $this->description,
-            'price'       => $this->price,
+            'adult_price' => $this->adult_price,
+            'child_price' => $this->child_price,
             'sort_order'  => $this->sort_order,
         ];
     }

@@ -44,7 +44,7 @@ class Ticket extends Model
     /** Minimum active variant price in whole THB for the listing card. */
     public function startingFromPrice(): ?int
     {
-        return $this->activeVariants()->min('price');
+        return $this->activeVariants()->min('adult_price');
     }
 
     // ─── Relationships ────────────────────────────────────────────────────────

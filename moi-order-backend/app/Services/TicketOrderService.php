@@ -69,11 +69,16 @@ class TicketOrderService
                 ]);
 
                 foreach ($dto->items as $item) {
-                    $variant = $variants->get($item->variantId);
+                    $variant        = $variants->get($item->variantId);
+                    $priceSnapshot  = $item->personType === 'child'
+                        ? ($variant->child_price ?? $variant->adult_price)
+                        : $variant->adult_price;
+
                     $order->items()->create([
                         'ticket_variant_id' => $variant->id,
                         'quantity'          => $item->quantity,
-                        'price_snapshot'    => $variant->price,
+                        'price_snapshot'    => $priceSnapshot,
+                        'person_type'       => $item->personType,
                     ]);
                 }
 

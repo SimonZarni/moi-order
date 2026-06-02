@@ -59,7 +59,7 @@ export type RootStackParamList = {
   TicketDetail: { ticketId: number };
   TicketDateSelection: {
     ticketId: number;
-    /** JSON-encoded Record<variantId, quantity> */
+    /** JSON-encoded SelectionItem[] — see features/tickets/types.ts */
     selectionsJson: string;
   };
   TicketOrderDetail: { ticketOrderId: string };

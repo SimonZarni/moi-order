@@ -18,6 +18,7 @@ class TicketOrderItem extends Model
         'ticket_variant_id',
         'quantity',
         'price_snapshot',
+        'person_type',
     ];
 
     protected function casts(): array

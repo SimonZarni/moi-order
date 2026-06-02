@@ -5,7 +5,7 @@ export interface CreateTicketOrderPayload {
   ticket_id: number;
   visit_date: string;
   idempotency_key: string;
-  items: Array<{ ticket_variant_id: number; quantity: number }>;
+  items: Array<{ ticket_variant_id: number; quantity: number; person_type: 'adult' | 'child' | 'general' }>;
 }
 
 export async function createTicketOrder(payload: CreateTicketOrderPayload): Promise<TicketOrder> {

@@ -15,6 +15,7 @@ class TicketOrderItemResource extends JsonResource
             'id'             => $this->id,
             'quantity'       => $this->quantity,
             'price_snapshot' => $this->price_snapshot,
+            'person_type'    => $this->person_type,
             'subtotal'       => $this->subtotalThb(),
             'variant'        => $this->when(
                 $this->relationLoaded('variant'),

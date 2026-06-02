@@ -39,7 +39,8 @@ type FormState = {
 type LocalVariant = {
   tempId: string;
   name: string;
-  price: number;
+  adult_price: number;
+  child_price: number | null;
   description: string;
 };
 
@@ -80,10 +81,10 @@ export function AttractionCreateView() {
   };
 
   const addVariant = () => {
-    setVariants((prev) => [...prev, { tempId: genTempId(), name: '', price: 0, description: '' }]);
+    setVariants((prev) => [...prev, { tempId: genTempId(), name: '', adult_price: 0, child_price: null, description: '' }]);
   };
 
-  const updateVariant = (tempId: string, field: keyof LocalVariant, value: string | number) => {
+  const updateVariant = (tempId: string, field: keyof LocalVariant, value: string | number | null) => {
     setVariants((prev) => prev.map((v) => (v.tempId === tempId ? { ...v, [field]: value } : v)));
   };
 
@@ -113,7 +114,8 @@ export function AttractionCreateView() {
           variants.map((v, i) =>
             attractionsApi.createVariant(ticket.id, {
               name: v.name,
-              price: v.price,
+              adult_price: v.adult_price,
+              child_price: v.child_price ?? null,
               description: v.description,
               sort_order: i + 1,
             })
@@ -138,7 +140,7 @@ export function AttractionCreateView() {
     !!form.city.trim() &&
     !!form.province.trim() &&
     !!coverFile &&
-    variants.every((v) => !!v.name.trim() && v.price >= 1);
+    variants.every((v) => !!v.name.trim() && v.adult_price >= 1);
 
   return (
     <DashboardContent>
@@ -347,48 +349,44 @@ export function AttractionCreateView() {
                       key={v.tempId}
                       sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1.5 }}
                     >
-                      <Grid container spacing={2} alignItems="center">
-                        <Grid size={{ xs: 12, sm: 5 }}>
+                      <Grid container spacing={2} alignItems="flex-start">
+                        <Grid size={{ xs: 12, sm: 4 }}>
                           <TextField
-                            fullWidth
-                            size="small"
-                            label="Variant Name"
+                            fullWidth size="small" label="Variant Name"
                             value={v.name}
                             onChange={(e) => updateVariant(v.tempId, 'name', e.target.value)}
                           />
                         </Grid>
-                        <Grid size={{ xs: 6, sm: 3 }}>
+                        <Grid size={{ xs: 6, sm: 2.5 }}>
                           <TextField
-                            fullWidth
-                            size="small"
-                            label="Price (THB)"
-                            type="number"
+                            fullWidth size="small" label="Adult ฿" type="number"
                             slotProps={{ htmlInput: { min: 1 } }}
-                            value={v.price}
-                            error={v.price < 1}
-                            helperText={v.price < 1 ? 'Min 1 THB' : ''}
-                            onChange={(e) =>
-                              updateVariant(v.tempId, 'price', Number(e.target.value))
-                            }
+                            value={v.adult_price}
+                            error={v.adult_price < 1}
+                            helperText={v.adult_price < 1 ? 'Min 1 THB' : ''}
+                            onChange={(e) => updateVariant(v.tempId, 'adult_price', Number(e.target.value))}
                           />
                         </Grid>
-                        <Grid size={{ xs: 4, sm: 3 }}>
+                        <Grid size={{ xs: 6, sm: 2.5 }}>
                           <TextField
-                            fullWidth
-                            size="small"
-                            label="Description"
-                            value={v.description}
-                            onChange={(e) =>
-                              updateVariant(v.tempId, 'description', e.target.value)
-                            }
+                            fullWidth size="small" label="Child ฿ (optional)" type="number"
+                            slotProps={{ htmlInput: { min: 1 } }}
+                            value={v.child_price ?? ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              updateVariant(v.tempId, 'child_price', val === '' ? null : Number(val));
+                            }}
                           />
                         </Grid>
-                        <Grid size={{ xs: 2, sm: 1 }}>
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => removeVariant(v.tempId)}
-                          >
+                        <Grid size={{ xs: 10, sm: 2 }}>
+                          <TextField
+                            fullWidth size="small" label="Description"
+                            value={v.description}
+                            onChange={(e) => updateVariant(v.tempId, 'description', e.target.value)}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 2, sm: 1 }} sx={{ display: 'flex', alignItems: 'center', pt: '6px !important' }}>
+                          <IconButton size="small" color="error" onClick={() => removeVariant(v.tempId)}>
                             <Iconify icon="solar:trash-bin-trash-bold" width={16} />
                           </IconButton>
                         </Grid>

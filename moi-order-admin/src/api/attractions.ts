@@ -4,7 +4,8 @@ export type TicketVariantData = {
   id: number;
   name: string;
   description: string;
-  price: number;
+  adult_price: number;
+  child_price: number | null;
   sort_order: number;
 };
 
