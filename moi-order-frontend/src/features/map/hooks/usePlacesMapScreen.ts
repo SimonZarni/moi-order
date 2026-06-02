@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Keyboard, Linking } from 'react-native';
+import { Alert, Image, Keyboard, Linking } from 'react-native';
 import * as Location from 'expo-location';
 import * as SecureStore from 'expo-secure-store';
 import { useFocusEffect } from '@react-navigation/native';
@@ -110,6 +110,10 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const cameraRef = useRef<Camera>(null);
   // Guards against Android propagating button-press touches to the native Mapbox onPress.
   const ignoreNextMapPressRef = useRef(false);
+  // Ensures the GPS→camera fly-to fires only once per map visit (not on every GPS tick).
+  const cameraInitializedRef  = useRef(false);
+  // Tracks which cover_image URLs have been prefetched to avoid duplicate calls.
+  const prefetchedRef = useRef(new Set<string>());
 
   const [gpsCoords, setGpsCoords]           = useState<[number, number] | null>(null);
   const [userLocation, setUserLocation]     = useState<UserLocation | null>(null);
@@ -209,8 +213,11 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     }, []),
   );
 
+  // Fly to GPS once per visit — subsequent position updates only move the blue dot,
+  // not the camera. User is free to pan without being snapped back every ~8–10 s.
   useEffect(() => {
-    if (!gpsCoords) return;
+    if (!gpsCoords || cameraInitializedRef.current) return;
+    cameraInitializedRef.current = true;
     cameraRef.current?.setCamera({
       centerCoordinate: gpsCoords, zoomLevel: 13,
       animationMode: 'flyTo', animationDuration: 1200,
@@ -278,21 +285,36 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
 
   // ── Reset nav bar and search state when screen loses focus ──────────────
   useFocusEffect(
-    useCallback(() => () => {
-      setMapFullscreen(false);
-      setMapBottomSheetOpen(false);
-      setIsFullscreen(false);
-      setSheetExpanded(false);
-      setSearchQuery('');
-      setGeoSuggestions([]);
-      setGoogleSuggestions([]);
-      setSelectedGooglePlace(null);
-      setGooglePlaceCoords(null);
-      setSelectedPlace(null);
-      setDrivingRoute(null);
-      setWalkingRoute(null);
+    useCallback(() => {
+      // On each visit, allow a single fly-to GPS on first position update.
+      cameraInitializedRef.current = false;
+      return () => {
+        setMapFullscreen(false);
+        setMapBottomSheetOpen(false);
+        setIsFullscreen(false);
+        setSheetExpanded(false);
+        setSearchQuery('');
+        setGeoSuggestions([]);
+        setGoogleSuggestions([]);
+        setSelectedGooglePlace(null);
+        setGooglePlaceCoords(null);
+        setSelectedPlace(null);
+        setDrivingRoute(null);
+        setWalkingRoute(null);
+      };
     }, [setMapFullscreen, setMapBottomSheetOpen]),
   );
+
+  // ── Prefetch cover images so pin circles load instantly ───────────────────
+  // Called whenever the places list changes (initial load + refetch).
+  useEffect(() => {
+    for (const p of places) {
+      if (p.cover_image && !prefetchedRef.current.has(p.cover_image)) {
+        prefetchedRef.current.add(p.cover_image);
+        Image.prefetch(p.cover_image).catch(() => {});
+      }
+    }
+  }, [places]);
 
   // ── Fullscreen + bottom sheet sync ────────────────────────────────────────
   useEffect(() => { setMapFullscreen(isFullscreen); }, [isFullscreen, setMapFullscreen]);

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { ActivityIndicator, Animated, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Animated, Platform, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapboxGL from '@rnmapbox/maps';
 import { useNavigation } from '@react-navigation/native';
@@ -133,11 +133,18 @@ export function PlacesMapScreen(): React.JSX.Element {
           }}
           attributionEnabled={false}
           logoEnabled={false}
+          // Reduce post-swipe glide. iOS default (0.998) is too slow to decelerate —
+          // a tiny flick sends the map far. 0.996 stops it ~5× faster without feeling abrupt.
+          // Cast needed: panDecelerationFactor is in Mapbox source but missing from TS types v10.3.0.
+          {...(Platform.OS === 'ios' ? { panDecelerationFactor: 0.996 } as object : {})}
         >
+          {/* centerCoordinate is a STATIC fallback only — all camera movement
+              is driven imperatively via cameraRef.setCamera() in the hook.
+              Binding it to userLocation would re-animate on every GPS tick. */}
           <MapboxGL.Camera
             ref={cameraRef}
             zoomLevel={12}
-            centerCoordinate={userLocation?.coords ?? DEFAULT_CENTRE}
+            centerCoordinate={DEFAULT_CENTRE}
             animationMode="flyTo"
             animationDuration={800}
           />

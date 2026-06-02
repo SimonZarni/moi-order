@@ -5,11 +5,21 @@ import { CATEGORY_EMOJI } from '@/shared/theme/mapTheme';
 import { styles } from './PlaceMarker.styles';
 import type { Place } from '@/types/models';
 
+// ─── Module-level cache ───────────────────────────────────────────────────────
+// Persists across React remounts (which Mapbox forces on every key change).
+// If a cover_image URL was loaded before, the next remount starts with
+// imgReady=true so Mapbox snapshots the image instead of the white placeholder.
+const loadedImageUris = new Set<string>();
+
+// ─── Props ────────────────────────────────────────────────────────────────────
+
 interface Props {
   place:      Place;
   isSelected: boolean;
   onPress:    (place: Place) => void;
 }
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export const PlaceMarker = React.memo(function PlaceMarker(
   { place, isSelected, onPress }: Props,
@@ -18,8 +28,14 @@ export const PlaceMarker = React.memo(function PlaceMarker(
   // Neither Reanimated nor RN Animated propagate post-mount updates.
   // The ONLY way to update the visual is to change the key, forcing a
   // full remount and fresh snapshot with the correct static styles.
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [imgReady, setImgReady] = useState(!place.cover_image);
+  //
+  // White flash fix: if the image was loaded in a previous render cycle
+  // (tracked in the module-level Set), start imgReady=true so the snapshot
+  // sees the cached image immediately rather than the white background.
+  const uri = place.cover_image ?? null;
+  const [imgReady, setImgReady] = useState<boolean>(
+    () => !uri || loadedImageUris.has(uri),
+  );
 
   if (!place.latitude || !place.longitude) return null;
 
@@ -41,12 +57,16 @@ export const PlaceMarker = React.memo(function PlaceMarker(
         accessibilityLabel={`View ${place.name_en}`}
       >
         <View style={[styles.bubble, isSelected && styles.bubbleSelected]}>
-          {place.cover_image ? (
+          {uri ? (
             <Image
-              source={{ uri: place.cover_image }}
+              source={{ uri }}
               style={styles.coverImage}
               resizeMode="cover"
-              onLoad={() => setImgReady(true)}
+              onLoad={() => {
+                // Remember this URI so subsequent remounts skip the loading state.
+                loadedImageUris.add(uri);
+                setImgReady(true);
+              }}
             />
           ) : (
             <View style={styles.imageFallback}>
