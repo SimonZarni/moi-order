@@ -49,6 +49,18 @@ const getServiceDisplay = (row: SubmissionListItem): string => {
 
 // ----------------------------------------------------------------------
 
+const ACTIVE_STATUSES = new Set<SubmissionStatus>(['pending_payment', 'processing']);
+
+const getAgingInfo = (createdAt: string): { label: string; color: 'success' | 'warning' | 'error' } => {
+  const hours = (Date.now() - new Date(createdAt).getTime()) / 36e5;
+  if (hours < 24) return { label: `${Math.round(hours)}h ago`, color: 'success' };
+  const days = Math.floor(hours / 24);
+  if (hours < 72) return { label: `${days}d ago`, color: 'warning' };
+  return { label: `${days}d ago`, color: 'error' };
+};
+
+// ----------------------------------------------------------------------
+
 const STATUS_COLORS: Record<SubmissionStatus, 'warning' | 'success' | 'error'> = {
   pending_payment: 'warning',
   processing: 'warning',
@@ -252,7 +264,9 @@ export function SubmissionsView() {
                   </TableRow>
                 ) : (
                   <>
-                    {submissions.map((row, i) => (
+                    {submissions.map((row, i) => {
+                    const aging = ACTIVE_STATUSES.has(row.status as SubmissionStatus) ? getAgingInfo(row.created_at) : null;
+                    return (
                       <TableRow
                         key={row.id}
                         hover
@@ -287,7 +301,16 @@ export function SubmissionsView() {
                             </Typography>
                           )}
                         </TableCell>
-                        <TableCell>{fDate(row.created_at)}</TableCell>
+                        <TableCell>
+                          <Stack spacing={0.5}>
+                            <Typography variant="body2">{fDate(row.created_at)}</Typography>
+                            {aging && (
+                              <Label color={aging.color} sx={{ width: 'fit-content', fontSize: 10, py: 0 }}>
+                                {aging.label}
+                              </Label>
+                            )}
+                          </Stack>
+                        </TableCell>
                         <TableCell>
                           <Label color={STATUS_COLORS[row.status as SubmissionStatus] ?? 'default'}>{row.status_label}</Label>
                         </TableCell>
@@ -322,7 +345,8 @@ export function SubmissionsView() {
                           </IconButton>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    );
+                  })}
                     {submissions.length === 0 && (
                       <TableRow>
                         <TableCell
