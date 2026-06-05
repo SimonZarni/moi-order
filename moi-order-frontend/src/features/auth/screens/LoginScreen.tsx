@@ -72,7 +72,7 @@ export function LoginScreen(): React.JSX.Element {
         >
           <View style={styles.hero}>
             <Image
-              source={require('../../../../assets/whale.png')}
+              source={require('../../../../assets/in-app-logo.png')}
               style={styles.logo}
               resizeMode="contain"
               accessibilityLabel="Moi Order logo"

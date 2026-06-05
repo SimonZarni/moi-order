@@ -50,7 +50,7 @@ export function HomeScreen(): React.JSX.Element {
 
           <View style={styles.heroTopRow}>
             <Image
-              source={require('../../../../assets/whale.png')}
+              source={require('../../../../assets/in-app-logo.png')}
               style={styles.brandLogo}
               contentFit="contain"
               cachePolicy="memory"

@@ -31,7 +31,7 @@ export function Logo({
   const singleLogo = (
     <Box
       component="img"
-      src="/assets/icons/whale.png"
+      src="/assets/icons/moi-order-icon.png"
       alt="Moi Order"
       sx={{ width: 40, height: 40, borderRadius: '10px', objectFit: 'cover', display: 'block' }}
     />
@@ -41,7 +41,7 @@ export function Logo({
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
       <Box
         component="img"
-        src="/assets/icons/whale.png"
+        src="/assets/icons/moi-order-icon.png"
         alt="Moi Order"
         sx={{ width: 40, height: 40, borderRadius: '10px', objectFit: 'cover', flexShrink: 0 }}
       />
