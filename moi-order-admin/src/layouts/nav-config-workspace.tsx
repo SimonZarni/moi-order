@@ -6,7 +6,7 @@ export const _workspaces: WorkspacesPopoverProps['data'] = [
   {
     id: 'moi-order-main',
     name: 'Moi Order',
-    logo: '/assets/icons/moi-order-icon.png',
+    logo: '/assets/icons/whale.png',
   },
   {
     id: 'moi-order-trusted-brothers',
