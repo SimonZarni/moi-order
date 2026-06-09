@@ -1,5 +1,7 @@
 import type { SelectChangeEvent } from '@mui/material/Select';
 
+import { useState, useEffect } from 'react';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
@@ -81,6 +83,13 @@ export function PaymentsView() {
     handleExport,
   } = usePaymentsView();
 
+  const [pendingMode, setPendingMode] = useState(paymentMode);
+  const isDirty = pendingMode !== paymentMode;
+
+  useEffect(() => {
+    setPendingMode(paymentMode);
+  }, [paymentMode]);
+
   return (
     <DashboardContent>
       <Box sx={{ mb: 5, display: 'flex', alignItems: 'center' }}>
@@ -108,12 +117,12 @@ export function PaymentsView() {
               </Typography>
 
               <ToggleButtonGroup
-                value={paymentMode}
+                value={pendingMode}
                 exclusive
                 disabled={updatingMode}
-                onChange={(_, val) => { if (val) handleUpdateMode(val, { bankName: bankName ?? undefined, bankAccountNumber: bankAccountNumber ?? undefined, bankAccountName: bankAccountName ?? undefined }); }}
+                onChange={(_, val) => { if (val) setPendingMode(val); }}
                 size="small"
-                sx={{ mb: 2 }}
+                sx={{ mb: 1.5 }}
               >
                 <ToggleButton value="stripe" sx={{ px: 2, textTransform: 'none', fontWeight: 600, fontSize: 12 }}>
                   Stripe
@@ -126,7 +135,19 @@ export function PaymentsView() {
                 </ToggleButton>
               </ToggleButtonGroup>
 
-              {paymentMode === 'global_qr' && (
+              <Box sx={{ mb: 1 }}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  disabled={!isDirty || updatingMode}
+                  onClick={() => handleUpdateMode(pendingMode, { bankName: bankName ?? undefined, bankAccountNumber: bankAccountNumber ?? undefined, bankAccountName: bankAccountName ?? undefined })}
+                  startIcon={updatingMode ? <CircularProgress size={14} color="inherit" /> : null}
+                >
+                  Save
+                </Button>
+              </Box>
+
+              {pendingMode === 'global_qr' && (
                 <Box>
                   <Divider sx={{ my: 2 }} />
                   <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block', letterSpacing: 0.5, textTransform: 'uppercase' }}>
@@ -176,7 +197,7 @@ export function PaymentsView() {
                 </Box>
               )}
 
-              {paymentMode === 'manual_qr' && (
+              {pendingMode === 'manual_qr' && (
                 <Box sx={{ mt: 1 }}>
                   <Chip
                     icon={<Iconify icon="solar:settings-bold-duotone" width={14} />}
