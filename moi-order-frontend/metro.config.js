@@ -15,6 +15,9 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
   if (platform === 'web' && moduleName === 'sp-react-native-in-app-updates') {
     return { filePath: require.resolve('./in-app-updates-stub.js'), type: 'sourceFile' };
   }
+  if (platform === 'web' && moduleName === 'react-native-image-viewing') {
+    return { filePath: require.resolve('./image-viewing-stub.js'), type: 'sourceFile' };
+  }
   return context.resolveRequest(context, moduleName, platform);
 };
 
