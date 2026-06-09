@@ -10,13 +10,16 @@ config.resolver.extraNodeModules = {
   '@react-native-community/netinfo': require.resolve('./netinfo-mock.js'),
 };
 
-// sp-react-native-in-app-updates has no web build — swap it for a no-op stub on web.
+// Native-only packages that have no web build — stub them out on web.
+const WEB_STUBS = {
+  'sp-react-native-in-app-updates': './in-app-updates-stub.js',
+  'react-native-image-viewing':     './image-viewing-stub.js',
+  '@rnmapbox/maps':                 './rnmapbox-stub.js',
+};
+
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  if (platform === 'web' && moduleName === 'sp-react-native-in-app-updates') {
-    return { filePath: require.resolve('./in-app-updates-stub.js'), type: 'sourceFile' };
-  }
-  if (platform === 'web' && moduleName === 'react-native-image-viewing') {
-    return { filePath: require.resolve('./image-viewing-stub.js'), type: 'sourceFile' };
+  if (platform === 'web' && WEB_STUBS[moduleName]) {
+    return { filePath: require.resolve(WEB_STUBS[moduleName]), type: 'sourceFile' };
   }
   return context.resolveRequest(context, moduleName, platform);
 };
