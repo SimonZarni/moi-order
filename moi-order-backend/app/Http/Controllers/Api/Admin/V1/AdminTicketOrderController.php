@@ -113,11 +113,18 @@ class AdminTicketOrderController extends Controller
         $ticketOrder->loadMissing(['ticket', 'user']);
 
         if ($ticketOrder->user) {
-            $ticketOrder->user->notify(new PaymentReadyNotification(
-                orderType: 'ticket_order',
-                orderId:   $ticketOrder->id,
-                orderName: $ticketOrder->ticket?->name ?? 'Ticket Order #'.$ticketOrder->id,
-            ));
+            try {
+                $ticketOrder->user->notify(new PaymentReadyNotification(
+                    orderType: 'ticket_order',
+                    orderId:   $ticketOrder->id,
+                    orderName: $ticketOrder->ticket?->name ?? 'Ticket Order #'.$ticketOrder->id,
+                ));
+            } catch (\Throwable $e) {
+                \Log::warning('PaymentReadyNotification failed after confirm-payment', [
+                    'ticket_order_id' => $ticketOrder->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         return response()->json(['data' => new TicketOrderResource($ticketOrder)]);

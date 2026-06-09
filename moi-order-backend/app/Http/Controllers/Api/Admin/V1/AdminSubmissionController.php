@@ -78,11 +78,18 @@ class AdminSubmissionController extends Controller
 
         if ($submission->user) {
             $name = $submission->serviceType?->service?->name ?? 'Service Order #'.$submission->id;
-            $submission->user->notify(new PaymentReadyNotification(
-                orderType: 'submission',
-                orderId:   $submission->id,
-                orderName: $name,
-            ));
+            try {
+                $submission->user->notify(new PaymentReadyNotification(
+                    orderType: 'submission',
+                    orderId:   $submission->id,
+                    orderName: $name,
+                ));
+            } catch (\Throwable $e) {
+                \Log::warning('PaymentReadyNotification failed after confirm-payment', [
+                    'submission_id' => $submission->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         return response()->json(['data' => new AdminSubmissionResource($submission)]);
