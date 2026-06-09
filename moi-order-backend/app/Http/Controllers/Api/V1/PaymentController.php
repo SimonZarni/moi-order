@@ -80,4 +80,24 @@ class PaymentController extends Controller
 
         return response()->json(['synced' => true]);
     }
+
+    /**
+     * POST /api/v1/submissions/{id}/payment/notify
+     * User taps "I've already paid" — sends admin notification to verify PromptPay.
+     * No-op for Stripe payments (stripe_intent_id present).
+     */
+    public function notify(string $id, Request $request): JsonResponse
+    {
+        $submission = ServiceSubmission::with(['payment', 'user', 'serviceType.service'])
+            ->forUser($request->user()->id)
+            ->where('uuid', $id)
+            ->firstOrFail();
+
+        $payableName = $submission->serviceType->service->name ?? 'a service';
+        $userName    = $request->user()->name ?? 'A user';
+
+        $this->service->notifyManualPayment($submission, $userName, $payableName);
+
+        return response()->json(['notified' => true]);
+    }
 }

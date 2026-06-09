@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\PaymentMode;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -32,5 +33,59 @@ class AppSetting extends Model
     public static function isAutoPaymentEnabled(): bool
     {
         return (bool) static::get('auto_payment_enabled', '1');
+    }
+
+    // ─── Payment mode ─────────────────────────────────────────────────────────
+
+    public static function getPaymentMode(): PaymentMode
+    {
+        $raw = static::get('payment_mode', PaymentMode::Stripe->value);
+        return PaymentMode::tryFrom((string) $raw) ?? PaymentMode::Stripe;
+    }
+
+    public static function setPaymentMode(PaymentMode $mode): void
+    {
+        static::set('payment_mode', $mode->value);
+    }
+
+    // ─── PromptPay QR settings ────────────────────────────────────────────────
+
+    public static function getPromptPayQrImageUrl(): ?string
+    {
+        $value = static::get('promptpay_qr_image_url');
+        return $value !== null && $value !== '' ? (string) $value : null;
+    }
+
+    public static function setPromptPayQrImageUrl(?string $url): void
+    {
+        static::set('promptpay_qr_image_url', $url ?? '');
+    }
+
+    public static function getPromptPayBankName(): ?string
+    {
+        $value = static::get('promptpay_bank_name');
+        return $value !== null && $value !== '' ? (string) $value : null;
+    }
+
+    public static function getPromptPayBankAccountNumber(): ?string
+    {
+        $value = static::get('promptpay_bank_account_number');
+        return $value !== null && $value !== '' ? (string) $value : null;
+    }
+
+    public static function getPromptPayBankAccountName(): ?string
+    {
+        $value = static::get('promptpay_bank_account_name');
+        return $value !== null && $value !== '' ? (string) $value : null;
+    }
+
+    public static function setPromptPayBankInfo(
+        ?string $bankName,
+        ?string $accountNumber,
+        ?string $accountName,
+    ): void {
+        static::set('promptpay_bank_name', $bankName ?? '');
+        static::set('promptpay_bank_account_number', $accountNumber ?? '');
+        static::set('promptpay_bank_account_name', $accountName ?? '');
     }
 }

@@ -37,6 +37,10 @@ export async function syncTicketOrderPaymentStatus(ticketOrderId: string): Promi
   await apiClient.post(`/api/v1/ticket-orders/${ticketOrderId}/payment/sync`);
 }
 
+export async function notifyTicketOrderPaid(ticketOrderId: string): Promise<void> {
+  await apiClient.post(`/api/v1/ticket-orders/${ticketOrderId}/payment/notify`);
+}
+
 export async function fetchTicketOrderEticketUrl(ticketOrderId: string): Promise<{ url: string; mime_type: string }> {
   const { data } = await apiClient.get<ApiResponse<{ url: string; mime_type: string }>>(`/api/v1/ticket-orders/${ticketOrderId}/eticket`);
   return data.data;

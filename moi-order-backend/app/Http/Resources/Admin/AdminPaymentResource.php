@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Admin;
 
+use App\Contracts\FileStorageInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,6 +21,8 @@ class AdminPaymentResource extends JsonResource
             $userName = $this->payable->user?->name;
         }
 
+        $qrImageUrl = $this->resolveQrImageUrl($this->qr_image_url);
+
         return [
             'id'               => $this->uuid,
             'status'           => $this->status->value,
@@ -27,7 +30,8 @@ class AdminPaymentResource extends JsonResource
             'amount'           => $this->amount,
             'currency'         => $this->currency,
             'stripe_intent_id' => $this->stripe_intent_id,
-            'qr_image_url'     => $this->qr_image_url,
+            'qr_image_url'     => $qrImageUrl,
+            'qr_data'          => $this->qr_data,
             'expires_at'       => $this->expires_at?->toISOString(),
             'created_at'       => $this->created_at->toISOString(),
             'user_name'        => $userName,
@@ -39,5 +43,18 @@ class AdminPaymentResource extends JsonResource
                 ]
             ),
         ];
+    }
+
+    private function resolveQrImageUrl(?string $raw): ?string
+    {
+        if ($raw === null) {
+            return null;
+        }
+        if (str_starts_with($raw, 'http')) {
+            return $raw;
+        }
+        /** @var FileStorageInterface $storage */
+        $storage = app(FileStorageInterface::class);
+        return $storage->publicUrl($raw);
     }
 }

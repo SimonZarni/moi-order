@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createTicketOrderPayment,
   fetchTicketOrder,
+  fetchTicketOrderPayment,
   syncTicketOrderPaymentStatus,
 } from '@/shared/api/ticketOrders';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
@@ -17,6 +18,7 @@ export interface UseTicketOrderPaymentResult {
   isCreating: boolean;
   isLoadingOrder: boolean;
   createError: ApiError | null;
+  isWaitingForQr: boolean;
 }
 
 export interface UseTicketOrderPaymentRefreshable extends UseTicketOrderPaymentResult {
@@ -24,7 +26,7 @@ export interface UseTicketOrderPaymentRefreshable extends UseTicketOrderPaymentR
 }
 
 /**
- * Mirrors usePayment but for TicketOrder — same polling + AppState sync pattern.
+ * Mirrors usePayment — same polling + QR-wait pattern for TicketOrder.
  * Principle: OCP — new payable type adds a new hook instead of modifying usePayment.
  */
 export function useTicketOrderPayment(ticketOrderId: string): UseTicketOrderPaymentRefreshable {
@@ -32,7 +34,7 @@ export function useTicketOrderPayment(ticketOrderId: string): UseTicketOrderPaym
 
   const {
     mutate: create,
-    data: payment,
+    data: mutationPayment,
     isPending: isCreating,
     error: createError,
   } = useMutation<Payment, ApiError>({
@@ -42,7 +44,7 @@ export function useTicketOrderPayment(ticketOrderId: string): UseTicketOrderPaym
   useEffect(() => {
     if (!ticketOrderId) return;
     create();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketOrderId]);
 
   const { data: ticketOrder, isLoading: isLoadingOrder } = useQuery({
@@ -55,25 +57,51 @@ export function useTicketOrderPayment(ticketOrderId: string): UseTicketOrderPaym
     },
   });
 
+  const isWaitingForQr =
+    mutationPayment !== undefined &&
+    mutationPayment.qr_image_url === null &&
+    mutationPayment.qr_data === null &&
+    mutationPayment.status === 'pending';
+
+  const { data: polledPayment } = useQuery({
+    queryKey: QUERY_KEYS.PAYMENTS.DETAIL(ticketOrderId),
+    queryFn:  () => fetchTicketOrderPayment(ticketOrderId),
+    enabled:  isWaitingForQr,
+    refetchInterval: isWaitingForQr ? 5000 : false,
+  });
+
+  const payment = polledPayment ?? mutationPayment;
+
+  const isStripePayment = payment?.qr_data !== null;
   const isPendingRef = useRef(ticketOrder?.status === TICKET_ORDER_STATUS.PendingPayment);
   useEffect(() => {
     isPendingRef.current = ticketOrder?.status === TICKET_ORDER_STATUS.PendingPayment;
   }, [ticketOrder?.status]);
 
   const handleAppStateChange = useCallback(async (nextState: AppStateStatus): Promise<void> => {
-    if (nextState !== 'active' || !isPendingRef.current) return;
+    if (nextState !== 'active' || !isPendingRef.current || !isStripePayment) return;
     try {
       await syncTicketOrderPaymentStatus(ticketOrderId);
       await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TICKET_ORDERS.DETAIL(ticketOrderId) });
     } catch {
       // Non-critical; polling continues as fallback.
     }
-  }, [ticketOrderId, queryClient]);
+  }, [ticketOrderId, queryClient, isStripePayment]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', handleAppStateChange);
     return () => subscription.remove();
   }, [handleAppStateChange]);
 
-  return { payment, ticketOrder, isCreating, isLoadingOrder, createError, refreshPayment: create };
+  return {
+    payment,
+    ticketOrder,
+    isCreating,
+    isLoadingOrder,
+    createError,
+    isWaitingForQr: payment?.qr_image_url === null &&
+      payment?.qr_data === null &&
+      payment?.status === 'pending',
+    refreshPayment: create,
+  };
 }

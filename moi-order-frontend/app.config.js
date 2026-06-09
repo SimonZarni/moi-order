@@ -96,7 +96,7 @@ module.exports = {
       buildNumber: "2",
     },
     android: {
-      package: "com.moiorder.app",
+      package: "com.moiorder.customer",
       versionCode: 2,
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",

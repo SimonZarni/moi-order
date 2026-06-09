@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\FileStorageInterface;
 use App\Enums\PaymentStatus;
 use App\Exports\PaymentExport;
 use App\Http\Requests\Admin\AdminPaymentIndexRequest;
@@ -12,6 +13,7 @@ use App\Models\ServiceSubmission;
 use App\Models\TicketOrder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
@@ -24,7 +26,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class AdminPaymentService
 {
     public function __construct(
-        private readonly PaymentService $paymentService,
+        private readonly PaymentService       $paymentService,
+        private readonly FileStorageInterface $storage,
     ) {}
 
     private function withPayable(): array
@@ -150,6 +153,53 @@ class AdminPaymentService
         ]);
 
         return $newPayment->load($this->withPayable());
+    }
+
+    /**
+     * Upload a per-payment QR image and attach it to the payment record.
+     * Only valid for pending non-Stripe payments (manual_qr mode).
+     */
+    public function uploadPaymentQr(Payment $payment, UploadedFile $image): Payment
+    {
+        if ($payment->status !== PaymentStatus::Pending) {
+            throw new \DomainException('payment.not_uploadable', 409);
+        }
+
+        if ($payment->stripe_intent_id !== null) {
+            throw new \DomainException('payment.stripe_qr_not_replaceable', 409);
+        }
+
+        // Delete previous QR if one was already uploaded.
+        if ($payment->qr_image_url !== null && ! str_starts_with($payment->qr_image_url, 'http')) {
+            $this->storage->delete($payment->qr_image_url);
+        }
+
+        $path = $this->storage->store($image, 'payment-qr', ['image/jpeg', 'image/png', 'image/webp']);
+        $payment->update(['qr_image_url' => $path]);
+
+        Log::info('payment.qr_uploaded', ['payment_id' => $payment->id]);
+
+        return $payment->fresh($this->withPayable());
+    }
+
+    /**
+     * Remove the per-payment QR image from a pending non-Stripe payment.
+     */
+    public function removePaymentQr(Payment $payment): Payment
+    {
+        if ($payment->qr_image_url === null) {
+            throw new \DomainException('payment.no_qr_to_remove', 409);
+        }
+
+        if (! str_starts_with($payment->qr_image_url, 'http')) {
+            $this->storage->delete($payment->qr_image_url);
+        }
+
+        $payment->update(['qr_image_url' => null]);
+
+        Log::info('payment.qr_removed', ['payment_id' => $payment->id]);
+
+        return $payment->fresh($this->withPayable());
     }
 
     public function export(AdminPaymentIndexRequest $request): BinaryFileResponse

@@ -22,6 +22,7 @@ export const QUERY_KEYS = {
   },
   PAYMENTS: {
     FOR_SUBMISSION: (submissionId: string) => ['payments', 'submission', submissionId] as const,
+    DETAIL:         (submissionId: string) => ['payments', 'detail', submissionId] as const,
   },
   AUTH: {
     ME: ['auth', 'me'] as const,

@@ -127,12 +127,64 @@ export const styles = StyleSheet.create({
     color: colours.danger,
   },
 
-  // ── Divider + download ────────────────────────────────────────────────────
+  // ── Bank info section (PromptPay image modes) ────────────────────────────
+  bankInfoSection: {
+    width: '100%',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    gap: spacing.xs,
+  },
+  bankRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
+  },
+  bankLabel: {
+    color: colours.textMuted,
+    fontSize: typography.xs,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  bankValue: {
+    color: colours.textOnLight,
+    fontSize: typography.sm,
+    fontWeight: '600',
+    textAlign: 'right',
+    flex: 1,
+    marginLeft: spacing.md,
+  },
+
+  // ── Divider + actions ────────────────────────────────────────────────────
   divider: {
     width: '100%',
     height: 1,
     backgroundColor: colours.divider,
     marginTop: spacing.lg,
+  },
+  notifyBtn: {
+    backgroundColor: colours.primary,
+    borderRadius: radius.xl,
+    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.xl,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.md,
+    marginHorizontal: spacing.lg,
+    width: '85%',
+  },
+  notifyBtnDone: {
+    backgroundColor: colours.success,
+  },
+  notifyBtnText: {
+    color: colours.white,
+    fontSize: typography.sm,
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   downloadBtn: {
     flexDirection: 'row',

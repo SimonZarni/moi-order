@@ -18,3 +18,7 @@ export async function fetchPayment(submissionId: string): Promise<Payment> {
 export async function syncPaymentStatus(submissionId: string): Promise<void> {
   await apiClient.post(`/api/v1/submissions/${submissionId}/payment/sync`);
 }
+
+export async function notifyPaid(submissionId: string): Promise<void> {
+  await apiClient.post(`/api/v1/submissions/${submissionId}/payment/notify`);
+}

@@ -6,24 +6,19 @@ import { colours } from '@/shared/theme/colours';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BackButton } from '@/shared/components/BackButton/BackButton';
 import { QrCodeDisplay } from '@/features/payment/components/QrCodeDisplay';
+import { WaitingForQr } from '@/features/payment/components/WaitingForQr';
 import { usePaymentScreen } from '@/features/payment/hooks/usePaymentScreen';
 import { formatCurrency } from '@/shared/utils/formatCurrency';
 import { styles } from './PaymentScreen.styles';
 
 export function PaymentScreen(): React.JSX.Element {
   const {
-    payment,
-    isCreating,
-    isPaymentFailed,
-    isPaid,
-    isQrExpired,
-    countdownLabel,
-    secondsLeft,
-    createError,
-    handleBack,
-    handleGoToOrders,
-    handleRefreshQr,
-    handleDownloadQr,
+    payment, payableName, isCreating, isPaymentFailed, isPaid,
+    isWaitingForQr, isStripeQr, isQrExpired,
+    countdownLabel, secondsLeft,
+    createError, hasNotified, isNotifying,
+    handleBack, handleGoToOrders, handleRefreshQr,
+    handleDownloadQr, handleNotifyPaid,
   } = usePaymentScreen();
 
   const amountFormatted = formatCurrency((payment?.amount ?? 0) / 100);
@@ -32,14 +27,14 @@ export function PaymentScreen(): React.JSX.Element {
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.header}>
         <BackButton onPress={handleBack} />
-        <Text style={styles.headerTitle}>Pay with LINE Pay</Text>
+        <Text style={styles.headerTitle}>Payment</Text>
       </View>
 
       <View style={styles.body}>
         {isPaid ? (
           <View style={styles.successContainer}>
             <Ionicons name="checkmark-circle" size={64} color={colours.success} />
-            <Text style={styles.successTitle}>Payment Successful</Text>
+            <Text style={styles.successTitle}>Payment Confirmed</Text>
             <Text style={styles.successSubtitle}>
               Your payment has been confirmed.{'\n'}We'll start processing your order shortly.
             </Text>
@@ -69,8 +64,6 @@ export function PaymentScreen(): React.JSX.Element {
             </Pressable>
           </View>
         ) : createError !== null ? (
-          // Error check BEFORE the payment===undefined guard — failed mutation leaves
-          // payment as undefined, so the order here matters.
           <View style={styles.failureContainer}>
             <Ionicons name="warning" size={64} color={colours.secondary} />
             <Text style={styles.failureTitle}>Could not load payment</Text>
@@ -79,8 +72,13 @@ export function PaymentScreen(): React.JSX.Element {
         ) : isCreating || payment === undefined ? (
           <>
             <ActivityIndicator color={styles.waitingText.color} size="large" />
-            <Text style={styles.loadingText}>Generating QR code…</Text>
+            <Text style={styles.loadingText}>Generating payment…</Text>
           </>
+        ) : isWaitingForQr ? (
+          <WaitingForQr
+            payableName={payableName}
+            amountFormatted={amountFormatted}
+          />
         ) : isQrExpired ? (
           <View style={styles.expiredContainer}>
             <Ionicons name="time-outline" size={64} color={colours.secondary} />
@@ -103,13 +101,19 @@ export function PaymentScreen(): React.JSX.Element {
               qrData={payment.qr_data ?? null}
               qrImageUrl={payment.qr_image_url ?? null}
               amountFormatted={amountFormatted}
-              countdownLabel={countdownLabel}
+              countdownLabel={isStripeQr ? countdownLabel : ''}
               secondsLeft={secondsLeft}
+              bankName={payment.bank_name ?? null}
+              bankAccountNumber={payment.bank_account_number ?? null}
+              bankAccountName={payment.bank_account_name ?? null}
+              hasNotified={hasNotified}
+              isNotifying={isNotifying}
               onDownloadQr={handleDownloadQr}
+              onNotifyPaid={handleNotifyPaid}
             />
             <View style={styles.waitingRow}>
               <View style={styles.waitingDot} />
-              <Text style={styles.waitingText}>Waiting for payment…</Text>
+              <Text style={styles.waitingText}>Waiting for confirmation…</Text>
             </View>
             <Pressable
               style={styles.payLaterBtn}

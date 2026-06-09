@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -10,6 +10,8 @@ import * as Sharing from 'expo-sharing';
 import { usePayment } from './usePayment';
 import { useTicketOrderPayment } from './useTicketOrderPayment';
 import { useQrCountdown } from './useQrCountdown';
+import { notifyPaid } from '@/shared/api/payments';
+import { notifyTicketOrderPaid } from '@/shared/api/ticketOrders';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { SUBMISSION_STATUS, TICKET_ORDER_STATUS } from '@/types/enums';
 import { ApiError, Payment } from '@/types/models';
@@ -24,13 +26,18 @@ export interface UsePaymentScreenResult {
   createError: ApiError | null;
   isPaid: boolean;
   isPaymentFailed: boolean;
+  isWaitingForQr: boolean;
+  isStripeQr: boolean;
   isQrExpired: boolean;
   countdownLabel: string;
   secondsLeft: number;
+  hasNotified: boolean;
+  isNotifying: boolean;
   handleBack: () => void;
   handleGoToOrders: () => void;
   handleRefreshQr: () => void;
   handleDownloadQr: () => Promise<void>;
+  handleNotifyPaid: () => Promise<void>;
 }
 
 export function usePaymentScreen(): UsePaymentScreenResult {
@@ -38,6 +45,9 @@ export function usePaymentScreen(): UsePaymentScreenResult {
   const route = useRoute<RouteParams>();
   const queryClient = useQueryClient();
   const params = route.params;
+
+  const [hasNotified, setHasNotified] = useState(false);
+  const [isNotifying, setIsNotifying] = useState(false);
 
   // ── Submission path ───────────────────────────────────────────────────────
   const submissionId = params.kind === 'submission' ? params.submissionId : '';
@@ -47,6 +57,7 @@ export function usePaymentScreen(): UsePaymentScreenResult {
     isCreating: isCreatingSubmission,
     createError: submissionCreateError,
     refreshPayment: refreshSubmissionPayment,
+    isWaitingForQr: isWaitingSubmission,
   } = usePayment(submissionId);
 
   // ── Ticket order path ─────────────────────────────────────────────────────
@@ -57,6 +68,7 @@ export function usePaymentScreen(): UsePaymentScreenResult {
     isCreating: isCreatingTicket,
     createError: ticketCreateError,
     refreshPayment: refreshTicketPayment,
+    isWaitingForQr: isWaitingTicket,
   } = useTicketOrderPayment(ticketOrderId);
 
   // ── Derive unified values ─────────────────────────────────────────────────
@@ -76,6 +88,11 @@ export function usePaymentScreen(): UsePaymentScreenResult {
 
   const isCreating = params.kind === 'submission' ? isCreatingSubmission : isCreatingTicket;
   const createError = params.kind === 'submission' ? submissionCreateError : ticketCreateError;
+  const isWaitingForQr = params.kind === 'submission' ? isWaitingSubmission : isWaitingTicket;
+
+  // Stripe QR: has qr_data (SVG string) — shows countdown timer.
+  // PromptPay QR: has qr_image_url but no qr_data — shows bank info + notify button.
+  const isStripeQr = payment?.qr_data !== null && payment?.qr_data !== undefined;
 
   const handleBack = useCallback((): void => { navigation.goBack(); }, [navigation]);
 
@@ -106,7 +123,7 @@ export function usePaymentScreen(): UsePaymentScreenResult {
   }, [params.kind, refreshSubmissionPayment, refreshTicketPayment]);
 
   const { isExpired: isQrExpired, countdownLabel, secondsLeft } = useQrCountdown(
-    payment?.expires_at,
+    isStripeQr ? payment?.expires_at : null,
     handleRefreshQr,
   );
 
@@ -119,8 +136,6 @@ export function usePaymentScreen(): UsePaymentScreenResult {
       const result = await FileSystem.downloadAsync(url, fileUri);
       if (result.status !== 200) throw new Error(`Download failed: ${result.status}`);
 
-      // writeOnly=true requests only image/video permission — avoids the audio permission
-      // that MediaLibrary would otherwise require on Android 13+
       const permission = await MediaLibrary.requestPermissionsAsync(true);
       if (permission.granted) {
         await MediaLibrary.saveToLibraryAsync(result.uri);
@@ -129,7 +144,6 @@ export function usePaymentScreen(): UsePaymentScreenResult {
         return;
       }
 
-      // Expo Go or user denied — fall back to share sheet
       const canShare = await Sharing.isAvailableAsync();
       if (!canShare) throw new Error('Sharing not available on this device');
       await Sharing.shareAsync(result.uri, { mimeType: 'image/png', dialogTitle: 'Save QR code' });
@@ -139,11 +153,30 @@ export function usePaymentScreen(): UsePaymentScreenResult {
     }
   }, [payment?.qr_image_url]);
 
+  const handleNotifyPaid = useCallback(async (): Promise<void> => {
+    if (hasNotified || isNotifying) return;
+    setIsNotifying(true);
+    try {
+      if (params.kind === 'submission') {
+        await notifyPaid(submissionId);
+      } else {
+        await notifyTicketOrderPaid(ticketOrderId);
+      }
+      setHasNotified(true);
+    } catch {
+      Alert.alert('Error', 'Could not send notification. Please try again.');
+    } finally {
+      setIsNotifying(false);
+    }
+  }, [hasNotified, isNotifying, params.kind, submissionId, ticketOrderId]);
+
   return {
     payment, payableName, isCreating,
     createError: createError ?? null,
-    isPaid, isPaymentFailed, isQrExpired,
+    isPaid, isPaymentFailed,
+    isWaitingForQr, isStripeQr, isQrExpired,
     countdownLabel, secondsLeft,
-    handleBack, handleGoToOrders, handleRefreshQr, handleDownloadQr,
+    hasNotified, isNotifying,
+    handleBack, handleGoToOrders, handleRefreshQr, handleDownloadQr, handleNotifyPaid,
   };
 }

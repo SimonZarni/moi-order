@@ -158,6 +158,19 @@ export interface Payment {
   qr_image_url: string | null;
   qr_data: string | null;
   expires_at: string | null;
+  /** Present only when qr_image_url is non-null (PromptPay image modes). */
+  bank_name: string | null;
+  bank_account_number: string | null;
+  bank_account_name: string | null;
+}
+
+export interface PaymentSetting {
+  payment_mode: 'stripe' | 'global_qr' | 'manual_qr';
+  auto_payment_enabled: boolean;
+  global_qr_image_url: string | null;
+  bank_name: string | null;
+  bank_account_number: string | null;
+  bank_account_name: string | null;
 }
 
 export interface ServiceSubmission {

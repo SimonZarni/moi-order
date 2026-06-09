@@ -246,6 +246,10 @@ Route::prefix('payments')->name('admin.payments.')->group(function (): void {
         ->middleware('check.permission:payments.manage');
     Route::post('/{payment}/regenerate', [AdminPaymentController::class, 'regenerate'])->name('regenerate')
         ->middleware('check.permission:payments.manage');
+    Route::post('/{payment}/qr', [AdminPaymentController::class, 'uploadQr'])->name('qr.store')
+        ->middleware('check.permission:payments.manage');
+    Route::delete('/{payment}/qr', [AdminPaymentController::class, 'removeQr'])->name('qr.destroy')
+        ->middleware('check.permission:payments.manage');
 });
 
 // ── Places + Images ───────────────────────────────────────────────────────────
@@ -330,8 +334,14 @@ Route::prefix('tickets')->name('admin.tickets.')->group(function (): void {
     Route::delete('/{ticket}/images/{image}', [AdminTicketController::class, 'deleteImage'])->name('images.destroy');
 });
 
-Route::get('/payment-settings',  [AdminPaymentSettingController::class, 'show'])->name('admin.payment-settings.show');
-Route::put('/payment-settings',  [AdminPaymentSettingController::class, 'update'])->name('admin.payment-settings.update')
+Route::get('/payment-settings',       [AdminPaymentSettingController::class, 'show'])->name('admin.payment-settings.show');
+Route::put('/payment-settings',       [AdminPaymentSettingController::class, 'update'])->name('admin.payment-settings.update')
+    ->middleware('ensure.super_admin');
+Route::patch('/payment-settings/mode', [AdminPaymentSettingController::class, 'updateMode'])->name('admin.payment-settings.mode')
+    ->middleware('ensure.super_admin');
+Route::post('/payment-settings/qr',   [AdminPaymentSettingController::class, 'uploadGlobalQr'])->name('admin.payment-settings.qr.store')
+    ->middleware('ensure.super_admin');
+Route::delete('/payment-settings/qr', [AdminPaymentSettingController::class, 'removeGlobalQr'])->name('admin.payment-settings.qr.destroy')
     ->middleware('ensure.super_admin');
 
 Route::prefix('ticket-orders')->name('admin.ticket-orders.')->group(function (): void {

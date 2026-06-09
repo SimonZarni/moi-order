@@ -7,7 +7,10 @@ namespace App\Services;
 use App\Contracts\PayableInterface;
 use App\Contracts\PaymentGatewayInterface;
 use App\Enums\PaymentStatus;
+use App\Events\AdminNotificationReceived;
 use App\Models\Payment;
+use App\Models\User;
+use App\Notifications\Admin\NewPaymentNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -31,6 +34,7 @@ class PaymentService
     /**
      * Query Stripe directly for the PaymentIntent status and apply any state change.
      * Called by the client when it returns to the foreground — fallback for missed webhooks.
+     * No-op for non-Stripe payments (stripe_intent_id === null).
      *
      * @param PayableInterface&Model $payable
      */
@@ -40,6 +44,11 @@ class PaymentService
         $payment = $payable->payment;
 
         if ($payment === null || $payment->status->isTerminal()) {
+            return;
+        }
+
+        // Non-Stripe payments have no external status to query.
+        if ($payment->stripe_intent_id === null) {
             return;
         }
 
@@ -134,17 +143,55 @@ class PaymentService
             return Payment::create([
                 'payable_type'     => $payable->getMorphClass(),
                 'payable_id'       => $payable->getKey(),
-                'stripe_intent_id' => $dto->stripeIntentId,
+                // null for non-Stripe adapters.
+                'stripe_intent_id' => $dto->stripeIntentId !== '' ? $dto->stripeIntentId : null,
                 'amount'           => $payable->getPayableAmountSatangs(),
                 'currency'         => 'thb',
                 'status'           => PaymentStatus::Pending,
-                'qr_image_url'     => $dto->qrImageUrl,
-                'qr_data'          => $dto->qrData,
+                'qr_image_url'     => $dto->qrImageUrl !== '' ? $dto->qrImageUrl : null,
+                'qr_data'          => $dto->qrData !== '' ? $dto->qrData : null,
                 'stripe_payload'   => $dto->stripePayload,
                 'idempotency_key'  => $idempotencyKey,
-                // Always store an expiry — fall back to 60 min if Stripe omits it.
-                'expires_at'       => $dto->expiresAt ?? now()->addMinutes(60),
+                // Stripe: use expiresAt or fall back to 60 min.
+                // Non-Stripe: no expiry — admin confirms or rejects manually.
+                'expires_at'       => $dto->isStripe()
+                    ? ($dto->expiresAt ?? now()->addMinutes(60))
+                    : null,
             ]);
+        });
+    }
+
+    /**
+     * Notify all admins that a user has manually paid via PromptPay QR.
+     * Only valid when the payment exists, is pending, and has no Stripe intent.
+     * No-op if payment is already terminal or Stripe-based.
+     *
+     * @param PayableInterface&Model $payable
+     */
+    public function notifyManualPayment(
+        PayableInterface&Model $payable,
+        string                 $userName,
+        string                 $payableName,
+    ): void {
+        $payable->loadMissing('payment');
+        $payment = $payable->payment;
+
+        if ($payment === null || $payment->status->isTerminal() || $payment->stripe_intent_id !== null) {
+            return;
+        }
+
+        $body = "{$userName} says they've paid for {$payableName} — please verify.";
+
+        DB::afterCommit(function () use ($payable, $body, $userName, $payableName): void {
+            User::where('is_admin', true)->each(function (User $admin) use ($payable, $body, $userName, $payableName): void {
+                $admin->notify(new NewPaymentNotification($body, [
+                    'payable_id'   => $payable->uuid,
+                    'payable_type' => class_basename($payable),
+                    'user_name'    => $userName,
+                    'object_name'  => $payableName,
+                ]));
+                event(new AdminNotificationReceived($admin));
+            });
         });
     }
 
@@ -154,14 +201,18 @@ class PaymentService
             ->where('payable_id', $payable->getKey())
             ->where('status', PaymentStatus::Pending)
             ->where(function ($q): void {
-                // Non-null expires_at: must be in the future.
-                // Null expires_at (legacy rows before fallback was added): treat as
-                // expired after 1 hour from creation to prevent stale QR reuse.
-                $q->where('expires_at', '>', now())
-                  ->orWhere(function ($q2): void {
-                      $q2->whereNull('expires_at')
-                         ->where('created_at', '>', now()->subHour());
-                  });
+                // Stripe payments: must not be expired.
+                // Non-Stripe payments (stripe_intent_id IS NULL): no expiry — admin confirms.
+                $q->whereNotNull('stripe_intent_id')
+                  ->where(function ($q2): void {
+                      $q2->where('expires_at', '>', now())
+                         ->orWhere(function ($q3): void {
+                             // Legacy rows before the expiry fallback was added.
+                             $q3->whereNull('expires_at')
+                                ->where('created_at', '>', now()->subHour());
+                         });
+                  })
+                  ->orWhereNull('stripe_intent_id');
             });
 
         if ($lockForUpdate) {

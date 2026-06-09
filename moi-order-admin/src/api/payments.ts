@@ -8,6 +8,7 @@ export type PaymentData = {
   currency: string;
   stripe_intent_id: string | null;
   qr_image_url: string | null;
+  qr_data: string | null;
   expires_at: string | null;
   created_at: string;
   user_name: string | null;
@@ -51,4 +52,15 @@ export const paymentsApi = {
     apiClient.post<{ data: PaymentData }>(`/payments/${id}/regenerate`).then((r) => r.data.data),
   export: (params: ExportParams) =>
     apiClient.get<Blob>('/payments/export', { params, responseType: 'blob' }).then((r) => r.data),
+  uploadQr: (id: number | string, image: File) => {
+    const fd = new FormData();
+    fd.append('image', image);
+    return apiClient
+      .post<{ data: PaymentData }>(`/payments/${id}/qr`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((r) => r.data.data);
+  },
+  removeQr: (id: number | string) =>
+    apiClient.delete<{ data: PaymentData }>(`/payments/${id}/qr`).then((r) => r.data.data),
 };

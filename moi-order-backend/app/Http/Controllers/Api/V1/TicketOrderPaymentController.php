@@ -69,4 +69,20 @@ class TicketOrderPaymentController extends Controller
 
         return response()->json(['synced' => true]);
     }
+
+    /** POST /api/v1/ticket-orders/{id}/payment/notify */
+    public function notify(string $id, Request $request): JsonResponse
+    {
+        $order = TicketOrder::with(['items', 'payment', 'user', 'ticket'])
+            ->forUser($request->user()->id)
+            ->where('uuid', $id)
+            ->firstOrFail();
+
+        $payableName = $order->ticket->name ?? 'a ticket';
+        $userName    = $request->user()->name ?? 'A user';
+
+        $this->service->notifyManualPayment($order, $userName, $payableName);
+
+        return response()->json(['notified' => true]);
+    }
 }

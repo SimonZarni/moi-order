@@ -62,9 +62,10 @@ Route::post('/submissions/dynamic',        [DynamicSubmissionController::class,'
 Route::get('/submissions/{id}/result',     [SubmissionResultController::class, 'show']);
 
 // Payments
-Route::post('/submissions/{id}/payment',       [PaymentController::class, 'store']);
-Route::get('/submissions/{id}/payment',        [PaymentController::class, 'show']);
-Route::post('/submissions/{id}/payment/sync',  [PaymentController::class, 'sync']);
+Route::post('/submissions/{id}/payment',          [PaymentController::class, 'store']);
+Route::get('/submissions/{id}/payment',           [PaymentController::class, 'show']);
+Route::post('/submissions/{id}/payment/sync',     [PaymentController::class, 'sync']);
+Route::post('/submissions/{id}/payment/notify',   [PaymentController::class, 'notify']);
 
 // Ticket orders
 Route::post('/ticket-orders',                              [TicketOrderController::class,        'store']);
@@ -75,6 +76,7 @@ Route::delete('/ticket-orders/{id}',                       [TicketOrderControlle
 Route::post('/ticket-orders/{id}/payment',                 [TicketOrderPaymentController::class, 'store']);
 Route::get('/ticket-orders/{id}/payment',                  [TicketOrderPaymentController::class, 'show']);
 Route::post('/ticket-orders/{id}/payment/sync',            [TicketOrderPaymentController::class, 'sync']);
+Route::post('/ticket-orders/{id}/payment/notify',          [TicketOrderPaymentController::class, 'notify']);
 Route::get('/ticket-orders/{id}/eticket',                  [TicketOrderEticketController::class, 'show']);
 
 // Favorites

@@ -20,7 +20,10 @@ use App\Services\ClaudeOcrService;
 use App\Services\DocumentService;
 use App\Services\ExpoPushNotificationService;
 use App\Services\TicketOrderService;
+use App\Enums\PaymentMode;
+use App\Models\AppSetting;
 use App\Services\FileStorageService;
+use App\Services\PromptPayPaymentService;
 use App\Services\StripePaymentService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -166,12 +169,17 @@ class AppServiceProvider extends ServiceProvider
         // DIP: bind VAPID browser push adapter. To switch provider, swap WebPushService here.
         $this->app->bind(WebPushInterface::class, WebPushService::class);
 
-        // DIP: bind Stripe adapter to the payment gateway contract.
-        // To switch provider: swap StripePaymentService for an OmisePaymentService here.
-        $this->app->bind(PaymentGatewayInterface::class, function (): StripePaymentService {
-            return new StripePaymentService(
-                new StripeClient(config('services.stripe.secret')),
-            );
+        // DIP: dynamically bind the payment gateway based on admin-configured mode.
+        // Stripe adapter: charges via Stripe PromptPay.
+        // PromptPay adapter: returns admin-uploaded QR image; Stripe is never called.
+        $this->app->bind(PaymentGatewayInterface::class, function (): PaymentGatewayInterface {
+            $mode = AppSetting::getPaymentMode();
+            if ($mode === PaymentMode::Stripe) {
+                return new StripePaymentService(
+                    new StripeClient(config('services.stripe.secret')),
+                );
+            }
+            return new PromptPayPaymentService();
         });
     }
 

@@ -47,7 +47,7 @@ class Payment extends Model
 
     // ─── Domain methods ───────────────────────────────────────────────────────
 
-    public function markSucceeded(array $stripePayload): void
+    public function markSucceeded(array $stripePayload = []): void
     {
         $this->update([
             'status'         => PaymentStatus::Succeeded,
@@ -55,7 +55,7 @@ class Payment extends Model
         ]);
     }
 
-    public function markFailed(array $stripePayload): void
+    public function markFailed(array $stripePayload = []): void
     {
         $this->update([
             'status'         => PaymentStatus::Failed,

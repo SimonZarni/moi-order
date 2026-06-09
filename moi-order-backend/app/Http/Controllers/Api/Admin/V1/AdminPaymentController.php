@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\Admin\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AdminPaymentIndexRequest;
+use App\Http\Requests\Admin\UploadPerPaymentQrRequest;
 use App\Http\Resources\Admin\AdminPaymentResource;
 use App\Models\Payment;
 use App\Services\AdminPaymentService;
@@ -54,5 +55,17 @@ class AdminPaymentController extends Controller
     public function regenerate(Payment $payment): JsonResponse
     {
         return response()->json(['data' => new AdminPaymentResource($this->service->regenerate($payment))]);
+    }
+
+    /** POST /api/admin/v1/payments/{payment}/qr */
+    public function uploadQr(UploadPerPaymentQrRequest $request, Payment $payment): JsonResponse
+    {
+        return response()->json(['data' => new AdminPaymentResource($this->service->uploadPaymentQr($payment, $request->file('image')))]);
+    }
+
+    /** DELETE /api/admin/v1/payments/{payment}/qr */
+    public function removeQr(Payment $payment): JsonResponse
+    {
+        return response()->json(['data' => new AdminPaymentResource($this->service->removePaymentQr($payment))]);
     }
 }
