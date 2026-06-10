@@ -121,12 +121,32 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
   },
   tabCountTextActive: { color: colours.backgroundDark },
-  tabIconBtn: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+  tabLabelArea: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  tabEditBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: radius.full,
+    backgroundColor: colours.primaryBg,
+    borderWidth: 1,
+    borderColor: colours.primary + '55',
+  },
+  tabDeleteBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: radius.full,
+    backgroundColor: colours.errorBg,
+    borderWidth: 1,
+    borderColor: colours.error + '55',
   },
 
   // ── Warning banner ────────────────────────────────────────────────────────

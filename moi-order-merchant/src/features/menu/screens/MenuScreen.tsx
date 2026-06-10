@@ -367,28 +367,31 @@ interface CategoryTabProps {
 
 function CategoryTab({ label, count, isActive, onPress, onEdit, onDelete }: CategoryTabProps): React.JSX.Element {
   return (
-    <Pressable
-      style={[styles.tab, isActive && styles.tabActive]}
-      onPress={onPress}
-      accessibilityRole="tab"
-      accessibilityState={{ selected: isActive }}
-      accessibilityLabel={`${label} category, ${count} items`}
-    >
-      <Text style={[styles.tabText, isActive && styles.tabTextActive]}>{label}</Text>
-      <View style={[styles.tabCount, isActive && styles.tabCountActive]}>
-        <Text style={[styles.tabCountText, isActive && styles.tabCountTextActive]}>{count}</Text>
-      </View>
+    <View style={[styles.tab, isActive && styles.tabActive]}>
+      {/* Label + count — tappable area for selecting the category */}
+      <Pressable
+        style={styles.tabLabelArea}
+        onPress={onPress}
+        accessibilityRole="tab"
+        accessibilityState={{ selected: isActive }}
+        accessibilityLabel={`${label} category, ${count} items`}
+      >
+        <Text style={[styles.tabText, isActive && styles.tabTextActive]}>{label}</Text>
+        <View style={[styles.tabCount, isActive && styles.tabCountActive]}>
+          <Text style={[styles.tabCountText, isActive && styles.tabCountTextActive]}>{count}</Text>
+        </View>
+      </Pressable>
       {onEdit && (
-        <Pressable style={styles.tabIconBtn} onPress={onEdit} accessibilityRole="button" accessibilityLabel={`Rename ${label}`}>
-          <Ionicons name="pencil-outline" size={11} color={isActive ? colours.primaryDark : colours.textMuted} />
+        <Pressable style={styles.tabEditBtn} onPress={onEdit} accessibilityRole="button" accessibilityLabel={`Rename ${label}`}>
+          <Ionicons name="pencil" size={11} color={colours.primaryDark} />
         </Pressable>
       )}
       {onDelete && (
-        <Pressable style={styles.tabIconBtn} onPress={onDelete} accessibilityRole="button" accessibilityLabel={`Delete ${label}`}>
-          <Ionicons name="close-outline" size={13} color={colours.error} />
+        <Pressable style={styles.tabDeleteBtn} onPress={onDelete} accessibilityRole="button" accessibilityLabel={`Delete ${label}`}>
+          <Ionicons name="trash-outline" size={11} color={colours.error} />
         </Pressable>
       )}
-    </Pressable>
+    </View>
   );
 }
 
