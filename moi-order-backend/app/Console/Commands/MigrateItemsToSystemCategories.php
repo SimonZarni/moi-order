@@ -33,10 +33,12 @@ class MigrateItemsToSystemCategories extends Command
                         continue;
                     }
 
-                    // Find non-system categories on this restaurant with the same name
+                    // Match non-system categories by name — case-insensitive, singular or plural
+                    // e.g. "Recommendation" and "Recommendations" both match MenuCategoryType::Recommendations
+                    $prefix = strtolower(rtrim($type->label(), 's'));
                     $old = MenuCategory::where('restaurant_id', $restaurant->id)
                         ->whereNull('category_type')
-                        ->where('name', $type->label())
+                        ->whereRaw('LOWER(name) LIKE ?', [$prefix . '%'])
                         ->get();
 
                     foreach ($old as $oldCat) {
