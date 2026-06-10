@@ -133,8 +133,9 @@ class RestaurantService
      */
     public function browse(?float $lat = null, ?float $lng = null, ?string $search = null): LengthAwarePaginator
     {
-        $query = Restaurant::open()
+        $query = Restaurant::whereIn('status', [RestaurantStatus::Open->value, RestaurantStatus::Closed->value])
             ->with(['openingHours'])
+            ->orderByRaw("FIELD(status, ?, ?) ASC", [RestaurantStatus::Open->value, RestaurantStatus::Closed->value])
             ->select('restaurants.*');
 
         if ($search !== null) {
