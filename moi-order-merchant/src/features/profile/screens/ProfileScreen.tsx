@@ -29,7 +29,7 @@ function AccountRow({ icon, iconBg, iconColor, label, value }: AccountRowProps):
 }
 
 export function ProfileScreen(): React.JSX.Element {
-  const { restaurant, user, isLoading, handleLogout, handleUploadCover, handleUploadLogo } = useProfileScreen();
+  const { restaurant, user, isLoading, handleLogout, handleUploadCover, handleUploadLogo, handleNavigateToBusinessProfile } = useProfileScreen();
 
   if (isLoading) {
     return <View style={styles.centered}><ActivityIndicator size="large" color={colours.primary} /></View>;
@@ -105,6 +105,25 @@ export function ProfileScreen(): React.JSX.Element {
                 </>
               )}
             </View>
+          </View>
+        )}
+
+        {/* ── Business Profile ── */}
+        {user?.is_merchant === true && (
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>Business</Text>
+            <Pressable
+              style={styles.menuRow}
+              onPress={handleNavigateToBusinessProfile}
+              accessibilityLabel="View business profile"
+              accessibilityRole="button"
+            >
+              <View style={[styles.accountRowIcon, { backgroundColor: colours.primary + '22' }]}>
+                <Ionicons name="briefcase-outline" size={16} color={colours.primary} />
+              </View>
+              <Text style={styles.menuRowLabel}>Business Profile</Text>
+              <Ionicons name="chevron-forward" size={16} color={colours.textSubtle} />
+            </Pressable>
           </View>
         )}
 

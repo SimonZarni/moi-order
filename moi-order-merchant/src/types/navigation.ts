@@ -15,12 +15,14 @@ export type MerchantTabParamList = {
   Menu: undefined;
   Restaurant: undefined;
   Notifications: undefined;
+  Profile: undefined;
 };
 
 export type MerchantStackParamList = {
   Tabs: undefined;
   OrderDetail: { orderId: number };
   OrderChat: { orderId: number };
+  BusinessProfile: undefined;
 };
 
 export type RootStackParamList = {
@@ -35,4 +37,5 @@ export type WebScreen =
   | 'Menu'
   | 'Restaurant'
   | 'Analytics'
-  | 'Notifications';
+  | 'Notifications'
+  | 'BusinessProfile';

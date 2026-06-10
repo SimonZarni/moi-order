@@ -161,6 +161,26 @@ export const styles = StyleSheet.create({
   },
   rowSep: { height: 1, backgroundColor: colours.dividerDark, marginLeft: 38 + spacing.md * 2 },
 
+  // ── Menu row (e.g. Business Profile link) ────────────────────────────────────
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colours.backgroundMid,
+    borderRadius: 20,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    minHeight: 56,
+    borderWidth: 1,
+    borderColor: colours.dividerDark,
+  },
+  menuRowLabel: {
+    flex: 1,
+    fontSize: typography.sm,
+    fontWeight: '600',
+    color: colours.textOnDark,
+  },
+
   // ── Logout ───────────────────────────────────────────────────────────────────
   logoutBtn: {
     flexDirection: 'row',

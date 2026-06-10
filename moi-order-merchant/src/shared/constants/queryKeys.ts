@@ -12,6 +12,7 @@ export const QUERY_KEYS = {
   ANALYTICS_CHART: (period: Exclude<AnalyticsPeriod, 'all'>) =>
     ['analytics', 'chart', period] as const,
   ORDER_CHAT: (orderId: number) => ['orders', orderId, 'chat'] as const,
+  BUSINESS_PROFILE: ['business-profile'] as const,
   NOTIFICATIONS: {
     LIST: ['notifications'] as const,
     UNREAD_COUNT: ['notifications', 'unread-count'] as const,
