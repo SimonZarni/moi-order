@@ -18,6 +18,7 @@ class LineWebhookController extends Controller
 {
     public function handle(Request $request): Response
     {
+        file_put_contents(storage_path('logs/line_webhook.txt'), $request->getContent());
         Log::error('LINE webhook: raw payload', ['body' => $request->all()]);
 
         $events = $request->input('events', []);
