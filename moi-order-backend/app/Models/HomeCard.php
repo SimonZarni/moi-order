@@ -25,6 +25,7 @@ class HomeCard extends Model
         'tag_mm',
         'accent_color',
         'border_color',
+        'icon_color',
         'icon_key',
         'navigation_screen',
         'navigation_params',

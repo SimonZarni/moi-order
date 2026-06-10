@@ -75,6 +75,7 @@ type FormState = {
   tag_mm: string;
   accent_color: string;
   border_color: string;
+  icon_color: string;
   icon_key: string;
   navigation_screen: string;
   navigation_params_raw: string;
@@ -94,6 +95,7 @@ function defaultForm(card?: HomeCard): FormState {
     tag_mm:                card?.tag_mm            ?? '',
     accent_color:          card?.accent_color      ?? '#52796f',
     border_color:          card?.border_color      ?? '#52796f',
+    icon_color:            card?.icon_color        ?? '#52796f',
     icon_key:              card?.icon_key          ?? 'calendar',
     navigation_screen:     card?.navigation_screen ?? '',
     navigation_params_raw: card?.navigation_params ? JSON.stringify(card.navigation_params, null, 2) : '{}',
@@ -121,8 +123,10 @@ export function HomeCardFormView({ mode, card }: Props) {
   // ── Color pickers ───────────────────────────────────────────────────────────
   const [accentPickerAnchor, setAccentPickerAnchor] = useState<HTMLElement | null>(null);
   const [borderPickerAnchor, setBorderPickerAnchor] = useState<HTMLElement | null>(null);
+  const [iconPickerAnchor, setIconPickerAnchor] = useState<HTMLElement | null>(null);
   const [accentHexDraft, setAccentHexDraft] = useState(form.accent_color);
   const [borderHexDraft, setBorderHexDraft] = useState(form.border_color);
+  const [iconHexDraft, setIconHexDraft] = useState(form.icon_color);
 
   // ── Dynamic icon, route and parent-card lists ───────────────────────────────
   const [icons, setIcons] = useState<HomeCardIcon[]>([]);
@@ -271,6 +275,12 @@ export function HomeCardFormView({ mode, card }: Props) {
     if (HEX_RE.test(val)) update('border_color', val);
   }, [update]);
 
+  const handleIconHexInput = useCallback((raw: string) => {
+    const val = raw.startsWith('#') ? raw : `#${raw}`;
+    setIconHexDraft(val);
+    if (HEX_RE.test(val)) update('icon_color', val);
+  }, [update]);
+
   const buildPayload = useCallback((): HomeCardPayload | null => {
     let navigationParams: Record<string, unknown> | null = null;
     const raw = form.navigation_params_raw.trim();
@@ -293,6 +303,7 @@ export function HomeCardFormView({ mode, card }: Props) {
       tag_mm:            form.tag_mm,
       accent_color:      form.accent_color,
       border_color:      form.border_color,
+      icon_color:        form.icon_color,
       icon_key:          form.icon_key,
       navigation_screen: form.navigation_screen || null,
       navigation_params: navigationParams,
@@ -576,6 +587,74 @@ export function HomeCardFormView({ mode, card }: Props) {
                             width: 24, height: 24, borderRadius: '50%', cursor: 'pointer',
                             bgcolor: s.value, border: '2px solid',
                             borderColor: form.accent_color === s.value ? 'primary.main' : 'transparent',
+                            transition: 'border-color 0.15s',
+                          }}
+                        />
+                      </Tooltip>
+                    ))}
+                  </Box>
+                </Box>
+              </Popover>
+
+              <Divider sx={{ my: 2.5 }} />
+
+              {/* Icon Colour */}
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>Icon Colour</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+                Controls the primary fill of the card icon
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 0.5 }}>
+                <Box
+                  onClick={(e) => setIconPickerAnchor(e.currentTarget)}
+                  sx={{
+                    width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                    bgcolor: form.icon_color, cursor: 'pointer',
+                    border: '3px solid', borderColor: 'divider',
+                    boxShadow: 2, transition: 'transform 0.15s',
+                    '&:hover': { transform: 'scale(1.1)' },
+                  }}
+                />
+                <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                  {form.icon_color}
+                </Typography>
+              </Box>
+              <Popover
+                open={Boolean(iconPickerAnchor)}
+                anchorEl={iconPickerAnchor}
+                onClose={() => setIconPickerAnchor(null)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+              >
+                <Box sx={{ p: 2, width: 240 }}>
+                  <HexColorPicker
+                    color={form.icon_color}
+                    onChange={(hex) => { update('icon_color', hex); setIconHexDraft(hex); }}
+                    style={{ width: '100%' }}
+                  />
+                  <TextField
+                    size="small" fullWidth sx={{ mt: 1.5 }}
+                    value={iconHexDraft}
+                    onChange={(e) => handleIconHexInput(e.target.value)}
+                    onBlur={() => setIconHexDraft(form.icon_color)}
+                    error={!HEX_RE.test(iconHexDraft)}
+                    helperText={!HEX_RE.test(iconHexDraft) ? 'Enter a valid 6-digit hex' : ' '}
+                    slotProps={{
+                      input: {
+                        startAdornment: <InputAdornment position="start">#</InputAdornment>,
+                      },
+                    }}
+                    inputProps={{ maxLength: 7, style: { fontFamily: 'monospace' } }}
+                  />
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, mb: 0.5 }}>Quick picks</Typography>
+                  <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+                    {ACCENT_SWATCHES.map((s) => (
+                      <Tooltip key={s.value} title={s.label}>
+                        <Box
+                          onClick={() => { update('icon_color', s.value); setIconHexDraft(s.value); }}
+                          sx={{
+                            width: 24, height: 24, borderRadius: '50%', cursor: 'pointer',
+                            bgcolor: s.value, border: '2px solid',
+                            borderColor: form.icon_color === s.value ? 'primary.main' : 'transparent',
                             transition: 'border-color 0.15s',
                           }}
                         />

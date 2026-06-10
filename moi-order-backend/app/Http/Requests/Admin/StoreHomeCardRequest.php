@@ -28,6 +28,7 @@ class StoreHomeCardRequest extends FormRequest
             'tag_mm'            => ['required', 'string', 'max:100'],
             'accent_color'      => ['required', 'string', 'max:20', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'border_color'      => ['required', 'string', 'max:20', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'icon_color'        => ['required', 'string', 'max:20', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'icon_key'          => ['required', 'string', Rule::exists('home_card_icons', 'key')],
             'navigation_screen' => ['nullable', 'string', Rule::exists('home_card_routes', 'key')],
             'navigation_params' => ['nullable', 'array'],
@@ -66,6 +67,7 @@ class StoreHomeCardRequest extends FormRequest
             'tag_mm'            => 'Myanmar tag',
             'accent_color'      => 'accent colour',
             'border_color'      => 'border colour',
+            'icon_color'        => 'icon colour',
             'icon_key'          => 'icon',
             'navigation_screen' => 'navigation target',
             'navigation_params' => 'navigation parameters',
@@ -80,6 +82,7 @@ class StoreHomeCardRequest extends FormRequest
             'slug.regex'         => 'The slug may only contain lowercase letters, numbers, and hyphens.',
             'accent_color.regex' => 'The accent colour must be a valid hex colour (e.g. #52796f).',
             'border_color.regex' => 'The border colour must be a valid hex colour (e.g. #4a7fa5).',
+            'icon_color.regex'   => 'The icon colour must be a valid hex colour (e.g. #b08d57).',
         ];
     }
 }

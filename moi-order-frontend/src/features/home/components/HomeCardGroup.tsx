@@ -57,7 +57,7 @@ export function HomeCardGroup({
     <View style={[styles.card, { borderTopColor: card.border_color }]}>
       {/* Header — group icon sits absolute top-right */}
       <View style={styles.groupIcon}>
-        <CardIcon iconKey={card.icon_key} iconType={card.icon_type} iconUrl={card.icon_url} />
+        <CardIcon iconKey={card.icon_key} iconType={card.icon_type} iconUrl={card.icon_url} iconColor={card.icon_color} />
       </View>
 
       <Text style={[styles.cardTag, { color: card.accent_color }, isMM && styles.mmCardTag]} allowFontScaling={!isMM}>{tag}</Text>
@@ -81,6 +81,7 @@ export function HomeCardGroup({
                   iconKey={child.icon_key}
                   iconType={child.icon_type}
                   iconUrl={child.icon_url}
+                  iconColor={child.icon_color}
                 />
               </View>
               <Text

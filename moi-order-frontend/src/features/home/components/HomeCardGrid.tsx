@@ -133,7 +133,7 @@ function SingleCard({ card, locale, orderCount, onPress }: SingleCardProps): Rea
         </View>
       )}
       <View style={styles.cardIcon}>
-        <CardIcon iconKey={card.icon_key} iconType={card.icon_type} iconUrl={card.icon_url} />
+        <CardIcon iconKey={card.icon_key} iconType={card.icon_type} iconUrl={card.icon_url} iconColor={card.icon_color} />
       </View>
     </Pressable>
   );
