@@ -15,9 +15,9 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import { fDateTime } from 'src/utils/format-time';
 
-import { Iconify } from 'src/components/iconify';
-
 import { orderChatApi, type OrderChatMessage } from 'src/api/orderChat';
+
+import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
