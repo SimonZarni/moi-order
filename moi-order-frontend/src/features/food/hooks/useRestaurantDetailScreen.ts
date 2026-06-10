@@ -129,9 +129,9 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
     setActiveTabIndex(index);
   }, []);
 
-  const handleBack        = useCallback(() => navigation.goBack(),                   [navigation]);
-  const handleCartPress   = useCallback(() => navigation.navigate('Checkout'),       [navigation]);
-  const handleOrdersPress = useCallback(() => navigation.navigate('CartAndOrders'),  [navigation]);
+  const handleBack        = useCallback(() => navigation.goBack(),              [navigation]);
+  const handleCartPress   = useCallback(() => navigation.navigate('Cart'),       [navigation]);
+  const handleOrdersPress = useCallback(() => navigation.navigate('FoodOrders'), [navigation]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
