@@ -293,6 +293,22 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   confirmText: { color: colours.backgroundDark, fontSize: typography.xs, fontWeight: '700' },
+  deleteConfirmBody: {
+    fontSize: typography.sm,
+    color: 'rgba(255,255,255,0.65)',
+    lineHeight: 20,
+    marginBottom: spacing.md,
+  },
+  deleteConfirmBtn: {
+    backgroundColor: colours.error,
+    borderRadius: radius.full,
+    paddingVertical: 7,
+    paddingHorizontal: spacing.md,
+    minHeight: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteConfirmText: { color: '#fff', fontSize: typography.xs, fontWeight: '700' },
 
   // ── Item form: price row ──────────────────────────────────────────────────
   priceRow:     { flexDirection: 'row', gap: spacing.sm },

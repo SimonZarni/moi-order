@@ -25,7 +25,8 @@ export function MenuScreen(): React.JSX.Element {
     handleNewCategoryNameChange, handleConfirmAddCategory,
     renamingCategoryId, renamingCategoryName,
     handleOpenRename, handleRenameNameChange, handleConfirmRename, handleCancelRename,
-    handleRequestDeleteCategory,
+    deletingCategoryId, deletingCategoryName,
+    handleOpenDeleteConfirm, handleConfirmDelete, handleCancelDelete,
     handleToggleItemStatus, handleDeleteItem,
     addItemCategoryId, addItemForm, isAddingItem,
     handleOpenAddItem, handleCloseAddItem,
@@ -126,7 +127,7 @@ export function MenuScreen(): React.JSX.Element {
             isActive={selectedCategoryId === cat.id}
             onPress={() => handleSelectCategory(cat.id)}
             onEdit={cat.is_system ? undefined : () => handleOpenRename(cat.id, cat.name)}
-            onDelete={cat.is_system ? undefined : () => handleRequestDeleteCategory(cat.id, cat.name)}
+            onDelete={cat.is_system ? undefined : () => handleOpenDeleteConfirm(cat.id, cat.name)}
           />
         ))}
       </ScrollView>
@@ -251,6 +252,26 @@ export function MenuScreen(): React.JSX.Element {
               </Pressable>
               <Pressable style={styles.confirmButton} onPress={handleConfirmRename} accessibilityLabel="Save name" accessibilityRole="button">
                 <Text style={styles.confirmText}>Save</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── Delete category confirmation modal ──────────────────────────── */}
+      <Modal visible={deletingCategoryId !== null} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Delete Category</Text>
+            <Text style={styles.deleteConfirmBody}>
+              {`Delete "${deletingCategoryName}"? All items in this category will also be removed. This cannot be undone.`}
+            </Text>
+            <View style={styles.modalActions}>
+              <Pressable style={styles.cancelButton} onPress={handleCancelDelete} accessibilityLabel="Cancel" accessibilityRole="button">
+                <Text style={styles.cancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={styles.deleteConfirmBtn} onPress={handleConfirmDelete} accessibilityLabel="Confirm delete" accessibilityRole="button">
+                <Text style={styles.deleteConfirmText}>Delete</Text>
               </Pressable>
             </View>
           </View>

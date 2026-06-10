@@ -70,8 +70,13 @@ interface UseMenuScreenResult {
   handleRenameNameChange: (v: string) => void;
   handleConfirmRename:    () => void;
   handleCancelRename:     () => void;
+  // Delete category modal
+  deletingCategoryId:      number | null;
+  deletingCategoryName:    string;
+  handleOpenDeleteConfirm: (id: number, name: string) => void;
+  handleConfirmDelete:     () => void;
+  handleCancelDelete:      () => void;
   // Item mutations
-  handleRequestDeleteCategory: (id: number, name: string) => void;
   handleToggleItemStatus: (itemId: number, status: MenuItemStatus) => void;
   handleDeleteItem: (id: number) => void;
   // Add item modal
@@ -251,6 +256,10 @@ export function useMenuScreen(): UseMenuScreenResult {
   const [renamingCategoryId,   setRenamingCategoryId]   = useState<number | null>(null);
   const [renamingCategoryName, setRenamingCategoryName] = useState('');
 
+  // ── Delete category modal ─────────────────────────────────────────────────
+  const [deletingCategoryId,   setDeletingCategoryId]   = useState<number | null>(null);
+  const [deletingCategoryName, setDeletingCategoryName] = useState('');
+
   // ── Item modals ───────────────────────────────────────────────────────────
   const [addItemCategoryId, setAddItemCategoryId] = useState<number | null>(null);
   const [addItemForm, setAddItemForm] = useState<AddItemForm>(EMPTY_FORM);
@@ -399,16 +408,22 @@ export function useMenuScreen(): UseMenuScreenResult {
     setShowAddCategoryModal(false);
   }, [newCategoryName, mutateAddCategory]);
 
-  const handleRequestDeleteCategory = useCallback((id: number, name: string) => {
-    Alert.alert(
-      'Delete Category',
-      `Delete "${name}"? This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => mutateDeleteCategory(id) },
-      ],
-    );
-  }, [mutateDeleteCategory]);
+  const handleOpenDeleteConfirm = useCallback((id: number, name: string) => {
+    setDeletingCategoryId(id);
+    setDeletingCategoryName(name);
+  }, []);
+
+  const handleConfirmDelete = useCallback(() => {
+    if (deletingCategoryId === null) return;
+    mutateDeleteCategory(deletingCategoryId);
+    setDeletingCategoryId(null);
+    setDeletingCategoryName('');
+  }, [deletingCategoryId, mutateDeleteCategory]);
+
+  const handleCancelDelete = useCallback(() => {
+    setDeletingCategoryId(null);
+    setDeletingCategoryName('');
+  }, []);
 
   const handleOpenRename = useCallback((id: number, currentName: string) => {
     setRenamingCategoryId(id);
@@ -561,7 +576,9 @@ export function useMenuScreen(): UseMenuScreenResult {
     handleNewCategoryNameChange, handleConfirmAddCategory,
     renamingCategoryId, renamingCategoryName,
     handleOpenRename, handleRenameNameChange, handleConfirmRename, handleCancelRename,
-    handleRequestDeleteCategory, handleToggleItemStatus, handleDeleteItem,
+    deletingCategoryId, deletingCategoryName,
+    handleOpenDeleteConfirm, handleConfirmDelete, handleCancelDelete,
+    handleToggleItemStatus, handleDeleteItem,
     addItemCategoryId, addItemForm, isAddingItem,
     handleOpenAddItem, handleCloseAddItem,
     handleAddItemFieldChange, handleAddItemPhotoChange, handlePickAddPhoto,
