@@ -105,11 +105,14 @@ class FoodOrderService
                     ];
                 }
 
-                // Validate required groups have at least one selection.
-                foreach ($groups->where('is_required', true) as $group) {
-                    $filled = collect($selectedOptionsData)->firstWhere('option_group_id', $group->id);
-                    if ($filled === null) {
+                // Validate min/max selections per group (prevents under-selecting or client tampering).
+                foreach ($groups as $group) {
+                    $count = collect($selectedOptionsData)->where('option_group_id', $group->id)->count();
+                    if ($group->is_required && $count < max(1, $group->min_selections)) {
                         throw new DomainException('order.required_option_missing', 422);
+                    }
+                    if ($count > $group->max_selections) {
+                        throw new DomainException('order.too_many_options', 422);
                     }
                 }
 

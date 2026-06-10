@@ -70,7 +70,10 @@ export function MenuItemDetailScreen(): React.JSX.Element {
                   accessibilityState={{ checked: isSelected }}
                 >
                   <View style={[styles.selector, !isRadio && styles.selectorSquare, isSelected && styles.selectorActive]}>
-                    {isSelected && <View style={isRadio ? styles.selectorDot : styles.selectorCheck} />}
+                    {isSelected && (isRadio
+                      ? <View style={styles.selectorDot} />
+                      : <Ionicons name="checkmark" size={14} color={colours.white} />
+                    )}
                   </View>
                   <Text style={styles.optionLabel}>{opt.name}</Text>
                   {opt.additional_price_cents > 0 && (

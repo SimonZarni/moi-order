@@ -30,11 +30,28 @@ class UpdateMenuItemRequest extends FormRequest
             'option_groups'                               => ['sometimes', 'array'],
             'option_groups.*.name'                        => ['required', 'string', 'max:100'],
             'option_groups.*.is_required'                 => ['boolean'],
+            'option_groups.*.min_selections'              => ['integer', 'min:0', 'max:10'],
             'option_groups.*.max_selections'              => ['integer', 'min:1', 'max:10'],
             'option_groups.*.options'                     => ['required', 'array', 'min:1'],
             'option_groups.*.options.*.name'              => ['required', 'string', 'max:100'],
             'option_groups.*.options.*.additional_price_cents' => ['integer', 'min:0'],
         ];
+    }
+
+    public function withValidator(\Illuminate\Contracts\Validation\Validator $validator): void
+    {
+        $validator->after(function ($v) {
+            foreach ((array) $this->input('option_groups', []) as $i => $group) {
+                $min = (int) ($group['min_selections'] ?? 0);
+                $max = (int) ($group['max_selections'] ?? 1);
+                if ($min > $max) {
+                    $v->errors()->add(
+                        "option_groups.{$i}.min_selections",
+                        'Minimum selections cannot exceed maximum selections.'
+                    );
+                }
+            }
+        });
     }
 
     public function prepareForValidation(): void

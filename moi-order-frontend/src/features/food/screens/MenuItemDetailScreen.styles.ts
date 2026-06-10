@@ -131,12 +131,6 @@ export const styles = StyleSheet.create({
     borderRadius: radius.full,
     backgroundColor: colours.white,
   },
-  selectorCheck: {
-    width: 12,
-    height: 12,
-    borderRadius: 2,
-    backgroundColor: colours.white,
-  },
   noteBlock: {
     backgroundColor: colours.card,
     marginTop: spacing.sm,
