@@ -53,6 +53,13 @@ export type CreateMerchantPayload = {
   business_name: string;
   business_type: string;
   business_address: string;
+  business_phone: string;
+  documents: {
+    national_id?: File;
+    business_registration?: File;
+    bank_book?: File;
+    storefront_photo?: File;
+  };
 };
 
 export type CreateMerchantResponse = {
@@ -89,8 +96,21 @@ export const merchantsApi = {
       .get<{ data: { count: number } }>('/merchants/kyc-badge')
       .then((r) => r.data.data.count),
 
-  createMerchant: (payload: CreateMerchantPayload) =>
-    apiClient
-      .post<{ data: CreateMerchantResponse }>('/merchants', payload)
-      .then((r) => r.data.data),
+  createMerchant: (payload: CreateMerchantPayload) => {
+    const fd = new FormData();
+    fd.append('name', payload.name);
+    fd.append('email', payload.email);
+    fd.append('password', payload.password);
+    fd.append('business_name', payload.business_name);
+    fd.append('business_type', payload.business_type);
+    fd.append('business_address', payload.business_address);
+    if (payload.business_phone) fd.append('business_phone', payload.business_phone);
+    if (payload.documents.national_id)           fd.append('documents[national_id]',           payload.documents.national_id);
+    if (payload.documents.business_registration) fd.append('documents[business_registration]', payload.documents.business_registration);
+    if (payload.documents.bank_book)             fd.append('documents[bank_book]',             payload.documents.bank_book);
+    if (payload.documents.storefront_photo)      fd.append('documents[storefront_photo]',      payload.documents.storefront_photo);
+    return apiClient
+      .post<{ data: CreateMerchantResponse }>('/merchants', fd)
+      .then((r) => r.data.data);
+  },
 };
