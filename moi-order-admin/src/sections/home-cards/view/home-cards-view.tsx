@@ -145,7 +145,7 @@ function SortableRow({
               width: 6,
               height: 44,
               borderRadius: 1,
-              bgcolor: card.accent_color,
+              bgcolor: card.border_color,
               flexShrink: 0,
             }}
           />
@@ -240,7 +240,7 @@ function ChildRow({ card, onEdit, onDelete }: ChildRowProps) {
               width: 4,
               height: 36,
               borderRadius: 1,
-              bgcolor: card.accent_color,
+              bgcolor: card.border_color,
               flexShrink: 0,
             }}
           />

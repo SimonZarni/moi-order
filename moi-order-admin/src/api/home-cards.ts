@@ -18,6 +18,7 @@ export type HomeCardPayload = {
   tag_en: string;
   tag_mm: string;
   accent_color: string;
+  border_color: string;
   icon_key: string;
   navigation_screen: string | null;
   navigation_params: Record<string, unknown> | null;

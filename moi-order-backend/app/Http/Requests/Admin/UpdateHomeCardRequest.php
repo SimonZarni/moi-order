@@ -29,6 +29,7 @@ class UpdateHomeCardRequest extends FormRequest
             'tag_en'            => ['sometimes', 'string', 'max:50'],
             'tag_mm'            => ['sometimes', 'string', 'max:100'],
             'accent_color'      => ['sometimes', 'string', 'max:20', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'border_color'      => ['sometimes', 'string', 'max:20', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'icon_key'          => ['sometimes', 'string', Rule::exists('home_card_icons', 'key')],
             'navigation_screen' => ['nullable', 'string', Rule::exists('home_card_routes', 'key')],
             'navigation_params' => ['nullable', 'array'],
@@ -74,6 +75,7 @@ class UpdateHomeCardRequest extends FormRequest
             'tag_en'            => 'English tag',
             'tag_mm'            => 'Myanmar tag',
             'accent_color'      => 'accent colour',
+            'border_color'      => 'border colour',
             'icon_key'          => 'icon',
             'navigation_screen' => 'navigation target',
             'navigation_params' => 'navigation parameters',
@@ -87,6 +89,7 @@ class UpdateHomeCardRequest extends FormRequest
         return [
             'slug.regex'         => 'The slug may only contain lowercase letters, numbers, and hyphens.',
             'accent_color.regex' => 'The accent colour must be a valid hex colour (e.g. #52796f).',
+            'border_color.regex' => 'The border colour must be a valid hex colour (e.g. #4a7fa5).',
         ];
     }
 }

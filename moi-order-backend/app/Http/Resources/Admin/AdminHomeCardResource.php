@@ -23,6 +23,7 @@ class AdminHomeCardResource extends JsonResource
             'tag_en'            => $this->tag_en,
             'tag_mm'            => $this->tag_mm,
             'accent_color'      => $this->accent_color,
+            'border_color'      => $this->border_color,
             'icon_key'          => $this->icon_key,
             'navigation_screen' => $this->navigation_screen,
             'navigation_params' => $this->navigation_params,

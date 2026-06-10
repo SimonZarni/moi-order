@@ -3,12 +3,15 @@ import type { HomeCard, HomeCardIcon, HomeCardRoute } from 'src/types';
 
 import { useRef, useState, useEffect, useCallback } from 'react';
 
+import { HexColorPicker } from 'react-colorful';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+import Popover from '@mui/material/Popover';
 import Select from '@mui/material/Select';
 import Switch from '@mui/material/Switch';
 import Divider from '@mui/material/Divider';
@@ -25,6 +28,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import FormHelperText from '@mui/material/FormHelperText';
+import InputAdornment from '@mui/material/InputAdornment';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import CircularProgress from '@mui/material/CircularProgress';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -51,6 +55,8 @@ const ACCENT_SWATCHES = [
   { label: 'Amber',  value: '#c4813b' },
 ];
 
+const HEX_RE = /^#[0-9a-fA-F]{6}$/;
+
 const AUTO_SLUG_CREATE_NEW = '__create_new__';
 
 function toSlug(value: string): string {
@@ -69,6 +75,7 @@ type FormState = {
   tag_en: string;
   tag_mm: string;
   accent_color: string;
+  border_color: string;
   icon_key: string;
   navigation_screen: string;
   navigation_params_raw: string;
@@ -87,6 +94,7 @@ function defaultForm(card?: HomeCard): FormState {
     tag_en:                card?.tag_en            ?? '',
     tag_mm:                card?.tag_mm            ?? '',
     accent_color:          card?.accent_color      ?? '#52796f',
+    border_color:          card?.border_color      ?? '#52796f',
     icon_key:              card?.icon_key          ?? 'calendar',
     navigation_screen:     card?.navigation_screen ?? '',
     navigation_params_raw: card?.navigation_params ? JSON.stringify(card.navigation_params, null, 2) : '{}',
@@ -110,6 +118,12 @@ export function HomeCardFormView({ mode, card }: Props) {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  // ── Color pickers ───────────────────────────────────────────────────────────
+  const [accentPickerAnchor, setAccentPickerAnchor] = useState<HTMLElement | null>(null);
+  const [borderPickerAnchor, setBorderPickerAnchor] = useState<HTMLElement | null>(null);
+  const [accentHexDraft, setAccentHexDraft] = useState(form.accent_color);
+  const [borderHexDraft, setBorderHexDraft] = useState(form.border_color);
 
   // ── Dynamic icon, route and parent-card lists ───────────────────────────────
   const [icons, setIcons] = useState<HomeCardIcon[]>([]);
@@ -246,6 +260,18 @@ export function HomeCardFormView({ mode, card }: Props) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }, []);
 
+  const handleAccentHexInput = useCallback((raw: string) => {
+    const val = raw.startsWith('#') ? raw : `#${raw}`;
+    setAccentHexDraft(val);
+    if (HEX_RE.test(val)) update('accent_color', val);
+  }, [update]);
+
+  const handleBorderHexInput = useCallback((raw: string) => {
+    const val = raw.startsWith('#') ? raw : `#${raw}`;
+    setBorderHexDraft(val);
+    if (HEX_RE.test(val)) update('border_color', val);
+  }, [update]);
+
   const buildPayload = useCallback((): HomeCardPayload | null => {
     let navigationParams: Record<string, unknown> | null = null;
     const raw = form.navigation_params_raw.trim();
@@ -267,6 +293,7 @@ export function HomeCardFormView({ mode, card }: Props) {
       tag_en:            form.tag_en,
       tag_mm:            form.tag_mm,
       accent_color:      form.accent_color,
+      border_color:      form.border_color,
       icon_key:          form.icon_key,
       navigation_screen: form.navigation_screen || null,
       navigation_params: navigationParams,
@@ -422,28 +449,144 @@ export function HomeCardFormView({ mode, card }: Props) {
 
           {/* ── Appearance ── */}
           <Card sx={{ mb: 3 }}>
-            <CardHeader title="Appearance" subheader="Accent colour and icon shown on the card" />
+            <CardHeader title="Appearance" subheader="Border and accent colours for the card" />
             <CardContent>
-              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Accent Colour</Typography>
-              <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 3 }}>
-                {ACCENT_SWATCHES.map((swatch) => (
-                  <Tooltip key={swatch.value} title={swatch.label}>
-                    <Box
-                      onClick={() => update('accent_color', swatch.value)}
-                      sx={{
-                        width: 40, height: 40, borderRadius: '50%',
-                        bgcolor: swatch.value, cursor: 'pointer',
-                        border: form.accent_color === swatch.value ? '3px solid' : '3px solid transparent',
-                        borderColor: form.accent_color === swatch.value ? 'primary.main' : 'transparent',
-                        outline: form.accent_color === swatch.value ? '2px solid white' : 'none',
-                        outlineOffset: -4, transition: 'border-color 0.15s',
-                      }}
-                    />
-                  </Tooltip>
-                ))}
-              </Box>
 
-              <Divider sx={{ mb: 3 }} />
+              {/* Border Colour */}
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>Border Colour</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+                Controls the top stripe on the card
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 0.5 }}>
+                <Box
+                  onClick={(e) => setBorderPickerAnchor(e.currentTarget)}
+                  sx={{
+                    width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                    bgcolor: form.border_color, cursor: 'pointer',
+                    border: '3px solid', borderColor: 'divider',
+                    boxShadow: 2, transition: 'transform 0.15s',
+                    '&:hover': { transform: 'scale(1.1)' },
+                  }}
+                />
+                <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                  {form.border_color}
+                </Typography>
+              </Box>
+              <Popover
+                open={Boolean(borderPickerAnchor)}
+                anchorEl={borderPickerAnchor}
+                onClose={() => setBorderPickerAnchor(null)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+              >
+                <Box sx={{ p: 2, width: 240 }}>
+                  <HexColorPicker
+                    color={form.border_color}
+                    onChange={(hex) => { update('border_color', hex); setBorderHexDraft(hex); }}
+                    style={{ width: '100%' }}
+                  />
+                  <TextField
+                    size="small" fullWidth sx={{ mt: 1.5 }}
+                    value={borderHexDraft}
+                    onChange={(e) => handleBorderHexInput(e.target.value)}
+                    onBlur={() => setBorderHexDraft(form.border_color)}
+                    error={!HEX_RE.test(borderHexDraft)}
+                    helperText={!HEX_RE.test(borderHexDraft) ? 'Enter a valid 6-digit hex' : ' '}
+                    slotProps={{
+                      input: {
+                        startAdornment: <InputAdornment position="start">#</InputAdornment>,
+                      },
+                    }}
+                    inputProps={{ maxLength: 7, style: { fontFamily: 'monospace' } }}
+                  />
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, mb: 0.5 }}>Quick picks</Typography>
+                  <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+                    {ACCENT_SWATCHES.map((s) => (
+                      <Tooltip key={s.value} title={s.label}>
+                        <Box
+                          onClick={() => { update('border_color', s.value); setBorderHexDraft(s.value); }}
+                          sx={{
+                            width: 24, height: 24, borderRadius: '50%', cursor: 'pointer',
+                            bgcolor: s.value, border: '2px solid',
+                            borderColor: form.border_color === s.value ? 'primary.main' : 'transparent',
+                            transition: 'border-color 0.15s',
+                          }}
+                        />
+                      </Tooltip>
+                    ))}
+                  </Box>
+                </Box>
+              </Popover>
+
+              <Divider sx={{ my: 2.5 }} />
+
+              {/* Accent Colour */}
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>Accent Colour</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+                Controls the tag text and icon tint
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 0.5 }}>
+                <Box
+                  onClick={(e) => setAccentPickerAnchor(e.currentTarget)}
+                  sx={{
+                    width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                    bgcolor: form.accent_color, cursor: 'pointer',
+                    border: '3px solid', borderColor: 'divider',
+                    boxShadow: 2, transition: 'transform 0.15s',
+                    '&:hover': { transform: 'scale(1.1)' },
+                  }}
+                />
+                <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                  {form.accent_color}
+                </Typography>
+              </Box>
+              <Popover
+                open={Boolean(accentPickerAnchor)}
+                anchorEl={accentPickerAnchor}
+                onClose={() => setAccentPickerAnchor(null)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+              >
+                <Box sx={{ p: 2, width: 240 }}>
+                  <HexColorPicker
+                    color={form.accent_color}
+                    onChange={(hex) => { update('accent_color', hex); setAccentHexDraft(hex); }}
+                    style={{ width: '100%' }}
+                  />
+                  <TextField
+                    size="small" fullWidth sx={{ mt: 1.5 }}
+                    value={accentHexDraft}
+                    onChange={(e) => handleAccentHexInput(e.target.value)}
+                    onBlur={() => setAccentHexDraft(form.accent_color)}
+                    error={!HEX_RE.test(accentHexDraft)}
+                    helperText={!HEX_RE.test(accentHexDraft) ? 'Enter a valid 6-digit hex' : ' '}
+                    slotProps={{
+                      input: {
+                        startAdornment: <InputAdornment position="start">#</InputAdornment>,
+                      },
+                    }}
+                    inputProps={{ maxLength: 7, style: { fontFamily: 'monospace' } }}
+                  />
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, mb: 0.5 }}>Quick picks</Typography>
+                  <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+                    {ACCENT_SWATCHES.map((s) => (
+                      <Tooltip key={s.value} title={s.label}>
+                        <Box
+                          onClick={() => { update('accent_color', s.value); setAccentHexDraft(s.value); }}
+                          sx={{
+                            width: 24, height: 24, borderRadius: '50%', cursor: 'pointer',
+                            bgcolor: s.value, border: '2px solid',
+                            borderColor: form.accent_color === s.value ? 'primary.main' : 'transparent',
+                            transition: 'border-color 0.15s',
+                          }}
+                        />
+                      </Tooltip>
+                    ))}
+                  </Box>
+                </Box>
+              </Popover>
+
+              <Divider sx={{ my: 2.5 }} />
 
               <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Icon</Typography>
               {iconsLoading ? (
@@ -604,7 +747,7 @@ export function HomeCardFormView({ mode, card }: Props) {
                 sx={{
                   borderRadius: 2, bgcolor: 'background.paper',
                   border: '1px solid', borderColor: 'divider',
-                  borderTop: `4px solid ${form.accent_color}`,
+                  borderTop: `4px solid ${form.border_color}`,
                   p: 2, minHeight: 120, position: 'relative',
                   opacity: form.is_coming_soon ? 0.5 : 1,
                   boxShadow: 2,

@@ -25,6 +25,7 @@ class HomeCardResource extends JsonResource
             'tag_en'            => $this->tag_en,
             'tag_mm'            => $this->tag_mm,
             'accent_color'      => $this->accent_color,
+            'border_color'      => $this->border_color,
             'icon_key'          => $this->icon_key,
             'icon_type'         => $this->whenLoaded('icon', fn () => $this->icon?->type?->value ?? HomeCardIconType::Builtin->value, HomeCardIconType::Builtin->value),
             'icon_url'          => $this->whenLoaded('icon', fn () => $this->icon?->image_url ?? null, null),

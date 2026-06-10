@@ -54,7 +54,7 @@ export function HomeCardGroup({
   const isMM = locale === 'mm';
 
   return (
-    <View style={[styles.card, { borderTopColor: card.accent_color }]}>
+    <View style={[styles.card, { borderTopColor: card.border_color }]}>
       {/* Header — group icon sits absolute top-right */}
       <View style={styles.groupIcon}>
         <CardIcon iconKey={card.icon_key} iconType={card.icon_type} iconUrl={card.icon_url} />

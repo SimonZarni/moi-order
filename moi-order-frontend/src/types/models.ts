@@ -482,6 +482,7 @@ export interface HomeCard {
   tag_en: string;
   tag_mm: string;
   accent_color: string;
+  border_color: string;
   icon_key: string;
   icon_type: import('./enums').HomeCardIconType;
   icon_url: string | null;

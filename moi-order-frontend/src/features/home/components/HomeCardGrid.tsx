@@ -114,7 +114,7 @@ function SingleCard({ card, locale, orderCount, onPress }: SingleCardProps): Rea
 
   return (
     <Pressable
-      style={[styles.card, { borderTopColor: card.accent_color }, card.is_coming_soon && styles.cardDimmed]}
+      style={[styles.card, { borderTopColor: card.border_color }, card.is_coming_soon && styles.cardDimmed]}
       onPress={() => onPress(card)}
       accessibilityLabel={title}
       accessibilityRole="button"
