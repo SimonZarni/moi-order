@@ -110,6 +110,7 @@ class FoodOrder extends Model
             'Order   : ' . ($this->order_number ?? '#' . $this->id),
             'Restaurant: ' . ($this->restaurant?->name ?? '—'),
             'Customer: ' . ($this->user?->name ?? '—'),
+            'Phone   : ' . ($this->user?->phone_number ?? '—'),
             '',
             'Items:',
         ];
@@ -147,7 +148,7 @@ class FoodOrder extends Model
         $lines[] = '';
         $lines[] = 'Total   : ฿' . number_format($this->total_cents / 100, 0);
         $lines[] = '';
-        $lines[] = 'Our team will confirm your payment shortly. Thank you! 🙏';
+        $lines[] = '⚠️ Delivery fee not included. Restaurant will ask to pay delivery fee.';
 
         return implode("\n", $lines);
     }
