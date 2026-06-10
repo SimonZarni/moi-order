@@ -33,20 +33,30 @@ class MenuService
     public function createSystemCategoriesForRestaurant(Restaurant $restaurant): void
     {
         foreach (MenuCategoryType::cases() as $type) {
-            $category = $restaurant->menuCategories()
+            // Active category exists — nothing to do
+            $active = $restaurant->menuCategories()
                 ->where('category_type', $type->value)
-                ->withTrashed()
                 ->first();
 
-            if ($category === null) {
+            if ($active !== null) {
+                continue;
+            }
+
+            // No active one — restore the soft-deleted record if present, else create fresh
+            $trashed = $restaurant->menuCategories()
+                ->where('category_type', $type->value)
+                ->onlyTrashed()
+                ->first();
+
+            if ($trashed !== null) {
+                $trashed->restore();
+            } else {
                 MenuCategory::create([
                     'restaurant_id' => $restaurant->id,
                     'name'          => $type->label(),
                     'category_type' => $type->value,
                     'sort_order'    => $type->sortOrder(),
                 ]);
-            } elseif ($category->trashed()) {
-                $category->restore();
             }
         }
     }
