@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\VerificationStatusController;
 use App\Http\Controllers\Api\V1\DynamicSubmissionController;
 use App\Http\Controllers\Api\V1\FavoritePlaceController;
 use App\Http\Controllers\Api\V1\FoodOrderController;
+use App\Http\Controllers\Api\V1\MerchantApplicationController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\UserAddressController;
 use App\Http\Controllers\Api\V1\PaymentController;
@@ -93,6 +94,12 @@ Route::delete('/notifications',           [NotificationController::class, 'destr
 
 // Verification status — Moi Verified requirements check
 Route::get('/verification/status', VerificationStatusController::class);
+
+// Merchant application — single-identity model (Grab/LINE-style): an existing
+// customer applies to become a merchant from their own account, no new User row.
+Route::get('/merchant/apply',    [MerchantApplicationController::class, 'show']);
+Route::post('/merchant/apply',   [MerchantApplicationController::class, 'store']);
+Route::delete('/merchant/apply', [MerchantApplicationController::class, 'destroy']);
 
 // Device tokens — push notification registration
 Route::post('/device-tokens',   [DeviceTokenController::class, 'store']);

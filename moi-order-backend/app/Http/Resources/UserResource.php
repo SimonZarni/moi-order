@@ -32,6 +32,7 @@ class UserResource extends JsonResource
             'date_of_birth'     => $this->date_of_birth?->format('Y-m-d'),
             'role'              => $this->user_role?->value ?? 'regular',
             'is_privileged'     => $this->isPrivileged(),
+            'is_merchant'       => $this->is_merchant,
             'simulated_date'    => $this->isPrivileged() ? $this->simulated_date?->format('Y-m-d') : null,
             'email_verified_at' => $this->email_verified_at?->toISOString(),
             'created_at'        => $this->created_at->toISOString(),

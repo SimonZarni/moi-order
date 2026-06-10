@@ -28,7 +28,7 @@ class SelfRegisterMerchantRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.unique'     => 'This email is already registered. Please sign in instead.',
+            'email.unique'     => 'An account with this email already exists. Log in to the app and apply to become a merchant from your profile.',
             'password.min'     => 'Password must be at least 8 characters.',
         ];
     }

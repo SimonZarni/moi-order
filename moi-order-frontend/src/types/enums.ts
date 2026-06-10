@@ -49,6 +49,17 @@ export const PLACE_IMPORT_BATCH_STATUS = {
 
 export type PlaceImportBatchStatus = (typeof PLACE_IMPORT_BATCH_STATUS)[keyof typeof PLACE_IMPORT_BATCH_STATUS];
 
+// Mirrors App\Enums\KycApplicationStatus
+export const KYC_APPLICATION_STATUS = {
+  Draft:       'draft',
+  Submitted:   'submitted',
+  UnderReview: 'under_review',
+  Approved:    'approved',
+  Rejected:    'rejected',
+} as const;
+
+export type KycApplicationStatus = (typeof KYC_APPLICATION_STATUS)[keyof typeof KYC_APPLICATION_STATUS];
+
 // Mirrors App\Enums\DocumentType
 export const DOCUMENT_TYPE = {
   Passport:        'passport',

@@ -63,6 +63,15 @@ class KycApplication extends Model
     }
 
     /**
+     * Withdraw a draft application before submission.
+     * Principle: Encapsulation — caller does not manipulate raw columns.
+     */
+    public function cancel(): void
+    {
+        $this->delete();
+    }
+
+    /**
      * Transition to Approved state and elevate user to merchant.
      * Principle: Encapsulation — caller does not manipulate raw columns.
      */

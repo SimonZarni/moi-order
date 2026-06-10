@@ -196,6 +196,35 @@ export interface AppStrings {
     payments:         string;
   };
 
+  // Become a Merchant screen
+  merchant: {
+    title:               string;
+    subtitle:            string;
+    introTitle:          string;
+    introBody:           string;
+    benefitReach:        string;
+    benefitDashboard:    string;
+    benefitPayouts:      string;
+    applyButton:         string;
+    draftTitle:          string;
+    draftBody:           string;
+    downloadApp:         string;
+    cancelButton:        string;
+    cancelConfirmTitle:  string;
+    cancelConfirmBody:   string;
+    cancelConfirmYes:    string;
+    cancelConfirmNo:     string;
+    underReviewTitle:    string;
+    underReviewBody:     string;
+    approvedTitle:       string;
+    approvedBody:        string;
+    openAppButton:       string;
+    rejectedTitle:       string;
+    rejectedBody:        string;
+    reviewNotes:         string;
+    applyAgainButton:    string;
+  };
+
   // Profile
   profile: {
     personalInfo:       string;
@@ -224,6 +253,7 @@ export interface AppStrings {
     addEmail:           string;
     addEmailDesc:       string;
     becomeVerified:     string;
+    becomeMerchant:     string;
     addThaiPhone:       string;
     alreadyConnected:   string;
     useGoogleLater:     string;
@@ -529,6 +559,7 @@ const en: AppStrings = {
     addEmail:           'Add your real email',
     addEmailDesc:       'You signed in without an email address. Add one so your account can receive updates.',
     becomeVerified:     'Become Moi Verified',
+    becomeMerchant:     'Become a Merchant',
     addThaiPhone:       'Add a Thai phone number for OTP login',
     alreadyConnected:   'Already connected to this account',
     useGoogleLater:     'Use Google to sign in later',
@@ -609,6 +640,33 @@ const en: AppStrings = {
     requirements:     'Requirements',
     channels:         'Connected to at least 2 sign-in channels',
     payments:         'Completed at least 3 payments',
+  },
+  merchant: {
+    title:              'Become a Merchant',
+    subtitle:           'Open your own shop on Moi Order',
+    introTitle:         'Grow your business with Moi Order',
+    introBody:          'Apply to open your own restaurant or shop and reach thousands of customers.',
+    benefitReach:       'Reach more customers across the app',
+    benefitDashboard:   'Manage orders and menu from your own dashboard',
+    benefitPayouts:     'Receive payouts directly to your account',
+    applyButton:        'Apply Now',
+    draftTitle:         'Application started',
+    draftBody:          'To complete your application, download the "Moi Merchant" app and log in with the same email and password as this account. You can finish your KYC details and submit documents there.',
+    downloadApp:        'Download Moi Merchant',
+    cancelButton:       'Cancel Application',
+    cancelConfirmTitle: 'Cancel application?',
+    cancelConfirmBody:  'Your draft application will be removed. You can apply again later.',
+    cancelConfirmYes:   'Yes, cancel',
+    cancelConfirmNo:    'No, keep it',
+    underReviewTitle:   'Application under review',
+    underReviewBody:    'Our team is reviewing your application. We will notify you once a decision is made.',
+    approvedTitle:      'You are now a merchant!',
+    approvedBody:       'Your application was approved. Open the "Moi Merchant" app and log in with the same email and password to manage your shop.',
+    openAppButton:      'Open Moi Merchant',
+    rejectedTitle:      'Application not approved',
+    rejectedBody:       'Your application was not approved this time. You can review the notes below and apply again.',
+    reviewNotes:        'Reviewer notes',
+    applyAgainButton:   'Apply Again',
   },
   form: {
     personalInfo:      'Personal Information',
@@ -836,6 +894,7 @@ const mm: AppStrings = {
     addEmail:           'သင်၏ အီးမေးလ်ထည့်ပါ',
     addEmailDesc:       'အီးမေးလ်မပါဘဲ ဝင်ရောက်ထားသည်။ အကောင့်သတင်းများ လက်ခံရရှိရန် ထည့်ပါ။',
     becomeVerified:     'Moi Verified ရယူပါ',
+    becomeMerchant:     'အရောင်းသမားအဖြစ် လျှောက်ထားရန်',
     addThaiPhone:       'OTP ဖြင့် ဝင်ရောက်ရန် ထိုင်းဖုန်းနံပါတ် ထည့်ပါ',
     alreadyConnected:   'ဤအကောင့်နှင့် ချိတ်ဆက်ပြီးပါပြီ',
     useGoogleLater:     'Google ဖြင့် ဝင်ရောက်နိုင်သည်',
@@ -916,6 +975,33 @@ const mm: AppStrings = {
     requirements:     'လိုအပ်ချက်များ',
     channels:         'အနည်းဆုံး ဝင်ရောက်ချန်နယ် ၂ ခု ချိတ်ဆက်ပါ',
     payments:         'အနည်းဆုံး ၃ ကြိမ် ငွေပေးချေပြီးဖြစ်ရမည်',
+  },
+  merchant: {
+    title:              'အရောင်းသမားအဖြစ် လျှောက်ထားရန်',
+    subtitle:           'Moi Order တွင် သင့်ဆိုင်ကို ဖွင့်ပါ',
+    introTitle:         'Moi Order နှင့်အတူ သင့်လုပ်ငန်းကို တိုးချဲ့ပါ',
+    introBody:          'သင့်ဆိုင် (သို့) စားသောက်ဆိုင်ကို ဖွင့်ရန် လျှောက်ထားပြီး ဖောက်သည်များစွာထံ ရောက်ရှိပါ။',
+    benefitReach:       'အက်ပ်တစ်ခုလုံးရှိ ဖောက်သည်များထံ ရောက်ရှိနိုင်မည်',
+    benefitDashboard:   'သင့်ကိုယ်ပိုင် dashboard မှ အော်ဒါနှင့် မီနူးကို စီမံနိုင်မည်',
+    benefitPayouts:     'သင့်အကောင့်သို့ တိုက်ရိုက်ငွေလက်ခံနိုင်မည်',
+    applyButton:        'လျှောက်ထားမည်',
+    draftTitle:         'လျှောက်လွှာ စတင်ပြီးပါပြီ',
+    draftBody:          'လျှောက်လွှာကို ပြီးမြောက်ရန် "Moi Merchant" အက်ပ်ကို ဒေါင်းလုဒ်လုပ်ပြီး ဤအကောင့်နှင့် တူညီသော အီးမေးလ်နှင့် စကားဝှက်ဖြင့် ဝင်ရောက်ပါ။ KYC အချက်အလက်များနှင့် စာရွက်စာတမ်းများကို ထိုနေရာတွင် ပြီးမြောက်အောင် လုပ်ဆောင်နိုင်ပါသည်။',
+    downloadApp:        'Moi Merchant ဒေါင်းလုဒ်လုပ်ရန်',
+    cancelButton:       'လျှောက်လွှာ ပယ်ဖျက်မည်',
+    cancelConfirmTitle: 'လျှောက်လွှာကို ပယ်ဖျက်မလား?',
+    cancelConfirmBody:  'သင့် Draft လျှောက်လွှာကို ဖယ်ရှားပါမည်။ နောက်ပိုင်းတွင် ပြန်လည်လျှောက်ထားနိုင်ပါသည်။',
+    cancelConfirmYes:   'ဟုတ်၊ ပယ်ဖျက်မည်',
+    cancelConfirmNo:    'မပယ်ဖျက်တော့ပါ',
+    underReviewTitle:   'လျှောက်လွှာကို စိစစ်နေပါသည်',
+    underReviewBody:    'ကျွန်ုပ်တို့အဖွဲ့မှ သင့်လျှောက်လွှာကို စိစစ်နေပါသည်။ ဆုံးဖြတ်ချက်ရရှိပါက အကြောင်းကြားပါမည်။',
+    approvedTitle:      'သင်သည် အရောင်းသမားတစ်ဦး ဖြစ်လာပါပြီ!',
+    approvedBody:       'သင့်လျှောက်လွှာကို အတည်ပြုပြီးပါပြီ။ "Moi Merchant" အက်ပ်ကို ဖွင့်ပြီး ဤအကောင့်နှင့် တူညီသော အီးမေးလ်နှင့် စကားဝှက်ဖြင့် ဝင်ရောက်ပြီး သင့်ဆိုင်ကို စီမံပါ။',
+    openAppButton:      'Moi Merchant ဖွင့်ရန်',
+    rejectedTitle:      'လျှောက်လွှာ အတည်မပြုခဲ့ပါ',
+    rejectedBody:       'ယခုအကြိမ် သင့်လျှောက်လွှာကို အတည်မပြုခဲ့ပါ။ အောက်ပါမှတ်ချက်များကို ကြည့်ပြီး ပြန်လည်လျှောက်ထားနိုင်ပါသည်။',
+    reviewNotes:        'စိစစ်သူ၏ မှတ်ချက်',
+    applyAgainButton:   'ပြန်လည်လျှောက်ထားမည်',
   },
   form: {
     personalInfo:      'ကိုယ်ရေးအချက်အလက်',
@@ -1143,6 +1229,7 @@ const th: AppStrings = {
     addEmail:           'เพิ่มอีเมลของคุณ',
     addEmailDesc:       'คุณเข้าสู่ระบบโดยไม่มีอีเมล เพิ่มอีเมลเพื่อรับการอัปเดต',
     becomeVerified:     'กลายเป็น Moi Verified',
+    becomeMerchant:     'สมัครเป็นร้านค้า',
     addThaiPhone:       'เพิ่มเบอร์โทรไทยสำหรับเข้าสู่ระบบด้วย OTP',
     alreadyConnected:   'เชื่อมต่อกับบัญชีนี้แล้ว',
     useGoogleLater:     'ใช้ Google เข้าสู่ระบบในภายหลัง',
@@ -1223,6 +1310,33 @@ const th: AppStrings = {
     requirements:     'เงื่อนไข',
     channels:         'เชื่อมต่ออย่างน้อย 2 ช่องทางเข้าสู่ระบบ',
     payments:         'ชำระเงินสำเร็จอย่างน้อย 3 ครั้ง',
+  },
+  merchant: {
+    title:              'สมัครเป็นร้านค้า',
+    subtitle:           'เปิดร้านของคุณบน Moi Order',
+    introTitle:         'เติบโตไปกับ Moi Order',
+    introBody:          'สมัครเพื่อเปิดร้านอาหารหรือร้านค้าของคุณเองและเข้าถึงลูกค้าได้มากขึ้น',
+    benefitReach:       'เข้าถึงลูกค้าได้มากขึ้นทั่วทั้งแอป',
+    benefitDashboard:   'จัดการคำสั่งซื้อและเมนูจากแดชบอร์ดของคุณเอง',
+    benefitPayouts:     'รับเงินเข้าบัญชีของคุณโดยตรง',
+    applyButton:        'สมัครตอนนี้',
+    draftTitle:         'เริ่มใบสมัครแล้ว',
+    draftBody:          'หากต้องการสมัครให้เสร็จสมบูรณ์ ดาวน์โหลดแอป "Moi Merchant" แล้วเข้าสู่ระบบด้วยอีเมลและรหัสผ่านเดียวกับบัญชีนี้ คุณสามารถกรอกข้อมูล KYC และส่งเอกสารได้ที่นั่น',
+    downloadApp:        'ดาวน์โหลด Moi Merchant',
+    cancelButton:       'ยกเลิกใบสมัคร',
+    cancelConfirmTitle: 'ยกเลิกใบสมัครหรือไม่?',
+    cancelConfirmBody:  'ใบสมัครฉบับร่างของคุณจะถูกลบ คุณสามารถสมัครใหม่ได้ภายหลัง',
+    cancelConfirmYes:   'ใช่ ยกเลิก',
+    cancelConfirmNo:    'ไม่ เก็บไว้',
+    underReviewTitle:   'ใบสมัครอยู่ระหว่างการตรวจสอบ',
+    underReviewBody:    'ทีมงานของเรากำลังตรวจสอบใบสมัครของคุณ เราจะแจ้งให้ทราบเมื่อมีผลการพิจารณา',
+    approvedTitle:      'คุณเป็นร้านค้าแล้ว!',
+    approvedBody:       'ใบสมัครของคุณได้รับการอนุมัติแล้ว เปิดแอป "Moi Merchant" แล้วเข้าสู่ระบบด้วยอีเมลและรหัสผ่านเดียวกันเพื่อจัดการร้านของคุณ',
+    openAppButton:      'เปิด Moi Merchant',
+    rejectedTitle:      'ใบสมัครไม่ได้รับการอนุมัติ',
+    rejectedBody:       'ใบสมัครของคุณไม่ได้รับการอนุมัติในครั้งนี้ คุณสามารถดูหมายเหตุด้านล่างและสมัครใหม่ได้',
+    reviewNotes:        'หมายเหตุจากผู้ตรวจสอบ',
+    applyAgainButton:   'สมัครอีกครั้ง',
   },
   form: {
     personalInfo:      'ข้อมูลส่วนตัว',

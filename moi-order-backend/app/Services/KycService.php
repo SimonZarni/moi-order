@@ -68,6 +68,50 @@ class KycService
     }
 
     /**
+     * An existing customer applies to become a merchant from their own account.
+     * Principle: single-identity model (Grab/LINE-style) — no new User row is created;
+     * the KYC application is attached to the caller's existing user_id.
+     * Principle: DomainException — already being a merchant is a business rule
+     * violation, not a validation error.
+     */
+    public function applyForMerchant(User $user): KycApplication
+    {
+        if ($user->isMerchant()) {
+            throw new DomainException('merchant.already_merchant', 409);
+        }
+
+        return $this->getOrCreateApplication($user);
+    }
+
+    /**
+     * Return the user's most recent KYC application (any status), or null if none exists.
+     */
+    public function getLatestApplication(User $user): ?KycApplication
+    {
+        return KycApplication::forUser($user->id)->latest()->first();
+    }
+
+    /**
+     * Withdraw a draft merchant application.
+     * Principle: DomainException — only Draft applications can be cancelled;
+     * once Submitted, an admin may already be reviewing it.
+     */
+    public function cancelApplication(User $user): void
+    {
+        $app = $this->getLatestApplication($user);
+
+        if ($app === null) {
+            throw new DomainException('kyc.application_not_found', 404);
+        }
+
+        if ($app->status !== KycApplicationStatus::Draft) {
+            throw new DomainException('kyc.cannot_cancel', 409);
+        }
+
+        $app->cancel();
+    }
+
+    /**
      * Update the application's business info.
      * Principle: CQS — mutates, returns updated model.
      */

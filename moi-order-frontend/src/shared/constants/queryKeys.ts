@@ -72,4 +72,7 @@ export const QUERY_KEYS = {
   ADDRESSES: {
     LIST: ['addresses', 'list'] as const,
   },
+  MERCHANT_APPLICATION: {
+    STATUS: ['merchant-application', 'status'] as const,
+  },
 } as const;

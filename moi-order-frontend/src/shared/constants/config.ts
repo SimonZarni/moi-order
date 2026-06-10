@@ -4,6 +4,11 @@ export const LOCALE_KEY = 'app_locale'  as const;
 // MOI Order LINE Official Account — customer contacts here to complete payment
 export const LINE_OA_URL = process.env['EXPO_PUBLIC_LINE_OA_URL'] ?? 'https://line.me/R/ti/p/%40moiorder';
 
+// "Moi Merchant" app download link — shown to customers who apply to become a
+// merchant. Left empty until the merchant app is published; the download
+// button is hidden when blank.
+export const MERCHANT_APP_DOWNLOAD_URL = process.env['EXPO_PUBLIC_MERCHANT_APP_DOWNLOAD_URL'] ?? '';
+
 export const PUSHER_APP_KEY     = process.env['EXPO_PUBLIC_PUSHER_KEY']     ?? '';
 export const PUSHER_APP_CLUSTER = process.env['EXPO_PUBLIC_PUSHER_CLUSTER'] ?? 'ap1';
 export const LINE_CHANNEL_ID    = process.env['EXPO_PUBLIC_LINE_CHANNEL_ID'] ?? '';

@@ -10,6 +10,9 @@ export const ERROR_CODES = {
   EMAIL_NOT_VERIFIED:            'email.not_verified',
   EMAIL_ALREADY_REGISTERED:      'email.already_registered',
   OTP_RESEND_TOO_SOON:           'otp.resend_too_soon',
+  MERCHANT_ALREADY_MERCHANT:     'merchant.already_merchant',
+  KYC_APPLICATION_NOT_FOUND:     'kyc.application_not_found',
+  KYC_CANNOT_CANCEL:             'kyc.cannot_cancel',
 } as const;
 
 export const DOMAIN_ERROR_MESSAGES: Record<string, string> = {
@@ -23,6 +26,9 @@ export const DOMAIN_ERROR_MESSAGES: Record<string, string> = {
   [ERROR_CODES.ACCOUNT_MINIMUM_LOGIN_METHOD]: 'Cannot remove this account. You need at least one sign-in method.',
   [ERROR_CODES.EMAIL_NOT_VERIFIED]:           'Please verify your email before signing in.',
   [ERROR_CODES.EMAIL_ALREADY_REGISTERED]:     'This email is already registered. Please sign in instead.',
+  [ERROR_CODES.MERCHANT_ALREADY_MERCHANT]:    'You are already a merchant.',
+  [ERROR_CODES.KYC_APPLICATION_NOT_FOUND]:    'No application found to cancel.',
+  [ERROR_CODES.KYC_CANNOT_CANCEL]:            'This application can no longer be cancelled.',
 };
 
 /**

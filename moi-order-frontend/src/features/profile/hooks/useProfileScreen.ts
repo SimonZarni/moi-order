@@ -76,6 +76,7 @@ export interface UseProfileScreenResult {
   // Handlers — nav
   handleGoToOrders: () => void;
   handleGoToMoiVerified: () => void;
+  handleGoToBecomeMerchant: () => void;
   handleGoToPrivacyPolicy: () => void;
   handleGoToTerms: () => void;
   handleGoToPdpa: () => void;
@@ -266,6 +267,10 @@ export function useProfileScreen(): UseProfileScreenResult {
     navigation.navigate('MoiVerified');
   }, [navigation]);
 
+  const handleGoToBecomeMerchant = useCallback((): void => {
+    navigation.navigate('BecomeMerchant');
+  }, [navigation]);
+
   const handleGoToPrivacyPolicy = useCallback((): void => {
     navigation.navigate('PrivacyPolicy');
   }, [navigation]);
@@ -391,6 +396,7 @@ export function useProfileScreen(): UseProfileScreenResult {
     handleSetLocale,
     handleGoToOrders,
     handleGoToMoiVerified,
+    handleGoToBecomeMerchant,
     handleGoToPrivacyPolicy,
     handleGoToTerms,
     handleGoToPdpa,

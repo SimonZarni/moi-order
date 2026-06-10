@@ -48,7 +48,7 @@ export function ProfileScreen(): React.JSX.Element {
     handleTogglePasswordSection,
     handleCurrentPasswordChange, handleNewPasswordChange, handleConfirmPasswordChange,
     handleChangePassword,
-    handleGoToOrders, handleGoToMoiVerified, handleGoToPrivacyPolicy, handleGoToTerms, handleGoToPdpa,
+    handleGoToOrders, handleGoToMoiVerified, handleGoToBecomeMerchant, handleGoToPrivacyPolicy, handleGoToTerms, handleGoToPdpa,
     handleGoToForgotPassword, handleLogout,
     handleDeleteAccount, isDeletingAccount,
     handleUpdatePhone, handleUpdateEmail,
@@ -191,6 +191,24 @@ export function ProfileScreen(): React.JSX.Element {
               <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
             </View>
           </Pressable>
+
+          {/* § Become a Merchant */}
+          {!user?.is_merchant && (
+            <Pressable
+              style={styles.card}
+              onPress={handleGoToBecomeMerchant}
+              accessibilityLabel={s.profile.becomeMerchant}
+              accessibilityRole="button"
+            >
+              <View style={styles.row}>
+                <View style={[styles.iconBadge, styles.iconBadgeAmber]}>
+                  <Ionicons name="storefront-outline" size={16} color={colours.secondary} />
+                </View>
+                <Text style={[styles.rowLabel, styles.rowLabelBold]}>{s.profile.becomeMerchant}</Text>
+                <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
+              </View>
+            </Pressable>
+          )}
 
           {/* § Personal Info */}
           <View style={styles.sectionRow}>

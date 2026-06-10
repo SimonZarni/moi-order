@@ -59,6 +59,7 @@ export interface User {
   date_of_birth: string | null;  // ISO date "YYYY-MM-DD"
   role: string;
   is_privileged: boolean;
+  is_merchant: boolean;
   simulated_date: string | null;  // ISO date "YYYY-MM-DD" — privileged accounts only
   email_verified_at: string | null;
   created_at: string;
@@ -87,6 +88,24 @@ export interface VerificationStatus {
   connected_channels: number;   // need ≥ 2
   successful_payments: number;  // need ≥ 3
   is_verified: boolean;
+}
+
+// Mirrors App\Http\Resources\Merchant\KycApplicationResource (self-view: no
+// `documents`/`user_*`/`shop_id` fields, since those relations are not loaded).
+export interface KycApplication {
+  id: number;
+  type: string;
+  user_id: number;
+  business_name: string;
+  business_type: string;
+  business_address: string;
+  business_phone: string | null;
+  status: import('./enums').KycApplicationStatus;
+  status_label: string;
+  review_notes: string | null;
+  reviewed_at: string | null;
+  submitted_at: string | null;
+  created_at: string;
 }
 
 // ── Services ───────────────────────────────────────────────────────────────
