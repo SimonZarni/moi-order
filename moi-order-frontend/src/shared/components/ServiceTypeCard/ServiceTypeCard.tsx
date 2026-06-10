@@ -17,29 +17,39 @@ interface Props {
 export function ServiceTypeCard({ type, onPress }: Props): React.JSX.Element {
   const { locale } = useLocale();
   const displayName = localeName(type, locale);
+  const inactive = !type.is_active;
 
   const handlePress = (): void => {
+    if (inactive) return;
     onPress(type);
   };
 
   return (
     <Pressable
-      style={({ pressed }) => [styles.card, { opacity: pressed ? 0.85 : 1 }]}
+      style={({ pressed }) => [
+        styles.card,
+        inactive ? styles.cardInactive : { opacity: pressed ? 0.85 : 1 },
+      ]}
       onPress={handlePress}
-      accessibilityLabel={`Select ${displayName} — ${formatCurrency(type.price)}`}
+      accessibilityLabel={inactive ? `${displayName} — Unavailable` : `Select ${displayName} — ${formatCurrency(type.price)}`}
       accessibilityRole="button"
+      accessibilityState={{ disabled: inactive }}
     >
       <View style={styles.content}>
-        <Text style={styles.nameEn}>{displayName}</Text>
-        <View style={styles.priceRow}>
-          <Text style={styles.priceCurrency}>฿</Text>
-          <Text style={styles.priceAmount}>
-            {type.price.toLocaleString('th-TH')}
-          </Text>
-        </View>
+        <Text style={[styles.nameEn, inactive && styles.textInactive]}>{displayName}</Text>
+        {inactive ? (
+          <Text style={styles.unavailableLabel}>Unavailable</Text>
+        ) : (
+          <View style={styles.priceRow}>
+            <Text style={styles.priceCurrency}>฿</Text>
+            <Text style={styles.priceAmount}>
+              {type.price.toLocaleString('th-TH')}
+            </Text>
+          </View>
+        )}
       </View>
-      <View style={styles.chevron}>
-        <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
+      <View style={[styles.chevron, inactive && styles.chevronInactive]}>
+        <Ionicons name="chevron-forward" size={18} color={inactive ? colours.textMuted : colours.textMuted} />
       </View>
     </Pressable>
   );

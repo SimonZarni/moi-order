@@ -110,6 +110,7 @@ export interface ServiceType {
   name_en: string;
   name_mm: string | null;
   price: number; // whole THB
+  is_active: boolean;
   field_schema: FieldSchemaItem[];
   // Present only when the parent service relation is loaded (detail endpoint)
   service?: {

@@ -23,6 +23,7 @@ class ServiceTypeResource extends JsonResource
             'name_en'      => $this->name_en,
             'name_mm'      => $this->name_mm,
             'price'        => $this->price, // satangs
+            'is_active'    => (bool) $this->is_active,
             'field_schema' => $this->resolvedFieldSchema(),
             'service'      => $this->when(
                 $this->relationLoaded('service'),

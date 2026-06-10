@@ -23,7 +23,7 @@ class ServiceController extends Controller
     {
         $services = Service::with([
                 'serviceCategory',
-                'types' => fn ($q) => $q->active()->orderBy('id'),
+                'types' => fn ($q) => $q->orderBy('id'),
             ])
             ->active()
             ->orderBy('id')

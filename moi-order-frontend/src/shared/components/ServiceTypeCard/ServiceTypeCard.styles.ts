@@ -53,4 +53,21 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     marginLeft: spacing.md,
   },
+  cardInactive: {
+    opacity: 0.45,
+    borderLeftColor: colours.textMuted,
+  },
+  textInactive: {
+    color: colours.textMuted,
+  },
+  unavailableLabel: {
+    fontSize: typography.xs,
+    color: colours.textMuted,
+    marginTop: spacing.sm,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  chevronInactive: {
+    backgroundColor: colours.infoBg,
+  },
 });
