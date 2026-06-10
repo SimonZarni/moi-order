@@ -203,6 +203,7 @@ export function OrderProgressBar({ status, canShowPromptPay, onPromptPayPress }:
           accessibilityRole="button"
           accessibilityLabel="Pay via LINE"
         >
+          <Ionicons name="chatbubble" size={18} color="#fff" />
           <Text style={styles.promptPayText}>Pay via LINE</Text>
         </Pressable>
       )}

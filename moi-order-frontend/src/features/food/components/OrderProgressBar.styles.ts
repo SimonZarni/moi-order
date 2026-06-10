@@ -92,7 +92,7 @@ export const styles = StyleSheet.create({
     color: colours.tertiary,
     fontWeight: '500',
   },
-  // PromptPay button
+  // LINE Pay button — LINE brand green
   promptPayBtn: {
     borderRadius: radius.xl,
     paddingVertical: spacing.md,
@@ -100,8 +100,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     gap: spacing.sm,
-    // PromptPay brand color (navy blue-purple)
-    backgroundColor: '#003f9e',
+    backgroundColor: '#06C755',
   },
   promptPayText: {
     fontSize: typography.md,
