@@ -44,9 +44,6 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.15)',
   },
-  fullWidthBtn: {
-    flex: 1,
-  },
   badge: {
     backgroundColor: 'rgba(255,255,255,0.25)',
     borderRadius: radius.full,
