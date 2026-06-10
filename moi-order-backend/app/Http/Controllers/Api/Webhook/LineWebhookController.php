@@ -18,7 +18,7 @@ class LineWebhookController extends Controller
 {
     public function handle(Request $request): Response
     {
-        Log::info('LINE webhook: raw payload', ['body' => $request->all()]);
+        Log::error('LINE webhook: raw payload', ['body' => $request->all()]);
 
         $events = $request->input('events', []);
 
@@ -28,12 +28,12 @@ class LineWebhookController extends Controller
 
             if ($type === 'join' && $sourceType === 'group') {
                 $groupId = $event['source']['groupId'] ?? 'unknown';
-                Log::info('LINE webhook: OA joined a group', ['group_id' => $groupId]);
+                Log::error('LINE webhook: OA joined a group — GROUP ID: ' . $groupId);
             }
 
             if ($type === 'follow') {
                 $userId = $event['source']['userId'] ?? 'unknown';
-                Log::info('LINE webhook: user followed OA', ['user_id' => $userId]);
+                Log::error('LINE webhook: user followed OA — USER ID: ' . $userId);
             }
         }
 
