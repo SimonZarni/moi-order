@@ -328,6 +328,7 @@ export const styles = StyleSheet.create({
   // ── List ──────────────────────────────────────────────────────────────────
   flatList: {
     flex: 1,
+    backgroundColor: CREAM,
   },
   list: {
     flexGrow: 1,
