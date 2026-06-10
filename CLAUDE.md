@@ -359,6 +359,30 @@ TESTS (Pest + Vitest+RTL):
       return $job->orderId === $order->id;
     });
 
+11. **Burmese (Myanmar) script — top diacritic clipping in React Native.** Myanmar stacked characters extend ~2.5–3× the font size above the baseline. React Native allocates exactly `lineHeight` pixels per text line; anything beyond that is clipped by the parent's default `overflow: hidden`. This causes the top vowel marks / diacritics to be cut off whenever `lineHeight` is too small or absent. **Fix**: set `lineHeight` to ≥ 3× the font size on every `Text` style that may render Burmese content (restaurant names, menu item names, headings, etc.).
+  - `fontSize: 15` (typography.md) → `lineHeight: 44`
+  - `fontSize: 17` (typography.lg) → `lineHeight: 50`
+  - `fontSize: 22` (typography.xl) → `lineHeight: 60`
+  - For locale-specific overrides only (e.g. hero titles), `paddingTop: 8` + `includeFontPadding: false` can substitute, but the lineHeight rule above is the global default.
+  Ratio `lineHeight: 32` (2.13×) at fontSize 15 looks fixed but still clips — always verify on device with a deeply-stacked Burmese word like "မြန်မာ". Deploy via `npx eas update --branch production` after fixing.
+
+12. **Merchant menu system-category rule (enforced in backend and enforced at open-time).**
+  Every restaurant must always have exactly 3 non-deletable, non-renameable system categories:
+  **Popular Picks** (sort 0), **Promotions** (sort 1), **Recommendations** (sort 2).
+  - `MenuCategoryType::isRequired()` returns `true` for PopularPicks and Recommendations only.
+  - `MenuService::validateOpenReady()` throws `DomainException('menu.system_category_empty')` if
+    either required category has no `Available` menu item. This is called by `RestaurantService::update()`
+    (merchant) and `AdminRestaurantController::updateStatus()` (admin) before `markAsOpen()`.
+  - `MenuService::createSystemCategoriesForRestaurant()` is idempotent and also **restores soft-deleted**
+    system categories (not just creates missing ones). Called on restaurant creation and via the backfill command.
+  - New restaurants are created with `status: Closed` — they cannot open until both required categories have items.
+  - `restaurants:enforce-menu-rules` command: backfills system categories + force-closes non-compliant open restaurants.
+    Run with `--dry-run` first to see violations without changes.
+    Run in production after any code deploy that touches menu-category logic.
+  - Mobile: `ERROR_CODES.MENU_SYSTEM_CATEGORY_EMPTY` + message in `DOMAIN_ERROR_MESSAGES` in `errorCodes.ts`.
+  - `MenuCategoryResource` already returns `is_system: bool` and `category_type`. `MerchantMenuCategoriesScreen`
+    already hides edit/delete for system categories and shows a "system" badge.
+
 10. **Google Sign-In on iOS — GestureResponderEvent passed as loginHint (iOS only, not Android).** `Pressable.onPress` always passes a `GestureResponderEvent` as the first argument at JavaScript runtime, regardless of TypeScript types. If `handleGoogleSignIn` is used directly as `onPress={handleGoogleSignIn}`, the event object is received as `loginHint`. Since the event is truthy, the code enters the `if (loginHint)` branch and calls `GoogleSignin.signIn({ loginHint: <event> })` — passing a JS object to the native iOS module causes `Exception in HostFunction: Unsupported jsi::Value kind`. This only affects iOS because on Android, `hasPlayServices()` gates the flow differently and the error manifests differently. **Fix**: (a) In the handler: `const loginHint = typeof loginHintOrEvent === 'string' ? loginHintOrEvent : undefined;` (b) In the button: `onPress={() => onPress()}` so the event is never forwarded. Also required: both `iosClientId` AND `webClientId` must be non-empty strings in `GoogleSignin.configure()` — passing an empty string for either causes the same JSI crash. Hardcode fallback values in `config.ts` so env vars missing from an old build don't cause empty strings.
 
 RESPONSE FORMAT:

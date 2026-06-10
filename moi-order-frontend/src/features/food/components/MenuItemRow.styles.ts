@@ -27,7 +27,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.md,
     fontWeight: '600',
     color: colours.textOnLight,
-    lineHeight: 32,
+    lineHeight: 44,
   },
   description: {
     fontSize: typography.xs,

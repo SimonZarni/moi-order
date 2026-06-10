@@ -48,7 +48,7 @@ class RestaurantService
                 'phone'                 => $data['phone'] ?? null,
                 'cover_photo_path'      => $coverPath,
                 'logo_path'             => $logoPath,
-                'status'                => isset($data['status']) ? RestaurantStatus::from($data['status']) : RestaurantStatus::Open,
+                'status'                => isset($data['status']) ? RestaurantStatus::from($data['status']) : RestaurantStatus::Closed,
                 'delivery_radius_km'    => $data['delivery_radius_km'] ?? null,
                 'is_delivery_available' => $data['is_delivery_available'] ?? true,
                 'is_pickup_available'   => $data['is_pickup_available'] ?? true,

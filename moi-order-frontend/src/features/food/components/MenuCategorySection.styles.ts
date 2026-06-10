@@ -4,6 +4,9 @@ import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 
 export const styles = StyleSheet.create({
+  section: {
+    backgroundColor: colours.backgroundLight,
+  },
   header: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,

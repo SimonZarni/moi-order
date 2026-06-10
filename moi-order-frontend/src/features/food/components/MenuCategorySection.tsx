@@ -25,7 +25,7 @@ export function MenuCategorySection({
   );
 
   return (
-    <View onLayout={handleLayout}>
+    <View onLayout={handleLayout} style={styles.section}>
       <View style={styles.header}>
         <Text style={styles.headerText}>{category.name}</Text>
       </View>

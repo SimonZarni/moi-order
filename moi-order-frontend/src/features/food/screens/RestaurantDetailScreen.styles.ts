@@ -6,7 +6,7 @@ import { typography } from '@/shared/theme/typography';
 
 export const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colours.backgroundDark },
-  scroll: { flex: 1, backgroundColor: colours.backgroundLight },
+  scroll: { flex: 1, backgroundColor: colours.backgroundDark },
   backBtn: {
     position: 'absolute',
     top: spacing.md,
@@ -30,6 +30,7 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.textOnLight,
     letterSpacing: -0.3,
+    lineHeight: 60,
     marginBottom: 4,
   },
   description: {
@@ -97,7 +98,8 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
   },
   cartBarSpace: {
-    height: 90,
+    height: 200,
+    backgroundColor: colours.backgroundLight,
   },
   stateBox: {
     flex: 1,

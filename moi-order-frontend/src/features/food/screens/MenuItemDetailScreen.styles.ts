@@ -5,19 +5,32 @@ import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 
 export const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colours.backgroundLight },
-  scroll: { flex: 1, backgroundColor: colours.backgroundLight },
-  photo: { width: '100%', height: 240, backgroundColor: colours.infoBg },
+  root: { flex: 1, backgroundColor: colours.backgroundDark },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    backgroundColor: colours.backgroundDark,
+    gap: spacing.sm,
+  },
   backBtn: {
-    position: 'absolute',
-    zIndex: 10,
     width: 40,
     height: 40,
     borderRadius: radius.full,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  headerTitle: {
+    flex: 1,
+    fontSize: typography.lg,
+    fontWeight: '800',
+    color: colours.textOnDark,
+    lineHeight: 50,
+  },
+  scroll: { flex: 1, backgroundColor: colours.backgroundLight },
+  photo: { width: '100%', height: 240, backgroundColor: colours.infoBg },
   infoBlock: {
     backgroundColor: colours.card,
     padding: spacing.md,
@@ -29,6 +42,7 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.textOnLight,
     letterSpacing: -0.3,
+    lineHeight: 60,
     marginBottom: spacing.xs,
   },
   priceRow: {

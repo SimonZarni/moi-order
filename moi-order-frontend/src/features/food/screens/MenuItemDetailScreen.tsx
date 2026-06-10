@@ -32,10 +32,13 @@ export function MenuItemDetailScreen(): React.JSX.Element {
   const isDiscounted = item.original_price_cents !== null && item.original_price_cents > item.price_cents;
 
   return (
-    <SafeAreaView style={styles.root} edges={[]}>
-      <Pressable style={[styles.backBtn, { top: insets.top + 8, left: 16 }]} onPress={handleBack} accessibilityRole="button" accessibilityLabel="Go back">
-        <Ionicons name="chevron-back" size={22} color={colours.white} />
-      </Pressable>
+    <SafeAreaView style={styles.root} edges={['top']}>
+      <View style={styles.header}>
+        <Pressable style={styles.backBtn} onPress={handleBack} accessibilityRole="button" accessibilityLabel="Go back">
+          <Ionicons name="chevron-back" size={22} color={colours.textOnDark} />
+        </Pressable>
+        <Text style={styles.headerTitle} numberOfLines={1}>{item.name}</Text>
+      </View>
 
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
         <Image source={item.photo_url ? { uri: item.photo_url } : null} style={styles.photo} contentFit="cover" transition={200} />

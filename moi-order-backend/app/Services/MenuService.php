@@ -33,18 +33,20 @@ class MenuService
     public function createSystemCategoriesForRestaurant(Restaurant $restaurant): void
     {
         foreach (MenuCategoryType::cases() as $type) {
-            $exists = $restaurant->menuCategories()
+            $category = $restaurant->menuCategories()
                 ->where('category_type', $type->value)
                 ->withTrashed()
-                ->exists();
+                ->first();
 
-            if (! $exists) {
+            if ($category === null) {
                 MenuCategory::create([
                     'restaurant_id' => $restaurant->id,
                     'name'          => $type->label(),
                     'category_type' => $type->value,
                     'sort_order'    => $type->sortOrder(),
                 ]);
+            } elseif ($category->trashed()) {
+                $category->restore();
             }
         }
     }
