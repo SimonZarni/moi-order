@@ -21,7 +21,7 @@ const STATUS_BADGE_STYLE = {
 
 export function RestaurantCard({ restaurant, onPress }: Props): React.JSX.Element {
   const badge = STATUS_BADGE_STYLE[restaurant.status];
-  const thumbUri = restaurant.cover_photo_url ?? restaurant.logo_url;
+  const thumbUri = restaurant.logo_url ?? restaurant.cover_photo_url;
   const isOpen = restaurant.status === RESTAURANT_STATUS.Open;
 
   return (
