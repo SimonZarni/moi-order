@@ -31,7 +31,8 @@ export const styles = StyleSheet.create({
   },
   heroTitleMM: {
     fontSize: typography.lg,
-    lineHeight: typography.xxl + 8,
+    lineHeight: typography.xxl,
+    paddingTop: 8,
     includeFontPadding: false,
   },
   heroLeft: {
