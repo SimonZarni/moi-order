@@ -67,12 +67,6 @@ class RestaurantService
     /** @param array<string, mixed> $data */
     public function update(Restaurant $restaurant, array $data): Restaurant
     {
-        $newStatus = isset($data['status']) ? RestaurantStatus::from($data['status']) : null;
-
-        if ($newStatus === RestaurantStatus::Open) {
-            $this->menuService->validateOpenReady($restaurant);
-        }
-
         return DB::transaction(function () use ($restaurant, $data): Restaurant {
             $updates = array_filter([
                 'name'                  => $data['name'] ?? null,
@@ -139,8 +133,9 @@ class RestaurantService
      */
     public function browse(?float $lat = null, ?float $lng = null, ?string $search = null): LengthAwarePaginator
     {
-        $query = Restaurant::open()
+        $query = Restaurant::whereIn('status', [RestaurantStatus::Open->value, RestaurantStatus::Closed->value])
             ->with(['openingHours'])
+            ->orderByRaw("FIELD(status, ?, ?) ASC", [RestaurantStatus::Open->value, RestaurantStatus::Closed->value])
             ->select('restaurants.*');
 
         if ($search !== null) {

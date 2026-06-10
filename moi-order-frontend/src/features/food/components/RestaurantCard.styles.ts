@@ -19,6 +19,9 @@ export const styles = StyleSheet.create({
   cardPressed: {
     opacity: 0.85,
   },
+  cardClosed: {
+    opacity: 0.45,
+  },
   thumb: {
     width: 80,
     height: 80,

@@ -22,13 +22,15 @@ const STATUS_BADGE_STYLE = {
 export function RestaurantCard({ restaurant, onPress }: Props): React.JSX.Element {
   const badge = STATUS_BADGE_STYLE[restaurant.status];
   const thumbUri = restaurant.cover_photo_url ?? restaurant.logo_url;
+  const isOpen = restaurant.status === RESTAURANT_STATUS.Open;
 
   return (
     <Pressable
-      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-      onPress={() => onPress(restaurant)}
+      style={({ pressed }) => [styles.card, !isOpen && styles.cardClosed, pressed && isOpen && styles.cardPressed]}
+      onPress={isOpen ? () => onPress(restaurant) : undefined}
       accessibilityRole="button"
       accessibilityLabel={`${restaurant.name}, ${badge.label}`}
+      accessibilityState={{ disabled: !isOpen }}
     >
       <Image
         source={thumbUri ? { uri: thumbUri } : null}
