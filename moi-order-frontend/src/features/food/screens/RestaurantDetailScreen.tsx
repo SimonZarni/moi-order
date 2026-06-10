@@ -58,6 +58,7 @@ export function RestaurantDetailScreen(): React.JSX.Element {
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}

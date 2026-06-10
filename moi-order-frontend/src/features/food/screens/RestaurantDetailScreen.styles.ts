@@ -7,6 +7,7 @@ import { typography } from '@/shared/theme/typography';
 export const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colours.backgroundDark },
   scroll: { flex: 1, backgroundColor: colours.backgroundDark },
+  scrollContent: { flexGrow: 1, backgroundColor: colours.backgroundLight },
   backBtn: {
     position: 'absolute',
     top: spacing.md,
