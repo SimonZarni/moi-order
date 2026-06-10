@@ -213,6 +213,12 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
     fontWeight: '500',
   },
+  addressRequiredHint: {
+    fontSize: typography.xs,
+    color: colours.error,
+    fontWeight: '500',
+    marginTop: spacing.xs,
+  },
   addressCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',

@@ -123,6 +123,9 @@ export function CheckoutScreen(): React.JSX.Element {
 
         <Text style={styles.sectionTitle}>Delivery Address</Text>
         <AddressSection address={selectedAddress} onPress={handleChangeAddress} />
+        {selectedAddress === null && (
+          <Text style={styles.addressRequiredHint}>Address required to place order</Text>
+        )}
 
         <Text style={styles.sectionTitle}>Payment Method</Text>
         <View style={styles.card}>
@@ -170,10 +173,10 @@ export function CheckoutScreen(): React.JSX.Element {
           style={[
             styles.placeBtn,
             paymentMethod === FOOD_PAYMENT_METHOD.LinePay && styles.placeBtnLine,
-            isPlacing && styles.placeBtnDisabled,
+            (isPlacing || selectedAddress === null) && styles.placeBtnDisabled,
           ]}
           onPress={handlePlaceOrder}
-          disabled={isPlacing || items.length === 0}
+          disabled={isPlacing || items.length === 0 || selectedAddress === null}
           accessibilityRole="button"
           accessibilityLabel="Place order"
         >
