@@ -2,6 +2,7 @@ import React from 'react';
 import {
   View, Text, Pressable, ActivityIndicator, Modal,
   TextInput, ScrollView, Switch, Image,
+  StyleProp, TextStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useCallback } from 'react';
@@ -286,6 +287,42 @@ export function MenuScreen(): React.JSX.Element {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
+interface NumericInputProps {
+  value: number;
+  min: number;
+  max: number;
+  fallback: number;
+  style: StyleProp<TextStyle>;
+  onChange: (n: number) => void;
+  accessibilityLabel: string;
+}
+
+/** Controlled number input that avoids the "append-to-existing-digit" bug.
+ *  On focus: pre-selects the current value so typing replaces it entirely.
+ *  On blur: clamps the draft string to [min, max], falling back to `fallback`. */
+function NumericInput({ value, min, max, fallback, style, onChange, accessibilityLabel }: NumericInputProps): React.JSX.Element {
+  const [draft, setDraft] = useState<string | null>(null);
+  const display = draft !== null ? draft : String(value);
+
+  return (
+    <TextInput
+      style={style}
+      value={display}
+      onFocus={() => setDraft(String(value))}
+      onChangeText={setDraft}
+      onBlur={() => {
+        const parsed = parseInt(draft ?? '', 10);
+        const clamped = isNaN(parsed) ? fallback : Math.min(max, Math.max(min, parsed));
+        setDraft(null);
+        onChange(clamped);
+      }}
+      selectTextOnFocus
+      keyboardType="number-pad"
+      accessibilityLabel={accessibilityLabel}
+    />
+  );
+}
+
 interface CategoryTabProps {
   label: string;
   count: number;
@@ -453,21 +490,25 @@ function ItemFormContent({
             </View>
             <View style={styles.toggleRowSmall}>
               <Text style={styles.toggleLabelSmall}>Min</Text>
-              <TextInput
+              <NumericInput
                 style={styles.smallNumInput}
-                value={String(group.min_selections)}
-                onChangeText={(v) => onOptionGroupChange(gi, 'min_selections', parseInt(v, 10) || 0)}
-                keyboardType="number-pad"
+                value={group.min_selections}
+                min={0}
+                max={10}
+                fallback={0}
+                onChange={(n) => onOptionGroupChange(gi, 'min_selections', n)}
                 accessibilityLabel={`Min selections for group ${gi + 1}`}
               />
             </View>
             <View style={styles.toggleRowSmall}>
               <Text style={styles.toggleLabelSmall}>Max</Text>
-              <TextInput
+              <NumericInput
                 style={styles.smallNumInput}
-                value={String(group.max_selections)}
-                onChangeText={(v) => onOptionGroupChange(gi, 'max_selections', parseInt(v, 10) || 1)}
-                keyboardType="number-pad"
+                value={group.max_selections}
+                min={1}
+                max={10}
+                fallback={1}
+                onChange={(n) => onOptionGroupChange(gi, 'max_selections', n)}
                 accessibilityLabel={`Max selections for group ${gi + 1}`}
               />
             </View>
