@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\Webhook\LineWebhookController;
 use App\Http\Controllers\Api\Webhook\StripeWebhookController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
@@ -69,4 +70,9 @@ Broadcast::routes([
 // Stripe webhook — no auth:sanctum; Stripe-Signature header IS the authentication.
 // intentionally public
 Route::post('/webhook/stripe', [StripeWebhookController::class, 'handle'])
+    ->middleware('throttle:60,1');
+
+// LINE Messaging API webhook — no auth:sanctum; used to capture group ID when OA joins a staff group.
+// intentionally public
+Route::post('/webhook/line', [LineWebhookController::class, 'handle'])
     ->middleware('throttle:60,1');
