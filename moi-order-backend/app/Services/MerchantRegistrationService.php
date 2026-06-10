@@ -9,6 +9,7 @@ use App\DTOs\SelfRegisterMerchantDTO;
 use App\Enums\KycApplicationStatus;
 use App\Enums\KycDocumentType;
 use App\Models\KycApplication;
+use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -95,6 +96,15 @@ class MerchantRegistrationService
                 'reviewed_by'      => $admin->id,
                 'reviewed_at'      => now(),
                 'submitted_at'     => now(),
+            ]);
+
+            // Mirror KycApplication::approve() — create the restaurant immediately
+            // so the merchant portal shows data without needing a separate KYC approval step.
+            Restaurant::create([
+                'user_id' => $user->id,
+                'name'    => $dto->businessName,
+                'address' => $dto->businessAddress,
+                'phone'   => $dto->businessPhone,
             ]);
 
             $token = $user->createToken(
