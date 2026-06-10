@@ -16,7 +16,7 @@ export function FoodScreen(): React.JSX.Element {
     hasNextPage, fetchNextPage, cartItemCount,
     searchText, activeCategory,
     setSearchText, setActiveCategory,
-    handleRestaurantPress, handleMapPress, handleAddressPress, handleCartPress, handleBack,
+    handleRestaurantPress, handleAddressPress, handleCartPress, handleBack,
     handleRefresh,
   } = useFoodScreen();
   const s = useStrings();
@@ -35,10 +35,7 @@ export function FoodScreen(): React.JSX.Element {
             </Text>
           </View>
           <View style={styles.heroActions}>
-            <Pressable style={styles.iconBtn} onPress={handleAddressPress} accessibilityRole="button" accessibilityLabel="Saved addresses">
-              <Ionicons name="location-outline" size={18} color={colours.textOnDark} />
-            </Pressable>
-            <Pressable style={styles.iconBtn} onPress={handleMapPress} accessibilityRole="button" accessibilityLabel="View map">
+            <Pressable style={styles.iconBtn} onPress={handleAddressPress} accessibilityRole="button" accessibilityLabel="Addresses and map">
               <Ionicons name="navigate-outline" size={18} color={colours.textOnDark} />
             </Pressable>
             <Pressable style={styles.iconBtn} onPress={handleCartPress} accessibilityRole="button" accessibilityLabel="Cart and orders">

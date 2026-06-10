@@ -11,6 +11,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     backgroundColor: colours.backgroundDark,
+    gap: spacing.xs,
   },
   backBtn: {
     width: 40,

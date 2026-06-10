@@ -23,10 +23,10 @@ export function RestaurantDetailScreen(): React.JSX.Element {
   const s      = useStrings();
   const {
     restaurant, isLoading, isError, sortedCategories, activeTabIndex, scrollRef,
-    cartItemCount, cartTotalCents, getQuantity,
+    cartItemCount, cartTotalCents, activeOrderCount, getQuantity,
     isRefreshing, handleBack, handleRefresh,
     handleTabPress, handleTabBarLayout, handleSectionLayout,
-    handleScroll, handleAddItem, handleRemoveItem, handleItemPress, handleCartPress,
+    handleScroll, handleAddItem, handleRemoveItem, handleItemPress, handleCartPress, handleOrdersPress,
   } = useRestaurantDetailScreen();
 
   const STATUS_BADGE: Record<string, { bg: string; color: string; label: string }> = {
@@ -83,7 +83,7 @@ export function RestaurantDetailScreen(): React.JSX.Element {
         ))}
         <View style={styles.cartBarSpace} />
       </ScrollView>
-      <CartBar itemCount={cartItemCount} totalCents={cartTotalCents} onPress={handleCartPress} />
+      <CartBar itemCount={cartItemCount} totalCents={cartTotalCents} onPress={handleCartPress} orderCount={activeOrderCount} onOrdersPress={handleOrdersPress} />
     </SafeAreaView>
   );
 }

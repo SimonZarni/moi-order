@@ -5,10 +5,11 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { RootStackParamList } from '@/types/navigation';
 import { MenuCategory, MenuItem } from '@/types/models';
-import { MENU_CATEGORY_TYPE } from '@/types/enums';
+import { FOOD_ORDER_STATUS, MENU_CATEGORY_TYPE } from '@/types/enums';
 import { buildCartKey, useCartStore } from '@/shared/store/cartStore';
 import { useStrings } from '@/shared/i18n';
 import { useRestaurantDetailData } from './useRestaurantDetailData';
+import { useFoodOrdersData } from './useFoodOrdersData';
 
 type DetailRoute = RouteProp<RootStackParamList, 'RestaurantDetail'>;
 
@@ -21,6 +22,7 @@ export interface UseRestaurantDetailScreenResult {
   scrollRef:        React.RefObject<ScrollView | null>;
   cartItemCount:    number;
   cartTotalCents:   number;
+  activeOrderCount: number;
   getQuantity:      (menuItemId: number) => number;
   isRefreshing:         boolean;
   handleBack:           () => void;
@@ -33,6 +35,7 @@ export interface UseRestaurantDetailScreenResult {
   handleRemoveItem:     (cartKey: string) => void;
   handleItemPress:      (item: MenuItem) => void;
   handleCartPress:      () => void;
+  handleOrdersPress:    () => void;
 }
 
 const SYSTEM_SORT: Record<string, number> = {
@@ -63,7 +66,17 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
   const s              = useStrings();
 
   const { restaurant, isLoading, isError, refetch } = useRestaurantDetailData(restaurantId);
+  const { orders } = useFoodOrdersData();
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const activeOrderCount = useMemo(
+    () => orders.filter((o) =>
+      o.status !== FOOD_ORDER_STATUS.Completed &&
+      o.status !== FOOD_ORDER_STATUS.Cancelled  &&
+      o.status !== FOOD_ORDER_STATUS.Expired,
+    ).length,
+    [orders],
+  );
 
   const addItem   = useCartStore((s) => s.addItem);
   const increment = useCartStore((s) => s.increment);
@@ -116,8 +129,9 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
     setActiveTabIndex(index);
   }, []);
 
-  const handleBack    = useCallback(() => navigation.goBack(), [navigation]);
-  const handleCartPress = useCallback(() => navigation.navigate('Checkout'), [navigation]);
+  const handleBack        = useCallback(() => navigation.goBack(),                   [navigation]);
+  const handleCartPress   = useCallback(() => navigation.navigate('Checkout'),       [navigation]);
+  const handleOrdersPress = useCallback(() => navigation.navigate('CartAndOrders'),  [navigation]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -164,6 +178,7 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
     scrollRef,
     cartItemCount:  cartCount,
     cartTotalCents: cartTotal,
+    activeOrderCount,
     getQuantity:    getQty,
     isRefreshing,
     handleBack,
@@ -176,5 +191,6 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
     handleRemoveItem,
     handleItemPress,
     handleCartPress,
+    handleOrdersPress,
   };
 }

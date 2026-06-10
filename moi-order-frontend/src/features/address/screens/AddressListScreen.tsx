@@ -11,7 +11,7 @@ import { styles } from './AddressListScreen.styles';
 export function AddressListScreen(): React.JSX.Element {
   const {
     addresses, isLoading, mode,
-    handleSelect, handleAddNew, handleEdit, handleDelete, handleBack,
+    handleSelect, handleAddNew, handleEdit, handleDelete, handleBack, handleMapPress,
   } = useAddressListScreen();
 
   return (
@@ -23,6 +23,9 @@ export function AddressListScreen(): React.JSX.Element {
         <Text style={styles.headerTitle}>
           {mode === 'select' ? 'Delivery Addresses' : 'My Addresses'}
         </Text>
+        <Pressable style={styles.addBtn} onPress={handleMapPress} accessibilityRole="button" accessibilityLabel="View restaurants on map">
+          <Ionicons name="navigate-outline" size={20} color={colours.textOnDark} />
+        </Pressable>
         <Pressable style={styles.addBtn} onPress={handleAddNew} accessibilityRole="button" accessibilityLabel="Add new address">
           <Ionicons name="add" size={22} color={colours.textOnDark} />
         </Pressable>

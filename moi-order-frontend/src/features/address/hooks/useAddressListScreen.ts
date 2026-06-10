@@ -18,6 +18,7 @@ export interface UseAddressListScreenResult {
   handleEdit: (address: UserAddress) => void;
   handleDelete: (address: UserAddress) => void;
   handleBack: () => void;
+  handleMapPress: () => void;
   isDeleting: boolean;
 }
 
@@ -28,7 +29,8 @@ export function useAddressListScreen(): UseAddressListScreenResult {
 
   const { addresses, isLoading, handleDelete: deleteAddress, isDeleting } = useAddresses();
 
-  const handleBack = useCallback(() => navigation.goBack(), [navigation]);
+  const handleBack     = useCallback(() => navigation.goBack(),                  [navigation]);
+  const handleMapPress = useCallback(() => navigation.navigate('RestaurantMap'), [navigation]);
 
   const handleSelect = useCallback((address: UserAddress) => {
     navigation.navigate('Checkout', { selectedAddressId: address.id });
@@ -66,6 +68,7 @@ export function useAddressListScreen(): UseAddressListScreenResult {
     handleEdit,
     handleDelete,
     handleBack,
+    handleMapPress,
     isDeleting,
   };
 }

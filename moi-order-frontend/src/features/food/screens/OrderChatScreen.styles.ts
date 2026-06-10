@@ -50,7 +50,7 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
     lineHeight: 16,
   },
-  list: { flex: 1, backgroundColor: colours.backgroundDark },
+  list: { flex: 1, backgroundColor: colours.backgroundLight },
   listContent: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,

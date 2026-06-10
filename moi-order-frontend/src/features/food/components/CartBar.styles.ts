@@ -17,7 +17,12 @@ export const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colours.divider,
   },
+  row: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
   btn: {
+    flex: 1,
     backgroundColor: colours.primary,
     borderRadius: radius.xl,
     paddingVertical: spacing.md,
@@ -25,6 +30,22 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: spacing.md,
+  },
+  ordersBtn: {
+    flex: 1,
+    backgroundColor: colours.backgroundDark,
+    borderRadius: radius.xl,
+    paddingVertical: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+    gap: spacing.xs,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  fullWidthBtn: {
+    flex: 1,
   },
   badge: {
     backgroundColor: 'rgba(255,255,255,0.25)',
@@ -40,12 +61,26 @@ export const styles = StyleSheet.create({
     color: colours.white,
     lineHeight: 16,
   },
+  badgeTextDark: {
+    fontSize: typography.xs,
+    fontWeight: '800',
+    color: colours.textOnDark,
+    lineHeight: 16,
+  },
   label: {
     fontSize: typography.md,
     fontWeight: '700',
     color: colours.white,
     flex: 1,
     textAlign: 'center',
+  },
+  ordersLabel: {
+    fontSize: typography.md,
+    fontWeight: '700',
+    color: colours.textOnDark,
+  },
+  ordersIcon: {
+    marginLeft: 2,
   },
   total: {
     fontSize: typography.sm,

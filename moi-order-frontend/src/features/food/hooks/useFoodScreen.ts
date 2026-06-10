@@ -16,7 +16,6 @@ export interface UseFoodScreenResult extends UseRestaurantListDataResult {
   setSearchText:         (t: string) => void;
   setActiveCategory:     (c: FoodCategory) => void;
   handleRestaurantPress: (restaurant: Restaurant) => void;
-  handleMapPress:        () => void;
   handleAddressPress:    () => void;
   handleCartPress:       () => void;
   handleBack:            () => void;
@@ -55,7 +54,6 @@ export function useFoodScreen(): UseFoodScreenResult {
     [navigation],
   );
 
-  const handleMapPress     = useCallback(() => navigation.navigate('RestaurantMap'),                  [navigation]);
   const handleAddressPress = useCallback(() => navigation.navigate('AddressList', { mode: 'manage' }), [navigation]);
   // Cart icon now opens the combined cart + orders screen.
   const handleCartPress    = useCallback(() => navigation.navigate('CartAndOrders'),                  [navigation]);
@@ -69,7 +67,6 @@ export function useFoodScreen(): UseFoodScreenResult {
     setSearchText,
     setActiveCategory,
     handleRestaurantPress,
-    handleMapPress,
     handleAddressPress,
     handleCartPress,
     handleBack,
