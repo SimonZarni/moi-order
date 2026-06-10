@@ -18,6 +18,8 @@ class LineWebhookController extends Controller
 {
     public function handle(Request $request): Response
     {
+        Log::info('LINE webhook: raw payload', ['body' => $request->all()]);
+
         $events = $request->input('events', []);
 
         foreach ($events as $event) {
