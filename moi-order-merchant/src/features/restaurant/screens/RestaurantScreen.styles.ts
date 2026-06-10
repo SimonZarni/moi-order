@@ -174,6 +174,23 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.surfaceMuted,
   },
 
+  // ── Gallery photos ────────────────────────────────────────────────────────────
+  galleryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  galleryItem: { width: 90, gap: spacing.xs },
+  galleryPreview: { width: 90, height: 90, borderRadius: radius.md, backgroundColor: colours.surfaceMuted },
+  galleryActions: { flexDirection: 'row', gap: 4, justifyContent: 'center' },
+  galleryActionBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  galleryActionBtnDanger: { borderColor: colours.error + '55' },
+  galleryCount: { fontSize: typography.xs, color: colours.textSubtle },
+
   // ── Delivery / hours / toggles ────────────────────────────────────────────────
   toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   toggleLabel: { fontSize: typography.sm, color: colours.textOnLight, fontWeight: '500' },

@@ -380,6 +380,13 @@ Route::prefix('restaurants')->name('admin.restaurants.')->group(function (): voi
     Route::patch('/{restaurant}/status', [AdminRestaurantController::class, 'updateStatus'])->name('update-status')
         ->middleware('check.permission:restaurants.manage');
 
+    Route::post('/{restaurant}/photos', [AdminRestaurantController::class, 'uploadPhoto'])->name('photos.store')
+        ->middleware('check.permission:restaurants.manage');
+    Route::delete('/{restaurant}/photos/{photoId}', [AdminRestaurantController::class, 'removePhoto'])->name('photos.destroy')
+        ->middleware('check.permission:restaurants.manage');
+    Route::patch('/{restaurant}/photos/reorder', [AdminRestaurantController::class, 'reorderPhotos'])->name('photos.reorder')
+        ->middleware('check.permission:restaurants.manage');
+
     Route::post('/{restaurant}/categories', [AdminMenuCategoryController::class, 'store'])->name('categories.store')
         ->middleware('check.permission:restaurants.manage');
     Route::put('/{restaurant}/categories/{categoryId}', [AdminMenuCategoryController::class, 'update'])->name('categories.update')

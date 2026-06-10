@@ -73,3 +73,6 @@ Route::post('/restaurant/cover_photo', [MerchantRestaurantController::class, 'up
 Route::delete('/restaurant/cover_photo', [MerchantRestaurantController::class, 'removeCoverPhoto']);
 Route::post('/restaurant/logo', [MerchantRestaurantController::class, 'uploadLogo']);
 Route::delete('/restaurant/logo', [MerchantRestaurantController::class, 'removeLogo']);
+Route::post('/restaurant/photos', [MerchantRestaurantController::class, 'uploadPhoto']);
+Route::delete('/restaurant/photos/{photoId}', [MerchantRestaurantController::class, 'removePhoto']);
+Route::patch('/restaurant/photos/reorder', [MerchantRestaurantController::class, 'reorderPhotos']);

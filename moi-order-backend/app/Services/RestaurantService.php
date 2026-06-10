@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Contracts\FileStorageInterface;
 use App\Enums\RestaurantStatus;
+use App\Exceptions\DomainException;
 use App\Models\Restaurant;
 use App\Models\RestaurantOpeningHour;
 use App\Models\RestaurantPhoto;
@@ -110,8 +111,14 @@ class RestaurantService
         });
     }
 
+    public const MAX_GALLERY_PHOTOS = 8;
+
     public function addPhoto(Restaurant $restaurant, UploadedFile $file): RestaurantPhoto
     {
+        if ($restaurant->photos()->count() >= self::MAX_GALLERY_PHOTOS) {
+            throw new DomainException('restaurant.gallery_limit_reached', 422);
+        }
+
         $path  = $this->storage->store($file, 'restaurants/gallery');
         $order = RestaurantPhoto::where('restaurant_id', $restaurant->id)->max('sort_order') ?? 0;
 
@@ -127,6 +134,26 @@ class RestaurantService
         DB::transaction(function () use ($photo): void {
             $this->storage->delete($photo->file_path);
             $photo->delete();
+        });
+    }
+
+    /**
+     * Reorders the restaurant's gallery photos according to the given id order.
+     * Unknown ids (not belonging to this restaurant) are ignored.
+     *
+     * @param list<int> $orderedIds
+     */
+    public function reorderPhotos(Restaurant $restaurant, array $orderedIds): void
+    {
+        DB::transaction(function () use ($restaurant, $orderedIds): void {
+            $photos = RestaurantPhoto::where('restaurant_id', $restaurant->id)
+                ->whereIn('id', $orderedIds)
+                ->get()
+                ->keyBy('id');
+
+            foreach (array_values($orderedIds) as $index => $id) {
+                $photos->get($id)?->update(['sort_order' => $index + 1]);
+            }
         });
     }
 

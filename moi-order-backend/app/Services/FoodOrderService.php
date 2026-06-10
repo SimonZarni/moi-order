@@ -153,6 +153,10 @@ class FoodOrderService
                 $deliveryLng     = $saved->longitude;
             }
 
+            if ($deliveryAddress === null) {
+                throw new DomainException('order.address_required', 422);
+            }
+
             $order = FoodOrder::create([
                 'user_id'          => $dto->userId,
                 'restaurant_id'    => $restaurant->id,

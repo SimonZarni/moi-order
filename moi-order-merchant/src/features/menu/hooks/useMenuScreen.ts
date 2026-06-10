@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, type Dispatch, type SetStateAction } from 'react';
-import { Platform } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import {
@@ -13,8 +13,10 @@ import {
   deleteMenuItem,
 } from '../../../api/menu';
 import { getRestaurant } from '../../../api/restaurant';
+import { extractApiError } from '../../../api/client';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { CACHE_TTL } from '../../../shared/constants/config';
+import { DOMAIN_MESSAGES, MESSAGES } from '../../../shared/constants/messages';
 import { RESTAURANT_STATUS } from '../../../types/enums';
 import type { MenuCategory, MenuItem } from '../../../types/models';
 import type { MenuItemStatus, RestaurantStatus } from '../../../types/enums';
@@ -324,6 +326,11 @@ export function useMenuScreen(): UseMenuScreenResult {
   const { mutate: mutateDeleteCategory } = useMutation({
     mutationFn: (id: number) => deleteCategory(id),
     onSuccess: () => { void invalidateMenu(); },
+    onError: (error) => {
+      const apiError = extractApiError(error);
+      const message = (apiError.code ? DOMAIN_MESSAGES[apiError.code] : undefined) ?? MESSAGES.genericError;
+      Alert.alert('Cannot delete category', message);
+    },
   });
 
   const { mutate: mutateToggleStatus } = useMutation({

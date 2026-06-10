@@ -108,11 +108,11 @@ class MenuService
             throw new DomainException('menu.system_category_immutable');
         }
 
-        DB::transaction(function () use ($category): void {
-            // Soft-delete items before category so FK stays valid for order history.
-            $category->menuItems()->delete();
-            $category->delete();
-        });
+        if ($category->menuItems()->exists()) {
+            throw new DomainException('menu.category_has_items');
+        }
+
+        $category->delete();
     }
 
     // ─── Items ────────────────────────────────────────────────────────────────

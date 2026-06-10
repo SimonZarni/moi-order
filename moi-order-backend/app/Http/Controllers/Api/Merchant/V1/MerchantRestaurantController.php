@@ -11,6 +11,7 @@ use App\Http\Requests\Merchant\StoreRestaurantRequest;
 use App\Http\Requests\Merchant\UpdateRestaurantRequest;
 use App\Http\Resources\RestaurantResource;
 use App\Models\KycApplication;
+use App\Models\RestaurantPhoto;
 use App\Services\RestaurantService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -104,5 +105,33 @@ class MerchantRestaurantController extends Controller
             $restaurant->update(['logo_path' => null]);
         }
         return response()->json(['data' => new RestaurantResource($restaurant->fresh(), $this->storage)]);
+    }
+
+    /** POST /api/merchant/v1/restaurant/photos */
+    public function uploadPhoto(Request $request): JsonResponse
+    {
+        // 'image' rule uses getimagesize() which does not support HEIC/HEIF — omitted intentionally.
+        $request->validate(['photo' => ['required', 'file', 'mimes:jpeg,jpg,png,webp,heic,heif', 'max:5120']]);
+        $restaurant = $request->user()->restaurant()->firstOrFail();
+        $this->restaurantService->addPhoto($restaurant, $request->file('photo'));
+        return response()->json(['data' => new RestaurantResource($restaurant->fresh(['photos']), $this->storage)], 201);
+    }
+
+    /** DELETE /api/merchant/v1/restaurant/photos/{photoId} */
+    public function removePhoto(Request $request, int $photoId): JsonResponse
+    {
+        $restaurant = $request->user()->restaurant()->firstOrFail();
+        $photo = RestaurantPhoto::where('restaurant_id', $restaurant->id)->findOrFail($photoId);
+        $this->restaurantService->deletePhoto($photo);
+        return response()->json(['data' => new RestaurantResource($restaurant->fresh(['photos']), $this->storage)]);
+    }
+
+    /** PATCH /api/merchant/v1/restaurant/photos/reorder */
+    public function reorderPhotos(Request $request): JsonResponse
+    {
+        $validated = $request->validate(['ids' => ['required', 'array'], 'ids.*' => ['integer']]);
+        $restaurant = $request->user()->restaurant()->firstOrFail();
+        $this->restaurantService->reorderPhotos($restaurant, $validated['ids']);
+        return response()->json(['data' => new RestaurantResource($restaurant->fresh(['photos']), $this->storage)]);
     }
 }

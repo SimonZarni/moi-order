@@ -13,6 +13,7 @@ export const ERROR_CODES = {
   MERCHANT_ALREADY_MERCHANT:     'merchant.already_merchant',
   KYC_APPLICATION_NOT_FOUND:     'kyc.application_not_found',
   KYC_CANNOT_CANCEL:             'kyc.cannot_cancel',
+  ORDER_ADDRESS_REQUIRED:        'order.address_required',
 } as const;
 
 export const DOMAIN_ERROR_MESSAGES: Record<string, string> = {
@@ -29,6 +30,7 @@ export const DOMAIN_ERROR_MESSAGES: Record<string, string> = {
   [ERROR_CODES.MERCHANT_ALREADY_MERCHANT]:    'You are already a merchant.',
   [ERROR_CODES.KYC_APPLICATION_NOT_FOUND]:    'No application found to cancel.',
   [ERROR_CODES.KYC_CANNOT_CANCEL]:            'This application can no longer be cancelled.',
+  [ERROR_CODES.ORDER_ADDRESS_REQUIRED]:       'Please add a delivery address before placing your order.',
 };
 
 /**

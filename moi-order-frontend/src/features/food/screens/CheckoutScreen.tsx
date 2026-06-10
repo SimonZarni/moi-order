@@ -63,7 +63,7 @@ function AddressSection({ address, onPress }: { address: UserAddress | null; onP
 export function CheckoutScreen(): React.JSX.Element {
   const {
     items, restaurantName, subtotalCents,
-    paymentMethod, notes, selectedAddress, isPlacing,
+    paymentMethod, notes, selectedAddress, hasDeliveryAddress, isPlacing,
     setPaymentMethod, setNotes,
     handleIncrement, handleDecrement,
     handleBack, handleChangeAddress, handlePlaceOrder,
@@ -182,6 +182,8 @@ export function CheckoutScreen(): React.JSX.Element {
         >
           {isPlacing ? (
             <Text style={styles.placeBtnText}>Placing order…</Text>
+          ) : !hasDeliveryAddress ? (
+            <Text style={styles.placeBtnText}>Add Delivery Address</Text>
           ) : paymentMethod === FOOD_PAYMENT_METHOD.LinePay ? (
             <View style={styles.placeBtnRow}>
               <Ionicons name="chatbubble-ellipses" size={18} color={colours.white} />

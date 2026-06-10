@@ -14,6 +14,7 @@ import Switch from '@mui/material/Switch';
 import Select from '@mui/material/Select';
 import Divider from '@mui/material/Divider';
 import Tooltip from '@mui/material/Tooltip';
+import Snackbar from '@mui/material/Snackbar';
 import Checkbox from '@mui/material/Checkbox';
 import MenuItem from '@mui/material/MenuItem';
 import TableRow from '@mui/material/TableRow';
@@ -58,6 +59,7 @@ const STATUS_COLOR: Record<string, 'success' | 'warning' | 'error' | 'default'> 
 };
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MAX_GALLERY_PHOTOS = 8;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -129,6 +131,14 @@ export function RestaurantDetailView() {
   const [deletingCategoryId, setDeletingCategoryId] = useState<number | null>(null);
   const [deletingItemId, setDeletingItemId] = useState<number | null>(null);
   const [deleteRestaurantOpen, setDeleteRestaurantOpen] = useState(false);
+
+  // Gallery photos
+  const [galleryUploading, setGalleryUploading] = useState(false);
+  const [deletingPhotoId, setDeletingPhotoId] = useState<number | null>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  // Notifications
+  const [notification, setNotification] = useState<{ msg: string; severity: 'success' | 'error' } | null>(null);
 
   // ── Load ────────────────────────────────────────────────────────────────────
 
@@ -262,9 +272,58 @@ export function RestaurantDetailView() {
     restaurantsApi
       .deleteCategory(id, catId)
       .then(() => setRestaurant((prev) => prev ? { ...prev, menu: prev.menu.filter((c) => c.id !== catId) } : prev))
-      .catch(() => {})
+      .catch((err) => {
+        const code = err?.response?.data?.code as string | undefined;
+        const message = code === 'menu.category_has_items'
+          ? "This category has menu items and can't be deleted. Remove or move its items first."
+          : (err?.response?.data?.message ?? 'Failed to delete category.');
+        setNotification({ msg: message, severity: 'error' });
+      })
       .finally(() => setDeletingCategoryId(null));
   }, [id]);
+
+  // ── Gallery photos ───────────────────────────────────────────────────────────
+
+  const handleAddGalleryPhoto = useCallback((file: File) => {
+    if (!id) return;
+    setGalleryUploading(true);
+    restaurantsApi
+      .addGalleryPhoto(id, file)
+      .then((updated) => setRestaurant((prev) => prev ? { ...prev, photos: updated.photos } : prev))
+      .catch((err) => {
+        const code = err?.response?.data?.code as string | undefined;
+        const message = code === 'restaurant.gallery_limit_reached'
+          ? `You can upload up to ${MAX_GALLERY_PHOTOS} gallery photos.`
+          : (err?.response?.data?.message ?? 'Failed to upload photo.');
+        setNotification({ msg: message, severity: 'error' });
+      })
+      .finally(() => setGalleryUploading(false));
+  }, [id]);
+
+  const handleDeleteGalleryPhoto = useCallback((photoId: number) => {
+    if (!id) return;
+    setDeletingPhotoId(photoId);
+    restaurantsApi
+      .deleteGalleryPhoto(id, photoId)
+      .then((updated) => setRestaurant((prev) => prev ? { ...prev, photos: updated.photos } : prev))
+      .catch(() => setNotification({ msg: 'Failed to remove photo.', severity: 'error' }))
+      .finally(() => setDeletingPhotoId(null));
+  }, [id]);
+
+  const handleMoveGalleryPhoto = useCallback((photoId: number, direction: 'up' | 'down') => {
+    if (!id || !restaurant) return;
+    const sorted = [...restaurant.photos].sort((a, b) => a.sort_order - b.sort_order);
+    const index = sorted.findIndex((p) => p.id === photoId);
+    if (index === -1) return;
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= sorted.length) return;
+    const reordered = [...sorted];
+    [reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]];
+    restaurantsApi
+      .reorderGalleryPhotos(id, reordered.map((p) => p.id))
+      .then((updated) => setRestaurant((prev) => prev ? { ...prev, photos: updated.photos } : prev))
+      .catch(() => setNotification({ msg: 'Failed to reorder photos.', severity: 'error' }));
+  }, [id, restaurant]);
 
   // ── Items ────────────────────────────────────────────────────────────────────
 
@@ -520,6 +579,78 @@ export function RestaurantDetailView() {
                     ))}
                   </TableBody>
                 </Table>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* ── Gallery photos ── */}
+        <Grid size={{ xs: 12 }}>
+          <Card>
+            <CardHeader
+              title="Gallery Photos"
+              subheader={`${restaurant.photos.length}/${MAX_GALLERY_PHOTOS} photos`}
+              action={
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={galleryUploading ? <CircularProgress size={14} /> : <Iconify icon="mingcute:add-line" width={14} />}
+                  disabled={galleryUploading || restaurant.photos.length >= MAX_GALLERY_PHOTOS}
+                  onClick={() => galleryInputRef.current?.click()}
+                >
+                  Add Photo
+                </Button>
+              }
+            />
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleAddGalleryPhoto(file);
+                e.target.value = '';
+              }}
+            />
+            <CardContent sx={{ pt: 0 }}>
+              {restaurant.photos.length === 0 ? (
+                <Typography variant="body2" color="text.secondary">No gallery photos yet.</Typography>
+              ) : (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                  {[...restaurant.photos].sort((a, b) => a.sort_order - b.sort_order).map((photo, index, sorted) => (
+                    <Box key={photo.id} sx={{ width: 120 }}>
+                      <Box
+                        component="img"
+                        src={photo.url}
+                        sx={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 1, border: (theme) => `1px solid ${theme.palette.divider}` }}
+                      />
+                      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5, mt: 0.5 }}>
+                        <Tooltip title="Move earlier">
+                          <span>
+                            <IconButton size="small" disabled={index === 0} onClick={() => handleMoveGalleryPhoto(photo.id, 'up')}>
+                              <Iconify icon="eva:arrow-ios-upward-fill" width={16} />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                        <Tooltip title="Move later">
+                          <span>
+                            <IconButton size="small" disabled={index === sorted.length - 1} onClick={() => handleMoveGalleryPhoto(photo.id, 'down')}>
+                              <Iconify icon="eva:arrow-ios-downward-fill" width={16} />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                        <Tooltip title="Remove">
+                          <span>
+                            <IconButton size="small" color="error" disabled={deletingPhotoId === photo.id} onClick={() => handleDeleteGalleryPhoto(photo.id)}>
+                              {deletingPhotoId === photo.id ? <CircularProgress size={14} /> : <Iconify icon="solar:trash-bin-trash-bold" width={16} />}
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      </Box>
+                    </Box>
+                  ))}
+                </Box>
               )}
             </CardContent>
           </Card>
@@ -875,6 +1006,15 @@ export function RestaurantDetailView() {
           <Button color="error" variant="contained" onClick={handleDeleteRestaurant}>Delete</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Notifications */}
+      <Snackbar open={!!notification} autoHideDuration={4000} onClose={() => setNotification(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        {notification ? (
+          <Alert severity={notification.severity} onClose={() => setNotification(null)} sx={{ width: '100%' }}>
+            {notification.msg}
+          </Alert>
+        ) : undefined}
+      </Snackbar>
     </DashboardContent>
   );
 }

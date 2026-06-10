@@ -112,6 +112,12 @@ export interface OpeningHour {
   is_closed: boolean;
 }
 
+export interface RestaurantPhoto {
+  id: number;
+  url: string;
+  sort_order: number;
+}
+
 export interface Restaurant {
   id: number;
   name: string;
@@ -123,6 +129,7 @@ export interface Restaurant {
   status: RestaurantStatus;
   cover_photo_url: string | null;
   logo_url: string | null;
+  photos: RestaurantPhoto[];
   delivery_radius_km: number | null;
   is_delivery_available: boolean;
   is_pickup_available: boolean;

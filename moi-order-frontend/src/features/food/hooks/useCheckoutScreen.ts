@@ -10,6 +10,8 @@ import { UserAddress } from '@/types/models';
 import { CartItem, useCartStore } from '@/shared/store/cartStore';
 import { useAddresses } from '@/features/address/hooks/useAddresses';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
+import { ApiError } from '@/types/models';
+import { DOMAIN_ERROR_MESSAGES } from '@/shared/constants/errorCodes';
 import { usePlaceFoodOrder } from './useFoodOrdersData';
 
 type Nav   = NativeStackNavigationProp<RootStackParamList>;
@@ -22,6 +24,7 @@ export interface UseCheckoutScreenResult {
   paymentMethod: FoodPaymentMethod;
   notes: string;
   selectedAddress: UserAddress | null;
+  hasDeliveryAddress: boolean;
   isPlacing: boolean;
   setPaymentMethod:      (method: FoodPaymentMethod) => void;
   setNotes:              (text: string) => void;
@@ -67,6 +70,7 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
   }, [route.params?.selectedAddressId]);
 
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId) ?? null;
+  const hasDeliveryAddress = selectedAddress !== null;
 
   const queryClient = useQueryClient();
   const { mutate: placeOrder, isPending: isPlacing } = usePlaceFoodOrder();
@@ -81,6 +85,18 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
 
   const handlePlaceOrder = useCallback(async () => {
     if (restaurantId === null || items.length === 0) return;
+
+    if (!hasDeliveryAddress) {
+      Alert.alert(
+        'Delivery address required',
+        'Please add a delivery address before placing your order.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Add Address', onPress: handleChangeAddress },
+        ],
+      );
+      return;
+    }
 
     const idempotencyKey = await Crypto.randomUUID();
 
@@ -108,12 +124,14 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
           queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOOD_ORDERS.ACTIVE });
           navigation.replace('FoodOrderDetail', { orderId: order.id });
         },
-        onError: () => {
-          Alert.alert('Order failed', 'Could not place your order. Please try again.');
+        onError: (error) => {
+          const apiError = error as unknown as ApiError;
+          const message = DOMAIN_ERROR_MESSAGES[apiError.code] ?? 'Could not place your order. Please try again.';
+          Alert.alert('Order failed', message);
         },
       },
     );
-  }, [restaurantId, items, paymentMethod, selectedAddressId, notes, placeOrder, clearCart, navigation]);
+  }, [restaurantId, items, paymentMethod, selectedAddressId, notes, hasDeliveryAddress, handleChangeAddress, placeOrder, clearCart, navigation]);
 
   return {
     items,
@@ -122,6 +140,7 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
     paymentMethod,
     notes,
     selectedAddress,
+    hasDeliveryAddress,
     isPlacing,
     setPaymentMethod,
     setNotes,

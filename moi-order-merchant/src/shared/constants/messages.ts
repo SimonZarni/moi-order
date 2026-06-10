@@ -10,4 +10,6 @@ export const DOMAIN_MESSAGES: Record<string, string> = {
   'kyc.already_submitted': 'Your KYC application has already been submitted.',
   'kyc.not_found': 'No KYC application found. Please start a new one.',
   'menu.system_category_empty': 'Add at least 1 item to Popular Picks and Recommendations before opening your restaurant.',
+  'menu.category_has_items': 'This category has menu items. Remove or move all items before deleting it.',
+  'restaurant.gallery_limit_reached': 'You can upload up to 8 gallery photos.',
 };

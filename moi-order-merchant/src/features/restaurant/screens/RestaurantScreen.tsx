@@ -12,6 +12,7 @@ import { colours } from '../../../shared/theme/colours';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
 import { RESTAURANT_STATUS } from '../../../types/enums';
 import type { RestaurantStatus } from '../../../types/enums';
+import { MAX_GALLERY_PHOTOS } from '../../../shared/constants/config';
 
 const LINE_OA_URL = 'https://line.me/R/ti/p/%40moiorder';
 
@@ -26,7 +27,7 @@ const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export function RestaurantScreen(): React.JSX.Element {
   const {
     restaurant, isLoading, isEditing, isSaving, isNewRestaurant,
-    isUploadingCover, isUploadingLogo,
+    isUploadingCover, isUploadingLogo, isUploadingGalleryPhoto,
     isEditingDelivery, isEditingPhone, isEditingHours,
     minOrderInput, phoneInput, openingHoursInput, descriptionForm,
     resubmitModal, resubmitForm,
@@ -34,6 +35,7 @@ export function RestaurantScreen(): React.JSX.Element {
     handleToggleStatus,
     handleUploadCoverPhoto, handleRemoveCoverPhoto,
     handleUploadLogo, handleRemoveLogo,
+    handleUploadGalleryPhoto, handleRemoveGalleryPhoto, handleMoveGalleryPhoto,
     handleEditDelivery, handleCancelDelivery, handleMinOrderChange, handleSaveDelivery,
     handleToggleDelivery, handleTogglePickup,
     handleEditPhone, handleCancelPhone, handlePhoneChange, handleSavePhone,
@@ -75,6 +77,10 @@ export function RestaurantScreen(): React.JSX.Element {
   const handlePickLogo = useCallback(async () => {
     await pickAndConvert(handleUploadLogo, 'logo');
   }, [pickAndConvert, handleUploadLogo]);
+
+  const handlePickGalleryPhoto = useCallback(async () => {
+    await pickAndConvert(handleUploadGalleryPhoto, 'gallery');
+  }, [pickAndConvert, handleUploadGalleryPhoto]);
 
   const handleContactSupport = useCallback(() => {
     Linking.openURL(LINE_OA_URL).catch(() => {});
@@ -190,6 +196,39 @@ export function RestaurantScreen(): React.JSX.Element {
                     <><Ionicons name="image-outline" size={18} color={colours.primary} /><Text style={styles.photoBtnText}>Upload Logo</Text></>
                   )}
                 </Pressable>
+              )}
+              <View style={styles.divider} />
+              <Text style={styles.infoLabel}>Gallery ({restaurant.photos.length}/{MAX_GALLERY_PHOTOS})</Text>
+              <View style={styles.galleryRow}>
+                {[...restaurant.photos].sort((a, b) => a.sort_order - b.sort_order).map((photo, index, sorted) => (
+                  <View key={photo.id} style={styles.galleryItem}>
+                    <Image source={{ uri: photo.url }} style={styles.galleryPreview} resizeMode="cover" />
+                    <View style={styles.galleryActions}>
+                      <Pressable style={styles.galleryActionBtn} onPress={() => handleMoveGalleryPhoto(photo.id, 'up')}
+                        disabled={index === 0} accessibilityRole="button" accessibilityLabel="Move photo earlier">
+                        <Ionicons name="arrow-up" size={14} color={index === 0 ? colours.textSubtle : colours.textMuted} />
+                      </Pressable>
+                      <Pressable style={styles.galleryActionBtn} onPress={() => handleMoveGalleryPhoto(photo.id, 'down')}
+                        disabled={index === sorted.length - 1} accessibilityRole="button" accessibilityLabel="Move photo later">
+                        <Ionicons name="arrow-down" size={14} color={index === sorted.length - 1 ? colours.textSubtle : colours.textMuted} />
+                      </Pressable>
+                      <Pressable style={[styles.galleryActionBtn, styles.galleryActionBtnDanger]} onPress={() => handleRemoveGalleryPhoto(photo.id)}
+                        accessibilityRole="button" accessibilityLabel="Remove gallery photo">
+                        <Ionicons name="trash-outline" size={14} color={colours.error} />
+                      </Pressable>
+                    </View>
+                  </View>
+                ))}
+              </View>
+              {restaurant.photos.length < MAX_GALLERY_PHOTOS ? (
+                <Pressable style={styles.photoUploadBtn} onPress={handlePickGalleryPhoto} disabled={isUploadingGalleryPhoto}
+                  accessibilityRole="button" accessibilityLabel="Add gallery photo">
+                  {isUploadingGalleryPhoto ? <ActivityIndicator size="small" color={colours.primary} /> : (
+                    <><Ionicons name="image-outline" size={18} color={colours.primary} /><Text style={styles.photoBtnText}>Add Gallery Photo</Text></>
+                  )}
+                </Pressable>
+              ) : (
+                <Text style={styles.galleryCount}>Maximum of {MAX_GALLERY_PHOTOS} gallery photos reached.</Text>
               )}
             </View>
           </View>

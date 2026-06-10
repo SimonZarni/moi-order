@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getRestaurant, updateRestaurant, createRestaurant,
   uploadRestaurantPhoto, removeRestaurantPhoto,
+  uploadRestaurantGalleryPhoto, deleteRestaurantGalleryPhoto, reorderRestaurantGalleryPhotos,
   type OpeningHourInput,
 } from '../../../api/restaurant';
 import { getMenuCategories } from '../../../api/menu';
@@ -53,6 +54,7 @@ interface UseRestaurantScreenResult {
   isSaving: boolean;
   isUploadingCover: boolean;
   isUploadingLogo: boolean;
+  isUploadingGalleryPhoto: boolean;
   isEditingDelivery: boolean;
   isEditingPhone: boolean;
   isEditingHours: boolean;
@@ -74,6 +76,9 @@ interface UseRestaurantScreenResult {
   handleRemoveCoverPhoto: () => void;
   handleUploadLogo: (uri: string, name: string, type: string) => void;
   handleRemoveLogo: () => void;
+  handleUploadGalleryPhoto: (uri: string, name: string, type: string) => void;
+  handleRemoveGalleryPhoto: (photoId: number) => void;
+  handleMoveGalleryPhoto: (photoId: number, direction: 'up' | 'down') => void;
   handleEditDelivery: () => void;
   handleCancelDelivery: () => void;
   handleMinOrderChange: (v: string) => void;
@@ -189,6 +194,26 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     onSuccess: invalidateRestaurant,
   });
 
+  const { mutate: mutateGalleryUpload, isPending: isUploadingGalleryPhoto } = useMutation({
+    mutationFn: (fd: FormData) => uploadRestaurantGalleryPhoto(fd),
+    onSuccess: setCache,
+    onError: (error) => {
+      const apiError = extractApiError(error);
+      const message = apiError.code ? DOMAIN_MESSAGES[apiError.code] : undefined;
+      if (message) setStatusWarning(message);
+    },
+  });
+
+  const { mutate: mutateGalleryRemove } = useMutation({
+    mutationFn: (photoId: number) => deleteRestaurantGalleryPhoto(photoId),
+    onSuccess: setCache,
+  });
+
+  const { mutate: mutateGalleryReorder } = useMutation({
+    mutationFn: (ids: number[]) => reorderRestaurantGalleryPhotos(ids),
+    onSuccess: setCache,
+  });
+
   const { mutate: mutateResubmitCreate, isPending: isCreatingResubmit } = useMutation({
     mutationFn: ({ name, address }: { name: string; address: string }) =>
       createKycResubmission(name, address),
@@ -295,6 +320,36 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
   }, [mutateLogoUpload]);
 
   const handleRemoveLogo = useCallback(() => mutateLogoRemove(), [mutateLogoRemove]);
+
+  const handleUploadGalleryPhoto = useCallback((uri: string, name: string, type: string) => {
+    void (async () => {
+      const fd = new FormData();
+      if (Platform.OS === 'web') {
+        const blob = await fetch(uri).then((r) => r.blob());
+        fd.append('photo', new File([blob], name, { type }));
+      } else {
+        fd.append('photo', { uri, name, type } as unknown as Blob);
+      }
+      mutateGalleryUpload(fd);
+    })();
+  }, [mutateGalleryUpload]);
+
+  const handleRemoveGalleryPhoto = useCallback(
+    (photoId: number) => mutateGalleryRemove(photoId),
+    [mutateGalleryRemove],
+  );
+
+  const handleMoveGalleryPhoto = useCallback((photoId: number, direction: 'up' | 'down') => {
+    if (!restaurant) return;
+    const sorted = [...restaurant.photos].sort((a, b) => a.sort_order - b.sort_order);
+    const index = sorted.findIndex((p) => p.id === photoId);
+    if (index === -1) return;
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= sorted.length) return;
+    const reordered = [...sorted];
+    [reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]];
+    mutateGalleryReorder(reordered.map((p) => p.id));
+  }, [restaurant, mutateGalleryReorder]);
 
   // ── Phone ─────────────────────────────────────────────────────────────────────
 
@@ -417,6 +472,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     isSaving: isSaving || isSavingDelivery || isSavingPhone || isSavingHours || isCreatingResubmit,
     isUploadingCover,
     isUploadingLogo,
+    isUploadingGalleryPhoto,
     isEditingDelivery,
     isEditingPhone,
     isEditingHours,
@@ -438,6 +494,9 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     handleRemoveCoverPhoto,
     handleUploadLogo,
     handleRemoveLogo,
+    handleUploadGalleryPhoto,
+    handleRemoveGalleryPhoto,
+    handleMoveGalleryPhoto,
     handleEditDelivery,
     handleCancelDelivery,
     handleMinOrderChange,

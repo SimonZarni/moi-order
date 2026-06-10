@@ -71,3 +71,27 @@ export async function removeRestaurantPhoto(
   );
   return response.data.data;
 }
+
+export async function uploadRestaurantGalleryPhoto(formData: FormData): Promise<Restaurant> {
+  const response = await apiClient.post<{ data: Restaurant }>(
+    '/restaurant/photos',
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
+  return response.data.data;
+}
+
+export async function deleteRestaurantGalleryPhoto(photoId: number): Promise<Restaurant> {
+  const response = await apiClient.delete<{ data: Restaurant }>(
+    `/restaurant/photos/${photoId}`,
+  );
+  return response.data.data;
+}
+
+export async function reorderRestaurantGalleryPhotos(ids: number[]): Promise<Restaurant> {
+  const response = await apiClient.patch<{ data: Restaurant }>(
+    '/restaurant/photos/reorder',
+    { ids },
+  );
+  return response.data.data;
+}

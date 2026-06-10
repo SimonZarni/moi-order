@@ -43,12 +43,19 @@ export type MenuCategoryDetail = {
   items: MenuItemDetail[];
 };
 
+export type RestaurantPhoto = {
+  id: number;
+  url: string;
+  sort_order: number;
+};
+
 export type RestaurantDetail = RestaurantListItem & {
   description: string | null;
   latitude: number | null;
   longitude: number | null;
   cover_photo_url: string | null;
   logo_url: string | null;
+  photos: RestaurantPhoto[];
   opening_hours: OpeningHour[];
   menu: MenuCategoryDetail[];
 };
@@ -194,4 +201,23 @@ export const restaurantsApi = {
 
   deleteItem: (restaurantId: number | string, itemId: number) =>
     apiClient.delete(`/restaurants/${restaurantId}/items/${itemId}`),
+
+  // ─── Gallery photos ─────────────────────────────────────────────────────────
+  addGalleryPhoto: (restaurantId: number | string, photo: File) => {
+    const fd = new FormData();
+    fd.append('photo', photo);
+    return apiClient
+      .post<{ data: RestaurantDetail }>(`/restaurants/${restaurantId}/photos`, fd, multipart)
+      .then((r) => r.data.data);
+  },
+
+  deleteGalleryPhoto: (restaurantId: number | string, photoId: number) =>
+    apiClient
+      .delete<{ data: RestaurantDetail }>(`/restaurants/${restaurantId}/photos/${photoId}`)
+      .then((r) => r.data.data),
+
+  reorderGalleryPhotos: (restaurantId: number | string, ids: number[]) =>
+    apiClient
+      .patch<{ data: RestaurantDetail }>(`/restaurants/${restaurantId}/photos/reorder`, { ids })
+      .then((r) => r.data.data),
 };

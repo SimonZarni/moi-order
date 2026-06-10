@@ -1,7 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { RESTAURANT_STATUS } from '@/types/enums';
@@ -9,6 +8,7 @@ import { OpeningHour } from '@/types/models';
 import { useStrings } from '@/shared/i18n';
 import { CategoryTabBar } from '../components/CategoryTabBar';
 import { MenuCategorySection } from '../components/MenuCategorySection';
+import { RestaurantPhotoCarousel } from '../components/RestaurantPhotoCarousel';
 import { CartBar } from '../components/CartBar';
 import { useRestaurantDetailScreen } from '../hooks/useRestaurantDetailScreen';
 import { styles } from './RestaurantDetailScreen.styles';
@@ -68,7 +68,7 @@ export function RestaurantDetailScreen(): React.JSX.Element {
         }
       >
         <View>
-          <Image source={restaurant.cover_photo_url ? { uri: restaurant.cover_photo_url } : null} style={styles.cover} contentFit="cover" transition={200} />
+          <RestaurantPhotoCarousel photos={restaurant.photos ?? []} coverPhotoUrl={restaurant.cover_photo_url} />
           <View style={styles.infoBlock}>
             <Text style={styles.restaurantName}>{restaurant.name}</Text>
             {restaurant.description ? <Text style={styles.description}>{restaurant.description}</Text> : null}
