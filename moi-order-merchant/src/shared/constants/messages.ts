@@ -9,4 +9,5 @@ export const DOMAIN_MESSAGES: Record<string, string> = {
   'order.not_cancellable': 'This order can no longer be cancelled.',
   'kyc.already_submitted': 'Your KYC application has already been submitted.',
   'kyc.not_found': 'No KYC application found. Please start a new one.',
+  'menu.system_category_empty': 'Add at least 1 item to Popular Picks and Recommendations before opening your restaurant.',
 };

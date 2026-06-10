@@ -82,6 +82,10 @@ class RestaurantService
                 'min_order_cents'       => $data['min_order_cents'] ?? null,
             ], fn ($v) => $v !== null);
 
+            if (($updates['status'] ?? null) === RestaurantStatus::Open) {
+                $this->menuService->validateOpenReady($restaurant);
+            }
+
             // Handle photo replacements
             if (isset($data['cover_photo'])) {
                 if ($restaurant->cover_photo_path !== null) {

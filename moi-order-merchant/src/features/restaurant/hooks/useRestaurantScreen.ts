@@ -6,12 +6,15 @@ import {
   uploadRestaurantPhoto, removeRestaurantPhoto,
   type OpeningHourInput,
 } from '../../../api/restaurant';
+import { getMenuCategories } from '../../../api/menu';
+import { extractApiError } from '../../../api/client';
 import {
   createKycResubmission, uploadResubmitDocument, submitKycResubmission,
   type UploadFileRef,
 } from '../../../api/kyc';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { CACHE_TTL } from '../../../shared/constants/config';
+import { DOMAIN_MESSAGES } from '../../../shared/constants/messages';
 import type { Restaurant, OpeningHour, MenuCategory } from '../../../types/models';
 import type { KycDocType, RestaurantStatus } from '../../../types/enums';
 import { RESTAURANT_STATUS } from '../../../types/enums';
@@ -134,6 +137,11 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     mutationFn: (payload: Parameters<typeof updateRestaurant>[0]) =>
       restaurant === null ? createRestaurant(payload) : updateRestaurant(payload),
     onSuccess: (updated) => { setCache(updated); setIsEditing(false); },
+    onError: (error) => {
+      const apiError = extractApiError(error);
+      const message = apiError.code ? DOMAIN_MESSAGES[apiError.code] : undefined;
+      if (message) setStatusWarning(message);
+    },
   });
 
   const { mutate: saveDelivery, isPending: isSavingDelivery } = useMutation({
@@ -232,8 +240,12 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
   const handleToggleStatus = useCallback((status: RestaurantStatus) => {
     // Block opening if required system categories have no items.
     if (status === RESTAURANT_STATUS.Open) {
-      const menuData = queryClient.getQueryData<MenuCategory[]>(QUERY_KEYS.MENU_CATEGORIES);
-      if (menuData) {
+      void (async () => {
+        const menuData = await queryClient.ensureQueryData<MenuCategory[]>({
+          queryKey: QUERY_KEYS.MENU_CATEGORIES,
+          queryFn: getMenuCategories,
+          staleTime: CACHE_TTL.MENU,
+        });
         const emptyRequired = REQUIRED_MENU_TYPES.filter((type) => {
           const cat = menuData.find((c) => c.is_system && c.category_type === type);
           return !cat || (cat.items ?? []).length === 0;
@@ -243,7 +255,9 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
           setStatusWarning(`Add at least 1 item to ${labels} before opening your restaurant.`);
           return;
         }
-      }
+        save({ status });
+      })();
+      return;
     }
     save({ status });
   }, [save, queryClient]);

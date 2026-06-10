@@ -51,9 +51,8 @@ class MenuService
 
     /**
      * Throws DomainException if the restaurant is not ready to open.
-     * Rules: required system categories (Popular Picks, Recommendations) must have
-     * at least one available item, AND at least one merchant-added category must have
-     * at least one available item.
+     * Rule: required system categories (Popular Picks, Recommendations) must each
+     * have at least one available item.
      */
     public function validateOpenReady(Restaurant $restaurant): void
     {
@@ -73,17 +72,6 @@ class MenuService
             if (! $hasItems) {
                 throw new DomainException('menu.system_category_empty');
             }
-        }
-
-        $merchantCategories = $restaurant->menuCategories
-            ->filter(fn ($c) => $c->category_type === null);
-
-        $hasFilledMerchantCategory = $merchantCategories->contains(
-            fn ($c) => $c->menuItems->where('status', MenuItemStatus::Available)->isNotEmpty()
-        );
-
-        if (! $hasFilledMerchantCategory) {
-            throw new DomainException('menu.no_merchant_category_items');
         }
     }
 
