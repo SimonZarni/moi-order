@@ -24,6 +24,7 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
     handleSlideComplete, handleCompleteConfirm, handleCompleteCancel,
     handleRatingChange, handleReviewChange,
     handleCallRestaurant, handleOrderAgain,
+    handleCancelOrder, isCancelling,
   } = useFoodOrderDetailScreen();
 
   if (isLoading || !order) {
@@ -68,7 +69,7 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
           <View style={styles.timeoutBanner}>
             <Ionicons name="time-outline" size={16} color="#92400e" />
             <Text style={styles.timeoutText}>
-              The restaurant hasn&apos;t confirmed yet. You can order again below.
+              The restaurant hasn&apos;t confirmed yet. You can cancel this order below.
             </Text>
           </View>
         )}
@@ -103,6 +104,24 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
             <Text style={styles.totalValue}>{formatPrice(order.total_cents / 100)}</Text>
           </View>
         </View>
+
+        {order.can_cancel && (
+          <Pressable
+            style={styles.cancelBtn}
+            onPress={handleCancelOrder}
+            disabled={isCancelling}
+            accessibilityRole="button"
+            accessibilityLabel="Cancel this order"
+          >
+            {isCancelling
+              ? <ActivityIndicator size="small" color={colours.danger} />
+              : <>
+                  <Ionicons name="close-circle-outline" size={16} color={colours.danger} />
+                  <Text style={styles.cancelBtnText}>Cancel Order</Text>
+                </>
+            }
+          </Pressable>
+        )}
 
         {canViewInvoice && (
           <Pressable style={styles.invoiceBtn} onPress={handleInvoiceOpen} accessibilityRole="button" accessibilityLabel="View full invoice">

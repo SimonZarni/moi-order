@@ -1,0 +1,125 @@
+import { StyleSheet } from 'react-native';
+import { colours } from '@/shared/theme/colours';
+import { radius } from '@/shared/theme/radius';
+import { spacing } from '@/shared/theme/spacing';
+import { typography } from '@/shared/theme/typography';
+
+export const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: colours.backgroundLight,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
+    backgroundColor: colours.card,
+    gap: spacing.sm,
+  },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: typography.lg,
+    fontWeight: '700',
+    color: colours.textOnLight,
+    flex: 1,
+  },
+  list: {
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colours.card,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    gap: spacing.sm,
+  },
+  categoryName: {
+    flex: 1,
+    fontSize: typography.md,
+    fontWeight: '600',
+    color: colours.textOnLight,
+    lineHeight: 32,
+  },
+  systemBadge: {
+    fontSize: typography.xxs,
+    fontWeight: '600',
+    color: colours.textMuted,
+    backgroundColor: colours.infoBg,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: 2,
+  },
+  iconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editInput: {
+    flex: 1,
+    fontSize: typography.md,
+    fontWeight: '600',
+    color: colours.textOnLight,
+    borderWidth: 1.5,
+    borderColor: colours.primary,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    lineHeight: 32,
+  },
+  addRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colours.card,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    gap: spacing.sm,
+    borderWidth: 1.5,
+    borderColor: colours.primary,
+    borderStyle: 'dashed',
+  },
+  addInput: {
+    flex: 1,
+    fontSize: typography.md,
+    color: colours.textOnLight,
+    paddingVertical: 4,
+  },
+  addBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  addBtnText: {
+    fontSize: typography.sm,
+    fontWeight: '600',
+    color: colours.primary,
+  },
+  center: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  empty: {
+    textAlign: 'center',
+    color: colours.textMuted,
+    fontSize: typography.sm,
+    marginTop: spacing.xl,
+  },
+});

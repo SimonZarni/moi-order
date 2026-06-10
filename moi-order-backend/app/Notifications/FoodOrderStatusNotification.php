@@ -96,6 +96,10 @@ class FoodOrderStatusNotification extends Notification
                 'Order Cancelled',
                 "Order {$num} has been cancelled.",
             ],
+            FoodOrderStatus::Expired            => [
+                'Order Expired',
+                "Order {$num} was not confirmed in time and has expired.",
+            ],
             default => ['Order Update', "Order {$num} status: {$status->label()}."],
         };
     }

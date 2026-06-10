@@ -121,6 +121,13 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
   },
   tabCountTextActive: { color: colours.backgroundDark },
+  tabIconBtn: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
   // ── Warning banner ────────────────────────────────────────────────────────
   warnBanner: {

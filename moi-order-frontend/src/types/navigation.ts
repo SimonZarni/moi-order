@@ -90,6 +90,7 @@ export type RootStackParamList = {
   // ── Profile extras ────────────────────────────────────────────────────────
   MoiVerified: undefined;
   BecomeMerchant: undefined;
+  MerchantMenuCategories: undefined;
   UpdatePhone: undefined;
   UpdateEmail: undefined;
   AppVersion: undefined;

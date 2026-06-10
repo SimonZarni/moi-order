@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Contracts\FileStorageInterface;
+use App\Enums\FoodOrderStatus;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -39,6 +40,7 @@ class FoodOrderResource extends JsonResource
             'customer_notes'         => $this->customer_notes,
             'prompt_pay_url'         => $this->prompt_pay_url,
             'can_show_prompt_pay'    => $this->canShowPromptPay(),
+            'can_cancel'             => $this->status === FoodOrderStatus::OrderPlaced,
             'user'                   => $this->whenLoaded('user', fn () => [
                 'id'    => $this->user->uuid,
                 'name'  => $this->user->name,

@@ -128,6 +128,24 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.white,
   },
+  // Cancel order
+  cancelBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    backgroundColor: colours.card,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.md,
+    marginTop: spacing.xs,
+    borderWidth: 1.5,
+    borderColor: colours.danger,
+  },
+  cancelBtnText: {
+    fontSize: typography.sm,
+    fontWeight: '700',
+    color: colours.danger,
+  },
   // Invoice
   invoiceBtn: {
     flexDirection: 'row',

@@ -48,7 +48,7 @@ export function ProfileScreen(): React.JSX.Element {
     handleTogglePasswordSection,
     handleCurrentPasswordChange, handleNewPasswordChange, handleConfirmPasswordChange,
     handleChangePassword,
-    handleGoToOrders, handleGoToMoiVerified, handleGoToBecomeMerchant, handleGoToPrivacyPolicy, handleGoToTerms, handleGoToPdpa,
+    handleGoToOrders, handleGoToMoiVerified, handleGoToBecomeMerchant, handleGoToMerchantMenu, handleGoToPrivacyPolicy, handleGoToTerms, handleGoToPdpa,
     handleGoToForgotPassword, handleLogout,
     handleDeleteAccount, isDeletingAccount,
     handleUpdatePhone, handleUpdateEmail,
@@ -194,7 +194,12 @@ export function ProfileScreen(): React.JSX.Element {
 
           {/* § Become a Merchant */}
           {user?.is_merchant ? (
-            <View style={styles.card}>
+            <Pressable
+              style={styles.card}
+              onPress={handleGoToMerchantMenu}
+              accessibilityRole="button"
+              accessibilityLabel={s.profile.manageMenu}
+            >
               <View style={styles.row}>
                 <View style={[styles.iconBadge, styles.iconBadgeAmber]}>
                   <Ionicons name="storefront-outline" size={16} color={colours.secondary} />
@@ -203,8 +208,9 @@ export function ProfileScreen(): React.JSX.Element {
                 <View style={styles.approvedBadge}>
                   <Text style={styles.approvedBadgeText}>{s.profile.approvedBadge}</Text>
                 </View>
+                <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
               </View>
-            </View>
+            </Pressable>
           ) : (
             <Pressable
               style={styles.card}

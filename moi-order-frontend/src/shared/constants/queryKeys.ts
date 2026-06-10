@@ -75,4 +75,7 @@ export const QUERY_KEYS = {
   MERCHANT_APPLICATION: {
     STATUS: ['merchant-application', 'status'] as const,
   },
+  MERCHANT: {
+    MENU_CATEGORIES: ['merchant', 'menu-categories'] as const,
+  },
 } as const;

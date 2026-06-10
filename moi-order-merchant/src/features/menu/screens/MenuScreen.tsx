@@ -23,6 +23,9 @@ export function MenuScreen(): React.JSX.Element {
     selectedCategoryId, searchQuery, handleSelectCategory, handleSearchChange,
     showAddCategoryModal, newCategoryName, setShowAddCategoryModal,
     handleNewCategoryNameChange, handleConfirmAddCategory,
+    renamingCategoryId, renamingCategoryName,
+    handleOpenRename, handleRenameNameChange, handleConfirmRename, handleCancelRename,
+    handleRequestDeleteCategory,
     handleToggleItemStatus, handleDeleteItem,
     addItemCategoryId, addItemForm, isAddingItem,
     handleOpenAddItem, handleCloseAddItem,
@@ -122,6 +125,8 @@ export function MenuScreen(): React.JSX.Element {
             count={cat.items.length}
             isActive={selectedCategoryId === cat.id}
             onPress={() => handleSelectCategory(cat.id)}
+            onEdit={cat.is_system ? undefined : () => handleOpenRename(cat.id, cat.name)}
+            onDelete={cat.is_system ? undefined : () => handleRequestDeleteCategory(cat.id, cat.name)}
           />
         ))}
       </ScrollView>
@@ -218,6 +223,34 @@ export function MenuScreen(): React.JSX.Element {
                 accessibilityRole="button"
               >
                 <Text style={styles.confirmText}>Add</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── Rename category modal ───────────────────────────────────────── */}
+      <Modal visible={renamingCategoryId !== null} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Rename Category</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Category name"
+              placeholderTextColor="rgba(255,255,255,0.3)"
+              value={renamingCategoryName}
+              onChangeText={handleRenameNameChange}
+              autoFocus
+              returnKeyType="done"
+              onSubmitEditing={handleConfirmRename}
+              accessibilityLabel="Category name"
+            />
+            <View style={styles.modalActions}>
+              <Pressable style={styles.cancelButton} onPress={handleCancelRename} accessibilityLabel="Cancel" accessibilityRole="button">
+                <Text style={styles.cancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={styles.confirmButton} onPress={handleConfirmRename} accessibilityLabel="Save name" accessibilityRole="button">
+                <Text style={styles.confirmText}>Save</Text>
               </Pressable>
             </View>
           </View>
@@ -328,9 +361,11 @@ interface CategoryTabProps {
   count: number;
   isActive: boolean;
   onPress: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-function CategoryTab({ label, count, isActive, onPress }: CategoryTabProps): React.JSX.Element {
+function CategoryTab({ label, count, isActive, onPress, onEdit, onDelete }: CategoryTabProps): React.JSX.Element {
   return (
     <Pressable
       style={[styles.tab, isActive && styles.tabActive]}
@@ -343,6 +378,16 @@ function CategoryTab({ label, count, isActive, onPress }: CategoryTabProps): Rea
       <View style={[styles.tabCount, isActive && styles.tabCountActive]}>
         <Text style={[styles.tabCountText, isActive && styles.tabCountTextActive]}>{count}</Text>
       </View>
+      {onEdit && (
+        <Pressable style={styles.tabIconBtn} onPress={onEdit} accessibilityRole="button" accessibilityLabel={`Rename ${label}`}>
+          <Ionicons name="pencil-outline" size={11} color={isActive ? colours.primaryDark : colours.textMuted} />
+        </Pressable>
+      )}
+      {onDelete && (
+        <Pressable style={styles.tabIconBtn} onPress={onDelete} accessibilityRole="button" accessibilityLabel={`Delete ${label}`}>
+          <Ionicons name="close-outline" size={13} color={colours.error} />
+        </Pressable>
+      )}
     </Pressable>
   );
 }

@@ -8,7 +8,7 @@ import { FoodOrder } from '@/types/models';
 import { FOOD_ORDER_STATUS } from '@/types/enums';
 import { LINE_OA_URL, ORDER_PAYMENT_TIMEOUT_MS } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
-import { completeFoodOrder } from '@/shared/api/foodOrders';
+import { cancelFoodOrder, completeFoodOrder } from '@/shared/api/foodOrders';
 import { useFoodOrderDetailData } from './useFoodOrdersData';
 
 type DetailRoute = RouteProp<RootStackParamList, 'FoodOrderDetail'>;
@@ -36,6 +36,8 @@ export interface UseFoodOrderDetailScreenResult {
   handleReviewChange: (t: string) => void;
   handleCallRestaurant: () => void;
   handleOrderAgain: () => void;
+  handleCancelOrder: () => void;
+  isCancelling: boolean;
 }
 
 export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
@@ -49,6 +51,7 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
   const [invoiceVisible,    setInvoiceVisible]    = useState(false);
   const [completeModalVisible, setCompleteModal]  = useState(false);
   const [isCompleting,      setIsCompleting]      = useState(false);
+  const [isCancelling,      setIsCancelling]      = useState(false);
   const [rating,            setRating]            = useState<number | null>(null);
   const [review,            setReview]            = useState('');
 
@@ -107,8 +110,35 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
     );
   }, [order]);
 
-  // Show a warning banner when the restaurant hasn't responded for 15+ minutes.
-  // The backend auto-expires at 30 min; this gives users early visibility.
+  const handleCancelOrder = useCallback(() => {
+    Alert.alert(
+      'Cancel Order',
+      'Are you sure you want to cancel this order?',
+      [
+        { text: 'Keep Order', style: 'cancel' },
+        {
+          text: 'Cancel Order',
+          style: 'destructive',
+          onPress: async () => {
+            if (!order) return;
+            setIsCancelling(true);
+            try {
+              const updated = await cancelFoodOrder(order.id);
+              queryClient.setQueryData(QUERY_KEYS.FOOD_ORDERS.DETAIL(order.id), updated);
+              queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOOD_ORDERS.LIST });
+            } catch {
+              Alert.alert('Error', 'Could not cancel order. Please try again.');
+            } finally {
+              setIsCancelling(false);
+            }
+          },
+        },
+      ],
+    );
+  }, [order, queryClient]);
+
+  // Show a warning banner when the restaurant hasn't responded for 30+ minutes.
+  // The backend auto-expires at 60 min; this gives users early visibility.
   const isPaymentTimedOut = useMemo(() => {
     if (!order || order.status !== FOOD_ORDER_STATUS.OrderPlaced) return false;
     return Date.now() - new Date(order.created_at).getTime() > ORDER_PAYMENT_TIMEOUT_MS;
@@ -143,5 +173,7 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
     handleReviewChange,
     handleCallRestaurant,
     handleOrderAgain,
+    handleCancelOrder,
+    isCancelling,
   };
 }

@@ -77,6 +77,7 @@ export interface UseProfileScreenResult {
   handleGoToOrders: () => void;
   handleGoToMoiVerified: () => void;
   handleGoToBecomeMerchant: () => void;
+  handleGoToMerchantMenu: () => void;
   handleGoToPrivacyPolicy: () => void;
   handleGoToTerms: () => void;
   handleGoToPdpa: () => void;
@@ -271,6 +272,10 @@ export function useProfileScreen(): UseProfileScreenResult {
     navigation.navigate('BecomeMerchant');
   }, [navigation]);
 
+  const handleGoToMerchantMenu = useCallback((): void => {
+    navigation.navigate('MerchantMenuCategories');
+  }, [navigation]);
+
   const handleGoToPrivacyPolicy = useCallback((): void => {
     navigation.navigate('PrivacyPolicy');
   }, [navigation]);
@@ -397,6 +402,7 @@ export function useProfileScreen(): UseProfileScreenResult {
     handleGoToOrders,
     handleGoToMoiVerified,
     handleGoToBecomeMerchant,
+    handleGoToMerchantMenu,
     handleGoToPrivacyPolicy,
     handleGoToTerms,
     handleGoToPdpa,

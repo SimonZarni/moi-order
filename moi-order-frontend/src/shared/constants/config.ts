@@ -39,7 +39,7 @@ export const GOOGLE_IOS_CLIENT_ID =
 
 // How long before a pending (order_placed) order is considered timed-out by the restaurant.
 // The backend auto-expires at 30 min; we show a warning banner at 15 min.
-export const ORDER_PAYMENT_TIMEOUT_MS = 15 * 60 * 1_000; // 15 minutes
+export const ORDER_PAYMENT_TIMEOUT_MS = 30 * 60 * 1_000; // 30 minutes — halfway to 60-min auto-expiry
 
 export const CACHE_TTL = {
   USER_DATA:       5  * 60 * 1000,

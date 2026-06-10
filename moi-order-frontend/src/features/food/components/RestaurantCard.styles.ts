@@ -45,7 +45,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.md,
     fontWeight: '700',
     color: colours.textOnLight,
-    lineHeight: 20,
+    lineHeight: 32,
   },
   address: {
     fontSize: typography.xs,

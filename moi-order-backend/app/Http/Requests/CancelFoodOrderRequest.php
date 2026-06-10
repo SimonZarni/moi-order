@@ -13,10 +13,11 @@ class CancelFoodOrderRequest extends FormRequest
     public function authorize(): bool
     {
         $order = FoodOrder::where('user_id', $this->user()->id)
-            ->find((int) $this->route('id'));
+            ->where('uuid', $this->route('id'))
+            ->first();
 
         return $order !== null
-            && $order->status === FoodOrderStatus::WaitingForPayment;
+            && $order->status === FoodOrderStatus::OrderPlaced;
     }
 
     public function rules(): array

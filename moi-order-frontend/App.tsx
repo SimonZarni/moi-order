@@ -76,6 +76,7 @@ import { NinetyDayVaultScreen } from '@/features/documents/screens/NinetyDayVaul
 import { MyDocumentsScreen } from '@/features/documents/screens/MyDocumentsScreen';
 import { MoiVerifiedScreen } from '@/features/profile/screens/MoiVerifiedScreen';
 import { BecomeMerchantScreen } from '@/features/merchant-application/screens/BecomeMerchantScreen';
+import { MerchantMenuCategoriesScreen } from '@/features/merchant/screens/MerchantMenuCategoriesScreen';
 import { AppVersionScreen } from '@/features/profile/screens/AppVersionScreen';
 import { UpdatePhoneScreen } from '@/features/profile/screens/UpdatePhoneScreen';
 import { UpdateEmailScreen } from '@/features/profile/screens/UpdateEmailScreen';
@@ -289,6 +290,7 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="MyDocuments"                   component={guardedScreen(MyDocumentsScreen)} />
       <Stack.Screen name="MoiVerified"                   component={guardedScreen(MoiVerifiedScreen)} />
       <Stack.Screen name="BecomeMerchant"                component={guardedScreen(BecomeMerchantScreen)} />
+      <Stack.Screen name="MerchantMenuCategories"        component={guardedScreen(MerchantMenuCategoriesScreen)} options={{ headerShown: false }} />
       <Stack.Screen name="AppVersion"                    component={AppVersionScreen} options={{ headerShown: false }} />
       <Stack.Screen name="UpdatePhone"                   component={guardedScreen(UpdatePhoneScreen)} options={{ headerShown: false }} />
       <Stack.Screen name="UpdateEmail"                   component={guardedScreen(UpdateEmailScreen)} options={{ headerShown: false }} />
