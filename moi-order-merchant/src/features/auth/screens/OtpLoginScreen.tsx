@@ -32,7 +32,7 @@ export function OtpLoginScreen(): React.JSX.Element {
             <Text style={styles.fieldLabel}>PHONE NUMBER</Text>
             <TextInput
               style={styles.input}
-              placeholder="+66 8x xxx xxxx"
+              placeholder="0812345678 or 66812345678"
               placeholderTextColor={colours.textSubtle}
               value={phoneNumber}
               onChangeText={setPhoneNumber}
