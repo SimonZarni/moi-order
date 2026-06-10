@@ -16,6 +16,7 @@ export const styles = StyleSheet.create({
   },
   scroll: {
     flex: 1,
+    backgroundColor: colours.backgroundDark,
   },
 
   // ── Hero ──────────────────────────────────────────────────────────────────

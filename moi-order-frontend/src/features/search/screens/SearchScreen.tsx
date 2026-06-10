@@ -97,6 +97,7 @@ export function SearchScreen(): React.JSX.Element {
         )}
 
         <FlatList
+          style={styles.listBg}
           data={results}
           keyExtractor={(item: SearchResult) => `${item.type}-${item.id}`}
           renderItem={({ item }) => (
