@@ -7,6 +7,9 @@ import { radius } from '../../../shared/theme/radius';
 export const styles = StyleSheet.create({
   container: {
     padding: spacing.lg,
+    maxWidth: 480,
+    width: '100%',
+    alignSelf: 'center',
   },
   sectionTitle: {
     fontSize: typography.xl,

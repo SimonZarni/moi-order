@@ -10,6 +10,9 @@ export const styles = StyleSheet.create({
     padding: spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
+    maxWidth: 480,
+    width: '100%',
+    alignSelf: 'center',
   },
   iconContainer: {
     marginBottom: spacing.lg,

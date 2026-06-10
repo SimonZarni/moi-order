@@ -33,6 +33,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colours.dark,
   },
+  scrollBg: { backgroundColor: colours.dark },
   centered: {
     flex: 1,
     alignItems: 'center',

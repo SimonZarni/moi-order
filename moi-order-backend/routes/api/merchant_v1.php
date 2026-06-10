@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\Merchant\V1\BusinessProfileController;
 use App\Http\Controllers\Api\Merchant\V1\KycController;
 use App\Http\Controllers\Api\V1\DeviceTokenController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantAnalyticsController;
@@ -12,6 +13,11 @@ use App\Http\Controllers\Api\Merchant\V1\MerchantRestaurantController;
 use App\Http\Controllers\Api\Merchant\V1\MenuCategoryController;
 use App\Http\Controllers\Api\Merchant\V1\MenuItemController;
 use Illuminate\Support\Facades\Route;
+
+// ── Business profile ─────────────────────────────────────────────────────────
+Route::get('/business-profile',             [BusinessProfileController::class, 'show']);
+Route::patch('/business-profile',           [BusinessProfileController::class, 'update']);
+Route::post('/business-profile/documents',  [BusinessProfileController::class, 'uploadDocument']);
 
 // ── Restaurant ────────────────────────────────────────────────────────────────
 Route::get('/restaurant',    [MerchantRestaurantController::class, 'show']);

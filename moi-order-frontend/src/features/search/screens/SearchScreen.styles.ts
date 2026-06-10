@@ -67,6 +67,7 @@ export const styles = StyleSheet.create({
   emptyTitle: { fontSize: typography.lg, fontWeight: '700', color: colours.textOnLight, marginBottom: spacing.xs },
   emptySubtitle: { fontSize: typography.sm, color: colours.textMuted },
 
+  listBg: { flex: 1, backgroundColor: colours.backgroundLight },
   list: { paddingBottom: 80 },
   resultRow: {
     flexDirection: 'row', alignItems: 'center',

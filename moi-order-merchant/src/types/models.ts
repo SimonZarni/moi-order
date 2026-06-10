@@ -198,6 +198,37 @@ export interface MerchantNotification {
   created_at: string;
 }
 
+// ── Business profile ─────────────────────────────────────────────────────────
+
+export interface BusinessProfileUser {
+  id: number;
+  name: string;
+  email: string;
+  phone: string | null;
+}
+
+export interface BusinessProfileRestaurant {
+  id: number;
+  name: string;
+  description: string | null;
+  address: string | null;
+  phone: string | null;
+  status: RestaurantStatus;
+  status_label: string;
+  cover_photo_url: string | null;
+  logo_url: string | null;
+  is_delivery_available: boolean;
+  is_pickup_available: boolean;
+  min_order_cents: number;
+  delivery_radius_km: number | null;
+}
+
+export interface BusinessProfile {
+  user: BusinessProfileUser;
+  kyc: KycApplication | null;
+  restaurant: BusinessProfileRestaurant | null;
+}
+
 // ── Pagination ────────────────────────────────────────────────────────────────
 
 export interface PaginationMeta {

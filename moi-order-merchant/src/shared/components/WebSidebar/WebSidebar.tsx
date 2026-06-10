@@ -18,8 +18,9 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard',     icon: 'grid-outline',          activeIcon: 'grid',              screen: 'Dashboard',     section: 'MAIN' },
   { label: 'Orders',        icon: 'receipt-outline',        activeIcon: 'receipt',           screen: 'Orders',        section: 'MAIN' },
   { label: 'Notifications', icon: 'notifications-outline',  activeIcon: 'notifications',     screen: 'Notifications', section: 'MAIN' },
-  { label: 'Menu',          icon: 'restaurant-outline',     activeIcon: 'restaurant',        screen: 'Menu',          section: 'MANAGE' },
-  { label: 'Restaurant',    icon: 'storefront-outline',     activeIcon: 'storefront',        screen: 'Restaurant',    section: 'MANAGE' },
+  { label: 'Menu',             icon: 'restaurant-outline',    activeIcon: 'restaurant',          screen: 'Menu',            section: 'MANAGE' },
+  { label: 'Restaurant',       icon: 'storefront-outline',    activeIcon: 'storefront',          screen: 'Restaurant',      section: 'MANAGE' },
+  { label: 'Business Profile', icon: 'briefcase-outline',     activeIcon: 'briefcase',           screen: 'BusinessProfile', section: 'MANAGE' },
   { label: 'Analytics',     icon: 'bar-chart-outline',      activeIcon: 'bar-chart',         screen: 'Analytics',     section: 'INSIGHTS' },
 ];
 

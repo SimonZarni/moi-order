@@ -13,6 +13,7 @@ export const styles = StyleSheet.create({
   },
   keyboardAvoiding: { flex: 1 },
   scroll: { flexGrow: 1 },
+  scrollBg: { backgroundColor: colours.backgroundDark },
 
   hero: {
     paddingTop: spacing.xxl + spacing.lg,

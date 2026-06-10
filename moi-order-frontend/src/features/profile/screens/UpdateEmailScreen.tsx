@@ -21,7 +21,7 @@ export function UpdateEmailScreen(): React.JSX.Element {
         style={styles.keyboardAvoiding}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        <ScrollView style={styles.scrollBg} contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <View style={styles.hero}>
             <Text style={styles.heroLabel}>Profile</Text>
             <Text style={styles.heroTitle}>Update Email</Text>

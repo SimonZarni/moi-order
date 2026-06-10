@@ -20,6 +20,8 @@ import { RestaurantScreen } from '../features/restaurant/screens/RestaurantScree
 import { AnalyticsScreen } from '../features/analytics/screens/AnalyticsScreen';
 import { NotificationsScreen } from '../features/notifications/screens/NotificationsScreen';
 import { NotificationBell } from '../features/notifications/components/NotificationBell';
+import { ProfileScreen } from '../features/profile/screens/ProfileScreen';
+import { BusinessProfileScreen } from '../features/businessProfile/screens/BusinessProfileScreen';
 import { WebSidebar } from '../shared/components/WebSidebar/WebSidebar';
 import { colours } from '../shared/theme/colours';
 import { spacing } from '../shared/theme/spacing';
@@ -41,6 +43,7 @@ const TAB_ICONS: Record<TabName, { focused: keyof typeof Ionicons.glyphMap; unfo
   Menu:          { focused: 'restaurant',        unfocused: 'restaurant-outline' },
   Restaurant:    { focused: 'storefront',        unfocused: 'storefront-outline' },
   Notifications: { focused: 'notifications',     unfocused: 'notifications-outline' },
+  Profile:       { focused: 'person-circle',     unfocused: 'person-circle-outline' },
 };
 
 function DashboardTab(): React.JSX.Element {
@@ -99,6 +102,7 @@ function MobileTabNavigator(): React.JSX.Element {
           tabBarBadge: undefined,   // badge driven by NotificationBell internally
         }}
       />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profile' }} />
     </Tab.Navigator>
   );
 }
@@ -121,6 +125,7 @@ function MobileNavigator(): React.JSX.Element {
       <MobileStack.Screen name="Tabs" component={MobileTabNavigator} />
       <MobileStack.Screen name="OrderDetail" component={OrderDetailRoute} />
       <MobileStack.Screen name="OrderChat" component={OrderChatScreen} />
+      <MobileStack.Screen name="BusinessProfile" component={BusinessProfileScreen} options={{ headerShown: false }} />
     </MobileStack.Navigator>
   );
 }
@@ -193,6 +198,8 @@ function WebMerchantLayout(): React.JSX.Element {
         return <AnalyticsScreen />;
       case 'Notifications':
         return <NotificationsScreen />;
+      case 'BusinessProfile':
+        return <BusinessProfileScreen />;
     }
   };
 

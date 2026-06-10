@@ -19,7 +19,7 @@ export function EmailOtpScreen(): React.JSX.Element {
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.bottomFill} />
       <KeyboardAvoidingView style={styles.keyboardAvoiding} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <ScrollView style={styles.scrollBg} contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <View style={styles.hero}>
             <Text style={styles.heroLabel}>Moi Order</Text>
             <Text style={styles.heroTitle}>Check your email</Text>

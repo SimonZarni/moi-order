@@ -82,6 +82,7 @@ export function PlaceDetailScreen({ route }: Props): React.JSX.Element {
       </View>
 
       <Animated.ScrollView
+        style={styles.scrollBg}
         showsVerticalScrollIndicator={false}
         onScroll={scrollHandler}
         scrollEventThrottle={16}

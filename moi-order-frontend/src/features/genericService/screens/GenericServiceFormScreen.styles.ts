@@ -65,6 +65,7 @@ export const styles = StyleSheet.create({
     borderTopLeftRadius: radius.sheet,
     borderTopRightRadius: radius.sheet,
   },
+  scrollBg: { backgroundColor: colours.backgroundLight },
   scroll: {
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.xl,

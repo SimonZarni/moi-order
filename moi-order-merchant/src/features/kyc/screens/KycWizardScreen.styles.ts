@@ -55,5 +55,8 @@ export const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colours.error + '30',
+    maxWidth: 480,
+    alignSelf: 'center',
+    width: '100%',
   },
 });

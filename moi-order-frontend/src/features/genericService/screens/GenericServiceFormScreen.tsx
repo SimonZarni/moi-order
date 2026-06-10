@@ -189,6 +189,7 @@ export function GenericServiceFormScreen(): React.JSX.Element {
         ) : null}
 
         <ScrollView
+          style={styles.scrollBg}
           contentContainerStyle={styles.scroll}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
