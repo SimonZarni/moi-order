@@ -39,4 +39,19 @@ class OrderChatMessage extends Model
             $this->update(['read_at' => now()]);
         }
     }
+
+    /**
+     * Post an automated system notice into an order's chat thread (e.g. the
+     * pre-deletion warning sent when an order reaches a terminal status).
+     */
+    public static function postSystemMessage(int $foodOrderId, string $body): self
+    {
+        return self::create([
+            'food_order_id' => $foodOrderId,
+            'sender_type'   => 'system',
+            'sender_id'     => 0,
+            'sender_name'   => 'System',
+            'body'          => $body,
+        ]);
+    }
 }

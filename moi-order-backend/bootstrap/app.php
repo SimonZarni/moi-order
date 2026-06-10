@@ -71,8 +71,10 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (ValidationException $e): JsonResponse {
+            $firstError = collect($e->errors())->flatten()->first();
+
             return response()->json([
-                'message' => 'The given data was invalid.',
+                'message' => $firstError ?? 'The given data was invalid.',
                 'code'    => 'validation_failed',
                 'errors'  => $e->errors(),
             ], 422);

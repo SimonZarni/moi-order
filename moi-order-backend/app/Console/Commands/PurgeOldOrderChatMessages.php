@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Contracts\FileStorageInterface;
 use App\Enums\FoodOrderStatus;
 use App\Models\OrderChatMessage;
 use Illuminate\Console\Command;
@@ -11,19 +12,35 @@ use Illuminate\Console\Command;
 class PurgeOldOrderChatMessages extends Command
 {
     protected $signature   = 'order-chat:purge';
-    protected $description = 'Soft-delete chat messages for orders completed more than 3 hours ago.';
+    protected $description = 'Permanently delete chat messages for orders completed or cancelled more than 3 hours ago.';
+
+    public function __construct(private readonly FileStorageInterface $storage)
+    {
+        parent::__construct();
+    }
 
     public function handle(): int
     {
         $cutoff = now()->subHours(3);
 
-        OrderChatMessage::query()
+        $messages = OrderChatMessage::query()
             ->whereHas('foodOrder', fn ($q) => $q
-                ->where('status', FoodOrderStatus::Completed->value)
-                ->where('completed_at', '<=', $cutoff)
+                ->where(fn ($q2) => $q2
+                    ->where('status', FoodOrderStatus::Completed->value)
+                    ->where('completed_at', '<=', $cutoff))
+                ->orWhere(fn ($q2) => $q2
+                    ->where('status', FoodOrderStatus::Cancelled->value)
+                    ->where('cancelled_at', '<=', $cutoff))
             )
-            ->whereNull('deleted_at')
-            ->update(['deleted_at' => now()]);
+            ->get();
+
+        foreach ($messages as $message) {
+            if ($message->image_path !== null) {
+                $this->storage->delete($message->image_path);
+            }
+
+            $message->forceDelete();
+        }
 
         return self::SUCCESS;
     }
