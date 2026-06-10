@@ -16,7 +16,7 @@ export function useHomeCards(): UseHomeCardsResult {
   const { data, isPending, isError, refetch } = useQuery({
     queryKey: QUERY_KEYS.HOME_CARDS.LIST,
     queryFn:  fetchHomeCards,
-    staleTime: CACHE_TTL.STATIC_DATA,
+    staleTime: CACHE_TTL.USER_DATA,
     gcTime:    CACHE_TTL.GC_EXTENDED,
   });
 
