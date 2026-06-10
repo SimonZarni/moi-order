@@ -254,6 +254,8 @@ export interface AppStrings {
     addEmailDesc:       string;
     becomeVerified:     string;
     becomeMerchant:     string;
+    merchantApproved:   string;
+    approvedBadge:      string;
     addThaiPhone:       string;
     alreadyConnected:   string;
     useGoogleLater:     string;
@@ -560,6 +562,8 @@ const en: AppStrings = {
     addEmailDesc:       'You signed in without an email address. Add one so your account can receive updates.',
     becomeVerified:     'Become Moi Verified',
     becomeMerchant:     'Become a Merchant',
+    merchantApproved:   'Merchant Account',
+    approvedBadge:      'Approved',
     addThaiPhone:       'Add a Thai phone number for OTP login',
     alreadyConnected:   'Already connected to this account',
     useGoogleLater:     'Use Google to sign in later',
@@ -895,6 +899,8 @@ const mm: AppStrings = {
     addEmailDesc:       'အီးမေးလ်မပါဘဲ ဝင်ရောက်ထားသည်။ အကောင့်သတင်းများ လက်ခံရရှိရန် ထည့်ပါ။',
     becomeVerified:     'Moi Verified ရယူပါ',
     becomeMerchant:     'အရောင်းသမားအဖြစ် လျှောက်ထားရန်',
+    merchantApproved:   'အရောင်းသမား အကောင့်',
+    approvedBadge:      'အတည်ပြုပြီး',
     addThaiPhone:       'OTP ဖြင့် ဝင်ရောက်ရန် ထိုင်းဖုန်းနံပါတ် ထည့်ပါ',
     alreadyConnected:   'ဤအကောင့်နှင့် ချိတ်ဆက်ပြီးပါပြီ',
     useGoogleLater:     'Google ဖြင့် ဝင်ရောက်နိုင်သည်',
@@ -1230,6 +1236,8 @@ const th: AppStrings = {
     addEmailDesc:       'คุณเข้าสู่ระบบโดยไม่มีอีเมล เพิ่มอีเมลเพื่อรับการอัปเดต',
     becomeVerified:     'กลายเป็น Moi Verified',
     becomeMerchant:     'สมัครเป็นร้านค้า',
+    merchantApproved:   'บัญชีร้านค้า',
+    approvedBadge:      'อนุมัติแล้ว',
     addThaiPhone:       'เพิ่มเบอร์โทรไทยสำหรับเข้าสู่ระบบด้วย OTP',
     alreadyConnected:   'เชื่อมต่อกับบัญชีนี้แล้ว',
     useGoogleLater:     'ใช้ Google เข้าสู่ระบบในภายหลัง',

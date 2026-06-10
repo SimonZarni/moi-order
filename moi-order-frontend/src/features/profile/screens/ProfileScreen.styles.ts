@@ -345,6 +345,17 @@ export const styles = StyleSheet.create({
   },
   iconBadgeFacebook: { backgroundColor: '#1877F214' },
   iconBadgeLine:     { backgroundColor: '#06C75514' },
+  approvedBadge: {
+    backgroundColor: `${colours.success}1F`,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: radius.full,
+  },
+  approvedBadgeText: {
+    fontSize: typography.xs,
+    fontWeight: '700',
+    color: colours.success,
+  },
   rowDisabled: {
     opacity: 0.45,
   },

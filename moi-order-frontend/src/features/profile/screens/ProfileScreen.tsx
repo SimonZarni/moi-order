@@ -193,7 +193,19 @@ export function ProfileScreen(): React.JSX.Element {
           </Pressable>
 
           {/* § Become a Merchant */}
-          {!user?.is_merchant && (
+          {user?.is_merchant ? (
+            <View style={styles.card}>
+              <View style={styles.row}>
+                <View style={[styles.iconBadge, styles.iconBadgeAmber]}>
+                  <Ionicons name="storefront-outline" size={16} color={colours.secondary} />
+                </View>
+                <Text style={[styles.rowLabel, styles.rowLabelBold]}>{s.profile.merchantApproved}</Text>
+                <View style={styles.approvedBadge}>
+                  <Text style={styles.approvedBadgeText}>{s.profile.approvedBadge}</Text>
+                </View>
+              </View>
+            </View>
+          ) : (
             <Pressable
               style={styles.card}
               onPress={handleGoToBecomeMerchant}
