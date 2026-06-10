@@ -24,7 +24,7 @@ export function AddressListScreen(): React.JSX.Element {
           {mode === 'select' ? 'Delivery Addresses' : 'My Addresses'}
         </Text>
         <Pressable style={styles.addBtn} onPress={handleMapPress} accessibilityRole="button" accessibilityLabel="View restaurants on map">
-          <Ionicons name="navigate-outline" size={20} color={colours.textOnDark} />
+          <Ionicons name="map-outline" size={20} color={colours.textOnDark} />
         </Pressable>
         <Pressable style={styles.addBtn} onPress={handleAddNew} accessibilityRole="button" accessibilityLabel="Add new address">
           <Ionicons name="add" size={22} color={colours.textOnDark} />
