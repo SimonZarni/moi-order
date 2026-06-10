@@ -30,7 +30,9 @@ export const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   heroTitleMM: {
-    fontSize: typography.xl,
+    fontSize: typography.lg,
+    lineHeight: typography.xxl + 8,
+    includeFontPadding: false,
   },
   heroLeft: {
     flexDirection: 'row',
