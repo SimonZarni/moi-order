@@ -59,12 +59,6 @@ export function RestaurantCard({ restaurant, onPress }: Props): React.JSX.Elemen
               <Text style={styles.metaText}>Delivery</Text>
             </View>
           )}
-          {restaurant.is_pickup_available && (
-            <View style={styles.metaChip}>
-              <Ionicons name="storefront-outline" size={11} color={colours.tertiary} />
-              <Text style={styles.metaText}>Pickup</Text>
-            </View>
-          )}
           {restaurant.min_order_cents > 0 && (
             <View style={styles.metaChip}>
               <Ionicons name="bag-outline" size={11} color={colours.tertiary} />
