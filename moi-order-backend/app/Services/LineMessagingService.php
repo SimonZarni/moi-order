@@ -27,12 +27,18 @@ class LineMessagingService implements LineMessagingInterface
     public function pushToAdmin(string $message): void
     {
         try {
-            Http::withToken($this->channelAccessToken)
+            $response = Http::withToken($this->channelAccessToken)
                 ->post(self::PUSH_URL, [
                     'to'       => $this->adminUserId,
                     'messages' => [['type' => 'text', 'text' => $message]],
-                ])
-                ->throw();
+                ]);
+
+            Log::info('LineMessagingService: push response', [
+                'status' => $response->status(),
+                'body'   => $response->body(),
+            ]);
+
+            $response->throw();
         } catch (\Throwable $e) {
             Log::error('LineMessagingService: push failed', [
                 'admin_user_id' => $this->adminUserId,
