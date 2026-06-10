@@ -101,6 +101,33 @@ class FoodOrder extends Model
         return $this->status === FoodOrderStatus::WaitingForPayment;
     }
 
+    /** Builds the LINE push message text the admin receives when a customer initiates payment. */
+    public function linePayNotificationText(): string
+    {
+        $lines = [
+            '💳 LINE Pay Request',
+            '',
+            'Order   : ' . ($this->order_number ?? '#' . $this->id),
+            'Restaurant: ' . ($this->restaurant?->name ?? '—'),
+            'Customer: ' . ($this->user?->name ?? '—'),
+            '',
+            'Items:',
+        ];
+
+        foreach ($this->items as $item) {
+            $lines[] = sprintf('• %s x%d — ฿%s', $item->name, $item->quantity, number_format($item->subtotal_cents / 100, 0));
+        }
+
+        $lines[] = '';
+        $lines[] = 'Total   : ฿' . number_format($this->total_cents / 100, 0);
+
+        if ($this->delivery_address) {
+            $lines[] = 'Deliver : ' . $this->delivery_address;
+        }
+
+        return implode("\n", $lines);
+    }
+
     // ─── Scopes ───────────────────────────────────────────────────────────────
 
     public function scopeForUser(\Illuminate\Database\Eloquent\Builder $query, int $userId): void

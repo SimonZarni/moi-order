@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Contracts\AuditLogInterface;
+use App\Contracts\LineMessagingInterface;
+use App\Services\LineMessagingService;
 use App\Contracts\DocumentOcrInterface;
 use App\Contracts\FileStorageInterface;
 use App\Contracts\GooglePlacesInterface;
@@ -162,6 +164,14 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(FileStorageInterface::class)
             )
         );
+
+        // DIP: bind LINE Messaging adapter — credentials injected from config.
+        $this->app->bind(LineMessagingInterface::class, function (): LineMessagingService {
+            return new LineMessagingService(
+                config('services.line.messaging_channel_access_token', ''),
+                config('services.line.admin_user_id', ''),
+            );
+        });
 
         // DIP: bind Expo push adapter. To switch to FCM direct, swap ExpoPushNotificationService.
         $this->app->bind(PushNotificationInterface::class, ExpoPushNotificationService::class);

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Contracts\FileStorageInterface;
+use App\Contracts\LineMessagingInterface;
 use App\DTOs\CompleteFoodOrderDTO;
 use App\DTOs\StoreFoodOrderDTO;
+use App\Exceptions\DomainException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\CompleteFoodOrderRequest;
 use App\Http\Requests\Api\StoreFoodOrderRequest;
@@ -14,6 +16,7 @@ use App\Http\Requests\CancelFoodOrderRequest;
 use App\Http\Requests\DeleteFoodOrderRequest;
 use App\Http\Resources\FoodOrderResource;
 use App\Enums\FoodOrderStatus;
+use App\Enums\FoodPaymentMethod;
 use App\Models\FoodOrder;
 use App\Services\FoodOrderService;
 use Illuminate\Http\JsonResponse;
@@ -22,8 +25,9 @@ use Illuminate\Http\Request;
 class FoodOrderController extends Controller
 {
     public function __construct(
-        private readonly FoodOrderService    $orderService,
+        private readonly FoodOrderService     $orderService,
         private readonly FileStorageInterface $storage,
+        private readonly LineMessagingInterface $lineMessaging,
     ) {}
 
     /** GET /api/v1/food-orders */
@@ -100,6 +104,27 @@ class FoodOrderController extends Controller
         $this->orderService->deleteCancelled($order);
 
         return response()->json(null, 204);
+    }
+
+    /** POST /api/v1/food-orders/{id}/notify-line-pay */
+    public function notifyLinePay(Request $request, string $id): JsonResponse
+    {
+        $order = FoodOrder::forUser($request->user()->id)
+            ->with(['items', 'restaurant', 'user'])
+            ->where('uuid', $id)
+            ->firstOrFail();
+
+        if ($order->payment_method !== FoodPaymentMethod::LinePay) {
+            throw new DomainException('order.not_line_pay', 409);
+        }
+
+        if (! $order->canShowPromptPay()) {
+            throw new DomainException('order.not_awaiting_payment', 409);
+        }
+
+        $this->lineMessaging->pushToAdmin($order->linePayNotificationText());
+
+        return response()->json(null, 200);
     }
 
     /** POST /api/v1/food-orders/{id}/complete */

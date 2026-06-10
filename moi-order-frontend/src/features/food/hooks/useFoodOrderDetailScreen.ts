@@ -8,7 +8,7 @@ import { FoodOrder } from '@/types/models';
 import { FOOD_ORDER_STATUS } from '@/types/enums';
 import { LINE_OA_URL, ORDER_PAYMENT_TIMEOUT_MS } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
-import { cancelFoodOrder, completeFoodOrder } from '@/shared/api/foodOrders';
+import { cancelFoodOrder, completeFoodOrder, notifyLinePayment } from '@/shared/api/foodOrders';
 import { useFoodOrderDetailData } from './useFoodOrdersData';
 
 type DetailRoute = RouteProp<RootStackParamList, 'FoodOrderDetail'>;
@@ -59,11 +59,16 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
   const handleInvoiceOpen  = useCallback(() => setInvoiceVisible(true), []);
   const handleInvoiceClose = useCallback(() => setInvoiceVisible(false), []);
 
-  const handlePromptPayPress = useCallback(() => {
+  const handlePromptPayPress = useCallback(async () => {
+    try {
+      await notifyLinePayment(orderId);
+    } catch {
+      // Best-effort — if the backend notify fails, still open LINE so the customer is not blocked.
+    }
     Linking.openURL(LINE_OA_URL).catch(() =>
       Alert.alert('Cannot open LINE', 'Please open LINE and search for @moiorder to complete your payment.'),
     );
-  }, []);
+  }, [orderId]);
 
   const handleChatPress = useCallback(() => {
     navigation.navigate('OrderChat', {
