@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
@@ -10,11 +10,12 @@ import { styles } from './FoodScreen.styles';
 
 export function FoodScreen(): React.JSX.Element {
   const {
-    restaurants, isLoading, isError, isFetchingNextPage,
+    restaurants, isLoading, isError, isRefreshing, isFetchingNextPage,
     hasNextPage, fetchNextPage, cartItemCount,
     searchText, activeCategory,
     setSearchText, setActiveCategory,
     handleRestaurantPress, handleMapPress, handleAddressPress, handleCartPress, handleBack,
+    handleRefresh,
   } = useFoodScreen();
 
   return (
@@ -95,9 +96,11 @@ export function FoodScreen(): React.JSX.Element {
           renderItem={({ item }: { item: Restaurant }) => (
             <RestaurantCard restaurant={item} onPress={handleRestaurantPress} />
           )}
+          style={styles.flatList}
           contentContainerStyle={styles.list}
           onEndReached={() => hasNextPage && fetchNextPage()}
           onEndReachedThreshold={0.4}
+          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={colours.primary} colors={[colours.primary]} />}
           ListFooterComponent={isFetchingNextPage ? <ActivityIndicator color={colours.primary} /> : null}
           ListEmptyComponent={!isLoading ? <View style={styles.emptyState}><Text style={styles.emptyText}>No restaurants found</Text></View> : null}
           showsVerticalScrollIndicator={false}

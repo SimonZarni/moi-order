@@ -116,6 +116,10 @@ export const styles = StyleSheet.create({
     borderTopRightRadius: 28,
     marginTop: -(spacing.xxl),
   },
+  flatList: {
+    flex: 1,
+    backgroundColor: colours.backgroundLight,
+  },
   list: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
