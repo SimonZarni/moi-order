@@ -1,9 +1,8 @@
 import type { HomeCardPayload } from 'src/api/home-cards';
 import type { HomeCard, HomeCardIcon, HomeCardRoute } from 'src/types';
 
-import { useRef, useState, useEffect, useCallback } from 'react';
-
 import { HexColorPicker } from 'react-colorful';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -11,10 +10,10 @@ import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
-import Popover from '@mui/material/Popover';
 import Select from '@mui/material/Select';
 import Switch from '@mui/material/Switch';
 import Divider from '@mui/material/Divider';
+import Popover from '@mui/material/Popover';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
