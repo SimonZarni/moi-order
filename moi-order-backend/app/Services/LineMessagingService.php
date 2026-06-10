@@ -9,35 +9,54 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Principle: SRP — owns LINE Messaging API push calls only.
+ * Principle: SRP — owns LINE Messaging API calls only.
  * Principle: DIP — bound to LineMessagingInterface in AppServiceProvider.
- *
- * Best-effort: HTTP failures are logged and swallowed so a LINE API outage
- * never blocks the customer from opening LINE to complete payment.
  */
 class LineMessagingService implements LineMessagingInterface
 {
-    private const PUSH_URL = 'https://api.line.me/v2/bot/message/push';
+    private const PUSH_URL    = 'https://api.line.me/v2/bot/message/push';
+    private const PROFILE_URL = 'https://api.line.me/v2/bot/profile/';
 
     public function __construct(
         private readonly string $channelAccessToken,
         private readonly string $adminUserId,
     ) {}
 
-    public function pushToAdmin(string $message): void
+    public function isFollowing(string $userId): bool
     {
         try {
             $response = Http::withToken($this->channelAccessToken)
-                ->post(self::PUSH_URL, [
-                    'to'       => $this->adminUserId,
-                    'messages' => [['type' => 'text', 'text' => $message]],
-                ]);
+                ->get(self::PROFILE_URL . $userId);
 
-            $response->throw();
+            return $response->successful();
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    public function pushToUser(string $userId, string $message): void
+    {
+        $this->push($userId, $message);
+    }
+
+    public function pushToAdmin(string $message): void
+    {
+        $this->push($this->adminUserId, $message);
+    }
+
+    private function push(string $to, string $message): void
+    {
+        try {
+            Http::withToken($this->channelAccessToken)
+                ->post(self::PUSH_URL, [
+                    'to'       => $to,
+                    'messages' => [['type' => 'text', 'text' => $message]],
+                ])
+                ->throw();
         } catch (\Throwable $e) {
             Log::error('LineMessagingService: push failed', [
-                'admin_user_id' => $this->adminUserId,
-                'error'         => $e->getMessage(),
+                'to'    => $to,
+                'error' => $e->getMessage(),
             ]);
         }
     }

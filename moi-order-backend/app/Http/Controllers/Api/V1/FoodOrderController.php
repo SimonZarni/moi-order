@@ -122,7 +122,18 @@ class FoodOrderController extends Controller
             throw new DomainException('order.not_awaiting_payment', 409);
         }
 
+        $lineId = $order->user?->line_id;
+
+        if (! $lineId) {
+            throw new DomainException('order.line_not_linked', 409);
+        }
+
+        if (! $this->lineMessaging->isFollowing($lineId)) {
+            throw new DomainException('order.line_not_following', 409);
+        }
+
         $this->lineMessaging->pushToAdmin($order->linePayNotificationText());
+        $this->lineMessaging->pushToUser($lineId, $order->linePayCustomerText());
 
         return response()->json(null, 200);
     }

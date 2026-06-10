@@ -128,6 +128,30 @@ class FoodOrder extends Model
         return implode("\n", $lines);
     }
 
+    /** Builds the LINE push message text sent to the customer when they initiate payment. */
+    public function linePayCustomerText(): string
+    {
+        $lines = [
+            '🧾 Order Summary',
+            '',
+            'Order   : ' . ($this->order_number ?? '#' . $this->id),
+            'Restaurant: ' . ($this->restaurant?->name ?? '—'),
+            '',
+            'Items:',
+        ];
+
+        foreach ($this->items as $item) {
+            $lines[] = sprintf('• %s x%d — ฿%s', $item->name, $item->quantity, number_format($item->subtotal_cents / 100, 0));
+        }
+
+        $lines[] = '';
+        $lines[] = 'Total   : ฿' . number_format($this->total_cents / 100, 0);
+        $lines[] = '';
+        $lines[] = 'Our team will confirm your payment shortly. Thank you! 🙏';
+
+        return implode("\n", $lines);
+    }
+
     // ─── Scopes ───────────────────────────────────────────────────────────────
 
     public function scopeForUser(\Illuminate\Database\Eloquent\Builder $query, int $userId): void

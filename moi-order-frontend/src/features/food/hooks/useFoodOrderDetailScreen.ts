@@ -7,8 +7,10 @@ import { RootStackParamList } from '@/types/navigation';
 import { FoodOrder } from '@/types/models';
 import { FOOD_ORDER_STATUS } from '@/types/enums';
 import { LINE_OA_URL, ORDER_PAYMENT_TIMEOUT_MS } from '@/shared/constants/config';
+import { ERROR_CODES } from '@/shared/constants/errorCodes';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { cancelFoodOrder, completeFoodOrder, notifyLinePayment } from '@/shared/api/foodOrders';
+import { ApiError } from '@/types/models';
 import { useFoodOrderDetailData } from './useFoodOrdersData';
 
 type DetailRoute = RouteProp<RootStackParamList, 'FoodOrderDetail'>;
@@ -62,8 +64,29 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
   const handlePromptPayPress = useCallback(async () => {
     try {
       await notifyLinePayment(orderId);
-    } catch {
-      // Best-effort — if the backend notify fails, still open LINE so the customer is not blocked.
+    } catch (e: unknown) {
+      const code = (e as ApiError)?.code;
+
+      if (code === ERROR_CODES.LINE_NOT_FOLLOWING) {
+        Alert.alert(
+          'Follow Moi Order on LINE',
+          'Please follow us on LINE to receive your order confirmation.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Follow Now',
+              onPress: () => Linking.openURL(LINE_OA_URL).catch(() => {}),
+            },
+          ],
+        );
+        return;
+      }
+
+      if (code === ERROR_CODES.LINE_NOT_LINKED) {
+        Alert.alert('LINE Account Required', 'Please sign in with LINE to use LINE Pay.');
+        return;
+      }
+      // Other errors: best-effort, still open LINE.
     }
     Linking.openURL(LINE_OA_URL).catch(() =>
       Alert.alert('Cannot open LINE', 'Please open LINE and search for @moiorder to complete your payment.'),
