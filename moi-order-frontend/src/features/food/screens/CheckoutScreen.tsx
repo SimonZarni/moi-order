@@ -19,9 +19,11 @@ const LABEL_ICON: Record<string, React.ComponentProps<typeof Ionicons>['name']> 
 const LINE_GREEN = '#00B900';
 
 const PAYMENT_OPTIONS: Array<{ value: FoodPaymentMethod; label: string; iconName: string; iconColor?: string }> = [
-  { value: FOOD_PAYMENT_METHOD.Cod,       label: 'Cash on Delivery',  iconName: 'cash-outline' },
   { value: FOOD_PAYMENT_METHOD.LinePay, label: 'LINE Pay', iconName: 'chatbubble-ellipses', iconColor: LINE_GREEN },
 ];
+
+const DELIVERY_FEE_NOTICE =
+  'A delivery fee may be added once the restaurant confirms your order, and you will be asked to pay it separately.';
 
 function AddressSection({ address, onPress }: { address: UserAddress | null; onPress: () => void }): React.JSX.Element {
   if (address === null) {
@@ -144,6 +146,12 @@ export function CheckoutScreen(): React.JSX.Element {
               </View>
             </Pressable>
           ))}
+        </View>
+
+        <Text style={styles.sectionTitle}>Delivery Method</Text>
+        <View style={styles.noticeCard}>
+          <Ionicons name="information-circle-outline" size={18} color={colours.textMuted} />
+          <Text style={styles.noticeText}>{DELIVERY_FEE_NOTICE}</Text>
         </View>
 
         <Text style={styles.sectionTitle}>Notes for restaurant</Text>

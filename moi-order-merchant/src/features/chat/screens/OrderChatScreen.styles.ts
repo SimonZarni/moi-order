@@ -36,6 +36,17 @@ export const styles = StyleSheet.create({
   emptyText: { fontSize: typography.sm, color: colours.textSubtle, textAlign: 'center', marginTop: 8 },
   loaderWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
+  systemNotice: {
+    alignItems: 'center',
+    paddingVertical: spacing.xs,
+  },
+  systemNoticeText: {
+    fontSize: typography.xxs,
+    fontStyle: 'italic',
+    color: colours.textSubtle,
+    textAlign: 'center',
+  },
+
   bubbleRow: { flexDirection: 'row' },
   bubbleRowRight: { justifyContent: 'flex-end' },
   bubbleRowLeft: { justifyContent: 'flex-start' },

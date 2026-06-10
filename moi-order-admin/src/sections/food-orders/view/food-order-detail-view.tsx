@@ -29,6 +29,8 @@ import { foodOrdersApi, type FoodOrderDetail } from 'src/api/foodOrders';
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 
+import { OrderChatDialog } from './order-chat-dialog';
+
 // ----------------------------------------------------------------------
 
 const STATUS_COLOR: Record<string, 'success' | 'warning' | 'info' | 'error' | 'default'> = {
@@ -57,6 +59,7 @@ export function FoodOrderDetailView() {
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState(false);
   const [confirmError, setConfirmError] = useState<string | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -111,6 +114,14 @@ export function FoodOrderDetailView() {
           Order #{order.id}
         </Typography>
         <Label color={STATUS_COLOR[order.status] ?? 'default'}>{order.status_label}</Label>
+
+        <Button
+          variant="outlined"
+          startIcon={<Iconify icon="solar:chat-round-dots-bold" />}
+          onClick={() => setChatOpen(true)}
+        >
+          View Chat
+        </Button>
 
         {order.status === 'waiting_for_payment' && (
           <Button
@@ -214,6 +225,8 @@ export function FoodOrderDetailView() {
           </Card>
         </Grid>
       </Grid>
+
+      <OrderChatDialog open={chatOpen} orderId={String(order.id)} onClose={() => setChatOpen(false)} />
     </DashboardContent>
   );
 }

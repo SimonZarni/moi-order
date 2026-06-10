@@ -44,7 +44,7 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
   const increment      = useCartStore((s) => s.increment);
   const decrement      = useCartStore((s) => s.decrement);
 
-  const [paymentMethod, setPaymentMethod] = useState<FoodPaymentMethod>(FOOD_PAYMENT_METHOD.Cod);
+  const [paymentMethod, setPaymentMethod] = useState<FoodPaymentMethod>(FOOD_PAYMENT_METHOD.LinePay);
   const [notes, setNotes]                 = useState('');
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
 

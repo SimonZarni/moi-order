@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FlatList, Keyboard } from 'react-native';
+import { Alert, FlatList, Keyboard } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
@@ -19,7 +19,7 @@ interface UseOrderChatScreenResult {
   listRef: React.RefObject<FlatList | null>;
   handleTextChange: (v: string) => void;
   handleSend: () => void;
-  handlePickImage: () => Promise<void>;
+  handleAttachPress: () => void;
   handlePhotoPress: (uri: string) => void;
   handlePhotoClose: () => void;
 }
@@ -77,14 +77,7 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
     setText('');
   }, [text, isSending, mutate]);
 
-  const handlePickImage = useCallback(async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images',
-      quality: 0.8,
-    });
-    if (result.canceled || result.assets.length === 0) return;
-    const asset = result.assets[0];
-    if (!asset) return;
+  const sendImageAsset = useCallback((asset: ImagePicker.ImagePickerAsset) => {
     const ext = asset.uri.split('.').pop() ?? 'jpg';
     setSendError(null);
     mutate(
@@ -93,13 +86,48 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
     );
   }, [mutate]);
 
+  const handlePickImage = useCallback(async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: 'images',
+      quality: 0.8,
+    });
+    if (result.canceled || result.assets.length === 0) return;
+    const asset = result.assets[0];
+    if (!asset) return;
+    sendImageAsset(asset);
+  }, [sendImageAsset]);
+
+  const handleTakePhoto = useCallback(async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Camera permission needed', 'Please allow camera access to take a photo.');
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: 'images',
+      quality: 0.8,
+    });
+    if (result.canceled || result.assets.length === 0) return;
+    const asset = result.assets[0];
+    if (!asset) return;
+    sendImageAsset(asset);
+  }, [sendImageAsset]);
+
+  const handleAttachPress = useCallback(() => {
+    Alert.alert('Add Photo', undefined, [
+      { text: 'Take Photo', onPress: () => { void handleTakePhoto(); } },
+      { text: 'Choose from Library', onPress: () => { void handlePickImage(); } },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+  }, [handleTakePhoto, handlePickImage]);
+
   const handlePhotoPress = useCallback((uri: string) => setSelectedPhoto(uri), []);
   const handlePhotoClose = useCallback(() => setSelectedPhoto(null), []);
 
   return {
     messages, isLoading, isError, sendError, text, isSending,
     inputBarPadding, selectedPhoto, listRef,
-    handleTextChange, handleSend, handlePickImage,
+    handleTextChange, handleSend, handleAttachPress,
     handlePhotoPress, handlePhotoClose,
   };
 }

@@ -38,6 +38,17 @@ export const styles = StyleSheet.create({
   },
   list: { maxHeight: 320 },
   listContent: { gap: spacing.xs, paddingVertical: spacing.xs },
+  // System notice
+  systemNotice: {
+    alignItems: 'center',
+    paddingVertical: spacing.xs,
+  },
+  systemNoticeText: {
+    fontSize: typography.xxs,
+    fontStyle: 'italic',
+    color: colours.textMuted,
+    textAlign: 'center',
+  },
   // Bubbles
   bubbleRow: {
     flexDirection: 'row',

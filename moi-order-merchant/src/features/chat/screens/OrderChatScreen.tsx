@@ -23,6 +23,14 @@ interface BubbleProps {
 }
 
 function MessageBubble({ msg, onPhotoPress }: BubbleProps): React.JSX.Element {
+  if (msg.sender_type === 'system') {
+    return (
+      <View style={styles.systemNotice}>
+        <Text style={styles.systemNoticeText}>{msg.body}</Text>
+      </View>
+    );
+  }
+
   const isMerchant = msg.sender_type === 'merchant';
   const time = new Date(msg.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   return (
@@ -58,7 +66,7 @@ export function OrderChatContent({ orderId, onBack }: ContentProps): React.JSX.E
   const {
     messages, isLoading, isError, sendError, text, isSending, inputBarPadding,
     selectedPhoto, listRef,
-    handleTextChange, handleSend, handlePickImage, handlePhotoPress, handlePhotoClose,
+    handleTextChange, handleSend, handleAttachPress, handlePhotoPress, handlePhotoClose,
   } = useOrderChatScreen(orderId);
 
   return (
@@ -117,9 +125,9 @@ export function OrderChatContent({ orderId, onBack }: ContentProps): React.JSX.E
         <View style={[styles.inputBar, { paddingBottom: inputBarPadding }]}>
           <Pressable
             style={styles.attachBtn}
-            onPress={handlePickImage}
+            onPress={handleAttachPress}
             accessibilityRole="button"
-            accessibilityLabel="Attach image"
+            accessibilityLabel="Add photo"
           >
             <Ionicons name="image-outline" size={22} color={colours.primary} />
           </Pressable>

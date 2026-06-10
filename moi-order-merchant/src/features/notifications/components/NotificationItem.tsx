@@ -8,7 +8,7 @@ import type { MerchantNotification, MerchantNotificationType } from '../../../ty
 
 interface NotificationItemProps {
   notification: MerchantNotification;
-  onPress: (id: number) => void;
+  onPress: (notification: MerchantNotification) => void;
 }
 
 const ICON_MAP: Record<MerchantNotificationType, keyof typeof Ionicons.glyphMap> = {
@@ -37,7 +37,7 @@ export function NotificationItem({ notification, onPress }: NotificationItemProp
         !notification.is_read && styles.rowUnread,
         pressed && styles.rowPressed,
       ]}
-      onPress={() => onPress(notification.id)}
+      onPress={() => onPress(notification)}
       accessibilityRole="button"
       accessibilityLabel={notification.title}
     >

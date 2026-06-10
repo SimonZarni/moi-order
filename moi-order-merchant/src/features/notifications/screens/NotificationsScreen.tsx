@@ -13,12 +13,12 @@ import type { MerchantNotification } from '../../../types/models';
 export function NotificationsScreen(): React.JSX.Element {
   const {
     notifications, unreadCount, isLoading, isError, isMarkingAllRead,
-    handleMarkRead, handleMarkAllRead, handleRefresh,
+    handlePressNotification, handleMarkAllRead, handleRefresh,
   } = useNotificationsScreen();
 
   const renderItem: ListRenderItem<MerchantNotification> = ({ item, index }) => (
     <>
-      <NotificationItem notification={item} onPress={handleMarkRead} />
+      <NotificationItem notification={item} onPress={handlePressNotification} />
       {index < notifications.length - 1 && <View style={styles.divider} />}
     </>
   );

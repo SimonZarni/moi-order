@@ -134,7 +134,7 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
           </View>
         )}
 
-        {!isCancelled && canViewInvoice && (
+        {!isCancelled && !isExpired && (
           <Pressable
             style={styles.chatBtn}
             onPress={handleChatPress}

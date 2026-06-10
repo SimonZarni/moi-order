@@ -271,4 +271,20 @@ export const styles = StyleSheet.create({
     marginLeft: spacing.sm,
     marginTop: 4,
   },
+
+  // ── Delivery method notice ─────────────────────────────────────────────────
+  noticeCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    backgroundColor: colours.infoBg,
+    borderRadius: radius.xl,
+    padding: spacing.md,
+  },
+  noticeText: {
+    flex: 1,
+    fontSize: typography.xs,
+    color: colours.textMuted,
+    lineHeight: 18,
+  },
 });

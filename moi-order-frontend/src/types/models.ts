@@ -459,7 +459,7 @@ export interface FoodOrder {
 
 export interface OrderChatMessage {
   id: number;
-  sender_type: 'customer' | 'admin';
+  sender_type: 'customer' | 'merchant' | 'admin' | 'system';
   sender_id: number;
   sender_name: string;
   body: string | null;
