@@ -29,6 +29,9 @@ export const styles = StyleSheet.create({
     color: colours.textOnDark,
     letterSpacing: -0.5,
   },
+  heroTitleMM: {
+    fontSize: typography.xl,
+  },
   heroLeft: {
     flexDirection: 'row',
     alignItems: 'center',

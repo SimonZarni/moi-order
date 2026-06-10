@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { useStrings } from '@/shared/i18n';
+import { useLocaleStore } from '@/shared/store/localeStore';
 import { Restaurant } from '@/types/models';
 import { RestaurantCard } from '../components/RestaurantCard';
 import { FOOD_CATEGORIES, FoodCategory, useFoodScreen } from '../hooks/useFoodScreen';
@@ -19,6 +20,7 @@ export function FoodScreen(): React.JSX.Element {
     handleRefresh,
   } = useFoodScreen();
   const s = useStrings();
+  const locale = useLocaleStore((state) => state.locale);
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -28,7 +30,9 @@ export function FoodScreen(): React.JSX.Element {
             <Pressable style={styles.iconBtn} onPress={handleBack} accessibilityRole="button" accessibilityLabel="Go back">
               <Ionicons name="arrow-back" size={20} color={colours.textOnDark} />
             </Pressable>
-            <Text style={styles.heroTitle}>{s.restaurant.listTitle}</Text>
+            <Text style={[styles.heroTitle, locale === 'mm' && styles.heroTitleMM]}>
+              {s.restaurant.listTitle}
+            </Text>
           </View>
           <View style={styles.heroActions}>
             <Pressable style={styles.iconBtn} onPress={handleAddressPress} accessibilityRole="button" accessibilityLabel="Saved addresses">
