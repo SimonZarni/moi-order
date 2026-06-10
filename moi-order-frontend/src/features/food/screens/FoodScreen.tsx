@@ -13,10 +13,10 @@ import { styles } from './FoodScreen.styles';
 export function FoodScreen(): React.JSX.Element {
   const {
     restaurants, isLoading, isError, isRefreshing, isFetchingNextPage,
-    hasNextPage, fetchNextPage, cartItemCount,
+    hasNextPage, fetchNextPage, cartItemCount, activeOrderCount,
     searchText, activeCategory,
     setSearchText, setActiveCategory,
-    handleRestaurantPress, handleAddressPress, handleCartPress, handleBack,
+    handleRestaurantPress, handleAddressPress, handleCartPress, handleOrdersPress, handleBack,
     handleRefresh,
   } = useFoodScreen();
   const s = useStrings();
@@ -38,7 +38,15 @@ export function FoodScreen(): React.JSX.Element {
             <Pressable style={styles.iconBtn} onPress={handleAddressPress} accessibilityRole="button" accessibilityLabel="Addresses and map">
               <Ionicons name="navigate-outline" size={18} color={colours.textOnDark} />
             </Pressable>
-            <Pressable style={styles.iconBtn} onPress={handleCartPress} accessibilityRole="button" accessibilityLabel="Cart and orders">
+            <Pressable style={styles.iconBtn} onPress={handleOrdersPress} accessibilityRole="button" accessibilityLabel="My orders">
+              <Ionicons name="receipt-outline" size={18} color={colours.textOnDark} />
+              {activeOrderCount > 0 && (
+                <View style={styles.cartBadge}>
+                  <Text style={styles.cartBadgeText}>{activeOrderCount > 9 ? '9+' : activeOrderCount}</Text>
+                </View>
+              )}
+            </Pressable>
+            <Pressable style={styles.iconBtn} onPress={handleCartPress} accessibilityRole="button" accessibilityLabel="View cart">
               <Ionicons name="cart-outline" size={18} color={colours.textOnDark} />
               {cartItemCount > 0 && (
                 <View style={styles.cartBadge}>

@@ -1,16 +1,19 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCartStore } from '@/shared/store/cartStore';
+import { FOOD_ORDER_STATUS } from '@/types/enums';
 import { RootStackParamList } from '@/types/navigation';
 import { Restaurant } from '@/types/models';
 import { useRestaurantListData, UseRestaurantListDataResult } from './useRestaurantListData';
+import { useFoodOrdersData } from './useFoodOrdersData';
 
 export const FOOD_CATEGORIES = ['All', 'Thai', 'Japanese', 'Burger', 'Coffee', 'Pizza', 'Dessert', 'Seafood', 'Chinese'] as const;
 export type FoodCategory = (typeof FOOD_CATEGORIES)[number];
 
 export interface UseFoodScreenResult extends UseRestaurantListDataResult {
   cartItemCount:         number;
+  activeOrderCount:      number;
   searchText:            string;
   activeCategory:        FoodCategory;
   setSearchText:         (t: string) => void;
@@ -18,12 +21,23 @@ export interface UseFoodScreenResult extends UseRestaurantListDataResult {
   handleRestaurantPress: (restaurant: Restaurant) => void;
   handleAddressPress:    () => void;
   handleCartPress:       () => void;
+  handleOrdersPress:     () => void;
   handleBack:            () => void;
 }
 
 export function useFoodScreen(): UseFoodScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const cartCount  = useCartStore((s) => s.itemCount());
+  const { orders } = useFoodOrdersData();
+
+  const activeOrderCount = useMemo(
+    () => orders.filter((o) =>
+      o.status !== FOOD_ORDER_STATUS.Completed &&
+      o.status !== FOOD_ORDER_STATUS.Cancelled  &&
+      o.status !== FOOD_ORDER_STATUS.Expired,
+    ).length,
+    [orders],
+  );
 
   const [searchText,     setSearchTextState]     = useState<string>('');
   const [activeCategory, setActiveCategoryState] = useState<FoodCategory>('All');
@@ -55,13 +69,14 @@ export function useFoodScreen(): UseFoodScreenResult {
   );
 
   const handleAddressPress = useCallback(() => navigation.navigate('AddressList', { mode: 'manage' }), [navigation]);
-  // Cart icon now opens the combined cart + orders screen.
-  const handleCartPress    = useCallback(() => navigation.navigate('CartAndOrders'),                  [navigation]);
-  const handleBack         = useCallback(() => navigation.goBack(),                                   [navigation]);
+  const handleCartPress    = useCallback(() => navigation.navigate('Cart'),                            [navigation]);
+  const handleOrdersPress  = useCallback(() => navigation.navigate('FoodOrders'),                     [navigation]);
+  const handleBack         = useCallback(() => navigation.goBack(),                                    [navigation]);
 
   return {
     ...listData,
     cartItemCount: cartCount,
+    activeOrderCount,
     searchText,
     activeCategory,
     setSearchText,
@@ -69,6 +84,7 @@ export function useFoodScreen(): UseFoodScreenResult {
     handleRestaurantPress,
     handleAddressPress,
     handleCartPress,
+    handleOrdersPress,
     handleBack,
   };
 }
