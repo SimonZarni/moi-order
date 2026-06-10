@@ -337,7 +337,7 @@ function DocumentUploadBox({ label, file, error, onSelect, onRemove }: DocumentU
             gap: 1,
           }}
         >
-          <Iconify icon="solar:document-text-bold" width={20} sx={{ color: 'success.main', flexShrink: 0 }} />
+          <Iconify icon="solar:file-bold" width={20} sx={{ color: 'success.main', flexShrink: 0 }} />
           <Typography
             variant="body2"
             sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
@@ -348,7 +348,7 @@ function DocumentUploadBox({ label, file, error, onSelect, onRemove }: DocumentU
             {(file.size / 1024).toFixed(0)} KB
           </Typography>
           <IconButton size="small" onClick={onRemove} sx={{ flexShrink: 0 }}>
-            <Iconify icon="solar:close-circle-bold" width={16} />
+            <Iconify icon="mingcute:close-line" width={16} />
           </IconButton>
         </Box>
       ) : (
@@ -368,7 +368,7 @@ function DocumentUploadBox({ label, file, error, onSelect, onRemove }: DocumentU
             '&:hover': { borderColor: 'text.secondary', bgcolor: 'action.hover' },
           }}
         >
-          <Iconify icon="solar:upload-minimalistic-bold" width={20} sx={{ color: 'text.disabled' }} />
+          <Iconify icon="mingcute:add-line" width={20} sx={{ color: 'text.disabled' }} />
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             Click to upload &nbsp;·&nbsp; JPG, PNG, PDF &nbsp;·&nbsp; max 10 MB
           </Typography>
