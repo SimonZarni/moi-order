@@ -47,8 +47,8 @@ class MoveCategoryToSystem extends Command
 
         $itemCount = $source->menuItems()->count();
 
-        $this->line("Source : #{$source->id} "{$source->name}" ({$itemCount} item(s)) — restaurant #{$source->restaurant_id}");
-        $this->line("Dest   : #{$dest->id} "{$dest->name}" (system: {$type->value})");
+        $this->line("Source : #{$source->id} \"{$source->name}\" ({$itemCount} item(s)) — restaurant #{$source->restaurant_id}");
+        $this->line("Dest   : #{$dest->id} \"{$dest->name}\" (system: {$type->value})");
 
         if ($dryRun) {
             $this->info("DRY RUN — no changes made.");
