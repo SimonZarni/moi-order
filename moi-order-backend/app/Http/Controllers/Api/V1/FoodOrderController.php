@@ -124,6 +124,15 @@ class FoodOrderController extends Controller
 
         $lineId = $order->user?->line_id;
 
+        \Illuminate\Support\Facades\Log::error('notifyLinePay debug', [
+            'order_uuid'      => $order->uuid,
+            'order_number'    => $order->order_number,
+            'user_id'         => $order->user?->id,
+            'line_id'         => $lineId,
+            'payment_method'  => $order->payment_method?->value,
+            'status'          => $order->status?->value,
+        ]);
+
         if (! $lineId) {
             throw new DomainException('order.line_not_linked', 409);
         }
