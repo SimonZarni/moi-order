@@ -1060,7 +1060,7 @@ const mm: AppStrings = {
     recommendations:         'အကြံပြုချက်များ',
     noItemsYet:              'ပစ္စည်းမရှိသေးပါ',
     specialInstructions:     'အထူးညွှန်ကြားချက် (ရွေးချယ်နိုင်)',
-    instructionsPlaceholder: 'ဥပမာ မဆီမထည့်နဲ့၊ ဆော့စ်ပိုထည့်…',
+    instructionsPlaceholder: 'ဥပမာ ဆီမထည့်နဲ့၊ ဆော့စ်ပိုထည့်…',
     addToCart:               'ခြင်းတောင်းထဲ ထည့်မည်',
     customizable:            'စိတ်ကြိုက်ရွေးချယ်နိုင်',
     unavailable:             'မရရှိနိုင်ပါ',
