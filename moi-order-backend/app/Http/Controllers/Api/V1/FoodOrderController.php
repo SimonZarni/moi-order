@@ -133,9 +133,11 @@ class FoodOrderController extends Controller
         }
 
         $this->lineMessaging->pushToAdmin($order->linePayNotificationText());
-        $this->lineMessaging->pushToUser($lineId, $order->linePayCustomerText());
 
-        return response()->json(null, 200);
+        $customerMessage = $order->linePayCustomerText();
+        $this->lineMessaging->pushToUser($lineId, $customerMessage);
+
+        return response()->json(['pre_filled_message' => $customerMessage], 200);
     }
 
     /** POST /api/v1/food-orders/{id}/complete */

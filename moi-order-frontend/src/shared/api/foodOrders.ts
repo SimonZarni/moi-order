@@ -62,8 +62,9 @@ export async function deleteFoodOrder(id: string): Promise<void> {
   await apiClient.delete(`/api/v1/food-orders/${id}`);
 }
 
-export async function notifyLinePayment(id: string): Promise<void> {
-  await apiClient.post(`/api/v1/food-orders/${id}/notify-line-pay`);
+export async function notifyLinePayment(id: string): Promise<{ pre_filled_message: string }> {
+  const res = await apiClient.post<{ pre_filled_message: string }>(`/api/v1/food-orders/${id}/notify-line-pay`);
+  return res.data;
 }
 
 export async function fetchOrderChat(orderId: string): Promise<OrderChatMessage[]> {

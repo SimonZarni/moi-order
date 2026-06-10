@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { RootStackParamList } from '@/types/navigation';
 import { FoodOrder } from '@/types/models';
 import { FOOD_ORDER_STATUS } from '@/types/enums';
-import { LINE_OA_URL, ORDER_PAYMENT_TIMEOUT_MS } from '@/shared/constants/config';
+import { LINE_OA_MESSAGE_URL, LINE_OA_URL, ORDER_PAYMENT_TIMEOUT_MS } from '@/shared/constants/config';
 import { ERROR_CODES } from '@/shared/constants/errorCodes';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { cancelFoodOrder, completeFoodOrder, notifyLinePayment } from '@/shared/api/foodOrders';
@@ -63,7 +63,11 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
 
   const handlePromptPayPress = useCallback(async () => {
     try {
-      await notifyLinePayment(orderId);
+      const { pre_filled_message } = await notifyLinePayment(orderId);
+      const url = `${LINE_OA_MESSAGE_URL}?text=${encodeURIComponent(pre_filled_message)}`;
+      Linking.openURL(url).catch(() =>
+        Alert.alert('Cannot open LINE', 'Please open LINE and search for @moiorder to complete your payment.'),
+      );
     } catch (e: unknown) {
       const code = (e as ApiError)?.code;
 
@@ -86,11 +90,12 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
         Alert.alert('LINE Account Required', 'Please sign in with LINE to use LINE Pay.');
         return;
       }
-      // Other errors: best-effort, still open LINE.
+
+      // Other errors: fall back to plain OA chat.
+      Linking.openURL(LINE_OA_URL).catch(() =>
+        Alert.alert('Cannot open LINE', 'Please open LINE and search for @moiorder to complete your payment.'),
+      );
     }
-    Linking.openURL(LINE_OA_URL).catch(() =>
-      Alert.alert('Cannot open LINE', 'Please open LINE and search for @moiorder to complete your payment.'),
-    );
   }, [orderId]);
 
   const handleChatPress = useCallback(() => {
