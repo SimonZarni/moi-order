@@ -67,12 +67,6 @@ class RestaurantService
     /** @param array<string, mixed> $data */
     public function update(Restaurant $restaurant, array $data): Restaurant
     {
-        $newStatus = isset($data['status']) ? RestaurantStatus::from($data['status']) : null;
-
-        if ($newStatus === RestaurantStatus::Open) {
-            $this->menuService->validateOpenReady($restaurant);
-        }
-
         return DB::transaction(function () use ($restaurant, $data): Restaurant {
             $updates = array_filter([
                 'name'                  => $data['name'] ?? null,
