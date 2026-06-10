@@ -15,6 +15,9 @@ export const styles = StyleSheet.create({
     borderTopLeftRadius: radius.sheet,
     borderTopRightRadius: radius.sheet,
     flex: 1,
+    maxWidth: 480,
+    width: '100%',
+    alignSelf: 'center',
   },
   loader: {
     marginTop: spacing.xxl,
