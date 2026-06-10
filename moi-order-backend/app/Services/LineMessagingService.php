@@ -33,11 +33,6 @@ class LineMessagingService implements LineMessagingInterface
                     'messages' => [['type' => 'text', 'text' => $message]],
                 ]);
 
-            Log::info('LineMessagingService: push response', [
-                'status' => $response->status(),
-                'body'   => $response->body(),
-            ]);
-
             $response->throw();
         } catch (\Throwable $e) {
             Log::error('LineMessagingService: push failed', [
