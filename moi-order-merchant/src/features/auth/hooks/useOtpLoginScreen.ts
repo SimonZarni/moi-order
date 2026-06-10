@@ -5,6 +5,14 @@ import { extractApiError } from '../../../api/client';
 
 type OtpStep = 'phone' | 'pin';
 
+function normalizeThai(raw: string): string {
+  const digits = raw.replace(/\D/g, '');
+  if (digits.startsWith('66') && digits.length === 11) return digits;
+  if (digits.startsWith('0') && digits.length === 10) return '66' + digits.slice(1);
+  if (digits.length === 9) return '66' + digits;
+  return digits;
+}
+
 interface UseOtpLoginScreenResult {
   step: OtpStep;
   phoneNumber: string;
@@ -33,7 +41,9 @@ export function useOtpLoginScreen(): UseOtpLoginScreenResult {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await requestOtp(phoneNumber.trim());
+      const normalized = normalizeThai(phoneNumber.trim());
+      const result = await requestOtp(normalized);
+      setPhoneNumber(normalized);
       setOtpRequestId(result.otp_request_id);
       setStep('pin');
     } catch (e) {
