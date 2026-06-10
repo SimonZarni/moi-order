@@ -33,6 +33,15 @@ Schedule::command('order-chat:purge')
         \Illuminate\Support\Facades\Log::error('order-chat:purge failed');
     });
 
+// Auto-close restaurants that are Open but still missing required menu items (Popular Picks / Recommendations).
+// Runs daily at 03:00 Bangkok time (UTC+7 = 20:00 UTC) — gives admin-forced openings a 24-hour grace window.
+Schedule::command('restaurants:enforce-menu-rules')
+    ->dailyAt('20:00')
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        \Illuminate\Support\Facades\Log::error('restaurants:enforce-menu-rules scheduled run failed');
+    });
+
 // Send 90-day report reminders once daily at 09:00 Bangkok time (UTC+7 = 02:00 UTC).
 Schedule::command('documents:send-ninety-day-reminders')
     ->dailyAt('02:00')
