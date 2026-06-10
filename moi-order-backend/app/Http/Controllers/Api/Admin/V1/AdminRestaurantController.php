@@ -12,7 +12,6 @@ use App\Http\Resources\RestaurantResource;
 use App\Models\Restaurant;
 use App\Models\RestaurantPhoto;
 use App\Models\User;
-use App\Services\MenuService;
 use App\Services\RestaurantService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,7 +25,6 @@ class AdminRestaurantController extends Controller
     public function __construct(
         private readonly RestaurantService    $restaurantService,
         private readonly FileStorageInterface $storage,
-        private readonly MenuService          $menuService,
     ) {}
 
     public function index(Request $request): JsonResponse
@@ -125,10 +123,7 @@ class AdminRestaurantController extends Controller
     {
         $request->validate(['status' => ['required', 'string', 'in:open,closed,paused']]);
 
-        if ($request->string('status')->toString() === 'open') {
-            $this->menuService->validateOpenReady($restaurant);
-        }
-
+        // Admin can force-open without the menu-rule check — merchant self-service enforces it instead.
         match ($request->string('status')->toString()) {
             'open'   => $restaurant->markAsOpen(),
             'closed' => $restaurant->markAsClosed(),

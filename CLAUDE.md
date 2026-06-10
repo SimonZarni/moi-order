@@ -372,7 +372,7 @@ TESTS (Pest + Vitest+RTL):
   - `MenuCategoryType::isRequired()` returns `true` for PopularPicks and Recommendations only.
   - `MenuService::validateOpenReady()` throws `DomainException('menu.system_category_empty')` if
     either required category has no `Available` menu item. This is called by `RestaurantService::update()`
-    (merchant) and `AdminRestaurantController::updateStatus()` (admin) before `markAsOpen()`.
+    (merchant) only — admins can force-open any restaurant without the check.
   - `MenuService::createSystemCategoriesForRestaurant()` is idempotent and also **restores soft-deleted**
     system categories (not just creates missing ones). Called on restaurant creation and via the backfill command.
   - New restaurants are created with `status: Closed` — they cannot open until both required categories have items.
