@@ -159,9 +159,30 @@ function MobileNavigator(): React.JSX.Element {
 
 // ── Web ────────────────────────────────────────────────────────────────────────
 
+const VALID_SCREENS: ReadonlySet<WebScreen> = new Set<WebScreen>([
+  'Dashboard', 'Orders', 'Menu', 'Restaurant', 'Analytics',
+  'Notifications', 'BusinessProfile', 'Reviews', 'CancelledOrders',
+]);
+
+function readPersistedScreen(): WebScreen {
+  try {
+    const v = localStorage.getItem('merchant_screen') as WebScreen | null;
+    return v !== null && VALID_SCREENS.has(v) ? v : 'Dashboard';
+  } catch { return 'Dashboard'; }
+}
+
+function readPersistedOrderId(): number | null {
+  try {
+    const v = localStorage.getItem('merchant_order_id');
+    if (v === null) return null;
+    const n = Number(v);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  } catch { return null; }
+}
+
 function WebMerchantLayout(): React.JSX.Element {
-  const [activeScreen, setActiveScreen] = useState<WebScreen>('Dashboard');
-  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+  const [activeScreen, setActiveScreen] = useState<WebScreen>(readPersistedScreen);
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(readPersistedOrderId);
   const [chatOrderId, setChatOrderId] = useState<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { isDesktop } = useResponsive();
@@ -172,15 +193,19 @@ function WebMerchantLayout(): React.JSX.Element {
     setSelectedOrderId(null);
     setChatOrderId(null);
     setSidebarOpen(false);
+    try { localStorage.setItem('merchant_screen', screen); } catch {}
+    try { localStorage.removeItem('merchant_order_id'); } catch {}
   }, []);
 
   const handleSelectOrder = useCallback((orderId: number) => {
     setSelectedOrderId(orderId);
     setChatOrderId(null);
+    try { localStorage.setItem('merchant_order_id', String(orderId)); } catch {}
   }, []);
 
   const handleBackFromOrder = useCallback(() => {
     setSelectedOrderId(null);
+    try { localStorage.removeItem('merchant_order_id'); } catch {}
   }, []);
 
   const handleChatOpen = useCallback((orderId: number) => {

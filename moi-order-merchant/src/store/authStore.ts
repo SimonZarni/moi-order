@@ -32,6 +32,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
   logout() {
     storage.deleteItemAsync(TOKEN_KEY).catch(() => {});
     setApiToken(null);
+    try { localStorage.removeItem('merchant_screen'); } catch {}
+    try { localStorage.removeItem('merchant_order_id'); } catch {}
     set({ user: null, token: null });
   },
 
