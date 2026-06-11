@@ -35,7 +35,7 @@ export function setMemoryLocale(locale: string): void {
 
 const apiClient = axios.create({
   baseURL: process.env['EXPO_PUBLIC_API_URL'],
-  timeout: 30_000,
+  timeout: 120_000,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',

@@ -7,7 +7,7 @@ const BASE_URL =
 export const apiClient = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-  timeout: 15_000,
+  timeout: 120_000,
 });
 
 // In-memory token ref — populated at login, avoids awaiting SecureStore in the interceptor
