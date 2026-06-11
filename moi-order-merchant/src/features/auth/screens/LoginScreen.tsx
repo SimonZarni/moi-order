@@ -119,7 +119,6 @@ export function LoginScreen(): React.JSX.Element {
           {isLineLoading
             ? <ActivityIndicator size="small" color={colours.textOnDark} />
             : <Text style={styles.socialBtnLine}>LINE</Text>}
-          <Text style={styles.socialBtnText}>LINE</Text>
         </Pressable>
       </View>
 
