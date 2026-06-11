@@ -106,7 +106,7 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
   const waitingNote = WAITING_NOTES[order.status];
   const canCancel = CANCELLABLE_STATUSES.has(order.status);
   const statusColour = STATUS_COLOURS[order.status] ?? colours.medium;
-  const canChat = order.payment_confirmed_at !== null && order.status !== ORDER_STATUS.Cancelled;
+  const canChat = order.status !== ORDER_STATUS.Cancelled && order.status !== ORDER_STATUS.Completed;
 
   const handleCallCustomer = (): void => {
     if (order.user.phone !== null) {
