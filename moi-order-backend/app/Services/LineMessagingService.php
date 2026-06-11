@@ -28,16 +28,8 @@ class LineMessagingService implements LineMessagingInterface
             $response = Http::withToken($this->channelAccessToken)
                 ->get(self::PROFILE_URL . $userId);
 
-            Log::error('LINE isFollowing', [
-                'user_id' => $userId,
-                'status'  => $response->status(),
-                'body'    => $response->body(),
-                'token_length' => strlen($this->channelAccessToken),
-            ]);
-
             return $response->successful();
-        } catch (\Throwable $e) {
-            Log::error('LINE isFollowing exception', ['user_id' => $userId, 'error' => $e->getMessage()]);
+        } catch (\Throwable) {
             return false;
         }
     }

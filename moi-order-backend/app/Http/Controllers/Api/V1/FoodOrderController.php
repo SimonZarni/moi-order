@@ -122,27 +122,15 @@ class FoodOrderController extends Controller
             throw new DomainException('order.not_awaiting_payment', 409);
         }
 
-        $lineId = $order->user?->line_id;
-
-        \Illuminate\Support\Facades\Log::error('notifyLinePay debug', [
-            'order_uuid'      => $order->uuid,
-            'order_number'    => $order->order_number,
-            'user_id'         => $order->user?->id,
-            'line_id'         => $lineId,
-            'payment_method'  => $order->payment_method?->value,
-            'status'          => $order->status?->value,
-        ]);
-
-        if (! $lineId) {
-            throw new DomainException('order.line_not_linked', 409);
-        }
-
-        if (! $this->lineMessaging->isFollowing($lineId)) {
-            throw new DomainException('order.line_not_following', 409);
-        }
-
+        // Always notify the admin group — customer LINE status must never block this.
         $this->lineMessaging->pushToAdmin($order->linePayNotificationText());
-        $this->lineMessaging->pushToUser($lineId, $order->linePayCustomerText());
+
+        // Best-effort push to customer — silently skip if they haven't linked LINE or
+        // haven't followed the OA (pushToUser already swallows all LINE API errors).
+        $lineId = $order->user?->line_id;
+        if ($lineId && $this->lineMessaging->isFollowing($lineId)) {
+            $this->lineMessaging->pushToUser($lineId, $order->linePayCustomerText());
+        }
 
         $preFilled = 'I have ordered ' . ($order->order_number ?? '#' . $order->id) . ' and ready to pay via LINE.';
 
