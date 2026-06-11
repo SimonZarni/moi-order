@@ -713,7 +713,7 @@ const en: AppStrings = {
     loading:      'Loading…',
   },
   restaurant: {
-    listTitle:               'Restaurantshaa',
+    listTitle:               'Restaurants',
     couldNotLoad:            'Could not load restaurant.',
     closesAt:                'Closes at {time}',
     statusOpen:              'Open',
