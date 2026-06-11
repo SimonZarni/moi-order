@@ -29,7 +29,7 @@
     "web": {
       "bundler": "metro",
       "output": "single",
-      "favicon": "./assets/moi-order-icon.png",
+      "favicon": "./public/favicon-32x32.png",
       "name": "Moi Order Merchant",
       "shortName": "Moi Order",
       "description": "Manage orders, menus, and analytics for your restaurant.",
