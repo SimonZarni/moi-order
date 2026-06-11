@@ -34,6 +34,7 @@ export const styles = StyleSheet.create({
   brandLogo: {
     width: 64,
     height: 64,
+    borderRadius: radius.xl,
     marginBottom: spacing.sm,
   },
   brandName: {

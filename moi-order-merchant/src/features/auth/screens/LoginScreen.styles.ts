@@ -31,7 +31,7 @@ export const styles = StyleSheet.create({
   container: { flex: 1, padding: spacing.lg, justifyContent: 'center' },
 
   // ── Brand ─────────────────────────────────────────────────────────────────────
-  brandLogo: { width: 48, height: 48 },
+  brandLogo: { width: 48, height: 48, borderRadius: radius.xl },
   brandName: { fontSize: typography.lg, fontWeight: '800', color: colours.textOnDark, letterSpacing: -0.3 },
   brandRole: { fontSize: typography.xxs, fontWeight: '700', color: colours.primary, textTransform: 'uppercase', letterSpacing: 1.6, marginTop: 2 },
   brandDivider: { width: 32, height: 1.5, backgroundColor: colours.primary + '44', marginVertical: spacing.xs },
