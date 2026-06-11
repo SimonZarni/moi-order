@@ -140,6 +140,9 @@ export function KycDetailView() {
         <Typography variant="h4" sx={{ flexGrow: 1 }}>
           KYC Review — {application.business_name}
         </Typography>
+        <Label color={application.type === 'resubmission' ? 'warning' : 'default'}>
+          {application.type === 'resubmission' ? 'Resubmission' : 'Initial KYC'}
+        </Label>
         <Label color={STATUS_COLOR[application.status] ?? 'default'}>
           {application.status_label}
         </Label>

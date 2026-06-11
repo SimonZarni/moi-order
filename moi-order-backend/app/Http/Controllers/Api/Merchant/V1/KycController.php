@@ -101,6 +101,19 @@ class KycController extends Controller
         return response()->json(['data' => new KycDocumentResource($doc)], 201);
     }
 
+    /** POST /api/merchant/v1/kyc/resubmit/{id}/use-existing-documents */
+    public function useExistingDocuments(Request $request, int $id): JsonResponse
+    {
+        $app = KycApplication::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->where('type', 'resubmission')
+            ->firstOrFail();
+
+        $app = $this->kycService->copyDocumentsFromOriginal($app);
+
+        return response()->json(['data' => new KycApplicationResource($app)]);
+    }
+
     /** POST /api/merchant/v1/kyc/resubmit/{id}/submit */
     public function submitResubmission(Request $request, int $id): JsonResponse
     {

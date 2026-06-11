@@ -11,6 +11,7 @@ import { getMenuCategories } from '../../../api/menu';
 import { extractApiError } from '../../../api/client';
 import {
   createKycResubmission, uploadResubmitDocument, submitKycResubmission,
+  useExistingDocumentsForResubmission,
   type UploadFileRef,
 } from '../../../api/kyc';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
@@ -40,6 +41,7 @@ export interface ResubmitForm {
   business_address: string;
   resubmissionId: number | null;
   step: 'form' | 'docs' | 'submitting' | 'done';
+  uploadedDocTypes: string[];
 }
 
 interface DescriptionForm {
@@ -102,6 +104,8 @@ interface UseRestaurantScreenResult {
   handleResubmitSubmitForm: () => void;
   handleResubmitUploadDoc: (type: KycDocType, file: UploadFileRef) => void;
   handleResubmitFinalSubmit: () => void;
+  handleUseExistingDocs: () => void;
+  isUsingExistingDocs: boolean;
 }
 
 export function useRestaurantScreen(): UseRestaurantScreenResult {
@@ -122,6 +126,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     business_address: '',
     resubmissionId: null,
     step: 'form',
+    uploadedDocTypes: [],
   });
 
   const { data, isLoading } = useQuery({
@@ -232,6 +237,22 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
   const { mutate: mutateResubmitDoc } = useMutation({
     mutationFn: ({ id, type, file }: { id: number; type: KycDocType; file: UploadFileRef }) =>
       uploadResubmitDocument(id, type, file),
+    onSuccess: (doc) => {
+      setResubmitForm((prev) => ({
+        ...prev,
+        uploadedDocTypes: [...prev.uploadedDocTypes.filter((t) => t !== doc.type), doc.type],
+      }));
+    },
+  });
+
+  const { mutate: mutateUseExistingDocs, isPending: isUsingExistingDocs } = useMutation({
+    mutationFn: (id: number) => useExistingDocumentsForResubmission(id),
+    onSuccess: (app) => {
+      setResubmitForm((prev) => ({
+        ...prev,
+        uploadedDocTypes: app.documents.map((d) => d.type),
+      }));
+    },
   });
 
   const { mutate: mutateResubmitSubmit } = useMutation({
@@ -448,6 +469,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
       business_address: restaurant?.address ?? '',
       resubmissionId: null,
       step: 'form',
+      uploadedDocTypes: [],
     });
     setResubmitModal(true);
   }, [restaurant]);
@@ -482,6 +504,11 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     setResubmitForm((prev) => ({ ...prev, step: 'submitting' }));
     mutateResubmitSubmit(resubmitForm.resubmissionId);
   }, [resubmitForm.resubmissionId, mutateResubmitSubmit]);
+
+  const handleUseExistingDocs = useCallback(() => {
+    if (resubmitForm.resubmissionId === null) return;
+    mutateUseExistingDocs(resubmitForm.resubmissionId);
+  }, [resubmitForm.resubmissionId, mutateUseExistingDocs]);
 
   return {
     restaurant,
@@ -539,5 +566,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     handleResubmitSubmitForm,
     handleResubmitUploadDoc,
     handleResubmitFinalSubmit,
+    handleUseExistingDocs,
+    isUsingExistingDocs,
   };
 }

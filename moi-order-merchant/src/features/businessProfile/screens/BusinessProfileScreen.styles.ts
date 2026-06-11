@@ -88,5 +88,5 @@ export const styles = StyleSheet.create({
   unverifiedBanner: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: '#f59e0b18', padding: spacing.md, borderRadius: radius.lg, borderWidth: 1, borderColor: '#f59e0b33', marginBottom: spacing.sm },
   unverifiedBannerBody: { flex: 1 },
   unverifiedBannerTitle: { fontSize: typography.sm, fontWeight: '700', color: '#f59e0b' },
-  unverifiedBannerSub: { fontSize: typography.xs, color: 'rgba(255,255,255,0.5)', marginTop: 2 },
+  unverifiedBannerSub: { fontSize: typography.xs, color: '#92400e', marginTop: 2 },
 });

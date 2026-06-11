@@ -251,6 +251,43 @@ class KycService
     }
 
     /**
+     * Copy documents from the merchant's original approved KYC to a resubmission application.
+     * Allows merchants to reuse their existing documents without re-uploading.
+     * Principle: Security — only copies within the same user_id scope.
+     * Principle: Idempotency — clears any existing resubmission docs before copying.
+     */
+    public function copyDocumentsFromOriginal(KycApplication $resubmission): KycApplication
+    {
+        $original = KycApplication::where('user_id', $resubmission->user_id)
+            ->where('type', 'initial')
+            ->where('status', KycApplicationStatus::Approved->value)
+            ->latest()
+            ->first();
+
+        if ($original === null) {
+            throw new DomainException('kyc.no_original_application', 409);
+        }
+
+        $original->load('documents');
+
+        DB::transaction(function () use ($resubmission, $original): void {
+            $resubmission->documents()->delete();
+
+            foreach ($original->documents as $doc) {
+                KycDocument::create([
+                    'kyc_application_id' => $resubmission->id,
+                    'type'               => $doc->type->value,
+                    'file_path'          => $doc->file_path,
+                ]);
+            }
+        });
+
+        $resubmission->load('documents');
+
+        return $resubmission;
+    }
+
+    /**
      * Reject the KYC application.
      * DB::transaction — single-table write but explicit for consistency.
      */

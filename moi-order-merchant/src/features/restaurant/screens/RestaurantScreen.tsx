@@ -11,11 +11,18 @@ import { CoverPhotoCropModal } from '../components/CoverPhotoCropModal';
 import { styles } from './RestaurantScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
-import { RESTAURANT_STATUS } from '../../../types/enums';
-import type { RestaurantStatus } from '../../../types/enums';
+import { RESTAURANT_STATUS, KYC_DOC_TYPE } from '../../../types/enums';
+import type { RestaurantStatus, KycDocType } from '../../../types/enums';
 import { MAX_GALLERY_PHOTOS } from '../../../shared/constants/config';
 
 const LINE_OA_URL = 'https://line.me/R/ti/p/%40moiorder';
+
+const RESUBMIT_DOC_TYPES: Array<{ type: KycDocType; label: string }> = [
+  { type: KYC_DOC_TYPE.NationalId,           label: 'National ID' },
+  { type: KYC_DOC_TYPE.BusinessRegistration, label: 'Business Registration' },
+  { type: KYC_DOC_TYPE.BankBook,             label: 'Bank Book' },
+  { type: KYC_DOC_TYPE.StorefrontPhoto,      label: 'Storefront Photo' },
+];
 
 const STATUS_CONFIG: Record<RestaurantStatus, { label: string; color: string; bg: string }> = {
   [RESTAURANT_STATUS.Open]:   { label: '🟢 Open',   color: colours.success,  bg: colours.successBg },
@@ -48,7 +55,8 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
     hoursError,
     handleOpenResubmit, handleCloseResubmit,
     handleResubmitFieldChange, handleResubmitSubmitForm,
-    handleResubmitFinalSubmit,
+    handleResubmitUploadDoc, handleResubmitFinalSubmit,
+    handleUseExistingDocs, isUsingExistingDocs,
     statusWarning, handleDismissStatusWarning,
   } = useRestaurantScreen();
 
@@ -117,6 +125,13 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
   const handlePickGalleryPhoto = useCallback(async () => {
     await pickAndConvert(handleUploadGalleryPhoto, 'gallery');
   }, [pickAndConvert, handleUploadGalleryPhoto]);
+
+  const handlePickResubmitDoc = useCallback(async (docType: KycDocType) => {
+    await pickAndConvert(
+      (uri, name, type) => handleResubmitUploadDoc(docType, { uri, name, type }),
+      docType,
+    );
+  }, [pickAndConvert, handleResubmitUploadDoc]);
 
   const handleContactSupport = useCallback(() => {
     Linking.openURL(LINE_OA_URL).catch(() => {});
@@ -591,23 +606,80 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
             )}
 
             {resubmitForm.step === 'docs' && (
-              <View style={styles.modalBody}>
+              <ScrollView style={{ maxHeight: 480 }} contentContainerStyle={styles.modalScrollBody} showsVerticalScrollIndicator={false}>
                 <Text style={styles.modalNote}>
-                  Please upload your supporting documents (passport, business registration, proof of address) to verify the change.
+                  Verify your identity to approve this change. Use your existing documents or upload new ones.
                 </Text>
-                <Text style={styles.modalDocNote}>
-                  Use the same document upload process as your original KYC. When ready, tap Submit.
-                </Text>
+
+                {/* Use existing docs shortcut */}
                 <Pressable
-                  style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
+                  style={styles.useExistingBtn}
+                  onPress={handleUseExistingDocs}
+                  disabled={isUsingExistingDocs}
+                  accessibilityRole="button"
+                  accessibilityLabel="Use same documents as original KYC"
+                >
+                  {isUsingExistingDocs
+                    ? <ActivityIndicator size="small" color={colours.primary} />
+                    : <Ionicons name="copy-outline" size={16} color={colours.primary} />
+                  }
+                  <Text style={styles.useExistingBtnText}>
+                    {isUsingExistingDocs ? 'Copying…' : 'Use same documents as original KYC'}
+                  </Text>
+                </Pressable>
+
+                {/* OR divider */}
+                <View style={styles.orDivider}>
+                  <View style={styles.orDividerLine} />
+                  <Text style={styles.orDividerText}>OR UPLOAD NEW</Text>
+                  <View style={styles.orDividerLine} />
+                </View>
+
+                {/* Individual doc upload rows */}
+                <View>
+                  {RESUBMIT_DOC_TYPES.map(({ type, label }) => {
+                    const uploaded = resubmitForm.uploadedDocTypes.includes(type);
+                    return (
+                      <View key={type} style={styles.docUploadRow}>
+                        <Ionicons
+                          name={uploaded ? 'checkmark-circle' : 'ellipse-outline'}
+                          size={18}
+                          color={uploaded ? colours.success : colours.textSubtle}
+                        />
+                        <Text style={styles.docUploadRowLabel}>{label}</Text>
+                        {uploaded && <Text style={styles.docUploadRowUploaded}>✓ Ready</Text>}
+                        <Pressable
+                          style={styles.docUploadRowBtn}
+                          onPress={() => { void handlePickResubmitDoc(type); }}
+                          accessibilityRole="button"
+                          accessibilityLabel={`${uploaded ? 'Replace' : 'Upload'} ${label}`}
+                        >
+                          <Text style={styles.docUploadRowBtnText}>{uploaded ? 'Replace' : 'Upload'}</Text>
+                        </Pressable>
+                      </View>
+                    );
+                  })}
+                </View>
+
+                {/* Progress + submit */}
+                <View style={styles.docUploadProgress}>
+                  <Text style={styles.docUploadProgressText}>
+                    {resubmitForm.uploadedDocTypes.length}/{RESUBMIT_DOC_TYPES.length} documents ready
+                  </Text>
+                </View>
+                <Pressable
+                  style={[
+                    styles.saveButton,
+                    (isSaving || resubmitForm.uploadedDocTypes.length < RESUBMIT_DOC_TYPES.length) && styles.saveButtonDisabled,
+                  ]}
                   onPress={handleResubmitFinalSubmit}
-                  disabled={isSaving}
+                  disabled={isSaving || resubmitForm.uploadedDocTypes.length < RESUBMIT_DOC_TYPES.length}
                   accessibilityRole="button"
                   accessibilityLabel="Submit resubmission"
                 >
                   <Text style={styles.saveButtonText}>{isSaving ? 'Submitting…' : 'Submit for Review'}</Text>
                 </Pressable>
-              </View>
+              </ScrollView>
             )}
 
             {resubmitForm.step === 'done' && (

@@ -109,3 +109,10 @@ export async function submitKycResubmission(resubmissionId: number): Promise<Kyc
   const response = await apiClient.post<{ data: KycApplication }>(`/kyc/resubmit/${resubmissionId}/submit`);
   return response.data.data;
 }
+
+export async function useExistingDocumentsForResubmission(resubmissionId: number): Promise<KycApplication> {
+  const response = await apiClient.post<{ data: KycApplication }>(
+    `/kyc/resubmit/${resubmissionId}/use-existing-documents`,
+  );
+  return response.data.data;
+}

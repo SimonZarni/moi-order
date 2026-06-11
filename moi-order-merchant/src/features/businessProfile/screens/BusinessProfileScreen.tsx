@@ -85,7 +85,7 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
                 Tap to verify your email and set your own password.
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.4)" />
+            <Ionicons name="chevron-forward" size={16} color="#78350f" />
           </Pressable>
         )}
 
