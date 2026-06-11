@@ -81,12 +81,18 @@ export async function sendOrderChatMessage(
   const form = new FormData();
   if (body) form.append('body', body);
   if (image) {
-    form.append('image', { uri: image.uri, name: image.name, type: image.type } as unknown as Blob);
+    // Normalise MIME: HEIC/HEIF → jpeg; uppercase → lowercase.
+    const rawMime = image.type.toLowerCase();
+    const mime = rawMime.includes('heic') || rawMime.includes('heif') ? 'image/jpeg' : rawMime;
+    const ext  = mime.split('/')[1] ?? 'jpg';
+    form.append('image', { uri: image.uri, name: `chat.${ext}`, type: mime } as unknown as Blob);
   }
+  // Do NOT set Content-Type manually — React Native XHR adds multipart/form-data
+  // with the correct boundary automatically when it detects a FormData body.
+  // Setting it manually strips the boundary and the server cannot parse the upload.
   const res = await apiClient.post<ApiResponse<OrderChatMessage>>(
     `/api/v1/food-orders/${orderId}/chat`,
     form,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
   );
   return res.data.data;
 }

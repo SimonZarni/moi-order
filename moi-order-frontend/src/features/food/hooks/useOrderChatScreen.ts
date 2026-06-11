@@ -78,10 +78,14 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
     if (result.canceled || result.assets.length === 0) return;
     const asset = result.assets[0];
     if (!asset) return;
-    const ext = asset.uri.split('.').pop() ?? 'jpg';
+    const rawMime = (asset.mimeType ?? '').toLowerCase();
+    const mime = rawMime.includes('heic') || rawMime.includes('heif') || !rawMime
+      ? 'image/jpeg'
+      : rawMime;
+    const ext = mime.split('/')[1] ?? 'jpg';
     setSendError(null);
     sendMutation.mutate(
-      { orderId, body: null, image: { uri: asset.uri, name: `chat.${ext}`, type: `image/${ext}` } },
+      { orderId, body: null, image: { uri: asset.uri, name: `chat.${ext}`, type: mime } },
       { onError: () => setSendError('Failed to send image. Please try again.') },
     );
   }, [sendMutation, orderId]);

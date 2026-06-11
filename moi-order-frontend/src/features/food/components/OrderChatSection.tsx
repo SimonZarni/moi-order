@@ -60,11 +60,15 @@ export function OrderChatSection({ order }: Props): React.JSX.Element {
   }, [text, sendMutation, order.id]);
 
   const sendImageAsset = useCallback((asset: ImagePicker.ImagePickerAsset) => {
-    const ext = asset.uri.split('.').pop() ?? 'jpg';
+    const rawMime = (asset.mimeType ?? '').toLowerCase();
+    const mime = rawMime.includes('heic') || rawMime.includes('heif') || !rawMime
+      ? 'image/jpeg'
+      : rawMime;
+    const ext = mime.split('/')[1] ?? 'jpg';
     sendMutation.mutate({
       orderId: order.id,
       body:    null,
-      image:   { uri: asset.uri, name: `chat.${ext}`, type: `image/${ext}` },
+      image:   { uri: asset.uri, name: `chat.${ext}`, type: mime },
     });
   }, [sendMutation, order.id]);
 
