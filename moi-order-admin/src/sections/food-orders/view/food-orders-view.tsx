@@ -175,7 +175,7 @@ export function FoodOrdersView() {
                       <TableRow key={row.id} hover>
                         <TableCell>
                           <Typography variant="body2" fontWeight={600} color="primary.main">
-                            #{row.id}
+                            {row.order_number ?? `#${row.id.slice(0, 8)}`}
                           </Typography>
                         </TableCell>
                         <TableCell>

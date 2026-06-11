@@ -111,7 +111,7 @@ export function FoodOrderDetailView() {
           Back
         </Button>
         <Typography variant="h4" sx={{ flexGrow: 1 }}>
-          Order #{order.id}
+          Order {order.order_number ?? `#${order.id.slice(0, 8)}`}
         </Typography>
         <Label color={STATUS_COLOR[order.status] ?? 'default'}>{order.status_label}</Label>
 

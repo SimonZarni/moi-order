@@ -14,7 +14,8 @@ export type FoodOrderStatus =
 export type FoodPaymentMethod = 'cod' | 'prompt_pay';
 
 export type FoodOrderListItem = {
-  id: number;
+  id: string;
+  order_number: string | null;
   status: FoodOrderStatus;
   status_label: string;
   payment_method: FoodPaymentMethod;
@@ -41,10 +42,12 @@ export type FoodOrderDetail = FoodOrderListItem & {
   subtotal_cents: number;
   customer_notes: string | null;
   prompt_pay_url: string | null;
+  contact_no: string | null;
   items: FoodOrderItemDetail[];
   preparing_at: string | null;
   picked_up_at: string | null;
   delivered_at: string | null;
+  cancelled_at: string | null;
 };
 
 type Meta = { current_page: number; last_page: number; per_page: number; total: number };
