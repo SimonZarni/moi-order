@@ -19,7 +19,7 @@ class StoreOrderChatMessageRequest extends FormRequest
     {
         return [
             'body'  => ['nullable', 'string', 'max:2000'],
-            'image' => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
+            'image' => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp,gif,heic,heif,bmp,tiff', 'max:51200'],
         ];
     }
 
@@ -37,8 +37,8 @@ class StoreOrderChatMessageRequest extends FormRequest
     {
         return [
             'body.max'    => 'Message must not exceed 2000 characters.',
-            'image.mimes' => 'Image must be jpeg, jpg, png, or webp.',
-            'image.max'   => 'Image must not exceed 5 MB.',
+            'image.mimes' => 'Image must be jpeg, png, webp, gif, heic, heif, bmp, or tiff.',
+            'image.max'   => 'Image must not exceed 50 MB.',
         ];
     }
 

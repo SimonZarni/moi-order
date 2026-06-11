@@ -45,7 +45,7 @@ class MerchantOrderChatController extends Controller
             $imagePath = $this->storage->store(
                 $request->file('image'),
                 'chat-images',
-                ['image/jpeg', 'image/png', 'image/webp'],
+                [],
             );
         }
 

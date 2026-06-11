@@ -31,6 +31,9 @@ class FileStorageService implements FileStorageInterface
         'image/gif',
         'image/heic',
         'image/heif',
+        'image/bmp',
+        'image/x-bmp',
+        'image/tiff',
     ];
 
     public function __construct(

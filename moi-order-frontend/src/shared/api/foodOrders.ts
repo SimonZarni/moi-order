@@ -81,9 +81,8 @@ export async function sendOrderChatMessage(
   const form = new FormData();
   if (body) form.append('body', body);
   if (image) {
-    // Normalise MIME: HEIC/HEIF → jpeg; uppercase → lowercase.
-    const rawMime = image.type.toLowerCase();
-    const mime = rawMime.includes('heic') || rawMime.includes('heif') ? 'image/jpeg' : rawMime;
+    // Normalise to lowercase; fall back to jpeg when MIME is missing.
+    const mime = image.type.toLowerCase() || 'image/jpeg';
     const ext  = mime.split('/')[1] ?? 'jpg';
     form.append('image', { uri: image.uri, name: `chat.${ext}`, type: mime } as unknown as Blob);
   }

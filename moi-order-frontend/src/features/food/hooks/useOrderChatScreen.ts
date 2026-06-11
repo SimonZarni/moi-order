@@ -78,11 +78,8 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
     if (result.canceled || result.assets.length === 0) return;
     const asset = result.assets[0];
     if (!asset) return;
-    const rawMime = (asset.mimeType ?? '').toLowerCase();
-    const mime = rawMime.includes('heic') || rawMime.includes('heif') || !rawMime
-      ? 'image/jpeg'
-      : rawMime;
-    const ext = mime.split('/')[1] ?? 'jpg';
+    const mime = (asset.mimeType ?? '').toLowerCase() || 'image/jpeg';
+    const ext  = mime.split('/')[1] ?? 'jpg';
     setSendError(null);
     sendMutation.mutate(
       { orderId, body: null, image: { uri: asset.uri, name: `chat.${ext}`, type: mime } },
