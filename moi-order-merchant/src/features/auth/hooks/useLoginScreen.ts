@@ -13,6 +13,7 @@ import {
 import { useAuthStore } from '../../../store/authStore';
 import { extractApiError } from '../../../api/client';
 import { GoogleSignin, statusCodes } from '../../../shared/utils/googleSignin';
+import { signInWithGoogleWeb, GOOGLE_WEB_CANCELLED } from '../../../shared/utils/googleSigninWeb';
 import { Line, lineErrorCodes } from '../../../shared/utils/lineLogin';
 import {
   GOOGLE_WEB_CLIENT_ID,
@@ -83,15 +84,20 @@ export function useLoginScreen(): UseLoginScreenResult {
     setGoogleL(true);
     setError(null);
     try {
-      await GoogleSignin.hasPlayServices();
-      const { data } = await GoogleSignin.signIn();
-      const idToken = data?.idToken;
-      if (!idToken) throw new Error('Google sign-in returned no ID token.');
+      let idToken: string;
+      if (Platform.OS === 'web') {
+        idToken = await signInWithGoogleWeb(GOOGLE_WEB_CLIENT_ID);
+      } else {
+        await GoogleSignin.hasPlayServices();
+        const { data } = await GoogleSignin.signIn();
+        idToken = data?.idToken ?? '';
+        if (!idToken) throw new Error('Google sign-in returned no ID token.');
+      }
       const { user, token } = await signInWithGoogle(idToken);
       setAuth(user, token);
     } catch (e: unknown) {
       const code = (e as { code?: string })?.code;
-      if (code === statusCodes.SIGN_IN_CANCELLED) return;
+      if (code === statusCodes.SIGN_IN_CANCELLED || code === GOOGLE_WEB_CANCELLED) return;
       setError(e instanceof Error ? e.message : extractApiError(e).message);
     } finally {
       setGoogleL(false);
