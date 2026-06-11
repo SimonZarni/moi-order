@@ -7,13 +7,13 @@ import { typography } from '../../../shared/theme/typography';
 export const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#111',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.xl,
+    paddingTop: spacing.md,
     paddingBottom: spacing.sm,
   },
   headerBtn: {
@@ -35,24 +35,49 @@ export const styles = StyleSheet.create({
   hint: {
     textAlign: 'center',
     fontSize: typography.xs,
-    color: 'rgba(255,255,255,0.45)',
-    marginBottom: spacing.md,
+    color: 'rgba(255,255,255,0.4)',
+    marginBottom: spacing.sm,
   },
-  viewportWrap: {
+  imageContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  viewport: {
+  dim: {
+    position: 'absolute',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+  },
+  cropBorder: {
+    position: 'absolute',
+    borderWidth: 1.5,
+    borderColor: '#fff',
     overflow: 'hidden',
-    backgroundColor: '#111',
+  },
+  ruleV: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 1,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+  },
+  ruleH: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+  },
+  handle: {
+    position: 'absolute',
+    width: 14,
+    height: 14,
+    backgroundColor: '#fff',
+    borderRadius: 2,
   },
   footer: {
     flexDirection: 'row',
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
-    paddingBottom: spacing.xl,
+    paddingBottom: spacing.md,
   },
   cancelBtn: {
     flex: 1,
