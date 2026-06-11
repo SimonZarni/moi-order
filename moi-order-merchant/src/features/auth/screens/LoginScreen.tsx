@@ -1,5 +1,8 @@
 import React from 'react';
-import { View, Text, TextInput, Pressable, ActivityIndicator, Platform, ScrollView, KeyboardAvoidingView, useWindowDimensions, Image } from 'react-native';
+import {
+  View, Text, TextInput, Pressable, ActivityIndicator,
+  Platform, ScrollView, KeyboardAvoidingView, useWindowDimensions, Image,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLoginScreen } from '../hooks/useLoginScreen';
@@ -10,13 +13,17 @@ const LOGO = require('../../../../assets/moi-order-icon.png') as number;
 
 export function LoginScreen(): React.JSX.Element {
   const {
-    email, password, isLoading, error,
+    email, password, isLoading,
+    isGoogleLoading, isAppleLoading, isLineLoading, appleAvailable,
+    error,
     setEmail, setPassword,
-    handleSubmit, handleGoToOtp, handleGoToRegister,
+    handleSubmit, handleGoogleSignIn, handleAppleSignIn, handleLineSignIn,
+    handleGoToOtp, handleGoToRegister,
   } = useLoginScreen();
 
   const { width } = useWindowDimensions();
   const isMobileWeb = Platform.OS === 'web' && width < 768;
+  const socialDisabled = isLoading || isGoogleLoading || isAppleLoading || isLineLoading;
 
   const formContent = (
     <>
@@ -58,7 +65,7 @@ export function LoginScreen(): React.JSX.Element {
       <Pressable
         style={({ pressed }) => [styles.primaryBtn, (isLoading || pressed) && styles.primaryBtnDisabled]}
         onPress={handleSubmit}
-        disabled={isLoading}
+        disabled={socialDisabled}
         accessibilityLabel="Sign in"
         accessibilityRole="button"
       >
@@ -69,13 +76,63 @@ export function LoginScreen(): React.JSX.Element {
 
       <View style={styles.orRow}>
         <View style={styles.orLine} />
+        <Text style={styles.orText}>or continue with</Text>
+        <View style={styles.orLine} />
+      </View>
+
+      <View style={styles.socialRow}>
+        <Pressable
+          style={[styles.socialBtn, socialDisabled && styles.socialBtnDisabled]}
+          onPress={() => handleGoogleSignIn()}
+          disabled={socialDisabled}
+          accessibilityLabel="Sign in with Google"
+          accessibilityRole="button"
+        >
+          {isGoogleLoading
+            ? <ActivityIndicator size="small" color={colours.textOnDark} />
+            : <Ionicons name="logo-google" size={20} color={colours.textOnDark} />}
+          <Text style={styles.socialBtnText}>Google</Text>
+        </Pressable>
+
+        {(Platform.OS === 'ios' ? appleAvailable : Platform.OS === 'web') && (
+          <Pressable
+            style={[styles.socialBtn, socialDisabled && styles.socialBtnDisabled]}
+            onPress={() => handleAppleSignIn()}
+            disabled={socialDisabled}
+            accessibilityLabel="Sign in with Apple"
+            accessibilityRole="button"
+          >
+            {isAppleLoading
+              ? <ActivityIndicator size="small" color={colours.textOnDark} />
+              : <Ionicons name="logo-apple" size={20} color={colours.textOnDark} />}
+            <Text style={styles.socialBtnText}>Apple</Text>
+          </Pressable>
+        )}
+
+        <Pressable
+          style={[styles.socialBtn, socialDisabled && styles.socialBtnDisabled]}
+          onPress={() => handleLineSignIn()}
+          disabled={socialDisabled}
+          accessibilityLabel="Sign in with LINE"
+          accessibilityRole="button"
+        >
+          {isLineLoading
+            ? <ActivityIndicator size="small" color={colours.textOnDark} />
+            : <Text style={styles.socialBtnLine}>LINE</Text>}
+          <Text style={styles.socialBtnText}>LINE</Text>
+        </Pressable>
+      </View>
+
+      <View style={styles.orRow}>
+        <View style={styles.orLine} />
         <Text style={styles.orText}>or</Text>
         <View style={styles.orLine} />
       </View>
 
       <Pressable
-        style={styles.secondaryBtn}
+        style={[styles.secondaryBtn, socialDisabled && styles.primaryBtnDisabled]}
         onPress={handleGoToOtp}
+        disabled={socialDisabled}
         accessibilityLabel="Use phone OTP instead"
         accessibilityRole="button"
       >
@@ -91,7 +148,6 @@ export function LoginScreen(): React.JSX.Element {
     </>
   );
 
-  // ── Web layout ──
   if (Platform.OS === 'web') {
     return (
       <View style={[styles.screen, isMobileWeb && styles.screenColumn]}>
@@ -127,7 +183,6 @@ export function LoginScreen(): React.JSX.Element {
     );
   }
 
-  // ── Mobile layout: dark brand panel top + white form sheet bottom ──
   return (
     <KeyboardAvoidingView style={styles.safe} behavior="padding">
       <SafeAreaView style={styles.brandArea} edges={['top']}>

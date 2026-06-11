@@ -44,7 +44,9 @@
           "color": "#f97316",
           "sounds": []
         }
-      ]
+      ],
+      "@react-native-google-signin/google-signin",
+      "@xmartlabs/react-native-line"
     ],
     "extra": {
       "eas": {

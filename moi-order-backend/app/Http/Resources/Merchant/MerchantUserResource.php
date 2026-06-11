@@ -19,13 +19,14 @@ class MerchantUserResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'          => $this->uuid,
-            'name'        => $this->name,
-            'email'       => $this->email,
-            'phone'       => $this->phone_number,
-            'is_merchant' => $this->is_merchant,
-            'kyc_status'  => $this->resolveKycStatus(),
-            'created_at'  => $this->created_at?->toIso8601String(),
+            'id'             => $this->uuid,
+            'name'           => $this->name,
+            'email'          => $this->email,
+            'phone'          => $this->phone_number,
+            'is_merchant'    => $this->is_merchant,
+            'email_verified' => $this->email_verified_at !== null,
+            'kyc_status'     => $this->resolveKycStatus(),
+            'created_at'     => $this->created_at?->toIso8601String(),
         ];
     }
 

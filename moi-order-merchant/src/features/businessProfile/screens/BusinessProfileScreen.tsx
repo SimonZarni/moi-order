@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, ActivityIndicator, Pressable, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,9 +6,11 @@ import { useBusinessProfileScreen } from '../hooks/useBusinessProfileScreen';
 import { BusinessInfoSection } from '../components/BusinessInfoSection';
 import { KycDocumentCard } from '../components/KycDocumentCard';
 import { RestaurantInfoCard } from '../components/RestaurantInfoCard';
+import { EmailVerificationScreen } from './EmailVerificationScreen';
 import { styles } from './BusinessProfileScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { KYC_DOC_TYPE } from '../../../types/enums';
+import { useAuthStore } from '../../../store/authStore';
 import type { KycDocType } from '../../../types/enums';
 
 const DOC_TYPES: Array<{ type: KycDocType; label: string }> = [
@@ -31,8 +33,22 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
     handleBack,
   } = useBusinessProfileScreen();
 
+  const user = useAuthStore((s) => s.user);
+  const [showVerify, setShowVerify] = useState(false);
+
   const goBack = onBack ?? handleBack;
   const showBackBtn = Platform.OS !== 'web';
+  const emailUnverified = user !== null && !user.email_verified;
+
+  if (showVerify && user !== null) {
+    return (
+      <EmailVerificationScreen
+        email={user.email}
+        onBack={() => setShowVerify(false)}
+        onDone={() => setShowVerify(false)}
+      />
+    );
+  }
 
   if (isLoading) {
     return <View style={styles.centered}><ActivityIndicator size="large" color={colours.primary} /></View>;
@@ -53,14 +69,57 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
         </View>
       )}
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+
+        {/* Unverified email banner */}
+        {emailUnverified && (
+          <Pressable
+            style={styles.unverifiedBanner}
+            onPress={() => setShowVerify(true)}
+            accessibilityLabel="Verify your email address"
+            accessibilityRole="button"
+          >
+            <Ionicons name="warning-outline" size={18} color="#f59e0b" />
+            <View style={styles.unverifiedBannerBody}>
+              <Text style={styles.unverifiedBannerTitle}>Email not verified</Text>
+              <Text style={styles.unverifiedBannerSub}>
+                Tap to verify your email and set your own password.
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.4)" />
+          </Pressable>
+        )}
+
         {/* Account section */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Account</Text>
           <View style={styles.accountCard}>
-            <Text style={styles.accountName}>{profile.user.name}</Text>
+            <View style={styles.accountRow}>
+              <Text style={styles.accountName}>{profile.user.name}</Text>
+              {emailUnverified ? (
+                <View style={styles.unverifiedBadge}>
+                  <Text style={styles.unverifiedBadgeText}>Unverified</Text>
+                </View>
+              ) : (
+                <View style={styles.verifiedBadge}>
+                  <Ionicons name="checkmark-circle" size={14} color={colours.primary} />
+                  <Text style={styles.verifiedBadgeText}>Verified</Text>
+                </View>
+              )}
+            </View>
             <Text style={styles.accountDetail}>{profile.user.email}</Text>
             {profile.user.phone !== null && (
               <Text style={styles.accountDetail}>{profile.user.phone}</Text>
+            )}
+            {emailUnverified && (
+              <Pressable
+                style={styles.verifyBtn}
+                onPress={() => setShowVerify(true)}
+                accessibilityLabel="Verify email and set password"
+                accessibilityRole="button"
+              >
+                <Ionicons name="shield-checkmark-outline" size={14} color={colours.primary} />
+                <Text style={styles.verifyBtnText}>Verify Email & Set Password</Text>
+              </Pressable>
             )}
           </View>
         </View>

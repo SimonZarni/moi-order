@@ -36,3 +36,16 @@ export const PUSHER_APP_CLUSTER = (process.env.EXPO_PUBLIC_PUSHER_CLUSTER as str
 
 // Broadcast auth — Laravel channel auth endpoint (routes/api.php: Broadcast::routes).
 export const BROADCAST_AUTH_URL = `${_apiBase}/broadcasting/auth` as const;
+
+// ── Social auth ───────────────────────────────────────────────────────────────
+// Shared with moi-order-frontend — same Google project, same LINE channel.
+export const GOOGLE_WEB_CLIENT_ID =
+  (process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID as string | undefined) ??
+  '661538209777-nhtp07mb5guuhrd3128r80m83imtut6p.apps.googleusercontent.com';
+
+export const GOOGLE_IOS_CLIENT_ID =
+  (process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID as string | undefined) ??
+  '661538209777-o33avjo80379ui26kj2clbn4snla6j2g.apps.googleusercontent.com';
+
+export const LINE_CHANNEL_ID =
+  (process.env.EXPO_PUBLIC_LINE_CHANNEL_ID as string | undefined) ?? '';

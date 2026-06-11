@@ -69,4 +69,14 @@ export const styles = StyleSheet.create({
   formScroll: { flex: 1, width: '100%' },
   formCard: { flexGrow: 1, justifyContent: 'center', maxWidth: 440, width: '100%', alignSelf: 'center', padding: spacing.xxl },
   errorBannerLegacy: { backgroundColor: colours.error + '18', color: colours.error, padding: spacing.md, borderRadius: radius.lg, fontSize: typography.sm, marginBottom: spacing.md },
+
+  sheetScroll: { flex: 1, backgroundColor: colours.backgroundMid },
+  sheetContent: { padding: spacing.lg, paddingTop: spacing.xl, paddingBottom: spacing.xxl, flexGrow: 1 },
+
+  // ── Social buttons ─────────────────────────────────────────────────────────
+  socialRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
+  socialBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1, borderColor: colours.dividerDark, borderRadius: radius.lg, paddingVertical: spacing.sm + 2, minHeight: 48, backgroundColor: colours.backgroundDark },
+  socialBtnDisabled: { opacity: 0.5 },
+  socialBtnText: { color: colours.textOnDark, fontSize: typography.sm, fontWeight: '700' },
+  socialBtnLine: { color: '#06C755', fontSize: typography.sm, fontWeight: '900' },
 });

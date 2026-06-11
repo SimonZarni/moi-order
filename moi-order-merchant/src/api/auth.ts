@@ -97,6 +97,61 @@ export async function completeRegisterWithOtp(
   return response.data.data;
 }
 
+export async function signInWithGoogle(idToken: string): Promise<AuthResponse> {
+  const response = await apiClient.post<{ data: AuthResponse }>('/auth/google', { id_token: idToken });
+  return response.data.data;
+}
+
+export async function signInWithApple(
+  idToken: string,
+  email?: string,
+  name?: string,
+): Promise<AuthResponse> {
+  const response = await apiClient.post<{ data: AuthResponse }>('/auth/apple', {
+    id_token: idToken,
+    email,
+    name,
+  });
+  return response.data.data;
+}
+
+export async function signInWithLine(
+  idToken: string,
+  nonce?: string,
+  name?: string,
+): Promise<AuthResponse> {
+  const response = await apiClient.post<{ data: AuthResponse }>('/auth/line', {
+    id_token: idToken,
+    nonce,
+    name,
+  });
+  return response.data.data;
+}
+
+export interface EmailVerifyOtpResponse {
+  expires_in: number;
+  resend_after: number;
+}
+
+export async function sendEmailVerificationOtp(): Promise<EmailVerifyOtpResponse> {
+  const response = await apiClient.post<{ data: EmailVerifyOtpResponse }>(
+    '/profile/verify-email/send',
+  );
+  return response.data.data;
+}
+
+export async function confirmEmailVerification(
+  otp: string,
+  password: string,
+  passwordConfirmation: string,
+): Promise<MerchantUser> {
+  const response = await apiClient.post<{ data: MerchantUser }>(
+    '/profile/verify-email/confirm',
+    { otp, password, password_confirmation: passwordConfirmation },
+  );
+  return response.data.data;
+}
+
 export async function getMe(): Promise<MerchantUser> {
   const response = await apiClient.get<{ data: MerchantUser }>('/auth/me');
   return response.data.data;

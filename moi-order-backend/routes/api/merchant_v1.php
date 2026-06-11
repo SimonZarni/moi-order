@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\Merchant\V1\BusinessProfileController;
 use App\Http\Controllers\Api\Merchant\V1\KycController;
 use App\Http\Controllers\Api\V1\DeviceTokenController;
+use App\Http\Controllers\Api\Merchant\V1\MerchantEmailVerificationController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantAnalyticsController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantNotificationController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantOrderChatController;
@@ -14,6 +15,10 @@ use App\Http\Controllers\Api\Merchant\V1\MenuCategoryController;
 use App\Http\Controllers\Api\Merchant\V1\MenuItemController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantReviewController;
 use Illuminate\Support\Facades\Route;
+
+// ── Email verification (for admin-provisioned accounts) ───────────────────────
+Route::post('/profile/verify-email/send',    [MerchantEmailVerificationController::class, 'send']);
+Route::post('/profile/verify-email/confirm', [MerchantEmailVerificationController::class, 'confirm']);
 
 // ── Business profile ─────────────────────────────────────────────────────────
 Route::get('/business-profile',             [BusinessProfileController::class, 'show']);
