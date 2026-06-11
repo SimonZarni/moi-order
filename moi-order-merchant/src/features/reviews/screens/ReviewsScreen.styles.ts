@@ -35,11 +35,13 @@ export const styles = StyleSheet.create({
   },
   filterRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.sm,
     gap: spacing.xs,
   },
   filterPill: {
+    alignSelf: 'flex-start',
     paddingHorizontal: spacing.sm,
     paddingVertical: 5,
     borderRadius: 20,
