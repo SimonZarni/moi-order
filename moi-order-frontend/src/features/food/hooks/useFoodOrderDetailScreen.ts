@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, Linking } from 'react-native';
+import { Alert, Linking, Share } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -90,16 +90,19 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
   const handleCopyMessage = useCallback(async () => {
     if (!copyMessage) return;
     try {
+      // expo-clipboard requires native build — works after next EAS build
       await Clipboard.setStringAsync(copyMessage);
       setHasCopied(true);
       setTimeout(() => setHasCopied(false), 2000);
     } catch {
-      // Native module not yet compiled into binary — show Alert as fallback
-      Alert.alert(
-        locale === 'mm' ? 'ကော်ပီကူးရန်' : 'Copy this message',
-        copyMessage,
-        [{ text: 'OK' }],
-      );
+      // Native module not yet in binary: open the OS share sheet so the user
+      // can tap "Copy" (iOS) or "Copy to clipboard" (Android). No native module needed.
+      Share.share({ message: copyMessage }).catch(() => {
+        Alert.alert(
+          locale === 'mm' ? 'ကော်ပီကူးရန်' : 'Copy this message',
+          copyMessage,
+        );
+      });
     }
   }, [copyMessage, locale]);
 
