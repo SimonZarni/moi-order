@@ -51,7 +51,13 @@ export function useNotificationsScreen(): UseNotificationsScreenResult {
       markOneRead(notification.id);
     }
 
-    if (notification.data.submission_id !== undefined) {
+    if (notification.data.food_order_id !== undefined) {
+      navigation.navigate('OrderChat', {
+        orderId:        notification.data.food_order_id,
+        orderNumber:    null,
+        restaurantName: null,
+      });
+    } else if (notification.data.submission_id !== undefined) {
       navigation.navigate('OrderDetail', { submissionId: notification.data.submission_id });
     } else if (notification.data.ticket_order_id !== undefined) {
       navigation.navigate('TicketOrderDetail', { ticketOrderId: notification.data.ticket_order_id });
