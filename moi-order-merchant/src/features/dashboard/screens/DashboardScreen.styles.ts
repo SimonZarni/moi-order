@@ -204,6 +204,12 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.textOnLight,
   },
+  topCardMore: {
+    marginLeft: 'auto' as unknown as number,
+    fontSize: typography.xxs,
+    fontWeight: '600',
+    color: colours.textSubtle,
+  },
   topCardEmpty: {
     padding: spacing.lg,
     alignItems: 'center',

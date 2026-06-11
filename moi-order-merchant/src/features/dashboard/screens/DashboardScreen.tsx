@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { View, Text, ScrollView, Pressable, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useDashboardScreen } from '../hooks/useDashboardScreen';
@@ -235,7 +235,13 @@ export function DashboardScreen({ onSelectOrder, onBellPress }: DashboardScreenP
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
+const TOP_VISIBLE  = 5;
+// Each row is paddingVertical: sm (8) × 2 + ~18px content ≈ 44px. 5 rows = 220.
+const TOP_LIST_MAX = TOP_VISIBLE * 44;
+
 function TopSalesCard({ items }: { items: TopItem[] }): React.JSX.Element {
+  const visible = items.slice(0, TOP_VISIBLE);
+  const hasMore = items.length > TOP_VISIBLE;
   return (
     <View style={styles.topCard}>
       <View style={styles.topCardHeader}>
@@ -243,6 +249,7 @@ function TopSalesCard({ items }: { items: TopItem[] }): React.JSX.Element {
           <Ionicons name="flame-outline" size={14} color={colours.primary} />
         </View>
         <Text style={styles.topCardTitle}>Top Sales</Text>
+        {hasMore && <Text style={styles.topCardMore}>+{items.length - TOP_VISIBLE} more</Text>}
       </View>
 
       {items.length === 0 ? (
@@ -250,24 +257,32 @@ function TopSalesCard({ items }: { items: TopItem[] }): React.JSX.Element {
           <Text style={styles.topCardEmptyText}>No data for this period</Text>
         </View>
       ) : (
-        items.map((item, i) => (
-          <View key={item.name} style={[styles.topRow, i < items.length - 1 && styles.topRowBorder]}>
-            <View style={styles.topRank}>
-              <Text style={styles.topRankText}>{i + 1}</Text>
+        <ScrollView
+          style={{ maxHeight: TOP_LIST_MAX }}
+          showsVerticalScrollIndicator={Platform.OS === 'web'}
+          nestedScrollEnabled
+        >
+          {visible.map((item, i) => (
+            <View key={item.name} style={[styles.topRow, i < visible.length - 1 && styles.topRowBorder]}>
+              <View style={styles.topRank}>
+                <Text style={styles.topRankText}>{i + 1}</Text>
+              </View>
+              <View style={styles.topRowInfo}>
+                <Text style={styles.topRowName} numberOfLines={1}>{item.name}</Text>
+                <Text style={styles.topRowSub}>{item.total_quantity} sold</Text>
+              </View>
+              <Text style={styles.topRowValue}>{formatPrice(item.revenue_cents)}</Text>
             </View>
-            <View style={styles.topRowInfo}>
-              <Text style={styles.topRowName} numberOfLines={1}>{item.name}</Text>
-              <Text style={styles.topRowSub}>{item.total_quantity} sold</Text>
-            </View>
-            <Text style={styles.topRowValue}>{formatPrice(item.revenue_cents)}</Text>
-          </View>
-        ))
+          ))}
+        </ScrollView>
       )}
     </View>
   );
 }
 
 function TopCustomersCard({ customers }: { customers: TopCustomer[] }): React.JSX.Element {
+  const visible = customers.slice(0, TOP_VISIBLE);
+  const hasMore = customers.length > TOP_VISIBLE;
   return (
     <View style={styles.topCard}>
       <View style={styles.topCardHeader}>
@@ -275,6 +290,7 @@ function TopCustomersCard({ customers }: { customers: TopCustomer[] }): React.JS
           <Ionicons name="people-outline" size={14} color={colours.success} />
         </View>
         <Text style={styles.topCardTitle}>Top Customers</Text>
+        {hasMore && <Text style={styles.topCardMore}>+{customers.length - TOP_VISIBLE} more</Text>}
       </View>
 
       {customers.length === 0 ? (
@@ -282,18 +298,24 @@ function TopCustomersCard({ customers }: { customers: TopCustomer[] }): React.JS
           <Text style={styles.topCardEmptyText}>No data for this period</Text>
         </View>
       ) : (
-        customers.map((customer, i) => (
-          <View key={customer.name + i} style={[styles.topRow, i < customers.length - 1 && styles.topRowBorder]}>
-            <View style={[styles.topRank, i === 0 && styles.topRankGold]}>
-              <Text style={[styles.topRankText, i === 0 && styles.topRankTextGold]}>{i + 1}</Text>
+        <ScrollView
+          style={{ maxHeight: TOP_LIST_MAX }}
+          showsVerticalScrollIndicator={Platform.OS === 'web'}
+          nestedScrollEnabled
+        >
+          {visible.map((customer, i) => (
+            <View key={customer.name + i} style={[styles.topRow, i < visible.length - 1 && styles.topRowBorder]}>
+              <View style={[styles.topRank, i === 0 && styles.topRankGold]}>
+                <Text style={[styles.topRankText, i === 0 && styles.topRankTextGold]}>{i + 1}</Text>
+              </View>
+              <View style={styles.topRowInfo}>
+                <Text style={styles.topRowName} numberOfLines={1}>{customer.name}</Text>
+                <Text style={styles.topRowSub}>{customer.order_count} {customer.order_count === 1 ? 'order' : 'orders'}</Text>
+              </View>
+              <Text style={styles.topRowValue}>{formatPrice(customer.total_cents)}</Text>
             </View>
-            <View style={styles.topRowInfo}>
-              <Text style={styles.topRowName} numberOfLines={1}>{customer.name}</Text>
-              <Text style={styles.topRowSub}>{customer.order_count} {customer.order_count === 1 ? 'order' : 'orders'}</Text>
-            </View>
-            <Text style={styles.topRowValue}>{formatPrice(customer.total_cents)}</Text>
-          </View>
-        ))
+          ))}
+        </ScrollView>
       )}
     </View>
   );
