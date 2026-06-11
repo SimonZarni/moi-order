@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, Text, TextInput, Pressable, ActivityIndicator, Platform, ScrollView, KeyboardAvoidingView, useWindowDimensions } from 'react-native';
+import { View, Text, TextInput, Pressable, ActivityIndicator, Platform, ScrollView, KeyboardAvoidingView, useWindowDimensions, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useOtpLoginScreen } from '../hooks/useOtpLoginScreen';
 import { styles } from './OtpLoginScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { OTP_PIN_LENGTH } from '../../../shared/constants/config';
+
+const LOGO = require('../../../../assets/moi-order-icon.png') as number;
 
 export function OtpLoginScreen(): React.JSX.Element {
   const {
@@ -90,7 +92,7 @@ export function OtpLoginScreen(): React.JSX.Element {
       <View style={[styles.screen, isMobileWeb && styles.screenColumn]}>
         {isMobileWeb ? (
           <View style={styles.leftPanelMobile}>
-            <View style={styles.brandMark}><Text style={styles.brandMarkText}>M</Text></View>
+            <Image source={LOGO} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="Moi Order logo" />
             <View>
               <Text style={styles.brandName}>moi·order</Text>
               <Text style={styles.brandRole}>Merchant Platform</Text>
@@ -98,7 +100,7 @@ export function OtpLoginScreen(): React.JSX.Element {
           </View>
         ) : (
           <View style={styles.leftPanel}>
-            <View style={styles.brandMark}><Text style={styles.brandMarkText}>M</Text></View>
+            <Image source={LOGO} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="Moi Order logo" />
             <Text style={styles.brandName}>moi·order</Text>
             <Text style={styles.brandRole}>Merchant Platform</Text>
             <View style={styles.brandDivider} />
