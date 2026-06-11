@@ -7,6 +7,7 @@ export interface OrdersParams {
   date_from?: string;   // range start YYYY-MM-DD
   date_to?:   string;   // range end   YYYY-MM-DD
   page?:      number;
+  per_page?:  number;
 }
 
 export async function getOrders(

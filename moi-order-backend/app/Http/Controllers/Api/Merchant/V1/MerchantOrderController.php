@@ -31,7 +31,16 @@ class MerchantOrderController extends Controller
         }
 
         $filters = $request->only(['date', 'date_from', 'date_to']);
-        $orders  = $this->orderService->listForRestaurant($restaurant->id, $filters);
+
+        // status param: comma-separated e.g. "order_placed,waiting_for_payment"
+        if ($request->filled('status')) {
+            $filters['statuses'] = array_filter(
+                array_map('trim', explode(',', $request->string('status')->toString())),
+            );
+        }
+
+        $perPage = min((int) $request->input('per_page', 30), 100);
+        $orders  = $this->orderService->listForRestaurant($restaurant->id, $filters, $perPage);
 
         return response()->json([
             'data' => collect($orders->items())

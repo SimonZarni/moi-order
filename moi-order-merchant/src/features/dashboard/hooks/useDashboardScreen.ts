@@ -4,13 +4,10 @@ import { getAnalytics, getTopData, type TopPeriod } from '../../../api/analytics
 import { getOrders, updateOrderStatus } from '../../../api/orders';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { CACHE_TTL, GC_TIME, QUERY_RETRY } from '../../../shared/constants/config';
-import { ORDER_STATUS } from '../../../types/enums';
 import type { AnalyticsData, FoodOrder, TopData } from '../../../types/models';
 
-const PENDING_STATUSES = new Set([
-  ORDER_STATUS.OrderPlaced,
-  ORDER_STATUS.WaitingForPayment,
-]);
+const PENDING_STATUS_PARAM = 'order_placed,waiting_for_payment';
+const PENDING_ORDERS_KEY   = ['orders', 'pending'] as const;
 
 interface UseDashboardScreenResult {
   analytics: AnalyticsData | undefined;
@@ -44,6 +41,7 @@ export function useDashboardScreen(): UseDashboardScreenResult {
     retry:     QUERY_RETRY,
   });
 
+  // Recent orders (last 5) — shown on the default dashboard view
   const {
     data: ordersData,
     isLoading: isOrdersLoading,
@@ -51,10 +49,25 @@ export function useDashboardScreen(): UseDashboardScreenResult {
     refetch: refetchOrders,
   } = useQuery({
     queryKey: QUERY_KEYS.ORDERS(),
-    queryFn:  () => getOrders(),
+    queryFn:  () => getOrders({ per_page: 5 }),
     staleTime: CACHE_TTL.ORDERS,
     gcTime:    GC_TIME.DEFAULT,
     retry:     QUERY_RETRY,
+  });
+
+  // Pending orders — fetched from backend with status filter, no count cap
+  const {
+    data: pendingOrdersData,
+    isLoading: isPendingLoading,
+    isError: isPendingError,
+    refetch: refetchPending,
+  } = useQuery({
+    queryKey: PENDING_ORDERS_KEY,
+    queryFn:  () => getOrders({ status: PENDING_STATUS_PARAM, per_page: 100 }),
+    staleTime: CACHE_TTL.ORDERS,
+    gcTime:    GC_TIME.DEFAULT,
+    retry:     QUERY_RETRY,
+    enabled:   pendingOnly,
   });
 
   const { data: topData, refetch: refetchTop } = useQuery({
@@ -70,21 +83,17 @@ export function useDashboardScreen(): UseDashboardScreenResult {
       updateOrderStatus(id, status),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS() });
+      void queryClient.invalidateQueries({ queryKey: PENDING_ORDERS_KEY });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ANALYTICS });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TOP_DATA(topPeriod) });
     },
   });
 
-  const allRecentOrders = useMemo(
-    () => (ordersData?.data ?? []).slice(0, 5),
-    [ordersData],
-  );
-
-  const recentOrders = useMemo(
+  const recentOrders = useMemo<FoodOrder[]>(
     () => pendingOnly
-      ? allRecentOrders.filter((o) => PENDING_STATUSES.has(o.status))
-      : allRecentOrders,
-    [allRecentOrders, pendingOnly],
+      ? (pendingOrdersData?.data ?? [])
+      : (ordersData?.data ?? []),
+    [pendingOnly, pendingOrdersData, ordersData],
   );
 
   const handlePendingToggle = useCallback(() => setPendingOnly((v) => !v), []);
@@ -93,7 +102,8 @@ export function useDashboardScreen(): UseDashboardScreenResult {
     void refetchAnalytics();
     void refetchOrders();
     void refetchTop();
-  }, [refetchAnalytics, refetchOrders, refetchTop]);
+    if (pendingOnly) void refetchPending();
+  }, [refetchAnalytics, refetchOrders, refetchTop, refetchPending, pendingOnly]);
 
   const handleUpdateStatus = useCallback(
     (orderId: number, newStatus: string) => {
@@ -112,8 +122,8 @@ export function useDashboardScreen(): UseDashboardScreenResult {
     topData,
     topPeriod,
     pendingOnly,
-    isLoading: isAnalyticsLoading || isOrdersLoading,
-    isError:   isAnalyticsError   || isOrdersError,
+    isLoading: isAnalyticsLoading || isOrdersLoading || (pendingOnly && isPendingLoading),
+    isError:   isAnalyticsError   || isOrdersError   || (pendingOnly && isPendingError),
     refetch,
     handleUpdateStatus,
     handleTopPeriodChange,

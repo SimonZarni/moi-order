@@ -262,7 +262,7 @@ class FoodOrderService
     }
 
     /**
-     * @param array{date?: string, date_from?: string, date_to?: string} $filters
+     * @param array{date?: string, date_from?: string, date_to?: string, statuses?: string[]} $filters
      */
     public function listForRestaurant(
         int   $restaurantId,
@@ -274,14 +274,16 @@ class FoodOrderService
             ->latest();
 
         if (! empty($filters['date'])) {
-            // Single-day filter
             $query->whereDate('created_at', $filters['date']);
         } elseif (! empty($filters['date_from']) && ! empty($filters['date_to'])) {
-            // Date range filter — inclusive both ends
             $query->whereBetween('created_at', [
                 $filters['date_from'] . ' 00:00:00',
                 $filters['date_to']   . ' 23:59:59',
             ]);
+        }
+
+        if (! empty($filters['statuses'])) {
+            $query->whereIn('status', $filters['statuses']);
         }
 
         return $query->paginate($perPage);
