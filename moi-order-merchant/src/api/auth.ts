@@ -128,6 +128,19 @@ export async function signInWithLine(
   return response.data.data;
 }
 
+export async function signInWithLineWebCode(
+  code: string,
+  redirectUri: string,
+  nonce?: string,
+): Promise<AuthResponse> {
+  const response = await apiClient.post<{ data: AuthResponse }>('/auth/line/web', {
+    code,
+    redirect_uri: redirectUri,
+    nonce,
+  });
+  return response.data.data;
+}
+
 export interface EmailVerifyOtpResponse {
   expires_in: number;
   resend_after: number;

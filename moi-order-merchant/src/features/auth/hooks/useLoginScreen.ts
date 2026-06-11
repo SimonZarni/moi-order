@@ -9,6 +9,7 @@ import {
   signInWithGoogle,
   signInWithApple,
   signInWithLine,
+  signInWithLineWebCode,
 } from '../../../api/auth';
 import { useAuthStore } from '../../../store/authStore';
 import { extractApiError } from '../../../api/client';
@@ -160,24 +161,19 @@ export function useLoginScreen(): UseLoginScreenResult {
     setLineL(true);
     setError(null);
     try {
-      let idToken: string;
-      let nonce: string | undefined;
-      let displayName: string | undefined;
-
       if (Platform.OS === 'web') {
         const result = await signInWithLineWeb(LINE_CHANNEL_ID, LINE_WEB_REDIRECT_URI);
-        idToken = result.idToken;
-        nonce   = result.nonce;
+        const { user, token } = await signInWithLineWebCode(result.code, result.redirectUri, result.nonce);
+        setAuth(user, token);
       } else {
         const result = await Line.login({ scopes: ['profile', 'openid', 'email'] });
-        idToken     = result.accessToken.idToken ?? '';
-        nonce       = result.idTokenNonce ?? result.IDTokenNonce;
-        displayName = result.userProfile?.displayName;
+        const idToken     = result.accessToken.idToken ?? '';
+        const nonce       = result.idTokenNonce ?? result.IDTokenNonce;
+        const displayName = result.userProfile?.displayName;
         if (!idToken) throw new Error('LINE sign-in returned no ID token.');
+        const { user, token } = await signInWithLine(idToken, nonce, displayName);
+        setAuth(user, token);
       }
-
-      const { user, token } = await signInWithLine(idToken, nonce, displayName);
-      setAuth(user, token);
     } catch (e: unknown) {
       const code = (e as { code?: string })?.code;
       if (code === lineErrorCodes.CANCELLED || code === LINE_WEB_CANCELLED) return;

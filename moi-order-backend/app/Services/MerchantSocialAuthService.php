@@ -7,9 +7,11 @@ namespace App\Services;
 use App\DTOs\AppleAuthDTO;
 use App\DTOs\GoogleAuthDTO;
 use App\DTOs\LineAuthDTO;
+use App\Exceptions\DomainException;
 use App\Models\KycApplication;
 use App\Models\User;
-use App\Exceptions\DomainException;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Principle: SRP — owns social-auth login for the merchant dashboard only.
@@ -60,6 +62,42 @@ class MerchantSocialAuthService
      */
     public function authenticateLine(LineAuthDTO $dto): array
     {
+        $result = $this->lineService->authenticate($dto);
+        return $this->issueMerchantToken($result['user']);
+    }
+
+    /**
+     * Web-only: exchange an authorization code for an id_token server-side
+     * (browser cannot call LINE's token endpoint due to missing CORS headers),
+     * then re-use the existing LINE authentication flow.
+     *
+     * @return array{user: User, token: string}
+     */
+    public function authenticateLineWeb(string $code, string $redirectUri, ?string $nonce): array
+    {
+        $response = Http::asForm()->post('https://api.line.me/oauth2/v2.1/token', [
+            'grant_type'   => 'authorization_code',
+            'code'         => $code,
+            'redirect_uri' => $redirectUri,
+            'client_id'    => config('services.line.channel_id'),
+            'client_secret'=> config('services.line.channel_secret'),
+        ]);
+
+        if (! $response->successful()) {
+            throw ValidationException::withMessages([
+                'code' => ['LINE sign-in failed. Please try again.'],
+            ]);
+        }
+
+        $idToken = (string) ($response->json('id_token') ?? '');
+
+        if ($idToken === '') {
+            throw ValidationException::withMessages([
+                'code' => ['LINE did not return an ID token. Ensure openid scope is enabled.'],
+            ]);
+        }
+
+        $dto    = new LineAuthDTO(idToken: $idToken, nonce: $nonce, name: null);
         $result = $this->lineService->authenticate($dto);
         return $this->issueMerchantToken($result['user']);
     }

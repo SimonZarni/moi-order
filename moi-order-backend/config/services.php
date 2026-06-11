@@ -58,6 +58,7 @@ return [
 
     'line' => [
         'channel_id'                     => env('LINE_CHANNEL_ID'),
+        'channel_secret'                 => env('LINE_CHANNEL_SECRET', ''),
         'messaging_channel_access_token' => env('LINE_MESSAGING_CHANNEL_ACCESS_TOKEN', ''),
         'admin_user_id'                  => env('LINE_ADMIN_USER_ID', ''),
     ],

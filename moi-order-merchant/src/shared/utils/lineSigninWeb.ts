@@ -4,6 +4,8 @@ export const LINE_WEB_CANCELLED = 'LINE_WEB_SIGN_IN_CANCELLED';
 
 const DISCOVERY = {
   authorizationEndpoint: 'https://access.line.me/oauth2/v2.1/authorize',
+  // Token exchange is done server-side — LINE's token endpoint lacks CORS headers
+  // for browser requests. The backend endpoint /auth/line/web handles the exchange.
   tokenEndpoint: 'https://api.line.me/oauth2/v2.1/token',
 };
 
@@ -17,8 +19,9 @@ function generateNonce(length = 16): string {
 }
 
 /**
- * Opens a LINE OAuth popup using PKCE (no client_secret exposed in browser).
- * Returns the id_token + nonce to send to /auth/line — no backend changes needed.
+ * Opens a LINE OAuth popup and returns the authorization code + nonce.
+ * The caller must send these to /auth/line/web (backend) which exchanges
+ * the code server-side (LINE's token endpoint has no CORS headers for browsers).
  *
  * Prerequisites (LINE Developer Console > your Login channel > Web app):
  *   - Callback URL: https://merchant.moiorder.com/auth/line/callback
@@ -28,20 +31,19 @@ function generateNonce(length = 16): string {
 export async function signInWithLineWeb(
   channelId: string,
   redirectUri: string,
-): Promise<{ idToken: string; nonce: string }> {
+): Promise<{ code: string; nonce: string; redirectUri: string }> {
   const nonce = generateNonce();
 
   const request = new AuthSession.AuthRequest({
     clientId: channelId,
     scopes: ['profile', 'openid', 'email'],
     redirectUri,
-    usePKCE: true,
+    usePKCE: false,
     responseType: AuthSession.ResponseType.Code,
     extraParams: { nonce },
   });
 
   await request.makeAuthUrlAsync(DISCOVERY);
-
   const result = await request.promptAsync(DISCOVERY);
 
   if (result.type === 'cancel' || result.type === 'dismiss') {
@@ -55,21 +57,5 @@ export async function signInWithLineWeb(
     throw new Error(`LINE sign-in failed: ${msg}`);
   }
 
-  // LINE supports PKCE — client_secret not required when code_verifier is present.
-  const tokenResponse = await AuthSession.exchangeCodeAsync(
-    {
-      code: result.params.code,
-      clientId: channelId,
-      redirectUri,
-      extraParams: { code_verifier: request.codeVerifier ?? '' },
-    },
-    { tokenEndpoint: DISCOVERY.tokenEndpoint },
-  );
-
-  const idToken = tokenResponse.idToken;
-  if (!idToken) {
-    throw new Error('LINE did not return an ID token. Ensure openid is in the scopes.');
-  }
-
-  return { idToken, nonce };
+  return { code: result.params.code, nonce, redirectUri };
 }

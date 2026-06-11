@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AppleAuthRequest;
 use App\Http\Requests\GoogleAuthRequest;
 use App\Http\Requests\LineAuthRequest;
+use App\Http\Requests\LineWebAuthRequest;
 use App\Http\Resources\Merchant\MerchantUserResource;
 use App\Services\MerchantSocialAuthService;
 use Illuminate\Http\JsonResponse;
@@ -55,6 +56,23 @@ class MerchantSocialAuthController extends Controller
     public function line(LineAuthRequest $request): JsonResponse
     {
         $result = $this->service->authenticateLine(LineAuthDTO::fromRequest($request));
+
+        return response()->json([
+            'data' => [
+                'user'  => new MerchantUserResource($result['user']),
+                'token' => $result['token'],
+            ],
+        ]);
+    }
+
+    /** POST /api/merchant/v1/auth/line/web — web OAuth code exchange, intentionally public */
+    public function lineWeb(LineWebAuthRequest $request): JsonResponse
+    {
+        $result = $this->service->authenticateLineWeb(
+            code:        $request->string('code')->toString(),
+            redirectUri: $request->string('redirect_uri')->toString(),
+            nonce:       $request->string('nonce')->toString() ?: null,
+        );
 
         return response()->json([
             'data' => [
