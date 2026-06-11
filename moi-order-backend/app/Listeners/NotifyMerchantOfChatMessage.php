@@ -50,8 +50,9 @@ class NotifyMerchantOfChatMessage implements ShouldQueue
             return;
         }
 
-        // 5-minute throttle: skip if we already notified this merchant about this
-        // order's chat in the last 5 minutes to avoid notification spam.
+        // 5-minute throttle: skip creating a new DB notification row if we already
+        // created one for this order recently — but always broadcast the real-time
+        // WebSocket signal so the merchant's bell rings for every message.
         $alreadyNotified = MerchantNotification::forMerchant($merchantId)
             ->where('type', 'chat_message')
             ->where('order_id', $order->id)
@@ -59,6 +60,14 @@ class NotifyMerchantOfChatMessage implements ShouldQueue
             ->exists();
 
         if ($alreadyNotified) {
+            $existing = MerchantNotification::forMerchant($merchantId)
+                ->where('type', 'chat_message')
+                ->where('order_id', $order->id)
+                ->latest()
+                ->first();
+            if ($existing !== null) {
+                DB::afterCommit(fn () => event(new MerchantNotificationReceived($existing)));
+            }
             return;
         }
 

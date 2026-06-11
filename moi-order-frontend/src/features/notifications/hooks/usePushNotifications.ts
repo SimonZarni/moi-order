@@ -28,6 +28,11 @@ import { RootStackParamList } from '@/types/navigation';
 // running inside Expo Go — in-app notifications via Pusher still work normally.
 const IS_EXPO_GO = Constants.appOwnership === 'expo';
 
+// Module-level dedup: track the last notification identifier processed via
+// getLastNotificationResponseAsync so re-runs of the effect (e.g. after login)
+// don't replay stale navigation from a previous session's tapped notification.
+let _lastColdStartNotifId: string | null = null;
+
 if (Constants.appOwnership !== 'expo') {
   // Android 8+ requires a notification channel to be created before any notification
   // is displayed. The channel importance must be HIGH for heads-up (pop-over) banners
@@ -80,11 +85,16 @@ export function usePushNotifications(): void {
       (response: Notifications.NotificationResponse) => handleNotificationTap(response),
     );
 
-    // Handle tap from killed state — getLastNotificationResponseAsync fires once on mount
-    // for notifications tapped while the app was terminated.
+    // Handle tap from killed state. Guard against re-processing the same notification
+    // when the effect re-runs (e.g. userId change after login) — the OS keeps
+    // returning the last-tapped notification until a new one is tapped.
     Notifications.getLastNotificationResponseAsync().then((response: Notifications.NotificationResponse | null) => {
       if (response !== null) {
-        handleNotificationTap(response);
+        const notifId = response.notification.request.identifier;
+        if (notifId !== _lastColdStartNotifId) {
+          _lastColdStartNotifId = notifId;
+          handleNotificationTap(response);
+        }
       }
     });
 

@@ -15,9 +15,7 @@ use Illuminate\Support\Facades\Log;
  * Principle: SRP — reacts to OrderChatMessageSent by notifying the customer only.
  * Principle: DIP — depends on Laravel's Notifiable trait via $user->notify().
  *
- * Guards:
- *   - sender_type must be 'merchant'; customers/admin/system never self-notify.
- *   - 5-minute throttle per order: one chat notification per order per 5 min.
+ * Guard: sender_type must be 'merchant'; customers/admin/system never self-notify.
  *
  * LISTENER REGISTRATION: auto-discovered via typed handle(). Do NOT also add
  * Event::listen() in AppServiceProvider — that would fire this listener twice.
@@ -40,18 +38,6 @@ class NotifyCustomerOfChatMessage implements ShouldQueue
             Log::warning('NotifyCustomerOfChatMessage: could not resolve customer', [
                 'chat_message_id' => $message->id,
             ]);
-            return;
-        }
-
-        // 5-minute throttle: skip if a chat notification was already sent for this
-        // order in the last 5 minutes to avoid spamming the customer.
-        $alreadyNotified = $user->notifications()
-            ->where('type', OrderChatMessageNotification::class)
-            ->where('data->food_order_id', $order->uuid)
-            ->where('created_at', '>=', now()->subMinutes(5))
-            ->exists();
-
-        if ($alreadyNotified) {
             return;
         }
 

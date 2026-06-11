@@ -5,7 +5,20 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 import { fetchOrderChat, sendOrderChatMessage } from '../../../api/chat';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
+import { PUSHER_APP_KEY, PUSHER_APP_CLUSTER, BROADCAST_AUTH_URL } from '../../../shared/constants/config';
+import { useAuthStore } from '../../../store/authStore';
 import type { OrderChatMessage } from '../../../types/models';
+
+interface PusherChannel {
+  bind(event: string, callback: (data: unknown) => void): void;
+  unbind_all(): void;
+}
+interface PusherInstance {
+  subscribe(channel: string): PusherChannel;
+  unsubscribe(channel: string): void;
+  disconnect(): void;
+}
+type PusherConstructorFn = new (key: string, options: object) => PusherInstance;
 
 interface UseOrderChatScreenResult {
   messages: OrderChatMessage[];
@@ -26,12 +39,68 @@ interface UseOrderChatScreenResult {
 
 export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
   const queryClient = useQueryClient();
+  const token = useAuthStore((s) => s.token);
   const { bottom: bottomInset } = useSafeAreaInsets();
   const [text, setText] = useState('');
   const [sendError, setSendError] = useState<string | null>(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const listRef = useRef<FlatList>(null);
+
+  // Real-time chat updates via Pusher private-order.{orderId} channel.
+  // Reduces perceived latency vs 10-second polling for incoming messages.
+  useEffect(() => {
+    if (!token || !PUSHER_APP_KEY) return;
+    let pusher: PusherInstance | null = null;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any
+      const mod = require('pusher-js') as any;
+      const PusherClass: PusherConstructorFn = mod.Pusher ?? mod.default ?? mod;
+      pusher = new PusherClass(PUSHER_APP_KEY, {
+        cluster: PUSHER_APP_CLUSTER,
+        forceTLS: true,
+        channelAuthorization: {
+          customHandler: async (
+            { channelName, socketId }: { channelName: string; socketId: string },
+            callback: (err: Error | null, data: { auth: string } | null) => void,
+          ) => {
+            try {
+              // eslint-disable-next-line @typescript-eslint/no-require-imports
+              const { apiClient } = require('../../../shared/api/client') as {
+                apiClient: { post: <T>(url: string, data: unknown) => Promise<{ data: T }> };
+              };
+              const res = await apiClient.post<{ auth: string }>(
+                BROADCAST_AUTH_URL.replace(_getApiBase(), ''),
+                { socket_id: socketId, channel_name: channelName },
+              );
+              callback(null, res.data);
+            } catch {
+              callback(new Error('Channel auth failed'), null);
+            }
+          },
+        },
+      });
+      const channel = pusher.subscribe(`private-order.${orderId}`);
+      channel.bind('chat.message-sent', (data: unknown) => {
+        const msg = data as OrderChatMessage;
+        queryClient.setQueryData<OrderChatMessage[]>(
+          QUERY_KEYS.ORDER_CHAT(orderId),
+          (prev) => {
+            const existing = prev ?? [];
+            // Dedup: mutation onSuccess already adds merchant's own sent messages.
+            if (existing.some((m) => m.id === msg.id)) return existing;
+            return [...existing, msg];
+          },
+        );
+      });
+    } catch { /* pusher-js not installed or network error — polling continues */ }
+    return () => {
+      try {
+        pusher?.unsubscribe(`private-order.${orderId}`);
+        pusher?.disconnect();
+      } catch { /* silent */ }
+    };
+  }, [token, orderId, queryClient]);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: QUERY_KEYS.ORDER_CHAT(orderId),
@@ -130,4 +199,9 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
     handleTextChange, handleSend, handleAttachPress,
     handlePhotoPress, handlePhotoClose,
   };
+}
+
+function _getApiBase(): string {
+  return (process.env.EXPO_PUBLIC_API_URL as string | undefined) ??
+    'https://api.moiorder.com/api/merchant/v1';
 }

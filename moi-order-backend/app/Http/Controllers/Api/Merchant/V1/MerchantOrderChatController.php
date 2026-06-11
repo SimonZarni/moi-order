@@ -21,7 +21,7 @@ class MerchantOrderChatController extends Controller
     public function index(Request $request, string $id): JsonResponse
     {
         $restaurant = $request->user()->restaurant()->firstOrFail();
-        $order      = $restaurant->foodOrders()->where('uuid', $id)->firstOrFail();
+        $order      = $restaurant->foodOrders()->where('id', $id)->firstOrFail();
 
         $messages = OrderChatMessage::query()
             ->forOrder($order->id)
@@ -37,7 +37,7 @@ class MerchantOrderChatController extends Controller
     public function store(StoreOrderChatMessageRequest $request, string $id): JsonResponse
     {
         $restaurant = $request->user()->restaurant()->firstOrFail();
-        $order      = $restaurant->foodOrders()->where('uuid', $id)->firstOrFail();
+        $order      = $restaurant->foodOrders()->where('id', $id)->firstOrFail();
         $user       = $request->user();
 
         $imagePath = null;
