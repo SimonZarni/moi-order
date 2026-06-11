@@ -12,6 +12,7 @@ export const DOMAIN_MESSAGES: Record<string, string> = {
   'menu.system_category_empty': 'Add at least 1 item to Popular Picks and Recommendations before opening your restaurant.',
   'menu.category_has_items': 'This category has menu items. Remove or move all items before deleting it.',
   'restaurant.gallery_limit_reached': 'You can upload up to 8 gallery photos.',
-  'merchant.access_required': 'This account is not registered as a merchant. Please sign in with your merchant account or contact support.',
+  'merchant.access_required': 'This account has no merchant profile. Please sign in with your merchant account or contact support.',
   'account.suspended': 'Your account has been suspended. Please contact support.',
+  'line.auth_failed': 'Unable to sign in with LINE. Please try again or use a different sign-in method.',
 };

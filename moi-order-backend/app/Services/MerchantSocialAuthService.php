@@ -11,6 +11,7 @@ use App\Exceptions\DomainException;
 use App\Models\KycApplication;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -84,21 +85,26 @@ class MerchantSocialAuthService
         ]);
 
         if (! $response->successful()) {
-            throw ValidationException::withMessages([
-                'code' => ['LINE sign-in failed. Please try again.'],
+            Log::error('LINE web token exchange failed', [
+                'status' => $response->status(),
+                'body'   => $response->body(),
             ]);
+            throw new DomainException('line.auth_failed', 422);
         }
 
         $idToken = (string) ($response->json('id_token') ?? '');
 
         if ($idToken === '') {
-            throw ValidationException::withMessages([
-                'code' => ['LINE did not return an ID token. Ensure openid scope is enabled.'],
-            ]);
+            throw new DomainException('line.auth_failed', 422);
         }
 
-        $dto    = new LineAuthDTO(idToken: $idToken, nonce: $nonce, name: null);
-        $result = $this->lineService->authenticate($dto);
+        try {
+            $dto    = new LineAuthDTO(idToken: $idToken, nonce: $nonce, name: null);
+            $result = $this->lineService->authenticate($dto);
+        } catch (ValidationException) {
+            throw new DomainException('line.auth_failed', 422);
+        }
+
         return $this->issueMerchantToken($result['user']);
     }
 
