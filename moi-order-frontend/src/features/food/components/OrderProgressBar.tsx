@@ -83,7 +83,7 @@ const PHASE_LABELS: Record<Locale, PhaseLabels> = {
 
 const PAY_VIA_LINE_LABELS: Record<Locale, string> = {
   en: 'Pay via LINE',
-  mm: 'ေငွေပေးချေရန် Line',
+  mm: 'ငွေပေးချေရန် Line',
   th: 'ชำระผ่าน LINE',
 };
 
