@@ -24,9 +24,11 @@ interface DashboardScreenProps {
   onSelectOrder?: (orderId: number) => void;
   /** Called when the notification bell is pressed (mobile nav or web sidebar navigate). */
   onBellPress?: () => void;
+  /** Called when the pending orders pill is pressed — navigate to Orders filtered to pending. */
+  onPendingPress?: () => void;
 }
 
-export function DashboardScreen({ onSelectOrder, onBellPress }: DashboardScreenProps): React.JSX.Element {
+export function DashboardScreen({ onSelectOrder, onBellPress, onPendingPress }: DashboardScreenProps): React.JSX.Element {
   const {
     analytics, recentOrders, topData, topPeriod,
     isLoading, handleUpdateStatus, handleTopPeriodChange,
@@ -187,10 +189,15 @@ export function DashboardScreen({ onSelectOrder, onBellPress }: DashboardScreenP
           <Text style={styles.topBarDate}>{dateLabel}</Text>
           <View style={styles.topBarActions}>
             {pending > 0 && (
-              <View style={styles.pendingPill}>
+              <Pressable
+                style={styles.pendingPill}
+                onPress={onPendingPress}
+                accessibilityRole="button"
+                accessibilityLabel={`${pending} pending orders, tap to view`}
+              >
                 <View style={styles.pendingDot} />
                 <Text style={styles.pendingText}>{pending} pending</Text>
-              </View>
+              </Pressable>
             )}
             {onBellPress !== undefined && (
               <NotificationBell

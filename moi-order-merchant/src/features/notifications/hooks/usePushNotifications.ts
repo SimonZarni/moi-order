@@ -40,7 +40,7 @@ if (!IS_EXPO_GO && Platform.OS !== 'web') {
 }
 
 interface MerchantPushData {
-  type?: 'new_order' | string;
+  type?: 'new_order' | 'chat_message' | string;
   order_id?: number;
 }
 
@@ -98,7 +98,11 @@ export function usePushNotifications(): void {
   function handleNotificationTap(response: Notifications.NotificationResponse): void {
     const data = response.notification.request.content.data as MerchantPushData;
 
-    if (data.type === 'new_order' && data.order_id !== undefined) {
+    if (data.order_id === undefined) return;
+
+    if (data.type === 'chat_message') {
+      navigation.navigate('OrderChat', { orderId: data.order_id });
+    } else if (data.type === 'new_order') {
       navigation.navigate('OrderDetail', { orderId: data.order_id });
     }
   }

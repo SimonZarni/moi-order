@@ -44,9 +44,10 @@ function formatDateLabel(d: string | null, from: string | null, to: string | nul
 
 interface OrdersScreenProps {
   onSelectOrder?: (orderId: number) => void;
+  filterOverride?: StatusFilter;
 }
 
-export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.Element {
+export function OrdersScreen({ onSelectOrder, filterOverride }: OrdersScreenProps): React.JSX.Element {
   const {
     sections, isLoading,
     statusFilter, dateFilter, dateFrom, dateTo, datePreset,
@@ -54,7 +55,7 @@ export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.El
     handleUpdateStatus, handleStatusFilterChange,
     handleDatePreset, handleDatePrev, handleDateNext, handleDateToday,
     handleSearchChange, handleExportCsv,
-  } = useOrdersScreen();
+  } = useOrdersScreen(filterOverride);
 
   const isToday        = datePreset === 'today';
   const isRangePreset  = datePreset === 'last7' || datePreset === 'last30';
@@ -68,10 +69,15 @@ export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.El
         <View style={styles.pageHeaderLeft}>
           <Text style={styles.pageTitle}>Orders</Text>
           {pending > 0 && (
-            <View style={styles.pendingPill}>
+            <Pressable
+              style={styles.pendingPill}
+              onPress={() => handleStatusFilterChange('new')}
+              accessibilityRole="button"
+              accessibilityLabel={`${pending} pending orders, tap to filter`}
+            >
               <View style={styles.pendingDot} />
               <Text style={styles.pendingText}>{pending} pending</Text>
-            </View>
+            </Pressable>
           )}
         </View>
         <Pressable

@@ -39,7 +39,11 @@ export function useNotificationsScreen(): UseNotificationsScreenResult {
       markRead(notification.id);
     }
 
-    if (notification.order_id !== null) {
+    if (notification.order_id === null) return;
+
+    if (notification.type === 'chat_message') {
+      navigation.navigate('OrderChat', { orderId: notification.order_id });
+    } else {
       navigation.navigate('OrderDetail', { orderId: notification.order_id });
     }
   }, [markRead, navigation]);

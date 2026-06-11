@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View, Text, ScrollView, Pressable, TextInput, ActivityIndicator,
   Image, Linking, Switch, Modal, Platform,
@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRestaurantScreen } from '../hooks/useRestaurantScreen';
+import { CoverPhotoCropModal } from '../components/CoverPhotoCropModal';
 import { styles } from './RestaurantScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
@@ -70,9 +71,39 @@ export function RestaurantScreen(): React.JSX.Element {
     onPick(uri, fileName, mimeType);
   }, []);
 
+  const [coverCropSource, setCoverCropSource] = useState<{
+    uri: string; name: string; type: string; width: number; height: number;
+  } | null>(null);
+
   const handlePickCoverPhoto = useCallback(async () => {
-    await pickAndConvert(handleUploadCoverPhoto, 'cover');
-  }, [pickAndConvert, handleUploadCoverPhoto]);
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'images', quality: 1 });
+    if (result.canceled || !result.assets[0]) return;
+    const asset = result.assets[0];
+    let uri = asset.uri;
+    let mimeType = asset.mimeType ?? 'image/jpeg';
+    let fileName = asset.fileName ?? `cover.${mimeType.split('/')[1] ?? 'jpg'}`;
+    if (Platform.OS === 'web' && (mimeType === 'image/heic' || mimeType === 'image/heif')) {
+      try {
+        const heic2any = (await import('heic2any')).default;
+        const srcBlob = await fetch(uri).then((r) => r.blob());
+        const converted = await heic2any({ blob: srcBlob, toType: 'image/jpeg', quality: 0.85 });
+        const jpegBlob = Array.isArray(converted) ? converted[0] : converted;
+        uri = URL.createObjectURL(jpegBlob);
+        mimeType = 'image/jpeg';
+        fileName = fileName.replace(/\.(heic|heif)$/i, '.jpg');
+      } catch { /* fall through with original */ }
+    }
+    setCoverCropSource({ uri, name: fileName, type: mimeType, width: asset.width ?? 1200, height: asset.height ?? 675 });
+  }, []);
+
+  const handleCoverCropDone = useCallback((croppedUri: string) => {
+    if (coverCropSource === null) return;
+    const croppedName = coverCropSource.name.replace(/\.[^.]+$/, '.jpg');
+    handleUploadCoverPhoto(croppedUri, croppedName, 'image/jpeg');
+    setCoverCropSource(null);
+  }, [coverCropSource, handleUploadCoverPhoto]);
+
+  const handleCoverCropCancel = useCallback(() => setCoverCropSource(null), []);
 
   const handlePickLogo = useCallback(async () => {
     await pickAndConvert(handleUploadLogo, 'logo');
@@ -479,6 +510,17 @@ export function RestaurantScreen(): React.JSX.Element {
           <Text style={styles.supportButtonText}>Contact Support (LINE)</Text>
         </Pressable>
       </ScrollView>
+
+      {/* Cover photo crop modal */}
+      {coverCropSource !== null && (
+        <CoverPhotoCropModal
+          uri={coverCropSource.uri}
+          imageWidth={coverCropSource.width}
+          imageHeight={coverCropSource.height}
+          onCrop={handleCoverCropDone}
+          onCancel={handleCoverCropCancel}
+        />
+      )}
 
       {/* KYC Resubmit Modal */}
       <Modal visible={resubmitModal} animationType="slide" transparent onRequestClose={handleCloseResubmit}>

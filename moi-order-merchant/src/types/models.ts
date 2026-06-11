@@ -193,7 +193,7 @@ export interface AnalyticsChartData {
 
 // ── Merchant in-app notifications ─────────────────────────────────────────────
 
-export type MerchantNotificationType = 'new_order' | 'order_status' | 'system';
+export type MerchantNotificationType = 'new_order' | 'order_status' | 'chat_message' | 'system';
 
 export interface MerchantNotification {
   id: number;
