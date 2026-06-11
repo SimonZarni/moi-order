@@ -16,11 +16,13 @@ import { DOMAIN_MESSAGES } from '../../../shared/constants/messages';
 import { GoogleSignin, statusCodes } from '../../../shared/utils/googleSignin';
 import { signInWithGoogleWeb, GOOGLE_WEB_CANCELLED } from '../../../shared/utils/googleSigninWeb';
 import { signInWithAppleWeb, APPLE_WEB_CANCELLED } from '../../../shared/utils/appleSigninWeb';
+import { signInWithLineWeb, LINE_WEB_CANCELLED } from '../../../shared/utils/lineSigninWeb';
 import { Line, lineErrorCodes } from '../../../shared/utils/lineLogin';
 import {
   GOOGLE_WEB_CLIENT_ID,
   GOOGLE_IOS_CLIENT_ID,
   LINE_CHANNEL_ID,
+  LINE_WEB_REDIRECT_URI,
   APPLE_WEB_CLIENT_ID,
   APPLE_WEB_REDIRECT_URI,
 } from '../../../shared/constants/config';
@@ -48,6 +50,9 @@ type Nav = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 
 function resolveSocialError(e: unknown): string {
   const api = extractApiError(e);
+  // extractApiError returns the generic fallback for plain Errors; use the
+  // original message instead so stub/SDK errors surface correctly.
+  if (api.status === 0 && e instanceof Error) return e.message;
   return DOMAIN_MESSAGES[api.code ?? ''] ?? api.message;
 }
 
@@ -155,19 +160,27 @@ export function useLoginScreen(): UseLoginScreenResult {
     setLineL(true);
     setError(null);
     try {
-      const result = await Line.login({ scopes: ['profile', 'openid', 'email'] });
-      const idToken = result.accessToken.idToken;
-      const nonce   = result.idTokenNonce ?? result.IDTokenNonce;
-      if (!idToken) throw new Error('LINE sign-in returned no ID token.');
-      const { user, token } = await signInWithLine(
-        idToken,
-        nonce,
-        result.userProfile?.displayName,
-      );
+      let idToken: string;
+      let nonce: string | undefined;
+      let displayName: string | undefined;
+
+      if (Platform.OS === 'web') {
+        const result = await signInWithLineWeb(LINE_CHANNEL_ID, LINE_WEB_REDIRECT_URI);
+        idToken = result.idToken;
+        nonce   = result.nonce;
+      } else {
+        const result = await Line.login({ scopes: ['profile', 'openid', 'email'] });
+        idToken     = result.accessToken.idToken ?? '';
+        nonce       = result.idTokenNonce ?? result.IDTokenNonce;
+        displayName = result.userProfile?.displayName;
+        if (!idToken) throw new Error('LINE sign-in returned no ID token.');
+      }
+
+      const { user, token } = await signInWithLine(idToken, nonce, displayName);
       setAuth(user, token);
     } catch (e: unknown) {
       const code = (e as { code?: string })?.code;
-      if (code === lineErrorCodes.CANCELLED) return;
+      if (code === lineErrorCodes.CANCELLED || code === LINE_WEB_CANCELLED) return;
       setError(resolveSocialError(e));
     } finally {
       setLineL(false);
