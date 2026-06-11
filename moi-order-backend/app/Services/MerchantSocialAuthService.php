@@ -9,7 +9,7 @@ use App\DTOs\GoogleAuthDTO;
 use App\DTOs\LineAuthDTO;
 use App\Models\KycApplication;
 use App\Models\User;
-use Illuminate\Auth\Access\AuthorizationException;
+use App\Exceptions\DomainException;
 
 /**
  * Principle: SRP — owns social-auth login for the merchant dashboard only.
@@ -80,11 +80,11 @@ class MerchantSocialAuthService
             || KycApplication::forUser($user->id)->exists();
 
         if (! $hasMerchantAccess) {
-            throw new AuthorizationException('merchant.access_required');
+            throw new DomainException('merchant.access_required', 403);
         }
 
         if ($user->isRestricted()) {
-            throw new AuthorizationException('account.suspended');
+            throw new DomainException('account.suspended', 403);
         }
 
         $token = $user->createToken('merchant-auth', ['merchant'], now()->addDays(30))->plainTextToken;

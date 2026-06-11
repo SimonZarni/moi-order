@@ -12,6 +12,7 @@ import {
 } from '../../../api/auth';
 import { useAuthStore } from '../../../store/authStore';
 import { extractApiError } from '../../../api/client';
+import { DOMAIN_MESSAGES } from '../../../shared/constants/messages';
 import { GoogleSignin, statusCodes } from '../../../shared/utils/googleSignin';
 import { signInWithGoogleWeb, GOOGLE_WEB_CANCELLED } from '../../../shared/utils/googleSigninWeb';
 import { signInWithAppleWeb, APPLE_WEB_CANCELLED } from '../../../shared/utils/appleSigninWeb';
@@ -44,6 +45,11 @@ interface UseLoginScreenResult {
 }
 
 type Nav = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
+
+function resolveSocialError(e: unknown): string {
+  const api = extractApiError(e);
+  return DOMAIN_MESSAGES[api.code ?? ''] ?? api.message;
+}
 
 export function useLoginScreen(): UseLoginScreenResult {
   const navigation = useNavigation<Nav>();
@@ -101,7 +107,7 @@ export function useLoginScreen(): UseLoginScreenResult {
     } catch (e: unknown) {
       const code = (e as { code?: string })?.code;
       if (code === statusCodes.SIGN_IN_CANCELLED || code === GOOGLE_WEB_CANCELLED) return;
-      setError(e instanceof Error ? e.message : extractApiError(e).message);
+      setError(resolveSocialError(e));
     } finally {
       setGoogleL(false);
     }
@@ -139,7 +145,7 @@ export function useLoginScreen(): UseLoginScreenResult {
     } catch (e: unknown) {
       const code = (e as { code?: string })?.code;
       if (code === 'ERR_REQUEST_CANCELED' || code === APPLE_WEB_CANCELLED) return;
-      setError(e instanceof Error ? e.message : extractApiError(e).message);
+      setError(resolveSocialError(e));
     } finally {
       setAppleL(false);
     }
@@ -162,7 +168,7 @@ export function useLoginScreen(): UseLoginScreenResult {
     } catch (e: unknown) {
       const code = (e as { code?: string })?.code;
       if (code === lineErrorCodes.CANCELLED) return;
-      setError(e instanceof Error ? e.message : extractApiError(e).message);
+      setError(resolveSocialError(e));
     } finally {
       setLineL(false);
     }

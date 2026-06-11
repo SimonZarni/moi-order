@@ -62,7 +62,7 @@ export async function signInWithAppleWeb(
 
   let response: AppleAuthResponse;
   try {
-    response = await window.AppleID.auth.signIn();
+    response = await window.AppleID!.auth.signIn();
   } catch (e: unknown) {
     // Apple throws { error: 'popup_closed_by_user' } when the user dismisses
     const appleError = (e as { error?: string })?.error;
