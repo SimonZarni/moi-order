@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Alert } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, Animated } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
@@ -25,6 +25,7 @@ export interface UseCheckoutScreenResult {
   notes: string;
   contactNo: string;
   contactNoError: string | null;
+  contactShakeAnim: Animated.Value;
   selectedAddress: UserAddress | null;
   hasDeliveryAddress: boolean;
   isPlacing: boolean;
@@ -52,8 +53,19 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
 
   const [paymentMethod, setPaymentMethod] = useState<FoodPaymentMethod>(FOOD_PAYMENT_METHOD.LinePay);
   const [notes, setNotes]                 = useState('');
-  const [contactNo, setContactNo]         = useState('');
+  const [contactNo, setContactNo]           = useState('');
   const [contactNoError, setContactNoError] = useState<string | null>(null);
+  const contactShakeAnim = useRef(new Animated.Value(0)).current;
+
+  const shakeContactInput = useCallback(() => {
+    Animated.sequence([
+      Animated.timing(contactShakeAnim, { toValue: 10,  duration: 50, useNativeDriver: true }),
+      Animated.timing(contactShakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
+      Animated.timing(contactShakeAnim, { toValue: 6,   duration: 50, useNativeDriver: true }),
+      Animated.timing(contactShakeAnim, { toValue: -6,  duration: 50, useNativeDriver: true }),
+      Animated.timing(contactShakeAnim, { toValue: 0,   duration: 50, useNativeDriver: true }),
+    ]).start();
+  }, [contactShakeAnim]);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
 
   const { addresses } = useAddresses();
@@ -105,6 +117,7 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
 
     if (contactNo.trim() === '') {
       setContactNoError('Contact number is required');
+      shakeContactInput();
       return;
     }
     setContactNoError(null);
@@ -143,7 +156,7 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
         },
       },
     );
-  }, [restaurantId, items, paymentMethod, selectedAddressId, notes, contactNo, hasDeliveryAddress, handleChangeAddress, placeOrder, clearCart, navigation]);
+  }, [restaurantId, items, paymentMethod, selectedAddressId, notes, contactNo, hasDeliveryAddress, handleChangeAddress, shakeContactInput, placeOrder, clearCart, navigation]);
 
   return {
     items,
@@ -153,6 +166,7 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
     notes,
     contactNo,
     contactNoError,
+    contactShakeAnim,
     selectedAddress,
     hasDeliveryAddress,
     isPlacing,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Animated, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
@@ -63,7 +63,7 @@ function AddressSection({ address, onPress }: { address: UserAddress | null; onP
 export function CheckoutScreen(): React.JSX.Element {
   const {
     items, restaurantName, subtotalCents,
-    paymentMethod, notes, contactNo, contactNoError, selectedAddress, hasDeliveryAddress, isPlacing,
+    paymentMethod, notes, contactNo, contactNoError, contactShakeAnim, selectedAddress, hasDeliveryAddress, isPlacing,
     setPaymentMethod, setNotes, setContactNo,
     handleIncrement, handleDecrement,
     handleBack, handleChangeAddress, handlePlaceOrder,
@@ -158,16 +158,18 @@ export function CheckoutScreen(): React.JSX.Element {
         </View>
 
         <Text style={styles.sectionTitle}>Contact No</Text>
-        <TextInput
-          style={[styles.contactInput, contactNoError !== null && styles.contactInputError]}
-          value={contactNo}
-          onChangeText={setContactNo}
-          placeholder="Your phone number"
-          placeholderTextColor={colours.textMuted}
-          keyboardType="phone-pad"
-          maxLength={50}
-          accessibilityLabel="Contact number"
-        />
+        <Animated.View style={{ transform: [{ translateX: contactShakeAnim }] }}>
+          <TextInput
+            style={[styles.contactInput, contactNoError !== null && styles.contactInputError]}
+            value={contactNo}
+            onChangeText={setContactNo}
+            placeholder="Your phone number"
+            placeholderTextColor={colours.textMuted}
+            keyboardType="phone-pad"
+            maxLength={50}
+            accessibilityLabel="Contact number"
+          />
+        </Animated.View>
         {contactNoError !== null && (
           <Text style={styles.contactErrorText}>{contactNoError}</Text>
         )}
