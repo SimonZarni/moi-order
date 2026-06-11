@@ -40,12 +40,13 @@ class AdminFoodOrderController extends Controller
         if ($request->filled('search')) {
             $search = $request->string('search')->toString();
             $query->where(function ($q) use ($search): void {
-                $q->whereHas('user', fn ($uq) =>
-                    $uq->where('name', 'like', "%{$search}%")
-                       ->orWhere('email', 'like', "%{$search}%")
-                )->orWhereHas('restaurant', fn ($rq) =>
-                    $rq->where('name', 'like', "%{$search}%")
-                );
+                $q->where('order_number', 'like', "%{$search}%")
+                  ->orWhereHas('user', fn ($uq) =>
+                      $uq->where('name', 'like', "%{$search}%")
+                         ->orWhere('email', 'like', "%{$search}%")
+                  )->orWhereHas('restaurant', fn ($rq) =>
+                      $rq->where('name', 'like', "%{$search}%")
+                  );
             });
         }
 
@@ -54,6 +55,7 @@ class AdminFoodOrderController extends Controller
         return response()->json([
             'data' => collect($orders->items())->map(fn (FoodOrder $o) => [
                 'id'               => $o->uuid,
+                'order_number'     => $o->order_number,
                 'status'           => $o->status->value,
                 'status_label'     => $o->status->label(),
                 'payment_method'   => $o->payment_method->value,
