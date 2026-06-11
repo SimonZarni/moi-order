@@ -14,11 +14,14 @@ import { useAuthStore } from '../../../store/authStore';
 import { extractApiError } from '../../../api/client';
 import { GoogleSignin, statusCodes } from '../../../shared/utils/googleSignin';
 import { signInWithGoogleWeb, GOOGLE_WEB_CANCELLED } from '../../../shared/utils/googleSigninWeb';
+import { signInWithAppleWeb, APPLE_WEB_CANCELLED } from '../../../shared/utils/appleSigninWeb';
 import { Line, lineErrorCodes } from '../../../shared/utils/lineLogin';
 import {
   GOOGLE_WEB_CLIENT_ID,
   GOOGLE_IOS_CLIENT_ID,
   LINE_CHANNEL_ID,
+  APPLE_WEB_CLIENT_ID,
+  APPLE_WEB_REDIRECT_URI,
 } from '../../../shared/constants/config';
 
 interface UseLoginScreenResult {
@@ -105,35 +108,37 @@ export function useLoginScreen(): UseLoginScreenResult {
   }, [setAuth]);
 
   const handleAppleSignIn = useCallback(async () => {
-    if (Platform.OS === 'web') {
-      setError('Apple sign-in is not yet supported in the browser. Please use the Moi Order mobile app.');
-      return;
-    }
     setAppleL(true);
     setError(null);
     try {
-      const credential = await AppleAuthentication.signInAsync({
-        requestedScopes: [
-          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-          AppleAuthentication.AppleAuthenticationScope.EMAIL,
-        ],
-      });
-      const name = [
-        credential.fullName?.givenName,
-        credential.fullName?.familyName,
-      ]
-        .filter(Boolean)
-        .join(' ') || undefined;
+      let idToken: string;
+      let name: string | undefined;
+      let email: string | undefined;
 
-      const { user, token } = await signInWithApple(
-        credential.identityToken ?? '',
-        credential.email ?? undefined,
-        name,
-      );
+      if (Platform.OS === 'web') {
+        const result = await signInWithAppleWeb(APPLE_WEB_CLIENT_ID, APPLE_WEB_REDIRECT_URI);
+        idToken = result.idToken;
+        name    = result.name;
+        email   = result.email;
+      } else {
+        const credential = await AppleAuthentication.signInAsync({
+          requestedScopes: [
+            AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+            AppleAuthentication.AppleAuthenticationScope.EMAIL,
+          ],
+        });
+        idToken = credential.identityToken ?? '';
+        email   = credential.email ?? undefined;
+        name    = [credential.fullName?.givenName, credential.fullName?.familyName]
+          .filter(Boolean)
+          .join(' ') || undefined;
+      }
+
+      const { user, token } = await signInWithApple(idToken, email, name);
       setAuth(user, token);
     } catch (e: unknown) {
       const code = (e as { code?: string })?.code;
-      if (code === 'ERR_REQUEST_CANCELED') return;
+      if (code === 'ERR_REQUEST_CANCELED' || code === APPLE_WEB_CANCELLED) return;
       setError(e instanceof Error ? e.message : extractApiError(e).message);
     } finally {
       setAppleL(false);

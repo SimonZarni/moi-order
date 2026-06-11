@@ -81,10 +81,11 @@ function ImagePreviewItem({ img, index, onRemove }: ImagePreviewItemProps): Reac
 
 interface ContentProps {
   orderId: number;
+  orderNumber?: string;
   onBack: () => void;
 }
 
-export function OrderChatContent({ orderId, onBack }: ContentProps): React.JSX.Element {
+export function OrderChatContent({ orderId, orderNumber, onBack }: ContentProps): React.JSX.Element {
   const {
     messages, isLoading, isError, sendError, text, isSending, inputBarPadding,
     selectedImages, selectedPhoto, listRef,
@@ -107,7 +108,7 @@ export function OrderChatContent({ orderId, onBack }: ContentProps): React.JSX.E
         </Pressable>
         <View style={styles.headerInfo}>
           <Text style={styles.topBarTitle}>Chat with Customer</Text>
-          <Text style={styles.topBarSub}>Order #{orderId}</Text>
+          <Text style={styles.topBarSub}>{orderNumber ?? `Order #${orderId}`}</Text>
         </View>
       </View>
 
@@ -213,6 +214,6 @@ export function OrderChatContent({ orderId, onBack }: ContentProps): React.JSX.E
 export function OrderChatScreen(): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
   const route = useRoute<Route>();
-  const { orderId } = route.params;
-  return <OrderChatContent orderId={orderId} onBack={() => navigation.goBack()} />;
+  const { orderId, orderNumber } = route.params;
+  return <OrderChatContent orderId={orderId} orderNumber={orderNumber} onBack={() => navigation.goBack()} />;
 }

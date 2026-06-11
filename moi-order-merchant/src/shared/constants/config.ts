@@ -49,3 +49,11 @@ export const GOOGLE_IOS_CLIENT_ID =
 
 export const LINE_CHANNEL_ID =
   (process.env.EXPO_PUBLIC_LINE_CHANNEL_ID as string | undefined) ?? '';
+
+export const APPLE_WEB_CLIENT_ID =
+  (process.env.EXPO_PUBLIC_APPLE_WEB_CLIENT_ID as string | undefined) ??
+  'com.moiorder.merchantweb';
+
+export const APPLE_WEB_REDIRECT_URI =
+  (process.env.EXPO_PUBLIC_APPLE_WEB_REDIRECT_URI as string | undefined) ??
+  'https://merchant.moiorder.com/auth/apple/callback';

@@ -127,7 +127,7 @@ function OrderDetailRoute(
   const { orderId } = route.params;
   const handleBack = useCallback(() => navigation.goBack(), [navigation]);
   const handleChatPress = useCallback(
-    (id: number) => navigation.navigate('OrderChat', { orderId: id }),
+    (id: number, orderNum: string) => navigation.navigate('OrderChat', { orderId: id, orderNumber: orderNum }),
     [navigation],
   );
   return <OrderDetailScreen orderId={orderId} onBack={handleBack} onChatPress={handleChatPress} />;
@@ -184,6 +184,7 @@ function WebMerchantLayout(): React.JSX.Element {
   const [activeScreen, setActiveScreen] = useState<WebScreen>(readPersistedScreen);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(readPersistedOrderId);
   const [chatOrderId, setChatOrderId] = useState<number | null>(null);
+  const [chatOrderNumber, setChatOrderNumber] = useState<string>('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { isDesktop } = useResponsive();
   const logout = useAuthStore((s) => s.logout);
@@ -192,6 +193,7 @@ function WebMerchantLayout(): React.JSX.Element {
     setActiveScreen(screen);
     setSelectedOrderId(null);
     setChatOrderId(null);
+    setChatOrderNumber('');
     setSidebarOpen(false);
     try { localStorage.setItem('merchant_screen', screen); } catch {}
     try { localStorage.removeItem('merchant_order_id'); } catch {}
@@ -200,6 +202,7 @@ function WebMerchantLayout(): React.JSX.Element {
   const handleSelectOrder = useCallback((orderId: number) => {
     setSelectedOrderId(orderId);
     setChatOrderId(null);
+    setChatOrderNumber('');
     try { localStorage.setItem('merchant_order_id', String(orderId)); } catch {}
   }, []);
 
@@ -208,12 +211,14 @@ function WebMerchantLayout(): React.JSX.Element {
     try { localStorage.removeItem('merchant_order_id'); } catch {}
   }, []);
 
-  const handleChatOpen = useCallback((orderId: number) => {
+  const handleChatOpen = useCallback((orderId: number, orderNumber: string) => {
     setChatOrderId(orderId);
+    setChatOrderNumber(orderNumber);
   }, []);
 
   const handleChatClose = useCallback(() => {
     setChatOrderId(null);
+    setChatOrderNumber('');
   }, []);
 
   const sidebarActiveScreen: WebScreen =
@@ -221,7 +226,7 @@ function WebMerchantLayout(): React.JSX.Element {
 
   const renderContent = (): React.JSX.Element => {
     if (chatOrderId !== null) {
-      return <OrderChatContent orderId={chatOrderId} onBack={handleChatClose} />;
+      return <OrderChatContent orderId={chatOrderId} orderNumber={chatOrderNumber} onBack={handleChatClose} />;
     }
     if (selectedOrderId !== null) {
       return (

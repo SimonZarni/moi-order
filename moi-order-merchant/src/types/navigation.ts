@@ -21,7 +21,7 @@ export type MerchantTabParamList = {
 export type MerchantStackParamList = {
   Tabs: undefined;
   OrderDetail: { orderId: number };
-  OrderChat: { orderId: number };
+  OrderChat: { orderId: number; orderNumber?: string };
   BusinessProfile: undefined;
   Reviews: undefined;
   CancelledOrders: undefined;
