@@ -405,6 +405,7 @@ Route::prefix('restaurants')->name('admin.restaurants.')->group(function (): voi
 // ── Food Orders ───────────────────────────────────────────────────────────────
 Route::prefix('food-orders')->name('admin.food-orders.')->group(function (): void {
     Route::get('/',         [AdminFoodOrderController::class, 'index'])->name('index');
+    Route::get('/reviews',  [AdminFoodOrderController::class, 'reviews'])->name('reviews');
     Route::get('/export',   [AdminFoodOrderController::class, 'export'])->name('export');
     Route::get('/{foodOrder}', [AdminFoodOrderController::class, 'show'])->name('show');
     Route::post('/{foodOrder}/confirm-payment', [AdminFoodOrderController::class, 'confirmPayment'])->name('confirm-payment');

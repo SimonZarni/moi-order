@@ -88,6 +88,11 @@ export const navData: NavItem[] = [
         path: '/food-orders',
         icon: icon('solar:cart-3-bold'),
       },
+      {
+        title: 'Reviews',
+        path: '/food-orders/reviews',
+        icon: icon('solar:star-bold'),
+      },
     ],
   },
   {

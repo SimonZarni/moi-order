@@ -58,6 +58,24 @@ type ListParams = {
 
 type ExportParams = Omit<ListParams, 'page' | 'per_page'>;
 
+export type ReviewListItem = {
+  id: string;
+  order_number: string | null;
+  rating: number;
+  customer_review: string | null;
+  restaurant: { id: number; name: string };
+  user: { id: string; name: string };
+  completed_at: string | null;
+};
+
+type ReviewListParams = {
+  page?: number;
+  per_page?: number;
+  restaurant_id?: number;
+  rating?: number;
+  search?: string;
+};
+
 export const foodOrdersApi = {
   list: (params: ListParams) =>
     apiClient
@@ -73,4 +91,8 @@ export const foodOrdersApi = {
       .then((r) => r.data.data),
   export: (params: ExportParams) =>
     apiClient.get<Blob>('/food-orders/export', { params, responseType: 'blob' }).then((r) => r.data),
+  reviews: (params: ReviewListParams) =>
+    apiClient
+      .get<{ data: ReviewListItem[]; meta: Meta }>('/food-orders/reviews', { params })
+      .then((r) => r.data),
 };

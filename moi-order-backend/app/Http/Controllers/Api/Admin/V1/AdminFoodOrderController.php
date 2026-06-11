@@ -111,6 +111,54 @@ class AdminFoodOrderController extends Controller
         ]);
     }
 
+    /** GET /api/admin/v1/food-orders/reviews — orders that have a customer rating */
+    public function reviews(Request $request): JsonResponse
+    {
+        $query = FoodOrder::with(['restaurant', 'user'])
+            ->whereNotNull('rating')
+            ->orderByDesc('completed_at');
+
+        if ($request->filled('restaurant_id')) {
+            $query->where('restaurant_id', $request->integer('restaurant_id'));
+        }
+
+        if ($request->filled('rating')) {
+            $query->where('rating', $request->integer('rating'));
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->string('search')->toString();
+            $query->where(function ($q) use ($search): void {
+                $q->whereHas('user', fn ($uq) =>
+                    $uq->where('name', 'like', "%{$search}%")
+                       ->orWhere('email', 'like', "%{$search}%")
+                )->orWhereHas('restaurant', fn ($rq) =>
+                    $rq->where('name', 'like', "%{$search}%")
+                );
+            });
+        }
+
+        $orders = $query->paginate($request->integer('per_page', 20));
+
+        return response()->json([
+            'data' => collect($orders->items())->map(fn (FoodOrder $o) => [
+                'id'              => $o->uuid,
+                'order_number'    => $o->order_number,
+                'rating'          => $o->rating,
+                'customer_review' => $o->customer_review,
+                'restaurant'      => ['id' => $o->restaurant->id, 'name' => $o->restaurant->name],
+                'user'            => ['id' => $o->user->uuid, 'name' => $o->user->name],
+                'completed_at'    => $o->completed_at?->toIso8601String(),
+            ]),
+            'meta' => [
+                'current_page' => $orders->currentPage(),
+                'last_page'    => $orders->lastPage(),
+                'per_page'     => $orders->perPage(),
+                'total'        => $orders->total(),
+            ],
+        ]);
+    }
+
     public function confirmPayment(FoodOrder $foodOrder): JsonResponse
     {
         $foodOrder->load(['restaurant', 'user', 'items']);

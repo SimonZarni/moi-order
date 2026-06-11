@@ -25,7 +25,11 @@ const STATUS_CONFIG: Record<RestaurantStatus, { label: string; color: string; bg
 
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-export function RestaurantScreen(): React.JSX.Element {
+interface RestaurantScreenProps {
+  onReviewsPress?: () => void;
+}
+
+export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): React.JSX.Element {
   const {
     restaurant, isLoading, isEditing, isSaving, isNewRestaurant,
     isUploadingCover, isUploadingLogo, isUploadingGalleryPhoto,
@@ -40,7 +44,8 @@ export function RestaurantScreen(): React.JSX.Element {
     handleEditDelivery, handleCancelDelivery, handleMinOrderChange, handleSaveDelivery,
     handleToggleDelivery, handleTogglePickup,
     handleEditPhone, handleCancelPhone, handlePhoneChange, handleSavePhone,
-    handleEditHours, handleCancelHours, handleHourChange, handleHourToggle, handleSaveHours,
+    handleEditHours, handleCancelHours, handleClearHoursError, handleHourChange, handleHourToggle, handleSaveHours,
+    hoursError,
     handleOpenResubmit, handleCloseResubmit,
     handleResubmitFieldChange, handleResubmitSubmitForm,
     handleResubmitFinalSubmit,
@@ -407,6 +412,11 @@ export function RestaurantScreen(): React.JSX.Element {
                     </View>
                   </View>
                 ))}
+                {hoursError !== null && (
+                  <Pressable onPress={handleClearHoursError} accessibilityRole="button" accessibilityLabel="Dismiss error">
+                    <Text style={{ color: colours.error, fontSize: 13, marginTop: 8, marginBottom: 4 }}>{hoursError}</Text>
+                  </Pressable>
+                )}
                 <View style={[styles.formActions, { marginTop: 12 }]}>
                   <Pressable style={styles.cancelButton} onPress={handleCancelHours} accessibilityRole="button" accessibilityLabel="Cancel">
                     <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -501,6 +511,15 @@ export function RestaurantScreen(): React.JSX.Element {
               )}
             </View>
           </View>
+        )}
+
+        {/* Reviews shortcut */}
+        {restaurant !== null && onReviewsPress !== undefined && (
+          <Pressable style={styles.supportButton} onPress={onReviewsPress}
+            accessibilityRole="button" accessibilityLabel="View customer reviews">
+            <Ionicons name="star-outline" size={18} color={colours.primary} />
+            <Text style={styles.supportButtonText}>Customer Reviews</Text>
+          </Pressable>
         )}
 
         {/* Contact support */}

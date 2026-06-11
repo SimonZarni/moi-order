@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Merchant\V1\MerchantOrderController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantRestaurantController;
 use App\Http\Controllers\Api\Merchant\V1\MenuCategoryController;
 use App\Http\Controllers\Api\Merchant\V1\MenuItemController;
+use App\Http\Controllers\Api\Merchant\V1\MerchantReviewController;
 use Illuminate\Support\Facades\Route;
 
 // ── Business profile ─────────────────────────────────────────────────────────
@@ -63,6 +64,9 @@ Route::post('/notifications/{id}/read',   [MerchantNotificationController::class
 Route::post('/kyc/resubmit',                             [KycController::class, 'resubmit']);
 Route::post('/kyc/resubmit/{id}/documents',              [KycController::class, 'uploadResubmitDocument']);
 Route::post('/kyc/resubmit/{id}/submit',                 [KycController::class, 'submitResubmission']);
+
+// ── Reviews ───────────────────────────────────────────────────────────────────
+Route::get('/reviews', [MerchantReviewController::class, 'index']);
 
 // ── Device tokens — push notification registration ────────────────────────────
 Route::post('/device-tokens',   [DeviceTokenController::class, 'store']);

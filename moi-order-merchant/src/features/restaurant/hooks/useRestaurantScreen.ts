@@ -58,6 +58,7 @@ interface UseRestaurantScreenResult {
   isEditingDelivery: boolean;
   isEditingPhone: boolean;
   isEditingHours: boolean;
+  hoursError: string | null;
   minOrderInput: string;
   phoneInput: string;
   openingHoursInput: OpeningHourInput[];
@@ -91,6 +92,7 @@ interface UseRestaurantScreenResult {
   handleSavePhone: () => void;
   handleEditHours: () => void;
   handleCancelHours: () => void;
+  handleClearHoursError: () => void;
   handleHourChange: (dayOfWeek: number, field: 'opens_at' | 'closes_at', value: string) => void;
   handleHourToggle: (dayOfWeek: number, isClosed: boolean) => void;
   handleSaveHours: () => void;
@@ -108,6 +110,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
   const [isEditingDelivery, setIsEditingDelivery] = useState(false);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [isEditingHours, setIsEditingHours] = useState(false);
+  const [hoursError, setHoursError] = useState<string | null>(null);
   const [minOrderInput, setMinOrderInput] = useState('');
   const [phoneInput, setPhoneInput] = useState('');
   const [openingHoursInput, setOpeningHoursInput] = useState<OpeningHourInput[]>(DEFAULT_HOURS);
@@ -161,7 +164,11 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
 
   const { mutate: saveHours, isPending: isSavingHours } = useMutation({
     mutationFn: (hours: OpeningHourInput[]) => updateRestaurant({ opening_hours: hours }),
-    onSuccess: (updated) => { setCache(updated); setIsEditingHours(false); },
+    onSuccess: (updated) => { setCache(updated); setIsEditingHours(false); setHoursError(null); },
+    onError: (error) => {
+      const apiError = extractApiError(error);
+      setHoursError(apiError.message ?? 'Could not save opening hours. Check the time format (HH:MM).');
+    },
   });
 
   const { mutate: mutateToggleDelivery } = useMutation({
@@ -400,7 +407,8 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     setIsEditingHours(true);
   }, [hoursFromRestaurant]);
 
-  const handleCancelHours = useCallback(() => setIsEditingHours(false), []);
+  const handleCancelHours = useCallback(() => { setIsEditingHours(false); setHoursError(null); }, []);
+  const handleClearHoursError = useCallback(() => setHoursError(null), []);
 
   const handleHourChange = useCallback(
     (dayOfWeek: number, field: 'opens_at' | 'closes_at', value: string) => {
@@ -418,7 +426,18 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
   }, []);
 
   const handleSaveHours = useCallback(() => {
-    saveHours(openingHoursInput);
+    const normalizeTime = (t: string | null): string | null => {
+      if (!t) return null;
+      const [h, m] = t.split(':');
+      if (!h || !m) return t;
+      return `${h.padStart(2, '0')}:${m.padStart(2, '0')}`;
+    };
+    const normalized = openingHoursInput.map((h) => ({
+      ...h,
+      opens_at:  h.is_closed ? null : normalizeTime(h.opens_at),
+      closes_at: h.is_closed ? null : normalizeTime(h.closes_at),
+    }));
+    saveHours(normalized);
   }, [openingHoursInput, saveHours]);
 
   // ── KYC resubmission ──────────────────────────────────────────────────────────
@@ -476,6 +495,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     isEditingDelivery,
     isEditingPhone,
     isEditingHours,
+    hoursError,
     minOrderInput,
     phoneInput,
     openingHoursInput,
@@ -509,6 +529,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     handleSavePhone,
     handleEditHours,
     handleCancelHours,
+    handleClearHoursError,
     handleHourChange,
     handleHourToggle,
     handleSaveHours,

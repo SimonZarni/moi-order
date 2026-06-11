@@ -1,5 +1,13 @@
-import React, { useRef, useCallback } from 'react';
-import { Animated, PanResponder, Text, View } from 'react-native';
+import React, { useRef } from 'react';
+import { View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { styles, TRACK_WIDTH, THUMB_SIZE } from './SlideToComplete.styles';
@@ -12,44 +20,44 @@ interface Props {
 const THRESHOLD = TRACK_WIDTH - THUMB_SIZE - 8;
 
 export function SlideToComplete({ onComplete, disabled = false }: Props): React.JSX.Element {
-  const translateX = useRef(new Animated.Value(0)).current;
+  const translateX = useSharedValue(0);
   const completed  = useRef(false);
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => !disabled,
-      onPanResponderGrant: () => {
-        Animated.spring(translateX, { toValue: 4, useNativeDriver: true, friction: 8 }).start();
-      },
-      onPanResponderMove: (_, gs) => {
-        const clamped = Math.max(0, Math.min(THRESHOLD, gs.dx));
-        translateX.setValue(clamped);
-      },
-      onPanResponderRelease: (_, gs) => {
-        if (gs.dx >= THRESHOLD * 0.85 && !completed.current) {
-          completed.current = true;
-          Animated.spring(translateX, { toValue: THRESHOLD, useNativeDriver: true }).start();
-          onComplete();
-        } else {
-          Animated.spring(translateX, { toValue: 0, useNativeDriver: true, friction: 6 }).start();
-        }
-      },
-    }),
-  ).current;
+  const gesture = Gesture.Pan()
+    .enabled(!disabled)
+    .onUpdate((e) => {
+      translateX.value = Math.max(0, Math.min(THRESHOLD, e.translationX));
+    })
+    .onEnd((e) => {
+      if (e.translationX >= THRESHOLD * 0.85 && !completed.current) {
+        completed.current = true;
+        translateX.value = withSpring(THRESHOLD, { damping: 18, stiffness: 200 });
+        runOnJS(onComplete)();
+      } else {
+        translateX.value = withSpring(0, { damping: 14, stiffness: 160 });
+      }
+    });
 
-  const opacity = translateX.interpolate({ inputRange: [0, THRESHOLD * 0.6], outputRange: [1, 0], extrapolate: 'clamp' });
+  const thumbStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
+
+  const labelStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(translateX.value, [0, THRESHOLD * 0.6], [1, 0], 'clamp'),
+  }));
 
   return (
     <View style={[styles.track, disabled && styles.trackDisabled]}>
-      <Animated.Text style={[styles.trackLabel, { opacity }]}>Slide to Complete Order</Animated.Text>
-      <Animated.View
-        style={[styles.thumb, { transform: [{ translateX }] }]}
-        {...panResponder.panHandlers}
-        accessibilityRole="button"
-        accessibilityLabel="Slide to complete order"
-      >
-        <Ionicons name="chevron-forward-outline" size={22} color={colours.white} />
-      </Animated.View>
+      <Animated.Text style={[styles.trackLabel, labelStyle]}>Slide to Complete Order</Animated.Text>
+      <GestureDetector gesture={gesture}>
+        <Animated.View
+          style={[styles.thumb, thumbStyle]}
+          accessibilityRole="button"
+          accessibilityLabel="Slide to complete order"
+        >
+          <Ionicons name="chevron-forward-outline" size={22} color={colours.white} />
+        </Animated.View>
+      </GestureDetector>
     </View>
   );
 }

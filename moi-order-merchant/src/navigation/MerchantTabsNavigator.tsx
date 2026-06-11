@@ -22,6 +22,7 @@ import { NotificationsScreen } from '../features/notifications/screens/Notificat
 import { NotificationBell } from '../features/notifications/components/NotificationBell';
 import { ProfileScreen } from '../features/profile/screens/ProfileScreen';
 import { BusinessProfileScreen } from '../features/businessProfile/screens/BusinessProfileScreen';
+import { ReviewsScreen } from '../features/reviews/screens/ReviewsScreen';
 import { WebSidebar } from '../shared/components/WebSidebar/WebSidebar';
 import { colours } from '../shared/theme/colours';
 import { spacing } from '../shared/theme/spacing';
@@ -65,6 +66,15 @@ function OrdersTab(): React.JSX.Element {
   return <OrdersScreen onSelectOrder={handleSelectOrder} />;
 }
 
+function RestaurantTab(): React.JSX.Element {
+  const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
+  const handleReviews = useCallback(
+    () => navigation.navigate('Reviews'),
+    [navigation],
+  );
+  return <RestaurantScreen onReviewsPress={handleReviews} />;
+}
+
 function MobileTabNavigator(): React.JSX.Element {
   return (
     <Tab.Navigator
@@ -92,7 +102,7 @@ function MobileTabNavigator(): React.JSX.Element {
       <Tab.Screen name="Dashboard"     component={DashboardTab}        options={{ title: 'Dashboard' }} />
       <Tab.Screen name="Orders"        component={OrdersTab}           options={{ title: 'Orders' }} />
       <Tab.Screen name="Menu"          component={MenuScreen}          options={{ title: 'Menu' }} />
-      <Tab.Screen name="Restaurant"    component={RestaurantScreen}    options={{ title: 'Restaurant' }} />
+      <Tab.Screen name="Restaurant"    component={RestaurantTab}       options={{ title: 'Restaurant' }} />
       <Tab.Screen
         name="Notifications"
         component={NotificationsScreen}
@@ -125,6 +135,7 @@ function MobileNavigator(): React.JSX.Element {
       <MobileStack.Screen name="OrderDetail" component={OrderDetailRoute} />
       <MobileStack.Screen name="OrderChat" component={OrderChatScreen} />
       <MobileStack.Screen name="BusinessProfile" component={BusinessProfileScreen} options={{ headerShown: false }} />
+      <MobileStack.Screen name="Reviews" component={ReviewsScreen} options={{ headerShown: false }} />
     </MobileStack.Navigator>
   );
 }
@@ -210,6 +221,8 @@ function WebMerchantLayout(): React.JSX.Element {
         );
       case 'BusinessProfile':
         return <BusinessProfileScreen />;
+      case 'Reviews':
+        return <ReviewsScreen />;
     }
   };
 

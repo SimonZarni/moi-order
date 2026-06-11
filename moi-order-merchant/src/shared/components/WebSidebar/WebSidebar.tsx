@@ -22,6 +22,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Restaurant',       icon: 'storefront-outline',    activeIcon: 'storefront',          screen: 'Restaurant',      section: 'MANAGE' },
   { label: 'Business Profile', icon: 'briefcase-outline',     activeIcon: 'briefcase',           screen: 'BusinessProfile', section: 'MANAGE' },
   { label: 'Analytics',     icon: 'bar-chart-outline',      activeIcon: 'bar-chart',         screen: 'Analytics',     section: 'INSIGHTS' },
+  { label: 'Reviews',       icon: 'star-outline',            activeIcon: 'star',              screen: 'Reviews',       section: 'INSIGHTS' },
 ];
 
 interface WebSidebarProps {

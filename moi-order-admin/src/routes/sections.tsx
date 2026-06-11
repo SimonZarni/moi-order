@@ -44,6 +44,7 @@ export const RestaurantCreatePage = lazy(() => import('src/pages/restaurant-crea
 export const RestaurantDetailPage = lazy(() => import('src/pages/restaurant-detail'));
 export const FoodOrdersPage = lazy(() => import('src/pages/food-orders'));
 export const FoodOrderDetailPage = lazy(() => import('src/pages/food-order-detail'));
+export const FoodOrderReviewsPage = lazy(() => import('src/pages/food-order-reviews'));
 export const HomeCardsPage = lazy(() => import('src/pages/home-cards'));
 export const HomeCardCreatePage = lazy(() => import('src/pages/home-card-create'));
 export const HomeCardEditPage = lazy(() => import('src/pages/home-card-edit'));
@@ -152,6 +153,7 @@ export const routesSection: RouteObject[] = [
 
       // Food Orders — no backend permission guard
       { path: 'food-orders', element: <FoodOrdersPage /> },
+      { path: 'food-orders/reviews', element: <FoodOrderReviewsPage /> },
       { path: 'food-orders/:id', element: <FoodOrderDetailPage /> },
       // Home Cards — requires home_cards.manage
       { path: 'home-cards', element: guard('home_cards.manage', <HomeCardsPage />) },

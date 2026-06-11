@@ -17,4 +17,5 @@ export const QUERY_KEYS = {
     LIST: ['notifications'] as const,
     UNREAD_COUNT: ['notifications', 'unread-count'] as const,
   },
+  REVIEWS: (page?: number, rating?: number) => ['reviews', page ?? 1, rating ?? null] as const,
 } as const;

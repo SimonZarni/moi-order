@@ -23,6 +23,7 @@ export type MerchantStackParamList = {
   OrderDetail: { orderId: number };
   OrderChat: { orderId: number };
   BusinessProfile: undefined;
+  Reviews: undefined;
 };
 
 export type RootStackParamList = {
@@ -38,4 +39,5 @@ export type WebScreen =
   | 'Restaurant'
   | 'Analytics'
   | 'Notifications'
-  | 'BusinessProfile';
+  | 'BusinessProfile'
+  | 'Reviews';

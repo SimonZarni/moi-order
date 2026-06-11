@@ -54,12 +54,13 @@ if (Constants.appOwnership !== 'expo') {
 }
 
 interface PushNotificationData {
-  notification_type?: 'submission_status' | 'ticket_order_status' | 'custom_announcement' | 'ninety_day_reminder' | 'payment_ready' | 'chat_message' | string;
+  notification_type?: 'submission_status' | 'ticket_order_status' | 'food_order_status' | 'custom_announcement' | 'ninety_day_reminder' | 'payment_ready' | 'chat_message' | string;
   submission_id?: string;
   ticket_order_id?: string;
   food_order_id?: string;
   order_type?: 'ticket_order' | 'submission';
   order_id?: string;
+  status?: string;
 }
 
 export function usePushNotifications(): void {
@@ -123,7 +124,9 @@ export function usePushNotifications(): void {
   function handleNotificationTap(response: Notifications.NotificationResponse): void {
     const data = response.notification.request.content.data as PushNotificationData;
 
-    if (data.notification_type === 'chat_message' && data.food_order_id !== undefined) {
+    if (data.notification_type === 'food_order_status' && data.food_order_id !== undefined) {
+      navigation.navigate('FoodOrderDetail', { orderId: data.food_order_id });
+    } else if (data.notification_type === 'chat_message' && data.food_order_id !== undefined) {
       navigation.navigate('OrderChat', {
         orderId:        data.food_order_id,
         orderNumber:    null,

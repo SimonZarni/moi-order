@@ -51,10 +51,4 @@ export async function cancelOrderWithReason(
   return response.data.data;
 }
 
-export async function confirmOrderPayment(id: number): Promise<FoodOrder> {
-  const response = await apiClient.post<{ data: FoodOrder }>(
-    `/orders/${id}/confirm-payment`,
-  );
-  return response.data.data;
-}
 
