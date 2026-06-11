@@ -196,7 +196,18 @@ function WebMerchantLayout(): React.JSX.Element {
       case 'Analytics':
         return <AnalyticsScreen />;
       case 'Notifications':
-        return <NotificationsScreen />;
+        return (
+          <NotificationsScreen
+            onPressNotification={(n) => {
+              if (n.order_id === null) return;
+              if (n.type === 'chat_message') {
+                setChatOrderId(n.order_id);
+              } else {
+                setSelectedOrderId(n.order_id);
+              }
+            }}
+          />
+        );
       case 'BusinessProfile':
         return <BusinessProfileScreen />;
     }

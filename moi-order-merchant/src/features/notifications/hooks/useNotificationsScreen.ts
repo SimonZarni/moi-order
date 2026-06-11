@@ -1,6 +1,11 @@
 /**
  * Principle: SRP — coordinator hook for NotificationsScreen.
  * Composes useMerchantNotifications and exposes only what the screen needs.
+ *
+ * onPressNotification: optional override for web, where NotificationsScreen is
+ * rendered outside the MobileStack and useNavigation() resolves to the root
+ * navigator (which has no OrderDetail/OrderChat). Web callers pass state setters
+ * instead. On mobile the hook falls back to React Navigation.
  */
 import { useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
@@ -8,6 +13,10 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMerchantNotifications } from './useMerchantNotifications';
 import type { MerchantNotification } from '../../../types/models';
 import type { MerchantStackParamList } from '../../../types/navigation';
+
+interface UseNotificationsScreenParams {
+  onPressNotification?: (notification: MerchantNotification) => void;
+}
 
 export interface UseNotificationsScreenResult {
   notifications: MerchantNotification[];
@@ -20,7 +29,9 @@ export interface UseNotificationsScreenResult {
   handleRefresh: () => void;
 }
 
-export function useNotificationsScreen(): UseNotificationsScreenResult {
+export function useNotificationsScreen(
+  { onPressNotification }: UseNotificationsScreenParams = {},
+): UseNotificationsScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
 
   const {
@@ -39,6 +50,11 @@ export function useNotificationsScreen(): UseNotificationsScreenResult {
       markRead(notification.id);
     }
 
+    if (onPressNotification) {
+      onPressNotification(notification);
+      return;
+    }
+
     if (notification.order_id === null) return;
 
     if (notification.type === 'chat_message') {
@@ -46,7 +62,7 @@ export function useNotificationsScreen(): UseNotificationsScreenResult {
     } else {
       navigation.navigate('OrderDetail', { orderId: notification.order_id });
     }
-  }, [markRead, navigation]);
+  }, [markRead, navigation, onPressNotification]);
 
   const handleMarkAllRead = useCallback(() => {
     markAllRead();

@@ -14,18 +14,21 @@ interface NotificationItemProps {
 const ICON_MAP: Record<MerchantNotificationType, keyof typeof Ionicons.glyphMap> = {
   new_order:    'receipt',
   order_status: 'checkmark-circle',
+  chat_message: 'chatbubble-ellipses',
   system:       'information-circle',
 };
 
 const ICON_BG: Record<MerchantNotificationType, string> = {
   new_order:    colours.primary + '22',
   order_status: colours.success + '22',
+  chat_message: colours.info    + '22',
   system:       colours.info    + '22',
 };
 
 const ICON_COLOUR: Record<MerchantNotificationType, string> = {
   new_order:    colours.primary,
   order_status: colours.success,
+  chat_message: colours.info,
   system:       colours.info,
 };
 

@@ -10,11 +10,15 @@ import { styles } from './NotificationsScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import type { MerchantNotification } from '../../../types/models';
 
-export function NotificationsScreen(): React.JSX.Element {
+interface NotificationsScreenProps {
+  onPressNotification?: (notification: MerchantNotification) => void;
+}
+
+export function NotificationsScreen({ onPressNotification }: NotificationsScreenProps = {}): React.JSX.Element {
   const {
     notifications, unreadCount, isLoading, isError, isMarkingAllRead,
     handlePressNotification, handleMarkAllRead, handleRefresh,
-  } = useNotificationsScreen();
+  } = useNotificationsScreen({ onPressNotification });
 
   const renderItem: ListRenderItem<MerchantNotification> = ({ item, index }) => (
     <>
