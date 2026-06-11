@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator, Animated, Dimensions, Image,
-  Modal, PanResponder, Pressable, Text, View,
+  Modal, PanResponder, Platform, Pressable, Text, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,9 +9,13 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import { colours } from '../../../shared/theme/colours';
 import { styles } from './CoverPhotoCropModal.styles';
 
-const { width: SCREEN_W } = Dimensions.get('window');
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 const CROP_ASPECT = 16 / 9;
-const CROP_W = SCREEN_W;
+// On web (desktop), constrain the crop box so header + hint + footer (~200px) still fit on screen.
+const RESERVED_VERTICAL = 200;
+const CROP_W = Platform.OS === 'web'
+  ? Math.min(SCREEN_W, Math.floor((SCREEN_H - RESERVED_VERTICAL) * CROP_ASPECT))
+  : SCREEN_W;
 const CROP_H = Math.round(CROP_W / CROP_ASPECT);
 
 interface Props {
@@ -100,7 +104,7 @@ export function CoverPhotoCropModal({ uri, imageWidth, imageHeight, onCrop, onCa
         <Text style={styles.hint}>Drag to reposition · 16:9</Text>
 
         <View style={styles.viewportWrap}>
-          <View style={[styles.viewport, { height: CROP_H }]} {...panResponder.panHandlers}>
+          <View style={[styles.viewport, { width: CROP_W, height: CROP_H }]} {...panResponder.panHandlers}>
             <Animated.View
               pointerEvents="none"
               style={{

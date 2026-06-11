@@ -44,7 +44,6 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   viewport: {
-    width: '100%',
     overflow: 'hidden',
     backgroundColor: '#111',
   },
