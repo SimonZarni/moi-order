@@ -394,6 +394,11 @@ export interface AppStrings {
     chooseOne:               string; // "Choose 1"
     chooseAtLeast:           string; // "Choose at least {n}"
     chooseUpTo:              string; // "Choose up to {n}"
+    payViaLine:              string; // "Pay via LINE"
+    chatWithRestaurant:      string; // "Chat with Restaurant"
+    contactNoLabel:          string; // "Contact No"
+    contactNoPlaceholder:    string; // "Your phone number"
+    contactNoRequired:       string; // "Contact number is required"
   };
 }
 
@@ -713,7 +718,7 @@ const en: AppStrings = {
     loading:      'Loading…',
   },
   restaurant: {
-    listTitle:               'Restaurant',
+    listTitle:               'Restaurants',
     couldNotLoad:            'Could not load restaurant.',
     closesAt:                'Closes at {time}',
     statusOpen:              'Open',
@@ -733,6 +738,11 @@ const en: AppStrings = {
     chooseOne:               'Choose 1',
     chooseAtLeast:           'Choose at least {n}',
     chooseUpTo:              'Choose up to {n}',
+    payViaLine:              'Pay via LINE',
+    chatWithRestaurant:      'Chat with Restaurant',
+    contactNoLabel:          'Contact No',
+    contactNoPlaceholder:    'Your phone number',
+    contactNoRequired:       'Contact number is required',
   },
 };
 
@@ -1072,6 +1082,11 @@ const mm: AppStrings = {
     chooseOne:               'တစ်ခုရွေးချယ်ပါ',
     chooseAtLeast:           'အနည်းဆုံး {n} ခုရွေးချယ်ပါ',
     chooseUpTo:              'အများဆုံး {n} ခုအထိ ရွေးချယ်နိုင်',
+    payViaLine:              'ေငွေပေးချေရန် Line',
+    chatWithRestaurant:      'ဆိုင်နှင့် ချတ်ဆွေးနွေးမည်',
+    contactNoLabel:          'ဆက်သွယ်ရန် နံပါတ်',
+    contactNoPlaceholder:    'ဖုန်းနံပါတ်',
+    contactNoRequired:       'ဆက်သွယ်ရန် နံပါတ် ဖြည့်ပေးပါ',
   },
 };
 
@@ -1411,6 +1426,11 @@ const th: AppStrings = {
     chooseOne:               'เลือก 1 อย่าง',
     chooseAtLeast:           'เลือกอย่างน้อย {n} อย่าง',
     chooseUpTo:              'เลือกได้สูงสุด {n} อย่าง',
+    payViaLine:              'ชำระผ่าน LINE',
+    chatWithRestaurant:      'แชทกับร้านอาหาร',
+    contactNoLabel:          'เบอร์ติดต่อ',
+    contactNoPlaceholder:    'หมายเลขโทรศัพท์ของคุณ',
+    contactNoRequired:       'กรุณากรอกเบอร์ติดต่อ',
   },
 };
 

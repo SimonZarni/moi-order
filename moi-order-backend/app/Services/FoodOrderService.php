@@ -168,6 +168,7 @@ class FoodOrderService
                 'delivery_lat'     => $deliveryLat,
                 'delivery_lng'     => $deliveryLng,
                 'customer_notes'   => $dto->customerNotes,
+                'contact_no'       => $dto->contactNo,
                 'idempotency_key'  => $dto->idempotencyKey,
             ]);
 

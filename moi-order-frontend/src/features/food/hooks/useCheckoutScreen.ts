@@ -23,11 +23,14 @@ export interface UseCheckoutScreenResult {
   subtotalCents: number;
   paymentMethod: FoodPaymentMethod;
   notes: string;
+  contactNo: string;
+  contactNoError: string | null;
   selectedAddress: UserAddress | null;
   hasDeliveryAddress: boolean;
   isPlacing: boolean;
   setPaymentMethod:      (method: FoodPaymentMethod) => void;
   setNotes:              (text: string) => void;
+  setContactNo:          (text: string) => void;
   handleIncrement:       (cartKey: string) => void;
   handleDecrement:       (cartKey: string) => void;
   handleBack:            () => void;
@@ -49,6 +52,8 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
 
   const [paymentMethod, setPaymentMethod] = useState<FoodPaymentMethod>(FOOD_PAYMENT_METHOD.LinePay);
   const [notes, setNotes]                 = useState('');
+  const [contactNo, setContactNo]         = useState('');
+  const [contactNoError, setContactNoError] = useState<string | null>(null);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
 
   const { addresses } = useAddresses();
@@ -98,6 +103,12 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
       return;
     }
 
+    if (contactNo.trim() === '') {
+      setContactNoError('Contact number is required');
+      return;
+    }
+    setContactNoError(null);
+
     const idempotencyKey = await Crypto.randomUUID();
 
     placeOrder(
@@ -108,6 +119,7 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
         delivery_address_id: selectedAddressId,
         delivery_address:    null,
         customer_notes:      notes.trim() || null,
+        contact_no:          contactNo.trim(),
         items: items.map((i) => ({
           menu_item_id:     i.menuItemId,
           quantity:         i.quantity,
@@ -131,7 +143,7 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
         },
       },
     );
-  }, [restaurantId, items, paymentMethod, selectedAddressId, notes, hasDeliveryAddress, handleChangeAddress, placeOrder, clearCart, navigation]);
+  }, [restaurantId, items, paymentMethod, selectedAddressId, notes, contactNo, hasDeliveryAddress, handleChangeAddress, placeOrder, clearCart, navigation]);
 
   return {
     items,
@@ -139,11 +151,14 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
     subtotalCents:  totalCents,
     paymentMethod,
     notes,
+    contactNo,
+    contactNoError,
     selectedAddress,
     hasDeliveryAddress,
     isPlacing,
     setPaymentMethod,
     setNotes,
+    setContactNo,
     handleIncrement,
     handleDecrement,
     handleBack,

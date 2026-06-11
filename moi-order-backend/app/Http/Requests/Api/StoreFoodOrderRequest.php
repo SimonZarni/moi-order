@@ -21,6 +21,10 @@ class StoreFoodOrderRequest extends FormRequest
             $this->merge(['customer_notes' => strip_tags(trim((string) $this->input('customer_notes')))]);
         }
 
+        if ($this->has('contact_no')) {
+            $this->merge(['contact_no' => strip_tags(trim((string) $this->input('contact_no')))]);
+        }
+
         $items = $this->input('items', []);
         if (is_array($items)) {
             $this->merge([
@@ -46,6 +50,7 @@ class StoreFoodOrderRequest extends FormRequest
             'delivery_lat'        => ['nullable', 'numeric', 'between:-90,90'],
             'delivery_lng'        => ['nullable', 'numeric', 'between:-180,180'],
             'customer_notes'   => ['nullable', 'string', 'max:500'],
+            'contact_no'       => ['required', 'string', 'max:50'],
             'items'            => ['required', 'array', 'min:1', 'max:50'],
             'items.*.menu_item_id' => ['required', 'integer', 'exists:menu_items,id'],
             'items.*.quantity'     => ['required', 'integer', 'min:1', 'max:99'],
@@ -66,6 +71,7 @@ class StoreFoodOrderRequest extends FormRequest
             'payment_method.required'     => 'Payment method is required.',
             'idempotency_key.required'    => 'Idempotency key is required.',
             'idempotency_key.uuid'        => 'Idempotency key must be a valid UUID.',
+            'contact_no.required'         => 'Contact number is required.',
             'items.required'              => 'At least one item is required.',
             'items.min'                   => 'At least one item is required.',
             'items.*.menu_item_id.exists' => 'One or more items were not found.',

@@ -21,7 +21,7 @@ class FoodOrder extends Model
         'order_number',
         'user_id', 'restaurant_id', 'status', 'payment_method',
         'subtotal_cents', 'total_cents', 'delivery_address',
-        'delivery_lat', 'delivery_lng', 'customer_notes',
+        'delivery_lat', 'delivery_lng', 'customer_notes', 'contact_no',
         'idempotency_key', 'prompt_pay_url',
         'confirmed_at', 'payment_confirmed_at', 'preparing_at',
         'picked_up_at', 'delivered_at', 'completed_at', 'cancelled_at',
@@ -110,7 +110,7 @@ class FoodOrder extends Model
             'Order   : ' . ($this->order_number ?? '#' . $this->id),
             'Restaurant: ' . ($this->restaurant?->name ?? '—'),
             'Customer: ' . ($this->user?->name ?? '—'),
-            'Phone   : ' . ($this->user?->phone_number ?? '—'),
+            'Phone   : ' . ($this->contact_no ?? $this->user?->phone_number ?? '—'),
             '',
             'Items:',
         ];
@@ -137,6 +137,7 @@ class FoodOrder extends Model
             '',
             'Order   : ' . ($this->order_number ?? '#' . $this->id),
             'Restaurant: ' . ($this->restaurant?->name ?? '—'),
+            'Phone   : ' . ($this->contact_no ?? '—'),
             '',
             'Items:',
         ];

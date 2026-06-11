@@ -98,30 +98,30 @@ export const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: '#c6ecd4',
-    padding: spacing.md,
-    gap: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    gap: 4,
   },
   copyHint: {
-    fontSize: typography.xs,
+    fontSize: typography.xxs,
     color: '#2d7a4a',
     fontWeight: '500',
-    lineHeight: 33, // ≥3× for Burmese glyphs at fontSize 11
+    lineHeight: 28,
   },
   copyRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
+    alignItems: 'center',
+    gap: spacing.xs,
   },
   copyMessageText: {
     flex: 1,
-    fontSize: typography.sm,
+    fontSize: typography.xs,
     color: colours.textOnLight,
     fontWeight: '500',
-    lineHeight: 39, // ≥3× for Burmese glyphs at fontSize 13
+    lineHeight: 33, // ≥3× for Burmese glyphs at fontSize 11
   },
   copyBtn: {
-    padding: spacing.xs,
-    marginTop: -2,
+    padding: 4,
   },
   // LINE Pay button — LINE brand green
   promptPayBtn: {

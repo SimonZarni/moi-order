@@ -38,6 +38,7 @@ class FoodOrderResource extends JsonResource
             'total_cents'            => $this->total_cents,
             'delivery_address'       => $this->delivery_address,
             'customer_notes'         => $this->customer_notes,
+            'contact_no'             => $this->contact_no,
             'prompt_pay_url'         => $this->prompt_pay_url,
             'can_show_prompt_pay'    => $this->canShowPromptPay(),
             'can_cancel'             => $this->status === FoodOrderStatus::OrderPlaced,

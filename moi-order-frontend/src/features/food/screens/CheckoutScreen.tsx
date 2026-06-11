@@ -63,8 +63,8 @@ function AddressSection({ address, onPress }: { address: UserAddress | null; onP
 export function CheckoutScreen(): React.JSX.Element {
   const {
     items, restaurantName, subtotalCents,
-    paymentMethod, notes, selectedAddress, hasDeliveryAddress, isPlacing,
-    setPaymentMethod, setNotes,
+    paymentMethod, notes, contactNo, contactNoError, selectedAddress, hasDeliveryAddress, isPlacing,
+    setPaymentMethod, setNotes, setContactNo,
     handleIncrement, handleDecrement,
     handleBack, handleChangeAddress, handlePlaceOrder,
   } = useCheckoutScreen();
@@ -157,6 +157,21 @@ export function CheckoutScreen(): React.JSX.Element {
           <Text style={styles.noticeText}>{DELIVERY_FEE_NOTICE}</Text>
         </View>
 
+        <Text style={styles.sectionTitle}>Contact No</Text>
+        <TextInput
+          style={[styles.contactInput, contactNoError !== null && styles.contactInputError]}
+          value={contactNo}
+          onChangeText={setContactNo}
+          placeholder="Your phone number"
+          placeholderTextColor={colours.textMuted}
+          keyboardType="phone-pad"
+          maxLength={50}
+          accessibilityLabel="Contact number"
+        />
+        {contactNoError !== null && (
+          <Text style={styles.contactErrorText}>{contactNoError}</Text>
+        )}
+
         <Text style={styles.sectionTitle}>Notes for restaurant</Text>
         <TextInput
           style={styles.notesInput}
@@ -176,7 +191,7 @@ export function CheckoutScreen(): React.JSX.Element {
             (isPlacing || selectedAddress === null) && styles.placeBtnDisabled,
           ]}
           onPress={handlePlaceOrder}
-          disabled={isPlacing || items.length === 0 || selectedAddress === null}
+          disabled={isPlacing || items.length === 0 || selectedAddress === null || contactNo.trim() === ''}
           accessibilityRole="button"
           accessibilityLabel="Place order"
         >

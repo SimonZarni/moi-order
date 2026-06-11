@@ -22,6 +22,7 @@ readonly class StoreFoodOrderDTO
         public ?float            $deliveryLat,
         public ?float            $deliveryLng,
         public ?string           $customerNotes,
+        public ?string           $contactNo,
         public array             $items,
     ) {}
 
@@ -39,6 +40,7 @@ readonly class StoreFoodOrderDTO
             deliveryLat:       isset($validated['delivery_lat']) ? (float) $validated['delivery_lat'] : null,
             deliveryLng:       isset($validated['delivery_lng']) ? (float) $validated['delivery_lng'] : null,
             customerNotes:     $validated['customer_notes'] ?? null,
+            contactNo:         $validated['contact_no'],
             items:             $validated['items'],
         );
     }

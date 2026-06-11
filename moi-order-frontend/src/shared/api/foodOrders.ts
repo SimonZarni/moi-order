@@ -10,6 +10,7 @@ export interface PlaceFoodOrderInput {
   delivery_address_id: number | null;
   delivery_address: string | null;
   customer_notes: string | null;
+  contact_no: string;
   items: Array<{
     menu_item_id: number;
     quantity: number;

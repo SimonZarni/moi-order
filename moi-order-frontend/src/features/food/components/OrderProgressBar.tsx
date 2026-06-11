@@ -81,6 +81,12 @@ const PHASE_LABELS: Record<Locale, PhaseLabels> = {
   th: { phase1: 'สั่งและชำระเงิน',             phase2: 'การจัดส่ง' },
 };
 
+const PAY_VIA_LINE_LABELS: Record<Locale, string> = {
+  en: 'Pay via LINE',
+  mm: 'ေငွေပေးချေရန် Line',
+  th: 'ชำระผ่าน LINE',
+};
+
 function getSteps(locale: Locale): StepDef[] {
   const l = STEP_LABELS[locale];
   return [
@@ -293,7 +299,7 @@ export function OrderProgressBar({
             accessibilityLabel="Pay via LINE"
           >
             <Ionicons name="chatbubble" size={18} color="#fff" />
-            <Text style={styles.promptPayText}>Pay via LINE</Text>
+            <Text style={styles.promptPayText}>{PAY_VIA_LINE_LABELS[locale]}</Text>
           </Pressable>
         </>
       )}

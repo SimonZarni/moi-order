@@ -161,6 +161,25 @@ export const styles = StyleSheet.create({
     borderRadius: 6,
     backgroundColor: colours.primary,
   },
+  contactInput: {
+    backgroundColor: colours.card,
+    borderRadius: radius.xl,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    fontSize: typography.sm,
+    color: colours.textOnLight,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+  },
+  contactInputError: {
+    borderColor: colours.danger,
+  },
+  contactErrorText: {
+    fontSize: typography.xs,
+    color: colours.danger,
+    fontWeight: '500',
+    marginTop: spacing.xs,
+  },
   notesInput: {
     backgroundColor: colours.card,
     borderRadius: radius.xl,
@@ -215,7 +234,7 @@ export const styles = StyleSheet.create({
   },
   addressRequiredHint: {
     fontSize: typography.xs,
-    color: colours.error,
+    color: colours.danger,
     fontWeight: '500',
     marginTop: spacing.xs,
   },

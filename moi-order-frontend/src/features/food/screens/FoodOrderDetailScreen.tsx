@@ -167,7 +167,9 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
             accessibilityLabel="Open chat with restaurant"
           >
             <Ionicons name="chatbubbles-outline" size={18} color={colours.textOnDark} />
-            <Text style={styles.chatBtnText}>Chat with Restaurant</Text>
+            <Text style={styles.chatBtnText}>
+              {locale === 'mm' ? 'ဆိုင်နှင့် ချတ်ဆွေးနွေးမည်' : locale === 'th' ? 'แชทกับร้านอาหาร' : 'Chat with Restaurant'}
+            </Text>
           </Pressable>
         )}
 
