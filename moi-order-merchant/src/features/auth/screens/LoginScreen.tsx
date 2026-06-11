@@ -1,10 +1,12 @@
 import React from 'react';
-import { View, Text, TextInput, Pressable, ActivityIndicator, Platform, ScrollView, KeyboardAvoidingView, useWindowDimensions } from 'react-native';
+import { View, Text, TextInput, Pressable, ActivityIndicator, Platform, ScrollView, KeyboardAvoidingView, useWindowDimensions, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLoginScreen } from '../hooks/useLoginScreen';
 import { styles } from './LoginScreen.styles';
 import { colours } from '../../../shared/theme/colours';
+
+const LOGO = require('../../../../assets/moi-order-icon.png') as number;
 
 export function LoginScreen(): React.JSX.Element {
   const {
@@ -95,7 +97,7 @@ export function LoginScreen(): React.JSX.Element {
       <View style={[styles.screen, isMobileWeb && styles.screenColumn]}>
         {isMobileWeb ? (
           <View style={styles.leftPanelMobile}>
-            <View style={styles.brandMark}><Text style={styles.brandMarkText}>M</Text></View>
+            <Image source={LOGO} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="Moi Order logo" />
             <View>
               <Text style={styles.brandName}>moi·order</Text>
               <Text style={styles.brandRole}>Merchant Platform</Text>
@@ -103,7 +105,7 @@ export function LoginScreen(): React.JSX.Element {
           </View>
         ) : (
           <View style={styles.leftPanel}>
-            <View style={styles.brandMark}><Text style={styles.brandMarkText}>M</Text></View>
+            <Image source={LOGO} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="Moi Order logo" />
             <Text style={styles.brandName}>moi·order</Text>
             <Text style={styles.brandRole}>Merchant Platform</Text>
             <View style={styles.brandDivider} />
@@ -130,7 +132,7 @@ export function LoginScreen(): React.JSX.Element {
     <KeyboardAvoidingView style={styles.safe} behavior="padding">
       <SafeAreaView style={styles.brandArea} edges={['top']}>
         <View style={styles.brandAreaContent}>
-          <View style={styles.brandMark}><Text style={styles.brandMarkText}>M</Text></View>
+          <Image source={LOGO} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="Moi Order logo" />
           <View>
             <Text style={styles.brandName}>moi·order</Text>
             <Text style={styles.brandRole}>Merchant Platform</Text>

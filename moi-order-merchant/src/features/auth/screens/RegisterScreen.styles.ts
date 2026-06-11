@@ -31,25 +31,10 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colours.dividerDark,
   },
-  brandMark: {
+  brandLogo: {
     width: 64,
     height: 64,
-    borderRadius: radius.xl,
-    backgroundColor: colours.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: spacing.sm,
-    shadowColor: colours.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 20,
-    elevation: 8,
-  },
-  brandMarkText: {
-    fontSize: typography.xxl,
-    fontWeight: '900',
-    color: colours.white,
-    letterSpacing: -0.5,
   },
   brandName: {
     fontSize: typography.xxl,
