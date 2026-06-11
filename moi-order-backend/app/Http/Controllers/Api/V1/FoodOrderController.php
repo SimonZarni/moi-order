@@ -122,6 +122,12 @@ class FoodOrderController extends Controller
             throw new DomainException('order.not_awaiting_payment', 409);
         }
 
+        \Illuminate\Support\Facades\Log::error('notifyLinePay called', [
+            'order' => $order->order_number,
+            'user'  => $order->user?->id,
+            'line_id' => $order->user?->line_id ? 'set' : 'null',
+        ]);
+
         // Always notify the admin group — customer LINE status must never block this.
         $this->lineMessaging->pushToAdmin($order->linePayNotificationText());
 
