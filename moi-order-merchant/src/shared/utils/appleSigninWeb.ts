@@ -1,5 +1,8 @@
 export const APPLE_WEB_CANCELLED = 'APPLE_WEB_SIGN_IN_CANCELLED';
 
+const APPLE_SDK_URL =
+  'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js';
+
 interface AppleAuthResponse {
   authorization: { id_token: string; code: string };
   user?: {
@@ -17,11 +20,28 @@ declare global {
   interface Window { AppleID?: { auth: AppleIDAuth } }
 }
 
+function loadAppleSDK(): Promise<void> {
+  if (window.AppleID) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${APPLE_SDK_URL}"]`);
+    if (existing) {
+      existing.addEventListener('load', () => resolve());
+      existing.addEventListener('error', () => reject(new Error('Apple SDK script failed to load.')));
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = APPLE_SDK_URL;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Apple SDK script failed to load.'));
+    document.head.appendChild(script);
+  });
+}
+
 /**
- * Opens an Apple Sign In popup (no server redirect needed with usePopup: true)
- * and returns the id_token to send to /auth/apple.
+ * Dynamically loads the Apple JS SDK if needed, then opens a Sign In popup.
+ * usePopup: true means no server redirect — id_token comes back to the browser.
  *
- * Prerequisites (Apple Developer Console > Services ID):
+ * Prerequisites (Apple Developer Console > Services ID com.moiorder.merchantweb):
  *   - Domain: merchant.moiorder.com
  *   - Return URL: https://merchant.moiorder.com/auth/apple/callback
  *
@@ -31,11 +51,9 @@ export async function signInWithAppleWeb(
   clientId: string,
   redirectURI: string,
 ): Promise<{ idToken: string; name?: string; email?: string }> {
-  if (!window.AppleID) {
-    throw new Error('Apple Sign In SDK not loaded. Ensure the appleid.auth.js script is in index.html.');
-  }
+  await loadAppleSDK();
 
-  window.AppleID.auth.init({
+  window.AppleID!.auth.init({
     clientId,
     scope: 'name email',
     redirectURI,

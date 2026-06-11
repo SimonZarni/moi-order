@@ -3,9 +3,11 @@
   "outputDirectory": "dist",
   "build": {
     "env": {
-      "EXPO_PUBLIC_API_URL":        "https://api.moiorder.com/api/merchant/v1",
-      "EXPO_PUBLIC_PUSHER_KEY":     "12880de2bf84dbdcffaa",
-      "EXPO_PUBLIC_PUSHER_CLUSTER": "ap1"
+      "EXPO_PUBLIC_API_URL":              "https://api.moiorder.com/api/merchant/v1",
+      "EXPO_PUBLIC_PUSHER_KEY":           "12880de2bf84dbdcffaa",
+      "EXPO_PUBLIC_PUSHER_CLUSTER":       "ap1",
+      "EXPO_PUBLIC_APPLE_WEB_CLIENT_ID":  "com.moiorder.merchantweb",
+      "EXPO_PUBLIC_APPLE_WEB_REDIRECT_URI": "https://merchant.moiorder.com/auth/apple/callback"
     }
   },
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
