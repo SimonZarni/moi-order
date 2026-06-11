@@ -1,4 +1,4 @@
-import { Alert, TurboModuleRegistry } from 'react-native';
+import { Alert, Platform, TurboModuleRegistry } from 'react-native';
 
 export interface LineAccessToken {
   accessToken: string;
@@ -27,8 +27,10 @@ export interface LineModule {
 }
 
 // Safe shim for @xmartlabs/react-native-line.
-// Native LINE login is unavailable in Expo Go, so we show a clear alert instead of crashing.
-const isNativeAvailable = TurboModuleRegistry.get('LineLogin') !== null;
+// TurboModuleRegistry is undefined on web (react-native-web doesn't export it),
+// so we guard with Platform.OS !== 'web' to short-circuit before the .get() call.
+const isNativeAvailable =
+  Platform.OS !== 'web' && TurboModuleRegistry.get('LineLogin') !== null;
 
 const LINE_CANCELLED = 'LINE_LOGIN_CANCELLED';
 

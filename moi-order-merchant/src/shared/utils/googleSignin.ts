@@ -1,11 +1,12 @@
-import { Alert, TurboModuleRegistry } from 'react-native';
+import { Alert, Platform, TurboModuleRegistry } from 'react-native';
 
 // Safe shim for @react-native-google-signin/google-signin.
-// TurboModuleRegistry.get (non-throwing) detects Expo Go at runtime.
-// Metro bundles the real module but never evaluates it in Expo Go,
-// so TurboModuleRegistry.getEnforcing never fires and the app doesn't crash.
+// TurboModuleRegistry is undefined on web (react-native-web doesn't export it),
+// so we guard with Platform.OS !== 'web' to short-circuit before the .get() call.
+// On native, TurboModuleRegistry.get (non-throwing) detects Expo Go at runtime.
 
-const isNativeAvailable = TurboModuleRegistry.get('RNGoogleSignin') !== null;
+const isNativeAvailable =
+  Platform.OS !== 'web' && TurboModuleRegistry.get('RNGoogleSignin') !== null;
 
 const SIGN_IN_CANCELLED = 'SIGN_IN_CANCELLED';
 
