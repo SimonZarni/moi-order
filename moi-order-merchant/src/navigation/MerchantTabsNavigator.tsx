@@ -2,9 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Platform, View, Text, Pressable, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import type { CompositeNavigationProp } from '@react-navigation/native';
-import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,8 +13,6 @@ import type {
 } from '../types/navigation';
 import { DashboardScreen } from '../features/dashboard/screens/DashboardScreen';
 import { OrdersScreen } from '../features/orders/screens/OrdersScreen';
-import { requestOrdersFilter, consumeOrdersFilter } from '../features/orders/ordersFilterSignal';
-import type { StatusFilter } from '../features/orders/hooks/useOrdersScreen';
 import { OrderDetailScreen } from '../features/orders/screens/OrderDetailScreen';
 import { OrderChatContent, OrderChatScreen } from '../features/chat/screens/OrderChatScreen';
 import { MenuScreen } from '../features/menu/screens/MenuScreen';
@@ -50,41 +46,23 @@ const TAB_ICONS: Record<TabName, { focused: keyof typeof Ionicons.glyphMap; unfo
   Profile:       { focused: 'person-circle',     unfocused: 'person-circle-outline' },
 };
 
-type DashboardNavProp = CompositeNavigationProp<
-  BottomTabNavigationProp<MerchantTabParamList>,
-  NativeStackNavigationProp<MerchantStackParamList>
->;
-
 function DashboardTab(): React.JSX.Element {
-  const navigation = useNavigation<DashboardNavProp>();
+  const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
   const handleSelectOrder = useCallback(
     (orderId: number) => navigation.navigate('OrderDetail', { orderId }),
     [navigation],
   );
-  const handlePendingPress = useCallback(() => {
-    requestOrdersFilter('new');
-    navigation.navigate('Orders');
-  }, [navigation]);
   // On mobile, the bell doesn't render — the tab badge already shows count.
-  return <DashboardScreen onSelectOrder={handleSelectOrder} onPendingPress={handlePendingPress} />;
+  return <DashboardScreen onSelectOrder={handleSelectOrder} />;
 }
 
 function OrdersTab(): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
-  const [filterOverride, setFilterOverride] = useState<StatusFilter | undefined>(undefined);
-
-  useFocusEffect(
-    useCallback(() => {
-      const f = consumeOrdersFilter();
-      if (f !== null) setFilterOverride(f);
-    }, []),
-  );
-
   const handleSelectOrder = useCallback(
     (orderId: number) => navigation.navigate('OrderDetail', { orderId }),
     [navigation],
   );
-  return <OrdersScreen onSelectOrder={handleSelectOrder} filterOverride={filterOverride} />;
+  return <OrdersScreen onSelectOrder={handleSelectOrder} />;
 }
 
 function MobileTabNavigator(): React.JSX.Element {
@@ -158,21 +136,11 @@ function WebMerchantLayout(): React.JSX.Element {
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [chatOrderId, setChatOrderId] = useState<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [ordersFilter, setOrdersFilter] = useState<StatusFilter | undefined>(undefined);
   const { isDesktop } = useResponsive();
   const logout = useAuthStore((s) => s.logout);
 
   const handleNavigate = useCallback((screen: WebScreen) => {
     setActiveScreen(screen);
-    setSelectedOrderId(null);
-    setChatOrderId(null);
-    setSidebarOpen(false);
-    setOrdersFilter(undefined);
-  }, []);
-
-  const handlePendingPress = useCallback(() => {
-    setOrdersFilter('new');
-    setActiveScreen('Orders');
     setSelectedOrderId(null);
     setChatOrderId(null);
     setSidebarOpen(false);
@@ -217,11 +185,10 @@ function WebMerchantLayout(): React.JSX.Element {
           <DashboardScreen
             onSelectOrder={handleSelectOrder}
             onBellPress={() => handleNavigate('Notifications')}
-            onPendingPress={handlePendingPress}
           />
         );
       case 'Orders':
-        return <OrdersScreen onSelectOrder={handleSelectOrder} filterOverride={ordersFilter} />;
+        return <OrdersScreen onSelectOrder={handleSelectOrder} />;
       case 'Menu':
         return <MenuScreen />;
       case 'Restaurant':

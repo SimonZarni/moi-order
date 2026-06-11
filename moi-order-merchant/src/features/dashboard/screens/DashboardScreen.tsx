@@ -24,14 +24,12 @@ interface DashboardScreenProps {
   onSelectOrder?: (orderId: number) => void;
   /** Called when the notification bell is pressed (mobile nav or web sidebar navigate). */
   onBellPress?: () => void;
-  /** Called when the pending orders pill is pressed — navigate to Orders filtered to pending. */
-  onPendingPress?: () => void;
 }
 
-export function DashboardScreen({ onSelectOrder, onBellPress, onPendingPress }: DashboardScreenProps): React.JSX.Element {
+export function DashboardScreen({ onSelectOrder, onBellPress }: DashboardScreenProps): React.JSX.Element {
   const {
-    analytics, recentOrders, topData, topPeriod,
-    isLoading, handleUpdateStatus, handleTopPeriodChange,
+    analytics, recentOrders, topData, topPeriod, pendingOnly,
+    isLoading, handleUpdateStatus, handleTopPeriodChange, handlePendingToggle,
   } = useDashboardScreen();
   const { isDesktop } = useResponsive();
 
@@ -120,7 +118,7 @@ export function DashboardScreen({ onSelectOrder, onBellPress, onPendingPress }: 
   const ordersCard = (
     <View style={styles.ordersCard}>
       <View style={styles.ordersCardHeader}>
-        <Text style={styles.cardSectionTitle}>RECENT ORDERS</Text>
+        <Text style={styles.cardSectionTitle}>{pendingOnly ? 'PENDING ORDERS' : 'RECENT ORDERS'}</Text>
       </View>
       {recentOrders.length === 0 ? (
         <View style={styles.emptyOrders}>
@@ -190,13 +188,15 @@ export function DashboardScreen({ onSelectOrder, onBellPress, onPendingPress }: 
           <View style={styles.topBarActions}>
             {pending > 0 && (
               <Pressable
-                style={styles.pendingPill}
-                onPress={onPendingPress}
+                style={[styles.pendingPill, pendingOnly && styles.pendingPillActive]}
+                onPress={handlePendingToggle}
                 accessibilityRole="button"
-                accessibilityLabel={`${pending} pending orders, tap to view`}
+                accessibilityLabel={pendingOnly ? 'Showing pending orders, tap to show all' : `${pending} pending orders, tap to filter`}
               >
                 <View style={styles.pendingDot} />
-                <Text style={styles.pendingText}>{pending} pending</Text>
+                <Text style={[styles.pendingText, pendingOnly && styles.pendingTextActive]}>
+                  {pending} pending
+                </Text>
               </Pressable>
             )}
             {onBellPress !== undefined && (

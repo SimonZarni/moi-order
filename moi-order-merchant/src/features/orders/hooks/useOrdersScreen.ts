@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Platform } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getOrders, updateOrderStatus } from '../../../api/orders';
@@ -86,13 +86,9 @@ function buildCsv(orders: FoodOrder[]): string {
     .join('\n');
 }
 
-export function useOrdersScreen(filterOverride?: StatusFilter): UseOrdersScreenResult {
+export function useOrdersScreen(): UseOrdersScreenResult {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-
-  useEffect(() => {
-    if (filterOverride !== undefined) setStatusFilter(filterOverride);
-  }, [filterOverride]);
   const [datePreset, setDatePreset]     = useState<DatePreset>('today');
   // Single-day (custom nav) — null = today
   const [dateFilter, setDateFilter]     = useState<string | null>(null);

@@ -44,10 +44,9 @@ function formatDateLabel(d: string | null, from: string | null, to: string | nul
 
 interface OrdersScreenProps {
   onSelectOrder?: (orderId: number) => void;
-  filterOverride?: StatusFilter;
 }
 
-export function OrdersScreen({ onSelectOrder, filterOverride }: OrdersScreenProps): React.JSX.Element {
+export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.Element {
   const {
     sections, isLoading,
     statusFilter, dateFilter, dateFrom, dateTo, datePreset,
@@ -55,7 +54,7 @@ export function OrdersScreen({ onSelectOrder, filterOverride }: OrdersScreenProp
     handleUpdateStatus, handleStatusFilterChange,
     handleDatePreset, handleDatePrev, handleDateNext, handleDateToday,
     handleSearchChange, handleExportCsv,
-  } = useOrdersScreen(filterOverride);
+  } = useOrdersScreen();
 
   const isToday        = datePreset === 'today';
   const isRangePreset  = datePreset === 'last7' || datePreset === 'last30';

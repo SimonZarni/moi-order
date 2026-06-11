@@ -57,8 +57,13 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colours.warning + '55',
   },
+  pendingPillActive: {
+    backgroundColor: colours.warning + '40',
+    borderColor: colours.warning,
+  },
   pendingDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colours.warning },
   pendingText: { fontSize: typography.xs, fontWeight: '700', color: colours.warning },
+  pendingTextActive: { color: colours.warning },
 
   // ── Revenue card ─────────────────────────────────────────────────────────────
   revenueCard: {
