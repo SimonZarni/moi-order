@@ -30,14 +30,14 @@ class MerchantAnalyticsController extends Controller
             ]]);
         }
 
-        $rid      = $restaurant->id;
-        $excluded = [FoodOrderStatus::Cancelled->value];
+        $rid     = $restaurant->id;
+        $counted = [FoodOrderStatus::Completed->value];
 
         return response()->json([
             'data' => [
-                'today'         => $this->periodStats($rid, now()->startOfDay(), $excluded),
-                'this_week'     => $this->periodStats($rid, now()->startOfWeek(), $excluded),
-                'this_month'    => $this->periodStats($rid, now()->startOfMonth(), $excluded),
+                'today'         => $this->periodStats($rid, now()->startOfDay(), $counted),
+                'this_week'     => $this->periodStats($rid, now()->startOfWeek(), $counted),
+                'this_month'    => $this->periodStats($rid, now()->startOfMonth(), $counted),
                 'pending_count' => FoodOrder::forRestaurant($rid)
                     ->whereIn('status', [
                         FoodOrderStatus::OrderPlaced->value,
@@ -65,16 +65,16 @@ class MerchantAnalyticsController extends Controller
             return response()->json(['data' => ['period' => 'today', 'points' => []]]);
         }
 
-        $period   = in_array($request->query('period'), ['today', 'week', 'month'], true)
+        $period  = in_array($request->query('period'), ['today', 'week', 'month'], true)
             ? $request->query('period')
             : 'today';
-        $rid      = $restaurant->id;
-        $excluded = [FoodOrderStatus::Cancelled->value];
+        $rid     = $restaurant->id;
+        $counted = [FoodOrderStatus::Completed->value];
 
         $points = match ($period) {
-            'week'  => $this->weeklyPoints($rid, $excluded),
-            'month' => $this->monthlyPoints($rid, $excluded),
-            default => $this->hourlyPoints($rid, $excluded),
+            'week'  => $this->weeklyPoints($rid, $counted),
+            'month' => $this->monthlyPoints($rid, $counted),
+            default => $this->hourlyPoints($rid, $counted),
         };
 
         return response()->json(['data' => ['period' => $period, 'points' => $points]]);
@@ -100,14 +100,14 @@ class MerchantAnalyticsController extends Controller
             'month' => now()->startOfMonth(),
             default => now()->startOfDay(),
         };
-        $rid      = $restaurant->id;
-        $excluded = [FoodOrderStatus::Cancelled->value];
+        $rid     = $restaurant->id;
+        $counted = [FoodOrderStatus::Completed->value];
 
         // Top items — grouped by snapshot name, ranked by total quantity sold
         $topItems = DB::table('food_order_items')
             ->join('food_orders', 'food_orders.id', '=', 'food_order_items.food_order_id')
             ->where('food_orders.restaurant_id', $rid)
-            ->whereNotIn('food_orders.status', $excluded)
+            ->whereIn('food_orders.status', $counted)
             ->where('food_orders.created_at', '>=', $from)
             ->groupBy('food_order_items.name')
             ->selectRaw('food_order_items.name,
@@ -121,7 +121,7 @@ class MerchantAnalyticsController extends Controller
         $topCustomers = DB::table('food_orders')
             ->join('users', 'users.id', '=', 'food_orders.user_id')
             ->where('food_orders.restaurant_id', $rid)
-            ->whereNotIn('food_orders.status', $excluded)
+            ->whereIn('food_orders.status', $counted)
             ->where('food_orders.created_at', '>=', $from)
             ->groupBy('food_orders.user_id', 'users.name')
             ->selectRaw('users.name,
@@ -142,13 +142,13 @@ class MerchantAnalyticsController extends Controller
     // ── Private helpers ───────────────────────────────────────────────────────
 
     /** Hourly breakdown for today (24 points, hour 0–23). */
-    /** @param string[] $excluded */
-    private function hourlyPoints(int $restaurantId, array $excluded): array
+    /** @param string[] $counted */
+    private function hourlyPoints(int $restaurantId, array $counted): array
     {
         $date = now()->format('Y-m-d');
 
         $rows = FoodOrder::forRestaurant($restaurantId)
-            ->whereNotIn('status', $excluded)
+            ->whereIn('status', $counted)
             ->whereDate('created_at', $date)
             ->selectRaw('HOUR(created_at) AS hr,
                          COUNT(*) AS order_count,
@@ -168,13 +168,13 @@ class MerchantAnalyticsController extends Controller
     }
 
     /** Daily breakdown for the last 7 days (7 points). */
-    /** @param string[] $excluded */
-    private function weeklyPoints(int $restaurantId, array $excluded): array
+    /** @param string[] $counted */
+    private function weeklyPoints(int $restaurantId, array $counted): array
     {
         $from = now()->subDays(6)->startOfDay();
 
         $rows = FoodOrder::forRestaurant($restaurantId)
-            ->whereNotIn('status', $excluded)
+            ->whereIn('status', $counted)
             ->where('created_at', '>=', $from)
             ->selectRaw('DATE(created_at) AS day,
                          COUNT(*) AS order_count,
@@ -196,13 +196,13 @@ class MerchantAnalyticsController extends Controller
     }
 
     /** Daily breakdown for the last 30 days (30 points). */
-    /** @param string[] $excluded */
-    private function monthlyPoints(int $restaurantId, array $excluded): array
+    /** @param string[] $counted */
+    private function monthlyPoints(int $restaurantId, array $counted): array
     {
         $from = now()->subDays(29)->startOfDay();
 
         $rows = FoodOrder::forRestaurant($restaurantId)
-            ->whereNotIn('status', $excluded)
+            ->whereIn('status', $counted)
             ->where('created_at', '>=', $from)
             ->selectRaw('DATE(created_at) AS day,
                          COUNT(*) AS order_count,
@@ -223,11 +223,11 @@ class MerchantAnalyticsController extends Controller
         })->values()->all();
     }
 
-    /** @param string[] $excluded */
-    private function periodStats(int $restaurantId, Carbon $from, array $excluded): array
+    /** @param string[] $counted */
+    private function periodStats(int $restaurantId, Carbon $from, array $counted): array
     {
         $row = FoodOrder::forRestaurant($restaurantId)
-            ->whereNotIn('status', $excluded)
+            ->whereIn('status', $counted)
             ->where('created_at', '>=', $from)
             ->selectRaw('COUNT(*) as order_count, COALESCE(SUM(total_cents), 0) as revenue_cents')
             ->first();
