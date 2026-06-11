@@ -112,7 +112,13 @@ export type RootStackParamList = {
   CartAndOrders: undefined;  // combined cart + orders view (new entry point from FoodScreen)
   Checkout: { selectedAddressId?: number } | undefined;
   FoodOrderDetail: { orderId: string };
-  OrderChat: { orderId: string; orderNumber: string | null; restaurantName: string | null };
+  OrderChat: {
+    orderId: string;
+    orderNumber: string | null;
+    restaurantName: string | null;
+    completedAt?: string | null;
+    orderStatus?: import('./enums').FoodOrderStatus;
+  };
 
   // ── Address management ────────────────────────────────────────────────────
   AddressList: { mode: 'select' | 'manage' };

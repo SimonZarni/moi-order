@@ -141,10 +141,12 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
   const handleChatPress = useCallback(() => {
     navigation.navigate('OrderChat', {
       orderId,
-      orderNumber: order?.order_number ?? null,
+      orderNumber:    order?.order_number ?? null,
       restaurantName: order?.restaurant_name ?? null,
+      ...(order?.completed_at !== undefined && { completedAt: order.completed_at }),
+      ...(order?.status !== undefined && { orderStatus: order.status }),
     });
-  }, [navigation, orderId, order?.order_number, order?.restaurant_name]);
+  }, [navigation, orderId, order?.order_number, order?.restaurant_name, order?.completed_at, order?.status]);
 
   const handleRefetch = useCallback(() => refetch(), [refetch]);
 

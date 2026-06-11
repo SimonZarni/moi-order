@@ -14,7 +14,7 @@ export function useOrderChatData(orderId: string): UseOrderChatDataResult {
     queryKey: QUERY_KEYS.FOOD_ORDERS.CHAT(orderId),
     queryFn:  () => fetchOrderChat(orderId),
     enabled:  orderId.length > 0,
-    refetchInterval: 10_000,
+    refetchInterval: 5_000,
   });
 
   return {

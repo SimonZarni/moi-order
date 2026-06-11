@@ -58,9 +58,16 @@ export function usePusherNotifications(): void {
     const notifChannelName = `private-App.Models.User.${userId}`;
     const notifChannel     = pusher.subscribe(notifChannelName);
 
-    notifChannel.bind('notification.created', () => {
+    notifChannel.bind('notification.created', (payload: { type?: string; food_order_id?: string }) => {
       incrementUnread();
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.LIST });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.LIST });
+      // When a merchant sends a chat message the payload carries the order UUID —
+      // invalidate immediately so the chat screen refreshes without waiting for the poll.
+      if (payload?.type === 'chat_message' && payload.food_order_id) {
+        void queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.FOOD_ORDERS.CHAT(payload.food_order_id),
+        });
+      }
     });
 
     // ── Food-order status channel ───────────────────────────────────────────

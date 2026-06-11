@@ -130,4 +130,27 @@ export const styles = StyleSheet.create({
   sendBtnDisabled: {
     opacity: 0.4,
   },
+  // Image preview strip (above input row)
+  imagePreviewItem: {
+    position: 'relative',
+    width: 56,
+    height: 56,
+  },
+  imagePreviewThumb: {
+    width: 56,
+    height: 56,
+    borderRadius: radius.md,
+    backgroundColor: colours.divider,
+  },
+  imagePreviewRemove: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: colours.textOnLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

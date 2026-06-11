@@ -8,6 +8,7 @@ import {
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   View,
@@ -18,7 +19,7 @@ const KEYBOARD_BEHAVIOR = Platform.OS === 'ios' ? 'padding' : 'height';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { OrderChatMessage } from '@/types/models';
-import { useOrderChatScreen } from '../hooks/useOrderChatScreen';
+import { useOrderChatScreen, SelectedImage } from '../hooks/useOrderChatScreen';
 import { styles } from './OrderChatScreen.styles';
 
 interface BubbleProps {
@@ -27,6 +28,13 @@ interface BubbleProps {
 }
 
 function MessageBubble({ msg, onPhotoPress }: BubbleProps): React.JSX.Element {
+  if (msg.sender_type === 'system') {
+    return (
+      <View style={styles.systemNotice}>
+        <Text style={styles.systemNoticeText}>{msg.body}</Text>
+      </View>
+    );
+  }
   const isCustomer = msg.sender_type === 'customer';
   const time = new Date(msg.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   return (
@@ -51,13 +59,38 @@ function MessageBubble({ msg, onPhotoPress }: BubbleProps): React.JSX.Element {
   );
 }
 
+interface ImagePreviewItemProps {
+  img: SelectedImage;
+  index: number;
+  onRemove: (i: number) => void;
+}
+
+function ImagePreviewItem({ img, index, onRemove }: ImagePreviewItemProps): React.JSX.Element {
+  return (
+    <View style={styles.imagePreviewItem}>
+      <Image source={{ uri: img.uri }} style={styles.imagePreviewThumb} resizeMode="cover" />
+      <Pressable
+        style={styles.imagePreviewRemove}
+        onPress={() => onRemove(index)}
+        accessibilityRole="button"
+        accessibilityLabel="Remove image"
+      >
+        <Ionicons name="close" size={12} color={colours.white} />
+      </Pressable>
+    </View>
+  );
+}
+
 export function OrderChatScreen(): React.JSX.Element {
   const {
     restaurantName, orderNumber, messages, isLoading, isError,
-    sendError, text, isSending, inputBarPadding, selectedPhoto, listRef,
+    sendError, text, isSending, isChatLocked, inputBarPadding,
+    selectedImages, selectedPhoto, listRef,
     handleBack, handleTextChange, handleSend, handlePickImage,
-    handlePhotoPress, handlePhotoClose,
+    handleRemoveImage, handlePhotoPress, handlePhotoClose,
   } = useOrderChatScreen();
+
+  const canSend = !isSending && (text.trim().length > 0 || selectedImages.length > 0);
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -67,9 +100,7 @@ export function OrderChatScreen(): React.JSX.Element {
         </Pressable>
         <View style={styles.headerInfo}>
           <Text style={styles.headerTitle} numberOfLines={1}>{restaurantName ?? 'Chat with Restaurant'}</Text>
-          {orderNumber !== null && (
-            <Text style={styles.headerSub}>Order #{orderNumber}</Text>
-          )}
+          {orderNumber !== null && <Text style={styles.headerSub}>Order #{orderNumber}</Text>}
         </View>
       </View>
 
@@ -115,39 +146,56 @@ export function OrderChatScreen(): React.JSX.Element {
             <Text style={styles.sendErrorText}>{sendError}</Text>
           </View>
         )}
-        <View style={[styles.inputBar, { paddingBottom: inputBarPadding }]}>
-          <Pressable
-            style={styles.attachBtn}
-            onPress={handlePickImage}
-            accessibilityRole="button"
-            accessibilityLabel="Attach image"
-          >
-            <Ionicons name="image-outline" size={22} color={colours.primary} />
-          </Pressable>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Type a message…"
-            placeholderTextColor={colours.textMuted}
-            value={text}
-            onChangeText={handleTextChange}
-            multiline
-            maxLength={2000}
-            accessibilityLabel="Message input"
-          />
-          <Pressable
-            style={[styles.sendBtn, (!text.trim() || isSending) && styles.sendBtnDisabled]}
-            onPress={handleSend}
-            disabled={!text.trim() || isSending}
-            accessibilityRole="button"
-            accessibilityLabel="Send message"
-          >
-            {isSending ? (
-              <ActivityIndicator size="small" color={colours.white} />
-            ) : (
-              <Ionicons name="send" size={16} color={colours.white} />
+
+        {!isChatLocked && (
+          <>
+            {selectedImages.length > 0 && (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.imagePreviewStrip}
+                contentContainerStyle={{ gap: 8 }}
+              >
+                {selectedImages.map((img, i) => (
+                  <ImagePreviewItem key={`${img.uri}-${i}`} img={img} index={i} onRemove={handleRemoveImage} />
+                ))}
+              </ScrollView>
             )}
-          </Pressable>
-        </View>
+            <View style={[styles.inputBar, { paddingBottom: inputBarPadding }]}>
+              <Pressable
+                style={styles.attachBtn}
+                onPress={handlePickImage}
+                accessibilityRole="button"
+                accessibilityLabel="Attach images"
+              >
+                <Ionicons name="image-outline" size={22} color={colours.primary} />
+              </Pressable>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Type a message…"
+                placeholderTextColor={colours.textMuted}
+                value={text}
+                onChangeText={handleTextChange}
+                multiline
+                maxLength={2000}
+                accessibilityLabel="Message input"
+              />
+              <Pressable
+                style={[styles.sendBtn, !canSend && styles.sendBtnDisabled]}
+                onPress={handleSend}
+                disabled={!canSend}
+                accessibilityRole="button"
+                accessibilityLabel="Send message"
+              >
+                {isSending ? (
+                  <ActivityIndicator size="small" color={colours.white} />
+                ) : (
+                  <Ionicons name="send" size={16} color={colours.white} />
+                )}
+              </Pressable>
+            </View>
+          </>
+        )}
       </KeyboardAvoidingView>
 
       <Modal visible={selectedPhoto !== null} transparent animationType="fade" onRequestClose={handlePhotoClose}>

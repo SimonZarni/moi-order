@@ -5,9 +5,12 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { RootStackParamList } from '@/types/navigation';
+import { FOOD_ORDER_STATUS, FoodOrderStatus } from '@/types/enums';
 import { useOrderChatData, useSendChatMessage } from './useOrderChatData';
 
 type Route = RouteProp<RootStackParamList, 'OrderChat'>;
+
+export type SelectedImage = { uri: string; name: string; type: string };
 
 export interface UseOrderChatScreenResult {
   orderId: string;
@@ -19,30 +22,53 @@ export interface UseOrderChatScreenResult {
   sendError: string | null;
   text: string;
   isSending: boolean;
+  isChatLocked: boolean;
   inputBarPadding: number;
+  selectedImages: SelectedImage[];
   selectedPhoto: string | null;
   listRef: React.RefObject<FlatList | null>;
   handleBack: () => void;
   handleTextChange: (v: string) => void;
   handleSend: () => void;
   handlePickImage: () => Promise<void>;
+  handleRemoveImage: (index: number) => void;
   handlePhotoPress: (uri: string) => void;
   handlePhotoClose: () => void;
 }
 
+function computeIsChatLocked(
+  orderStatus: FoodOrderStatus | undefined,
+  completedAt: string | null | undefined,
+): boolean {
+  if (
+    orderStatus === FOOD_ORDER_STATUS.Cancelled ||
+    orderStatus === FOOD_ORDER_STATUS.Expired
+  ) {
+    return true;
+  }
+  if (orderStatus === FOOD_ORDER_STATUS.Completed && completedAt) {
+    return Date.now() > new Date(completedAt).getTime() + 3 * 60 * 60 * 1_000;
+  }
+  return false;
+}
+
 export function useOrderChatScreen(): UseOrderChatScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const route = useRoute<Route>();
-  const { orderId, orderNumber, restaurantName } = route.params;
+  const route      = useRoute<Route>();
+  const { orderId, orderNumber, restaurantName, completedAt, orderStatus } = route.params;
   const { bottom: bottomInset } = useSafeAreaInsets();
 
   const { messages, isLoading, isError } = useOrderChatData(orderId);
-  const sendMutation = useSendChatMessage();
-  const [text, setText] = useState('');
-  const [sendError, setSendError] = useState<string | null>(null);
+  const { mutateAsync }  = useSendChatMessage();
+  const [text, setText]             = useState('');
+  const [sendError, setSendError]   = useState<string | null>(null);
+  const [isSending, setIsSending]   = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [selectedImages, setSelectedImages]   = useState<SelectedImage[]>([]);
+  const [selectedPhoto, setSelectedPhoto]     = useState<string | null>(null);
   const listRef = useRef<FlatList>(null);
+
+  const isChatLocked = computeIsChatLocked(orderStatus, completedAt);
 
   useEffect(() => {
     const show = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
@@ -56,36 +82,58 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
   // Collapse safe-area gap when keyboard is visible (keyboard fills that space)
   const inputBarPadding = keyboardVisible ? 8 : Math.max(bottomInset, 8) + 8;
 
-  const handleBack = useCallback(() => navigation.goBack(), [navigation]);
-  const handleTextChange = useCallback((v: string) => setText(v), []);
+  const handleBack        = useCallback(() => navigation.goBack(), [navigation]);
+  const handleTextChange  = useCallback((v: string) => setText(v), []);
+  const handleRemoveImage = useCallback(
+    (index: number) => setSelectedImages((prev) => prev.filter((_, i) => i !== index)),
+    [],
+  );
 
   const handleSend = useCallback(() => {
     const trimmed = text.trim();
-    if (!trimmed || sendMutation.isPending) return;
+    if ((!trimmed && selectedImages.length === 0) || isSending) return;
+
+    setIsSending(true);
     setSendError(null);
-    sendMutation.mutate(
-      { orderId, body: trimmed, image: null },
-      { onError: () => setSendError('Failed to send. Tap to retry.') },
-    );
-    setText('');
-  }, [text, sendMutation, orderId]);
+
+    const sends: Array<() => Promise<unknown>> = [];
+    if (trimmed) {
+      sends.push(() => mutateAsync({ orderId, body: trimmed, image: null }));
+    }
+    for (const img of selectedImages) {
+      const captured = img;
+      sends.push(() => mutateAsync({ orderId, body: null, image: captured }));
+    }
+
+    (async () => {
+      try {
+        for (const fn of sends) {
+          await fn();
+        }
+        setText('');
+        setSelectedImages([]);
+      } catch {
+        setSendError('Failed to send. Please try again.');
+      } finally {
+        setIsSending(false);
+      }
+    })();
+  }, [text, selectedImages, isSending, mutateAsync, orderId]);
 
   const handlePickImage = useCallback(async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: 'images',
       quality: 0.8,
+      allowsMultipleSelection: true,
     });
     if (result.canceled || result.assets.length === 0) return;
-    const asset = result.assets[0];
-    if (!asset) return;
-    const mime = (asset.mimeType ?? '').toLowerCase() || 'image/jpeg';
-    const ext  = mime.split('/')[1] ?? 'jpg';
-    setSendError(null);
-    sendMutation.mutate(
-      { orderId, body: null, image: { uri: asset.uri, name: `chat.${ext}`, type: mime } },
-      { onError: () => setSendError('Failed to send image. Please try again.') },
-    );
-  }, [sendMutation, orderId]);
+    const newImages = result.assets.map((asset) => {
+      const mime = (asset.mimeType ?? '').toLowerCase() || 'image/jpeg';
+      const ext  = mime.split('/')[1] ?? 'jpg';
+      return { uri: asset.uri, name: `chat.${ext}`, type: mime };
+    });
+    setSelectedImages((prev) => [...prev, ...newImages]);
+  }, []);
 
   const handlePhotoPress = useCallback((uri: string) => setSelectedPhoto(uri), []);
   const handlePhotoClose = useCallback(() => setSelectedPhoto(null), []);
@@ -99,14 +147,17 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
     isError,
     sendError,
     text,
-    isSending: sendMutation.isPending,
+    isSending,
+    isChatLocked,
     inputBarPadding,
+    selectedImages,
     selectedPhoto,
     listRef,
     handleBack,
     handleTextChange,
     handleSend,
     handlePickImage,
+    handleRemoveImage,
     handlePhotoPress,
     handlePhotoClose,
   };

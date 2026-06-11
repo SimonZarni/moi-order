@@ -44,8 +44,14 @@ class NotifyCustomerOfChatMessage implements ShouldQueue
         $user->notify(new OrderChatMessageNotification($message));
 
         // Broadcast only after the DB row is committed so the app sees it on refetch.
-        DB::afterCommit(function () use ($user): void {
-            event(new UserNotificationReceived($user));
+        // Pass food_order_id (UUID) so the mobile client can immediately invalidate
+        // the correct chat query without waiting for the next poll cycle.
+        $orderUuid = $order->uuid;
+        DB::afterCommit(function () use ($user, $orderUuid): void {
+            event(new UserNotificationReceived($user, [
+                'type'          => 'chat_message',
+                'food_order_id' => $orderUuid,
+            ]));
         });
     }
 }

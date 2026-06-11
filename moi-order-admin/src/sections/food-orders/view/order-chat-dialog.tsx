@@ -21,7 +21,7 @@ import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-const POLL_INTERVAL_MS = 5000;
+const POLL_INTERVAL_MS = 3000;
 
 const SENDER_LABEL: Record<OrderChatMessage['sender_type'], string> = {
   customer: 'Customer',

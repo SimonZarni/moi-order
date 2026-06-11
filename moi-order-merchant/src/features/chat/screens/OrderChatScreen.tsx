@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   ActivityIndicator, FlatList, Image, Keyboard, KeyboardAvoidingView,
-  Modal, Platform, Pressable, Text, TextInput, View,
+  Modal, Platform, Pressable, ScrollView, Text, TextInput, View,
 } from 'react-native';
 
 const KEYBOARD_BEHAVIOR = Platform.OS === 'ios' ? 'padding' : 'height';
@@ -12,7 +12,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colours } from '../../../shared/theme/colours';
 import type { OrderChatMessage } from '../../../types/models';
 import type { MerchantStackParamList } from '../../../types/navigation';
-import { useOrderChatScreen } from '../hooks/useOrderChatScreen';
+import { useOrderChatScreen, SelectedImage } from '../hooks/useOrderChatScreen';
 import { styles } from './OrderChatScreen.styles';
 
 type Route = RouteProp<MerchantStackParamList, 'OrderChat'>;
@@ -55,6 +55,28 @@ function MessageBubble({ msg, onPhotoPress }: BubbleProps): React.JSX.Element {
   );
 }
 
+interface ImagePreviewItemProps {
+  img: SelectedImage;
+  index: number;
+  onRemove: (i: number) => void;
+}
+
+function ImagePreviewItem({ img, index, onRemove }: ImagePreviewItemProps): React.JSX.Element {
+  return (
+    <View style={styles.imagePreviewItem}>
+      <Image source={{ uri: img.uri }} style={styles.imagePreviewThumb} resizeMode="cover" />
+      <Pressable
+        style={styles.imagePreviewRemove}
+        onPress={() => onRemove(index)}
+        accessibilityRole="button"
+        accessibilityLabel="Remove image"
+      >
+        <Ionicons name="close" size={12} color={colours.white} />
+      </Pressable>
+    </View>
+  );
+}
+
 // ── Shared content (used by both mobile route and web prop variant) ───────────
 
 interface ContentProps {
@@ -65,9 +87,12 @@ interface ContentProps {
 export function OrderChatContent({ orderId, onBack }: ContentProps): React.JSX.Element {
   const {
     messages, isLoading, isError, sendError, text, isSending, inputBarPadding,
-    selectedPhoto, listRef,
-    handleTextChange, handleSend, handleAttachPress, handlePhotoPress, handlePhotoClose,
+    selectedImages, selectedPhoto, listRef,
+    handleTextChange, handleSend, handleAttachPress, handleRemoveImage,
+    handlePhotoPress, handlePhotoClose,
   } = useOrderChatScreen(orderId);
+
+  const canSend = !isSending && (text.trim().length > 0 || selectedImages.length > 0);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -122,6 +147,19 @@ export function OrderChatContent({ orderId, onBack }: ContentProps): React.JSX.E
           </View>
         )}
 
+        {selectedImages.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.imagePreviewStrip}
+            contentContainerStyle={{ gap: 8 }}
+          >
+            {selectedImages.map((img, i) => (
+              <ImagePreviewItem key={`${img.uri}-${i}`} img={img} index={i} onRemove={handleRemoveImage} />
+            ))}
+          </ScrollView>
+        )}
+
         <View style={[styles.inputBar, { paddingBottom: inputBarPadding }]}>
           <Pressable
             style={styles.attachBtn}
@@ -142,9 +180,9 @@ export function OrderChatContent({ orderId, onBack }: ContentProps): React.JSX.E
             accessibilityLabel="Message input"
           />
           <Pressable
-            style={[styles.sendBtn, (!text.trim() || isSending) && styles.sendBtnDisabled]}
+            style={[styles.sendBtn, !canSend && styles.sendBtnDisabled]}
             onPress={handleSend}
-            disabled={!text.trim() || isSending}
+            disabled={!canSend}
             accessibilityRole="button"
             accessibilityLabel="Send message"
           >

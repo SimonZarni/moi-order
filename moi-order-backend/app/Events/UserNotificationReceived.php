@@ -30,6 +30,7 @@ class UserNotificationReceived implements ShouldBroadcastNow
 
     public function __construct(
         public readonly User $user,
+        private readonly array $data = [],
     ) {}
 
     /**
@@ -50,6 +51,6 @@ class UserNotificationReceived implements ShouldBroadcastNow
      */
     public function broadcastWith(): array
     {
-        return [];
+        return $this->data;
     }
 }

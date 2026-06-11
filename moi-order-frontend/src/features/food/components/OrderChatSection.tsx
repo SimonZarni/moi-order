@@ -1,5 +1,15 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Image, Pressable, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
@@ -13,6 +23,18 @@ interface Props {
 }
 
 interface MessageBubbleProps { msg: OrderChatMessage }
+
+type SelectedImage = { uri: string; name: string; type: string };
+
+function computeIsChatLocked(order: FoodOrder): boolean {
+  if (order.status === FOOD_ORDER_STATUS.Cancelled || order.status === FOOD_ORDER_STATUS.Expired) {
+    return true;
+  }
+  if (order.status === FOOD_ORDER_STATUS.Completed && order.completed_at !== null) {
+    return Date.now() > new Date(order.completed_at).getTime() + 3 * 60 * 60 * 1_000;
+  }
+  return false;
+}
 
 function MessageBubble({ msg }: MessageBubbleProps): React.JSX.Element {
   if (msg.sender_type === 'system') {
@@ -45,42 +67,64 @@ function MessageBubble({ msg }: MessageBubbleProps): React.JSX.Element {
 }
 
 export function OrderChatSection({ order }: Props): React.JSX.Element {
-  const { messages, isLoading } = useOrderChatData(order.id);
-  const sendMutation = useSendChatMessage();
-  const [text, setText] = useState('');
+  const { messages, isLoading }    = useOrderChatData(order.id);
+  const { mutateAsync }            = useSendChatMessage();
+  const [text, setText]            = useState('');
+  const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
+  const [isSending, setIsSending]  = useState(false);
   const listRef = useRef<FlatList>(null);
 
-  const isCompleted = order.status === FOOD_ORDER_STATUS.Completed;
+  const isChatLocked = computeIsChatLocked(order);
+  const canSend = !isSending && (text.trim().length > 0 || selectedImages.length > 0);
+
+  const handleRemoveImage = useCallback(
+    (index: number) => setSelectedImages((prev) => prev.filter((_, i) => i !== index)),
+    [],
+  );
 
   const handleSend = useCallback(() => {
     const trimmed = text.trim();
-    if (!trimmed || sendMutation.isPending) return;
-    sendMutation.mutate({ orderId: order.id, body: trimmed, image: null });
-    setText('');
-  }, [text, sendMutation, order.id]);
+    if ((!trimmed && selectedImages.length === 0) || isSending) return;
 
-  const sendImageAsset = useCallback((asset: ImagePicker.ImagePickerAsset) => {
-    const mime = (asset.mimeType ?? '').toLowerCase() || 'image/jpeg';
-    const ext  = mime.split('/')[1] ?? 'jpg';
-    sendMutation.mutate({
-      orderId: order.id,
-      body:    null,
-      image:   { uri: asset.uri, name: `chat.${ext}`, type: mime },
-    });
-  }, [sendMutation, order.id]);
+    setIsSending(true);
+    const sends: Array<() => Promise<unknown>> = [];
+    if (trimmed) {
+      sends.push(() => mutateAsync({ orderId: order.id, body: trimmed, image: null }));
+    }
+    for (const img of selectedImages) {
+      const captured = img;
+      sends.push(() => mutateAsync({ orderId: order.id, body: null, image: captured }));
+    }
 
-  const handlePickImage = useCallback(async () => {
+    (async () => {
+      try {
+        for (const fn of sends) {
+          await fn();
+        }
+        setText('');
+        setSelectedImages([]);
+      } finally {
+        setIsSending(false);
+      }
+    })();
+  }, [text, selectedImages, isSending, mutateAsync, order.id]);
+
+  const pickFromLibrary = useCallback(async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.8,
+      allowsMultipleSelection: true,
     });
     if (result.canceled || result.assets.length === 0) return;
-    const asset = result.assets[0];
-    if (!asset) return;
-    sendImageAsset(asset);
-  }, [sendImageAsset]);
+    const newImages = result.assets.map((asset) => {
+      const mime = (asset.mimeType ?? '').toLowerCase() || 'image/jpeg';
+      const ext  = mime.split('/')[1] ?? 'jpg';
+      return { uri: asset.uri, name: `chat.${ext}`, type: mime };
+    });
+    setSelectedImages((prev) => [...prev, ...newImages]);
+  }, []);
 
-  const handleTakePhoto = useCallback(async () => {
+  const takePhoto = useCallback(async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Camera permission needed', 'Please allow camera access to take a photo.');
@@ -93,26 +137,33 @@ export function OrderChatSection({ order }: Props): React.JSX.Element {
     if (result.canceled || result.assets.length === 0) return;
     const asset = result.assets[0];
     if (!asset) return;
-    sendImageAsset(asset);
-  }, [sendImageAsset]);
+    const mime = (asset.mimeType ?? '').toLowerCase() || 'image/jpeg';
+    const ext  = mime.split('/')[1] ?? 'jpg';
+    setSelectedImages((prev) => [...prev, { uri: asset.uri, name: `chat.${ext}`, type: mime }]);
+  }, []);
 
   const handleAttachPress = useCallback(() => {
     Alert.alert('Add Photo', undefined, [
-      { text: 'Take Photo', onPress: () => { void handleTakePhoto(); } },
-      { text: 'Choose from Library', onPress: () => { void handlePickImage(); } },
+      { text: 'Take Photo',          onPress: () => { void takePhoto(); } },
+      { text: 'Choose from Library', onPress: () => { void pickFromLibrary(); } },
       { text: 'Cancel', style: 'cancel' },
     ]);
-  }, [handleTakePhoto, handlePickImage]);
+  }, [takePhoto, pickFromLibrary]);
+
+  const isCompletedButNotLocked =
+    order.status === FOOD_ORDER_STATUS.Completed && !isChatLocked;
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Chat with Restaurant</Text>
 
-      {isCompleted && (
+      {(isCompletedButNotLocked || isChatLocked) && (
         <View style={styles.noticeBanner}>
           <Ionicons name="information-circle-outline" size={14} color={colours.textMuted} />
           <Text style={styles.noticeText}>
-            Chat messages are automatically deleted 3 hours after the order is completed.
+            {isChatLocked
+              ? 'Chat has closed. Messages are deleted 3 hours after order completion.'
+              : 'Chat messages are automatically deleted 3 hours after the order is completed.'}
           </Text>
         </View>
       )}
@@ -136,40 +187,64 @@ export function OrderChatSection({ order }: Props): React.JSX.Element {
         />
       )}
 
-      {!isCompleted && (
-        <View style={styles.inputRow}>
-          <Pressable
-            style={styles.attachBtn}
-            onPress={handleAttachPress}
-            accessibilityRole="button"
-            accessibilityLabel="Add photo"
-          >
-            <Ionicons name="image-outline" size={20} color={colours.primary} />
-          </Pressable>
-          <TextInput
-            style={styles.input}
-            placeholder="Type a message…"
-            placeholderTextColor={colours.textMuted}
-            value={text}
-            onChangeText={setText}
-            multiline
-            maxLength={2000}
-            accessibilityLabel="Message input"
-          />
-          <Pressable
-            style={[styles.sendBtn, (!text.trim() || sendMutation.isPending) && styles.sendBtnDisabled]}
-            onPress={handleSend}
-            disabled={!text.trim() || sendMutation.isPending}
-            accessibilityRole="button"
-            accessibilityLabel="Send message"
-          >
-            {sendMutation.isPending ? (
-              <ActivityIndicator size="small" color={colours.white} />
-            ) : (
-              <Ionicons name="send" size={16} color={colours.white} />
-            )}
-          </Pressable>
-        </View>
+      {!isChatLocked && (
+        <>
+          {selectedImages.length > 0 && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 8 }}
+            >
+              {selectedImages.map((img, i) => (
+                <View key={`${img.uri}-${i}`} style={styles.imagePreviewItem}>
+                  <Image source={{ uri: img.uri }} style={styles.imagePreviewThumb} resizeMode="cover" />
+                  <Pressable
+                    style={styles.imagePreviewRemove}
+                    onPress={() => handleRemoveImage(i)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Remove image"
+                  >
+                    <Ionicons name="close" size={10} color={colours.white} />
+                  </Pressable>
+                </View>
+              ))}
+            </ScrollView>
+          )}
+
+          <View style={styles.inputRow}>
+            <Pressable
+              style={styles.attachBtn}
+              onPress={handleAttachPress}
+              accessibilityRole="button"
+              accessibilityLabel="Add photo"
+            >
+              <Ionicons name="image-outline" size={20} color={colours.primary} />
+            </Pressable>
+            <TextInput
+              style={styles.input}
+              placeholder="Type a message…"
+              placeholderTextColor={colours.textMuted}
+              value={text}
+              onChangeText={setText}
+              multiline
+              maxLength={2000}
+              accessibilityLabel="Message input"
+            />
+            <Pressable
+              style={[styles.sendBtn, !canSend && styles.sendBtnDisabled]}
+              onPress={handleSend}
+              disabled={!canSend}
+              accessibilityRole="button"
+              accessibilityLabel="Send message"
+            >
+              {isSending ? (
+                <ActivityIndicator size="small" color={colours.white} />
+              ) : (
+                <Ionicons name="send" size={16} color={colours.white} />
+              )}
+            </Pressable>
+          </View>
+        </>
       )}
     </View>
   );

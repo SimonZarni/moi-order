@@ -20,6 +20,8 @@ interface PusherInstance {
 }
 type PusherConstructorFn = new (key: string, options: object) => PusherInstance;
 
+export type SelectedImage = { uri: string; name: string; type: string };
+
 interface UseOrderChatScreenResult {
   messages: OrderChatMessage[];
   isLoading: boolean;
@@ -28,11 +30,13 @@ interface UseOrderChatScreenResult {
   text: string;
   isSending: boolean;
   inputBarPadding: number;
+  selectedImages: SelectedImage[];
   selectedPhoto: string | null;
   listRef: React.RefObject<FlatList | null>;
   handleTextChange: (v: string) => void;
   handleSend: () => void;
   handleAttachPress: () => void;
+  handleRemoveImage: (index: number) => void;
   handlePhotoPress: (uri: string) => void;
   handlePhotoClose: () => void;
 }
@@ -41,10 +45,12 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
   const queryClient = useQueryClient();
   const token = useAuthStore((s) => s.token);
   const { bottom: bottomInset } = useSafeAreaInsets();
-  const [text, setText] = useState('');
-  const [sendError, setSendError] = useState<string | null>(null);
+  const [text, setText]                     = useState('');
+  const [sendError, setSendError]           = useState<string | null>(null);
+  const [isSending, setIsSending]           = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
+  const [selectedPhoto, setSelectedPhoto]   = useState<string | null>(null);
   const listRef = useRef<FlatList>(null);
 
   // Real-time chat updates via Pusher private-order.{orderId} channel.
@@ -105,7 +111,7 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
   const { data, isLoading, isError } = useQuery({
     queryKey: QUERY_KEYS.ORDER_CHAT(orderId),
     queryFn: () => fetchOrderChat(orderId),
-    refetchInterval: 10_000,
+    refetchInterval: 5_000,
   });
 
   const messages = data ?? [];
@@ -122,8 +128,8 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
   // Collapse safe-area gap when keyboard is visible (keyboard fills that space)
   const inputBarPadding = keyboardVisible ? 8 : Math.max(bottomInset, 8) + 8;
 
-  const { mutate, isPending: isSending } = useMutation({
-    mutationFn: ({ body, image }: { body: string | null; image: { uri: string; name: string; type: string } | null }) =>
+  const { mutateAsync } = useMutation({
+    mutationFn: ({ body, image }: { body: string | null; image: SelectedImage | null }) =>
       sendOrderChatMessage(orderId, body, image),
     onSuccess: (newMsg) => {
       queryClient.setQueryData<OrderChatMessage[]>(
@@ -133,40 +139,59 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
     },
   });
 
-  const handleTextChange = useCallback((v: string) => setText(v), []);
+  const handleTextChange  = useCallback((v: string) => setText(v), []);
+  const handleRemoveImage = useCallback(
+    (index: number) => setSelectedImages((prev) => prev.filter((_, i) => i !== index)),
+    [],
+  );
 
   const handleSend = useCallback(() => {
     const trimmed = text.trim();
-    if (!trimmed || isSending) return;
-    setSendError(null);
-    mutate(
-      { body: trimmed, image: null },
-      { onError: () => setSendError('Failed to send. Please try again.') },
-    );
-    setText('');
-  }, [text, isSending, mutate]);
+    if ((!trimmed && selectedImages.length === 0) || isSending) return;
 
-  const sendImageAsset = useCallback((asset: ImagePicker.ImagePickerAsset) => {
-    const ext = asset.uri.split('.').pop() ?? 'jpg';
+    setIsSending(true);
     setSendError(null);
-    mutate(
-      { body: null, image: { uri: asset.uri, name: `chat.${ext}`, type: `image/${ext}` } },
-      { onError: () => setSendError('Failed to send image. Please try again.') },
-    );
-  }, [mutate]);
 
-  const handlePickImage = useCallback(async () => {
+    const sends: Array<() => Promise<unknown>> = [];
+    if (trimmed) {
+      sends.push(() => mutateAsync({ body: trimmed, image: null }));
+    }
+    for (const img of selectedImages) {
+      const captured = img;
+      sends.push(() => mutateAsync({ body: null, image: captured }));
+    }
+
+    (async () => {
+      try {
+        for (const fn of sends) {
+          await fn();
+        }
+        setText('');
+        setSelectedImages([]);
+      } catch {
+        setSendError('Failed to send. Please try again.');
+      } finally {
+        setIsSending(false);
+      }
+    })();
+  }, [text, selectedImages, isSending, mutateAsync]);
+
+  const pickFromLibrary = useCallback(async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: 'images',
       quality: 0.8,
+      allowsMultipleSelection: true,
     });
     if (result.canceled || result.assets.length === 0) return;
-    const asset = result.assets[0];
-    if (!asset) return;
-    sendImageAsset(asset);
-  }, [sendImageAsset]);
+    const newImages = result.assets.map((asset) => {
+      const mime = (asset.mimeType ?? '').toLowerCase() || 'image/jpeg';
+      const ext  = mime.split('/')[1] ?? 'jpg';
+      return { uri: asset.uri, name: `chat.${ext}`, type: mime };
+    });
+    setSelectedImages((prev) => [...prev, ...newImages]);
+  }, []);
 
-  const handleTakePhoto = useCallback(async () => {
+  const takePhoto = useCallback(async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Camera permission needed', 'Please allow camera access to take a photo.');
@@ -179,24 +204,26 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
     if (result.canceled || result.assets.length === 0) return;
     const asset = result.assets[0];
     if (!asset) return;
-    sendImageAsset(asset);
-  }, [sendImageAsset]);
+    const mime = (asset.mimeType ?? '').toLowerCase() || 'image/jpeg';
+    const ext  = mime.split('/')[1] ?? 'jpg';
+    setSelectedImages((prev) => [...prev, { uri: asset.uri, name: `chat.${ext}`, type: mime }]);
+  }, []);
 
   const handleAttachPress = useCallback(() => {
     Alert.alert('Add Photo', undefined, [
-      { text: 'Take Photo', onPress: () => { void handleTakePhoto(); } },
-      { text: 'Choose from Library', onPress: () => { void handlePickImage(); } },
+      { text: 'Take Photo',          onPress: () => { void takePhoto(); } },
+      { text: 'Choose from Library', onPress: () => { void pickFromLibrary(); } },
       { text: 'Cancel', style: 'cancel' },
     ]);
-  }, [handleTakePhoto, handlePickImage]);
+  }, [takePhoto, pickFromLibrary]);
 
   const handlePhotoPress = useCallback((uri: string) => setSelectedPhoto(uri), []);
   const handlePhotoClose = useCallback(() => setSelectedPhoto(null), []);
 
   return {
     messages, isLoading, isError, sendError, text, isSending,
-    inputBarPadding, selectedPhoto, listRef,
-    handleTextChange, handleSend, handleAttachPress,
+    inputBarPadding, selectedImages, selectedPhoto, listRef,
+    handleTextChange, handleSend, handleAttachPress, handleRemoveImage,
     handlePhotoPress, handlePhotoClose,
   };
 }

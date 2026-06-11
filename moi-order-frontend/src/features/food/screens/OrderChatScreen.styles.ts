@@ -152,6 +152,47 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sendBtnDisabled: { opacity: 0.4 },
+  // Image preview strip (above input bar)
+  imagePreviewStrip: {
+    flexDirection: 'row',
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xs,
+    gap: spacing.xs,
+    backgroundColor: colours.card,
+    borderTopWidth: 1,
+    borderTopColor: colours.divider,
+  },
+  imagePreviewItem: {
+    position: 'relative',
+    width: 64,
+    height: 64,
+  },
+  imagePreviewThumb: {
+    width: 64,
+    height: 64,
+    borderRadius: radius.md,
+    backgroundColor: colours.divider,
+  },
+  imagePreviewRemove: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: colours.textOnLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // System notice bubble
+  systemNotice: { alignItems: 'center', paddingVertical: spacing.xs },
+  systemNoticeText: {
+    fontSize: typography.xxs,
+    fontStyle: 'italic',
+    color: colours.textMuted,
+    textAlign: 'center',
+  },
   // Photo lightbox
   photoOverlay: {
     flex: 1,
