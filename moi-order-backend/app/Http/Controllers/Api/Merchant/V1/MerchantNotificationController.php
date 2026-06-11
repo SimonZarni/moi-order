@@ -27,6 +27,7 @@ class MerchantNotificationController extends Controller
         $perPage = min((int) ($request->query('per_page', 20)), 50);
 
         $notifications = MerchantNotification::forMerchant($request->user()->id)
+            ->with('order')
             ->orderByDesc('created_at')
             ->paginate($perPage);
 
@@ -53,6 +54,7 @@ class MerchantNotificationController extends Controller
     public function markRead(Request $request, int $id): JsonResponse
     {
         $notification = MerchantNotification::forMerchant($request->user()->id)
+            ->with('order')
             ->findOrFail($id);
 
         $notification->markRead();

@@ -24,7 +24,7 @@ class MerchantNotificationResource extends JsonResource
             'type'       => $this->type,
             'title'      => $this->title,
             'body'       => $this->body,
-            'order_id'   => $this->order_id,
+            'order_id'   => $this->order?->uuid,
             'is_read'    => $this->read_at !== null,
             'created_at' => $this->created_at->toIso8601String(),
         ];

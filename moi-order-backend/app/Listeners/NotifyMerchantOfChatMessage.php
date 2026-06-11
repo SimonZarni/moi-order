@@ -91,7 +91,7 @@ class NotifyMerchantOfChatMessage implements ShouldQueue
         $this->push->send($tokens, new ExpoPushMessage(
             title: 'New Message',
             body:  $preview,
-            data:  ['type' => 'chat_message', 'order_id' => $order->id],
+            data:  ['type' => 'chat_message', 'order_id' => $order->uuid],
         ));
     }
 }

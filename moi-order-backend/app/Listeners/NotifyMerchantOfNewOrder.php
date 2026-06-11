@@ -56,7 +56,7 @@ class NotifyMerchantOfNewOrder implements ShouldQueue
         $this->push->send($tokens, new ExpoPushMessage(
             title: 'New Order!',
             body:  "Order {$order->order_number} — ฿" . number_format($order->total_cents / 100, 0),
-            data:  ['type' => 'new_order', 'order_id' => $order->id],
+            data:  ['type' => 'new_order', 'order_id' => $order->uuid],
         ));
     }
 }
