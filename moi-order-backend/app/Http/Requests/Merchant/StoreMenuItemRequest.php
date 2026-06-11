@@ -25,7 +25,7 @@ class StoreMenuItemRequest extends FormRequest
             'original_price_cents'   => ['nullable', 'integer', 'min:0'],
             'status'                 => ['sometimes', Rule::enum(MenuItemStatus::class)],
             'sort_order'             => ['integer', 'min:0', 'max:9999'],
-            'photo'                  => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp,heic,heif', 'max:5120'],
+            'photo'                  => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp,heic,heif', 'max:51200'],
             'option_groups'                           => ['sometimes', 'array'],
             'option_groups.*.name'                    => ['required', 'string', 'max:100'],
             'option_groups.*.is_required'             => ['boolean'],
