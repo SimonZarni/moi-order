@@ -12,7 +12,7 @@ import { ERROR_CODES } from '@/shared/constants/errorCodes';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { cancelFoodOrder, completeFoodOrder, notifyLinePayment } from '@/shared/api/foodOrders';
 import { ApiError } from '@/types/models';
-import { useLocaleStore } from '@/shared/store/localeStore';
+import { useLocaleStore, Locale } from '@/shared/store/localeStore';
 import { useFoodOrderDetailData } from './useFoodOrdersData';
 
 type DetailRoute = RouteProp<RootStackParamList, 'FoodOrderDetail'>;
@@ -30,6 +30,7 @@ export interface UseFoodOrderDetailScreenResult {
   copyMessage: string | null;
   copyHint: string | null;
   hasCopied: boolean;
+  locale: Locale;
   handleBack: () => void;
   handlePromptPayPress: () => void;
   handleCopyMessage: () => void;
@@ -245,6 +246,7 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
     copyMessage,
     copyHint,
     hasCopied,
+    locale,
     handleBack,
     handlePromptPayPress,
     handleCopyMessage,

@@ -20,7 +20,7 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
     invoiceVisible, handleInvoiceOpen, handleInvoiceClose,
     completeModalVisible, isCompleting,
     rating, review,
-    copyMessage, copyHint, hasCopied,
+    copyMessage, copyHint, hasCopied, locale,
     handleBack, handlePromptPayPress, handleCopyMessage, handleChatPress,
     handleSlideComplete, handleCompleteConfirm, handleCompleteCancel,
     handleRatingChange, handleReviewChange,
@@ -92,6 +92,7 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
             copyHint={copyHint}
             hasCopied={hasCopied}
             onCopyPress={handleCopyMessage}
+            locale={locale}
           />
         )}
 

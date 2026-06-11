@@ -8,6 +8,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { FOOD_ORDER_STATUS, FoodOrderStatus } from '@/types/enums';
+import { Locale } from '@/shared/store/localeStore';
 import { styles } from './OrderProgressBar.styles';
 
 const LINE_GREEN = '#06C755';
@@ -35,17 +36,65 @@ interface StepDef {
   phase: 1 | 2;
 }
 
-const STEPS: StepDef[] = [
-  { label: 'Order Placed',             statusThreshold: 0,  phase: 1 },
-  { label: 'Confirmed by restaurant',  statusThreshold: -1, phase: 1 },
-  { label: 'Waiting for payment',      statusThreshold: 1,  phase: 1 },
-  { label: 'Payment confirmed',        statusThreshold: 2,  phase: 1 },
-  { label: 'Preparing Food',           statusThreshold: 3,  phase: 2 },
-  { label: 'Waiting for Delivery',     statusThreshold: 4,  phase: 2 },
-  { label: 'Delivery on the way',      statusThreshold: 5,  phase: 2 },
-  { label: 'Delivered',                statusThreshold: 6,  phase: 2 },
-  { label: 'Completed',                statusThreshold: 7,  phase: 2 },
-];
+type StepLabels = [string, string, string, string, string, string, string, string, string];
+type PhaseLabels = { phase1: string; phase2: string };
+
+const STEP_LABELS: Record<Locale, StepLabels> = {
+  en: [
+    'Order Placed',
+    'Confirmed by restaurant',
+    'Waiting for payment',
+    'Payment confirmed',
+    'Preparing Food',
+    'Waiting for Delivery',
+    'Delivery on the way',
+    'Delivered',
+    'Completed',
+  ],
+  mm: [
+    'မှာယူမှု တင်သွင်းပြီး',
+    'စားသောက်ဆိုင်မှ အတည်ပြုပြီး',
+    'ငွေပေးချေရန် စောင့်ဆိုင်းနေ',
+    'ငွေပေးချေမှု အတည်ပြုပြီး',
+    'အစားအစာ ပြင်ဆင်နေ',
+    'ပို့ဆောင်မှုကို စောင့်ဆိုင်းနေ',
+    'ပို့ဆောင်နေဆဲ',
+    'ပို့ဆောင်ပြီး',
+    'ပြီးဆုံးပြီး',
+  ],
+  th: [
+    'สั่งอาหารแล้ว',
+    'ร้านยืนยันแล้ว',
+    'รอชำระเงิน',
+    'ยืนยันการชำระเงินแล้ว',
+    'กำลังเตรียมอาหาร',
+    'รอการจัดส่ง',
+    'กำลังจัดส่ง',
+    'ส่งแล้ว',
+    'เสร็จสิ้น',
+  ],
+};
+
+const PHASE_LABELS: Record<Locale, PhaseLabels> = {
+  en: { phase1: 'Order & Payment',           phase2: 'Delivery' },
+  mm: { phase1: 'မှာယူမှုနှင့် ငွေပေးချေမှု', phase2: 'ပို့ဆောင်မှု' },
+  th: { phase1: 'สั่งและชำระเงิน',             phase2: 'การจัดส่ง' },
+};
+
+function getSteps(locale: Locale): StepDef[] {
+  const l = STEP_LABELS[locale];
+  return [
+    { label: l[0], statusThreshold: 0,  phase: 1 },
+    { label: l[1], statusThreshold: -1, phase: 1 },
+    { label: l[2], statusThreshold: 1,  phase: 1 },
+    { label: l[3], statusThreshold: 2,  phase: 1 },
+    { label: l[4], statusThreshold: 3,  phase: 2 },
+    { label: l[5], statusThreshold: 4,  phase: 2 },
+    { label: l[6], statusThreshold: 5,  phase: 2 },
+    { label: l[7], statusThreshold: 6,  phase: 2 },
+    { label: l[8], statusThreshold: 7,  phase: 2 },
+  ];
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function getStepState(step: StepDef, currentIdx: number): 'done' | 'active' | 'upcoming' {
@@ -66,6 +115,7 @@ interface Props {
   copyHint: string | null;
   hasCopied: boolean;
   onCopyPress: () => void;
+  locale: Locale;
 }
 
 // ─── Pulsing dot for active step ─────────────────────────────────────────────
@@ -166,19 +216,22 @@ export function OrderProgressBar({
   copyHint,
   hasCopied,
   onCopyPress,
+  locale,
 }: Props): React.JSX.Element {
   const currentIdx = STATUS_INDEX[status] ?? 0;
   const inPhase2   = currentIdx >= 3;
 
-  const phase1Steps = STEPS.filter((s) => s.phase === 1);
-  const phase2Steps = STEPS.filter((s) => s.phase === 2);
+  const steps      = getSteps(locale);
+  const phase1Steps = steps.filter((s) => s.phase === 1);
+  const phase2Steps = steps.filter((s) => s.phase === 2);
+  const phaseLabels = PHASE_LABELS[locale];
 
   return (
     <>
       {/* Phase 1 card */}
       <View style={styles.phaseCard}>
         <View style={styles.phaseHeaderRow}>
-          <Text style={[styles.phaseTag, styles.phaseTagPhase1]}>Order & Payment</Text>
+          <Text style={[styles.phaseTag, styles.phaseTagPhase1]}>{phaseLabels.phase1}</Text>
         </View>
         {phase1Steps.map((step, i) => (
           <StepRow
@@ -196,7 +249,7 @@ export function OrderProgressBar({
       <AnimatedPhase2 visible={inPhase2}>
         <View style={styles.phaseCard}>
           <View style={styles.phaseHeaderRow}>
-            <Text style={[styles.phaseTag, styles.phaseTagPhase2]}>Delivery</Text>
+            <Text style={[styles.phaseTag, styles.phaseTagPhase2]}>{phaseLabels.phase2}</Text>
           </View>
           {phase2Steps.map((step, i) => (
             <StepRow
