@@ -51,7 +51,9 @@ return [
     ],
 
     'apple' => [
-        'client_id' => env('APPLE_CLIENT_ID', 'com.moiorder.app'),
+        'client_id'             => env('APPLE_CLIENT_ID', 'com.moiorder.app'),
+        'merchant_client_id'    => env('APPLE_MERCHANT_CLIENT_ID', 'com.moiorder.merchant'),
+        'merchant_web_client_id'=> env('APPLE_MERCHANT_WEB_CLIENT_ID', 'com.moiorder.merchantweb'),
     ],
 
     'line' => [

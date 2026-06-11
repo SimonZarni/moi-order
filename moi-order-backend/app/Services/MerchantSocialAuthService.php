@@ -48,7 +48,10 @@ class MerchantSocialAuthService
      */
     public function authenticateApple(AppleAuthDTO $dto): array
     {
-        $result = $this->appleService->authenticate($dto);
+        $result = $this->appleService->authenticate($dto, [
+            (string) config('services.apple.merchant_client_id', 'com.moiorder.merchant'),
+            (string) config('services.apple.merchant_web_client_id', 'com.moiorder.merchantweb'),
+        ]);
         return $this->issueMerchantToken($result['user']);
     }
 

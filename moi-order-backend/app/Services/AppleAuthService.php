@@ -28,12 +28,14 @@ class AppleAuthService
     ) {}
 
     /**
+     * @param  string[] $validClientIds  Extra audience values to accept (e.g. web Services IDs).
+     *                                   The default client_id from config is always included.
      * @return array{user: User, token: string}
      * @throws ValidationException when the identity token is invalid.
      */
-    public function authenticate(AppleAuthDTO $dto): array
+    public function authenticate(AppleAuthDTO $dto, array $validClientIds = []): array
     {
-        $payload = $this->verifyIdentityToken($dto->idToken);
+        $payload = $this->verifyIdentityToken($dto->idToken, $validClientIds);
 
         $appleId = (string) ($payload['sub'] ?? '');
         $email   = $this->resolveEmail($payload, $dto);
@@ -99,7 +101,8 @@ class AppleAuthService
     /**
      * @return array<string, mixed>
      */
-    private function verifyIdentityToken(string $idToken): array
+    /** @param string[] $extraClientIds */
+    private function verifyIdentityToken(string $idToken, array $extraClientIds = []): array
     {
         $parts = explode('.', $idToken);
         if (count($parts) !== 3) {
@@ -136,9 +139,14 @@ class AppleAuthService
         $audience = (string) ($payload['aud'] ?? '');
         $expires  = (int) ($payload['exp'] ?? 0);
 
+        $validClientIds = array_merge(
+            [(string) config('services.apple.client_id')],
+            $extraClientIds,
+        );
+
         if (
             $issuer !== self::APPLE_ISSUER ||
-            $audience !== (string) config('services.apple.client_id') ||
+            ! in_array($audience, $validClientIds, true) ||
             $expires <= now()->timestamp
         ) {
             throw ValidationException::withMessages([
