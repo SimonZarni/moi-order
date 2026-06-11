@@ -24,6 +24,7 @@ export type MerchantStackParamList = {
   OrderChat: { orderId: number };
   BusinessProfile: undefined;
   Reviews: undefined;
+  CancelledOrders: undefined;
 };
 
 export type RootStackParamList = {
@@ -40,4 +41,5 @@ export type WebScreen =
   | 'Analytics'
   | 'Notifications'
   | 'BusinessProfile'
-  | 'Reviews';
+  | 'Reviews'
+  | 'CancelledOrders';

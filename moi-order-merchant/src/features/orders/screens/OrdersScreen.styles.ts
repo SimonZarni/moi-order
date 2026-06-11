@@ -43,6 +43,27 @@ export const styles = StyleSheet.create({
   },
   pendingDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colours.warning },
   pendingText: { fontSize: typography.xs, fontWeight: '700', color: colours.warning },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  cancelledBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    borderWidth: 1,
+    borderColor: colours.error + '55',
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 7,
+    backgroundColor: colours.errorBg,
+  },
+  cancelledBtnText: {
+    fontSize: typography.xs,
+    fontWeight: '700',
+    color: colours.error,
+  },
   exportBtn: {
     flexDirection: 'row',
     alignItems: 'center',

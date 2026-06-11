@@ -4,6 +4,7 @@ import { getAnalytics, getTopData, type TopPeriod } from '../../../api/analytics
 import { getOrders, updateOrderStatus } from '../../../api/orders';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { CACHE_TTL, GC_TIME, QUERY_RETRY } from '../../../shared/constants/config';
+import { ORDER_STATUS } from '../../../types/enums';
 import type { AnalyticsData, FoodOrder, TopData } from '../../../types/models';
 
 const PENDING_STATUS_PARAM = 'order_placed,waiting_for_payment';
@@ -49,7 +50,7 @@ export function useDashboardScreen(): UseDashboardScreenResult {
     refetch: refetchOrders,
   } = useQuery({
     queryKey: QUERY_KEYS.ORDERS(),
-    queryFn:  () => getOrders({ per_page: 5 }),
+    queryFn:  () => getOrders({ per_page: 10 }),
     staleTime: CACHE_TTL.ORDERS,
     gcTime:    GC_TIME.DEFAULT,
     retry:     QUERY_RETRY,
@@ -90,9 +91,12 @@ export function useDashboardScreen(): UseDashboardScreenResult {
   });
 
   const recentOrders = useMemo<FoodOrder[]>(
-    () => pendingOnly
-      ? (pendingOrdersData?.data ?? [])
-      : (ordersData?.data ?? []),
+    () => {
+      if (pendingOnly) return pendingOrdersData?.data ?? [];
+      return (ordersData?.data ?? [])
+        .filter((o) => o.status !== ORDER_STATUS.Cancelled)
+        .slice(0, 5);
+    },
     [pendingOnly, pendingOrdersData, ordersData],
   );
 

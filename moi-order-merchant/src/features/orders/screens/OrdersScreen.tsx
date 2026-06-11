@@ -28,9 +28,9 @@ const DATE_PRESETS: { key: DatePreset; label: string }[] = [
 ];
 
 const SECTION_DOTS: Record<string, string> = {
-  'New Orders':            colours.warning,
-  'In Progress':           colours.primary,
-  'Completed & Cancelled': colours.textSubtle,
+  'New Orders':  colours.warning,
+  'In Progress': colours.primary,
+  'Completed':   colours.textSubtle,
 };
 
 function formatDateLabel(d: string | null, from: string | null, to: string | null, preset: DatePreset): string {
@@ -44,9 +44,10 @@ function formatDateLabel(d: string | null, from: string | null, to: string | nul
 
 interface OrdersScreenProps {
   onSelectOrder?: (orderId: number) => void;
+  onCancelledOrders?: () => void;
 }
 
-export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.Element {
+export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenProps): React.JSX.Element {
   const {
     sections, isLoading,
     statusFilter, dateFilter, dateFrom, dateTo, datePreset,
@@ -79,15 +80,26 @@ export function OrdersScreen({ onSelectOrder }: OrdersScreenProps): React.JSX.El
             </Pressable>
           )}
         </View>
-        <Pressable
-          style={styles.exportBtn}
-          onPress={handleExportCsv}
-          accessibilityRole="button"
-          accessibilityLabel="Export orders as CSV"
-        >
-          <Ionicons name="download-outline" size={14} color={colours.backgroundDark} />
-          <Text style={styles.exportBtnText}>Export CSV</Text>
-        </Pressable>
+        <View style={styles.headerActions}>
+          <Pressable
+            style={styles.cancelledBtn}
+            onPress={onCancelledOrders}
+            accessibilityRole="button"
+            accessibilityLabel="View cancelled orders"
+          >
+            <Ionicons name="close-circle-outline" size={14} color={colours.error} />
+            <Text style={styles.cancelledBtnText}>Cancelled</Text>
+          </Pressable>
+          <Pressable
+            style={styles.exportBtn}
+            onPress={handleExportCsv}
+            accessibilityRole="button"
+            accessibilityLabel="Export orders as CSV"
+          >
+            <Ionicons name="download-outline" size={14} color={colours.backgroundDark} />
+            <Text style={styles.exportBtnText}>Export CSV</Text>
+          </Pressable>
+        </View>
       </View>
 
       {/* ── Status tabs ─────────────────────────────────────────────────────── */}

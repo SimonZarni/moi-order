@@ -13,6 +13,7 @@ import type {
 } from '../types/navigation';
 import { DashboardScreen } from '../features/dashboard/screens/DashboardScreen';
 import { OrdersScreen } from '../features/orders/screens/OrdersScreen';
+import { CancelledOrdersScreen } from '../features/orders/screens/CancelledOrdersScreen';
 import { OrderDetailScreen } from '../features/orders/screens/OrderDetailScreen';
 import { OrderChatContent, OrderChatScreen } from '../features/chat/screens/OrderChatScreen';
 import { MenuScreen } from '../features/menu/screens/MenuScreen';
@@ -63,7 +64,11 @@ function OrdersTab(): React.JSX.Element {
     (orderId: number) => navigation.navigate('OrderDetail', { orderId }),
     [navigation],
   );
-  return <OrdersScreen onSelectOrder={handleSelectOrder} />;
+  const handleCancelledOrders = useCallback(
+    () => navigation.navigate('CancelledOrders'),
+    [navigation],
+  );
+  return <OrdersScreen onSelectOrder={handleSelectOrder} onCancelledOrders={handleCancelledOrders} />;
 }
 
 function RestaurantTab(): React.JSX.Element {
@@ -128,6 +133,17 @@ function OrderDetailRoute(
   return <OrderDetailScreen orderId={orderId} onBack={handleBack} onChatPress={handleChatPress} />;
 }
 
+function CancelledOrdersRoute(
+  { navigation }: NativeStackScreenProps<MerchantStackParamList, 'CancelledOrders'>,
+): React.JSX.Element {
+  const handleBack = useCallback(() => navigation.goBack(), [navigation]);
+  const handleSelectOrder = useCallback(
+    (orderId: number) => navigation.navigate('OrderDetail', { orderId }),
+    [navigation],
+  );
+  return <CancelledOrdersScreen onBack={handleBack} onSelectOrder={handleSelectOrder} />;
+}
+
 function MobileNavigator(): React.JSX.Element {
   return (
     <MobileStack.Navigator screenOptions={{ headerShown: false }}>
@@ -136,6 +152,7 @@ function MobileNavigator(): React.JSX.Element {
       <MobileStack.Screen name="OrderChat" component={OrderChatScreen} />
       <MobileStack.Screen name="BusinessProfile" component={BusinessProfileScreen} options={{ headerShown: false }} />
       <MobileStack.Screen name="Reviews" component={ReviewsScreen} options={{ headerShown: false }} />
+      <MobileStack.Screen name="CancelledOrders" component={CancelledOrdersRoute} options={{ headerShown: false }} />
     </MobileStack.Navigator>
   );
 }
@@ -199,7 +216,19 @@ function WebMerchantLayout(): React.JSX.Element {
           />
         );
       case 'Orders':
-        return <OrdersScreen onSelectOrder={handleSelectOrder} />;
+        return (
+          <OrdersScreen
+            onSelectOrder={handleSelectOrder}
+            onCancelledOrders={() => handleNavigate('CancelledOrders')}
+          />
+        );
+      case 'CancelledOrders':
+        return (
+          <CancelledOrdersScreen
+            onBack={() => handleNavigate('Orders')}
+            onSelectOrder={handleSelectOrder}
+          />
+        );
       case 'Menu':
         return <MenuScreen />;
       case 'Restaurant':
