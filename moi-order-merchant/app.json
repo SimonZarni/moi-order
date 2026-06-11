@@ -28,7 +28,13 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "single"
+      "output": "single",
+      "favicon": "./assets/moi-order-icon.png",
+      "name": "Moi Order Merchant",
+      "shortName": "Moi Order",
+      "description": "Manage orders, menus, and analytics for your restaurant.",
+      "themeColor": "#22c55e",
+      "backgroundColor": "#0f1a14"
     },
     "plugins": [
       [
