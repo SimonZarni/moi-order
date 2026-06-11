@@ -24,7 +24,7 @@ class UploadProfileDocumentRequest extends FormRequest
     {
         return [
             'type' => ['required', new Enum(KycDocumentType::class)],
-            'file' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:10240'],
+            'file' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:51200'],
         ];
     }
 

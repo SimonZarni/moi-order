@@ -32,10 +32,10 @@ class CreateAdminMerchantRequest extends FormRequest
             'business_address'                => ['required', 'string', 'max:1000'],
             'business_phone'                  => ['nullable', 'string', 'max:50'],
             'documents'                       => ['nullable', 'array'],
-            'documents.national_id'           => ['nullable', 'file', 'mimes:jpeg,jpg,png,pdf', 'max:10240'],
-            'documents.business_registration' => ['nullable', 'file', 'mimes:jpeg,jpg,png,pdf', 'max:10240'],
-            'documents.bank_book'             => ['nullable', 'file', 'mimes:jpeg,jpg,png,pdf', 'max:10240'],
-            'documents.storefront_photo'      => ['nullable', 'file', 'mimes:jpeg,jpg,png,pdf', 'max:10240'],
+            'documents.national_id'           => ['nullable', 'file', 'mimes:jpeg,jpg,png,pdf', 'max:51200'],
+            'documents.business_registration' => ['nullable', 'file', 'mimes:jpeg,jpg,png,pdf', 'max:51200'],
+            'documents.bank_book'             => ['nullable', 'file', 'mimes:jpeg,jpg,png,pdf', 'max:51200'],
+            'documents.storefront_photo'      => ['nullable', 'file', 'mimes:jpeg,jpg,png,pdf', 'max:51200'],
         ];
     }
 
