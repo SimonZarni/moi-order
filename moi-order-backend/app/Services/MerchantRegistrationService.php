@@ -26,6 +26,7 @@ class MerchantRegistrationService
 {
     public function __construct(
         private readonly KycService $kycService,
+        private readonly MenuService $menuService,
     ) {}
 
     /**
@@ -100,12 +101,14 @@ class MerchantRegistrationService
 
             // Mirror KycApplication::approve() — create the restaurant immediately
             // so the merchant portal shows data without needing a separate KYC approval step.
-            Restaurant::create([
+            $restaurant = Restaurant::create([
                 'user_id' => $user->id,
                 'name'    => $dto->businessName,
                 'address' => $dto->businessAddress,
                 'phone'   => $dto->businessPhone,
             ]);
+
+            $this->menuService->createSystemCategoriesForRestaurant($restaurant);
 
             $token = $user->createToken(
                 'merchant-admin-auth',
