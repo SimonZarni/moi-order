@@ -92,13 +92,17 @@ export function useLoginScreen(): UseLoginScreenResult {
     } catch (e: unknown) {
       const code = (e as { code?: string })?.code;
       if (code === statusCodes.SIGN_IN_CANCELLED) return;
-      setError(extractApiError(e).message);
+      setError(e instanceof Error ? e.message : extractApiError(e).message);
     } finally {
       setGoogleL(false);
     }
   }, [setAuth]);
 
   const handleAppleSignIn = useCallback(async () => {
+    if (Platform.OS === 'web') {
+      setError('Apple sign-in is not yet supported in the browser. Please use the Moi Order mobile app.');
+      return;
+    }
     setAppleL(true);
     setError(null);
     try {
@@ -124,7 +128,7 @@ export function useLoginScreen(): UseLoginScreenResult {
     } catch (e: unknown) {
       const code = (e as { code?: string })?.code;
       if (code === 'ERR_REQUEST_CANCELED') return;
-      setError(extractApiError(e).message);
+      setError(e instanceof Error ? e.message : extractApiError(e).message);
     } finally {
       setAppleL(false);
     }
@@ -147,7 +151,7 @@ export function useLoginScreen(): UseLoginScreenResult {
     } catch (e: unknown) {
       const code = (e as { code?: string })?.code;
       if (code === lineErrorCodes.CANCELLED) return;
-      setError(extractApiError(e).message);
+      setError(e instanceof Error ? e.message : extractApiError(e).message);
     } finally {
       setLineL(false);
     }

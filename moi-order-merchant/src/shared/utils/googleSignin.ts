@@ -1,4 +1,4 @@
-import { Alert, Platform, TurboModuleRegistry } from 'react-native';
+import { Platform, TurboModuleRegistry } from 'react-native';
 
 // Safe shim for @react-native-google-signin/google-signin.
 // TurboModuleRegistry is undefined on web (react-native-web doesn't export it),
@@ -22,11 +22,11 @@ const mockGoogleSignin = {
   hasPlayServices: async (): Promise<boolean> => true,
   signOut: async (): Promise<null> => null,
   signIn: async (): Promise<never> => {
-    Alert.alert(
-      'Expo Go',
-      'Google Sign-In requires a development build (APK). It is not available in Expo Go.',
+    throw new Error(
+      Platform.OS === 'web'
+        ? 'Google sign-in is not yet supported in the browser. Please use the Moi Order mobile app.'
+        : 'Google sign-in requires a custom development build.',
     );
-    throw { code: SIGN_IN_CANCELLED };
   },
   getTokens: async (): Promise<{ idToken: string; accessToken: string }> => {
     throw { code: SIGN_IN_CANCELLED };

@@ -1,4 +1,4 @@
-import { Alert, Platform, TurboModuleRegistry } from 'react-native';
+import { Platform, TurboModuleRegistry } from 'react-native';
 
 export interface LineAccessToken {
   accessToken: string;
@@ -37,12 +37,11 @@ const LINE_CANCELLED = 'LINE_LOGIN_CANCELLED';
 const mockLineModule: LineModule = {
   setup: async (): Promise<void> => {},
   login: async (): Promise<never> => {
-    Alert.alert(
-      'Expo Go',
-      'LINE sign-in requires a development build. It is not available in Expo Go.',
+    throw new Error(
+      Platform.OS === 'web'
+        ? 'LINE sign-in is not yet supported in the browser. Please use the Moi Order mobile app.'
+        : 'LINE sign-in requires a custom development build.',
     );
-
-    throw { code: LINE_CANCELLED };
   },
 };
 
