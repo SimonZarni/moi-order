@@ -10,6 +10,8 @@ import { colours } from '@/shared/theme/colours';
 import { FOOD_ORDER_STATUS, FoodOrderStatus } from '@/types/enums';
 import { styles } from './OrderProgressBar.styles';
 
+const LINE_GREEN = '#06C755';
+
 // ─── Status index map ────────────────────────────────────────────────────────
 const STATUS_INDEX: Record<FoodOrderStatus, number> = {
   [FOOD_ORDER_STATUS.OrderPlaced]:        0,
@@ -60,6 +62,10 @@ interface Props {
   status: FoodOrderStatus;
   canShowPromptPay: boolean;
   onPromptPayPress: () => void;
+  copyMessage: string | null;
+  copyHint: string | null;
+  hasCopied: boolean;
+  onCopyPress: () => void;
 }
 
 // ─── Pulsing dot for active step ─────────────────────────────────────────────
@@ -152,7 +158,15 @@ function StepRow({ step, state, isLast }: { step: StepDef; state: 'done' | 'acti
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export function OrderProgressBar({ status, canShowPromptPay, onPromptPayPress }: Props): React.JSX.Element {
+export function OrderProgressBar({
+  status,
+  canShowPromptPay,
+  onPromptPayPress,
+  copyMessage,
+  copyHint,
+  hasCopied,
+  onCopyPress,
+}: Props): React.JSX.Element {
   const currentIdx = STATUS_INDEX[status] ?? 0;
   const inPhase2   = currentIdx >= 3;
 
@@ -195,8 +209,43 @@ export function OrderProgressBar({ status, canShowPromptPay, onPromptPayPress }:
         </View>
       </AnimatedPhase2>
 
-      {/* PromptPay CTA — shown when payment is pending */}
-      {canShowPromptPay && (
+      {/* Copy-to-clipboard helper + Pay via LINE button */}
+      {canShowPromptPay && copyMessage && (
+        <>
+          <View style={styles.copyCard}>
+            {copyHint ? (
+              <Text style={styles.copyHint}>{copyHint}</Text>
+            ) : null}
+            <View style={styles.copyRow}>
+              <Text style={styles.copyMessageText} selectable>{copyMessage}</Text>
+              <Pressable
+                style={styles.copyBtn}
+                onPress={onCopyPress}
+                accessibilityRole="button"
+                accessibilityLabel="Copy message"
+              >
+                <Ionicons
+                  name={hasCopied ? 'checkmark' : 'clipboard-outline'}
+                  size={20}
+                  color={hasCopied ? LINE_GREEN : colours.textMuted}
+                />
+              </Pressable>
+            </View>
+          </View>
+
+          <Pressable
+            style={styles.promptPayBtn}
+            onPress={onPromptPayPress}
+            accessibilityRole="button"
+            accessibilityLabel="Pay via LINE"
+          >
+            <Ionicons name="chatbubble" size={18} color="#fff" />
+            <Text style={styles.promptPayText}>Pay via LINE</Text>
+          </Pressable>
+        </>
+      )}
+
+      {canShowPromptPay && !copyMessage && (
         <Pressable
           style={styles.promptPayBtn}
           onPress={onPromptPayPress}

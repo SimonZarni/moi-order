@@ -92,6 +92,37 @@ export const styles = StyleSheet.create({
     color: colours.tertiary,
     fontWeight: '500',
   },
+  // Copy-to-clipboard section
+  copyCard: {
+    backgroundColor: '#f0faf4',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: '#c6ecd4',
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  copyHint: {
+    fontSize: typography.xs,
+    color: '#2d7a4a',
+    fontWeight: '500',
+    lineHeight: 33, // ≥3× for Burmese glyphs at fontSize 11
+  },
+  copyRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+  },
+  copyMessageText: {
+    flex: 1,
+    fontSize: typography.sm,
+    color: colours.textOnLight,
+    fontWeight: '500',
+    lineHeight: 39, // ≥3× for Burmese glyphs at fontSize 13
+  },
+  copyBtn: {
+    padding: spacing.xs,
+    marginTop: -2,
+  },
   // LINE Pay button — LINE brand green
   promptPayBtn: {
     borderRadius: radius.xl,
@@ -101,6 +132,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
     backgroundColor: '#06C755',
+    marginTop: spacing.sm,
   },
   promptPayText: {
     fontSize: typography.md,

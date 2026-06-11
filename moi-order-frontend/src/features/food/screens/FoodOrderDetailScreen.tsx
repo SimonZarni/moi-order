@@ -20,7 +20,8 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
     invoiceVisible, handleInvoiceOpen, handleInvoiceClose,
     completeModalVisible, isCompleting,
     rating, review,
-    handleBack, handlePromptPayPress, handleChatPress,
+    copyMessage, copyHint, hasCopied,
+    handleBack, handlePromptPayPress, handleCopyMessage, handleChatPress,
     handleSlideComplete, handleCompleteConfirm, handleCompleteCancel,
     handleRatingChange, handleReviewChange,
     handleCallRestaurant, handleOrderAgain,
@@ -87,6 +88,10 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
             status={order.status}
             canShowPromptPay={order.can_show_prompt_pay}
             onPromptPayPress={handlePromptPayPress}
+            copyMessage={copyMessage}
+            copyHint={copyHint}
+            hasCopied={hasCopied}
+            onCopyPress={handleCopyMessage}
           />
         )}
 

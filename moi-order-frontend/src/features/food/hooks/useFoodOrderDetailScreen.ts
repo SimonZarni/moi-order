@@ -1,16 +1,18 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, Linking } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
 import { RootStackParamList } from '@/types/navigation';
 import { FoodOrder } from '@/types/models';
-import { FOOD_ORDER_STATUS } from '@/types/enums';
+import { FOOD_ORDER_STATUS, FOOD_PAYMENT_METHOD } from '@/types/enums';
 import { LINE_OA_URL, ORDER_PAYMENT_TIMEOUT_MS } from '@/shared/constants/config';
 import { ERROR_CODES } from '@/shared/constants/errorCodes';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { cancelFoodOrder, completeFoodOrder, notifyLinePayment } from '@/shared/api/foodOrders';
 import { ApiError } from '@/types/models';
+import { useLocaleStore } from '@/shared/store/localeStore';
 import { useFoodOrderDetailData } from './useFoodOrdersData';
 
 type DetailRoute = RouteProp<RootStackParamList, 'FoodOrderDetail'>;
@@ -25,8 +27,12 @@ export interface UseFoodOrderDetailScreenResult {
   isCompleting: boolean;
   rating: number | null;
   review: string;
+  copyMessage: string | null;
+  copyHint: string | null;
+  hasCopied: boolean;
   handleBack: () => void;
   handlePromptPayPress: () => void;
+  handleCopyMessage: () => void;
   handleChatPress: () => void;
   handleRefetch: () => void;
   handleInvoiceOpen: () => void;
@@ -49,13 +55,53 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
   const { orderId } = route.params;
 
   const { order, isLoading, isError, refetch } = useFoodOrderDetailData(orderId);
+  const { locale } = useLocaleStore();
 
   const [invoiceVisible,    setInvoiceVisible]    = useState(false);
   const [completeModalVisible, setCompleteModal]  = useState(false);
   const [isCompleting,      setIsCompleting]      = useState(false);
   const [isCancelling,      setIsCancelling]      = useState(false);
+  const [hasCopied,         setHasCopied]         = useState(false);
   const [rating,            setRating]            = useState<number | null>(null);
   const [review,            setReview]            = useState('');
+
+  const isLinePay = order?.payment_method === FOOD_PAYMENT_METHOD.LinePay;
+
+  const copyMessage = useMemo<string | null>(() => {
+    if (!order?.can_show_prompt_pay || !isLinePay) return null;
+    const num  = order.order_number ?? order.id;
+    const rest = order.restaurant_name ?? '';
+    if (locale === 'mm') {
+      return `အမှာစာ ${num} (${rest}) အတွက် ငွေပေးချေရန် အဆင်သင့်ဖြစ်ပါသည်။`;
+    }
+    if (locale === 'th') {
+      return `ฉันพร้อมชำระเงินสำหรับออร์เดอร์ ${num} จาก ${rest}`;
+    }
+    return `I am ready to pay for order ${num} for ${rest}.`;
+  }, [order, isLinePay, locale]);
+
+  const copyHint = useMemo<string | null>(() => {
+    if (!order?.can_show_prompt_pay || !isLinePay) return null;
+    if (locale === 'mm') return 'အောက်ပါစာကူး၍ ကျွန်ုပ်တို့ LINE channel တွင် ကူးထည့်ပေးပို့ပါ';
+    if (locale === 'th') return 'คัดลอกข้อความด้านล่างและวางในช่อง LINE ของเรา';
+    return 'Copy the message below and paste it in our LINE channel';
+  }, [order?.can_show_prompt_pay, isLinePay, locale]);
+
+  const handleCopyMessage = useCallback(async () => {
+    if (!copyMessage) return;
+    try {
+      await Clipboard.setStringAsync(copyMessage);
+      setHasCopied(true);
+      setTimeout(() => setHasCopied(false), 2000);
+    } catch {
+      // Native module not yet compiled into binary — show Alert as fallback
+      Alert.alert(
+        locale === 'mm' ? 'ကော်ပီကူးရန်' : 'Copy this message',
+        copyMessage,
+        [{ text: 'OK' }],
+      );
+    }
+  }, [copyMessage, locale]);
 
   const handleBack         = useCallback(() => navigation.goBack(), [navigation]);
   const handleInvoiceOpen  = useCallback(() => setInvoiceVisible(true), []);
@@ -193,8 +239,12 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
     isCompleting,
     rating,
     review,
+    copyMessage,
+    copyHint,
+    hasCopied,
     handleBack,
     handlePromptPayPress,
+    handleCopyMessage,
     handleChatPress,
     handleRefetch,
     handleInvoiceOpen,
