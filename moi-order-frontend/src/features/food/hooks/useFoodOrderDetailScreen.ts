@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { RootStackParamList } from '@/types/navigation';
 import { FoodOrder } from '@/types/models';
 import { FOOD_ORDER_STATUS } from '@/types/enums';
-import { LINE_OA_MESSAGE_URL, LINE_OA_URL, ORDER_PAYMENT_TIMEOUT_MS } from '@/shared/constants/config';
+import { LINE_OA_URL, ORDER_PAYMENT_TIMEOUT_MS } from '@/shared/constants/config';
 import { ERROR_CODES } from '@/shared/constants/errorCodes';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { cancelFoodOrder, completeFoodOrder, notifyLinePayment } from '@/shared/api/foodOrders';
@@ -63,10 +63,11 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
 
   const handlePromptPayPress = useCallback(async () => {
     try {
-      const { pre_filled_message } = await notifyLinePayment(orderId);
-      const url = `${LINE_OA_MESSAGE_URL}?text=${encodeURIComponent(pre_filled_message)}`;
-      Linking.openURL(url).catch(() =>
-        Alert.alert('Cannot open LINE', 'Please open LINE and search for @moiorder to complete your payment.'),
+      await notifyLinePayment(orderId);
+      // oaMessage?text= causes LINE to show "User not found" — LINE doesn't split the
+      // query string when resolving the OA handle. Open the OA chat directly instead.
+      Linking.openURL(LINE_OA_URL).catch(() =>
+        Alert.alert('Cannot open LINE', 'Please open LINE and search for Moi Order to complete your payment.'),
       );
     } catch (e: unknown) {
       const code = (e as ApiError)?.code;
@@ -91,9 +92,8 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
         return;
       }
 
-      // Other errors: fall back to plain OA chat.
       Linking.openURL(LINE_OA_URL).catch(() =>
-        Alert.alert('Cannot open LINE', 'Please open LINE and search for @moiorder to complete your payment.'),
+        Alert.alert('Cannot open LINE', 'Please open LINE and search for Moi Order to complete your payment.'),
       );
     }
   }, [orderId]);
