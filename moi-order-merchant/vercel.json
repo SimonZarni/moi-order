@@ -8,7 +8,8 @@
       "EXPO_PUBLIC_PUSHER_CLUSTER":       "ap1",
       "EXPO_PUBLIC_APPLE_WEB_CLIENT_ID":   "com.moiorder.merchantweb",
       "EXPO_PUBLIC_APPLE_WEB_REDIRECT_URI": "https://merchant.moiorder.com/auth/apple/callback",
-      "EXPO_PUBLIC_LINE_WEB_REDIRECT_URI":  "https://merchant.moiorder.com/auth/line/callback"
+      "EXPO_PUBLIC_LINE_WEB_REDIRECT_URI":  "https://merchant.moiorder.com/auth/line/callback",
+      "EXPO_PUBLIC_LINE_CHANNEL_ID":        "2008805625"
     }
   },
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
