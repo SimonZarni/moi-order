@@ -1,109 +1,64 @@
-import { Platform } from 'react-native';
+import * as AuthSession from 'expo-auth-session';
 
 export const GOOGLE_WEB_CANCELLED = 'GOOGLE_WEB_SIGN_IN_CANCELLED';
 
-interface GisNotification {
-  isDisplayed: () => boolean;
-  isNotDisplayed: () => boolean;
-  getNotDisplayedReason: () => string;
-  isDismissedMoment: () => boolean;
-  isSkippedMoment: () => boolean;
-  getDismissedReason: () => string;
-}
-
-interface GisCredentialResponse {
-  credential: string;
-  select_by: string;
-}
-
-interface GisAccountsId {
-  initialize: (config: {
-    client_id: string;
-    callback: (response: GisCredentialResponse) => void;
-    auto_select?: boolean;
-    cancel_on_tap_outside?: boolean;
-  }) => void;
-  prompt: (notification?: (n: GisNotification) => void) => void;
-  disableAutoSelect: () => void;
-}
-
-declare global {
-  interface Window {
-    google?: { accounts: { id: GisAccountsId } };
-  }
-}
-
-// Polls until the GIS library is available (loaded via <script async> in index.html).
-// Rejects after timeoutMs if the script never loads (e.g. ad-blocker).
-function waitForGis(timeoutMs: number): Promise<GisAccountsId> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === 'undefined') {
-      reject(new Error('Not running in a browser.'));
-      return;
-    }
-    if (window.google?.accounts?.id) {
-      resolve(window.google.accounts.id);
-      return;
-    }
-    const deadline = performance.now() + timeoutMs;
-    const timer = setInterval(() => {
-      if (window.google?.accounts?.id) {
-        clearInterval(timer);
-        resolve(window.google.accounts.id);
-      } else if (performance.now() > deadline) {
-        clearInterval(timer);
-        reject(new Error(
-          'Google sign-in failed to load. Check your internet connection or disable any ad blockers, then refresh the page.',
-        ));
-      }
-    }, 100);
-  });
-}
-
-function notDisplayedMessage(reason: string): string {
-  if (reason === 'opt_out_or_no_session') {
-    return 'No Google account detected in this browser. Please sign in to Google in another tab first, then try again.';
-  }
-  if (reason === 'secure_http_required') {
-    return 'Google sign-in requires HTTPS. Please access the dashboard over a secure connection.';
-  }
-  if (reason === 'unregistered_origin') {
-    return 'Google sign-in is not configured for this domain. Contact support.';
-  }
-  return `Google sign-in could not be shown (${reason}). Try a different browser or check your browser settings.`;
-}
+const DISCOVERY = {
+  authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+  tokenEndpoint: 'https://oauth2.googleapis.com/token',
+};
 
 /**
- * Triggers Google One Tap sign-in and resolves with the credential (JWT ID token).
- * Only call on web — native flows use the @react-native-google-signin package.
+ * Opens a Google OAuth popup, exchanges the authorization code for tokens via
+ * PKCE, and returns the Google ID token.
+ *
+ * The caller sends this ID token to the existing /auth/google backend endpoint —
+ * no backend changes required.
+ *
+ * Prerequisites (Google Cloud Console > OAuth client):
+ *   - Authorized redirect URI: http://localhost:<PORT>/ (dev) and https://<domain>/ (prod)
+ *
+ * Only call on web — native flows use @react-native-google-signin.
  */
 export async function signInWithGoogleWeb(clientId: string): Promise<string> {
-  if (Platform.OS !== 'web') {
-    throw new Error('signInWithGoogleWeb must only be called on web.');
+  const redirectUri = AuthSession.makeRedirectUri();
+
+  const request = new AuthSession.AuthRequest({
+    clientId,
+    scopes: ['openid', 'email', 'profile'],
+    redirectUri,
+    usePKCE: true,
+    responseType: AuthSession.ResponseType.Code,
+  });
+
+  await request.makeAuthUrlAsync(DISCOVERY);
+
+  const result = await request.promptAsync(DISCOVERY);
+
+  if (result.type === 'cancel' || result.type === 'dismiss') {
+    const err = new Error('Google sign-in was cancelled.');
+    (err as Error & { code: string }).code = GOOGLE_WEB_CANCELLED;
+    throw err;
   }
 
-  const gis = await waitForGis(8_000);
+  if (result.type !== 'success') {
+    const msg = (result as { error?: { message?: string } }).error?.message ?? result.type;
+    throw new Error(`Google sign-in failed: ${msg}`);
+  }
 
-  return new Promise<string>((resolve, reject) => {
-    gis.initialize({
-      client_id: clientId,
-      callback: ({ credential }) => {
-        resolve(credential);
-      },
-      auto_select: false,
-      cancel_on_tap_outside: true,
-    });
+  const tokenResponse = await AuthSession.exchangeCodeAsync(
+    {
+      code: result.params.code,
+      clientId,
+      redirectUri,
+      extraParams: { code_verifier: request.codeVerifier ?? '' },
+    },
+    { tokenEndpoint: DISCOVERY.tokenEndpoint },
+  );
 
-    gis.prompt((notification) => {
-      if (notification.isNotDisplayed()) {
-        reject(new Error(notDisplayedMessage(notification.getNotDisplayedReason())));
-      } else if (notification.isDismissedMoment()) {
-        // User closed the One Tap dialog — treat as cancellation, not an error.
-        const err = new Error('Google sign-in was cancelled.');
-        (err as Error & { code: string }).code = GOOGLE_WEB_CANCELLED;
-        reject(err);
-      }
-      // isDisplayed: prompt is visible — wait for credential callback.
-    });
-  });
+  const idToken = tokenResponse.idToken;
+  if (!idToken) {
+    throw new Error('Google did not return an ID token. Ensure openid is in the scopes.');
+  }
+
+  return idToken;
 }

@@ -1,8 +1,13 @@
 import { Platform, StyleSheet, View } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as WebBrowser from 'expo-web-browser';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { CACHE_TTL } from './src/shared/constants/config';
+
+// Required for expo-auth-session on web: when the OAuth popup redirects back
+// to our app, this detects the auth params and sends them to the parent window.
+WebBrowser.maybeCompleteAuthSession();
 
 const queryClient = new QueryClient({
   defaultOptions: {
