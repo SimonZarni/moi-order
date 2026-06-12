@@ -29,7 +29,7 @@ function AccountRow({ icon, iconBg, iconColor, label, value }: AccountRowProps):
 }
 
 export function ProfileScreen(): React.JSX.Element {
-  const { restaurant, user, isLoading, handleLogout, handleUploadCover, handleUploadLogo, handleNavigateToBusinessProfile } = useProfileScreen();
+  const { restaurant, user, isLoading, handleLogout, handleUploadCover, handleUploadLogo, handleNavigateToBusinessProfile, handleNavigateToSettings } = useProfileScreen();
 
   if (isLoading) {
     return <View style={styles.centered}><ActivityIndicator size="large" color={colours.primary} /></View>;
@@ -126,6 +126,22 @@ export function ProfileScreen(): React.JSX.Element {
             </Pressable>
           </View>
         )}
+
+        {/* ── Settings ── */}
+        <View style={styles.section}>
+          <Pressable
+            style={styles.menuRow}
+            onPress={handleNavigateToSettings}
+            accessibilityLabel="Open settings"
+            accessibilityRole="button"
+          >
+            <View style={[styles.accountRowIcon, { backgroundColor: colours.textMuted + '22' }]}>
+              <Ionicons name="settings-outline" size={16} color={colours.textMuted} />
+            </View>
+            <Text style={styles.menuRowLabel}>Settings</Text>
+            <Ionicons name="chevron-forward" size={16} color={colours.textSubtle} />
+          </Pressable>
+        </View>
 
         {/* ── Logout ── */}
         <View style={styles.section}>

@@ -24,6 +24,9 @@ import { NotificationBell } from '../features/notifications/components/Notificat
 import { ProfileScreen } from '../features/profile/screens/ProfileScreen';
 import { BusinessProfileScreen } from '../features/businessProfile/screens/BusinessProfileScreen';
 import { ReviewsScreen } from '../features/reviews/screens/ReviewsScreen';
+import { SettingsScreen } from '../features/settings/screens/SettingsScreen';
+import { ChangePasswordScreen } from '../features/settings/screens/ChangePasswordScreen';
+import { OperatingHoursScreen } from '../features/settings/screens/OperatingHoursScreen';
 import { WebSidebar } from '../shared/components/WebSidebar/WebSidebar';
 import { colours } from '../shared/theme/colours';
 import { spacing } from '../shared/theme/spacing';
@@ -144,6 +147,34 @@ function CancelledOrdersRoute(
   return <CancelledOrdersScreen onBack={handleBack} onSelectOrder={handleSelectOrder} />;
 }
 
+function SettingsRoute(
+  { navigation }: NativeStackScreenProps<MerchantStackParamList, 'Settings'>,
+): React.JSX.Element {
+  const handleChangePassword = useCallback(
+    () => navigation.navigate('ChangePassword'),
+    [navigation],
+  );
+  const handleOperatingHours = useCallback(
+    () => navigation.navigate('OperatingHours'),
+    [navigation],
+  );
+  return <SettingsScreen onChangePassword={handleChangePassword} onOperatingHours={handleOperatingHours} />;
+}
+
+function ChangePasswordRoute(
+  { navigation }: NativeStackScreenProps<MerchantStackParamList, 'ChangePassword'>,
+): React.JSX.Element {
+  const handleBack = useCallback(() => navigation.goBack(), [navigation]);
+  return <ChangePasswordScreen onBack={handleBack} />;
+}
+
+function OperatingHoursRoute(
+  { navigation }: NativeStackScreenProps<MerchantStackParamList, 'OperatingHours'>,
+): React.JSX.Element {
+  const handleBack = useCallback(() => navigation.goBack(), [navigation]);
+  return <OperatingHoursScreen onBack={handleBack} />;
+}
+
 function MobileNavigator(): React.JSX.Element {
   return (
     <MobileStack.Navigator screenOptions={{ headerShown: false }}>
@@ -153,6 +184,9 @@ function MobileNavigator(): React.JSX.Element {
       <MobileStack.Screen name="BusinessProfile" component={BusinessProfileScreen} options={{ headerShown: false }} />
       <MobileStack.Screen name="Reviews" component={ReviewsScreen} options={{ headerShown: false }} />
       <MobileStack.Screen name="CancelledOrders" component={CancelledOrdersRoute} options={{ headerShown: false }} />
+      <MobileStack.Screen name="Settings" component={SettingsRoute} options={{ headerShown: false }} />
+      <MobileStack.Screen name="ChangePassword" component={ChangePasswordRoute} options={{ headerShown: false }} />
+      <MobileStack.Screen name="OperatingHours" component={OperatingHoursRoute} options={{ headerShown: false }} />
     </MobileStack.Navigator>
   );
 }
@@ -169,6 +203,7 @@ const SCREEN_TO_PATH: Record<WebScreen, string> = {
   BusinessProfile: '/business-profile',
   Reviews:         '/reviews',
   CancelledOrders: '/orders/cancelled',
+  Settings:        '/settings',
 };
 
 interface ParsedUrl {
@@ -197,12 +232,15 @@ function parseUrlPath(): ParsedUrl {
   return { screen: found?.[0] ?? 'Dashboard', orderId: null, chatId: null };
 }
 
+type SettingsSubView = 'list' | 'changePassword' | 'operatingHours';
+
 function WebMerchantLayout(): React.JSX.Element {
   const [activeScreen, setActiveScreen]     = useState<WebScreen>(() => parseUrlPath().screen);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(() => parseUrlPath().orderId);
   const [chatOrderId, setChatOrderId]       = useState<number | null>(() => parseUrlPath().chatId);
   const [chatOrderNumber, setChatOrderNumber] = useState<string>('');
   const [sidebarOpen, setSidebarOpen]       = useState(false);
+  const [settingsSubView, setSettingsSubView] = useState<SettingsSubView>('list');
   const { isDesktop } = useResponsive();
   const logout = useAuthStore((s) => s.logout);
 
@@ -243,6 +281,7 @@ function WebMerchantLayout(): React.JSX.Element {
     setChatOrderId(null);
     setChatOrderNumber('');
     setSidebarOpen(false);
+    setSettingsSubView('list');
   }, []);
 
   const handleSelectOrder = useCallback((orderId: number) => {
@@ -325,6 +364,19 @@ function WebMerchantLayout(): React.JSX.Element {
         return <BusinessProfileScreen />;
       case 'Reviews':
         return <ReviewsScreen />;
+      case 'Settings':
+        if (settingsSubView === 'changePassword') {
+          return <ChangePasswordScreen onBack={() => setSettingsSubView('list')} />;
+        }
+        if (settingsSubView === 'operatingHours') {
+          return <OperatingHoursScreen onBack={() => setSettingsSubView('list')} />;
+        }
+        return (
+          <SettingsScreen
+            onChangePassword={() => setSettingsSubView('changePassword')}
+            onOperatingHours={() => setSettingsSubView('operatingHours')}
+          />
+        );
     }
   };
 

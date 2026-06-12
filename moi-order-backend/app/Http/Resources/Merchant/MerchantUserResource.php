@@ -25,6 +25,7 @@ class MerchantUserResource extends JsonResource
             'phone'          => $this->phone_number,
             'is_merchant'    => $this->is_merchant,
             'email_verified' => $this->email_verified_at !== null,
+            'has_password'   => ! empty($this->password),
             'kyc_status'     => $this->resolveKycStatus(),
             'created_at'     => $this->created_at?->toIso8601String(),
         ];

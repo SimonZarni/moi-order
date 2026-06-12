@@ -7,6 +7,7 @@ export interface MerchantUser {
   phone: string | null;
   is_merchant: boolean;
   email_verified: boolean;
+  has_password: boolean;
   kyc_status: KycStatus | null;
   created_at: string;
 }

@@ -21,6 +21,7 @@ interface UseProfileScreenResult {
   handleUploadCover: () => Promise<void>;
   handleUploadLogo: () => Promise<void>;
   handleNavigateToBusinessProfile: () => void;
+  handleNavigateToSettings: () => void;
 }
 
 export function useProfileScreen(): UseProfileScreenResult {
@@ -50,6 +51,10 @@ export function useProfileScreen(): UseProfileScreenResult {
 
   const handleNavigateToBusinessProfile = useCallback(() => {
     navigation.navigate('BusinessProfile');
+  }, [navigation]);
+
+  const handleNavigateToSettings = useCallback(() => {
+    navigation.navigate('Settings');
   }, [navigation]);
 
   const handleUploadPhoto = useCallback(
@@ -95,5 +100,6 @@ export function useProfileScreen(): UseProfileScreenResult {
     handleUploadCover,
     handleUploadLogo,
     handleNavigateToBusinessProfile,
+    handleNavigateToSettings,
   };
 }

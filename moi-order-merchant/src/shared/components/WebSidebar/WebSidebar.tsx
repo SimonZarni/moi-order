@@ -11,7 +11,7 @@ interface NavItem {
   icon: keyof typeof Ionicons.glyphMap;
   activeIcon: keyof typeof Ionicons.glyphMap;
   screen: WebScreen;
-  section: 'MAIN' | 'MANAGE' | 'INSIGHTS';
+  section: 'MAIN' | 'MANAGE' | 'INSIGHTS' | 'ACCOUNT';
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -23,6 +23,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Business Profile', icon: 'briefcase-outline',     activeIcon: 'briefcase',           screen: 'BusinessProfile', section: 'MANAGE' },
   { label: 'Analytics',     icon: 'bar-chart-outline',      activeIcon: 'bar-chart',         screen: 'Analytics',     section: 'INSIGHTS' },
   { label: 'Reviews',       icon: 'star-outline',            activeIcon: 'star',              screen: 'Reviews',       section: 'INSIGHTS' },
+  { label: 'Settings',      icon: 'settings-outline',        activeIcon: 'settings',          screen: 'Settings',      section: 'ACCOUNT' },
 ];
 
 interface WebSidebarProps {
@@ -38,7 +39,7 @@ export function WebSidebar({ activeScreen, onNavigate, onLogout, pendingCount = 
     [onNavigate],
   );
 
-  const sections: Array<'MAIN' | 'MANAGE' | 'INSIGHTS'> = ['MAIN', 'MANAGE', 'INSIGHTS'];
+  const sections: Array<'MAIN' | 'MANAGE' | 'INSIGHTS' | 'ACCOUNT'> = ['MAIN', 'MANAGE', 'INSIGHTS', 'ACCOUNT'];
 
   return (
     <View style={styles.sidebar}>

@@ -25,6 +25,9 @@ export type MerchantStackParamList = {
   BusinessProfile: undefined;
   Reviews: undefined;
   CancelledOrders: undefined;
+  Settings: undefined;
+  ChangePassword: undefined;
+  OperatingHours: undefined;
 };
 
 export type RootStackParamList = {
@@ -42,4 +45,5 @@ export type WebScreen =
   | 'Notifications'
   | 'BusinessProfile'
   | 'Reviews'
-  | 'CancelledOrders';
+  | 'CancelledOrders'
+  | 'Settings';

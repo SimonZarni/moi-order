@@ -3,6 +3,7 @@ import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
+import { useSettingsStore } from '../store/settingsStore';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMe } from '../api/auth';
 import { getMenuCategories } from '../api/menu';
@@ -35,11 +36,13 @@ function WebSocketManager(): null {
 
 export function AppNavigator(): React.JSX.Element {
   const { token, user, isLoading, initFromStorage, setUser } = useAuthStore();
+  const initSettingsFromStorage = useSettingsStore((s) => s.initFromStorage);
   const queryClient = useQueryClient();
 
   useEffect(() => {
     initFromStorage();
-  }, [initFromStorage]);
+    void initSettingsFromStorage();
+  }, [initFromStorage, initSettingsFromStorage]);
 
   const { isLoading: isMeLoading } = useQuery({
     queryKey: QUERY_KEYS.ME,

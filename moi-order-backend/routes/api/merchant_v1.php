@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\Merchant\V1\BusinessProfileController;
 use App\Http\Controllers\Api\Merchant\V1\KycController;
+use App\Http\Controllers\Api\Merchant\V1\MerchantProfileController;
 use App\Http\Controllers\Api\V1\DeviceTokenController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantEmailVerificationController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantAnalyticsController;
@@ -15,6 +16,9 @@ use App\Http\Controllers\Api\Merchant\V1\MenuCategoryController;
 use App\Http\Controllers\Api\Merchant\V1\MenuItemController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantReviewController;
 use Illuminate\Support\Facades\Route;
+
+// ── Profile ───────────────────────────────────────────────────────────────────
+Route::patch('/profile/password', [MerchantProfileController::class, 'changePassword']);
 
 // ── Email verification (for admin-provisioned accounts) ───────────────────────
 Route::post('/profile/verify-email/send',    [MerchantEmailVerificationController::class, 'send']);
