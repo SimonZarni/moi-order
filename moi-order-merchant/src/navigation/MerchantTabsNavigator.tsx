@@ -33,6 +33,7 @@ import { spacing } from '../shared/theme/spacing';
 import { typography } from '../shared/theme/typography';
 import { WEB_SIDEBAR_WIDTH } from '../shared/constants/config';
 import { useAuthStore } from '../store/authStore';
+import { useSettingsStore } from '../store/settingsStore';
 import { useResponsive } from '../shared/hooks/useResponsive';
 
 // ── Mobile ─────────────────────────────────────────────────────────────────────
@@ -243,6 +244,8 @@ function WebMerchantLayout(): React.JSX.Element {
   const [settingsSubView, setSettingsSubView] = useState<SettingsSubView>('list');
   const { isDesktop } = useResponsive();
   const logout = useAuthStore((s) => s.logout);
+  const theme = useSettingsStore((s) => s.theme);
+  const darkStyle = theme === 'dark' ? ({ filter: 'invert(1) hue-rotate(180deg)' } as object) : null;
 
   // Push URL when navigation state changes. Skips if already matches (no extra
   // history entry on mount since initial state is derived from the current URL).
@@ -423,7 +426,7 @@ function WebMerchantLayout(): React.JSX.Element {
             </View>
           </View>
         )}
-        <View style={webStyles.contentInner}>
+        <View nativeID="dark-content" style={[webStyles.contentInner, darkStyle]}>
           {renderContent()}
         </View>
       </View>

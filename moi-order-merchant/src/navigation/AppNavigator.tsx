@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, StyleSheet, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
@@ -37,7 +37,26 @@ function WebSocketManager(): null {
 export function AppNavigator(): React.JSX.Element {
   const { token, user, isLoading, initFromStorage, setUser } = useAuthStore();
   const initSettingsFromStorage = useSettingsStore((s) => s.initFromStorage);
+  const theme = useSettingsStore((s) => s.theme);
   const queryClient = useQueryClient();
+
+  // Inject global CSS (once) so images inside the dark-content area get
+  // counter-inverted and appear normal despite the parent filter.
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    if (document.getElementById('moi-dark-css')) return;
+    const el = document.createElement('style');
+    el.id = 'moi-dark-css';
+    el.textContent =
+      '[data-theme="dark"] #dark-content img { filter: invert(1) hue-rotate(180deg) !important; }';
+    document.head.appendChild(el);
+  }, []);
+
+  // Sync the current theme to the document root so the CSS rule above activates.
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   useEffect(() => {
     initFromStorage();

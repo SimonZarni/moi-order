@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useWindowDimensions } from 'react-native';
 import { useMenuScreen } from '../hooks/useMenuScreen';
 import { MenuItemCard } from '../components/MenuItemCard';
+import { MenuItemRow } from '../components/MenuItemRow';
 import { styles } from './MenuScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { spacing } from '../../../shared/theme/spacing';
@@ -19,7 +20,7 @@ import type { AddItemForm } from '../hooks/useMenuScreen';
 
 export function MenuScreen(): React.JSX.Element {
   const {
-    categories, filteredItems, guardedItemIds, isLoading, hasMissingSystemCategories,
+    categories, filteredItems, guardedItemIds, isLoading, hasMissingSystemCategories, menuView,
     selectedCategoryId, searchQuery, handleSelectCategory, handleSearchChange,
     showAddCategoryModal, newCategoryName, setShowAddCategoryModal,
     handleNewCategoryNameChange, handleConfirmAddCategory,
@@ -160,6 +161,19 @@ export function MenuScreen(): React.JSX.Element {
                 ? 'Try a different keyword'
                 : 'Select a category below and add your first item'}
             </Text>
+          </View>
+        ) : menuView === 'list' ? (
+          <View style={styles.listWrap}>
+            {filteredItems.map((item) => (
+              <MenuItemRow
+                key={item.id}
+                item={item}
+                isLastInRequiredCategory={guardedItemIds.has(item.id)}
+                onToggleStatus={handleToggleItemStatus}
+                onDelete={handleDeleteItem}
+                onEdit={handleOpenEditItem}
+              />
+            ))}
           </View>
         ) : (
           <View style={styles.gridWrap}>

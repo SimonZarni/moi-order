@@ -19,6 +19,7 @@ import { CACHE_TTL } from '../../../shared/constants/config';
 import { DOMAIN_MESSAGES, MESSAGES } from '../../../shared/constants/messages';
 import { RESTAURANT_STATUS } from '../../../types/enums';
 import { normalizePickedImage } from '../../../shared/utils/imageUtils';
+import { useSettingsStore, type MenuView } from '../../../store/settingsStore';
 import type { MenuCategory, MenuItem } from '../../../types/models';
 import type { MenuItemStatus, RestaurantStatus } from '../../../types/enums';
 
@@ -53,6 +54,7 @@ interface UseMenuScreenResult {
   isError: boolean;
   hasMissingSystemCategories: boolean;
   restaurantStatus: RestaurantStatus | null;
+  menuView: MenuView;
   // Tab + search
   selectedCategoryId: number | 'all';
   searchQuery: string;
@@ -226,6 +228,7 @@ async function pickPhoto(): Promise<AddItemForm['photo'] | null> {
 
 export function useMenuScreen(): UseMenuScreenResult {
   const queryClient = useQueryClient();
+  const menuView = useSettingsStore((s) => s.menuView);
 
   // ── Tab + search ──────────────────────────────────────────────────────────
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | 'all'>('all');
@@ -553,7 +556,7 @@ export function useMenuScreen(): UseMenuScreenResult {
 
   return {
     categories, filteredItems, guardedItemIds, isLoading, isError,
-    hasMissingSystemCategories, restaurantStatus,
+    hasMissingSystemCategories, restaurantStatus, menuView,
     selectedCategoryId, searchQuery, handleSelectCategory, handleSearchChange,
     showAddCategoryModal, newCategoryName, setShowAddCategoryModal,
     handleNewCategoryNameChange, handleConfirmAddCategory,

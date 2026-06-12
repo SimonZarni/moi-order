@@ -189,6 +189,10 @@ export const styles = StyleSheet.create({
   gridItem: {
     padding: 6,
   },
+  listWrap: {
+    flexDirection: 'column',
+    width: '100%',
+  },
 
   // ── Empty state ───────────────────────────────────────────────────────────
   emptyState: {
