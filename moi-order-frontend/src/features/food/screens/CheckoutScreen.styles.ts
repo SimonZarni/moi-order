@@ -37,13 +37,24 @@ export const styles = StyleSheet.create({
     overflow: 'hidden',
     paddingVertical: spacing.xs,
   },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    marginBottom: spacing.xs,
+  },
   sectionTitle: {
     fontSize: typography.xxs,
     fontWeight: '700',
     color: colours.textMuted,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
-    marginBottom: spacing.xs,
+  },
+  requiredStar: {
+    fontSize: typography.xxs,
+    fontWeight: '700',
+    color: colours.danger,
+    lineHeight: 14,
   },
   itemRow: {
     flexDirection: 'row',

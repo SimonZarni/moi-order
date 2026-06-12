@@ -157,7 +157,10 @@ export function CheckoutScreen(): React.JSX.Element {
           <Text style={styles.noticeText}>{DELIVERY_FEE_NOTICE}</Text>
         </View>
 
-        <Text style={styles.sectionTitle}>Contact No</Text>
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionTitle}>Contact No</Text>
+          <Text style={styles.requiredStar}>*</Text>
+        </View>
         <Animated.View style={{ transform: [{ translateX: contactShakeAnim }] }}>
           <TextInput
             style={[styles.contactInput, contactNoError !== null && styles.contactInputError]}
