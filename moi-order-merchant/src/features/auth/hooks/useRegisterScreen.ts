@@ -45,6 +45,7 @@ export function useRegisterScreen(): UseRegisterScreenResult {
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const startCooldown = useCallback((seconds: number) => {
+    if (cooldownRef.current) clearInterval(cooldownRef.current);
     setResendCooldown(seconds);
     cooldownRef.current = setInterval(() => {
       setResendCooldown((prev) => {

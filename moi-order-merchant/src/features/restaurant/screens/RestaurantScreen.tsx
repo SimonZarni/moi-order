@@ -111,11 +111,15 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
   const handleCoverCropDone = useCallback((croppedUri: string) => {
     if (coverCropSource === null) return;
     const croppedName = coverCropSource.name.replace(/\.[^.]+$/, '.jpg');
+    if (coverCropSource.uri.startsWith('blob:')) URL.revokeObjectURL(coverCropSource.uri);
     handleUploadCoverPhoto(croppedUri, croppedName, 'image/jpeg');
     setCoverCropSource(null);
   }, [coverCropSource, handleUploadCoverPhoto]);
 
-  const handleCoverCropCancel = useCallback(() => setCoverCropSource(null), []);
+  const handleCoverCropCancel = useCallback(() => {
+    if (coverCropSource?.uri.startsWith('blob:')) URL.revokeObjectURL(coverCropSource.uri);
+    setCoverCropSource(null);
+  }, [coverCropSource]);
 
   const handlePickLogo = useCallback(async () => {
     await pickAndConvert(handleUploadLogo, 'logo');

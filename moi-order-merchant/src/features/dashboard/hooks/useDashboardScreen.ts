@@ -83,8 +83,7 @@ export function useDashboardScreen(): UseDashboardScreenResult {
     mutationFn: ({ id, status }: { id: number; status: string }) =>
       updateOrderStatus(id, status),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS() });
-      void queryClient.invalidateQueries({ queryKey: PENDING_ORDERS_KEY });
+      void queryClient.invalidateQueries({ queryKey: ['orders'] });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ANALYTICS });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TOP_DATA(topPeriod) });
     },

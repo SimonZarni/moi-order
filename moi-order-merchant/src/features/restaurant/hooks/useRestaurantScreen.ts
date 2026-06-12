@@ -324,6 +324,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
       const fd = new FormData();
       if (Platform.OS === 'web') {
         const blob = await fetch(uri).then((r) => r.blob());
+        if (uri.startsWith('blob:')) URL.revokeObjectURL(uri);
         fd.append('photo', new File([blob], name, { type }));
       } else {
         fd.append('photo', { uri, name, type } as unknown as Blob);
@@ -339,6 +340,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
       const fd = new FormData();
       if (Platform.OS === 'web') {
         const blob = await fetch(uri).then((r) => r.blob());
+        if (uri.startsWith('blob:')) URL.revokeObjectURL(uri);
         fd.append('photo', new File([blob], name, { type }));
       } else {
         fd.append('photo', { uri, name, type } as unknown as Blob);
@@ -354,6 +356,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
       const fd = new FormData();
       if (Platform.OS === 'web') {
         const blob = await fetch(uri).then((r) => r.blob());
+        if (uri.startsWith('blob:')) URL.revokeObjectURL(uri);
         fd.append('photo', new File([blob], name, { type }));
       } else {
         fd.append('photo', { uri, name, type } as unknown as Blob);

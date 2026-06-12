@@ -144,6 +144,7 @@ async function buildItemFormData(form: AddItemForm): Promise<FormData> {
   if (form.photo !== null) {
     if (Platform.OS === 'web') {
       const blob = await fetch(form.photo.uri).then((r) => r.blob());
+      if (form.photo.uri.startsWith('blob:')) URL.revokeObjectURL(form.photo.uri);
       fd.append('photo', new File([blob], form.photo.name, { type: form.photo.type }));
     } else {
       fd.append('photo', { uri: form.photo.uri, name: form.photo.name, type: form.photo.type } as unknown as Blob);
