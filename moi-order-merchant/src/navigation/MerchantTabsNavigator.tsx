@@ -286,7 +286,6 @@ function WebMerchantLayout(): React.JSX.Element {
         return (
           <DashboardScreen
             onSelectOrder={handleSelectOrder}
-            onBellPress={() => handleNavigate('Notifications')}
           />
         );
       case 'Orders':
