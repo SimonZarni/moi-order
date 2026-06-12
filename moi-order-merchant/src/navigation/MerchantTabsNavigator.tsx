@@ -213,10 +213,7 @@ interface ParsedUrl {
   chatId:  number | null;
 }
 
-function parseUrlPath(): ParsedUrl {
-  if (typeof window === 'undefined') return { screen: 'Dashboard', orderId: null, chatId: null };
-  const path = window.location.pathname;
-
+function parseUrlPath(path: string = typeof window !== 'undefined' ? window.location.pathname : '/'): ParsedUrl {
   const chatMatch = path.match(/^\/orders\/(\d+)\/chat$/);
   if (chatMatch) {
     const id = Number(chatMatch[1]);
@@ -233,12 +230,19 @@ function parseUrlPath(): ParsedUrl {
   return { screen: found?.[0] ?? 'Dashboard', orderId: null, chatId: null };
 }
 
+// Snapshot the URL the moment this module loads — before NavigationContainer
+// initialises or any async auth effect can call history.replaceState.
+const _BOOT_URL: ParsedUrl =
+  Platform.OS === 'web' && typeof window !== 'undefined'
+    ? parseUrlPath(window.location.pathname)
+    : { screen: 'Dashboard', orderId: null, chatId: null };
+
 type SettingsSubView = 'list' | 'changePassword' | 'operatingHours';
 
 function WebMerchantLayout(): React.JSX.Element {
-  const [activeScreen, setActiveScreen]     = useState<WebScreen>(() => parseUrlPath().screen);
-  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(() => parseUrlPath().orderId);
-  const [chatOrderId, setChatOrderId]       = useState<number | null>(() => parseUrlPath().chatId);
+  const [activeScreen, setActiveScreen]     = useState<WebScreen>(_BOOT_URL.screen);
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(_BOOT_URL.orderId);
+  const [chatOrderId, setChatOrderId]       = useState<number | null>(_BOOT_URL.chatId);
   const [chatOrderNumber, setChatOrderNumber] = useState<string>('');
   const [sidebarOpen, setSidebarOpen]       = useState(false);
   const [settingsSubView, setSettingsSubView] = useState<SettingsSubView>('list');
