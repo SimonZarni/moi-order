@@ -7,27 +7,42 @@ const DISCOVERY = {
   tokenEndpoint: 'https://oauth2.googleapis.com/token',
 };
 
+function generateNonce(length = 16): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
 /**
- * Opens a Google OAuth popup, exchanges the authorization code for tokens via
- * PKCE, and returns the Google ID token.
+ * Opens a Google OAuth popup using response_type=id_token (OpenID implicit flow).
+ * Returns the Google ID token directly — no code exchange or client_secret required.
+ * The caller sends this ID token to /auth/google on the backend.
  *
- * The caller sends this ID token to the existing /auth/google backend endpoint —
- * no backend changes required.
+ * Why not PKCE + code flow: Google's token endpoint requires client_secret for the
+ * code exchange even when PKCE is used on web clients. client_secret cannot be
+ * embedded in a public frontend bundle, so the implicit id_token flow is the
+ * correct approach for browser-only SPAs.
  *
  * Prerequisites (Google Cloud Console > OAuth client):
- *   - Authorized redirect URI: http://localhost:<PORT>/ (dev) and https://<domain>/ (prod)
+ *   - Authorized JavaScript origins: https://<domain>
+ *   - Authorized redirect URIs: https://<domain>/
  *
  * Only call on web — native flows use @react-native-google-signin.
  */
 export async function signInWithGoogleWeb(clientId: string): Promise<string> {
   const redirectUri = AuthSession.makeRedirectUri();
+  const nonce = generateNonce();
 
   const request = new AuthSession.AuthRequest({
     clientId,
     scopes: ['openid', 'email', 'profile'],
     redirectUri,
-    usePKCE: true,
-    responseType: AuthSession.ResponseType.Code,
+    usePKCE: false,
+    responseType: AuthSession.ResponseType.IdToken,
+    extraParams: { nonce },
   });
 
   await request.makeAuthUrlAsync(DISCOVERY);
@@ -45,19 +60,9 @@ export async function signInWithGoogleWeb(clientId: string): Promise<string> {
     throw new Error(`Google sign-in failed: ${msg}`);
   }
 
-  const tokenResponse = await AuthSession.exchangeCodeAsync(
-    {
-      code: result.params.code,
-      clientId,
-      redirectUri,
-      extraParams: { code_verifier: request.codeVerifier ?? '' },
-    },
-    { tokenEndpoint: DISCOVERY.tokenEndpoint },
-  );
-
-  const idToken = tokenResponse.idToken;
+  const idToken = result.params.id_token;
   if (!idToken) {
-    throw new Error('Google did not return an ID token. Ensure openid is in the scopes.');
+    throw new Error('Google did not return an ID token.');
   }
 
   return idToken;
