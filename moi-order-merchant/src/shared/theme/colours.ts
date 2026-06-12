@@ -7,8 +7,8 @@ export const colours = {
   primaryGlow: '#22c55e1a',
 
   // ── Backgrounds ──────────────────────────────────────────────────────────
-  backgroundDark: '#0f1a14',
-  backgroundMid: '#1a2e20',
+  backgroundDark: '#0f3d25',
+  backgroundMid: '#1a5233',
   backgroundLight: '#f8faf8',
   surface: '#ffffff',
   surfaceMuted: '#f9fafb',
@@ -22,7 +22,7 @@ export const colours = {
 
   // ── Borders / dividers ────────────────────────────────────────────────────
   divider: '#e5e7eb',
-  dividerDark: '#1f3527',
+  dividerDark: '#1e5c3c',
 
   // ── Semantic ─────────────────────────────────────────────────────────────
   success: '#16a34a',
