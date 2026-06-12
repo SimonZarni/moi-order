@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Platform, View, Text, Pressable, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -159,35 +159,83 @@ function MobileNavigator(): React.JSX.Element {
 
 // ── Web ────────────────────────────────────────────────────────────────────────
 
-const VALID_SCREENS: ReadonlySet<WebScreen> = new Set<WebScreen>([
-  'Dashboard', 'Orders', 'Menu', 'Restaurant', 'Analytics',
-  'Notifications', 'BusinessProfile', 'Reviews', 'CancelledOrders',
-]);
+const SCREEN_TO_PATH: Record<WebScreen, string> = {
+  Dashboard:       '/',
+  Orders:          '/orders',
+  Menu:            '/menu',
+  Restaurant:      '/restaurant',
+  Analytics:       '/analytics',
+  Notifications:   '/notifications',
+  BusinessProfile: '/business-profile',
+  Reviews:         '/reviews',
+  CancelledOrders: '/orders/cancelled',
+};
 
-function readPersistedScreen(): WebScreen {
-  try {
-    const v = localStorage.getItem('merchant_screen') as WebScreen | null;
-    return v !== null && VALID_SCREENS.has(v) ? v : 'Dashboard';
-  } catch { return 'Dashboard'; }
+interface ParsedUrl {
+  screen:  WebScreen;
+  orderId: number | null;
+  chatId:  number | null;
 }
 
-function readPersistedOrderId(): number | null {
-  try {
-    const v = localStorage.getItem('merchant_order_id');
-    if (v === null) return null;
-    const n = Number(v);
-    return Number.isFinite(n) && n > 0 ? n : null;
-  } catch { return null; }
+function parseUrlPath(): ParsedUrl {
+  if (typeof window === 'undefined') return { screen: 'Dashboard', orderId: null, chatId: null };
+  const path = window.location.pathname;
+
+  const chatMatch = path.match(/^\/orders\/(\d+)\/chat$/);
+  if (chatMatch) {
+    const id = Number(chatMatch[1]);
+    return { screen: 'Orders', orderId: id, chatId: id };
+  }
+
+  const orderMatch = path.match(/^\/orders\/(\d+)$/);
+  if (orderMatch) {
+    return { screen: 'Orders', orderId: Number(orderMatch[1]), chatId: null };
+  }
+
+  const found = (Object.entries(SCREEN_TO_PATH) as [WebScreen, string][])
+    .find(([, p]) => p === path);
+  return { screen: found?.[0] ?? 'Dashboard', orderId: null, chatId: null };
 }
 
 function WebMerchantLayout(): React.JSX.Element {
-  const [activeScreen, setActiveScreen] = useState<WebScreen>(readPersistedScreen);
-  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(readPersistedOrderId);
-  const [chatOrderId, setChatOrderId] = useState<number | null>(null);
+  const [activeScreen, setActiveScreen]     = useState<WebScreen>(() => parseUrlPath().screen);
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(() => parseUrlPath().orderId);
+  const [chatOrderId, setChatOrderId]       = useState<number | null>(() => parseUrlPath().chatId);
   const [chatOrderNumber, setChatOrderNumber] = useState<string>('');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen]       = useState(false);
   const { isDesktop } = useResponsive();
   const logout = useAuthStore((s) => s.logout);
+
+  // Push URL when navigation state changes. Skips if already matches (no extra
+  // history entry on mount since initial state is derived from the current URL).
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let path: string;
+    if (chatOrderId !== null) {
+      path = `/orders/${chatOrderId}/chat`;
+    } else if (selectedOrderId !== null) {
+      path = `/orders/${selectedOrderId}`;
+    } else {
+      path = SCREEN_TO_PATH[activeScreen];
+    }
+    if (window.location.pathname !== path) {
+      window.history.pushState(null, '', path);
+    }
+  }, [activeScreen, selectedOrderId, chatOrderId]);
+
+  // Sync state when the user presses the browser back/forward button.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handlePop = () => {
+      const { screen, orderId, chatId } = parseUrlPath();
+      setActiveScreen(screen);
+      setSelectedOrderId(orderId);
+      setChatOrderId(chatId);
+      if (chatId === null) setChatOrderNumber('');
+    };
+    window.addEventListener('popstate', handlePop);
+    return () => window.removeEventListener('popstate', handlePop);
+  }, []);
 
   const handleNavigate = useCallback((screen: WebScreen) => {
     setActiveScreen(screen);
@@ -195,20 +243,16 @@ function WebMerchantLayout(): React.JSX.Element {
     setChatOrderId(null);
     setChatOrderNumber('');
     setSidebarOpen(false);
-    try { localStorage.setItem('merchant_screen', screen); } catch {}
-    try { localStorage.removeItem('merchant_order_id'); } catch {}
   }, []);
 
   const handleSelectOrder = useCallback((orderId: number) => {
     setSelectedOrderId(orderId);
     setChatOrderId(null);
     setChatOrderNumber('');
-    try { localStorage.setItem('merchant_order_id', String(orderId)); } catch {}
   }, []);
 
   const handleBackFromOrder = useCallback(() => {
     setSelectedOrderId(null);
-    try { localStorage.removeItem('merchant_order_id'); } catch {}
   }, []);
 
   const handleChatOpen = useCallback((orderId: number, orderNumber: string) => {
