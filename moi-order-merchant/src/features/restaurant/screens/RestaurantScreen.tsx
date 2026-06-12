@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import {
   View, Text, ScrollView, Pressable, TextInput, ActivityIndicator,
-  Image, Linking, Switch, Modal, Platform,
+  Image, Linking, Modal, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -49,7 +49,6 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
     handleUploadLogo, handleRemoveLogo,
     handleUploadGalleryPhoto, handleRemoveGalleryPhoto, handleMoveGalleryPhoto,
     handleEditDelivery, handleCancelDelivery, handleMinOrderChange, handleSaveDelivery,
-    handleToggleDelivery, handleTogglePickup,
     handleEditPhone, handleCancelPhone, handlePhoneChange, handleSavePhone,
     handleEditHours, handleCancelHours, handleClearHoursError, handleHourChange, handleHourToggle, handleSaveHours,
     hoursError,
@@ -462,44 +461,21 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
           </View>
         )}
 
-        {/* Delivery & Pickup */}
+        {/* Min Order */}
         {restaurant != null && (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>Delivery & Pickup</Text>
+              <Text style={styles.cardTitle}>Min Order</Text>
               {!isEditingDelivery && (
-                <Pressable style={styles.editDeliveryBtn} onPress={handleEditDelivery} accessibilityRole="button" accessibilityLabel="Edit min order">
+                <Pressable style={styles.editDeliveryBtn} onPress={handleEditDelivery} accessibilityRole="button" accessibilityLabel="Edit minimum order amount">
                   <Ionicons name="pencil-outline" size={12} color={colours.primary} />
                   <Text style={styles.editDeliveryBtnText}>Edit</Text>
                 </Pressable>
               )}
             </View>
             <View style={styles.cardBody}>
-              <View style={styles.toggleRow}>
-                <Text style={styles.toggleLabel}>Delivery</Text>
-                <Switch
-                  value={restaurant.is_delivery_available}
-                  onValueChange={handleToggleDelivery}
-                  trackColor={{ false: colours.surfaceMuted, true: colours.primary + '66' }}
-                  thumbColor={restaurant.is_delivery_available ? colours.primary : colours.medium}
-                  accessibilityLabel="Toggle delivery"
-                />
-              </View>
-              <View style={styles.divider} />
-              <View style={styles.toggleRow}>
-                <Text style={styles.toggleLabel}>Pickup</Text>
-                <Switch
-                  value={restaurant.is_pickup_available}
-                  onValueChange={handleTogglePickup}
-                  trackColor={{ false: colours.surfaceMuted, true: colours.primary + '66' }}
-                  thumbColor={restaurant.is_pickup_available ? colours.primary : colours.medium}
-                  accessibilityLabel="Toggle pickup"
-                />
-              </View>
-              <View style={styles.divider} />
               {isEditingDelivery ? (
                 <View style={styles.deliveryEditRow}>
-                  <Text style={styles.infoLabel}>Min Order</Text>
                   <View style={styles.deliveryEditInputWrap}>
                     <TextInput
                       style={styles.deliveryEditInput}

@@ -28,6 +28,7 @@ interface UseOrdersScreenResult {
   datePreset: DatePreset;
   searchQuery: string;
   totalVisible: number;
+  isActionsOpen: boolean;
   handleUpdateStatus: (orderId: number, newStatus: string) => void;
   handleStatusFilterChange: (filter: StatusFilter) => void;
   handleDatePreset: (preset: DatePreset) => void;
@@ -36,6 +37,8 @@ interface UseOrdersScreenResult {
   handleDateToday: () => void;
   handleSearchChange: (q: string) => void;
   handleExportCsv: () => void;
+  handleToggleActions: () => void;
+  handleCloseActions: () => void;
 }
 
 const NEW_STATUSES: ReadonlySet<OrderStatus> = new Set<OrderStatus>([
@@ -95,6 +98,7 @@ export function useOrdersScreen(): UseOrdersScreenResult {
   const [dateFrom, setDateFrom]         = useState<string | null>(null);
   const [dateTo, setDateTo]             = useState<string | null>(null);
   const [searchQuery, setSearchQuery]   = useState('');
+  const [isActionsOpen, setActionsOpen] = useState(false);
 
   // Build API params from current preset state
   const queryParams = useMemo(() => {
@@ -222,6 +226,9 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     setDateTo(null);
   }, []);
 
+  const handleToggleActions = useCallback(() => setActionsOpen((v) => !v), []);
+  const handleCloseActions  = useCallback(() => setActionsOpen(false), []);
+
   const handleExportCsv = useCallback(() => {
     if (Platform.OS !== 'web') return; // export is web-only
     const allOrders = sections.flatMap((s) => s.data);
@@ -254,6 +261,7 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     datePreset,
     searchQuery,
     totalVisible,
+    isActionsOpen,
     handleUpdateStatus,
     handleStatusFilterChange,
     handleDatePreset,
@@ -262,5 +270,7 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     handleDateToday,
     handleSearchChange,
     handleExportCsv,
+    handleToggleActions,
+    handleCloseActions,
   };
 }

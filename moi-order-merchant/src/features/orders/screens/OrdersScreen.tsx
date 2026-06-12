@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, Pressable, TextInput } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Skeleton } from '../../../shared/components/Skeleton';
@@ -51,10 +51,11 @@ export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenP
   const {
     sections, isLoading,
     statusFilter, dateFilter, dateFrom, dateTo, datePreset,
-    searchQuery, totalVisible,
+    searchQuery, totalVisible, isActionsOpen,
     handleUpdateStatus, handleStatusFilterChange,
     handleDatePreset, handleDatePrev, handleDateNext, handleDateToday,
     handleSearchChange, handleExportCsv,
+    handleToggleActions, handleCloseActions,
   } = useOrdersScreen();
 
   const isToday        = datePreset === 'today';
@@ -63,6 +64,15 @@ export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenP
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
+
+      {/* Full-screen backdrop — closes the actions dropdown on outside tap */}
+      {isActionsOpen && (
+        <Pressable
+          style={styles.menuBackdrop}
+          onPress={handleCloseActions}
+          accessibilityLabel="Close menu"
+        />
+      )}
 
       {/* ── Page header ─────────────────────────────────────────────────────── */}
       <View style={styles.pageHeader}>
@@ -80,25 +90,44 @@ export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenP
             </Pressable>
           )}
         </View>
-        <View style={styles.headerActions}>
+
+        {/* ⋮ overflow button + dropdown */}
+        <View style={styles.overflowWrapper}>
           <Pressable
-            style={styles.cancelledBtn}
-            onPress={onCancelledOrders}
+            style={styles.overflowBtn}
+            onPress={handleToggleActions}
             accessibilityRole="button"
-            accessibilityLabel="View cancelled orders"
+            accessibilityLabel="More actions"
           >
-            <Ionicons name="close-circle-outline" size={14} color={colours.error} />
-            <Text style={styles.cancelledBtnText}>Cancelled</Text>
+            <Ionicons name="ellipsis-vertical" size={18} color={colours.textMuted} />
           </Pressable>
-          <Pressable
-            style={styles.exportBtn}
-            onPress={handleExportCsv}
-            accessibilityRole="button"
-            accessibilityLabel="Export orders as CSV"
-          >
-            <Ionicons name="download-outline" size={14} color={colours.backgroundDark} />
-            <Text style={styles.exportBtnText}>Export CSV</Text>
-          </Pressable>
+          {isActionsOpen && (
+            <View style={styles.actionsDropdown}>
+              <Pressable
+                style={styles.dropdownItem}
+                onPress={() => { handleCloseActions(); onCancelledOrders?.(); }}
+                accessibilityRole="button"
+                accessibilityLabel="View cancelled orders"
+              >
+                <Ionicons name="close-circle-outline" size={15} color={colours.error} />
+                <Text style={[styles.dropdownItemText, { color: colours.error }]}>Cancelled Orders</Text>
+              </Pressable>
+              {Platform.OS === 'web' && (
+                <>
+                  <View style={styles.dropdownDivider} />
+                  <Pressable
+                    style={styles.dropdownItem}
+                    onPress={() => { handleCloseActions(); handleExportCsv(); }}
+                    accessibilityRole="button"
+                    accessibilityLabel="Export orders as CSV"
+                  >
+                    <Ionicons name="download-outline" size={15} color={colours.textOnLight} />
+                    <Text style={styles.dropdownItemText}>Export CSV</Text>
+                  </Pressable>
+                </>
+              )}
+            </View>
+          )}
         </View>
       </View>
 
