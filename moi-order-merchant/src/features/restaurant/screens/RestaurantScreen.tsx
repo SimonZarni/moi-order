@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import {
   View, Text, ScrollView, Pressable, TextInput, ActivityIndicator,
-  Image, Linking, Modal, Platform,
+  Image, Linking, Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +14,7 @@ import { formatPrice } from '../../../shared/utils/formatCurrency';
 import { RESTAURANT_STATUS, KYC_DOC_TYPE } from '../../../types/enums';
 import type { RestaurantStatus, KycDocType } from '../../../types/enums';
 import { MAX_GALLERY_PHOTOS } from '../../../shared/constants/config';
+import { normalizePickedImage } from '../../../shared/utils/imageUtils';
 
 const LINE_OA_URL = 'https://line.me/R/ti/p/%40moiorder';
 
@@ -65,22 +66,8 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
   ) => {
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'images', quality: 0.8 });
     if (result.canceled || !result.assets[0]) return;
-    const asset = result.assets[0];
-    let mimeType = asset.mimeType ?? 'image/jpeg';
-    let uri = asset.uri;
-    let fileName = asset.fileName ?? `${baseName}.${mimeType.split('/')[1] ?? 'jpg'}`;
-    if (Platform.OS === 'web' && (mimeType === 'image/heic' || mimeType === 'image/heif')) {
-      try {
-        const heic2any = (await import('heic2any')).default;
-        const srcBlob = await fetch(uri).then((r) => r.blob());
-        const converted = await heic2any({ blob: srcBlob, toType: 'image/jpeg', quality: 0.85 });
-        const jpegBlob = Array.isArray(converted) ? converted[0] : converted;
-        uri = URL.createObjectURL(jpegBlob);
-        mimeType = 'image/jpeg';
-        fileName = fileName.replace(/\.(heic|heif)$/i, '.jpg');
-      } catch { /* fall through with original file */ }
-    }
-    onPick(uri, fileName, mimeType);
+    const img = await normalizePickedImage(result.assets[0], baseName);
+    onPick(img.uri, img.name, img.type);
   }, []);
 
   const [coverCropSource, setCoverCropSource] = useState<{
@@ -91,21 +78,8 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'images', quality: 1 });
     if (result.canceled || !result.assets[0]) return;
     const asset = result.assets[0];
-    let uri = asset.uri;
-    let mimeType = asset.mimeType ?? 'image/jpeg';
-    let fileName = asset.fileName ?? `cover.${mimeType.split('/')[1] ?? 'jpg'}`;
-    if (Platform.OS === 'web' && (mimeType === 'image/heic' || mimeType === 'image/heif')) {
-      try {
-        const heic2any = (await import('heic2any')).default;
-        const srcBlob = await fetch(uri).then((r) => r.blob());
-        const converted = await heic2any({ blob: srcBlob, toType: 'image/jpeg', quality: 0.85 });
-        const jpegBlob = Array.isArray(converted) ? converted[0] : converted;
-        uri = URL.createObjectURL(jpegBlob);
-        mimeType = 'image/jpeg';
-        fileName = fileName.replace(/\.(heic|heif)$/i, '.jpg');
-      } catch { /* fall through with original */ }
-    }
-    setCoverCropSource({ uri, name: fileName, type: mimeType, width: asset.width ?? 1200, height: asset.height ?? 675 });
+    const img = await normalizePickedImage(asset, 'cover');
+    setCoverCropSource({ uri: img.uri, name: img.name, type: img.type, width: asset.width ?? 1200, height: asset.height ?? 675 });
   }, []);
 
   const handleCoverCropDone = useCallback((croppedUri: string) => {

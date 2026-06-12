@@ -8,7 +8,9 @@ import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { CACHE_TTL } from '../../../shared/constants/config';
 import type { Restaurant, MerchantUser } from '../../../types/models';
 import type { MerchantStackParamList } from '../../../types/navigation';
+import { Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { normalizePickedImage } from '../../../shared/utils/imageUtils';
 
 interface UseProfileScreenResult {
   restaurant: Restaurant | null;
@@ -53,18 +55,20 @@ export function useProfileScreen(): UseProfileScreenResult {
   const handleUploadPhoto = useCallback(
     async (field: 'cover_photo' | 'logo') => {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: 'images',
         allowsEditing: true,
         quality: 0.8,
       });
       if (result.canceled || !result.assets[0]) return;
-      const asset = result.assets[0];
+      const img = await normalizePickedImage(result.assets[0], field);
       const formData = new FormData();
-      formData.append('file', {
-        uri: asset.uri,
-        name: asset.uri.split('/').pop() ?? 'photo.jpg',
-        type: 'image/jpeg',
-      } as unknown as Blob);
+      if (Platform.OS === 'web') {
+        const blob = await fetch(img.uri).then((r) => r.blob());
+        if (img.uri.startsWith('blob:')) URL.revokeObjectURL(img.uri);
+        formData.append('file', new File([blob], img.name, { type: img.type }));
+      } else {
+        formData.append('file', { uri: img.uri, name: img.name, type: img.type } as unknown as Blob);
+      }
       await mutatePhoto({ field, form: formData });
     },
     [mutatePhoto],

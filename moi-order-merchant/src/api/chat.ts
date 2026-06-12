@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import type { OrderChatMessage } from '../types/models';
 import { apiClient } from './client';
 
@@ -16,11 +17,12 @@ export async function sendOrderChatMessage(
   const formData = new FormData();
   if (body !== null) formData.append('body', body);
   if (image !== null) {
-    formData.append('image', {
-      uri:  image.uri,
-      name: image.name,
-      type: image.type,
-    } as unknown as Blob);
+    if (Platform.OS === 'web') {
+      const blob = await fetch(image.uri).then((r) => r.blob());
+      formData.append('image', new File([blob], image.name, { type: image.type }));
+    } else {
+      formData.append('image', { uri: image.uri, name: image.name, type: image.type } as unknown as Blob);
+    }
   }
   const response = await apiClient.post<{ data: OrderChatMessage }>(
     `/orders/${orderId}/chat`,

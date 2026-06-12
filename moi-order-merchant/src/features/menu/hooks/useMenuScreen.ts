@@ -18,6 +18,7 @@ import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { CACHE_TTL } from '../../../shared/constants/config';
 import { DOMAIN_MESSAGES, MESSAGES } from '../../../shared/constants/messages';
 import { RESTAURANT_STATUS } from '../../../types/enums';
+import { normalizePickedImage } from '../../../shared/utils/imageUtils';
 import type { MenuCategory, MenuItem } from '../../../types/models';
 import type { MenuItemStatus, RestaurantStatus } from '../../../types/enums';
 
@@ -214,32 +215,13 @@ function makeOptionGroupHandlers(setForm: Dispatch<SetStateAction<AddItemForm>>)
   return { addOptionGroup, removeOptionGroup, changeOptionGroup, addOption, removeOption, changeOption };
 }
 
-// Shared photo picker — handles HEIC→JPEG conversion on web
 async function pickPhoto(): Promise<AddItemForm['photo'] | null> {
   const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'images', quality: 0.8 });
   if (result.canceled || result.assets.length === 0) return null;
   const asset = result.assets[0];
   if (!asset) return null;
-
-  let mimeType = asset.mimeType ?? 'image/jpeg';
-  let uri = asset.uri;
-  let fileName = asset.fileName ?? `item.${mimeType.split('/')[1] ?? 'jpg'}`;
-
-  // Chrome/Firefox cannot render or upload HEIC — convert to JPEG on web
-  if (Platform.OS === 'web' && (mimeType === 'image/heic' || mimeType === 'image/heif')) {
-    try {
-      const heic2any = (await import('heic2any')).default;
-      const srcBlob = await fetch(uri).then((r) => r.blob());
-      const converted = await heic2any({ blob: srcBlob, toType: 'image/jpeg', quality: 0.85 });
-      const jpegBlob = Array.isArray(converted) ? converted[0] : converted;
-      uri = URL.createObjectURL(jpegBlob);
-      mimeType = 'image/jpeg';
-      fileName = fileName.replace(/\.(heic|heif)$/i, '.jpg');
-    } catch {
-      // Safari handles HEIC natively — safe to proceed as-is if conversion fails
-    }
-  }
-  return { uri, name: fileName, type: mimeType };
+  const img = await normalizePickedImage(asset, 'item');
+  return { uri: img.uri, name: img.name, type: img.type };
 }
 
 export function useMenuScreen(): UseMenuScreenResult {

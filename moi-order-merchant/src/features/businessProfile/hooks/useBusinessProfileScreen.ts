@@ -8,6 +8,7 @@ import type { MerchantStackParamList } from '../../../types/navigation';
 import type { BusinessProfile } from '../../../types/models';
 import type { KycDocType } from '../../../types/enums';
 import type { ApiError } from '../../../api/client';
+import { normalizePickedImage } from '../../../shared/utils/imageUtils';
 
 export interface UseBusinessProfileScreenResult {
   profile: BusinessProfile | null;
@@ -55,22 +56,15 @@ export function useBusinessProfileScreen(): UseBusinessProfileScreenResult {
   const handleUploadDocument = useCallback(
     async (type: KycDocType) => {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: 'images',
         allowsEditing: false,
         quality: 0.85,
       });
       if (result.canceled || !result.assets[0]) return;
-      const asset = result.assets[0];
+      const img = await normalizePickedImage(result.assets[0], 'document');
       setUploadingDocType(type);
       try {
-        await uploadDocument.mutateAsync({
-          type,
-          file: {
-            uri: asset.uri,
-            name: asset.uri.split('/').pop() ?? 'document.jpg',
-            type: 'image/jpeg',
-          },
-        });
+        await uploadDocument.mutateAsync({ type, file: img });
       } finally {
         setUploadingDocType(null);
       }

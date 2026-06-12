@@ -8,6 +8,7 @@ import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { PUSHER_APP_KEY, PUSHER_APP_CLUSTER, BROADCAST_AUTH_URL } from '../../../shared/constants/config';
 import { useAuthStore } from '../../../store/authStore';
 import type { OrderChatMessage } from '../../../types/models';
+import { normalizePickedImage } from '../../../shared/utils/imageUtils';
 
 interface PusherChannel {
   bind(event: string, callback: (data: unknown) => void): void;
@@ -141,7 +142,11 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
 
   const handleTextChange  = useCallback((v: string) => setText(v), []);
   const handleRemoveImage = useCallback(
-    (index: number) => setSelectedImages((prev) => prev.filter((_, i) => i !== index)),
+    (index: number) => setSelectedImages((prev) => {
+      const img = prev[index];
+      if (img?.uri.startsWith('blob:')) URL.revokeObjectURL(img.uri);
+      return prev.filter((_, i) => i !== index);
+    }),
     [],
   );
 
@@ -167,6 +172,7 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
           await fn();
         }
         setText('');
+        selectedImages.forEach((img) => { if (img.uri.startsWith('blob:')) URL.revokeObjectURL(img.uri); });
         setSelectedImages([]);
       } catch {
         setSendError('Failed to send. Please try again.');
@@ -183,12 +189,10 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
       allowsMultipleSelection: true,
     });
     if (result.canceled || result.assets.length === 0) return;
-    const newImages = result.assets.map((asset) => {
-      const mime = (asset.mimeType ?? '').toLowerCase() || 'image/jpeg';
-      const ext  = mime.split('/')[1] ?? 'jpg';
-      return { uri: asset.uri, name: `chat.${ext}`, type: mime };
-    });
-    setSelectedImages((prev) => [...prev, ...newImages]);
+    const normalized = await Promise.all(
+      result.assets.map((asset, i) => normalizePickedImage(asset, `chat_${i}`)),
+    );
+    setSelectedImages((prev) => [...prev, ...normalized]);
   }, []);
 
   const takePhoto = useCallback(async () => {
@@ -204,9 +208,8 @@ export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
     if (result.canceled || result.assets.length === 0) return;
     const asset = result.assets[0];
     if (!asset) return;
-    const mime = (asset.mimeType ?? '').toLowerCase() || 'image/jpeg';
-    const ext  = mime.split('/')[1] ?? 'jpg';
-    setSelectedImages((prev) => [...prev, { uri: asset.uri, name: `chat.${ext}`, type: mime }]);
+    const img = await normalizePickedImage(asset, 'chat');
+    setSelectedImages((prev) => [...prev, img]);
   }, []);
 
   const handleAttachPress = useCallback(() => {
