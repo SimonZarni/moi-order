@@ -193,10 +193,10 @@ export function CheckoutScreen(): React.JSX.Element {
           style={[
             styles.placeBtn,
             paymentMethod === FOOD_PAYMENT_METHOD.LinePay && styles.placeBtnLine,
-            (isPlacing || selectedAddress === null) && styles.placeBtnDisabled,
+            (isPlacing || selectedAddress === null || contactNo.trim() === '') && styles.placeBtnDisabled,
           ]}
           onPress={handlePlaceOrder}
-          disabled={isPlacing || items.length === 0 || selectedAddress === null || contactNo.trim() === ''}
+          disabled={isPlacing || items.length === 0 || selectedAddress === null}
           accessibilityRole="button"
           accessibilityLabel="Place order"
         >
