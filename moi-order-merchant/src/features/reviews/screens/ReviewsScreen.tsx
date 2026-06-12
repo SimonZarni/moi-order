@@ -71,10 +71,12 @@ export function ReviewsScreen(): React.JSX.Element {
         </View>
       </View>
 
+      <View style={styles.filterRowOuter}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.filterRow}
+        style={styles.filterRowScroll}
       >
         {RATING_FILTERS.map(({ key, label }) => {
           const active = ratingFilter === key;
@@ -93,6 +95,7 @@ export function ReviewsScreen(): React.JSX.Element {
           );
         })}
       </ScrollView>
+      </View>
 
       {isLoading ? (
         <View style={styles.emptyWrap}>

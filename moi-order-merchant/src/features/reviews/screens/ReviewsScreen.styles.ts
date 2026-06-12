@@ -33,6 +33,12 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: colours.primaryDark,
   },
+  filterRowOuter: {
+    height: 44,
+  },
+  filterRowScroll: {
+    flexGrow: 0,
+  },
   filterRow: {
     flexDirection: 'row',
     alignItems: 'center',
