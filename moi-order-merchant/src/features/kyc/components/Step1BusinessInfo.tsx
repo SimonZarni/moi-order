@@ -3,7 +3,8 @@ import { View, Text, TextInput, Pressable, ActivityIndicator, ScrollView } from 
 import { styles } from './Step1BusinessInfo.styles';
 import { colours } from '../../../shared/theme/colours';
 
-const BUSINESS_TYPES = ['Restaurant', 'Cafe', 'Food Stall', 'Other'] as const;
+const PRESET_TYPES = ['Restaurant', 'Cafe', 'Food Stall'] as const;
+const BUSINESS_TYPES = [...PRESET_TYPES, 'Other'] as const;
 
 interface Step1Data {
   business_name: string;
@@ -23,19 +24,36 @@ export function Step1BusinessInfo({
   isLoading,
   onSubmit,
 }: Step1BusinessInfoProps): React.JSX.Element {
+  const isInitialPreset = (PRESET_TYPES as readonly string[]).includes(initialData.business_type);
+
   const [businessName, setBusinessName] = useState(initialData.business_name);
-  const [businessType, setBusinessType] = useState(initialData.business_type);
+  const [selectedChip, setSelectedChip] = useState<string>(
+    isInitialPreset ? initialData.business_type : 'Other',
+  );
+  const [otherTypeText, setOtherTypeText] = useState(
+    isInitialPreset ? '' : initialData.business_type,
+  );
   const [businessAddress, setBusinessAddress] = useState(initialData.business_address);
   const [businessPhone, setBusinessPhone] = useState(initialData.business_phone);
 
+  const isOtherSelected = selectedChip === 'Other';
+
+  const handleChipPress = useCallback((type: string) => {
+    setSelectedChip(type);
+    if (type !== 'Other') setOtherTypeText('');
+  }, []);
+
   const handleSubmit = useCallback(() => {
+    const businessType = isOtherSelected
+      ? (otherTypeText.trim() || 'Other')
+      : selectedChip;
     onSubmit({
       business_name: businessName.trim(),
       business_type: businessType,
       business_address: businessAddress.trim(),
       business_phone: businessPhone.trim(),
     });
-  }, [businessName, businessType, businessAddress, businessPhone, onSubmit]);
+  }, [businessName, selectedChip, isOtherSelected, otherTypeText, businessAddress, businessPhone, onSubmit]);
 
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
@@ -56,17 +74,27 @@ export function Step1BusinessInfo({
         {BUSINESS_TYPES.map((type) => (
           <Pressable
             key={type}
-            style={[styles.typeChip, businessType === type && styles.typeChipSelected]}
-            onPress={() => setBusinessType(type)}
+            style={[styles.typeChip, selectedChip === type && styles.typeChipSelected]}
+            onPress={() => handleChipPress(type)}
             accessibilityLabel={`Select business type: ${type}`}
             accessibilityRole="button"
           >
-            <Text style={[styles.typeChipText, businessType === type && styles.typeChipTextSelected]}>
+            <Text style={[styles.typeChipText, selectedChip === type && styles.typeChipTextSelected]}>
               {type}
             </Text>
           </Pressable>
         ))}
       </View>
+      {isOtherSelected && (
+        <TextInput
+          style={styles.input}
+          placeholder="Describe your business type"
+          placeholderTextColor="rgba(255,255,255,0.3)"
+          value={otherTypeText}
+          onChangeText={setOtherTypeText}
+          accessibilityLabel="Other business type description"
+        />
+      )}
 
       <Text style={styles.label}>Business Address</Text>
       <TextInput

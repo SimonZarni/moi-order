@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useKycWizard } from '../hooks/useKycWizard';
 import { Step1BusinessInfo } from '../components/Step1BusinessInfo';
 import { Step2Documents } from '../components/Step2Documents';
 import { Step3Confirmation } from '../components/Step3Confirmation';
 import { styles } from './KycWizardScreen.styles';
+import { colours } from '../../../shared/theme/colours';
 import { useAuthStore } from '../../../store/authStore';
 
 export function KycWizardScreen(): React.JSX.Element {
@@ -17,14 +19,25 @@ export function KycWizardScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
-      <View style={styles.stepIndicator}>
-        {([1, 2, 3] as const).map((step) => (
-          <View key={step} style={[styles.stepDot, currentStep >= step && styles.stepDotActive]}>
-            <Text style={[styles.stepDotText, currentStep >= step && styles.stepDotTextActive]}>
-              {step}
-            </Text>
-          </View>
-        ))}
+      <View style={styles.stepIndicatorRow}>
+        <View style={styles.stepIndicator}>
+          {([1, 2, 3] as const).map((step) => (
+            <View key={step} style={[styles.stepDot, currentStep >= step && styles.stepDotActive]}>
+              <Text style={[styles.stepDotText, currentStep >= step && styles.stepDotTextActive]}>
+                {step}
+              </Text>
+            </View>
+          ))}
+        </View>
+        <Pressable
+          style={styles.logoutBtn}
+          onPress={logout}
+          accessibilityLabel="Log out"
+          accessibilityRole="button"
+        >
+          <Ionicons name="log-out-outline" size={16} color={colours.textSubtle} />
+          <Text style={styles.logoutBtnText}>Log Out</Text>
+        </Pressable>
       </View>
 
       {error !== null && <Text style={styles.errorBanner}>{error}</Text>}
