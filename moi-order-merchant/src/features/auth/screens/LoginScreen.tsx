@@ -139,11 +139,7 @@ export function LoginScreen(): React.JSX.Element {
         <Text style={styles.secondaryBtnText}>Continue with Phone OTP</Text>
       </Pressable>
 
-      <Pressable onPress={handleGoToRegister} accessibilityLabel="Register as merchant" accessibilityRole="button">
-        <Text style={styles.footerLink}>
-          New merchant? <Text style={styles.footerLinkBold}>Create an account →</Text>
-        </Text>
-      </Pressable>
+      {/* Registration is invite-only — button hidden */}
     </>
   );
 
