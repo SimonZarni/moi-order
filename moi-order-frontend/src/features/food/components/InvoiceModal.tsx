@@ -28,10 +28,16 @@ function formatDate(iso: string): string {
 
 interface ItemLineProps { item: FoodOrderItem }
 function ItemLine({ item }: ItemLineProps): React.JSX.Element {
+  const modifiers = item.selected_options.map((o) => o.option_name).join(' · ');
   return (
     <View style={styles.itemRow}>
-      <Text style={[styles.itemName, styles.colName]} numberOfLines={2}>{item.name}</Text>
-      <Text style={[styles.itemQty,  styles.colQty]}>{item.quantity}</Text>
+      <View style={styles.colName}>
+        <Text style={styles.itemName}>{item.name}</Text>
+        {modifiers.length > 0 && (
+          <Text style={styles.itemModifiers}>{modifiers}</Text>
+        )}
+      </View>
+      <Text style={[styles.itemQty,   styles.colQty]}>{item.quantity}</Text>
       <Text style={[styles.itemPrice, styles.colPrice]}>{formatPrice(item.price_cents / 100)}</Text>
       <Text style={[styles.itemTotal, styles.colTotal]}>{formatPrice(item.subtotal_cents / 100)}</Text>
     </View>

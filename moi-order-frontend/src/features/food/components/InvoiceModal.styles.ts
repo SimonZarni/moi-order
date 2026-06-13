@@ -132,12 +132,16 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colours.divider,
     gap: spacing.xs,
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   itemName: {
-    flex: 1,
     fontSize: typography.xs,
     color: colours.textOnLight,
+  },
+  itemModifiers: {
+    fontSize: typography.xxs,
+    color: colours.textMuted,
+    marginTop: 2,
   },
   itemQty: {
     width: 28,
