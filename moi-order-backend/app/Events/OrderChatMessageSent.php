@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Events;
 
+use App\Contracts\FileStorageInterface;
 use App\Models\OrderChatMessage;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -32,13 +33,20 @@ class OrderChatMessageSent implements ShouldBroadcastNow
     /** @return array<string, mixed> */
     public function broadcastWith(): array
     {
+        // ShouldBroadcastNow fires synchronously in the same process, so I/O here is safe.
+        // Signed URL TTL matches OrderChatMessageResource (30 min).
+        $imageUrl = null;
+        if ($this->message->image_path !== null) {
+            $imageUrl = app(FileStorageInterface::class)->temporaryUrl($this->message->image_path, 1800);
+        }
+
         return [
             'id'          => $this->message->id,
             'sender_type' => $this->message->sender_type,
             'sender_id'   => $this->message->sender_id,
             'sender_name' => $this->message->sender_name,
             'body'        => $this->message->body,
-            'image_url'   => null,
+            'image_url'   => $imageUrl,
             'created_at'  => $this->message->created_at?->toIso8601String(),
         ];
     }

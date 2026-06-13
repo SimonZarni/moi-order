@@ -22,7 +22,6 @@ import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-const POLL_INTERVAL_MS = 3_000;
 
 const SENDER_LABEL: Record<OrderChatMessage['sender_type'], string> = {
   customer: 'Customer',
@@ -63,16 +62,12 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
       .finally(() => setLoading(false));
   }, [orderId]);
 
-  // Initial load + polling fallback
+  // Initial load on open
   useEffect(() => {
-    if (!open) return undefined;
-
+    if (!open) return;
     setLoading(true);
     setError(null);
     loadMessages();
-
-    const interval = setInterval(loadMessages, POLL_INTERVAL_MS);
-    return () => clearInterval(interval);
   }, [open, loadMessages]);
 
   // Real-time updates via Pusher private-order.{orderId}.

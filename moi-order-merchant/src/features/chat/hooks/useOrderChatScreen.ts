@@ -57,7 +57,6 @@ export function useOrderChatScreen(orderId: string): UseOrderChatScreenResult {
   const listRef = useRef<FlatList>(null);
 
   // Real-time chat updates via Pusher private-order.{orderId} channel.
-  // Reduces perceived latency vs 10-second polling for incoming messages.
   useEffect(() => {
     if (!token || !PUSHER_APP_KEY) return;
     let pusher: PusherInstance | null = null;
@@ -102,7 +101,7 @@ export function useOrderChatScreen(orderId: string): UseOrderChatScreenResult {
           },
         );
       });
-    } catch { /* pusher-js not installed or network error — polling continues */ }
+    } catch { /* pusher-js not installed or network error */ }
     return () => {
       try {
         pusher?.unsubscribe(`private-order.${orderId}`);
@@ -114,7 +113,6 @@ export function useOrderChatScreen(orderId: string): UseOrderChatScreenResult {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: QUERY_KEYS.ORDER_CHAT(orderId),
     queryFn: () => fetchOrderChat(orderId),
-    refetchInterval: 5_000,
     retry: 2,
   });
 

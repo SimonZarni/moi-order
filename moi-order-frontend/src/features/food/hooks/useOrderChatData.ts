@@ -30,12 +30,9 @@ export function useOrderChatData(orderId: string): UseOrderChatDataResult {
     queryKey: QUERY_KEYS.FOOD_ORDERS.CHAT(orderId),
     queryFn:  () => fetchOrderChat(orderId),
     enabled:  orderId.length > 0,
-    refetchInterval: 5_000,
   });
 
   // Real-time updates via Pusher private-order.{orderId} channel.
-  // Reduces perceived latency vs 5-second polling for incoming messages.
-  // Falls back to polling silently if Pusher is unavailable.
   useEffect(() => {
     if (!PUSHER_APP_KEY || !orderId) return;
 
@@ -78,7 +75,7 @@ export function useOrderChatData(orderId: string): UseOrderChatDataResult {
           },
         );
       });
-    } catch { /* pusher-js unavailable or network error — polling continues */ }
+    } catch { /* pusher-js unavailable or network error */ }
 
     return () => {
       try {
