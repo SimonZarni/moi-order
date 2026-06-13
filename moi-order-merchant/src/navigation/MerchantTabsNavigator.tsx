@@ -464,7 +464,6 @@ const webStyles = StyleSheet.create({
   },
   contentInner: {
     flex: 1,
-    maxWidth: 1280,
     alignSelf: 'stretch' as const,
   },
   backdrop: {
