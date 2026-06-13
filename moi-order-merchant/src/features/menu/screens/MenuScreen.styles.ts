@@ -180,9 +180,9 @@ export const styles = StyleSheet.create({
   gridWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    // stretch makes every gridItem in the same row grow to match the tallest,
-    // so all cards in a row share an identical height automatically.
-    alignItems: 'stretch',
+    // flex-start: each card keeps its own natural height so inline confirm/status
+    // bars expanding one card don't force its row neighbour to stretch and gap.
+    alignItems: 'flex-start',
   },
   // Each item gets an inline width={itemWidthPct} from MenuScreen; this
   // just adds uniform padding around each cell.
