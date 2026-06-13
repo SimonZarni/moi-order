@@ -131,7 +131,8 @@ function OrderDetailRoute(
   const { orderId } = route.params;
   const handleBack = useCallback(() => navigation.goBack(), [navigation]);
   const handleChatPress = useCallback(
-    (id: string, orderNum: string) => navigation.navigate('OrderChat', { orderId: id, orderNumber: orderNum }),
+    (id: string, orderNum: string, completedAt: string | null, orderStatus: string) =>
+      navigation.navigate('OrderChat', { orderId: id, orderNumber: orderNum, completedAt, orderStatus }),
     [navigation],
   );
   return <OrderDetailScreen orderId={orderId} onBack={handleBack} onChatPress={handleChatPress} />;
@@ -245,6 +246,8 @@ function WebMerchantLayout(): React.JSX.Element {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(_BOOT_URL.orderId);
   const [chatOrderId, setChatOrderId]       = useState<string | null>(_BOOT_URL.chatId);
   const [chatOrderNumber, setChatOrderNumber] = useState<string>('');
+  const [chatCompletedAt, setChatCompletedAt] = useState<string | null>(null);
+  const [chatOrderStatus, setChatOrderStatus] = useState<string>('');
   const [sidebarOpen, setSidebarOpen]       = useState(false);
   const [settingsSubView, setSettingsSubView] = useState<SettingsSubView>('list');
   const { isDesktop } = useResponsive();
@@ -302,14 +305,18 @@ function WebMerchantLayout(): React.JSX.Element {
     setSelectedOrderId(null);
   }, []);
 
-  const handleChatOpen = useCallback((orderId: string, orderNumber: string) => {
+  const handleChatOpen = useCallback((orderId: string, orderNumber: string, completedAt: string | null, orderStatus: string) => {
     setChatOrderId(orderId);
     setChatOrderNumber(orderNumber);
+    setChatCompletedAt(completedAt);
+    setChatOrderStatus(orderStatus);
   }, []);
 
   const handleChatClose = useCallback(() => {
     setChatOrderId(null);
     setChatOrderNumber('');
+    setChatCompletedAt(null);
+    setChatOrderStatus('');
   }, []);
 
   const sidebarActiveScreen: WebScreen =
@@ -317,7 +324,7 @@ function WebMerchantLayout(): React.JSX.Element {
 
   const renderContent = (): React.JSX.Element => {
     if (chatOrderId !== null) {
-      return <OrderChatContent orderId={chatOrderId} orderNumber={chatOrderNumber} onBack={handleChatClose} />;
+      return <OrderChatContent orderId={chatOrderId} orderNumber={chatOrderNumber} completedAt={chatCompletedAt} orderStatus={chatOrderStatus} onBack={handleChatClose} />;
     }
     if (selectedOrderId !== null) {
       return (

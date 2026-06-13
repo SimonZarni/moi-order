@@ -63,6 +63,15 @@ const PAYMENT_LABELS: Record<string, string> = {
   line_pay:   'LINE Pay',
 };
 
+function isChatWindowOpen(status: string, completedAt: string | null): boolean {
+  if (status === ORDER_STATUS.Cancelled || status === ORDER_STATUS.Expired) return false;
+  if (status === ORDER_STATUS.Completed) {
+    if (completedAt === null) return false;
+    return Date.now() - new Date(completedAt).getTime() < 3 * 60 * 60 * 1000;
+  }
+  return true;
+}
+
 const CANCEL_REASONS = [
   { value: 'closing_soon', label: 'Closing soon' },
   { value: 'sold_out',     label: 'Sold out' },
@@ -72,7 +81,7 @@ const CANCEL_REASONS = [
 interface OrderDetailScreenProps {
   orderId: string;
   onBack?: () => void;
-  onChatPress?: (orderId: string, orderNumber: string) => void;
+  onChatPress?: (orderId: string, orderNumber: string, completedAt: string | null, orderStatus: string) => void;
 }
 
 export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailScreenProps): React.JSX.Element {
@@ -114,7 +123,7 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
   const waitingNote = WAITING_NOTES[order.status];
   const canCancel = CANCELLABLE_STATUSES.has(order.status);
   const statusColour = STATUS_COLOURS[order.status] ?? colours.medium;
-  const canChat = order.status !== ORDER_STATUS.Cancelled && order.status !== ORDER_STATUS.Completed;
+  const canChat = isChatWindowOpen(order.status, order.completed_at);
 
   const handleCallCustomer = (): void => {
     if (order.user.phone !== null) {
@@ -125,9 +134,14 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
   const handleChatPress = (): void => {
     const orderNum = order.order_number ?? `#${orderId}`;
     if (onChatPress !== undefined) {
-      onChatPress(orderId, orderNum);
+      onChatPress(orderId, orderNum, order.completed_at, order.status);
     } else {
-      navigation.navigate('OrderChat', { orderId, orderNumber: orderNum });
+      navigation.navigate('OrderChat', {
+        orderId,
+        orderNumber: orderNum,
+        completedAt: order.completed_at,
+        orderStatus: order.status,
+      });
     }
   };
 

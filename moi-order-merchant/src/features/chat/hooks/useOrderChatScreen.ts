@@ -10,6 +10,7 @@ import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { PUSHER_APP_KEY, PUSHER_APP_CLUSTER } from '../../../shared/constants/config';
 import { useAuthStore } from '../../../store/authStore';
 import type { OrderChatMessage } from '../../../types/models';
+import { ORDER_STATUS } from '../../../types/enums';
 import { normalizePickedImage } from '../../../shared/utils/imageUtils';
 
 interface PusherChannel {
@@ -25,6 +26,15 @@ type PusherConstructorFn = new (key: string, options: object) => PusherInstance;
 
 export type SelectedImage = { uri: string; name: string; type: string };
 
+function computeIsChatLocked(orderStatus: string, completedAt: string | null): boolean {
+  if (orderStatus === ORDER_STATUS.Cancelled || orderStatus === ORDER_STATUS.Expired) return true;
+  if (orderStatus === ORDER_STATUS.Completed) {
+    if (completedAt === null) return true;
+    return Date.now() - new Date(completedAt).getTime() >= 3 * 60 * 60 * 1000;
+  }
+  return false;
+}
+
 interface UseOrderChatScreenResult {
   messages: OrderChatMessage[];
   isLoading: boolean;
@@ -37,6 +47,8 @@ interface UseOrderChatScreenResult {
   selectedImages: SelectedImage[];
   selectedPhoto: string | null;
   listRef: React.RefObject<FlatList | null>;
+  isChatLocked: boolean;
+  isCompletedButNotLocked: boolean;
   handleTextChange: (v: string) => void;
   handleSend: () => void;
   handleAttachPress: () => void;
@@ -45,7 +57,11 @@ interface UseOrderChatScreenResult {
   handlePhotoClose: () => void;
 }
 
-export function useOrderChatScreen(orderId: string): UseOrderChatScreenResult {
+export function useOrderChatScreen(
+  orderId: string,
+  orderStatus: string,
+  completedAt: string | null,
+): UseOrderChatScreenResult {
   const queryClient = useQueryClient();
   const token = useAuthStore((s) => s.token);
   const { bottom: bottomInset } = useSafeAreaInsets();
@@ -234,9 +250,13 @@ useEffect(() => {
   const handlePhotoPress = useCallback((uri: string) => setSelectedPhoto(uri), []);
   const handlePhotoClose = useCallback(() => setSelectedPhoto(null), []);
 
+  const isChatLocked = computeIsChatLocked(orderStatus, completedAt);
+  const isCompletedButNotLocked = orderStatus === ORDER_STATUS.Completed && !isChatLocked;
+
   return {
     messages, isLoading, isError, isNetworkError, sendError, text, isSending,
     inputBarPadding, selectedImages, selectedPhoto, listRef,
+    isChatLocked, isCompletedButNotLocked,
     handleTextChange, handleSend, handleAttachPress, handleRemoveImage,
     handlePhotoPress, handlePhotoClose,
   };

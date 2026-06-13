@@ -57,6 +57,7 @@ export const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   statusBadge: {
+    alignSelf: 'flex-start',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: radius.full,

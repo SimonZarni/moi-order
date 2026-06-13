@@ -81,18 +81,20 @@ function ImagePreviewItem({ img, index, onRemove }: ImagePreviewItemProps): Reac
 interface ContentProps {
   orderId: string;
   orderNumber?: string;
+  completedAt: string | null;
+  orderStatus: string;
   onBack: () => void;
 }
 
-export function OrderChatContent({ orderId, orderNumber, onBack }: ContentProps): React.JSX.Element {
+export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatus, onBack }: ContentProps): React.JSX.Element {
   const {
     messages, isLoading, isError, isNetworkError, sendError, text, isSending, inputBarPadding,
-    selectedImages, selectedPhoto, listRef,
+    selectedImages, selectedPhoto, listRef, isChatLocked, isCompletedButNotLocked,
     handleTextChange, handleSend, handleAttachPress, handleRemoveImage,
     handlePhotoPress, handlePhotoClose,
-  } = useOrderChatScreen(orderId);
+  } = useOrderChatScreen(orderId, orderStatus, completedAt);
 
-  const canSend = !isSending && (text.trim().length > 0 || selectedImages.length > 0);
+  const canSend = !isSending && !isChatLocked && (text.trim().length > 0 || selectedImages.length > 0);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -150,13 +152,13 @@ export function OrderChatContent({ orderId, orderNumber, onBack }: ContentProps)
           />
         )}
 
-        {sendError !== null && (
+        {sendError !== null && !isChatLocked && (
           <View style={styles.sendErrorBanner}>
             <Text style={styles.sendErrorText}>{sendError}</Text>
           </View>
         )}
 
-        {selectedImages.length > 0 && (
+        {selectedImages.length > 0 && !isChatLocked && (
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -169,38 +171,57 @@ export function OrderChatContent({ orderId, orderNumber, onBack }: ContentProps)
           </ScrollView>
         )}
 
-        <View style={[styles.inputBar, { paddingBottom: inputBarPadding }]}>
-          <Pressable
-            style={styles.attachBtn}
-            onPress={handleAttachPress}
-            accessibilityRole="button"
-            accessibilityLabel="Add photo"
-          >
-            <Ionicons name="image-outline" size={22} color={colours.primary} />
-          </Pressable>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Type a message…"
-            placeholderTextColor="rgba(255,255,255,0.3)"
-            value={text}
-            onChangeText={handleTextChange}
-            multiline
-            maxLength={2000}
-            accessibilityLabel="Message input"
-          />
-          <Pressable
-            style={[styles.sendBtn, !canSend && styles.sendBtnDisabled]}
-            onPress={handleSend}
-            disabled={!canSend}
-            accessibilityRole="button"
-            accessibilityLabel="Send message"
-          >
-            {isSending
-              ? <ActivityIndicator size="small" color={colours.white} />
-              : <Ionicons name="send" size={16} color={colours.white} />
-            }
-          </Pressable>
-        </View>
+        {isChatLocked ? (
+          <View style={styles.chatLockedBanner}>
+            <Ionicons name="lock-closed-outline" size={14} color={colours.error} />
+            <Text style={styles.chatLockedText}>
+              Chat has closed. Messages are deleted 3 hours after order completion.
+            </Text>
+          </View>
+        ) : (
+          <>
+            {isCompletedButNotLocked && (
+              <View style={styles.chatWarningBanner}>
+                <Ionicons name="time-outline" size={14} color={colours.warning} />
+                <Text style={styles.chatWarningText}>
+                  Chat will close 3 hours after order completion.
+                </Text>
+              </View>
+            )}
+            <View style={[styles.inputBar, { paddingBottom: inputBarPadding }]}>
+              <Pressable
+                style={styles.attachBtn}
+                onPress={handleAttachPress}
+                accessibilityRole="button"
+                accessibilityLabel="Add photo"
+              >
+                <Ionicons name="image-outline" size={22} color={colours.primary} />
+              </Pressable>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Type a message…"
+                placeholderTextColor="rgba(255,255,255,0.3)"
+                value={text}
+                onChangeText={handleTextChange}
+                multiline
+                maxLength={2000}
+                accessibilityLabel="Message input"
+              />
+              <Pressable
+                style={[styles.sendBtn, !canSend && styles.sendBtnDisabled]}
+                onPress={handleSend}
+                disabled={!canSend}
+                accessibilityRole="button"
+                accessibilityLabel="Send message"
+              >
+                {isSending
+                  ? <ActivityIndicator size="small" color={colours.white} />
+                  : <Ionicons name="send" size={16} color={colours.white} />
+                }
+              </Pressable>
+            </View>
+          </>
+        )}
       </KeyboardAvoidingView>
 
       <Modal visible={selectedPhoto !== null} transparent animationType="fade" onRequestClose={handlePhotoClose}>
@@ -222,6 +243,14 @@ export function OrderChatContent({ orderId, orderNumber, onBack }: ContentProps)
 export function OrderChatScreen(): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
   const route = useRoute<Route>();
-  const { orderId, orderNumber } = route.params;
-  return <OrderChatContent orderId={orderId} orderNumber={orderNumber} onBack={() => navigation.goBack()} />;
+  const { orderId, orderNumber, completedAt, orderStatus } = route.params;
+  return (
+    <OrderChatContent
+      orderId={orderId}
+      orderNumber={orderNumber}
+      completedAt={completedAt}
+      orderStatus={orderStatus}
+      onBack={() => navigation.goBack()}
+    />
+  );
 }
