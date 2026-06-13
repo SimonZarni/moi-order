@@ -42,7 +42,7 @@ interface UseOrderChatScreenResult {
   handlePhotoClose: () => void;
 }
 
-export function useOrderChatScreen(orderId: number): UseOrderChatScreenResult {
+export function useOrderChatScreen(orderId: string): UseOrderChatScreenResult {
   const queryClient = useQueryClient();
   const token = useAuthStore((s) => s.token);
   const { bottom: bottomInset } = useSafeAreaInsets();

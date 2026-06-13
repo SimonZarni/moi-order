@@ -28,7 +28,7 @@ function formatDateLabel(d: string | null, preset: DatePreset): string {
 
 interface CancelledOrdersScreenProps {
   onBack?: () => void;
-  onSelectOrder?: (orderId: number) => void;
+  onSelectOrder?: (orderId: string) => void;
 }
 
 export function CancelledOrdersScreen({ onBack, onSelectOrder }: CancelledOrdersScreenProps): React.JSX.Element {

@@ -64,9 +64,9 @@ const CANCEL_REASONS = [
 ];
 
 interface OrderDetailScreenProps {
-  orderId: number;
+  orderId: string;
   onBack?: () => void;
-  onChatPress?: (orderId: number, orderNumber: string) => void;
+  onChatPress?: (orderId: string, orderNumber: string) => void;
 }
 
 export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailScreenProps): React.JSX.Element {

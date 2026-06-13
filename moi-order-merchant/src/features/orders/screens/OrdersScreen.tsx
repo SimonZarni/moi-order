@@ -43,7 +43,7 @@ function formatDateLabel(d: string | null, from: string | null, to: string | nul
 }
 
 interface OrdersScreenProps {
-  onSelectOrder?: (orderId: number) => void;
+  onSelectOrder?: (orderId: string) => void;
   onCancelledOrders?: () => void;
 }
 

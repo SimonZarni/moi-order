@@ -20,13 +20,13 @@ export async function getOrders(
   return response.data;
 }
 
-export async function getOrder(id: number): Promise<FoodOrder> {
+export async function getOrder(id: string): Promise<FoodOrder> {
   const response = await apiClient.get<{ data: FoodOrder }>(`/orders/${id}`);
   return response.data.data;
 }
 
 export async function updateOrderStatus(
-  id: number,
+  id: string,
   status: string,
 ): Promise<FoodOrder> {
   const response = await apiClient.patch<{ data: FoodOrder }>(
@@ -42,7 +42,7 @@ export interface CancelOrderPayload {
 }
 
 export async function cancelOrderWithReason(
-  id: number,
+  id: string,
   payload: CancelOrderPayload,
 ): Promise<FoodOrder> {
   const response = await apiClient.patch<{ data: FoodOrder }>(

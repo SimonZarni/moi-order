@@ -55,7 +55,7 @@ const TAB_ICONS: Record<TabName, { focused: keyof typeof Ionicons.glyphMap; unfo
 function DashboardTab(): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
   const handleSelectOrder = useCallback(
-    (orderId: number) => navigation.navigate('OrderDetail', { orderId }),
+    (orderId: string) => navigation.navigate('OrderDetail', { orderId }),
     [navigation],
   );
   // On mobile, the bell doesn't render — the tab badge already shows count.
@@ -65,7 +65,7 @@ function DashboardTab(): React.JSX.Element {
 function OrdersTab(): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
   const handleSelectOrder = useCallback(
-    (orderId: number) => navigation.navigate('OrderDetail', { orderId }),
+    (orderId: string) => navigation.navigate('OrderDetail', { orderId }),
     [navigation],
   );
   const handleCancelledOrders = useCallback(
@@ -131,7 +131,7 @@ function OrderDetailRoute(
   const { orderId } = route.params;
   const handleBack = useCallback(() => navigation.goBack(), [navigation]);
   const handleChatPress = useCallback(
-    (id: number, orderNum: string) => navigation.navigate('OrderChat', { orderId: id, orderNumber: orderNum }),
+    (id: string, orderNum: string) => navigation.navigate('OrderChat', { orderId: id, orderNumber: orderNum }),
     [navigation],
   );
   return <OrderDetailScreen orderId={orderId} onBack={handleBack} onChatPress={handleChatPress} />;
@@ -142,7 +142,7 @@ function CancelledOrdersRoute(
 ): React.JSX.Element {
   const handleBack = useCallback(() => navigation.goBack(), [navigation]);
   const handleSelectOrder = useCallback(
-    (orderId: number) => navigation.navigate('OrderDetail', { orderId }),
+    (orderId: string) => navigation.navigate('OrderDetail', { orderId }),
     [navigation],
   );
   return <CancelledOrdersScreen onBack={handleBack} onSelectOrder={handleSelectOrder} />;
@@ -209,20 +209,21 @@ const SCREEN_TO_PATH: Record<WebScreen, string> = {
 
 interface ParsedUrl {
   screen:  WebScreen;
-  orderId: number | null;
-  chatId:  number | null;
+  orderId: string | null;
+  chatId:  string | null;
 }
 
+const UUID_RE = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
+
 function parseUrlPath(path: string = typeof window !== 'undefined' ? window.location.pathname : '/'): ParsedUrl {
-  const chatMatch = path.match(/^\/orders\/(\d+)\/chat$/);
+  const chatMatch = path.match(new RegExp(`^/orders/(${UUID_RE})/chat$`, 'i'));
   if (chatMatch) {
-    const id = Number(chatMatch[1]);
-    return { screen: 'Orders', orderId: id, chatId: id };
+    return { screen: 'Orders', orderId: chatMatch[1], chatId: chatMatch[1] };
   }
 
-  const orderMatch = path.match(/^\/orders\/(\d+)$/);
+  const orderMatch = path.match(new RegExp(`^/orders/(${UUID_RE})$`, 'i'));
   if (orderMatch) {
-    return { screen: 'Orders', orderId: Number(orderMatch[1]), chatId: null };
+    return { screen: 'Orders', orderId: orderMatch[1], chatId: null };
   }
 
   const found = (Object.entries(SCREEN_TO_PATH) as [WebScreen, string][])
@@ -241,8 +242,8 @@ type SettingsSubView = 'list' | 'changePassword' | 'operatingHours';
 
 function WebMerchantLayout(): React.JSX.Element {
   const [activeScreen, setActiveScreen]     = useState<WebScreen>(_BOOT_URL.screen);
-  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(_BOOT_URL.orderId);
-  const [chatOrderId, setChatOrderId]       = useState<number | null>(_BOOT_URL.chatId);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(_BOOT_URL.orderId);
+  const [chatOrderId, setChatOrderId]       = useState<string | null>(_BOOT_URL.chatId);
   const [chatOrderNumber, setChatOrderNumber] = useState<string>('');
   const [sidebarOpen, setSidebarOpen]       = useState(false);
   const [settingsSubView, setSettingsSubView] = useState<SettingsSubView>('list');
@@ -291,7 +292,7 @@ function WebMerchantLayout(): React.JSX.Element {
     setSettingsSubView('list');
   }, []);
 
-  const handleSelectOrder = useCallback((orderId: number) => {
+  const handleSelectOrder = useCallback((orderId: string) => {
     setSelectedOrderId(orderId);
     setChatOrderId(null);
     setChatOrderNumber('');
@@ -301,7 +302,7 @@ function WebMerchantLayout(): React.JSX.Element {
     setSelectedOrderId(null);
   }, []);
 
-  const handleChatOpen = useCallback((orderId: number, orderNumber: string) => {
+  const handleChatOpen = useCallback((orderId: string, orderNumber: string) => {
     setChatOrderId(orderId);
     setChatOrderNumber(orderNumber);
   }, []);

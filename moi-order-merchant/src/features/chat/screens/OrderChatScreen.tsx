@@ -80,7 +80,7 @@ function ImagePreviewItem({ img, index, onRemove }: ImagePreviewItemProps): Reac
 // ── Shared content (used by both mobile route and web prop variant) ───────────
 
 interface ContentProps {
-  orderId: number;
+  orderId: string;
   orderNumber?: string;
   onBack: () => void;
 }

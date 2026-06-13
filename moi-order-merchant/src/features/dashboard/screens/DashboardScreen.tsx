@@ -20,7 +20,7 @@ const TOP_PERIOD_TABS: { key: TopPeriod; label: string }[] = [
 ];
 
 interface DashboardScreenProps {
-  onSelectOrder?: (orderId: number) => void;
+  onSelectOrder?: (orderId: string) => void;
 }
 
 export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.JSX.Element {

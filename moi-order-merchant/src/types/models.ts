@@ -45,13 +45,13 @@ export interface FoodOrderItem {
 }
 
 export interface FoodOrderUser {
-  id: number;
+  id: string;
   name: string;
   phone: string | null;
 }
 
 export interface FoodOrder {
-  id: number;
+  id: string;
   order_number: string | null;
   status: OrderStatus;
   status_label: string;

@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import type { OrderChatMessage } from '../types/models';
 import { apiClient } from './client';
 
-export async function fetchOrderChat(orderId: number): Promise<OrderChatMessage[]> {
+export async function fetchOrderChat(orderId: string): Promise<OrderChatMessage[]> {
   const response = await apiClient.get<{ data: OrderChatMessage[] }>(
     `/orders/${orderId}/chat`,
   );
@@ -10,7 +10,7 @@ export async function fetchOrderChat(orderId: number): Promise<OrderChatMessage[
 }
 
 export async function sendOrderChatMessage(
-  orderId: number,
+  orderId: string,
   body: string | null,
   image: { uri: string; name: string; type: string } | null,
 ): Promise<OrderChatMessage> {

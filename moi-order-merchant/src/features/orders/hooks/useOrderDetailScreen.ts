@@ -21,7 +21,7 @@ interface UseOrderDetailScreenResult {
   handleCancelConfirm: () => void;
 }
 
-export function useOrderDetailScreen(orderId: number): UseOrderDetailScreenResult {
+export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResult {
   const queryClient = useQueryClient();
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
   const [cancelReason, setCancelReason] = useState('closing_soon');
