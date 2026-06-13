@@ -136,7 +136,13 @@ useEffect(() => {
     onSuccess: (newMsg) => {
       queryClient.setQueryData<OrderChatMessage[]>(
         QUERY_KEYS.ORDER_CHAT(orderId),
-        (prev) => [...(prev ?? []), newMsg],
+        (prev) => {
+          const existing = prev ?? [];
+          // Pusher may have already inserted this message before the HTTP response
+          // arrived — skip the append to avoid duplicates regardless of race order.
+          if (existing.some((m) => m.id === newMsg.id)) return existing;
+          return [...existing, newMsg];
+        },
       );
     },
   });
