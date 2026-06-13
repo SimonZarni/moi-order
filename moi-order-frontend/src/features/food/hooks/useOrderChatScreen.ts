@@ -79,6 +79,12 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
     };
   }, []);
 
+  // Scroll to bottom whenever message count changes (initial load + Pusher updates).
+  useEffect(() => {
+    if (messages.length === 0) return;
+    listRef.current?.scrollToEnd({ animated: false });
+  }, [messages.length]);
+
   // Collapse safe-area gap when keyboard is visible (keyboard fills that space)
   const inputBarPadding = keyboardVisible ? 8 : Math.max(bottomInset, 8) + 8;
 

@@ -118,6 +118,12 @@ export function useOrderChatScreen(orderId: string): UseOrderChatScreenResult {
 
   const messages = data ?? [];
 
+  // Scroll to bottom whenever message count changes (initial load + Pusher updates).
+  useEffect(() => {
+    if (messages.length === 0) return;
+    listRef.current?.scrollToEnd({ animated: false });
+  }, [messages.length]);
+
   useEffect(() => {
     const show = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
     const hide = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));

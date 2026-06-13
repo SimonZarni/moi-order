@@ -4,7 +4,6 @@ import {
   Modal, Platform, Pressable, ScrollView, Text, TextInput, View,
 } from 'react-native';
 
-const KEYBOARD_BEHAVIOR = Platform.OS === 'ios' ? 'padding' : 'height';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -112,7 +111,7 @@ export function OrderChatContent({ orderId, orderNumber, onBack }: ContentProps)
         </View>
       </View>
 
-      <KeyboardAvoidingView behavior={KEYBOARD_BEHAVIOR} style={styles.body}>
+      <KeyboardAvoidingView behavior="padding" enabled={Platform.OS === 'ios'} style={styles.body}>
         {isLoading ? (
           <Pressable style={styles.loaderWrap} onPress={Keyboard.dismiss}>
             <ActivityIndicator color={colours.primary} />
@@ -144,6 +143,7 @@ export function OrderChatContent({ orderId, orderNumber, onBack }: ContentProps)
             style={styles.list}
             contentContainerStyle={styles.listContent}
             onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
+            onLayout={() => messages.length > 0 && listRef.current?.scrollToEnd({ animated: false })}
             accessibilityRole="list"
             showsVerticalScrollIndicator={false}
             keyboardDismissMode="on-drag"

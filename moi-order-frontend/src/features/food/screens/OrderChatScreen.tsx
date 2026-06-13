@@ -15,7 +15,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const KEYBOARD_BEHAVIOR = Platform.OS === 'ios' ? 'padding' : 'height';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { OrderChatMessage } from '@/types/models';
@@ -104,7 +103,7 @@ export function OrderChatScreen(): React.JSX.Element {
         </View>
       </View>
 
-      <KeyboardAvoidingView behavior={KEYBOARD_BEHAVIOR} style={styles.body}>
+      <KeyboardAvoidingView behavior="padding" enabled={Platform.OS === 'ios'} style={styles.body}>
         <View style={styles.noticeBanner}>
           <Ionicons name="information-circle-outline" size={14} color={colours.textMuted} />
           <Text style={styles.noticeText}>
@@ -134,6 +133,7 @@ export function OrderChatScreen(): React.JSX.Element {
             style={styles.list}
             contentContainerStyle={styles.listContent}
             onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
+            onLayout={() => messages.length > 0 && listRef.current?.scrollToEnd({ animated: false })}
             accessibilityRole="list"
             showsVerticalScrollIndicator={false}
             keyboardDismissMode="on-drag"

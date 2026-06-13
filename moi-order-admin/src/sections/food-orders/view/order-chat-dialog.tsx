@@ -125,13 +125,16 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
   }, [open, orderId]);
 
   // Scroll to bottom on every messages change.
-  // requestAnimationFrame defers until after the browser has painted the new
-  // message nodes — reliable even when the Dialog animation is still running.
+  // Double rAF: first frame lets React commit the new nodes; second frame lets
+  // the browser paint them (and the MUI Dialog animation settle) so scrollHeight
+  // is accurate before we set scrollTop.
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
     requestAnimationFrame(() => {
-      container.scrollTop = container.scrollHeight;
+      requestAnimationFrame(() => {
+        container.scrollTop = container.scrollHeight;
+      });
     });
   }, [messages]);
 
