@@ -110,8 +110,13 @@ export function OrderChatSection({ order }: Props): React.JSX.Element {
   }, [text, selectedImages, isSending, mutateAsync, order.id]);
 
   const pickFromLibrary = useCallback(async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Please allow photo library access to attach images.');
+      return;
+    }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: 'images',
       quality: 0.8,
       allowsMultipleSelection: true,
     });
@@ -131,7 +136,7 @@ export function OrderChatSection({ order }: Props): React.JSX.Element {
       return;
     }
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: 'images',
       quality: 0.8,
     });
     if (result.canceled || result.assets.length === 0) return;
