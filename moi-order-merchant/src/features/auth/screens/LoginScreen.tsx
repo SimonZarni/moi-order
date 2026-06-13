@@ -13,10 +13,10 @@ const LOGO = require('../../../../assets/moi-order-icon.png') as number;
 
 export function LoginScreen(): React.JSX.Element {
   const {
-    email, password, isLoading,
+    email, password, showPassword, passwordInputRef, isLoading,
     isGoogleLoading, isAppleLoading, isLineLoading, appleAvailable,
     error,
-    setEmail, setPassword,
+    setEmail, setPassword, handleTogglePassword,
     handleSubmit, handleGoogleSignIn, handleAppleSignIn, handleLineSignIn,
     handleGoToOtp, handleGoToRegister,
   } = useLoginScreen();
@@ -45,21 +45,40 @@ export function LoginScreen(): React.JSX.Element {
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
+          returnKeyType="next"
+          onSubmitEditing={() => passwordInputRef.current?.focus()}
           accessibilityLabel="Email address"
         />
       </View>
 
       <View style={styles.field}>
         <Text style={styles.fieldLabel}>PASSWORD</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="••••••••"
-          placeholderTextColor={colours.textSubtle}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          accessibilityLabel="Password"
-        />
+        <View style={styles.inputWrap}>
+          <TextInput
+            ref={passwordInputRef}
+            style={styles.inputField}
+            placeholder="••••••••"
+            placeholderTextColor={colours.textSubtle}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            returnKeyType="go"
+            onSubmitEditing={() => { void handleSubmit(); }}
+            accessibilityLabel="Password"
+          />
+          <Pressable
+            onPress={handleTogglePassword}
+            style={styles.eyeBtn}
+            accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+            accessibilityRole="button"
+          >
+            <Ionicons
+              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+              size={20}
+              color={colours.textSubtle}
+            />
+          </Pressable>
+        </View>
       </View>
 
       <Pressable

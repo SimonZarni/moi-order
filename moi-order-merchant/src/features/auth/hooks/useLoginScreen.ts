@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
-import { Platform } from 'react-native';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { Platform, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as AppleAuthentication from 'expo-apple-authentication';
@@ -31,6 +31,8 @@ import {
 interface UseLoginScreenResult {
   email: string;
   password: string;
+  showPassword: boolean;
+  passwordInputRef: React.RefObject<TextInput | null>;
   isLoading: boolean;
   isGoogleLoading: boolean;
   isAppleLoading: boolean;
@@ -39,6 +41,7 @@ interface UseLoginScreenResult {
   error: string | null;
   setEmail: (v: string) => void;
   setPassword: (v: string) => void;
+  handleTogglePassword: () => void;
   handleSubmit: () => Promise<void>;
   handleGoogleSignIn: () => Promise<void>;
   handleAppleSignIn: () => Promise<void>;
@@ -63,7 +66,9 @@ export function useLoginScreen(): UseLoginScreenResult {
 
   const [email, setEmail]             = useState('');
   const [password, setPassword]       = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading]     = useState(false);
+  const passwordInputRef = useRef<TextInput>(null);
   const [isGoogleLoading, setGoogleL] = useState(false);
   const [isAppleLoading, setAppleL]   = useState(false);
   const [isLineLoading, setLineL]     = useState(false);
@@ -80,6 +85,8 @@ export function useLoginScreen(): UseLoginScreenResult {
       AppleAuthentication.isAvailableAsync().then(setAppleAv).catch(() => {});
     }
   }, []);
+
+  const handleTogglePassword = useCallback(() => setShowPassword((v) => !v), []);
 
   const handleSubmit = useCallback(async () => {
     if (!email.trim() || !password) return;
@@ -194,6 +201,8 @@ export function useLoginScreen(): UseLoginScreenResult {
   return {
     email,
     password,
+    showPassword,
+    passwordInputRef,
     isLoading,
     isGoogleLoading,
     isAppleLoading,
@@ -202,6 +211,7 @@ export function useLoginScreen(): UseLoginScreenResult {
     error,
     setEmail,
     setPassword,
+    handleTogglePassword,
     handleSubmit,
     handleGoogleSignIn,
     handleAppleSignIn,
