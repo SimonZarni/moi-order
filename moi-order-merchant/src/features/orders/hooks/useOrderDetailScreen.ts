@@ -4,14 +4,7 @@ import { getOrder, updateOrderStatus, cancelOrderWithReason, CancelOrderPayload 
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { CACHE_TTL, GC_TIME, PUSHER_APP_KEY, PUSHER_APP_CLUSTER, BROADCAST_AUTH_URL } from '../../../shared/constants/config';
 import { useAuthStore } from '../../../store/authStore';
-import { ORDER_STATUS } from '../../../types/enums';
 import type { FoodOrder } from '../../../types/models';
-
-const TERMINAL_STATUSES = new Set([
-  ORDER_STATUS.Completed,
-  ORDER_STATUS.Cancelled,
-  ORDER_STATUS.Expired,
-]);
 
 // ── Pusher type shims (avoids hard dep on @types/pusher-js) ──────────────────
 
@@ -58,14 +51,6 @@ export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResul
     staleTime: CACHE_TTL.ORDERS,
     gcTime: GC_TIME.DEFAULT,
     retry: 0,
-    // Poll every 5 s until the order reaches a terminal state so the merchant
-    // sees payment confirmation and status changes without refreshing.
-    // Pusher (private-order.{id}) will supersede this once the server is deployed.
-    refetchInterval: (query) => {
-      const status = query.state.data?.status;
-      if (status === undefined || TERMINAL_STATUSES.has(status)) return false;
-      return 5_000;
-    },
   });
 
   // Real-time status updates via private-order.{orderId} channel.
