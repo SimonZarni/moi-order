@@ -142,8 +142,8 @@ export function OrderChatContent({ orderId, orderNumber, onBack }: ContentProps)
             renderItem={({ item }) => <MessageBubble msg={item} onPhotoPress={handlePhotoPress} />}
             style={styles.list}
             contentContainerStyle={styles.listContent}
-            onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
-            onLayout={() => messages.length > 0 && listRef.current?.scrollToEnd({ animated: false })}
+            onContentSizeChange={() => requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: false }))}
+            onLayout={() => messages.length > 0 && requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: false }))}
             accessibilityRole="list"
             showsVerticalScrollIndicator={false}
             keyboardDismissMode="on-drag"
