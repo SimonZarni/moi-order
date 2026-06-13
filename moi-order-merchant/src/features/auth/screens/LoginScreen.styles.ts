@@ -45,7 +45,7 @@ export const styles = StyleSheet.create({
   fieldLabel: { fontSize: typography.xxs, fontWeight: '700', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1 },
   input: { backgroundColor: colours.backgroundDark, borderWidth: 1, borderColor: colours.dividerDark, borderRadius: radius.lg, paddingHorizontal: spacing.md, paddingVertical: spacing.sm + 4, fontSize: typography.md, color: colours.textOnDark, minHeight: 52 },
   inputWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: colours.backgroundDark, borderWidth: 1, borderColor: colours.dividerDark, borderRadius: radius.lg, paddingHorizontal: spacing.md, minHeight: 52 },
-  inputField: { flex: 1, paddingVertical: spacing.sm + 4, fontSize: typography.md, color: colours.textOnDark },
+  inputField: { flex: 1, paddingVertical: spacing.sm + 4, fontSize: typography.md, color: colours.textOnDark, backgroundColor: 'transparent', outlineWidth: 0 },
   eyeBtn: { paddingLeft: spacing.sm, paddingVertical: spacing.xs, minWidth: 36, alignItems: 'center' },
   inputGroup: { gap: spacing.xs, marginBottom: spacing.md },
   inputLabel: { fontSize: typography.xs, fontWeight: '700', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 0.8 },
