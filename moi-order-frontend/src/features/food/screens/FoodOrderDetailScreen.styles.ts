@@ -128,6 +128,32 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.white,
   },
+  // Preparation time card (shown during PreparingFood)
+  prepTimeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colours.card,
+    borderRadius: radius.xl,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    borderWidth: 1,
+    borderColor: colours.primary + '33',
+  },
+  prepTimeTextCol: {
+    flex: 1,
+    gap: 2,
+  },
+  prepTimeMinutes: {
+    fontSize: typography.md,
+    fontWeight: '800',
+    color: colours.primary,
+  },
+  prepTimeSub: {
+    fontSize: typography.xs,
+    color: colours.medium,
+  },
+
   // Cancel order
   cancelBtn: {
     flexDirection: 'row',

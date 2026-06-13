@@ -61,6 +61,7 @@ export interface FoodOrder {
   delivery_address: string | null;
   customer_notes: string | null;
   contact_no: string | null;
+  preparation_time_minutes: number | null;
   items: FoodOrderItem[];
   confirmed_at: string | null;
   payment_confirmed_at: string | null;

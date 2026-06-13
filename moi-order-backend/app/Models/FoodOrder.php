@@ -23,6 +23,7 @@ class FoodOrder extends Model
         'subtotal_cents', 'total_cents', 'delivery_address',
         'delivery_lat', 'delivery_lng', 'customer_notes', 'contact_no',
         'idempotency_key', 'prompt_pay_url',
+        'preparation_time_minutes',
         'confirmed_at', 'payment_confirmed_at', 'preparing_at',
         'picked_up_at', 'delivered_at', 'completed_at', 'cancelled_at',
         'cancel_reason', 'cancel_description',
@@ -45,7 +46,8 @@ class FoodOrder extends Model
             'delivered_at'         => 'datetime',
             'completed_at'         => 'datetime',
             'cancelled_at'         => 'datetime',
-            'rating'               => 'integer',
+            'preparation_time_minutes' => 'integer',
+            'rating'                   => 'integer',
         ];
     }
 

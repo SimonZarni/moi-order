@@ -95,6 +95,11 @@ class MerchantOrderController extends Controller
                 $request->validated('cancel_reason'),
                 $request->validated('cancel_description'),
             );
+        } elseif ($newStatus === FoodOrderStatus::PreparingFood) {
+            $order = $this->orderService->startPreparing(
+                $order,
+                (int) $request->validated('preparation_time_minutes'),
+            );
         } else {
             $order = $this->orderService->updateStatus($order, $newStatus);
         }

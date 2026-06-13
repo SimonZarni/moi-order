@@ -446,6 +446,7 @@ export interface FoodOrder {
   prompt_pay_url: string | null;
   can_show_prompt_pay: boolean;
   can_cancel: boolean;
+  preparation_time_minutes: number | null;
   items?: FoodOrderItem[];
   rating: number | null;
   customer_review: string | null;

@@ -28,10 +28,14 @@ export async function getOrder(id: string): Promise<FoodOrder> {
 export async function updateOrderStatus(
   id: string,
   status: string,
+  preparationTimeMinutes?: number,
 ): Promise<FoodOrder> {
   const response = await apiClient.patch<{ data: FoodOrder }>(
     `/orders/${id}/status`,
-    { status },
+    {
+      status,
+      ...(preparationTimeMinutes !== undefined ? { preparation_time_minutes: preparationTimeMinutes } : {}),
+    },
   );
   return response.data.data;
 }

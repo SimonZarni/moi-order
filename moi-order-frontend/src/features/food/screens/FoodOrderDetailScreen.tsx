@@ -96,6 +96,16 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
           />
         )}
 
+        {order.status === FOOD_ORDER_STATUS.PreparingFood && order.preparation_time_minutes !== null && (
+          <View style={styles.prepTimeCard}>
+            <Ionicons name="time-outline" size={18} color={colours.primary} />
+            <View style={styles.prepTimeTextCol}>
+              <Text style={styles.prepTimeMinutes}>~{order.preparation_time_minutes} min</Text>
+              <Text style={styles.prepTimeSub}>Estimated preparation time</Text>
+            </View>
+          </View>
+        )}
+
         <Text style={styles.sectionTitle}>Items</Text>
         <View style={styles.card}>
           {(order.items ?? []).map((item: FoodOrderItem) => (

@@ -140,6 +140,81 @@ export const styles = StyleSheet.create({
   },
   infoNoteText: { flex: 1, fontSize: typography.sm, color: colours.warning, fontWeight: '500' },
 
+  // ── Prep time card ────────────────────────────────────────────────────────────
+  prepTimeCard: {
+    backgroundColor: colours.surface,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    padding: spacing.md,
+    gap: spacing.md,
+    maxWidth: 480,
+    alignSelf: 'center',
+    width: '100%',
+  },
+  prepTimeLabel: {
+    fontSize: typography.xxs,
+    fontWeight: '700',
+    color: colours.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    textAlign: 'center',
+  },
+  prepTimeStepper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.md,
+  },
+  prepTimeBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.full,
+    backgroundColor: colours.surfaceMuted,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  prepTimeBtnText: {
+    fontSize: typography.xl,
+    fontWeight: '300',
+    color: colours.textOnLight,
+    lineHeight: 28,
+  },
+  prepTimeValue: {
+    fontSize: typography.xl,
+    fontWeight: '800',
+    color: colours.textOnLight,
+    minWidth: 90,
+    textAlign: 'center',
+  },
+  prepTimePresets: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.sm,
+  },
+  prepTimePreset: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: radius.full,
+    borderWidth: 1.5,
+    borderColor: colours.divider,
+    backgroundColor: colours.surfaceMuted,
+  },
+  prepTimePresetActive: {
+    borderColor: colours.primary,
+    backgroundColor: colours.primaryBg,
+  },
+  prepTimePresetText: {
+    fontSize: typography.sm,
+    fontWeight: '600',
+    color: colours.textMuted,
+  },
+  prepTimePresetTextActive: {
+    color: colours.primary,
+  },
+
   // ── Cancel modal (keep dark) ──────────────────────────────────────────────────
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'flex-end' },
   modalCard: {

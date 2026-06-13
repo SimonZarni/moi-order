@@ -3,7 +3,18 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getOrder, updateOrderStatus, cancelOrderWithReason, CancelOrderPayload } from '../../../api/orders';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { CACHE_TTL, GC_TIME } from '../../../shared/constants/config';
+import { ORDER_STATUS } from '../../../types/enums';
 import type { FoodOrder } from '../../../types/models';
+
+const PREP_TIME_MIN = 5;
+const PREP_TIME_MAX = 180;
+const PREP_TIME_STEP = 5;
+const PREP_TIME_DEFAULT = 15;
+
+interface StatusMutationPayload {
+  status: string;
+  preparationTimeMinutes?: number;
+}
 
 interface UseOrderDetailScreenResult {
   order: FoodOrder | undefined;
@@ -13,12 +24,16 @@ interface UseOrderDetailScreenResult {
   cancelModalVisible: boolean;
   cancelReason: string;
   cancelDescription: string;
+  preparationTimeMinutes: number;
   handleUpdateStatus: (newStatus: string) => void;
   handleCancelPress: () => void;
   handleCancelModalClose: () => void;
   handleCancelReasonChange: (v: string) => void;
   handleCancelDescriptionChange: (v: string) => void;
   handleCancelConfirm: () => void;
+  handlePreparationTimeDecrease: () => void;
+  handlePreparationTimeIncrease: () => void;
+  handlePreparationTimePreset: (val: number) => void;
 }
 
 export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResult {
@@ -26,6 +41,7 @@ export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResul
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
   const [cancelReason, setCancelReason] = useState('closing_soon');
   const [cancelDescription, setCancelDescription] = useState('');
+  const [preparationTimeMinutes, setPreparationTimeMinutes] = useState(PREP_TIME_DEFAULT);
 
   const { data: order, isLoading, isError } = useQuery({
     queryKey: QUERY_KEYS.ORDER_DETAIL(orderId),
@@ -41,7 +57,8 @@ export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResul
   }, [queryClient]);
 
   const { mutate, isPending: isUpdating } = useMutation({
-    mutationFn: (status: string) => updateOrderStatus(orderId, status),
+    mutationFn: ({ status, preparationTimeMinutes: prepTime }: StatusMutationPayload) =>
+      updateOrderStatus(orderId, status, prepTime),
     onSuccess: (updated) => {
       queryClient.setQueryData(QUERY_KEYS.ORDER_DETAIL(orderId), updated);
       invalidate();
@@ -58,8 +75,11 @@ export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResul
   });
 
   const handleUpdateStatus = useCallback(
-    (newStatus: string) => mutate(newStatus),
-    [mutate],
+    (newStatus: string) => mutate({
+      status: newStatus,
+      preparationTimeMinutes: newStatus === ORDER_STATUS.PreparingFood ? preparationTimeMinutes : undefined,
+    }),
+    [mutate, preparationTimeMinutes],
   );
 
   const handleCancelPress = useCallback(() => {
@@ -79,6 +99,18 @@ export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResul
     });
   }, [mutateCancel, cancelReason, cancelDescription]);
 
+  const handlePreparationTimeDecrease = useCallback(() => {
+    setPreparationTimeMinutes((prev) => Math.max(PREP_TIME_MIN, prev - PREP_TIME_STEP));
+  }, []);
+
+  const handlePreparationTimeIncrease = useCallback(() => {
+    setPreparationTimeMinutes((prev) => Math.min(PREP_TIME_MAX, prev + PREP_TIME_STEP));
+  }, []);
+
+  const handlePreparationTimePreset = useCallback((val: number) => {
+    setPreparationTimeMinutes(val);
+  }, []);
+
   return {
     order,
     isLoading,
@@ -87,11 +119,15 @@ export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResul
     cancelModalVisible,
     cancelReason,
     cancelDescription,
+    preparationTimeMinutes,
     handleUpdateStatus,
     handleCancelPress,
     handleCancelModalClose,
     handleCancelReasonChange,
     handleCancelDescriptionChange,
     handleCancelConfirm,
+    handlePreparationTimeDecrease,
+    handlePreparationTimeIncrease,
+    handlePreparationTimePreset,
   };
 }

@@ -41,7 +41,8 @@ class FoodOrderResource extends JsonResource
             'contact_no'             => $this->contact_no,
             'prompt_pay_url'         => $this->prompt_pay_url,
             'can_show_prompt_pay'    => $this->canShowPromptPay(),
-            'can_cancel'             => $this->status === FoodOrderStatus::OrderPlaced,
+            'preparation_time_minutes' => $this->preparation_time_minutes,
+            'can_cancel'               => $this->status === FoodOrderStatus::OrderPlaced,
             'user'                   => $this->whenLoaded('user', fn () => [
                 'id'    => $this->user->uuid,
                 'name'  => $this->user->name,

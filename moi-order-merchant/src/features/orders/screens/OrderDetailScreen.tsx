@@ -81,8 +81,10 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
   const {
     order, isLoading, isError, isUpdating,
     cancelModalVisible, cancelReason, cancelDescription,
+    preparationTimeMinutes,
     handleUpdateStatus, handleCancelPress, handleCancelModalClose,
     handleCancelReasonChange, handleCancelDescriptionChange, handleCancelConfirm,
+    handlePreparationTimeDecrease, handlePreparationTimeIncrease, handlePreparationTimePreset,
   } = useOrderDetailScreen(orderId);
 
   if (isLoading) {
@@ -215,6 +217,12 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
               <Text style={styles.label}>Placed</Text>
               <Text style={styles.value}>{formatDateTime(order.created_at)}</Text>
             </View>
+            {order.preparation_time_minutes !== null && (
+              <View style={styles.row}>
+                <Text style={styles.label}>Prep Time</Text>
+                <Text style={styles.value}>{order.preparation_time_minutes} min</Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -266,6 +274,46 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
             <Ionicons name="chatbubbles-outline" size={16} color={colours.primary} />
             <Text style={styles.chatButtonText}>Chat with Customer</Text>
           </Pressable>
+        )}
+
+        {nextStatus === ORDER_STATUS.PreparingFood && (
+          <View style={styles.prepTimeCard}>
+            <Text style={styles.prepTimeLabel}>How long will this order take?</Text>
+            <View style={styles.prepTimeStepper}>
+              <Pressable
+                style={styles.prepTimeBtn}
+                onPress={handlePreparationTimeDecrease}
+                accessibilityRole="button"
+                accessibilityLabel="Decrease preparation time"
+              >
+                <Text style={styles.prepTimeBtnText}>−</Text>
+              </Pressable>
+              <Text style={styles.prepTimeValue}>{preparationTimeMinutes} min</Text>
+              <Pressable
+                style={styles.prepTimeBtn}
+                onPress={handlePreparationTimeIncrease}
+                accessibilityRole="button"
+                accessibilityLabel="Increase preparation time"
+              >
+                <Text style={styles.prepTimeBtnText}>+</Text>
+              </Pressable>
+            </View>
+            <View style={styles.prepTimePresets}>
+              {([15, 20, 30, 45] as const).map((preset) => (
+                <Pressable
+                  key={preset}
+                  style={[styles.prepTimePreset, preparationTimeMinutes === preset && styles.prepTimePresetActive]}
+                  onPress={() => handlePreparationTimePreset(preset)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Set ${preset} minutes`}
+                >
+                  <Text style={[styles.prepTimePresetText, preparationTimeMinutes === preset && styles.prepTimePresetTextActive]}>
+                    {preset}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
         )}
 
         {nextStatus !== undefined && actionLabel !== undefined && (
