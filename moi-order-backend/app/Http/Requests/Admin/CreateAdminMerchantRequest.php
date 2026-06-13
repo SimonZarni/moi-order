@@ -26,7 +26,7 @@ class CreateAdminMerchantRequest extends FormRequest
         return [
             'name'                            => ['required', 'string', 'max:255'],
             'email'                           => ['required', 'string', 'email:rfc,dns', 'max:255', (new Unique('users', 'email'))->withoutTrashed()],
-            'password'                        => ['required', 'string', 'min:8', 'max:255'],
+            'password'                        => ['required', 'string', 'max:255', Password::min(8)->mixedCase()->numbers()],
             'business_name'                   => ['required', 'string', 'max:255'],
             'business_type'                   => ['required', 'string', 'max:100'],
             'business_address'                => ['required', 'string', 'max:1000'],
@@ -49,6 +49,8 @@ class CreateAdminMerchantRequest extends FormRequest
             'email.unique'                             => 'This email address is already registered.',
             'password.required'                        => 'Password is required.',
             'password.min'                             => 'Password must be at least 8 characters.',
+            'password.mixed'                           => 'Password must contain at least one uppercase and one lowercase letter.',
+            'password.numbers'                         => 'Password must contain at least one number.',
             'business_name.required'                   => 'Business name is required.',
             'business_type.required'                   => 'Business type is required.',
             'business_address.required'                => 'Business address is required.',
