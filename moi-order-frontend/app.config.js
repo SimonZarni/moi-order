@@ -66,11 +66,6 @@ module.exports = {
       url: "https://u.expo.dev/299e73b6-58b0-43d0-9a56-c7a212af98e5",
     },
     assetBundlePatterns: ["assets/**/*"],
-    splash: {
-      image: "./assets/splash-icon.png",
-      resizeMode: "contain",
-      backgroundColor: "#063B21",
-    },
     ios: {
       supportsTablet: true,
       infoPlist: {
@@ -120,6 +115,22 @@ module.exports = {
     },
     plugins: [
       withAbiSplits,
+      [
+        "expo-splash-screen",
+        {
+          backgroundColor: "#063B21",
+          image: "./assets/splash-icon.png",
+          resizeMode: "contain",
+          // iOS: keep the original 200dp default — native splash is seamlessly covered by AnimatedSplash
+          // Android: 400dp forces the logo to fill the full screen width (matching AnimatedSplash's LOGO_SIZE = SCREEN_W)
+          android: {
+            imageWidth: 400,
+          },
+          dark: {
+            backgroundColor: "#063B21",
+          },
+        },
+      ],
       "expo-apple-authentication",
       "expo-updates",
       "expo-secure-store",

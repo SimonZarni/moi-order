@@ -393,13 +393,21 @@ export default function App(): React.JSX.Element {
   const canHide = initDone && timerDone && fontsDone;
   const onSplashHidden = useCallback(() => setSplashGone(true), []);
   const onSplashReady = useCallback(() => {
+    if (Platform.OS === 'android') return; // native splash already hidden by platform useEffect
     if (nativeSplashHidden) return;
     setNativeSplashHidden(true);
     SplashScreen.hideAsync().catch(() => {});
   }, [nativeSplashHidden]);
 
-  // iOS: hide native splash immediately — AnimatedSplash covers with same background.
-  // Android: wait until canHide (min 1.5 s) so splashscreen_logo shows long enough.
+  // Android: hide the native splash immediately after first render — AnimatedSplash
+  // (zIndex 9999, same #063B21 background) owns the full launch experience.
+  // iOS: hide only when AnimatedSplash is painted (via onSplashReady) for a seamless crossfade.
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
