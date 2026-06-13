@@ -59,6 +59,14 @@ Route::prefix('merchant/v1')->middleware(['auth:sanctum', 'abilities:merchant', 
     base_path('routes/api/merchant_v1.php')
 );
 
+// Customer WebSocket channel auth — Pusher/Reverb calls this to verify private-channel subscriptions.
+// Endpoint: POST /api/v1/broadcasting/auth
+// See routes/channels.php for per-channel authorization logic.
+Broadcast::routes([
+    'prefix'     => 'api/v1',
+    'middleware' => ['auth:sanctum', 'abilities:user', 'user.not_suspended'],
+]);
+
 // Merchant WebSocket channel auth — Pusher/Reverb calls this to verify private-channel subscriptions.
 // Endpoint: POST /api/merchant/v1/broadcasting/auth
 // See routes/channels.php for per-channel authorization logic.
