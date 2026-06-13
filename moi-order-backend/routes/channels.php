@@ -45,8 +45,9 @@ Broadcast::channel('merchant.{merchantId}', function ($user, int $merchantId): b
         && (int) $user->id === $merchantId;
 });
 
-// Order chat — customer who owns the order, merchant who received the order, or any authenticated admin.
-Broadcast::channel('order.{foodOrderId}', function ($user, int $foodOrderId): bool {
+// Order chat + status updates — customer who owns the order, merchant who received it, or any admin.
+// Channel name uses the order UUID (not integer PK) so it matches HasUuid::getRouteKeyName().
+Broadcast::channel('order.{foodOrderUuid}', function ($user, string $foodOrderUuid): bool {
     // Admin token carries the 'admin' ability.
     if ($user->currentAccessToken()?->can('admin')) {
         return true;
@@ -55,10 +56,10 @@ Broadcast::channel('order.{foodOrderId}', function ($user, int $foodOrderId): bo
     // Merchant: must own the restaurant that received this order.
     if ($user->currentAccessToken()?->can('merchant')) {
         return $user->restaurant()
-            ->whereHas('foodOrders', fn ($q) => $q->where('id', $foodOrderId))
+            ->whereHas('foodOrders', fn ($q) => $q->where('uuid', $foodOrderUuid))
             ->exists();
     }
 
     // Customer: must own the order.
-    return FoodOrder::forUser($user->id)->where('id', $foodOrderId)->exists();
+    return FoodOrder::forUser($user->id)->where('uuid', $foodOrderUuid)->exists();
 });
