@@ -53,7 +53,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       set({
         language: parsed.language ?? 'en',
         theme: parsed.theme ?? 'light',
-        menuView: parsed.menuView ?? 'grid',
+        menuView: 'grid', // toggle hidden — always grid regardless of stored value
       });
     } catch {}
   },
