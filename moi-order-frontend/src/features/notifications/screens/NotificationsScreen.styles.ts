@@ -39,7 +39,7 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.textOnDark,
     letterSpacing: -0.3,
-    lineHeight: 28,
+    lineHeight: 60,
   },
 
   // ── Body ──────────────────────────────────────────────────────────────────
