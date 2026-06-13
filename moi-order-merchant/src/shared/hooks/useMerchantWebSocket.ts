@@ -57,6 +57,11 @@ interface NotificationCreatedPayload {
   order_id: number | null;
 }
 
+interface OrderStatusUpdatedPayload {
+  order_uuid: string;
+  status: string;
+}
+
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useMerchantWebSocket(): void {
@@ -80,6 +85,16 @@ export function useMerchantWebSocket(): void {
     (_data: NotificationCreatedPayload) => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.LIST });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT });
+    },
+    [queryClient],
+  );
+
+  // FoodOrderStatusUpdated now also broadcasts on the merchant channel so the order
+  // detail screen updates without a separate per-order Pusher connection.
+  const handleOrderStatusUpdated = useCallback(
+    (data: OrderStatusUpdatedPayload) => {
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDER_DETAIL(data.order_uuid) });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS() });
     },
     [queryClient],
   );
@@ -129,6 +144,9 @@ export function useMerchantWebSocket(): void {
       channel.bind('notification.created', (data: unknown) => {
         handleNotificationCreated(data as NotificationCreatedPayload);
       });
+      channel.bind('food-order.status-updated', (data: unknown) => {
+        handleOrderStatusUpdated(data as OrderStatusUpdatedPayload);
+      });
 
       pusherRef.current  = pusher;
       channelRef.current = channel;
@@ -145,7 +163,7 @@ export function useMerchantWebSocket(): void {
       pusherRef.current  = null;
       channelRef.current = null;
     };
-  }, [token, userId, handleNewOrder, handleNotificationCreated]);
+  }, [token, userId, handleNewOrder, handleNotificationCreated, handleOrderStatusUpdated]);
 }
 
 /** Strips the path suffix to get the API origin for the auth endpoint. */

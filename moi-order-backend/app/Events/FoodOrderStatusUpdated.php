@@ -27,8 +27,10 @@ class FoodOrderStatusUpdated implements ShouldBroadcast
         return [
             // Customer's private channel — mobile app listens for status updates.
             new PrivateChannel('user.' . $this->order->user->uuid),
-            // Order-scoped channel — merchant order detail screen listens for live updates.
+            // Order-scoped channel — order detail (chat, etc.) listens here.
             new PrivateChannel('order.' . $this->order->uuid),
+            // Merchant's dashboard channel — reuses the global connection; no extra Pusher instance needed.
+            new PrivateChannel('merchant.' . $this->order->restaurant->user_id),
         ];
     }
 
@@ -41,10 +43,11 @@ class FoodOrderStatusUpdated implements ShouldBroadcast
     public function broadcastWith(): array
     {
         return [
-            'order_id'           => $this->order->id,
-            'status'             => $this->order->status->value,
-            'status_label'       => $this->order->status->label(),
-            'prompt_pay_url'     => $this->order->prompt_pay_url,
+            'order_id'            => $this->order->id,
+            'order_uuid'          => $this->order->uuid,
+            'status'              => $this->order->status->value,
+            'status_label'        => $this->order->status->label(),
+            'prompt_pay_url'      => $this->order->prompt_pay_url,
             'can_show_prompt_pay' => $this->order->canShowPromptPay(),
         ];
     }
