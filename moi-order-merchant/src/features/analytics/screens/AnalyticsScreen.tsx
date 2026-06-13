@@ -8,20 +8,22 @@ import { StatCard } from '../components/StatCard';
 import { styles } from './AnalyticsScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 import type { AnalyticsPeriod } from '../../../types/models';
 
-const PERIOD_LABELS: Record<AnalyticsPeriod, string> = {
-  all:   'All',
-  today: 'Today',
-  week:  'Week',
-  month: 'Month',
-};
-
 export function AnalyticsScreen(): React.JSX.Element {
+  const t = useTranslation();
   const {
     period, analytics, chartData, isLoading, isChartLoading,
     handlePeriodChange,
   } = useAnalyticsScreen();
+
+  const PERIOD_LABELS: Record<AnalyticsPeriod, string> = {
+    all:   t('analytics_all'),
+    today: t('analytics_today'),
+    week:  t('analytics_week'),
+    month: t('analytics_month'),
+  };
 
   if (isLoading) {
     return (
@@ -44,26 +46,26 @@ export function AnalyticsScreen(): React.JSX.Element {
   const kpiCards = ((): React.JSX.Element => {
     if (period === 'today') return (
       <View style={styles.kpiRow}>
-        <StatCard label="Revenue" value={formatPrice(today?.revenue_cents ?? 0)}
-          sub={`${today?.order_count ?? 0} orders`} accent={colours.primary} highlight />
+        <StatCard label={t('analytics_revenue')} value={formatPrice(today?.revenue_cents ?? 0)}
+          sub={`${today?.order_count ?? 0} ${t('common_orders')}`} accent={colours.primary} highlight />
         {pending > 0 && (
-          <StatCard label="Pending Now" value={String(pending)}
-            sub="need attention" accent={colours.warning} />
+          <StatCard label={t('analytics_pending_now')} value={String(pending)}
+            sub={t('analytics_need_attention')} accent={colours.warning} />
         )}
       </View>
     );
     if (period === 'week') return (
       <View style={styles.kpiRow}>
-        <StatCard label="Week Revenue" value={formatPrice(week?.revenue_cents ?? 0)}
-          sub={`${week?.order_count ?? 0} orders`} accent={colours.primary} highlight />
+        <StatCard label={t('analytics_week_revenue')} value={formatPrice(week?.revenue_cents ?? 0)}
+          sub={`${week?.order_count ?? 0} ${t('common_orders')}`} accent={colours.primary} highlight />
       </View>
     );
     if (period === 'month') return (
       <View style={styles.kpiRow}>
-        <StatCard label="Month Revenue" value={formatPrice(month?.revenue_cents ?? 0)}
-          sub={`${month?.order_count ?? 0} orders`} accent={colours.primary} highlight />
-        <StatCard label="Avg Order Value" value={formatPrice(avgOrderCents)}
-          sub="this month" accent={colours.success} />
+        <StatCard label={t('analytics_month_revenue')} value={formatPrice(month?.revenue_cents ?? 0)}
+          sub={`${month?.order_count ?? 0} ${t('common_orders')}`} accent={colours.primary} highlight />
+        <StatCard label={t('analytics_avg_order_value')} value={formatPrice(avgOrderCents)}
+          sub={t('analytics_this_month')} accent={colours.success} />
       </View>
     );
     // 'all' — show all three + pending
@@ -80,10 +82,10 @@ export function AnalyticsScreen(): React.JSX.Element {
     return (
       <>
         <View style={styles.kpiRow}>
-          <StatCard label="Today's Revenue" value={formatPrice(today?.revenue_cents ?? 0)} sub={`${today?.order_count ?? 0} orders`} accent={colours.primary} />
-          <StatCard label="This Month"      value={formatPrice(month?.revenue_cents ?? 0)} sub={`${month?.order_count ?? 0} orders`} accent={colours.primary} highlight />
-          <StatCard label="Avg Order Value" value={formatPrice(avgOrderCents)} sub="this month" accent={colours.success} />
-          {pending > 0 && <StatCard label="Pending Now" value={String(pending)} sub="need attention" accent={colours.warning} />}
+          <StatCard label={t('dashboard_today_revenue')} value={formatPrice(today?.revenue_cents ?? 0)} sub={`${today?.order_count ?? 0} ${t('common_orders')}`} accent={colours.primary} />
+          <StatCard label={t('analytics_this_month')} value={formatPrice(month?.revenue_cents ?? 0)} sub={`${month?.order_count ?? 0} ${t('common_orders')}`} accent={colours.primary} highlight />
+          <StatCard label={t('analytics_avg_order_value')} value={formatPrice(avgOrderCents)} sub={t('analytics_this_month')} accent={colours.success} />
+          {pending > 0 && <StatCard label={t('analytics_pending_now')} value={String(pending)} sub={t('analytics_need_attention')} accent={colours.warning} />}
         </View>
         <View style={styles.chartCard}>
           <View style={styles.chartHeader}>

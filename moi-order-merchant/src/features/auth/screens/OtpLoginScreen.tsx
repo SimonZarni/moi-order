@@ -6,6 +6,7 @@ import { useOtpLoginScreen } from '../hooks/useOtpLoginScreen';
 import { styles } from './OtpLoginScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { OTP_PIN_LENGTH } from '../../../shared/constants/config';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 
 const LOGO = require('../../../../assets/moi-order-icon.png') as number;
 
@@ -16,6 +17,7 @@ export function OtpLoginScreen(): React.JSX.Element {
     handleRequestOtp, handleVerifyOtp,
   } = useOtpLoginScreen();
 
+  const t = useTranslation();
   const { width } = useWindowDimensions();
   const isMobileWeb = Platform.OS === 'web' && width < 768;
 
@@ -31,7 +33,7 @@ export function OtpLoginScreen(): React.JSX.Element {
       {step === 'phone' && (
         <>
           <View style={styles.field}>
-            <Text style={styles.fieldLabel}>PHONE NUMBER</Text>
+            <Text style={styles.fieldLabel}>{t('otp_phone_label')}</Text>
             <TextInput
               style={styles.input}
               placeholder=""
@@ -49,7 +51,7 @@ export function OtpLoginScreen(): React.JSX.Element {
             accessibilityLabel="Send OTP"
             accessibilityRole="button"
           >
-            {isLoading ? <ActivityIndicator color={colours.backgroundDark} /> : <Text style={styles.primaryBtnText}>Send OTP Code</Text>}
+            {isLoading ? <ActivityIndicator color={colours.backgroundDark} /> : <Text style={styles.primaryBtnText}>{t('otp_send_code')}</Text>}
           </Pressable>
         </>
       )}
@@ -58,10 +60,10 @@ export function OtpLoginScreen(): React.JSX.Element {
         <>
           <View style={styles.otpInfo}>
             <Ionicons name="checkmark-circle" size={16} color={colours.primary} />
-            <Text style={styles.otpInfoText}>Code sent to <Text style={{ fontWeight: '700', color: colours.textOnDark }}>{phoneNumber}</Text></Text>
+            <Text style={styles.otpInfoText}>{t('otp_code_sent_to')} <Text style={{ fontWeight: '700', color: colours.textOnDark }}>{phoneNumber}</Text></Text>
           </View>
           <View style={styles.field}>
-            <Text style={styles.fieldLabel}>ENTER {OTP_PIN_LENGTH}-DIGIT CODE</Text>
+            <Text style={styles.fieldLabel}>ENTER {OTP_PIN_LENGTH}{t('otp_enter_digit_code').toUpperCase()}</Text>
             <TextInput
               style={[styles.input, styles.pinInput]}
               placeholder={'· · · · · ·'.slice(0, OTP_PIN_LENGTH * 2 - 1)}
@@ -80,7 +82,7 @@ export function OtpLoginScreen(): React.JSX.Element {
             accessibilityLabel="Verify and sign in"
             accessibilityRole="button"
           >
-            {isLoading ? <ActivityIndicator color={colours.backgroundDark} /> : <Text style={styles.primaryBtnText}>Verify & Sign In</Text>}
+            {isLoading ? <ActivityIndicator color={colours.backgroundDark} /> : <Text style={styles.primaryBtnText}>{t('otp_verify_sign_in')}</Text>}
           </Pressable>
         </>
       )}
@@ -113,8 +115,8 @@ export function OtpLoginScreen(): React.JSX.Element {
             contentContainerStyle={[styles.webForm, isMobileWeb && styles.webFormMobile]}
             keyboardShouldPersistTaps="handled"
           >
-            <Text style={styles.formTitle}>{step === 'phone' ? 'Phone Login' : 'Enter your OTP'}</Text>
-            <Text style={styles.formSubtitle}>{step === 'phone' ? 'We will send you a one-time PIN' : `OTP sent to ${phoneNumber}`}</Text>
+            <Text style={styles.formTitle}>{step === 'phone' ? t('otp_phone_login_title') : t('otp_enter_otp_title')}</Text>
+            <Text style={styles.formSubtitle}>{step === 'phone' ? t('otp_send_pin_subtitle') : `${t('otp_code_sent_to')} ${phoneNumber}`}</Text>
             {formContent}
           </ScrollView>
         </View>
@@ -139,12 +141,12 @@ export function OtpLoginScreen(): React.JSX.Element {
           </View>
         </View>
         <Text style={styles.brandTagline}>
-          {step === 'phone' ? 'Enter your phone number to receive a login code' : `Enter the code we sent to ${phoneNumber}`}
+          {step === 'phone' ? t('otp_enter_phone_tagline') : `${t('otp_code_sent_to')} ${phoneNumber}`}
         </Text>
       </SafeAreaView>
       <ScrollView contentContainerStyle={styles.formSheetContent} keyboardShouldPersistTaps="handled">
-        <Text style={styles.sheetTitle}>{step === 'phone' ? 'Phone Login' : 'Check your messages'}</Text>
-        <Text style={styles.sheetSubtitle}>{step === 'phone' ? "We'll send a one-time PIN to your number" : `A ${OTP_PIN_LENGTH}-digit code was sent to ${phoneNumber}`}</Text>
+        <Text style={styles.sheetTitle}>{step === 'phone' ? t('otp_phone_login_title') : t('otp_check_messages')}</Text>
+        <Text style={styles.sheetSubtitle}>{step === 'phone' ? t('otp_sent_one_time_pin') : `A ${OTP_PIN_LENGTH}${t('otp_enter_digit_code')} sent to ${phoneNumber}`}</Text>
         {formContent}
       </ScrollView>
     </KeyboardAvoidingView>

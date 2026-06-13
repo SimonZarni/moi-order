@@ -9,38 +9,9 @@ import { styles } from './OrdersScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { spacing } from '../../../shared/theme/spacing';
 import type { FoodOrder } from '../../../types/models';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 
 type Section = { title: string; data: FoodOrder[] };
-
-const STATUS_TABS: { key: StatusFilter; label: string }[] = [
-  { key: 'all',         label: 'All Orders' },
-  { key: 'new',         label: 'New' },
-  { key: 'in_progress', label: 'In Progress' },
-  { key: 'done',        label: 'Done' },
-];
-
-const DATE_PRESETS: { key: DatePreset; label: string }[] = [
-  { key: 'today',     label: 'Today' },
-  { key: 'yesterday', label: 'Yesterday' },
-  { key: 'last7',     label: 'Last 7 Days' },
-  { key: 'last30',    label: 'Last 30 Days' },
-  { key: 'custom',    label: 'Custom' },
-];
-
-const SECTION_DOTS: Record<string, string> = {
-  'New Orders':  colours.warning,
-  'In Progress': colours.primary,
-  'Completed':   colours.textSubtle,
-};
-
-function formatDateLabel(d: string | null, from: string | null, to: string | null, preset: DatePreset): string {
-  if (preset === 'last7')     return 'Last 7 Days';
-  if (preset === 'last30')    return 'Last 30 Days';
-  if (preset === 'yesterday') return 'Yesterday';
-  if (d === null)             return 'Today';
-  const date = new Date(d + 'T00:00:00');
-  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
 
 interface OrdersScreenProps {
   onSelectOrder?: (orderId: string) => void;
@@ -48,6 +19,7 @@ interface OrdersScreenProps {
 }
 
 export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenProps): React.JSX.Element {
+  const t = useTranslation();
   const {
     sections, isLoading,
     statusFilter, dateFilter, dateFrom, dateTo, datePreset,
@@ -57,6 +29,44 @@ export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenP
     handleSearchChange, handleExportCsv,
     handleToggleActions, handleCloseActions,
   } = useOrdersScreen();
+
+  const STATUS_TABS: { key: StatusFilter; label: string }[] = [
+    { key: 'all',         label: t('orders_all') },
+    { key: 'new',         label: t('orders_new') },
+    { key: 'in_progress', label: t('orders_in_progress') },
+    { key: 'done',        label: t('orders_done') },
+  ];
+
+  const DATE_PRESETS: { key: DatePreset; label: string }[] = [
+    { key: 'today',     label: t('common_today') },
+    { key: 'yesterday', label: t('common_yesterday') },
+    { key: 'last7',     label: t('common_last_7_days') },
+    { key: 'last30',    label: t('common_last_30_days') },
+    { key: 'custom',    label: t('common_all') },
+  ];
+
+  // Section titles are internal keys; the dot colour map uses the English key from the hook.
+  const SECTION_DOTS: Record<string, string> = {
+    'New Orders':  colours.warning,
+    'In Progress': colours.primary,
+    'Completed':   colours.textSubtle,
+  };
+
+  // Section title displayed to user — translate the hook's English key.
+  const SECTION_TITLE_LABELS: Record<string, string> = {
+    'New Orders':  t('orders_section_new'),
+    'In Progress': t('orders_section_in_progress'),
+    'Completed':   t('orders_section_done'),
+  };
+
+  function formatDateLabel(d: string | null, from: string | null, to: string | null, preset: DatePreset): string {
+    if (preset === 'last7')     return t('common_last_7_days');
+    if (preset === 'last30')    return t('common_last_30_days');
+    if (preset === 'yesterday') return t('common_yesterday');
+    if (d === null)             return t('common_today');
+    const date = new Date(d + 'T00:00:00');
+    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
 
   const isToday        = datePreset === 'today';
   const isRangePreset  = datePreset === 'last7' || datePreset === 'last30';
@@ -77,7 +87,7 @@ export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenP
       {/* ── Page header ─────────────────────────────────────────────────────── */}
       <View style={styles.pageHeader}>
         <View style={styles.pageHeaderLeft}>
-          <Text style={styles.pageTitle}>Orders</Text>
+          <Text style={styles.pageTitle}>{t('orders_title')}</Text>
           {pending > 0 && (
             <Pressable
               style={styles.pendingPill}
@@ -86,7 +96,7 @@ export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenP
               accessibilityLabel={`${pending} pending orders, tap to filter`}
             >
               <View style={styles.pendingDot} />
-              <Text style={styles.pendingText}>{pending} pending</Text>
+              <Text style={styles.pendingText}>{pending} {t('orders_pending_count')}</Text>
             </Pressable>
           )}
         </View>
@@ -110,7 +120,7 @@ export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenP
                 accessibilityLabel="View cancelled orders"
               >
                 <Ionicons name="close-circle-outline" size={15} color={colours.error} />
-                <Text style={[styles.dropdownItemText, { color: colours.error }]}>Cancelled Orders</Text>
+                <Text style={[styles.dropdownItemText, { color: colours.error }]}>{t('orders_cancelled_orders')}</Text>
               </Pressable>
               {Platform.OS === 'web' && (
                 <>
@@ -122,7 +132,7 @@ export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenP
                     accessibilityLabel="Export orders as CSV"
                   >
                     <Ionicons name="download-outline" size={15} color={colours.textOnLight} />
-                    <Text style={styles.dropdownItemText}>Export CSV</Text>
+                    <Text style={styles.dropdownItemText}>{t('common_export_csv')}</Text>
                   </Pressable>
                 </>
               )}
@@ -180,7 +190,7 @@ export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenP
               <Text style={styles.dateLabel}>
                 {formatDateLabel(dateFilter, dateFrom, dateTo, datePreset)}
               </Text>
-              <Text style={styles.dateCount}>{totalVisible} orders</Text>
+              <Text style={styles.dateCount}>{totalVisible} {t('orders_count')}</Text>
             </View>
             <Pressable
               style={[styles.dateArrow, isToday && { opacity: 0.3 }]}
@@ -193,7 +203,7 @@ export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenP
             </Pressable>
             {!isToday && (
               <Pressable style={styles.todayBtn} onPress={handleDateToday} accessibilityRole="button" accessibilityLabel="Back to today">
-                <Text style={styles.todayBtnText}>Today</Text>
+                <Text style={styles.todayBtnText}>{t('orders_back_to_today')}</Text>
               </Pressable>
             )}
           </View>
@@ -204,7 +214,7 @@ export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenP
           <View style={styles.rangeLabel}>
             <Ionicons name="calendar-outline" size={13} color={colours.textMuted} />
             <Text style={styles.rangeLabelText}>
-              {formatDateLabel(dateFilter, dateFrom, dateTo, datePreset)} — {totalVisible} orders
+              {formatDateLabel(dateFilter, dateFrom, dateTo, datePreset)} — {totalVisible} {t('orders_count')}
             </Text>
           </View>
         )}
@@ -214,7 +224,7 @@ export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenP
           <Ionicons name="search-outline" size={14} color={colours.textSubtle} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search by customer or order #…"
+            placeholder={t('orders_search_placeholder')}
             placeholderTextColor={colours.textSubtle}
             value={searchQuery}
             onChangeText={handleSearchChange}
@@ -258,9 +268,9 @@ export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenP
             <View style={styles.emptyIcon}>
               <Ionicons name="receipt-outline" size={26} color={colours.textSubtle} />
             </View>
-            <Text style={styles.emptyTitle}>No orders found</Text>
+            <Text style={styles.emptyTitle}>{t('orders_no_orders_found')}</Text>
             <Text style={styles.emptyBody}>
-              {searchQuery ? 'Try a different search term' : 'Try a different filter or date'}
+              {searchQuery ? t('orders_no_orders_body_search') : t('orders_no_orders_body_filter')}
             </Text>
           </View>
         ) : (
@@ -268,7 +278,7 @@ export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenP
             <View key={section.title}>
               <View style={styles.sectionLabel}>
                 <View style={[styles.sectionDot, { backgroundColor: SECTION_DOTS[section.title] ?? colours.primary }]} />
-                <Text style={styles.sectionLabelText}>{section.title}</Text>
+                <Text style={styles.sectionLabelText}>{SECTION_TITLE_LABELS[section.title] ?? section.title}</Text>
                 <Text style={styles.sectionCount}>{section.data.length}</Text>
               </View>
               {section.data.map((item: FoodOrder) => (

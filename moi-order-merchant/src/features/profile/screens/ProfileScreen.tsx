@@ -5,6 +5,7 @@ import { useProfileScreen } from '../hooks/useProfileScreen';
 import { styles } from './ProfileScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 
 interface AccountRowProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -29,6 +30,7 @@ function AccountRow({ icon, iconBg, iconColor, label, value }: AccountRowProps):
 }
 
 export function ProfileScreen(): React.JSX.Element {
+  const t = useTranslation();
   const { restaurant, user, isLoading, handleLogout, handleUploadCover, handleUploadLogo, handleNavigateToBusinessProfile, handleNavigateToSettings } = useProfileScreen();
 
   if (isLoading) {
@@ -46,7 +48,7 @@ export function ProfileScreen(): React.JSX.Element {
             : (
               <View style={styles.coverPlaceholder}>
                 <Ionicons name="image-outline" size={36} color="rgba(255,255,255,0.25)" />
-                <Text style={styles.coverHint}>Tap to add cover photo</Text>
+                <Text style={styles.coverHint}>{t('profile_cover_hint')}</Text>
               </View>
             )}
           <View style={styles.coverEditBtn}>
@@ -71,7 +73,7 @@ export function ProfileScreen(): React.JSX.Element {
 
           <View style={styles.restaurantMeta}>
             <Text style={styles.restaurantName} numberOfLines={1}>
-              {restaurant?.name ?? 'Your Restaurant'}
+              {restaurant?.name ?? t('profile_your_restaurant')}
             </Text>
             {restaurant?.address !== null && restaurant?.address !== undefined && (
               <View style={styles.addressRow}>
@@ -93,15 +95,15 @@ export function ProfileScreen(): React.JSX.Element {
         {/* ── Account info ── */}
         {user !== null && user !== undefined && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Account</Text>
+            <Text style={styles.sectionLabel}>{t('profile_account')}</Text>
             <View style={styles.card}>
-              <AccountRow icon="person-outline" iconBg={colours.primary + '22'} iconColor={colours.primary} label="Name" value={user.name} />
+              <AccountRow icon="person-outline" iconBg={colours.primary + '22'} iconColor={colours.primary} label={t('profile_name')} value={user.name} />
               <View style={styles.rowSep} />
-              <AccountRow icon="mail-outline" iconBg={colours.info + '22'} iconColor={colours.info} label="Email" value={user.email ?? '—'} />
+              <AccountRow icon="mail-outline" iconBg={colours.info + '22'} iconColor={colours.info} label={t('profile_email')} value={user.email ?? '—'} />
               {user.phone !== null && (
                 <>
                   <View style={styles.rowSep} />
-                  <AccountRow icon="call-outline" iconBg={colours.success + '22'} iconColor={colours.success} label="Phone" value={user.phone} />
+                  <AccountRow icon="call-outline" iconBg={colours.success + '22'} iconColor={colours.success} label={t('profile_phone')} value={user.phone} />
                 </>
               )}
             </View>
@@ -111,7 +113,7 @@ export function ProfileScreen(): React.JSX.Element {
         {/* ── Business Profile ── */}
         {user?.is_merchant === true && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Business</Text>
+            <Text style={styles.sectionLabel}>{t('profile_business')}</Text>
             <Pressable
               style={styles.menuRow}
               onPress={handleNavigateToBusinessProfile}
@@ -121,7 +123,7 @@ export function ProfileScreen(): React.JSX.Element {
               <View style={[styles.accountRowIcon, { backgroundColor: colours.primary + '22' }]}>
                 <Ionicons name="briefcase-outline" size={16} color={colours.primary} />
               </View>
-              <Text style={styles.menuRowLabel}>Business Profile</Text>
+              <Text style={styles.menuRowLabel}>{t('profile_business_profile')}</Text>
               <Ionicons name="chevron-forward" size={16} color={colours.textSubtle} />
             </Pressable>
           </View>
@@ -138,7 +140,7 @@ export function ProfileScreen(): React.JSX.Element {
             <View style={[styles.accountRowIcon, { backgroundColor: colours.textMuted + '22' }]}>
               <Ionicons name="settings-outline" size={16} color={colours.textMuted} />
             </View>
-            <Text style={styles.menuRowLabel}>Settings</Text>
+            <Text style={styles.menuRowLabel}>{t('profile_settings')}</Text>
             <Ionicons name="chevron-forward" size={16} color={colours.textSubtle} />
           </Pressable>
         </View>
@@ -147,7 +149,7 @@ export function ProfileScreen(): React.JSX.Element {
         <View style={styles.section}>
           <Pressable style={styles.logoutBtn} onPress={handleLogout} accessibilityLabel="Log out" accessibilityRole="button">
             <Ionicons name="log-out-outline" size={20} color={colours.error} />
-            <Text style={styles.logoutText}>Sign Out</Text>
+            <Text style={styles.logoutText}>{t('profile_sign_out')}</Text>
           </Pressable>
         </View>
 

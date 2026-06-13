@@ -5,6 +5,7 @@ import { styles } from './BusinessInfoSection.styles';
 import { colours } from '../../../shared/theme/colours';
 import type { KycApplication } from '../../../types/models';
 import { KYC_STATUS } from '../../../types/enums';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 
 interface BusinessInfoSectionProps {
   kyc: KycApplication;
@@ -51,12 +52,13 @@ export function BusinessInfoSection({
   onChangePhone,
   onSave,
 }: BusinessInfoSectionProps): React.JSX.Element {
+  const t = useTranslation();
   const statusColour = STATUS_COLOUR[kyc.status] ?? colours.textMuted;
 
   return (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Business Information</Text>
+        <Text style={styles.sectionTitle}>{t('kyc_step1_title')}</Text>
         <View style={[styles.statusBadge, { backgroundColor: statusColour + '22' }]}>
           <View style={[styles.statusDot, { backgroundColor: statusColour }]} />
           <Text style={[styles.statusText, { color: statusColour }]}>{kyc.status_label}</Text>
@@ -64,16 +66,16 @@ export function BusinessInfoSection({
       </View>
 
       <View style={styles.card}>
-        <InfoRow label="Business Name" value={kyc.business_name} />
+        <InfoRow label={t('kyc_step1_business_name')} value={kyc.business_name} />
         <View style={styles.divider} />
-        <InfoRow label="Business Type" value={kyc.business_type} />
+        <InfoRow label={t('kyc_step1_business_type')} value={kyc.business_type} />
         <View style={styles.divider} />
-        <InfoRow label="Business Address" value={kyc.business_address} />
+        <InfoRow label={t('kyc_step1_business_address')} value={kyc.business_address} />
         <View style={styles.divider} />
 
         {/* Business phone — inline editable */}
         <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Business Phone</Text>
+          <Text style={styles.infoLabel}>{t('kyc_step1_business_phone')}</Text>
           {isEditingPhone ? (
             <View style={styles.editRow}>
               <TextInput

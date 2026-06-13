@@ -6,6 +6,7 @@ import { useRegisterScreen } from '../hooks/useRegisterScreen';
 import { styles } from './RegisterScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { OTP_PIN_LENGTH } from '../../../shared/constants/config';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 
 const LOGO = require('../../../../assets/moi-order-icon.png') as number;
 
@@ -17,6 +18,7 @@ export function RegisterScreen(): React.JSX.Element {
     handleSendOtp, handleVerifyAndComplete, handleBack, handleResend,
   } = useRegisterScreen();
 
+  const t = useTranslation();
   const { width } = useWindowDimensions();
   const isMobileWeb = Platform.OS === 'web' && width < 768;
 
@@ -25,7 +27,7 @@ export function RegisterScreen(): React.JSX.Element {
       {error !== null && <Text style={styles.errorBanner}>{error}</Text>}
       <TextInput
         style={styles.input}
-        placeholder="Full name"
+        placeholder={t('register_full_name')}
         placeholderTextColor="rgba(255,255,255,0.3)"
         value={name}
         onChangeText={setName}
@@ -34,7 +36,7 @@ export function RegisterScreen(): React.JSX.Element {
       {fieldErrors.name !== undefined && <Text style={styles.fieldError}>{fieldErrors.name}</Text>}
       <TextInput
         style={styles.input}
-        placeholder="Email address"
+        placeholder={t('register_email_address')}
         placeholderTextColor="rgba(255,255,255,0.3)"
         value={email}
         onChangeText={setEmail}
@@ -45,14 +47,14 @@ export function RegisterScreen(): React.JSX.Element {
       {fieldErrors.email !== undefined && <Text style={styles.fieldError}>{fieldErrors.email}</Text>}
       <TextInput
         style={styles.input}
-        placeholder="Password"
+        placeholder={t('register_password')}
         placeholderTextColor="rgba(255,255,255,0.3)"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
         accessibilityLabel="Password"
       />
-      <Text style={styles.inputHint}>Min 8 characters · uppercase · lowercase · number</Text>
+      <Text style={styles.inputHint}>{t('register_password_hint')}</Text>
       {fieldErrors.password !== undefined && <Text style={styles.fieldError}>{fieldErrors.password}</Text>}
       <Pressable
         style={[styles.button, isLoading && styles.buttonDisabled]}
@@ -63,11 +65,9 @@ export function RegisterScreen(): React.JSX.Element {
       >
         {isLoading
           ? <ActivityIndicator color={colours.backgroundDark} />
-          : <Text style={styles.buttonText}>Send Verification Code</Text>}
+          : <Text style={styles.buttonText}>{t('register_send_code')}</Text>}
       </Pressable>
-      <Text style={styles.note}>
-        After registration you will complete KYC verification before your store goes live.
-      </Text>
+      <Text style={styles.note}>{t('register_note')}</Text>
     </>
   );
 
@@ -77,7 +77,7 @@ export function RegisterScreen(): React.JSX.Element {
       <View style={styles.otpInfo}>
         <Ionicons name="checkmark-circle" size={16} color={colours.primary} />
         <Text style={styles.otpInfoText}>
-          Code sent to{' '}
+          {t('otp_code_sent_to')}{' '}
           <Text style={{ fontWeight: '700', color: colours.textOnDark }}>{email}</Text>
         </Text>
       </View>
@@ -101,7 +101,7 @@ export function RegisterScreen(): React.JSX.Element {
       >
         {isLoading
           ? <ActivityIndicator color={colours.backgroundDark} />
-          : <Text style={styles.buttonText}>Verify & Create Account</Text>}
+          : <Text style={styles.buttonText}>{t('register_verify_create')}</Text>}
       </Pressable>
       <View style={styles.resendRow}>
         <Pressable
@@ -109,7 +109,7 @@ export function RegisterScreen(): React.JSX.Element {
           accessibilityLabel="Back to edit details"
           accessibilityRole="button"
         >
-          <Text style={styles.linkBtn}>← Edit details</Text>
+          <Text style={styles.linkBtn}>{t('register_edit_details')}</Text>
         </Pressable>
         <Pressable
           onPress={handleResend}
@@ -118,7 +118,7 @@ export function RegisterScreen(): React.JSX.Element {
           accessibilityRole="button"
         >
           <Text style={resendCooldown > 0 ? styles.linkBtnMuted : styles.linkBtn}>
-            {resendCooldown > 0 ? `Resend (${resendCooldown}s)` : 'Resend code'}
+            {resendCooldown > 0 ? `${t('register_resend_code')} (${resendCooldown}s)` : t('register_resend_code')}
           </Text>
         </Pressable>
       </View>
@@ -126,8 +126,8 @@ export function RegisterScreen(): React.JSX.Element {
   );
 
   const isOtp = step === 'otp';
-  const formTitle    = isOtp ? 'Verify your email' : 'Create your account';
-  const formSubtitle = isOtp ? `Enter the code sent to ${email}` : 'Register to start selling with MOi Order';
+  const formTitle    = isOtp ? t('register_verify_email_title') : t('register_create_account_title');
+  const formSubtitle = isOtp ? `${t('otp_code_sent_to')} ${email}` : t('register_create_subtitle');
 
   if (Platform.OS === 'web') {
     return (

@@ -13,6 +13,7 @@ import { formatPrice } from '../../../shared/utils/formatCurrency';
 import { formatDateTime } from '../../../shared/utils/formatDate';
 import { ORDER_STATUS } from '../../../types/enums';
 import type { MerchantStackParamList } from '../../../types/navigation';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 
 const ORDER_ACTIONS: Partial<Record<string, string>> = {
   [ORDER_STATUS.OrderPlaced]:        ORDER_STATUS.WaitingForPayment,
@@ -21,15 +22,6 @@ const ORDER_ACTIONS: Partial<Record<string, string>> = {
   [ORDER_STATUS.WaitingForDelivery]: ORDER_STATUS.DeliveryOnTheWay,
   [ORDER_STATUS.DeliveryOnTheWay]:   ORDER_STATUS.Delivered,
   [ORDER_STATUS.Delivered]:          ORDER_STATUS.Completed,
-};
-
-const ACTION_LABELS: Partial<Record<string, string>> = {
-  [ORDER_STATUS.OrderPlaced]:        'Accept Order',
-  [ORDER_STATUS.PaymentConfirmed]:   'Start Preparing',
-  [ORDER_STATUS.PreparingFood]:      'Mark Ready for Pickup / Delivery',
-  [ORDER_STATUS.WaitingForDelivery]: 'Mark Picked Up by Rider',
-  [ORDER_STATUS.DeliveryOnTheWay]:   'Mark Delivered',
-  [ORDER_STATUS.Delivered]:          'Complete Order',
 };
 
 const CANCELLABLE_STATUSES = new Set<string>([
@@ -53,16 +45,6 @@ const STATUS_COLOURS: Record<string, string> = {
   [ORDER_STATUS.Cancelled]:          colours.error,
 };
 
-const WAITING_NOTES: Partial<Record<string, string>> = {
-  [ORDER_STATUS.WaitingForPayment]: 'Waiting for customer to complete payment.',
-};
-
-const PAYMENT_LABELS: Record<string, string> = {
-  cod:        'Cash on Delivery',
-  prompt_pay: 'PromptPay',
-  line_pay:   'LINE Pay',
-};
-
 function isChatWindowOpen(status: string, completedAt: string | null): boolean {
   if (status === ORDER_STATUS.Cancelled || status === ORDER_STATUS.Expired) return false;
   if (status === ORDER_STATUS.Completed) {
@@ -72,12 +54,6 @@ function isChatWindowOpen(status: string, completedAt: string | null): boolean {
   return true;
 }
 
-const CANCEL_REASONS = [
-  { value: 'closing_soon', label: 'Closing soon' },
-  { value: 'sold_out',     label: 'Sold out' },
-  { value: 'out_of_range', label: 'Delivery address out of range' },
-];
-
 interface OrderDetailScreenProps {
   orderId: string;
   onBack?: () => void;
@@ -86,6 +62,32 @@ interface OrderDetailScreenProps {
 
 export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailScreenProps): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
+  const t = useTranslation();
+
+  const ACTION_LABELS: Partial<Record<string, string>> = {
+    [ORDER_STATUS.OrderPlaced]:        t('action_accept'),
+    [ORDER_STATUS.PaymentConfirmed]:   t('action_start_preparing'),
+    [ORDER_STATUS.PreparingFood]:      t('action_mark_ready_pickup'),
+    [ORDER_STATUS.WaitingForDelivery]: t('action_rider_picked_up'),
+    [ORDER_STATUS.DeliveryOnTheWay]:   t('action_mark_delivered'),
+    [ORDER_STATUS.Delivered]:          t('action_complete'),
+  };
+
+  const PAYMENT_LABELS: Record<string, string> = {
+    cod:        t('payment_cod'),
+    prompt_pay: t('payment_prompt_pay'),
+    line_pay:   t('payment_line_pay'),
+  };
+
+  const WAITING_NOTES: Partial<Record<string, string>> = {
+    [ORDER_STATUS.WaitingForPayment]: t('order_detail_waiting_payment_note'),
+  };
+
+  const CANCEL_REASONS = [
+    { value: 'closing_soon', label: t('order_detail_cancel_closing') },
+    { value: 'sold_out',     label: t('order_detail_cancel_sold_out') },
+    { value: 'out_of_range', label: t('order_detail_cancel_out_of_range') },
+  ];
 
   const {
     order, isLoading, isError, isUpdating,
@@ -108,10 +110,10 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
     return (
       <View style={styles.centered}>
         <Ionicons name="alert-circle-outline" size={44} color={colours.error} />
-        <Text style={styles.errorText}>Order could not be loaded</Text>
+        <Text style={styles.errorText}>{t('order_detail_cannot_load')}</Text>
         {onBack !== undefined && (
           <Pressable onPress={onBack} accessibilityRole="button" style={{ marginTop: 4 }}>
-            <Text style={{ color: colours.primary, fontWeight: '600' }}>← Go back</Text>
+            <Text style={{ color: colours.primary, fontWeight: '600' }}>{t('order_detail_go_back')}</Text>
           </Pressable>
         )}
       </View>
@@ -169,16 +171,16 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Customer</Text>
+            <Text style={styles.cardTitle}>{t('order_detail_customer')}</Text>
           </View>
           <View style={styles.cardBody}>
             <View style={styles.row}>
-              <Text style={styles.label}>Name</Text>
+              <Text style={styles.label}>{t('order_detail_name')}</Text>
               <Text style={styles.value}>{order.user.name}</Text>
             </View>
             {order.user.phone !== null && (
               <View style={styles.row}>
-                <Text style={styles.label}>Phone</Text>
+                <Text style={styles.label}>{t('order_detail_phone')}</Text>
                 <Pressable onPress={handleCallCustomer} accessibilityRole="link">
                   <Text style={[styles.value, { color: colours.primary }]}>
                     {order.user.phone}
@@ -188,7 +190,7 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
             )}
             {order.contact_no !== null && order.contact_no !== order.user.phone && (
               <View style={styles.row}>
-                <Text style={styles.label}>Order Contact</Text>
+                <Text style={styles.label}>{t('order_detail_contact')}</Text>
                 <Pressable
                   onPress={() => { void Linking.openURL(`tel:${order.contact_no}`); }}
                   accessibilityRole="link"
@@ -201,13 +203,13 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
             )}
             {order.delivery_address !== null && (
               <View style={styles.row}>
-                <Text style={styles.label}>Address</Text>
+                <Text style={styles.label}>{t('order_detail_address')}</Text>
                 <Text style={styles.value}>{order.delivery_address}</Text>
               </View>
             )}
             {order.customer_notes !== null && (
               <View style={styles.row}>
-                <Text style={styles.label}>Notes</Text>
+                <Text style={styles.label}>{t('order_detail_notes')}</Text>
                 <Text style={styles.value}>{order.customer_notes}</Text>
               </View>
             )}
@@ -216,25 +218,25 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Order Details</Text>
+            <Text style={styles.cardTitle}>{t('order_detail_order_details')}</Text>
           </View>
           <View style={styles.cardBody}>
             <View style={styles.row}>
-              <Text style={styles.label}>Order #</Text>
+              <Text style={styles.label}>{t('order_detail_order_num')}</Text>
               <Text style={styles.value}>{order.order_number ?? order.id}</Text>
             </View>
             <View style={styles.row}>
-              <Text style={styles.label}>Payment</Text>
+              <Text style={styles.label}>{t('order_detail_payment')}</Text>
               <Text style={styles.value}>{PAYMENT_LABELS[order.payment_method] ?? order.payment_method}</Text>
             </View>
             <View style={styles.row}>
-              <Text style={styles.label}>Placed</Text>
+              <Text style={styles.label}>{t('order_detail_placed')}</Text>
               <Text style={styles.value}>{formatDateTime(order.created_at)}</Text>
             </View>
             {order.preparation_time_minutes !== null && (
               <View style={styles.row}>
-                <Text style={styles.label}>Prep Time</Text>
-                <Text style={styles.value}>{order.preparation_time_minutes} min</Text>
+                <Text style={styles.label}>{t('order_detail_prep_time')}</Text>
+                <Text style={styles.value}>{order.preparation_time_minutes} {t('common_min')}</Text>
               </View>
             )}
           </View>
@@ -242,7 +244,7 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Items ({order.items.length})</Text>
+            <Text style={styles.cardTitle}>{t('order_detail_items')} ({order.items.length})</Text>
           </View>
           <View style={styles.cardBody}>
             {order.items.map((item) => (
@@ -261,11 +263,11 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
             ))}
             <View style={styles.divider} />
             <View style={styles.row}>
-              <Text style={styles.label}>Subtotal</Text>
+              <Text style={styles.label}>{t('order_detail_subtotal')}</Text>
               <Text style={styles.value}>{formatPrice(order.subtotal_cents)}</Text>
             </View>
             <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Total</Text>
+              <Text style={styles.totalLabel}>{t('order_detail_total')}</Text>
               <Text style={styles.totalValue}>{formatPrice(order.total_cents)}</Text>
             </View>
           </View>
@@ -286,13 +288,13 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
             accessibilityRole="button"
           >
             <Ionicons name="chatbubbles-outline" size={16} color={colours.primary} />
-            <Text style={styles.chatButtonText}>Chat with Customer</Text>
+            <Text style={styles.chatButtonText}>{t('order_detail_chat_customer')}</Text>
           </Pressable>
         )}
 
         {(nextStatus === ORDER_STATUS.WaitingForPayment || nextStatus === ORDER_STATUS.PreparingFood) && (
           <View style={styles.prepTimeCard}>
-            <Text style={styles.prepTimeLabel}>How long will this order take?</Text>
+            <Text style={styles.prepTimeLabel}>{t('order_detail_how_long')}</Text>
             <View style={styles.prepTimeStepper}>
               <Pressable
                 style={styles.prepTimeBtn}
@@ -302,7 +304,7 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
               >
                 <Text style={styles.prepTimeBtnText}>−</Text>
               </Pressable>
-              <Text style={styles.prepTimeValue}>{preparationTimeMinutes} min</Text>
+              <Text style={styles.prepTimeValue}>{preparationTimeMinutes} {t('common_min')}</Text>
               <Pressable
                 style={styles.prepTimeBtn}
                 onPress={handlePreparationTimeIncrease}
@@ -342,7 +344,7 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
             accessibilityRole="button"
           >
             <Text style={styles.actionButtonText}>
-              {isUpdating ? 'Updating…' : actionLabel}
+              {isUpdating ? t('order_detail_updating') : actionLabel}
             </Text>
           </Pressable>
         )}
@@ -355,7 +357,7 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
             accessibilityLabel="Cancel this order"
             accessibilityRole="button"
           >
-            <Text style={styles.cancelButtonText}>Cancel Order</Text>
+            <Text style={styles.cancelButtonText}>{t('order_detail_cancel_order')}</Text>
           </Pressable>
         )}
       </ScrollView>
@@ -368,10 +370,10 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Cancel Order</Text>
+            <Text style={styles.modalTitle}>{t('order_detail_cancel_title')}</Text>
 
             <View>
-              <Text style={styles.modalLabel}>Reason</Text>
+              <Text style={styles.modalLabel}>{t('order_detail_reason')}</Text>
               {CANCEL_REASONS.map((r) => (
                 <Pressable
                   key={r.value}
@@ -390,12 +392,12 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
             </View>
 
             <View>
-              <Text style={styles.modalLabel}>Additional Details (optional)</Text>
+              <Text style={styles.modalLabel}>{t('order_detail_additional_details')}</Text>
               <TextInput
                 style={styles.modalTextInput}
                 value={cancelDescription}
                 onChangeText={handleCancelDescriptionChange}
-                placeholder="Describe the reason in more detail…"
+                placeholder={t('order_detail_details_placeholder')}
                 placeholderTextColor="rgba(255,255,255,0.3)"
                 multiline
                 maxLength={500}
@@ -410,7 +412,7 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
                 accessibilityRole="button"
                 accessibilityLabel="Keep order"
               >
-                <Text style={styles.modalCancelText}>Keep Order</Text>
+                <Text style={styles.modalCancelText}>{t('order_detail_keep_order')}</Text>
               </Pressable>
               <Pressable
                 style={[styles.modalConfirmBtn, isUpdating && { opacity: 0.6 }]}
@@ -421,7 +423,7 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
               >
                 {isUpdating
                   ? <ActivityIndicator size="small" color={colours.white} />
-                  : <Text style={styles.modalConfirmText}>Confirm Cancel</Text>
+                  : <Text style={styles.modalConfirmText}>{t('order_detail_confirm_cancel')}</Text>
                 }
               </Pressable>
             </View>

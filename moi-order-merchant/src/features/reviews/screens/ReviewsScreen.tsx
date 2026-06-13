@@ -6,6 +6,7 @@ import { useReviewsScreen, type RatingFilter } from '../hooks/useReviewsScreen';
 import { styles } from './ReviewsScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { formatDate } from '../../../shared/utils/formatDate';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 import type { ReviewItem } from '../../../api/reviews';
 
 const RATING_FILTERS: { key: RatingFilter; label: string }[] = [
@@ -55,6 +56,7 @@ function ReviewCard({ item }: { item: ReviewItem }): React.JSX.Element {
 }
 
 export function ReviewsScreen(): React.JSX.Element {
+  const t = useTranslation();
   const {
     reviews, isLoading, isError,
     currentPage, lastPage, total,
@@ -65,9 +67,9 @@ export function ReviewsScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <View style={styles.pageHeader}>
-        <Text style={styles.pageTitle}>Reviews</Text>
+        <Text style={styles.pageTitle}>{t('reviews_title')}</Text>
         <View style={styles.totalBadge}>
-          <Text style={styles.totalBadgeText}>{total} total</Text>
+          <Text style={styles.totalBadgeText}>{total} {t('reviews_total')}</Text>
         </View>
       </View>
 
@@ -100,14 +102,14 @@ export function ReviewsScreen(): React.JSX.Element {
       {isLoading ? (
         <View style={styles.emptyWrap}>
           <Ionicons name="hourglass-outline" size={28} color={colours.textSubtle} />
-          <Text style={styles.emptyTitle}>Loading…</Text>
+          <Text style={styles.emptyTitle}>{t('reviews_loading')}</Text>
         </View>
       ) : isError ? (
         <View style={styles.emptyWrap}>
           <View style={styles.emptyIcon}>
             <Ionicons name="alert-circle-outline" size={26} color={colours.error} />
           </View>
-          <Text style={styles.emptyTitle}>Could not load reviews</Text>
+          <Text style={styles.emptyTitle}>{t('reviews_cannot_load')}</Text>
         </View>
       ) : (
         <FlatList
@@ -120,8 +122,8 @@ export function ReviewsScreen(): React.JSX.Element {
               <View style={styles.emptyIcon}>
                 <Ionicons name="star-outline" size={26} color={colours.textSubtle} />
               </View>
-              <Text style={styles.emptyTitle}>No reviews yet</Text>
-              <Text style={styles.emptyBody}>Completed orders with ratings will appear here</Text>
+              <Text style={styles.emptyTitle}>{t('reviews_no_reviews')}</Text>
+              <Text style={styles.emptyBody}>{t('reviews_no_reviews_body')}</Text>
             </View>
           }
           renderItem={({ item }) => <ReviewCard item={item} />}

@@ -10,28 +10,30 @@ import { colours } from '../../../shared/theme/colours';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
 import { formatDate } from '../../../shared/utils/formatDate';
 import { useResponsive } from '../../../shared/hooks/useResponsive';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 import type { TopPeriod } from '../../../api/analytics';
 import type { TopItem, TopCustomer } from '../../../types/models';
-
-const TOP_PERIOD_TABS: { key: TopPeriod; label: string }[] = [
-  { key: 'today', label: 'Today' },
-  { key: 'week',  label: 'This Week' },
-  { key: 'month', label: 'This Month' },
-];
 
 interface DashboardScreenProps {
   onSelectOrder?: (orderId: string) => void;
 }
 
 export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.JSX.Element {
+  const t = useTranslation();
   const {
     analytics, recentOrders, topData, topPeriod, pendingOnly,
     isLoading, handleUpdateStatus, handleTopPeriodChange, handlePendingToggle,
   } = useDashboardScreen();
   const { isDesktop } = useResponsive();
 
+  const TOP_PERIOD_TABS: { key: TopPeriod; label: string }[] = [
+    { key: 'today', label: t('dashboard_period_today') },
+    { key: 'week',  label: t('dashboard_period_week') },
+    { key: 'month', label: t('dashboard_period_month') },
+  ];
+
   const hour     = new Date().getHours();
-  const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
+  const greeting = hour < 12 ? t('dashboard_greeting_morning') : hour < 17 ? t('dashboard_greeting_afternoon') : t('dashboard_greeting_evening');
   const dateLabel = new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
   const pending = analytics?.pending_count ?? 0;
 
@@ -63,17 +65,17 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
   const revenueCard = (
     <View style={styles.revenueCard}>
       <View style={styles.revenueLeft}>
-        <Text style={styles.revenueLabel}>TODAY'S REVENUE</Text>
+        <Text style={styles.revenueLabel}>{t('dashboard_today_revenue')}</Text>
         <Text style={styles.revenueAmount}>{formatPrice(analytics?.today.revenue_cents ?? 0)}</Text>
-        <Text style={styles.revenueOrders}>{analytics?.today.order_count ?? 0} orders today</Text>
+        <Text style={styles.revenueOrders}>{analytics?.today.order_count ?? 0} {t('dashboard_orders_count')}</Text>
       </View>
       <View style={styles.revenueRight}>
         <View style={styles.revenueMiniBlock}>
-          <Text style={styles.revenueMiniLabel}>THIS WEEK</Text>
+          <Text style={styles.revenueMiniLabel}>{t('dashboard_this_week')}</Text>
           <Text style={styles.revenueMiniValue}>{formatPrice(analytics?.this_week.revenue_cents ?? 0)}</Text>
         </View>
         <View style={styles.revenueMiniBlock}>
-          <Text style={styles.revenueMiniLabel}>THIS MONTH</Text>
+          <Text style={styles.revenueMiniLabel}>{t('dashboard_this_month')}</Text>
           <Text style={styles.revenueMiniValue}>{formatPrice(analytics?.this_month.revenue_cents ?? 0)}</Text>
         </View>
       </View>
@@ -85,7 +87,7 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
     <View style={styles.topSection}>
       {/* Shared period tab row */}
       <View style={styles.topSectionHeader}>
-        <Text style={styles.topSectionTitle}>Performance</Text>
+        <Text style={styles.topSectionTitle}>{t('dashboard_performance')}</Text>
         <View style={styles.periodTabs}>
           {TOP_PERIOD_TABS.map((t) => (
             <Pressable
@@ -105,8 +107,8 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
 
       {/* Two cards side-by-side on desktop, stacked on mobile */}
       <View style={[styles.topCardsRow, !isDesktop && styles.topCardsRowStack]}>
-        <TopSalesCard items={topData?.top_items ?? []} />
-        <TopCustomersCard customers={topData?.top_customers ?? []} />
+        <TopSalesCard items={topData?.top_items ?? []} topSalesLabel={t('dashboard_top_sales')} soldLabel={t('dashboard_sold')} noDataLabel={t('dashboard_no_data_period')} />
+        <TopCustomersCard customers={topData?.top_customers ?? []} topCustomersLabel={t('dashboard_top_customers')} ordersLabel={t('common_orders')} noDataLabel={t('dashboard_no_data_period')} />
       </View>
     </View>
   );
@@ -115,12 +117,12 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
   const ordersCard = (
     <View style={styles.ordersCard}>
       <View style={styles.ordersCardHeader}>
-        <Text style={styles.cardSectionTitle}>{pendingOnly ? 'PENDING ORDERS' : 'RECENT ORDERS'}</Text>
+        <Text style={styles.cardSectionTitle}>{pendingOnly ? t('dashboard_pending_orders') : t('dashboard_recent_orders')}</Text>
       </View>
       {recentOrders.length === 0 ? (
         <View style={styles.emptyOrders}>
           <Ionicons name="receipt-outline" size={28} color={colours.textSubtle} />
-          <Text style={styles.emptyText}>No recent orders</Text>
+          <Text style={styles.emptyText}>{t('dashboard_no_recent_orders')}</Text>
         </View>
       ) : (
         recentOrders.map((order) => (
@@ -139,14 +141,14 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
   // ── Quick stats card ──────────────────────────────────────────────────────────
   const statsCard = (
     <View style={styles.statsCard}>
-      <Text style={styles.cardSectionTitle}>QUICK STATS</Text>
+      <Text style={styles.cardSectionTitle}>{t('dashboard_quick_stats')}</Text>
       <View style={styles.statRow}>
-        <Text style={styles.statLabel}>Total Orders (Month)</Text>
+        <Text style={styles.statLabel}>{t('dashboard_total_orders_month')}</Text>
         <Text style={styles.statValue}>{analytics?.this_month.order_count ?? 0}</Text>
       </View>
       <View style={styles.statDivider} />
       <View style={styles.statRow}>
-        <Text style={styles.statLabel}>Avg. Order Value</Text>
+        <Text style={styles.statLabel}>{t('dashboard_avg_order_value')}</Text>
         <Text style={[styles.statValue, styles.statValueGreen]}>{formatPrice(avgOrderValue)}</Text>
       </View>
     </View>
@@ -155,15 +157,15 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
   // ── Activity card ─────────────────────────────────────────────────────────────
   const activityCard = (
     <View style={styles.activityCard}>
-      <Text style={styles.cardSectionTitle}>ACTIVITY</Text>
+      <Text style={styles.cardSectionTitle}>{t('dashboard_activity')}</Text>
       {recentOrders.length === 0 ? (
-        <Text style={styles.activityEmpty}>No recent activity</Text>
+        <Text style={styles.activityEmpty}>{t('dashboard_no_recent_activity')}</Text>
       ) : (
         recentOrders.slice(0, 3).map((order) => (
           <View key={order.id} style={styles.activityRow}>
             <View style={[styles.activityDot, { backgroundColor: colours.primary }]} />
             <View style={styles.activityInfo}>
-              <Text style={styles.activityText}>New order from {order.user.name}</Text>
+              <Text style={styles.activityText}>{t('dashboard_new_order_from')} {order.user.name}</Text>
               <Text style={styles.activityTime}>{formatDate(order.created_at)}</Text>
             </View>
           </View>
@@ -178,7 +180,7 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
       <View style={styles.topBar}>
         <View>
           <Text style={styles.topBarGreeting}>{greeting}</Text>
-          <Text style={styles.topBarTitle}>Dashboard</Text>
+          <Text style={styles.topBarTitle}>{t('dashboard_title')}</Text>
         </View>
         <View style={styles.topBarRight}>
           <Text style={styles.topBarDate}>{dateLabel}</Text>
@@ -192,7 +194,7 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
               >
                 <View style={styles.pendingDot} />
                 <Text style={[styles.pendingText, pendingOnly && styles.pendingTextActive]}>
-                  {pending} pending
+                  {pending} {t('dashboard_pending_count')}
                 </Text>
               </Pressable>
             )}
@@ -230,7 +232,7 @@ const TOP_VISIBLE  = 5;
 // Each row is paddingVertical: sm (8) × 2 + ~18px content ≈ 44px. 5 rows = 220.
 const TOP_LIST_MAX = TOP_VISIBLE * 44;
 
-function TopSalesCard({ items }: { items: TopItem[] }): React.JSX.Element {
+function TopSalesCard({ items, topSalesLabel, soldLabel, noDataLabel }: { items: TopItem[]; topSalesLabel: string; soldLabel: string; noDataLabel: string }): React.JSX.Element {
   const visible = items.slice(0, TOP_VISIBLE);
   const hasMore = items.length > TOP_VISIBLE;
   return (
@@ -239,13 +241,13 @@ function TopSalesCard({ items }: { items: TopItem[] }): React.JSX.Element {
         <View style={[styles.topCardIcon, { backgroundColor: colours.primary + '20' }]}>
           <Ionicons name="flame-outline" size={14} color={colours.primary} />
         </View>
-        <Text style={styles.topCardTitle}>Top Sales</Text>
+        <Text style={styles.topCardTitle}>{topSalesLabel}</Text>
         {hasMore && <Text style={styles.topCardMore}>+{items.length - TOP_VISIBLE} more</Text>}
       </View>
 
       {items.length === 0 ? (
         <View style={styles.topCardEmpty}>
-          <Text style={styles.topCardEmptyText}>No data for this period</Text>
+          <Text style={styles.topCardEmptyText}>{noDataLabel}</Text>
         </View>
       ) : (
         <ScrollView
@@ -260,7 +262,7 @@ function TopSalesCard({ items }: { items: TopItem[] }): React.JSX.Element {
               </View>
               <View style={styles.topRowInfo}>
                 <Text style={styles.topRowName} numberOfLines={1}>{item.name}</Text>
-                <Text style={styles.topRowSub}>{item.total_quantity} sold</Text>
+                <Text style={styles.topRowSub}>{item.total_quantity} {soldLabel}</Text>
               </View>
               <Text style={styles.topRowValue}>{formatPrice(item.revenue_cents)}</Text>
             </View>
@@ -271,7 +273,7 @@ function TopSalesCard({ items }: { items: TopItem[] }): React.JSX.Element {
   );
 }
 
-function TopCustomersCard({ customers }: { customers: TopCustomer[] }): React.JSX.Element {
+function TopCustomersCard({ customers, topCustomersLabel, ordersLabel, noDataLabel }: { customers: TopCustomer[]; topCustomersLabel: string; ordersLabel: string; noDataLabel: string }): React.JSX.Element {
   const visible = customers.slice(0, TOP_VISIBLE);
   const hasMore = customers.length > TOP_VISIBLE;
   return (
@@ -280,13 +282,13 @@ function TopCustomersCard({ customers }: { customers: TopCustomer[] }): React.JS
         <View style={[styles.topCardIcon, { backgroundColor: colours.success + '20' }]}>
           <Ionicons name="people-outline" size={14} color={colours.success} />
         </View>
-        <Text style={styles.topCardTitle}>Top Customers</Text>
+        <Text style={styles.topCardTitle}>{topCustomersLabel}</Text>
         {hasMore && <Text style={styles.topCardMore}>+{customers.length - TOP_VISIBLE} more</Text>}
       </View>
 
       {customers.length === 0 ? (
         <View style={styles.topCardEmpty}>
-          <Text style={styles.topCardEmptyText}>No data for this period</Text>
+          <Text style={styles.topCardEmptyText}>{noDataLabel}</Text>
         </View>
       ) : (
         <ScrollView
@@ -301,7 +303,7 @@ function TopCustomersCard({ customers }: { customers: TopCustomer[] }): React.JS
               </View>
               <View style={styles.topRowInfo}>
                 <Text style={styles.topRowName} numberOfLines={1}>{customer.name}</Text>
-                <Text style={styles.topRowSub}>{customer.order_count} {customer.order_count === 1 ? 'order' : 'orders'}</Text>
+                <Text style={styles.topRowSub}>{customer.order_count} {ordersLabel}</Text>
               </View>
               <Text style={styles.topRowValue}>{formatPrice(customer.total_cents)}</Text>
             </View>

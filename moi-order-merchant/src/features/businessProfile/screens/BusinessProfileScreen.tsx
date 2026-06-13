@@ -11,14 +11,8 @@ import { styles } from './BusinessProfileScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { KYC_DOC_TYPE } from '../../../types/enums';
 import { useAuthStore } from '../../../store/authStore';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 import type { KycDocType } from '../../../types/enums';
-
-const DOC_TYPES: Array<{ type: KycDocType; label: string }> = [
-  { type: KYC_DOC_TYPE.NationalId,           label: 'National ID' },
-  { type: KYC_DOC_TYPE.BusinessRegistration, label: 'Business Registration' },
-  { type: KYC_DOC_TYPE.BankBook,             label: 'Bank Book' },
-  { type: KYC_DOC_TYPE.StorefrontPhoto,      label: 'Storefront Photo' },
-];
 
 interface BusinessProfileScreenProps {
   onBack?: () => void;
@@ -35,8 +29,16 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
     handleBack,
   } = useBusinessProfileScreen();
 
+  const t = useTranslation();
   const user = useAuthStore((s) => s.user);
   const [showVerify, setShowVerify] = useState(false);
+
+  const DOC_TYPES: Array<{ type: KycDocType; label: string }> = [
+    { type: KYC_DOC_TYPE.NationalId,           label: t('kyc_doc_national_id') },
+    { type: KYC_DOC_TYPE.BusinessRegistration, label: t('kyc_doc_business_reg') },
+    { type: KYC_DOC_TYPE.BankBook,             label: t('kyc_doc_bank_book') },
+    { type: KYC_DOC_TYPE.StorefrontPhoto,      label: t('kyc_doc_storefront') },
+  ];
 
   const goBack = onBack ?? handleBack;
   const showBackBtn = Platform.OS !== 'web';
@@ -57,7 +59,7 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
   }
 
   if (isError || profile === null) {
-    return <View style={styles.centered}><Text style={styles.errorText}>Failed to load profile.</Text></View>;
+    return <View style={styles.centered}><Text style={styles.errorText}>{t('biz_failed_load')}</Text></View>;
   }
 
   return (
@@ -67,7 +69,7 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
           <Pressable onPress={goBack} style={styles.backBtn} accessibilityLabel="Go back" accessibilityRole="button">
             <Ionicons name="chevron-back" size={22} color={colours.textOnDark} />
           </Pressable>
-          <Text style={styles.headerTitle}>Business Profile</Text>
+          <Text style={styles.headerTitle}>{t('biz_title')}</Text>
         </View>
       )}
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
@@ -82,10 +84,8 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
           >
             <Ionicons name="warning-outline" size={18} color="#f59e0b" />
             <View style={styles.unverifiedBannerBody}>
-              <Text style={styles.unverifiedBannerTitle}>Email not verified</Text>
-              <Text style={styles.unverifiedBannerSub}>
-                Tap to verify your email and set your own password.
-              </Text>
+              <Text style={styles.unverifiedBannerTitle}>{t('biz_email_not_verified')}</Text>
+              <Text style={styles.unverifiedBannerSub}>{t('biz_tap_to_verify')}</Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color="#78350f" />
           </Pressable>
@@ -93,18 +93,18 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
 
         {/* Account section */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Account</Text>
+          <Text style={styles.sectionLabel}>{t('biz_account')}</Text>
           <View style={styles.accountCard}>
             <View style={styles.accountRow}>
               <Text style={styles.accountName}>{profile.user.name}</Text>
               {emailUnverified ? (
                 <View style={styles.unverifiedBadge}>
-                  <Text style={styles.unverifiedBadgeText}>Unverified</Text>
+                  <Text style={styles.unverifiedBadgeText}>{t('biz_unverified')}</Text>
                 </View>
               ) : (
                 <View style={styles.verifiedBadge}>
                   <Ionicons name="checkmark-circle" size={14} color={colours.primary} />
-                  <Text style={styles.verifiedBadgeText}>Verified</Text>
+                  <Text style={styles.verifiedBadgeText}>{t('biz_verified')}</Text>
                 </View>
               )}
             </View>
@@ -172,7 +172,7 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
                 accessibilityRole="button"
               >
                 <Ionicons name="add-circle-outline" size={14} color={colours.primary} />
-                <Text style={styles.addEmailPromptText}>Add email address</Text>
+                <Text style={styles.addEmailPromptText}>{t('biz_add_email')}</Text>
               </Pressable>
             )}
 
@@ -187,7 +187,7 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
                 accessibilityRole="button"
               >
                 <Ionicons name="shield-checkmark-outline" size={14} color={colours.primary} />
-                <Text style={styles.verifyBtnText}>Verify Email & Set Password</Text>
+                <Text style={styles.verifyBtnText}>{t('biz_verify_email_password')}</Text>
               </Pressable>
             )}
           </View>
@@ -209,7 +209,7 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
 
         {profile.kyc !== null && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Verification Documents</Text>
+            <Text style={styles.sectionLabel}>{t('biz_verification_docs')}</Text>
             {DOC_TYPES.map(({ type, label }) => (
               <KycDocumentCard
                 key={type}

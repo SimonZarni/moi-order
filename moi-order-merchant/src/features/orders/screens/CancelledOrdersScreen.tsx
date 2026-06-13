@@ -9,22 +9,7 @@ import { styles } from './CancelledOrdersScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { spacing } from '../../../shared/theme/spacing';
 import type { FoodOrder } from '../../../types/models';
-
-const DATE_PRESETS: { key: DatePreset; label: string }[] = [
-  { key: 'today',     label: 'Today' },
-  { key: 'yesterday', label: 'Yesterday' },
-  { key: 'last7',     label: 'Last 7 Days' },
-  { key: 'last30',    label: 'Last 30 Days' },
-];
-
-function formatDateLabel(d: string | null, preset: DatePreset): string {
-  if (preset === 'last7')     return 'Last 7 Days';
-  if (preset === 'last30')    return 'Last 30 Days';
-  if (preset === 'yesterday') return 'Yesterday';
-  if (d === null)             return 'Today';
-  const date = new Date(d + 'T00:00:00');
-  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 
 interface CancelledOrdersScreenProps {
   onBack?: () => void;
@@ -32,6 +17,7 @@ interface CancelledOrdersScreenProps {
 }
 
 export function CancelledOrdersScreen({ onBack, onSelectOrder }: CancelledOrdersScreenProps): React.JSX.Element {
+  const t = useTranslation();
   const {
     orders, isLoading,
     dateFilter, datePreset, dateFrom, dateTo,
@@ -39,6 +25,22 @@ export function CancelledOrdersScreen({ onBack, onSelectOrder }: CancelledOrders
     handleDatePreset, handleDatePrev, handleDateNext, handleDateToday,
     handleSearchChange, handleExportCsv,
   } = useCancelledOrdersScreen();
+
+  const DATE_PRESETS: { key: DatePreset; label: string }[] = [
+    { key: 'today',     label: t('common_today') },
+    { key: 'yesterday', label: t('common_yesterday') },
+    { key: 'last7',     label: t('common_last_7_days') },
+    { key: 'last30',    label: t('common_last_30_days') },
+  ];
+
+  function formatDateLabel(d: string | null, preset: DatePreset): string {
+    if (preset === 'last7')     return t('common_last_7_days');
+    if (preset === 'last30')    return t('common_last_30_days');
+    if (preset === 'yesterday') return t('common_yesterday');
+    if (d === null)             return t('common_today');
+    const date = new Date(d + 'T00:00:00');
+    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
 
   const isToday      = datePreset === 'today';
   const isRangePreset = datePreset === 'last7' || datePreset === 'last30';
@@ -59,7 +61,7 @@ export function CancelledOrdersScreen({ onBack, onSelectOrder }: CancelledOrders
               <Ionicons name="chevron-back" size={18} color={colours.textOnDark} />
             </Pressable>
           )}
-          <Text style={styles.pageTitle}>Cancelled Orders</Text>
+          <Text style={styles.pageTitle}>{t('cancelled_title')}</Text>
         </View>
         <Pressable
           style={styles.exportBtn}
@@ -68,7 +70,7 @@ export function CancelledOrdersScreen({ onBack, onSelectOrder }: CancelledOrders
           accessibilityLabel="Export cancelled orders as CSV"
         >
           <Ionicons name="download-outline" size={14} color={colours.backgroundDark} />
-          <Text style={styles.exportBtnText}>Export CSV</Text>
+          <Text style={styles.exportBtnText}>{t('common_export_csv')}</Text>
         </Pressable>
       </View>
 
@@ -99,7 +101,7 @@ export function CancelledOrdersScreen({ onBack, onSelectOrder }: CancelledOrders
             </Pressable>
             <View style={styles.dateCenter}>
               <Text style={styles.dateLabel}>{formatDateLabel(dateFilter, datePreset)}</Text>
-              <Text style={styles.dateCount}>{totalVisible} cancelled</Text>
+              <Text style={styles.dateCount}>{totalVisible} {t('common_cancelled')}</Text>
             </View>
             <Pressable
               style={[styles.dateArrow, isToday && { opacity: 0.3 }]}
@@ -112,7 +114,7 @@ export function CancelledOrdersScreen({ onBack, onSelectOrder }: CancelledOrders
             </Pressable>
             {!isToday && (
               <Pressable style={styles.todayBtn} onPress={handleDateToday} accessibilityRole="button" accessibilityLabel="Back to today">
-                <Text style={styles.todayBtnText}>Today</Text>
+                <Text style={styles.todayBtnText}>{t('common_today')}</Text>
               </Pressable>
             )}
           </View>
@@ -123,7 +125,7 @@ export function CancelledOrdersScreen({ onBack, onSelectOrder }: CancelledOrders
           <View style={styles.rangeLabel}>
             <Ionicons name="calendar-outline" size={13} color={colours.textMuted} />
             <Text style={styles.rangeLabelText}>
-              {formatDateLabel(dateFilter, datePreset)} — {totalVisible} cancelled
+              {formatDateLabel(dateFilter, datePreset)} — {totalVisible} {t('common_cancelled')}
             </Text>
           </View>
         )}
@@ -133,7 +135,7 @@ export function CancelledOrdersScreen({ onBack, onSelectOrder }: CancelledOrders
           <Ionicons name="search-outline" size={14} color={colours.textSubtle} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search by customer or order #…"
+            placeholder={t('common_search_customer_order')}
             placeholderTextColor={colours.textSubtle}
             value={searchQuery}
             onChangeText={handleSearchChange}
@@ -165,18 +167,18 @@ export function CancelledOrdersScreen({ onBack, onSelectOrder }: CancelledOrders
             <View style={styles.emptyIcon}>
               <Ionicons name="close-circle-outline" size={26} color={colours.error} />
             </View>
-            <Text style={styles.emptyTitle}>No cancelled orders</Text>
+            <Text style={styles.emptyTitle}>{t('cancelled_no_orders')}</Text>
             <Text style={styles.emptyBody}>
               {searchQuery.length > 0
-                ? 'Try a different search term'
-                : 'No orders were cancelled in this period'}
+                ? t('cancelled_no_orders_search')
+                : t('cancelled_no_orders_period')}
             </Text>
           </View>
         ) : (
           <View>
             <View style={styles.sectionLabel}>
               <View style={[styles.sectionDot, { backgroundColor: colours.error }]} />
-              <Text style={styles.sectionLabelText}>Cancelled</Text>
+              <Text style={styles.sectionLabelText}>{t('cancelled_section_label')}</Text>
               <Text style={styles.sectionCount}>{totalVisible}</Text>
             </View>
             {orders.map((item: FoodOrder) => (

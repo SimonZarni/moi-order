@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, TextInput, Pressable, ActivityIndicator, ScrollView } from 'react-native';
 import { styles } from './Step1BusinessInfo.styles';
 import { colours } from '../../../shared/theme/colours';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 
 const PRESET_TYPES = ['Restaurant', 'Cafe', 'Food Stall'] as const;
 const BUSINESS_TYPES = [...PRESET_TYPES, 'Other'] as const;
@@ -55,11 +56,13 @@ export function Step1BusinessInfo({
     });
   }, [businessName, selectedChip, isOtherSelected, otherTypeText, businessAddress, businessPhone, onSubmit]);
 
+  const t = useTranslation();
+
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-      <Text style={styles.sectionTitle}>Business Information</Text>
+      <Text style={styles.sectionTitle}>{t('kyc_step1_title')}</Text>
 
-      <Text style={styles.label}>Business Name</Text>
+      <Text style={styles.label}>{t('kyc_step1_business_name')}</Text>
       <TextInput
         style={styles.input}
         placeholder="Your restaurant name"
@@ -69,7 +72,7 @@ export function Step1BusinessInfo({
         accessibilityLabel="Business name"
       />
 
-      <Text style={styles.label}>Business Type</Text>
+      <Text style={styles.label}>{t('kyc_step1_business_type')}</Text>
       <View style={styles.typeRow}>
         {BUSINESS_TYPES.map((type) => (
           <Pressable
@@ -96,7 +99,7 @@ export function Step1BusinessInfo({
         />
       )}
 
-      <Text style={styles.label}>Business Address</Text>
+      <Text style={styles.label}>{t('kyc_step1_business_address')}</Text>
       <TextInput
         style={[styles.input, styles.textArea]}
         placeholder="Full address of your business"
@@ -108,7 +111,7 @@ export function Step1BusinessInfo({
         accessibilityLabel="Business address"
       />
 
-      <Text style={styles.label}>Business Phone <Text style={styles.labelOptional}>(optional)</Text></Text>
+      <Text style={styles.label}>{t('kyc_step1_business_phone')} <Text style={styles.labelOptional}>({t('common_optional')})</Text></Text>
       <TextInput
         style={styles.input}
         placeholder="e.g. +959 123 456 789"
@@ -129,7 +132,7 @@ export function Step1BusinessInfo({
       >
         {isLoading
           ? <ActivityIndicator color={colours.backgroundDark} />
-          : <Text style={styles.buttonText}>Continue</Text>}
+          : <Text style={styles.buttonText}>{t('kyc_step1_continue')}</Text>}
       </Pressable>
     </ScrollView>
   );

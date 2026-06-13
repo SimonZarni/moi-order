@@ -15,10 +15,12 @@ import { styles } from './MenuScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { spacing } from '../../../shared/theme/spacing';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 import type { MenuItem } from '../../../types/models';
 import type { AddItemForm } from '../hooks/useMenuScreen';
 
 export function MenuScreen(): React.JSX.Element {
+  const t = useTranslation();
   const {
     categories, filteredItems, guardedItemIds, isLoading, hasMissingSystemCategories, menuView,
     selectedCategoryId, searchQuery, handleSelectCategory, handleSearchChange,
@@ -43,14 +45,10 @@ export function MenuScreen(): React.JSX.Element {
 
   const { width } = useWindowDimensions();
 
-  // Responsive column count — content pane is roughly window-width minus sidebar (~220 px).
-  // Fewer, wider columns give each card room to show name, description, and price comfortably.
-  // Using flexWrap (not FlatList numColumns) so percentages map directly to CSS grid.
   const numColumns =
     width >= 1400 ? 4 :
     width >= 900  ? 3 : 2;
 
-  // Each item width as a CSS percentage string — React Native Web supports this.
   const itemWidthPct = `${Math.floor(100 / numColumns)}%` as `${number}%`;
 
   const activeCategory = selectedCategoryId !== 'all'
@@ -70,7 +68,7 @@ export function MenuScreen(): React.JSX.Element {
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <View style={styles.header}>
-        <Text style={styles.pageTitle}>Menu</Text>
+        <Text style={styles.pageTitle}>{t('menu_title')}</Text>
         <Pressable
           style={styles.addCategoryBtn}
           onPress={() => setShowAddCategoryModal(true)}
@@ -78,7 +76,7 @@ export function MenuScreen(): React.JSX.Element {
           accessibilityRole="button"
         >
           <Ionicons name="folder-open-outline" size={13} color={colours.backgroundDark} />
-          <Text style={styles.addCategoryBtnText}>Add Category</Text>
+          <Text style={styles.addCategoryBtnText}>{t('menu_add_category')}</Text>
         </Pressable>
       </View>
 
@@ -87,7 +85,7 @@ export function MenuScreen(): React.JSX.Element {
         <Ionicons name="search-outline" size={15} color={colours.textSubtle} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search items…"
+          placeholder={t('menu_search_placeholder')}
           placeholderTextColor={colours.textSubtle}
           value={searchQuery}
           onChangeText={handleSearchChange}
@@ -106,7 +104,6 @@ export function MenuScreen(): React.JSX.Element {
       </View>
 
       {/* ── Category tabs ────────────────────────────────────────────────── */}
-      {/* Outer View enforces height — ScrollView ignores height on its own style prop on Expo Web */}
       <View style={styles.tabsOuter}>
       <ScrollView
         horizontal
@@ -115,7 +112,7 @@ export function MenuScreen(): React.JSX.Element {
         style={styles.tabs}
       >
         <CategoryTab
-          label="All"
+          label={t('menu_all_category')}
           count={categories.reduce((sum, c) => sum + c.items.length, 0)}
           isActive={selectedCategoryId === 'all'}
           onPress={() => handleSelectCategory('all')}
@@ -138,13 +135,11 @@ export function MenuScreen(): React.JSX.Element {
       {hasMissingSystemCategories && (
         <View style={styles.warnBanner} accessibilityRole="alert">
           <Ionicons name="warning-outline" size={13} color={colours.warning} />
-          <Text style={styles.warnText}>
-            Menu hidden from customers — Popular Picks & Recommendations each need at least 1 item.
-          </Text>
+          <Text style={styles.warnText}>{t('menu_system_warn')}</Text>
         </View>
       )}
 
-      {/* ── Items grid — flexWrap ScrollView (reliable on Expo Web) ─────── */}
+      {/* ── Items grid ──────────────────────────────────────────────────── */}
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.grid}
@@ -154,12 +149,10 @@ export function MenuScreen(): React.JSX.Element {
           <View style={styles.emptyState}>
             <Ionicons name="restaurant-outline" size={40} color={colours.textSubtle} />
             <Text style={styles.emptyTitle}>
-              {searchQuery ? 'No items match your search' : 'No items yet'}
+              {searchQuery ? t('menu_no_items_search') : t('menu_no_items_empty')}
             </Text>
             <Text style={styles.emptySubtitle}>
-              {searchQuery
-                ? 'Try a different keyword'
-                : 'Select a category below and add your first item'}
+              {searchQuery ? t('menu_no_items_keyword') : t('menu_no_items_empty_hint')}
             </Text>
           </View>
         ) : menuView === 'list' ? (
@@ -178,7 +171,6 @@ export function MenuScreen(): React.JSX.Element {
         ) : (
           <View style={styles.gridWrap}>
             {filteredItems.map((item) => (
-              // Inline width so React Native Web maps it to a CSS percentage directly
               <View key={item.id} style={[styles.gridItem, { width: itemWidthPct }]}>
                 <MenuItemCard
                   item={item}
@@ -193,7 +185,7 @@ export function MenuScreen(): React.JSX.Element {
         )}
       </ScrollView>
 
-      {/* ── Floating "Add Item" button — only when a category is selected ── */}
+      {/* ── Floating "Add Item" button ─────────────────────────────────── */}
       {activeCategory !== null && (
         <Pressable
           style={styles.fab}
@@ -202,7 +194,7 @@ export function MenuScreen(): React.JSX.Element {
           accessibilityRole="button"
         >
           <Ionicons name="add" size={18} color={colours.backgroundDark} />
-          <Text style={styles.fabText}>Add Item</Text>
+          <Text style={styles.fabText}>{t('menu_add_item')}</Text>
         </Pressable>
       )}
 
@@ -210,10 +202,10 @@ export function MenuScreen(): React.JSX.Element {
       <Modal visible={showAddCategoryModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>New Category</Text>
+            <Text style={styles.modalTitle}>{t('menu_new_category_title')}</Text>
             <TextInput
               style={styles.modalInput}
-              placeholder="Category name"
+              placeholder={t('menu_category_name_placeholder')}
               placeholderTextColor="rgba(255,255,255,0.3)"
               value={newCategoryName}
               onChangeText={handleNewCategoryNameChange}
@@ -229,7 +221,7 @@ export function MenuScreen(): React.JSX.Element {
                 accessibilityLabel="Cancel"
                 accessibilityRole="button"
               >
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text style={styles.cancelText}>{t('common_cancel')}</Text>
               </Pressable>
               <Pressable
                 style={styles.confirmButton}
@@ -237,7 +229,7 @@ export function MenuScreen(): React.JSX.Element {
                 accessibilityLabel="Add category"
                 accessibilityRole="button"
               >
-                <Text style={styles.confirmText}>Add</Text>
+                <Text style={styles.confirmText}>{t('common_add')}</Text>
               </Pressable>
             </View>
           </View>
@@ -248,10 +240,10 @@ export function MenuScreen(): React.JSX.Element {
       <Modal visible={renamingCategoryId !== null} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Rename Category</Text>
+            <Text style={styles.modalTitle}>{t('menu_rename_category_title')}</Text>
             <TextInput
               style={styles.modalInput}
-              placeholder="Category name"
+              placeholder={t('menu_category_name_placeholder')}
               placeholderTextColor="rgba(255,255,255,0.3)"
               value={renamingCategoryName}
               onChangeText={handleRenameNameChange}
@@ -262,10 +254,10 @@ export function MenuScreen(): React.JSX.Element {
             />
             <View style={styles.modalActions}>
               <Pressable style={styles.cancelButton} onPress={handleCancelRename} accessibilityLabel="Cancel" accessibilityRole="button">
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text style={styles.cancelText}>{t('common_cancel')}</Text>
               </Pressable>
               <Pressable style={styles.confirmButton} onPress={handleConfirmRename} accessibilityLabel="Save name" accessibilityRole="button">
-                <Text style={styles.confirmText}>Save</Text>
+                <Text style={styles.confirmText}>{t('common_save')}</Text>
               </Pressable>
             </View>
           </View>
@@ -276,16 +268,16 @@ export function MenuScreen(): React.JSX.Element {
       <Modal visible={deletingCategoryId !== null} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Delete Category</Text>
+            <Text style={styles.modalTitle}>{t('menu_delete_category_title')}</Text>
             <Text style={styles.deleteConfirmBody}>
               {`Delete "${deletingCategoryName}"? All items in this category will also be removed. This cannot be undone.`}
             </Text>
             <View style={styles.modalActions}>
               <Pressable style={styles.cancelButton} onPress={handleCancelDelete} accessibilityLabel="Cancel" accessibilityRole="button">
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text style={styles.cancelText}>{t('common_cancel')}</Text>
               </Pressable>
               <Pressable style={styles.deleteConfirmBtn} onPress={handleConfirmDelete} accessibilityLabel="Confirm delete" accessibilityRole="button">
-                <Text style={styles.deleteConfirmText}>Delete</Text>
+                <Text style={styles.deleteConfirmText}>{t('common_delete')}</Text>
               </Pressable>
             </View>
           </View>
@@ -301,7 +293,7 @@ export function MenuScreen(): React.JSX.Element {
             keyboardShouldPersistTaps="handled"
           >
             <ItemFormContent
-              title="New Menu Item"
+              title={t('menu_new_item_title')}
               form={addItemForm}
               isSaving={isAddingItem}
               onFieldChange={handleAddItemFieldChange}
@@ -314,7 +306,7 @@ export function MenuScreen(): React.JSX.Element {
               onOptionChange={handleOptionChange}
               onCancel={handleCloseAddItem}
               onSubmit={handleAddItemSubmit}
-              submitLabel="Add Item"
+              submitLabel={t('menu_add_item')}
             />
           </ScrollView>
         </View>
@@ -329,7 +321,7 @@ export function MenuScreen(): React.JSX.Element {
             keyboardShouldPersistTaps="handled"
           >
             <ItemFormContent
-              title="Edit Menu Item"
+              title={t('menu_edit_item_title')}
               form={editItemForm}
               existingPhotoUrl={editItemExistingPhotoUrl}
               isSaving={isEditingItem}
@@ -343,7 +335,7 @@ export function MenuScreen(): React.JSX.Element {
               onOptionChange={handleEditOptionChange}
               onCancel={handleCloseEditItem}
               onSubmit={handleEditItemSubmit}
-              submitLabel="Save Changes"
+              submitLabel={t('menu_save_changes')}
             />
           </ScrollView>
         </View>
@@ -365,9 +357,6 @@ interface NumericInputProps {
   accessibilityLabel: string;
 }
 
-/** Controlled number input that avoids the "append-to-existing-digit" bug.
- *  On focus: pre-selects the current value so typing replaces it entirely.
- *  On blur: clamps the draft string to [min, max], falling back to `fallback`. */
 function NumericInput({ value, min, max, fallback, style, onChange, accessibilityLabel }: NumericInputProps): React.JSX.Element {
   const [draft, setDraft] = useState<string | null>(null);
   const display = draft !== null ? draft : String(value);
@@ -403,7 +392,6 @@ interface CategoryTabProps {
 function CategoryTab({ label, count, isActive, onPress, onEdit, onDelete }: CategoryTabProps): React.JSX.Element {
   return (
     <View style={[styles.tab, isActive && styles.tabActive]}>
-      {/* Label + count — tappable area for selecting the category */}
       <Pressable
         style={styles.tabLabelArea}
         onPress={onPress}
@@ -455,6 +443,8 @@ function ItemFormContent({
   onAddOption, onRemoveOption, onOptionChange,
   onCancel, onSubmit, submitLabel,
 }: ItemFormContentProps): React.JSX.Element {
+  const t = useTranslation();
+
   const discountAmount =
     form.original_price.trim() && form.price.trim()
       ? Math.max(0, parseFloat(form.original_price) - parseFloat(form.price))
@@ -466,7 +456,7 @@ function ItemFormContent({
 
       <TextInput
         style={styles.modalInput}
-        placeholder="Item name *"
+        placeholder={t('menu_item_name_placeholder')}
         placeholderTextColor="rgba(255,255,255,0.3)"
         value={form.name}
         onChangeText={(v) => onFieldChange('name', v)}
@@ -475,7 +465,7 @@ function ItemFormContent({
 
       <TextInput
         style={[styles.modalInput, { minHeight: 60, textAlignVertical: 'top' }]}
-        placeholder="Description (optional)"
+        placeholder={t('menu_item_desc_placeholder')}
         placeholderTextColor="rgba(255,255,255,0.3)"
         value={form.description}
         onChangeText={(v) => onFieldChange('description', v)}
@@ -485,7 +475,7 @@ function ItemFormContent({
 
       <View style={styles.priceRow}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.priceLabel}>Price *</Text>
+          <Text style={styles.priceLabel}>{t('menu_price_label')}</Text>
           <TextInput
             style={styles.modalInput}
             placeholder="100.00"
@@ -497,10 +487,10 @@ function ItemFormContent({
           />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.priceLabel}>Original Price (before discount)</Text>
+          <Text style={styles.priceLabel}>{t('menu_original_price_label')}</Text>
           <TextInput
             style={styles.modalInput}
-            placeholder="Optional"
+            placeholder={t('common_optional')}
             placeholderTextColor="rgba(255,255,255,0.3)"
             value={form.original_price}
             onChangeText={(v) => onFieldChange('original_price', v)}
@@ -524,7 +514,7 @@ function ItemFormContent({
 
       <View style={styles.sectionDivider} />
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Options / Modifiers</Text>
+        <Text style={styles.sectionTitle}>{t('menu_options_title')}</Text>
         <Pressable
           style={styles.addSmallBtn}
           onPress={onAddOptionGroup}
@@ -532,7 +522,7 @@ function ItemFormContent({
           accessibilityLabel="Add option group"
         >
           <Ionicons name="add-circle-outline" size={14} color={colours.primary} />
-          <Text style={styles.addSmallBtnText}>Add Group</Text>
+          <Text style={styles.addSmallBtnText}>{t('menu_add_group')}</Text>
         </Pressable>
       </View>
       <Text style={styles.sectionHint}>
@@ -544,7 +534,7 @@ function ItemFormContent({
           <View style={styles.optionGroupHeader}>
             <TextInput
               style={[styles.modalInput, { flex: 1, marginBottom: 0 }]}
-              placeholder="Group name (e.g. Protein)"
+              placeholder={t('menu_group_name_placeholder')}
               placeholderTextColor="rgba(255,255,255,0.3)"
               value={group.name}
               onChangeText={(v) => onOptionGroupChange(gi, 'name', v)}
@@ -562,7 +552,7 @@ function ItemFormContent({
 
           <View style={styles.optionGroupMeta}>
             <View style={styles.toggleRowSmall}>
-              <Text style={styles.toggleLabelSmall}>Required</Text>
+              <Text style={styles.toggleLabelSmall}>{t('menu_required')}</Text>
               <Switch
                 value={group.is_required}
                 onValueChange={(v) => onOptionGroupChange(gi, 'is_required', v)}
@@ -572,7 +562,7 @@ function ItemFormContent({
               />
             </View>
             <View style={styles.toggleRowSmall}>
-              <Text style={styles.toggleLabelSmall}>Min</Text>
+              <Text style={styles.toggleLabelSmall}>{t('menu_min')}</Text>
               <NumericInput
                 style={styles.smallNumInput}
                 value={group.min_selections}
@@ -584,7 +574,7 @@ function ItemFormContent({
               />
             </View>
             <View style={styles.toggleRowSmall}>
-              <Text style={styles.toggleLabelSmall}>Max</Text>
+              <Text style={styles.toggleLabelSmall}>{t('menu_max')}</Text>
               <NumericInput
                 style={styles.smallNumInput}
                 value={group.max_selections}
@@ -601,7 +591,7 @@ function ItemFormContent({
             <View key={oi} style={styles.optionRow}>
               <TextInput
                 style={[styles.modalInput, { flex: 2, marginBottom: 0 }]}
-                placeholder="Option name"
+                placeholder={t('menu_option_name_placeholder')}
                 placeholderTextColor="rgba(255,255,255,0.3)"
                 value={opt.name}
                 onChangeText={(v) => onOptionChange(gi, oi, 'name', v)}
@@ -636,7 +626,7 @@ function ItemFormContent({
             accessibilityLabel="Add option"
           >
             <Ionicons name="add-outline" size={13} color={colours.primary} />
-            <Text style={styles.addOptionBtnText}>Add Option</Text>
+            <Text style={styles.addOptionBtnText}>{t('menu_add_option')}</Text>
           </Pressable>
         </View>
       ))}
@@ -648,7 +638,7 @@ function ItemFormContent({
           accessibilityLabel="Cancel"
           accessibilityRole="button"
         >
-          <Text style={styles.cancelText}>Cancel</Text>
+          <Text style={styles.cancelText}>{t('common_cancel')}</Text>
         </Pressable>
         <Pressable
           style={[
@@ -677,6 +667,7 @@ interface PhotoPreviewProps {
 }
 
 function PhotoPreview({ newPhoto, existingUrl, onPickPhoto }: PhotoPreviewProps): React.JSX.Element {
+  const t = useTranslation();
   const [loadError, setLoadError] = useState(false);
   const uri = newPhoto !== null ? newPhoto.uri : existingUrl;
   const isNew = newPhoto !== null;
@@ -692,7 +683,7 @@ function PhotoPreview({ newPhoto, existingUrl, onPickPhoto }: PhotoPreviewProps)
       >
         <Ionicons name="image-outline" size={15} color={colours.primary} />
         <Text style={[styles.cancelText, { color: colours.primary, marginLeft: 6 }]}>
-          Add Photo (optional)
+          {t('menu_tap_upload_photo')}
         </Text>
       </Pressable>
     );
@@ -708,7 +699,7 @@ function PhotoPreview({ newPhoto, existingUrl, onPickPhoto }: PhotoPreviewProps)
           accessibilityLabel="Photo unavailable, tap to upload new"
         >
           <Ionicons name="image-outline" size={28} color={colours.medium} />
-          <Text style={styles.photoErrorText}>Tap to upload photo</Text>
+          <Text style={styles.photoErrorText}>{t('menu_tap_upload_photo')}</Text>
         </Pressable>
       ) : (
         <Image
@@ -721,7 +712,7 @@ function PhotoPreview({ newPhoto, existingUrl, onPickPhoto }: PhotoPreviewProps)
       )}
       {isNew && !loadError && (
         <View style={styles.photoNewBadge}>
-          <Text style={styles.photoNewBadgeText}>New</Text>
+          <Text style={styles.photoNewBadgeText}>{t('menu_photo_badge_new')}</Text>
         </View>
       )}
       {!loadError && (
@@ -732,7 +723,7 @@ function PhotoPreview({ newPhoto, existingUrl, onPickPhoto }: PhotoPreviewProps)
           accessibilityLabel="Change photo"
         >
           <Ionicons name="image-outline" size={14} color={colours.primary} />
-          <Text style={styles.photoChangeBtnText}>Change Photo</Text>
+          <Text style={styles.photoChangeBtnText}>{t('menu_change_photo')}</Text>
         </Pressable>
       )}
     </View>

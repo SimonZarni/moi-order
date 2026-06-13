@@ -8,10 +8,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLoginScreen } from '../hooks/useLoginScreen';
 import { styles } from './LoginScreen.styles';
 import { colours } from '../../../shared/theme/colours';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 
 const LOGO = require('../../../../assets/moi-order-icon.png') as number;
 
 export function LoginScreen(): React.JSX.Element {
+  const t = useTranslation();
   const {
     email, password, showPassword, passwordFocused, passwordInputRef, isLoading,
     isGoogleLoading, isAppleLoading, isLineLoading, appleAvailable,
@@ -35,10 +37,10 @@ export function LoginScreen(): React.JSX.Element {
       )}
 
       <View style={styles.field}>
-        <Text style={styles.fieldLabel}>EMAIL ADDRESS</Text>
+        <Text style={styles.fieldLabel}>{t('login_email_label')}</Text>
         <TextInput
           style={styles.input}
-          placeholder="you@email.com"
+          placeholder={t('login_email_placeholder')}
           placeholderTextColor={colours.textSubtle}
           value={email}
           onChangeText={setEmail}
@@ -52,7 +54,7 @@ export function LoginScreen(): React.JSX.Element {
       </View>
 
       <View style={styles.field}>
-        <Text style={styles.fieldLabel}>PASSWORD</Text>
+        <Text style={styles.fieldLabel}>{t('login_password_label')}</Text>
         <View style={[styles.inputWrap, passwordFocused && styles.inputWrapFocused]}>
           <TextInput
             ref={passwordInputRef}
@@ -71,7 +73,7 @@ export function LoginScreen(): React.JSX.Element {
           <Pressable
             onPress={handleTogglePassword}
             style={styles.eyeBtn}
-            accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+            accessibilityLabel={showPassword ? t('login_hide_password') : t('login_show_password')}
             accessibilityRole="button"
           >
             <Ionicons
@@ -92,12 +94,12 @@ export function LoginScreen(): React.JSX.Element {
       >
         {isLoading
           ? <ActivityIndicator color={colours.backgroundDark} />
-          : <Text style={styles.primaryBtnText}>Sign In</Text>}
+          : <Text style={styles.primaryBtnText}>{t('login_sign_in')}</Text>}
       </Pressable>
 
       <View style={styles.orRow}>
         <View style={styles.orLine} />
-        <Text style={styles.orText}>or continue with</Text>
+        <Text style={styles.orText}>{t('login_or_continue')}</Text>
         <View style={styles.orLine} />
       </View>
 
@@ -157,7 +159,7 @@ export function LoginScreen(): React.JSX.Element {
         accessibilityRole="button"
       >
         <Ionicons name="phone-portrait-outline" size={16} color={colours.primary} />
-        <Text style={styles.secondaryBtnText}>Continue with Phone OTP</Text>
+        <Text style={styles.secondaryBtnText}>{t('login_phone_instead')}</Text>
       </Pressable>
 
       {/* Registration is invite-only — button hidden */}

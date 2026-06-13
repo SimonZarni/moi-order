@@ -6,6 +6,7 @@ import { styles } from './KycPendingScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { KYC_STATUS } from '../../../types/enums';
 import { formatDateTime } from '../../../shared/utils/formatDate';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 
 export function KycPendingScreen(): React.JSX.Element {
   const {
@@ -17,6 +18,7 @@ export function KycPendingScreen(): React.JSX.Element {
     handleContactSupport,
   } = useKycPendingScreen();
 
+  const t = useTranslation();
   const isRejected = application?.status === KYC_STATUS.Rejected;
   const isPending =
     application?.status === KYC_STATUS.Submitted ||
@@ -30,7 +32,7 @@ export function KycPendingScreen(): React.JSX.Element {
 
         {application !== null && (
           <>
-            <Text style={styles.title}>Application Status</Text>
+            <Text style={styles.title}>{t('kyc_pending_title')}</Text>
 
             <View style={[styles.badge, getBadgeStyle(application.status)]}>
               <Text style={[styles.badgeText, getBadgeTextStyle(application.status)]}>
@@ -42,15 +44,13 @@ export function KycPendingScreen(): React.JSX.Element {
 
             {application.submitted_at !== null && (
               <Text style={styles.meta}>
-                Submitted: {formatDateTime(application.submitted_at)}
+                {t('kyc_pending_submitted')} {formatDateTime(application.submitted_at)}
               </Text>
             )}
 
             {isPending && (
               <View style={styles.infoBox}>
-                <Text style={styles.infoText}>
-                  Your application is under review. Our team will get back to you within 1–2 business days.
-                </Text>
+                <Text style={styles.infoText}>{t('kyc_pending_review_note')}</Text>
               </View>
             )}
 
@@ -58,14 +58,12 @@ export function KycPendingScreen(): React.JSX.Element {
               <>
                 {application.review_notes !== null && (
                   <View style={styles.rejectedBox}>
-                    <Text style={styles.rejectedTitle}>Reason for rejection:</Text>
+                    <Text style={styles.rejectedTitle}>{t('kyc_pending_rejection_title')}</Text>
                     <Text style={styles.rejectedNotes}>{application.review_notes}</Text>
                   </View>
                 )}
 
-                <Text style={styles.rejectedHelp}>
-                  You can correct the issues and resubmit, or contact our support team for assistance.
-                </Text>
+                <Text style={styles.rejectedHelp}>{t('kyc_pending_rejection_help')}</Text>
 
                 <Pressable
                   style={styles.resubmitButton}
@@ -73,7 +71,7 @@ export function KycPendingScreen(): React.JSX.Element {
                   accessibilityLabel="Resubmit KYC application"
                   accessibilityRole="button"
                 >
-                  <Text style={styles.resubmitButtonText}>Resubmit Application</Text>
+                  <Text style={styles.resubmitButtonText}>{t('kyc_pending_resubmit')}</Text>
                 </Pressable>
 
                 <Pressable
@@ -82,7 +80,7 @@ export function KycPendingScreen(): React.JSX.Element {
                   accessibilityLabel="Contact support via email"
                   accessibilityRole="button"
                 >
-                  <Text style={styles.contactButtonText}>Contact Support</Text>
+                  <Text style={styles.contactButtonText}>{t('kyc_pending_contact_support')}</Text>
                 </Pressable>
               </>
             )}
@@ -95,7 +93,7 @@ export function KycPendingScreen(): React.JSX.Element {
           accessibilityLabel="Log out of merchant account"
           accessibilityRole="button"
         >
-          <Text style={styles.logoutText}>Log Out</Text>
+          <Text style={styles.logoutText}>{t('kyc_log_out')}</Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>

@@ -9,8 +9,10 @@ import { Step3Confirmation } from '../components/Step3Confirmation';
 import { styles } from './KycWizardScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { useAuthStore } from '../../../store/authStore';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 
 export function KycWizardScreen(): React.JSX.Element {
+  const t = useTranslation();
   const logout = useAuthStore((s) => s.logout);
   const {
     currentStep, step1Data, uploadedTypes, previewUris, isLoading, error,
@@ -36,7 +38,7 @@ export function KycWizardScreen(): React.JSX.Element {
           accessibilityRole="button"
         >
           <Ionicons name="log-out-outline" size={16} color={colours.textSubtle} />
-          <Text style={styles.logoutBtnText}>Log Out</Text>
+          <Text style={styles.logoutBtnText}>{t('kyc_log_out')}</Text>
         </Pressable>
       </View>
 

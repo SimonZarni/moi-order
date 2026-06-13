@@ -13,6 +13,7 @@ import type { OrderChatMessage } from '../../../types/models';
 import type { MerchantStackParamList } from '../../../types/navigation';
 import { useOrderChatScreen, SelectedImage } from '../hooks/useOrderChatScreen';
 import { styles } from './OrderChatScreen.styles';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 
 type Route = RouteProp<MerchantStackParamList, 'OrderChat'>;
 
@@ -87,6 +88,7 @@ interface ContentProps {
 }
 
 export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatus, onBack }: ContentProps): React.JSX.Element {
+  const t = useTranslation();
   const {
     messages, isLoading, isError, isNetworkError, sendError, text, isSending, inputBarPadding,
     selectedImages, selectedPhoto, listRef, isChatLocked, isCompletedButNotLocked,
@@ -108,7 +110,7 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
           <Ionicons name="arrow-back" size={20} color={colours.textOnLight} />
         </Pressable>
         <View style={styles.headerInfo}>
-          <Text style={styles.topBarTitle}>Chat with Customer</Text>
+          <Text style={styles.topBarTitle}>{t('chat_title')}</Text>
           <Text style={styles.topBarSub}>{orderNumber ?? `Order #${orderId}`}</Text>
         </View>
       </View>
@@ -127,14 +129,14 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
             />
             <Text style={styles.emptyText}>
               {isNetworkError
-                ? 'Please check your internet connection.'
-                : 'Could not load messages.'}
+                ? t('chat_check_internet')
+                : t('chat_cannot_load')}
             </Text>
           </Pressable>
         ) : messages.length === 0 ? (
           <Pressable style={styles.emptyWrap} onPress={Keyboard.dismiss}>
             <Ionicons name="chatbubbles-outline" size={44} color={colours.textSubtle} />
-            <Text style={styles.emptyText}>No messages.</Text>
+            <Text style={styles.emptyText}>{t('chat_no_messages')}</Text>
           </Pressable>
         ) : (
           <FlatList
@@ -174,18 +176,14 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
         {isChatLocked ? (
           <View style={styles.chatLockedBanner}>
             <Ionicons name="lock-closed-outline" size={14} color={colours.error} />
-            <Text style={styles.chatLockedText}>
-              Chat has closed. Messages are deleted 3 hours after order completion.
-            </Text>
+            <Text style={styles.chatLockedText}>{t('chat_locked')}</Text>
           </View>
         ) : (
           <>
             {isCompletedButNotLocked && (
               <View style={styles.chatWarningBanner}>
                 <Ionicons name="time-outline" size={14} color={colours.warning} />
-                <Text style={styles.chatWarningText}>
-                  Chat will close 3 hours after order completion.
-                </Text>
+                <Text style={styles.chatWarningText}>{t('chat_will_close')}</Text>
               </View>
             )}
             <View style={[styles.inputBar, { paddingBottom: inputBarPadding }]}>
@@ -193,13 +191,13 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
                 style={styles.attachBtn}
                 onPress={handleAttachPress}
                 accessibilityRole="button"
-                accessibilityLabel="Add photo"
+                accessibilityLabel={t('chat_add_photo')}
               >
                 <Ionicons name="image-outline" size={22} color={colours.primary} />
               </Pressable>
               <TextInput
                 style={styles.textInput}
-                placeholder="Type a message…"
+                placeholder={t('chat_type_message')}
                 placeholderTextColor="rgba(255,255,255,0.3)"
                 value={text}
                 onChangeText={handleTextChange}

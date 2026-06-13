@@ -8,21 +8,13 @@ import { formatPrice } from '../../../shared/utils/formatCurrency';
 import { formatDateTime } from '../../../shared/utils/formatDate';
 import { ORDER_STATUS } from '../../../types/enums';
 import type { FoodOrder } from '../../../types/models';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 
 interface OrderAction {
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
   nextStatus: string;
 }
-
-const ORDER_ACTIONS: Partial<Record<string, OrderAction>> = {
-  [ORDER_STATUS.OrderPlaced]:          { label: 'Accept Order',    icon: 'checkmark-circle-outline', nextStatus: ORDER_STATUS.WaitingForPayment },
-  [ORDER_STATUS.PaymentConfirmed]:     { label: 'Start Preparing', icon: 'flame-outline',             nextStatus: ORDER_STATUS.PreparingFood },
-  [ORDER_STATUS.PreparingFood]:        { label: 'Mark Ready',      icon: 'bag-check-outline',         nextStatus: ORDER_STATUS.WaitingForDelivery },
-  [ORDER_STATUS.WaitingForDelivery]:   { label: 'Rider Picked Up', icon: 'bicycle-outline',           nextStatus: ORDER_STATUS.DeliveryOnTheWay },
-  [ORDER_STATUS.DeliveryOnTheWay]:     { label: 'Mark Delivered',  icon: 'location-outline',          nextStatus: ORDER_STATUS.Delivered },
-  [ORDER_STATUS.Delivered]:            { label: 'Complete Order',  icon: 'checkmark-done-outline',    nextStatus: ORDER_STATUS.Completed },
-};
 
 const STATUS_COLOURS: Record<string, string> = {
   [ORDER_STATUS.OrderPlaced]:        colours.warning,
@@ -45,7 +37,18 @@ interface OrderCardProps {
 
 export function OrderCard({ order, onUpdateStatus, onPress, variant = 'dark' }: OrderCardProps): React.JSX.Element {
   const { isDesktop } = useResponsive();
+  const t = useTranslation();
   const isLight = variant === 'light';
+
+  const ORDER_ACTIONS: Partial<Record<string, OrderAction>> = {
+    [ORDER_STATUS.OrderPlaced]:        { label: t('card_accept_order'),    icon: 'checkmark-circle-outline', nextStatus: ORDER_STATUS.WaitingForPayment },
+    [ORDER_STATUS.PaymentConfirmed]:   { label: t('card_start_preparing'), icon: 'flame-outline',             nextStatus: ORDER_STATUS.PreparingFood },
+    [ORDER_STATUS.PreparingFood]:      { label: t('card_mark_ready'),      icon: 'bag-check-outline',         nextStatus: ORDER_STATUS.WaitingForDelivery },
+    [ORDER_STATUS.WaitingForDelivery]: { label: t('card_rider_picked_up'), icon: 'bicycle-outline',           nextStatus: ORDER_STATUS.DeliveryOnTheWay },
+    [ORDER_STATUS.DeliveryOnTheWay]:   { label: t('card_mark_delivered'),  icon: 'location-outline',          nextStatus: ORDER_STATUS.Delivered },
+    [ORDER_STATUS.Delivered]:          { label: t('card_complete_order'),  icon: 'checkmark-done-outline',    nextStatus: ORDER_STATUS.Completed },
+  };
+
   const action = ORDER_ACTIONS[order.status];
   const statusColour = STATUS_COLOURS[order.status] ?? colours.medium;
   const initials = (order.user.name ?? '?').slice(0, 2).toUpperCase();

@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { styles } from './Step2Documents.styles';
 import { colours } from '../../../shared/theme/colours';
 import { KYC_DOC_TYPE, type KycDocType } from '../../../types/enums';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 import type { UploadFileRef } from '../../../api/kyc';
 import type { ImagePickerAsset } from 'expo-image-picker';
 
@@ -14,13 +15,6 @@ interface DocCard {
   label: string;
   description: string;
 }
-
-const DOC_CARDS: DocCard[] = [
-  { type: KYC_DOC_TYPE.NationalId, label: 'National ID', description: 'Front and back of your national ID card' },
-  { type: KYC_DOC_TYPE.BusinessRegistration, label: 'Business Registration', description: 'Certificate of business registration' },
-  { type: KYC_DOC_TYPE.BankBook, label: 'Bank Book', description: 'First page of your bank account book' },
-  { type: KYC_DOC_TYPE.StorefrontPhoto, label: 'Storefront Photo', description: 'A clear photo of your restaurant exterior' },
-];
 
 interface Step2DocumentsProps {
   uploadedTypes: Set<KycDocType>;
@@ -39,6 +33,15 @@ export function Step2Documents({
   onUpload,
   onSubmit,
 }: Step2DocumentsProps): React.JSX.Element {
+  const t = useTranslation();
+
+  const DOC_CARDS: DocCard[] = [
+    { type: KYC_DOC_TYPE.NationalId, label: t('kyc_doc_national_id'), description: t('kyc_doc_national_id_desc') },
+    { type: KYC_DOC_TYPE.BusinessRegistration, label: t('kyc_doc_business_reg'), description: t('kyc_doc_business_reg_desc') },
+    { type: KYC_DOC_TYPE.BankBook, label: t('kyc_doc_bank_book'), description: t('kyc_doc_bank_book_desc') },
+    { type: KYC_DOC_TYPE.StorefrontPhoto, label: t('kyc_doc_storefront'), description: t('kyc_doc_storefront_desc') },
+  ];
+
   const handlePickImage = useCallback(
     (docType: KycDocType) => async () => {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -78,11 +81,11 @@ export function Step2Documents({
         accessibilityLabel="Back to business info"
       >
         <Ionicons name="arrow-back" size={18} color={colours.primary} />
-        <Text style={styles.backText}>Back</Text>
+        <Text style={styles.backText}>{t('common_back')}</Text>
       </Pressable>
 
-      <Text style={styles.sectionTitle}>Required Documents</Text>
-      <Text style={styles.subtitle}>Upload all four documents to continue</Text>
+      <Text style={styles.sectionTitle}>{t('kyc_step2_title')}</Text>
+      <Text style={styles.subtitle}>{t('kyc_step2_subtitle')}</Text>
 
       {DOC_CARDS.map((card) => {
         const uploaded = uploadedTypes.has(card.type);
@@ -118,7 +121,7 @@ export function Step2Documents({
               accessibilityRole="button"
             >
               <Text style={[styles.uploadButtonText, uploaded && styles.uploadButtonTextDone]}>
-                {uploaded ? 'Re-upload' : 'Upload'}
+                {uploaded ? t('kyc_step2_reupload') : t('common_upload')}
               </Text>
             </Pressable>
           </View>
@@ -134,7 +137,7 @@ export function Step2Documents({
       >
         {isLoading
           ? <ActivityIndicator color={colours.backgroundDark} />
-          : <Text style={styles.submitButtonText}>Submit Application</Text>}
+          : <Text style={styles.submitButtonText}>{t('kyc_step2_submit')}</Text>}
       </Pressable>
     </ScrollView>
   );

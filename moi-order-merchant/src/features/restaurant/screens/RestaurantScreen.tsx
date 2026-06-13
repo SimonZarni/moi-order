@@ -15,23 +15,15 @@ import { RESTAURANT_STATUS, KYC_DOC_TYPE } from '../../../types/enums';
 import type { RestaurantStatus, KycDocType } from '../../../types/enums';
 import { MAX_GALLERY_PHOTOS } from '../../../shared/constants/config';
 import { normalizePickedImage } from '../../../shared/utils/imageUtils';
+import { useTranslation } from '../../../shared/hooks/useTranslation';
 
 const LINE_OA_URL = 'https://line.me/R/ti/p/%40moiorder';
-
-const RESUBMIT_DOC_TYPES: Array<{ type: KycDocType; label: string }> = [
-  { type: KYC_DOC_TYPE.NationalId,           label: 'National ID' },
-  { type: KYC_DOC_TYPE.BusinessRegistration, label: 'Business Registration' },
-  { type: KYC_DOC_TYPE.BankBook,             label: 'Bank Book' },
-  { type: KYC_DOC_TYPE.StorefrontPhoto,      label: 'Storefront Photo' },
-];
 
 const STATUS_CONFIG: Record<RestaurantStatus, { label: string; color: string; bg: string }> = {
   [RESTAURANT_STATUS.Open]:   { label: '🟢 Open',   color: colours.success,  bg: colours.successBg },
   [RESTAURANT_STATUS.Closed]: { label: '🔴 Closed', color: colours.error,    bg: colours.errorBg },
   [RESTAURANT_STATUS.Paused]: { label: '🟡 Paused', color: colours.warning,  bg: colours.warningBg },
 };
-
-const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 interface RestaurantScreenProps {
   onReviewsPress?: () => void;
@@ -59,6 +51,20 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
     handleUseExistingDocs, isUsingExistingDocs,
     statusWarning, handleDismissStatusWarning,
   } = useRestaurantScreen();
+
+  const t = useTranslation();
+
+  const DAY_SHORT = [
+    t('hours_day_sun'), t('hours_day_mon'), t('hours_day_tue'), t('hours_day_wed'),
+    t('hours_day_thu'), t('hours_day_fri'), t('hours_day_sat'),
+  ];
+
+  const RESUBMIT_DOC_TYPES: Array<{ type: KycDocType; label: string }> = [
+    { type: KYC_DOC_TYPE.NationalId,           label: t('kyc_doc_national_id') },
+    { type: KYC_DOC_TYPE.BusinessRegistration, label: t('kyc_doc_business_reg') },
+    { type: KYC_DOC_TYPE.BankBook,             label: t('kyc_doc_bank_book') },
+    { type: KYC_DOC_TYPE.StorefrontPhoto,      label: t('kyc_doc_storefront') },
+  ];
 
   const pickAndConvert = useCallback(async (
     onPick: (uri: string, name: string, type: string) => void,
@@ -131,12 +137,12 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
 
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>{isNewRestaurant ? 'Setup Restaurant' : 'Restaurant'}</Text>
+          <Text style={styles.headerTitle}>{isNewRestaurant ? t('restaurant_setup_title') : t('restaurant_title')}</Text>
           {!isEditing && restaurant !== null && (
             <Pressable style={styles.editButton} onPress={handleStartEdit}
               accessibilityLabel="Edit description" accessibilityRole="button">
               <Ionicons name="pencil-outline" size={14} color={colours.backgroundDark} />
-              <Text style={styles.editButtonText}>Edit Description</Text>
+              <Text style={styles.editButtonText}>{t('restaurant_edit_description')}</Text>
             </Pressable>
           )}
         </View>
@@ -145,7 +151,7 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
         {restaurant !== null && (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>Status</Text>
+              <Text style={styles.cardTitle}>{t('restaurant_status_card')}</Text>
             </View>
             {statusWarning !== null && (
               <View style={styles.statusWarningBar}>
@@ -176,20 +182,20 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
         {/* Photos */}
         {restaurant !== null && (
           <View style={styles.card}>
-            <View style={styles.cardHeader}><Text style={styles.cardTitle}>Photos</Text></View>
+            <View style={styles.cardHeader}><Text style={styles.cardTitle}>{t('restaurant_photos_card')}</Text></View>
             <View style={styles.cardBody}>
-              <Text style={styles.infoLabel}>Cover Photo</Text>
+              <Text style={styles.infoLabel}>{t('restaurant_cover_photo')}</Text>
               {restaurant.cover_photo_url != null ? (
                 <View style={styles.photoRow}>
                   <Image source={{ uri: restaurant.cover_photo_url }} style={styles.photoPreview} resizeMode="cover" />
                   <View style={styles.photoActions}>
                     <Pressable style={styles.photoBtn} onPress={handlePickCoverPhoto} disabled={isUploadingCover}
                       accessibilityRole="button" accessibilityLabel="Change cover photo">
-                      {isUploadingCover ? <ActivityIndicator size="small" color={colours.primary} /> : <Text style={styles.photoBtnText}>Change</Text>}
+                      {isUploadingCover ? <ActivityIndicator size="small" color={colours.primary} /> : <Text style={styles.photoBtnText}>{t('common_change')}</Text>}
                     </Pressable>
                     <Pressable style={[styles.photoBtn, styles.photoBtnDanger]} onPress={handleRemoveCoverPhoto}
                       accessibilityRole="button" accessibilityLabel="Remove cover photo">
-                      <Text style={[styles.photoBtnText, { color: colours.error }]}>Remove</Text>
+                      <Text style={[styles.photoBtnText, { color: colours.error }]}>{t('common_remove')}</Text>
                     </Pressable>
                   </View>
                 </View>
@@ -197,23 +203,23 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
                 <Pressable style={styles.photoUploadBtn} onPress={handlePickCoverPhoto} disabled={isUploadingCover}
                   accessibilityRole="button" accessibilityLabel="Upload cover photo">
                   {isUploadingCover ? <ActivityIndicator size="small" color={colours.primary} /> : (
-                    <><Ionicons name="image-outline" size={18} color={colours.primary} /><Text style={styles.photoBtnText}>Upload Cover Photo</Text></>
+                    <><Ionicons name="image-outline" size={18} color={colours.primary} /><Text style={styles.photoBtnText}>{t('restaurant_upload_cover')}</Text></>
                   )}
                 </Pressable>
               )}
               <View style={styles.divider} />
-              <Text style={styles.infoLabel}>Logo</Text>
+              <Text style={styles.infoLabel}>{t('restaurant_logo_label')}</Text>
               {restaurant.logo_url != null ? (
                 <View style={styles.photoRow}>
                   <Image source={{ uri: restaurant.logo_url }} style={styles.logoPreview} resizeMode="cover" />
                   <View style={styles.photoActions}>
                     <Pressable style={styles.photoBtn} onPress={handlePickLogo} disabled={isUploadingLogo}
                       accessibilityRole="button" accessibilityLabel="Change logo">
-                      {isUploadingLogo ? <ActivityIndicator size="small" color={colours.primary} /> : <Text style={styles.photoBtnText}>Change</Text>}
+                      {isUploadingLogo ? <ActivityIndicator size="small" color={colours.primary} /> : <Text style={styles.photoBtnText}>{t('common_change')}</Text>}
                     </Pressable>
                     <Pressable style={[styles.photoBtn, styles.photoBtnDanger]} onPress={handleRemoveLogo}
                       accessibilityRole="button" accessibilityLabel="Remove logo">
-                      <Text style={[styles.photoBtnText, { color: colours.error }]}>Remove</Text>
+                      <Text style={[styles.photoBtnText, { color: colours.error }]}>{t('common_remove')}</Text>
                     </Pressable>
                   </View>
                 </View>
@@ -221,7 +227,7 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
                 <Pressable style={styles.photoUploadBtn} onPress={handlePickLogo} disabled={isUploadingLogo}
                   accessibilityRole="button" accessibilityLabel="Upload logo">
                   {isUploadingLogo ? <ActivityIndicator size="small" color={colours.primary} /> : (
-                    <><Ionicons name="image-outline" size={18} color={colours.primary} /><Text style={styles.photoBtnText}>Upload Logo</Text></>
+                    <><Ionicons name="image-outline" size={18} color={colours.primary} /><Text style={styles.photoBtnText}>{t('restaurant_upload_logo')}</Text></>
                   )}
                 </Pressable>
               )}
@@ -252,7 +258,7 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
                 <Pressable style={styles.photoUploadBtn} onPress={handlePickGalleryPhoto} disabled={isUploadingGalleryPhoto}
                   accessibilityRole="button" accessibilityLabel="Add gallery photo">
                   {isUploadingGalleryPhoto ? <ActivityIndicator size="small" color={colours.primary} /> : (
-                    <><Ionicons name="image-outline" size={18} color={colours.primary} /><Text style={styles.photoBtnText}>Add Gallery Photo</Text></>
+                    <><Ionicons name="image-outline" size={18} color={colours.primary} /><Text style={styles.photoBtnText}>{t('restaurant_add_gallery')}</Text></>
                   )}
                 </Pressable>
               ) : (
@@ -264,21 +270,21 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
 
         {/* Profile card */}
         <View style={styles.card}>
-          <View style={styles.cardHeader}><Text style={styles.cardTitle}>Profile</Text></View>
+          <View style={styles.cardHeader}><Text style={styles.cardTitle}>{t('restaurant_profile_card')}</Text></View>
           <View style={styles.cardBody}>
 
             {/* Name — read-only, locked by KYC */}
-            <InfoRow label="Name" value={restaurant?.name ?? '—'} />
+            <InfoRow label={t('restaurant_name_label')} value={restaurant?.name ?? '—'} />
             <View style={styles.divider} />
 
             {/* Address — read-only, locked by KYC */}
-            <InfoRow label="Address" value={restaurant?.address ?? '—'} />
+            <InfoRow label={t('restaurant_address_label')} value={restaurant?.address ?? '—'} />
             <View style={styles.divider} />
 
             {/* Phone — editable */}
             {isEditingPhone ? (
               <View>
-                <Text style={styles.inputLabel}>Phone</Text>
+                <Text style={styles.inputLabel}>{t('restaurant_phone_label')}</Text>
                 <TextInput
                   style={styles.input}
                   value={phoneInput}
@@ -290,17 +296,17 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
                 />
                 <View style={styles.formActions}>
                   <Pressable style={styles.cancelButton} onPress={handleCancelPhone} accessibilityRole="button" accessibilityLabel="Cancel">
-                    <Text style={styles.cancelButtonText}>Cancel</Text>
+                    <Text style={styles.cancelButtonText}>{t('common_cancel')}</Text>
                   </Pressable>
                   <Pressable style={[styles.saveButton, isSaving && styles.saveButtonDisabled]} onPress={handleSavePhone} disabled={isSaving} accessibilityRole="button" accessibilityLabel="Save phone">
-                    <Text style={styles.saveButtonText}>{isSaving ? 'Saving…' : 'Save'}</Text>
+                    <Text style={styles.saveButtonText}>{isSaving ? t('common_saving') : t('common_save')}</Text>
                   </Pressable>
                 </View>
               </View>
             ) : (
               <View style={styles.infoRowWithAction}>
                 <View style={{ flex: 1 }}>
-                  <InfoRow label="Phone" value={restaurant?.phone ?? '—'} />
+                  <InfoRow label={t('restaurant_phone_label')} value={restaurant?.phone ?? '—'} />
                 </View>
                 {restaurant !== null && (
                   <Pressable style={styles.inlineEditBtn} onPress={handleEditPhone} accessibilityRole="button" accessibilityLabel="Edit phone">
@@ -314,12 +320,12 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
             {/* Description — editable */}
             {isEditing ? (
               <View>
-                <Text style={styles.inputLabel}>Description</Text>
+                <Text style={styles.inputLabel}>{t('restaurant_description_label')}</Text>
                 <TextInput
                   style={[styles.input, styles.inputMultiline]}
                   value={descriptionForm.description}
                   onChangeText={handleDescriptionChange}
-                  placeholder="Tell customers about your restaurant"
+                  placeholder={t('restaurant_description_placeholder')}
                   placeholderTextColor="rgba(255,255,255,0.3)"
                   multiline
                   numberOfLines={3}
@@ -327,15 +333,15 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
                 />
                 <View style={styles.formActions}>
                   <Pressable style={styles.cancelButton} onPress={handleCancelEdit} accessibilityRole="button" accessibilityLabel="Cancel">
-                    <Text style={styles.cancelButtonText}>Cancel</Text>
+                    <Text style={styles.cancelButtonText}>{t('common_cancel')}</Text>
                   </Pressable>
                   <Pressable style={[styles.saveButton, isSaving && styles.saveButtonDisabled]} onPress={handleSave} disabled={isSaving} accessibilityRole="button" accessibilityLabel="Save description">
-                    <Text style={styles.saveButtonText}>{isSaving ? 'Saving…' : 'Save'}</Text>
+                    <Text style={styles.saveButtonText}>{isSaving ? t('common_saving') : t('common_save')}</Text>
                   </Pressable>
                 </View>
               </View>
             ) : (
-              <InfoRow label="Description" value={restaurant?.description ?? '—'} />
+              <InfoRow label={t('restaurant_description_label')} value={restaurant?.description ?? '—'} />
             )}
           </View>
 
@@ -343,10 +349,10 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
           {restaurant !== null && (
             <View style={styles.kycNote}>
               <Text style={styles.kycNoteText}>
-                Name and address can only be changed via KYC resubmission.{' '}
+                {t('restaurant_kyc_note')}{' '}
               </Text>
               <Pressable onPress={handleOpenResubmit} accessibilityRole="button" accessibilityLabel="Request name or address change">
-                <Text style={styles.kycNoteLink}>Request change →</Text>
+                <Text style={styles.kycNoteLink}>{t('restaurant_request_change')}</Text>
               </Pressable>
             </View>
           )}
@@ -356,21 +362,21 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
         {restaurant != null && (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>Opening Hours</Text>
+              <Text style={styles.cardTitle}>{t('restaurant_opening_hours_card')}</Text>
               {!isEditingHours && (
                 <Pressable style={styles.editDeliveryBtn} onPress={handleEditHours} accessibilityRole="button" accessibilityLabel="Edit opening hours">
                   <Ionicons name="pencil-outline" size={12} color={colours.primary} />
-                  <Text style={styles.editDeliveryBtnText}>Edit</Text>
+                  <Text style={styles.editDeliveryBtnText}>{t('common_edit')}</Text>
                 </Pressable>
               )}
             </View>
             {isEditingHours ? (
               <View>
                 <View style={styles.hoursHeader}>
-                  <Text style={[styles.hoursCell, styles.hoursDayCell]}>Day</Text>
-                  <Text style={[styles.hoursCell, styles.hoursTimeCell]}>Opens</Text>
-                  <Text style={[styles.hoursCell, styles.hoursTimeCell]}>Closes</Text>
-                  <Text style={[styles.hoursCell, styles.hoursStatusCell]}>Open</Text>
+                  <Text style={[styles.hoursCell, styles.hoursDayCell]}>{t('restaurant_day_col')}</Text>
+                  <Text style={[styles.hoursCell, styles.hoursTimeCell]}>{t('restaurant_opens_col')}</Text>
+                  <Text style={[styles.hoursCell, styles.hoursTimeCell]}>{t('restaurant_closes_col')}</Text>
+                  <Text style={[styles.hoursCell, styles.hoursStatusCell]}>{t('restaurant_open_col')}</Text>
                 </View>
                 {openingHoursInput.map((h) => (
                   <View key={h.day_of_week} style={styles.hoursRow}>
@@ -411,10 +417,10 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
                 )}
                 <View style={[styles.formActions, { marginTop: 12 }]}>
                   <Pressable style={styles.cancelButton} onPress={handleCancelHours} accessibilityRole="button" accessibilityLabel="Cancel">
-                    <Text style={styles.cancelButtonText}>Cancel</Text>
+                    <Text style={styles.cancelButtonText}>{t('common_cancel')}</Text>
                   </Pressable>
                   <Pressable style={[styles.saveButton, isSaving && styles.saveButtonDisabled]} onPress={handleSaveHours} disabled={isSaving} accessibilityRole="button" accessibilityLabel="Save hours">
-                    <Text style={styles.saveButtonText}>{isSaving ? 'Saving…' : 'Save Hours'}</Text>
+                    <Text style={styles.saveButtonText}>{isSaving ? t('common_saving') : t('restaurant_save_hours')}</Text>
                   </Pressable>
                 </View>
               </View>
@@ -425,14 +431,14 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
                     <View key={h.day_of_week} style={styles.hoursReadRow}>
                       <Text style={styles.hoursDayLabel}>{DAY_SHORT[h.day_of_week]}</Text>
                       {h.is_closed ? (
-                        <Text style={styles.hoursClosed}>Closed</Text>
+                        <Text style={styles.hoursClosed}>{t('restaurant_closed_label')}</Text>
                       ) : (
                         <Text style={styles.hoursTime}>{h.opens_at} – {h.closes_at}</Text>
                       )}
                     </View>
                   ))
                 ) : (
-                  <Text style={styles.infoValue}>Not set</Text>
+                  <Text style={styles.infoValue}>{t('restaurant_not_set')}</Text>
                 )}
               </View>
             )}
@@ -443,11 +449,11 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
         {restaurant != null && (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>Min Order</Text>
+              <Text style={styles.cardTitle}>{t('restaurant_min_order_card')}</Text>
               {!isEditingDelivery && (
                 <Pressable style={styles.editDeliveryBtn} onPress={handleEditDelivery} accessibilityRole="button" accessibilityLabel="Edit minimum order amount">
                   <Ionicons name="pencil-outline" size={12} color={colours.primary} />
-                  <Text style={styles.editDeliveryBtnText}>Edit</Text>
+                  <Text style={styles.editDeliveryBtnText}>{t('common_edit')}</Text>
                 </Pressable>
               )}
             </View>
@@ -468,15 +474,15 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
                   </View>
                   <View style={styles.deliveryEditActions}>
                     <Pressable style={styles.deliveryEditCancel} onPress={handleCancelDelivery} accessibilityRole="button">
-                      <Text style={styles.deliveryEditCancelText}>Cancel</Text>
+                      <Text style={styles.deliveryEditCancelText}>{t('common_cancel')}</Text>
                     </Pressable>
                     <Pressable style={[styles.deliveryEditSave, isSaving && styles.saveButtonDisabled]} onPress={handleSaveDelivery} disabled={isSaving} accessibilityRole="button">
-                      <Text style={styles.deliveryEditSaveText}>{isSaving ? 'Saving…' : 'Save'}</Text>
+                      <Text style={styles.deliveryEditSaveText}>{isSaving ? t('common_saving') : t('common_save')}</Text>
                     </Pressable>
                   </View>
                 </View>
               ) : (
-                <InfoRow label="Min Order" value={formatPrice(restaurant.min_order_cents)} />
+                <InfoRow label={t('restaurant_min_order_card')} value={formatPrice(restaurant.min_order_cents)} />
               )}
             </View>
           </View>
@@ -487,7 +493,7 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
           <Pressable style={styles.supportButton} onPress={onReviewsPress}
             accessibilityRole="button" accessibilityLabel="View customer reviews">
             <Ionicons name="star-outline" size={18} color={colours.primary} />
-            <Text style={styles.supportButtonText}>Customer Reviews</Text>
+            <Text style={styles.supportButtonText}>{t('restaurant_customer_reviews')}</Text>
           </Pressable>
         )}
 
@@ -495,7 +501,7 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
         <Pressable style={styles.supportButton} onPress={handleContactSupport}
           accessibilityRole="button" accessibilityLabel="Contact MOi Order support on LINE">
           <Ionicons name="chatbubble-ellipses-outline" size={18} color={colours.primary} />
-          <Text style={styles.supportButtonText}>Contact Support (LINE)</Text>
+          <Text style={styles.supportButtonText}>{t('restaurant_contact_support')}</Text>
         </Pressable>
       </ScrollView>
 
@@ -516,7 +522,7 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
           <View style={styles.modalSheet}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
-                {resubmitForm.step === 'done' ? 'Request Submitted' : 'Change Name / Address'}
+                {resubmitForm.step === 'done' ? t('restaurant_request_submitted') : t('restaurant_change_name_address')}
               </Text>
               <Pressable onPress={handleCloseResubmit} accessibilityRole="button" accessibilityLabel="Close">
                 <Ionicons name="close" size={22} color={colours.textOnDark} />
@@ -525,24 +531,22 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
 
             {resubmitForm.step === 'form' && (
               <View style={styles.modalBody}>
-                <Text style={styles.modalNote}>
-                  Enter your new restaurant name and address. An admin will verify and approve the change.
-                </Text>
-                <Text style={styles.inputLabel}>New Restaurant Name</Text>
+                <Text style={styles.modalNote}>{t('restaurant_modal_form_note')}</Text>
+                <Text style={styles.inputLabel}>{t('restaurant_new_name_label')}</Text>
                 <TextInput
                   style={styles.input}
                   value={resubmitForm.business_name}
                   onChangeText={(v) => handleResubmitFieldChange('business_name', v)}
-                  placeholder="Restaurant name"
+                  placeholder={t('restaurant_name_label')}
                   placeholderTextColor="rgba(255,255,255,0.3)"
                   accessibilityLabel="New restaurant name"
                 />
-                <Text style={styles.inputLabel}>New Address</Text>
+                <Text style={styles.inputLabel}>{t('restaurant_new_address_label')}</Text>
                 <TextInput
                   style={[styles.input, styles.inputMultiline]}
                   value={resubmitForm.business_address}
                   onChangeText={(v) => handleResubmitFieldChange('business_address', v)}
-                  placeholder="Full business address"
+                  placeholder={t('restaurant_address_label')}
                   placeholderTextColor="rgba(255,255,255,0.3)"
                   multiline
                   accessibilityLabel="New address"
@@ -554,16 +558,14 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
                   accessibilityRole="button"
                   accessibilityLabel="Next"
                 >
-                  <Text style={styles.saveButtonText}>{isSaving ? 'Creating…' : 'Next → Upload Documents'}</Text>
+                  <Text style={styles.saveButtonText}>{isSaving ? t('restaurant_creating') : t('restaurant_next_upload_docs')}</Text>
                 </Pressable>
               </View>
             )}
 
             {resubmitForm.step === 'docs' && (
               <ScrollView style={{ maxHeight: 480 }} contentContainerStyle={styles.modalScrollBody} showsVerticalScrollIndicator={false}>
-                <Text style={styles.modalNote}>
-                  Verify your identity to approve this change. Use your existing documents or upload new ones.
-                </Text>
+                <Text style={styles.modalNote}>{t('restaurant_modal_docs_note')}</Text>
 
                 {/* Use existing docs shortcut */}
                 <Pressable
@@ -578,14 +580,14 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
                     : <Ionicons name="copy-outline" size={16} color={colours.primary} />
                   }
                   <Text style={styles.useExistingBtnText}>
-                    {isUsingExistingDocs ? 'Copying…' : 'Use same documents as original KYC'}
+                    {isUsingExistingDocs ? t('restaurant_copying') : t('restaurant_use_same_docs')}
                   </Text>
                 </Pressable>
 
                 {/* OR divider */}
                 <View style={styles.orDivider}>
                   <View style={styles.orDividerLine} />
-                  <Text style={styles.orDividerText}>OR UPLOAD NEW</Text>
+                  <Text style={styles.orDividerText}>{t('restaurant_or_upload_new')}</Text>
                   <View style={styles.orDividerLine} />
                 </View>
 
@@ -601,14 +603,14 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
                           color={uploaded ? colours.success : colours.textSubtle}
                         />
                         <Text style={styles.docUploadRowLabel}>{label}</Text>
-                        {uploaded && <Text style={styles.docUploadRowUploaded}>✓ Ready</Text>}
+                        {uploaded && <Text style={styles.docUploadRowUploaded}>{t('restaurant_doc_ready')}</Text>}
                         <Pressable
                           style={styles.docUploadRowBtn}
                           onPress={() => { void handlePickResubmitDoc(type); }}
                           accessibilityRole="button"
                           accessibilityLabel={`${uploaded ? 'Replace' : 'Upload'} ${label}`}
                         >
-                          <Text style={styles.docUploadRowBtnText}>{uploaded ? 'Replace' : 'Upload'}</Text>
+                          <Text style={styles.docUploadRowBtnText}>{uploaded ? t('common_replace') : t('common_upload')}</Text>
                         </Pressable>
                       </View>
                     );
@@ -631,7 +633,7 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
                   accessibilityRole="button"
                   accessibilityLabel="Submit resubmission"
                 >
-                  <Text style={styles.saveButtonText}>{isSaving ? 'Submitting…' : 'Submit for Review'}</Text>
+                  <Text style={styles.saveButtonText}>{isSaving ? t('restaurant_submitting') : t('restaurant_submit_review')}</Text>
                 </Pressable>
               </ScrollView>
             )}
@@ -640,10 +642,10 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
               <View style={styles.modalBody}>
                 <Ionicons name="checkmark-circle" size={48} color={colours.success} style={{ alignSelf: 'center', marginBottom: 12 }} />
                 <Text style={[styles.modalNote, { textAlign: 'center' }]}>
-                  Your request has been submitted. An admin will review and approve or reject the change. You will be notified of the outcome.
+                  {t('restaurant_submitted_note')}
                 </Text>
                 <Pressable style={styles.saveButton} onPress={handleCloseResubmit} accessibilityRole="button" accessibilityLabel="Close">
-                  <Text style={styles.saveButtonText}>Done</Text>
+                  <Text style={styles.saveButtonText}>{t('common_done')}</Text>
                 </Pressable>
               </View>
             )}
