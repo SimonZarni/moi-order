@@ -4,9 +4,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
+import { apiClient } from '../../../api/client';
 import { fetchOrderChat, sendOrderChatMessage } from '../../../api/chat';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
-import { PUSHER_APP_KEY, PUSHER_APP_CLUSTER, BROADCAST_AUTH_URL } from '../../../shared/constants/config';
+import { PUSHER_APP_KEY, PUSHER_APP_CLUSTER } from '../../../shared/constants/config';
 import { useAuthStore } from '../../../store/authStore';
 import type { OrderChatMessage } from '../../../types/models';
 import { normalizePickedImage } from '../../../shared/utils/imageUtils';
@@ -73,12 +74,8 @@ export function useOrderChatScreen(orderId: string): UseOrderChatScreenResult {
             callback: (err: Error | null, data: { auth: string } | null) => void,
           ) => {
             try {
-              // eslint-disable-next-line @typescript-eslint/no-require-imports
-              const { apiClient } = require('../../../shared/api/client') as {
-                apiClient: { post: <T>(url: string, data: unknown) => Promise<{ data: T }> };
-              };
               const res = await apiClient.post<{ auth: string }>(
-                BROADCAST_AUTH_URL.replace(_getApiBase(), ''),
+                '/broadcasting/auth',
                 { socket_id: socketId, channel_name: channelName },
               );
               callback(null, res.data);
@@ -237,9 +234,4 @@ export function useOrderChatScreen(orderId: string): UseOrderChatScreenResult {
     handleTextChange, handleSend, handleAttachPress, handleRemoveImage,
     handlePhotoPress, handlePhotoClose,
   };
-}
-
-function _getApiBase(): string {
-  return (process.env.EXPO_PUBLIC_API_URL as string | undefined) ??
-    'https://api.moiorder.com/api/merchant/v1';
 }
