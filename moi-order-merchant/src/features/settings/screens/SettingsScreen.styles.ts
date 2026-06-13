@@ -12,8 +12,8 @@ export const styles = StyleSheet.create({
   header: {
     backgroundColor: colours.backgroundDark,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
   },
   headerTitle: {
     fontSize: typography.xl,
