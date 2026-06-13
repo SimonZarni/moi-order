@@ -237,6 +237,7 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
           <TextField
             fullWidth
             size="small"
+            autoComplete="off"
             placeholder="Type a message…"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
