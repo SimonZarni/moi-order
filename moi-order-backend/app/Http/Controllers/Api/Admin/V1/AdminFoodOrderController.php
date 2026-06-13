@@ -9,6 +9,7 @@ use App\Enums\FoodOrderStatus;
 use App\Events\FoodOrderStatusUpdated;
 use App\Exports\FoodOrderExport;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 use App\Http\Resources\FoodOrderResource;
 use App\Models\FoodOrder;
 use Illuminate\Http\JsonResponse;
@@ -171,8 +172,11 @@ class AdminFoodOrderController extends Controller
     public function confirmPayment(FoodOrder $foodOrder): JsonResponse
     {
         $foodOrder->load(['restaurant', 'user', 'items']);
-        $foodOrder->transitionTo(FoodOrderStatus::PaymentConfirmed);
-        event(new FoodOrderStatusUpdated($foodOrder->fresh()));
+
+        DB::transaction(function () use ($foodOrder): void {
+            $foodOrder->transitionTo(FoodOrderStatus::PaymentConfirmed);
+            event(new FoodOrderStatusUpdated($foodOrder->fresh()));
+        });
 
         $fresh = $foodOrder->fresh(['items', 'restaurant', 'user']);
 

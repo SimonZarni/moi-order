@@ -360,10 +360,11 @@ function WebMerchantLayout(): React.JSX.Element {
           <NotificationsScreen
             onPressNotification={(n) => {
               if (n.order_id === null) return;
+              const orderId = String(n.order_id);
               if (n.type === 'chat_message') {
-                setChatOrderId(n.order_id);
+                setChatOrderId(orderId);
               } else {
-                setSelectedOrderId(n.order_id);
+                setSelectedOrderId(orderId);
               }
             }}
           />

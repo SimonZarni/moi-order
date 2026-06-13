@@ -276,7 +276,7 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
           </Pressable>
         )}
 
-        {nextStatus === ORDER_STATUS.PreparingFood && (
+        {(nextStatus === ORDER_STATUS.WaitingForPayment || nextStatus === ORDER_STATUS.PreparingFood) && (
           <View style={styles.prepTimeCard}>
             <Text style={styles.prepTimeLabel}>How long will this order take?</Text>
             <View style={styles.prepTimeStepper}>

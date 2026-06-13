@@ -192,6 +192,17 @@ class FoodOrderService
         return $order->fresh(['items', 'user']);
     }
 
+    public function acceptOrder(FoodOrder $order, int $preparationTimeMinutes): FoodOrder
+    {
+        DB::transaction(function () use ($order, $preparationTimeMinutes): void {
+            $order->transitionTo(FoodOrderStatus::WaitingForPayment);
+            $order->update(['preparation_time_minutes' => $preparationTimeMinutes]);
+            event(new FoodOrderStatusUpdated($order->fresh()));
+        });
+
+        return $order->fresh(['items', 'user']);
+    }
+
     public function startPreparing(FoodOrder $order, int $preparationTimeMinutes): FoodOrder
     {
         DB::transaction(function () use ($order, $preparationTimeMinutes): void {

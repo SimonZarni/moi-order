@@ -77,7 +77,10 @@ export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResul
   const handleUpdateStatus = useCallback(
     (newStatus: string) => mutate({
       status: newStatus,
-      preparationTimeMinutes: newStatus === ORDER_STATUS.PreparingFood ? preparationTimeMinutes : undefined,
+      preparationTimeMinutes:
+        newStatus === ORDER_STATUS.WaitingForPayment || newStatus === ORDER_STATUS.PreparingFood
+          ? preparationTimeMinutes
+          : undefined,
     }),
     [mutate, preparationTimeMinutes],
   );

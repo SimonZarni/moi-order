@@ -9,9 +9,10 @@ export type FoodOrderStatus =
   | 'delivery_on_the_way'
   | 'delivered'
   | 'completed'
-  | 'cancelled';
+  | 'cancelled'
+  | 'expired';
 
-export type FoodPaymentMethod = 'cod' | 'prompt_pay';
+export type FoodPaymentMethod = 'cod' | 'prompt_pay' | 'line_pay';
 
 export type FoodOrderListItem = {
   id: string;

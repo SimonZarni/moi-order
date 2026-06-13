@@ -47,11 +47,13 @@ const STATUS_COLOR: Record<string, 'success' | 'warning' | 'info' | 'error' | 'd
   delivered:             'info',
   completed:             'success',
   cancelled:             'error',
+  expired:               'error',
 };
 
 const PAYMENT_LABEL: Record<string, string> = {
   cod:        'Cash on Delivery',
   prompt_pay: 'PromptPay',
+  line_pay:   'LINE Pay',
 };
 
 // ----------------------------------------------------------------------
