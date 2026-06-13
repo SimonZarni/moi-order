@@ -3,7 +3,7 @@ import type { KycDocType, KycStatus, MenuItemStatus, OrderStatus, RestaurantStat
 export interface MerchantUser {
   id: number;
   name: string;
-  email: string;
+  email: string | null;
   phone: string | null;
   is_merchant: boolean;
   email_verified: boolean;
@@ -212,7 +212,7 @@ export interface MerchantNotification {
 export interface BusinessProfileUser {
   id: number;
   name: string;
-  email: string;
+  email: string | null;
   phone: string | null;
 }
 

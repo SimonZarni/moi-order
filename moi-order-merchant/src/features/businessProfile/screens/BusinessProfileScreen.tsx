@@ -40,9 +40,9 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
 
   const goBack = onBack ?? handleBack;
   const showBackBtn = Platform.OS !== 'web';
-  const emailUnverified = user !== null && !user.email_verified;
+  const emailUnverified = user !== null && !!user.email && !user.email_verified;
 
-  if (showVerify && user !== null) {
+  if (showVerify && user !== null && user.email !== null) {
     return (
       <EmailVerificationScreen
         email={user.email}
@@ -152,7 +152,7 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
                   <Text style={styles.emailFieldError}>{emailError}</Text>
                 )}
               </>
-            ) : (
+            ) : profile.user.email !== null ? (
               <View style={styles.accountDetailRow}>
                 <Text style={styles.accountDetail}>{profile.user.email}</Text>
                 <Pressable
@@ -164,6 +164,16 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
                   <Ionicons name="pencil-outline" size={14} color={colours.primary} />
                 </Pressable>
               </View>
+            ) : (
+              <Pressable
+                onPress={handleStartEditEmail}
+                style={styles.addEmailPrompt}
+                accessibilityLabel="Add email address"
+                accessibilityRole="button"
+              >
+                <Ionicons name="add-circle-outline" size={14} color={colours.primary} />
+                <Text style={styles.addEmailPromptText}>Add email address</Text>
+              </Pressable>
             )}
 
             {profile.user.phone !== null && (

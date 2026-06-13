@@ -110,4 +110,6 @@ export const styles = StyleSheet.create({
   emailInputError: { borderColor: colours.error },
   emailAction: { padding: 4, minWidth: 28, minHeight: 28, alignItems: 'center', justifyContent: 'center' },
   emailFieldError: { fontSize: typography.xs, color: colours.error, marginTop: 2 },
+  addEmailPrompt: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingVertical: 2 },
+  addEmailPromptText: { fontSize: typography.sm, color: colours.primary, fontWeight: '500' },
 });
