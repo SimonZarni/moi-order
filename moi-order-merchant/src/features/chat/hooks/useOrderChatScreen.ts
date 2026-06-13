@@ -3,6 +3,7 @@ import { Alert, FlatList, Keyboard } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios';
 import { fetchOrderChat, sendOrderChatMessage } from '../../../api/chat';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { PUSHER_APP_KEY, PUSHER_APP_CLUSTER, BROADCAST_AUTH_URL } from '../../../shared/constants/config';
@@ -27,6 +28,7 @@ interface UseOrderChatScreenResult {
   messages: OrderChatMessage[];
   isLoading: boolean;
   isError: boolean;
+  isNetworkError: boolean;
   sendError: string | null;
   text: string;
   isSending: boolean;
@@ -109,11 +111,15 @@ export function useOrderChatScreen(orderId: string): UseOrderChatScreenResult {
     };
   }, [token, orderId, queryClient]);
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: QUERY_KEYS.ORDER_CHAT(orderId),
     queryFn: () => fetchOrderChat(orderId),
     refetchInterval: 5_000,
+    retry: 2,
   });
+
+  const isNetworkError =
+    isError && axios.isAxiosError(error) && error.response === undefined;
 
   const messages = data ?? [];
 
@@ -224,7 +230,7 @@ export function useOrderChatScreen(orderId: string): UseOrderChatScreenResult {
   const handlePhotoClose = useCallback(() => setSelectedPhoto(null), []);
 
   return {
-    messages, isLoading, isError, sendError, text, isSending,
+    messages, isLoading, isError, isNetworkError, sendError, text, isSending,
     inputBarPadding, selectedImages, selectedPhoto, listRef,
     handleTextChange, handleSend, handleAttachPress, handleRemoveImage,
     handlePhotoPress, handlePhotoClose,

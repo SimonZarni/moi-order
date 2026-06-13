@@ -46,7 +46,8 @@
         }
       ],
       "@react-native-google-signin/google-signin",
-      "@xmartlabs/react-native-line"
+      "@xmartlabs/react-native-line",
+      "expo-web-browser"
     ],
     "extra": {
       "eas": {

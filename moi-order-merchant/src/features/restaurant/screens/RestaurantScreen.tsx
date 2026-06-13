@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import {
-  View, Text, ScrollView, Pressable, TextInput, ActivityIndicator,
-  Image, Linking, Modal, Switch,
+  View, Text, ScrollView, Pressable, Switch, TextInput, ActivityIndicator,
+  Image, Linking, Modal, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -396,7 +396,7 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
                     <View style={[styles.hoursStatusCell, { alignItems: 'center' }]}>
                       <Switch
                         value={!h.is_closed}
-                        onValueChange={(v) => handleHourToggle(h.day_of_week, !v)}
+                        onValueChange={(v: boolean) => handleHourToggle(h.day_of_week, !v)}
                         trackColor={{ false: colours.surfaceMuted, true: colours.primary + '66' }}
                         thumbColor={!h.is_closed ? colours.primary : colours.medium}
                         accessibilityLabel={`Toggle open for ${DAY_SHORT[h.day_of_week]}`}

@@ -20,7 +20,7 @@ export function AuthNavigator(): React.JSX.Element {
       <Stack.Screen
         name="Login"
         component={LoginScreen}
-        options={{ title: 'Merchant Login' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="OtpLogin"

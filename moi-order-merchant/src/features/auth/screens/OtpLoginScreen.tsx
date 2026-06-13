@@ -142,7 +142,7 @@ export function OtpLoginScreen(): React.JSX.Element {
           {step === 'phone' ? 'Enter your phone number to receive a login code' : `Enter the code we sent to ${phoneNumber}`}
         </Text>
       </SafeAreaView>
-      <ScrollView style={styles.sheetScroll} contentContainerStyle={styles.sheetContent} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.formSheetContent} keyboardShouldPersistTaps="handled">
         <Text style={styles.sheetTitle}>{step === 'phone' ? 'Phone Login' : 'Check your messages'}</Text>
         <Text style={styles.sheetSubtitle}>{step === 'phone' ? "We'll send a one-time PIN to your number" : `A ${OTP_PIN_LENGTH}-digit code was sent to ${phoneNumber}`}</Text>
         {formContent}

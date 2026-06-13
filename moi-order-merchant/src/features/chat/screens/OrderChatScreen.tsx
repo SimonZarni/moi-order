@@ -87,7 +87,7 @@ interface ContentProps {
 
 export function OrderChatContent({ orderId, orderNumber, onBack }: ContentProps): React.JSX.Element {
   const {
-    messages, isLoading, isError, sendError, text, isSending, inputBarPadding,
+    messages, isLoading, isError, isNetworkError, sendError, text, isSending, inputBarPadding,
     selectedImages, selectedPhoto, listRef,
     handleTextChange, handleSend, handleAttachPress, handleRemoveImage,
     handlePhotoPress, handlePhotoClose,
@@ -119,12 +119,21 @@ export function OrderChatContent({ orderId, orderNumber, onBack }: ContentProps)
           </Pressable>
         ) : isError ? (
           <Pressable style={styles.emptyWrap} onPress={Keyboard.dismiss}>
-            <Text style={styles.emptyText}>Could not load messages.</Text>
+            <Ionicons
+              name={isNetworkError ? 'wifi-outline' : 'alert-circle-outline'}
+              size={44}
+              color={colours.textSubtle}
+            />
+            <Text style={styles.emptyText}>
+              {isNetworkError
+                ? 'Please check your internet connection.'
+                : 'Could not load messages.'}
+            </Text>
           </Pressable>
         ) : messages.length === 0 ? (
           <Pressable style={styles.emptyWrap} onPress={Keyboard.dismiss}>
             <Ionicons name="chatbubbles-outline" size={44} color={colours.textSubtle} />
-            <Text style={styles.emptyText}>No messages yet.</Text>
+            <Text style={styles.emptyText}>No messages.</Text>
           </Pressable>
         ) : (
           <FlatList
