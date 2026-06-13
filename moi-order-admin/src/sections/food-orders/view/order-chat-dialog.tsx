@@ -156,7 +156,7 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
   }, [draft, orderId]);
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Iconify icon="solar:chat-round-dots-bold" width={22} />
         Order Chat
@@ -165,7 +165,7 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
         </IconButton>
       </DialogTitle>
 
-      <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2, minHeight: 420 }}>
+      <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2, minHeight: 540 }}>
         {error && <Alert severity="error">{error}</Alert>}
 
         {loading ? (
@@ -176,7 +176,7 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
           <Stack
             ref={containerRef}
             spacing={1.5}
-            sx={{ flexGrow: 1, overflowY: 'auto', maxHeight: 360 }}
+            sx={{ flexGrow: 1, overflowY: 'auto', maxHeight: 480 }}
           >
             {messages.length === 0 && (
               <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>

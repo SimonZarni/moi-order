@@ -57,6 +57,12 @@ const WAITING_NOTES: Partial<Record<string, string>> = {
   [ORDER_STATUS.WaitingForPayment]: 'Waiting for customer to complete payment.',
 };
 
+const PAYMENT_LABELS: Record<string, string> = {
+  cod:        'Cash on Delivery',
+  prompt_pay: 'PromptPay',
+  line_pay:   'LINE Pay',
+};
+
 const CANCEL_REASONS = [
   { value: 'closing_soon', label: 'Closing soon' },
   { value: 'sold_out',     label: 'Sold out' },
@@ -164,6 +170,19 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
                 </Pressable>
               </View>
             )}
+            {order.contact_no !== null && order.contact_no !== order.user.phone && (
+              <View style={styles.row}>
+                <Text style={styles.label}>Order Contact</Text>
+                <Pressable
+                  onPress={() => { void Linking.openURL(`tel:${order.contact_no}`); }}
+                  accessibilityRole="link"
+                >
+                  <Text style={[styles.value, { color: colours.primary }]}>
+                    {order.contact_no}
+                  </Text>
+                </Pressable>
+              </View>
+            )}
             {order.delivery_address !== null && (
               <View style={styles.row}>
                 <Text style={styles.label}>Address</Text>
@@ -190,7 +209,7 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Payment</Text>
-              <Text style={styles.value}>{order.payment_method}</Text>
+              <Text style={styles.value}>{PAYMENT_LABELS[order.payment_method] ?? order.payment_method}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Placed</Text>
@@ -208,7 +227,9 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
               <View key={item.id} style={styles.itemRow}>
                 <View style={styles.itemNameCol}>
                   <Text style={styles.itemName}>{item.name}</Text>
-                  <Text style={styles.itemQty}>× {item.quantity}</Text>
+                  <Text style={styles.itemQty}>
+                    × {item.quantity} @ {formatPrice(item.price_cents)}
+                  </Text>
                   {item.notes !== null && (
                     <Text style={styles.itemNotes}>{item.notes}</Text>
                   )}

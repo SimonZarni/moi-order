@@ -106,8 +106,12 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
             </View>
           ))}
           <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>{formatPrice(order.total_cents / 100)}</Text>
+            <Text style={styles.totalLabel}>Subtotal</Text>
+            <Text style={styles.totalValue}>{formatPrice(order.subtotal_cents / 100)}</Text>
+          </View>
+          <View style={styles.totalRow}>
+            <Text style={[styles.totalLabel, { fontWeight: '700' }]}>Total</Text>
+            <Text style={[styles.totalValue, { fontWeight: '700' }]}>{formatPrice(order.total_cents / 100)}</Text>
           </View>
         </View>
 

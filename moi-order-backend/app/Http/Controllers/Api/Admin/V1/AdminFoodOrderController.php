@@ -98,18 +98,25 @@ class AdminFoodOrderController extends Controller
     {
         $foodOrder->load(['restaurant', 'user', 'items']);
 
+        // array_merge (not +) so the right-side overrides win for 'user'/'restaurant'.
+        // PHP's + operator keeps the LEFT value for duplicate keys, causing email to be lost.
         return response()->json([
-            'data' => (new FoodOrderResource($foodOrder, $this->storage))->toArray(request()) + [
-                'user' => [
-                    'id'    => $foodOrder->user->uuid,
-                    'name'  => $foodOrder->user->name,
-                    'email' => $foodOrder->user->email,
-                ],
-                'restaurant' => [
-                    'id'   => $foodOrder->restaurant->id,
-                    'name' => $foodOrder->restaurant->name,
-                ],
-            ],
+            'data' => array_merge(
+                (new FoodOrderResource($foodOrder, $this->storage))->toArray(request()),
+                [
+                    'user' => [
+                        'id'    => $foodOrder->user->uuid,
+                        'name'  => $foodOrder->user->name,
+                        'email' => $foodOrder->user->email,
+                        'phone' => $foodOrder->user->phone_number,
+                    ],
+                    'restaurant' => [
+                        'id'    => $foodOrder->restaurant->id,
+                        'name'  => $foodOrder->restaurant->name,
+                        'phone' => $foodOrder->restaurant->phone,
+                    ],
+                ]
+            ),
         ]);
     }
 
@@ -170,17 +177,22 @@ class AdminFoodOrderController extends Controller
         $fresh = $foodOrder->fresh(['items', 'restaurant', 'user']);
 
         return response()->json([
-            'data' => (new FoodOrderResource($fresh, $this->storage))->toArray(request()) + [
-                'user' => [
-                    'id'    => $fresh->user->uuid,
-                    'name'  => $fresh->user->name,
-                    'email' => $fresh->user->email,
-                ],
-                'restaurant' => [
-                    'id'   => $fresh->restaurant->id,
-                    'name' => $fresh->restaurant->name,
-                ],
-            ],
+            'data' => array_merge(
+                (new FoodOrderResource($fresh, $this->storage))->toArray(request()),
+                [
+                    'user' => [
+                        'id'    => $fresh->user->uuid,
+                        'name'  => $fresh->user->name,
+                        'email' => $fresh->user->email,
+                        'phone' => $fresh->user->phone_number,
+                    ],
+                    'restaurant' => [
+                        'id'    => $fresh->restaurant->id,
+                        'name'  => $fresh->restaurant->name,
+                        'phone' => $fresh->restaurant->phone,
+                    ],
+                ]
+            ),
         ]);
     }
 }

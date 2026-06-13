@@ -22,7 +22,7 @@ export type FoodOrderListItem = {
   total_cents: number;
   delivery_address: string | null;
   restaurant: { id: number; name: string };
-  user: { id: number; name: string; email: string };
+  user: { id: string; name: string; email: string; phone: string | null };
   confirmed_at: string | null;
   payment_confirmed_at: string | null;
   completed_at: string | null;
@@ -36,13 +36,15 @@ export type FoodOrderItemDetail = {
   quantity: number;
   price_cents: number;
   subtotal_cents: number;
+  notes: string | null;
 };
 
-export type FoodOrderDetail = FoodOrderListItem & {
+export type FoodOrderDetail = Omit<FoodOrderListItem, 'restaurant'> & {
+  restaurant: { id: number; name: string; phone: string | null };
   subtotal_cents: number;
   customer_notes: string | null;
-  prompt_pay_url: string | null;
   contact_no: string | null;
+  prompt_pay_url: string | null;
   items: FoodOrderItemDetail[];
   preparing_at: string | null;
   picked_up_at: string | null;

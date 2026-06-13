@@ -148,7 +148,19 @@ export function FoodOrderDetailView() {
             <CardContent>
               <Stack spacing={1.5}>
                 <InfoRow label="Restaurant" value={order.restaurant.name} />
-                <InfoRow label="Customer" value={`${order.user.name} (${order.user.email})`} />
+                {order.restaurant.phone && (
+                  <InfoRow label="Restaurant Phone" value={order.restaurant.phone} />
+                )}
+                <Divider />
+                <InfoRow label="Customer" value={order.user.name} />
+                <InfoRow label="Email" value={order.user.email} />
+                {order.user.phone && (
+                  <InfoRow label="Customer Phone" value={order.user.phone} />
+                )}
+                {order.contact_no && order.contact_no !== order.user.phone && (
+                  <InfoRow label="Order Contact" value={order.contact_no} />
+                )}
+                <Divider />
                 <InfoRow label="Payment" value={PAYMENT_LABEL[order.payment_method] ?? order.payment_method} />
                 <InfoRow label="Delivery To" value={order.delivery_address ?? 'Pickup'} />
                 {order.customer_notes && (
@@ -185,7 +197,14 @@ export function FoodOrderDetailView() {
                 <TableBody>
                   {order.items.map((item) => (
                     <TableRow key={item.id}>
-                      <TableCell>{item.name}</TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{item.name}</Typography>
+                        {item.notes && (
+                          <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                            {item.notes}
+                          </Typography>
+                        )}
+                      </TableCell>
                       <TableCell align="right">{item.quantity}</TableCell>
                       <TableCell align="right">
                         {fCurrency(item.price_cents / 100)}
@@ -197,21 +216,15 @@ export function FoodOrderDetailView() {
                   ))}
                   <TableRow>
                     <TableCell colSpan={3} align="right">
-                      <Typography variant="body2" color="text.secondary">
-                        Subtotal
-                      </Typography>
+                      <Typography variant="body2" color="text.secondary">Subtotal</Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <Typography variant="body2">
-                        {fCurrency(order.subtotal_cents / 100)}
-                      </Typography>
+                      <Typography variant="body2">{fCurrency(order.subtotal_cents / 100)}</Typography>
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell colSpan={3} align="right">
-                      <Typography variant="subtitle2" fontWeight={700}>
-                        Total
-                      </Typography>
+                      <Typography variant="subtitle2" fontWeight={700}>Total</Typography>
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="subtitle2" fontWeight={700} color="primary.main">
@@ -236,7 +249,7 @@ export function FoodOrderDetailView() {
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <Box sx={{ display: 'flex', gap: 1 }}>
-      <Typography variant="body2" color="text.secondary" sx={{ minWidth: 140 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ minWidth: 148 }}>
         {label}
       </Typography>
       <Typography variant="body2">{value}</Typography>

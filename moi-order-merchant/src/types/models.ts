@@ -60,6 +60,7 @@ export interface FoodOrder {
   total_cents: number;
   delivery_address: string | null;
   customer_notes: string | null;
+  contact_no: string | null;
   items: FoodOrderItem[];
   confirmed_at: string | null;
   payment_confirmed_at: string | null;
