@@ -118,20 +118,7 @@ export function useOrderChatScreen(orderId: string): UseOrderChatScreenResult {
 
   const messages = data ?? [];
 
-  // Scroll to bottom whenever message count changes (initial load + Pusher updates).
-  // Double rAF: on web (React Native Web) the FlatList DOM nodes aren't fully
-  // laid out in the first paint frame, so scrollHeight is measured short.
-  // Two frames guarantee the browser has committed and painted all items.
-  useEffect(() => {
-    if (messages.length === 0) return;
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        listRef.current?.scrollToEnd({ animated: false });
-      });
-    });
-  }, [messages.length]);
-
-  useEffect(() => {
+useEffect(() => {
     const show = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
     const hide = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
     return () => {

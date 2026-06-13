@@ -137,13 +137,12 @@ export function OrderChatContent({ orderId, orderNumber, onBack }: ContentProps)
         ) : (
           <FlatList
             ref={listRef}
-            data={messages}
+            data={[...messages].reverse()}
+            inverted
             keyExtractor={(m) => String(m.id)}
             renderItem={({ item }) => <MessageBubble msg={item} onPhotoPress={handlePhotoPress} />}
             style={styles.list}
             contentContainerStyle={styles.listContent}
-            onContentSizeChange={() => requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: false }))}
-            onLayout={() => messages.length > 0 && requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: false }))}
             accessibilityRole="list"
             showsVerticalScrollIndicator={false}
             keyboardDismissMode="on-drag"
