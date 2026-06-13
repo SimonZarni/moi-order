@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, FlatList, Keyboard } from 'react-native';
+import { Alert, FlatList, Keyboard, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
@@ -219,6 +219,10 @@ export function useOrderChatScreen(orderId: string): UseOrderChatScreenResult {
   }, []);
 
   const handleAttachPress = useCallback(() => {
+    if (Platform.OS === 'web') {
+      void pickFromLibrary();
+      return;
+    }
     Alert.alert('Add Photo', undefined, [
       { text: 'Take Photo',          onPress: () => { void takePhoto(); } },
       { text: 'Choose from Library', onPress: () => { void pickFromLibrary(); } },
