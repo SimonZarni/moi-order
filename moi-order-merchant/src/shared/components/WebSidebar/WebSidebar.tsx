@@ -51,11 +51,11 @@ export function WebSidebar({ activeScreen, onNavigate, onLogout, pendingCount = 
             source={require('../../../../assets/icon.png')}
             style={styles.logoImage}
             resizeMode="cover"
-            accessibilityLabel="Moi Order logo"
+            accessibilityLabel="MOi Order logo"
           />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.logoText}>Moi Order</Text>
+          <Text style={styles.logoText}>MOi Order</Text>
           <Text style={styles.logoSubText}>Merchant Portal</Text>
         </View>
         {/* Bell in the sidebar header — navigates to Notifications screen */}

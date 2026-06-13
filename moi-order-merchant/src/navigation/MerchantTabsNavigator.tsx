@@ -422,7 +422,7 @@ function WebMerchantLayout(): React.JSX.Element {
             >
               <Ionicons name="menu-outline" size={24} color={colours.textOnDark} />
             </Pressable>
-            <Text style={webStyles.mobileTopBarTitle}>Moi Order</Text>
+            <Text style={webStyles.mobileTopBarTitle}>MOi Order</Text>
             <View style={{ marginLeft: 'auto' as unknown as number }}>
               <NotificationBell
                 onPress={() => handleNavigate('Notifications')}

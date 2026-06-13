@@ -24,7 +24,7 @@ const mockGoogleSignin = {
   signIn: async (): Promise<never> => {
     throw new Error(
       Platform.OS === 'web'
-        ? 'Google sign-in is not yet supported in the browser. Please use the Moi Order mobile app.'
+        ? 'Google sign-in is not yet supported in the browser. Please use the MOi Order mobile app.'
         : 'Google sign-in requires a custom development build.',
     );
   },

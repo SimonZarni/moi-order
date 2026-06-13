@@ -39,7 +39,7 @@ const mockLineModule: LineModule = {
   login: async (): Promise<never> => {
     throw new Error(
       Platform.OS === 'web'
-        ? 'LINE sign-in is not yet supported in the browser. Please use the Moi Order mobile app.'
+        ? 'LINE sign-in is not yet supported in the browser. Please use the MOi Order mobile app.'
         : 'LINE sign-in requires a custom development build.',
     );
   },

@@ -493,7 +493,7 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
 
         {/* Contact support */}
         <Pressable style={styles.supportButton} onPress={handleContactSupport}
-          accessibilityRole="button" accessibilityLabel="Contact Moi Order support on LINE">
+          accessibilityRole="button" accessibilityLabel="Contact MOi Order support on LINE">
           <Ionicons name="chatbubble-ellipses-outline" size={18} color={colours.primary} />
           <Text style={styles.supportButtonText}>Contact Support (LINE)</Text>
         </Pressable>

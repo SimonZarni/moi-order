@@ -127,23 +127,23 @@ export function RegisterScreen(): React.JSX.Element {
 
   const isOtp = step === 'otp';
   const formTitle    = isOtp ? 'Verify your email' : 'Create your account';
-  const formSubtitle = isOtp ? `Enter the code sent to ${email}` : 'Register to start selling with Moi Order';
+  const formSubtitle = isOtp ? `Enter the code sent to ${email}` : 'Register to start selling with MOi Order';
 
   if (Platform.OS === 'web') {
     return (
       <View style={[styles.screen, isMobileWeb && styles.screenColumn]}>
         {isMobileWeb ? (
           <View style={styles.leftPanelMobile}>
-            <Image source={LOGO} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="Moi Order logo" />
+            <Image source={LOGO} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="MOi Order logo" />
             <View>
-              <Text style={styles.brandName}>moi·order</Text>
+              <Text style={styles.brandName}>MOi Order</Text>
               <Text style={styles.brandRole}>Merchant Platform</Text>
             </View>
           </View>
         ) : (
           <View style={styles.leftPanel}>
-            <Image source={LOGO} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="Moi Order logo" />
-            <Text style={styles.brandName}>moi·order</Text>
+            <Image source={LOGO} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="MOi Order logo" />
+            <Text style={styles.brandName}>MOi Order</Text>
             <Text style={styles.brandRole}>Merchant Platform</Text>
             <View style={styles.brandDivider} />
             <Text style={styles.brandTagline}>

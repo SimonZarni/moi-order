@@ -169,16 +169,16 @@ export function LoginScreen(): React.JSX.Element {
       <View style={[styles.screen, isMobileWeb && styles.screenColumn]}>
         {isMobileWeb ? (
           <View style={styles.leftPanelMobile}>
-            <Image source={LOGO} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="Moi Order logo" />
+            <Image source={LOGO} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="MOi Order logo" />
             <View>
-              <Text style={styles.brandName}>moi·order</Text>
+              <Text style={styles.brandName}>MOi Order</Text>
               <Text style={styles.brandRole}>Merchant Platform</Text>
             </View>
           </View>
         ) : (
           <View style={styles.leftPanel}>
-            <Image source={LOGO} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="Moi Order logo" />
-            <Text style={styles.brandName}>moi·order</Text>
+            <Image source={LOGO} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="MOi Order logo" />
+            <Text style={styles.brandName}>MOi Order</Text>
             <Text style={styles.brandRole}>Merchant Platform</Text>
             <View style={styles.brandDivider} />
             <Text style={styles.brandTagline}>Manage orders, menus, and analytics — all in one place.</Text>
@@ -203,9 +203,9 @@ export function LoginScreen(): React.JSX.Element {
     <KeyboardAvoidingView style={styles.safe} behavior="padding">
       <SafeAreaView style={styles.brandArea} edges={['top']}>
         <View style={styles.brandAreaContent}>
-          <Image source={LOGO} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="Moi Order logo" />
+          <Image source={LOGO} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="MOi Order logo" />
           <View>
-            <Text style={styles.brandName}>moi·order</Text>
+            <Text style={styles.brandName}>MOi Order</Text>
             <Text style={styles.brandRole}>Merchant Platform</Text>
           </View>
         </View>
