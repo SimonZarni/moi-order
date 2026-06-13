@@ -86,12 +86,13 @@ export async function sendOrderChatMessage(
     const ext  = mime.split('/')[1] ?? 'jpg';
     form.append('image', { uri: image.uri, name: `chat.${ext}`, type: mime } as unknown as Blob);
   }
-  // Do NOT set Content-Type manually — React Native XHR adds multipart/form-data
-  // with the correct boundary automatically when it detects a FormData body.
-  // Setting it manually strips the boundary and the server cannot parse the upload.
+  // Set Content-Type to multipart/form-data (without boundary) so Axios overrides
+  // the instance default 'application/json'. React Native XHR then appends the
+  // correct boundary automatically when it serialises the FormData body.
   const res = await apiClient.post<ApiResponse<OrderChatMessage>>(
     `/api/v1/food-orders/${orderId}/chat`,
     form,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
   );
   return res.data.data;
 }
