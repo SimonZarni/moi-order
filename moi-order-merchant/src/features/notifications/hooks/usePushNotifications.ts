@@ -41,7 +41,7 @@ if (!IS_EXPO_GO && Platform.OS !== 'web') {
 
 interface MerchantPushData {
   type?: 'new_order' | 'chat_message' | string;
-  order_id?: number;
+  order_id?: string;
 }
 
 export function usePushNotifications(): void {

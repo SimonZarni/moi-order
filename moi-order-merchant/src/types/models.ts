@@ -202,7 +202,7 @@ export interface MerchantNotification {
   type: MerchantNotificationType;
   title: string;
   body: string;
-  order_id: number | null;
+  order_id: string | null;
   is_read: boolean;
   created_at: string;
 }
