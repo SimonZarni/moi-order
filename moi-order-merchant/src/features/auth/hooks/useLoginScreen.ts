@@ -32,6 +32,7 @@ interface UseLoginScreenResult {
   email: string;
   password: string;
   showPassword: boolean;
+  passwordFocused: boolean;
   passwordInputRef: React.RefObject<TextInput | null>;
   isLoading: boolean;
   isGoogleLoading: boolean;
@@ -42,6 +43,8 @@ interface UseLoginScreenResult {
   setEmail: (v: string) => void;
   setPassword: (v: string) => void;
   handleTogglePassword: () => void;
+  handlePasswordFocus: () => void;
+  handlePasswordBlur: () => void;
   handleSubmit: () => Promise<void>;
   handleGoogleSignIn: () => Promise<void>;
   handleAppleSignIn: () => Promise<void>;
@@ -64,16 +67,17 @@ export function useLoginScreen(): UseLoginScreenResult {
   const navigation = useNavigation<Nav>();
   const setAuth = useAuthStore((s) => s.setAuth);
 
-  const [email, setEmail]             = useState('');
-  const [password, setPassword]       = useState('');
+  const [email, setEmail]               = useState('');
+  const [password, setPassword]         = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading]     = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [isLoading, setIsLoading]       = useState(false);
   const passwordInputRef = useRef<TextInput>(null);
-  const [isGoogleLoading, setGoogleL] = useState(false);
-  const [isAppleLoading, setAppleL]   = useState(false);
-  const [isLineLoading, setLineL]     = useState(false);
-  const [appleAvailable, setAppleAv]  = useState(false);
-  const [error, setError]             = useState<string | null>(null);
+  const [isGoogleLoading, setGoogleL]   = useState(false);
+  const [isAppleLoading, setAppleL]     = useState(false);
+  const [isLineLoading, setLineL]       = useState(false);
+  const [appleAvailable, setAppleAv]    = useState(false);
+  const [error, setError]               = useState<string | null>(null);
 
   useEffect(() => {
     GoogleSignin.configure({
@@ -86,7 +90,9 @@ export function useLoginScreen(): UseLoginScreenResult {
     }
   }, []);
 
-  const handleTogglePassword = useCallback(() => setShowPassword((v) => !v), []);
+  const handleTogglePassword  = useCallback(() => setShowPassword((v) => !v), []);
+  const handlePasswordFocus   = useCallback(() => setPasswordFocused(true), []);
+  const handlePasswordBlur    = useCallback(() => setPasswordFocused(false), []);
 
   const handleSubmit = useCallback(async () => {
     if (!email.trim() || !password) return;
@@ -202,6 +208,7 @@ export function useLoginScreen(): UseLoginScreenResult {
     email,
     password,
     showPassword,
+    passwordFocused,
     passwordInputRef,
     isLoading,
     isGoogleLoading,
@@ -212,6 +219,8 @@ export function useLoginScreen(): UseLoginScreenResult {
     setEmail,
     setPassword,
     handleTogglePassword,
+    handlePasswordFocus,
+    handlePasswordBlur,
     handleSubmit,
     handleGoogleSignIn,
     handleAppleSignIn,

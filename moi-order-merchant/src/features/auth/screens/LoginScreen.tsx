@@ -13,10 +13,10 @@ const LOGO = require('../../../../assets/moi-order-icon.png') as number;
 
 export function LoginScreen(): React.JSX.Element {
   const {
-    email, password, showPassword, passwordInputRef, isLoading,
+    email, password, showPassword, passwordFocused, passwordInputRef, isLoading,
     isGoogleLoading, isAppleLoading, isLineLoading, appleAvailable,
     error,
-    setEmail, setPassword, handleTogglePassword,
+    setEmail, setPassword, handleTogglePassword, handlePasswordFocus, handlePasswordBlur,
     handleSubmit, handleGoogleSignIn, handleAppleSignIn, handleLineSignIn,
     handleGoToOtp, handleGoToRegister,
   } = useLoginScreen();
@@ -53,7 +53,7 @@ export function LoginScreen(): React.JSX.Element {
 
       <View style={styles.field}>
         <Text style={styles.fieldLabel}>PASSWORD</Text>
-        <View style={styles.inputWrap}>
+        <View style={[styles.inputWrap, passwordFocused && styles.inputWrapFocused]}>
           <TextInput
             ref={passwordInputRef}
             style={styles.inputField}
@@ -64,6 +64,8 @@ export function LoginScreen(): React.JSX.Element {
             secureTextEntry={!showPassword}
             returnKeyType="go"
             onSubmitEditing={() => { void handleSubmit(); }}
+            onFocus={handlePasswordFocus}
+            onBlur={handlePasswordBlur}
             accessibilityLabel="Password"
           />
           <Pressable
