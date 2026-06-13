@@ -45,14 +45,15 @@ export const styles = StyleSheet.create({
 
   row: {
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
   },
   rowLabel: {
     fontSize: typography.sm,
     fontWeight: '600',
     color: colours.textOnLight,
-    marginBottom: spacing.sm,
-    lineHeight: 44,
+    marginBottom: 4,
+    // lineHeight ≥ 3× fontSize for Burmese diacritic clearance (sm=14 → 42)
+    lineHeight: 42,
   },
   chipRow: {
     flexDirection: 'row',
@@ -74,7 +75,8 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     fontWeight: '500',
     color: colours.textMuted,
-    lineHeight: 44,
+    // lineHeight ≥ 3× fontSize for Burmese diacritic clearance (sm=14 → 42)
+    lineHeight: 42,
   },
   chipTextActive: {
     color: colours.primary,
@@ -91,14 +93,15 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    minHeight: 52,
+    paddingVertical: spacing.sm,
+    minHeight: 48,
   },
   navRowLabel: {
     flex: 1,
     fontSize: typography.sm,
     fontWeight: '500',
     color: colours.textOnLight,
-    lineHeight: 44,
+    // lineHeight ≥ 3× fontSize for Burmese diacritic clearance (sm=14 → 42)
+    lineHeight: 42,
   },
 });
