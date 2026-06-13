@@ -63,7 +63,7 @@ Route::prefix('merchant/v1')->middleware(['auth:sanctum', 'abilities:merchant', 
 // Endpoint: POST /api/v1/broadcasting/auth
 // See routes/channels.php for per-channel authorization logic.
 Broadcast::routes([
-    'prefix'     => 'api/v1',
+    'prefix'     => 'v1',
     'middleware' => ['auth:sanctum', 'abilities:user', 'user.not_suspended'],
 ]);
 
@@ -71,7 +71,7 @@ Broadcast::routes([
 // Endpoint: POST /api/merchant/v1/broadcasting/auth
 // See routes/channels.php for per-channel authorization logic.
 Broadcast::routes([
-    'prefix'     => 'api/merchant/v1',
+    'prefix'     => 'merchant/v1',
     'middleware' => ['auth:sanctum', 'abilities:merchant', 'merchant.auth', 'user.not_suspended'],
 ]);
 

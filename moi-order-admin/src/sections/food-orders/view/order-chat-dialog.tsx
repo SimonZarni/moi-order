@@ -1,14 +1,16 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 
+import Pusher from 'pusher-js';
+
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
-import Dialog from '@mui/material/Dialog';
+import Stack from '@mui/material/Stack';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -21,7 +23,7 @@ import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-const POLL_INTERVAL_MS = 3000;
+const POLL_INTERVAL_MS = 3_000;
 
 const SENDER_LABEL: Record<OrderChatMessage['sender_type'], string> = {
   customer: 'Customer',
@@ -45,11 +47,14 @@ type OrderChatDialogProps = {
 
 export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps) {
   const [messages, setMessages] = useState<OrderChatMessage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [draft, setDraft] = useState('');
-  const [sending, setSending] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState<string | null>(null);
+  const [draft, setDraft]       = useState('');
+  const [sending, setSending]   = useState(false);
+
+  // Scroll container ref — we set scrollTop directly (no smooth animation)
+  // so it works reliably even while the MUI Dialog open-animation is running.
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const loadMessages = useCallback(() => {
     orderChatApi
@@ -59,6 +64,7 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
       .finally(() => setLoading(false));
   }, [orderId]);
 
+  // Initial load + polling fallback
   useEffect(() => {
     if (!open) return undefined;
 
@@ -70,8 +76,69 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
     return () => clearInterval(interval);
   }, [open, loadMessages]);
 
+  // Real-time updates via Pusher private-order.{orderId}.
+  // Polling above stays active as a fallback when Pusher is unavailable.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (!open || !orderId) return undefined;
+
+    const pusherKey     = (import.meta.env['VITE_PUSHER_KEY']     as string | undefined) ?? '';
+    const pusherCluster = (import.meta.env['VITE_PUSHER_CLUSTER'] as string | undefined) ?? 'ap1';
+
+    if (!pusherKey) return undefined;
+
+    const appOrigin = new URL(import.meta.env['VITE_API_BASE_URL'] as string).origin;
+
+    const pusher = new Pusher(pusherKey, {
+      cluster: pusherCluster,
+      forceTLS: true,
+      channelAuthorization: {
+        customHandler: async ({ channelName, socketId }, callback) => {
+          try {
+            const token = sessionStorage.getItem('admin_token') ?? '';
+            const res = await fetch(`${appOrigin}/broadcasting/auth`, {
+              method: 'POST',
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+              body: JSON.stringify({ socket_id: socketId, channel_name: channelName }),
+            });
+            const data = await res.json() as { auth: string };
+            callback(null, data);
+          } catch {
+            callback(new Error('Channel auth failed'), null);
+          }
+        },
+      },
+    });
+
+    const channel = pusher.subscribe(`private-order.${orderId}`);
+    channel.bind('chat.message-sent', (data: unknown) => {
+      const msg = data as OrderChatMessage;
+      setMessages((prev) => {
+        // Dedup: the polling interval may have already added this message.
+        if (prev.some((m) => m.id === msg.id)) return prev;
+        return [...prev, msg];
+      });
+    });
+
+    return () => {
+      pusher.unsubscribe(`private-order.${orderId}`);
+      pusher.disconnect();
+    };
+  }, [open, orderId]);
+
+  // Scroll to bottom on every messages change.
+  // requestAnimationFrame defers until after the browser has painted the new
+  // message nodes — reliable even when the Dialog animation is still running.
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    requestAnimationFrame(() => {
+      container.scrollTop = container.scrollHeight;
+    });
   }, [messages]);
 
   const handleSend = useCallback(() => {
@@ -107,14 +174,18 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
             <CircularProgress />
           </Box>
         ) : (
-          <Stack spacing={1.5} sx={{ flexGrow: 1, overflowY: 'auto', maxHeight: 360 }}>
+          <Stack
+            ref={containerRef}
+            spacing={1.5}
+            sx={{ flexGrow: 1, overflowY: 'auto', maxHeight: 360 }}
+          >
             {messages.length === 0 && (
               <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
                 No messages yet.
               </Typography>
             )}
 
-            {messages.map((message) => (
+            {messages.map((message) =>
               message.sender_type === 'system' ? (
                 <Typography
                   key={message.id}
@@ -126,7 +197,14 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
                 </Typography>
               ) : (
                 <Stack key={message.id} direction="row" spacing={1.5} alignItems="flex-start">
-                  <Avatar sx={{ bgcolor: SENDER_COLOR[message.sender_type], width: 32, height: 32, fontSize: 14 }}>
+                  <Avatar
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      fontSize: 14,
+                      bgcolor: SENDER_COLOR[message.sender_type],
+                    }}
+                  >
                     {message.sender_name.charAt(0).toUpperCase()}
                   </Avatar>
                   <Box sx={{ flexGrow: 1 }}>
@@ -152,8 +230,7 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
                   </Box>
                 </Stack>
               )
-            ))}
-            <div ref={bottomRef} />
+            )}
           </Stack>
         )}
 
