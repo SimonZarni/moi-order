@@ -24,7 +24,7 @@ class UploadKycDocumentRequest extends FormRequest
     {
         return [
             'type' => ['required', new Enum(KycDocumentType::class)],
-            'file' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:51200'],
+            'file' => ['required', 'file', 'mimes:jpg,jpeg,png,heic,heif,pdf', 'max:51200'],
         ];
     }
 
@@ -34,7 +34,7 @@ class UploadKycDocumentRequest extends FormRequest
         return [
             'type.required' => 'Document type is required.',
             'file.required' => 'A file must be uploaded.',
-            'file.mimes'    => 'File must be a JPG, PNG, or PDF.',
+            'file.mimes'    => 'File must be a JPG, PNG, HEIC, or PDF.',
             'file.max'      => 'File may not exceed 10 MB.',
         ];
     }
