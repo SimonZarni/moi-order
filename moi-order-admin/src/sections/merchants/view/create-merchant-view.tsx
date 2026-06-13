@@ -121,15 +121,14 @@ export function CreateMerchantView() {
         setErrors({});
       })
       .catch((err) => {
-        if (err?.response?.status === 422) {
-          const serverErrs = err.response.data?.errors ?? {};
+        if (err?.status === 422 && err?.errors) {
           const flat: Record<string, string> = {};
-          Object.entries(serverErrs).forEach(([k, v]) => {
+          Object.entries(err.errors as Record<string, string[]>).forEach(([k, v]) => {
             flat[k] = Array.isArray(v) ? v[0] : String(v);
           });
           setErrors(flat);
         } else {
-          setErrorMsg(err?.response?.data?.message ?? 'Failed to create merchant account.');
+          setErrorMsg(err?.message ?? 'Failed to create merchant account.');
         }
       })
       .finally(() => setSaving(false));
