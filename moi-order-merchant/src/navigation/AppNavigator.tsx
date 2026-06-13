@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ActivityIndicator, View, StyleSheet, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -62,6 +62,17 @@ export function AppNavigator(): React.JSX.Element {
     initFromStorage();
     void initSettingsFromStorage();
   }, [initFromStorage, initSettingsFromStorage]);
+
+  // Clear all cached queries when a merchant logs out so the next merchant
+  // who logs in never sees the previous merchant's data.
+  const prevTokenRef = useRef<string | null>(token);
+  useEffect(() => {
+    const prev = prevTokenRef.current;
+    prevTokenRef.current = token;
+    if (prev !== null && token === null) {
+      queryClient.clear();
+    }
+  }, [token, queryClient]);
 
   const { isLoading: isMeLoading } = useQuery({
     queryKey: QUERY_KEYS.ME,

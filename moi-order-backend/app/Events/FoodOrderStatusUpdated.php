@@ -24,9 +24,12 @@ class FoodOrderStatusUpdated implements ShouldBroadcast
     /** @return Channel|list<Channel> */
     public function broadcastOn(): Channel|array
     {
-        // user_id is the integer FK — load uuid via relationship so the channel name
-        // matches what the mobile client subscribes to (private-user.{uuid}).
-        return new PrivateChannel('user.' . $this->order->user->uuid);
+        return [
+            // Customer's private channel — mobile app listens for status updates.
+            new PrivateChannel('user.' . $this->order->user->uuid),
+            // Order-scoped channel — merchant order detail screen listens for live updates.
+            new PrivateChannel('order.' . $this->order->uuid),
+        ];
     }
 
     public function broadcastAs(): string

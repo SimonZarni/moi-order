@@ -1,9 +1,25 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getOrder, updateOrderStatus, cancelOrderWithReason, CancelOrderPayload } from '../../../api/orders';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
-import { CACHE_TTL, GC_TIME } from '../../../shared/constants/config';
+import { CACHE_TTL, GC_TIME, PUSHER_APP_KEY, PUSHER_APP_CLUSTER, BROADCAST_AUTH_URL } from '../../../shared/constants/config';
+import { useAuthStore } from '../../../store/authStore';
 import type { FoodOrder } from '../../../types/models';
+
+// ── Pusher type shims (avoids hard dep on @types/pusher-js) ──────────────────
+
+interface PusherChannel {
+  bind(event: string, callback: (data: unknown) => void): void;
+  unbind_all(): void;
+}
+interface PusherInstance {
+  subscribe(channel: string): PusherChannel;
+  unsubscribe(channel: string): void;
+  disconnect(): void;
+}
+type PusherConstructorFn = new (key: string, options: object) => PusherInstance;
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface UseOrderDetailScreenResult {
   order: FoodOrder | undefined;
@@ -23,9 +39,11 @@ interface UseOrderDetailScreenResult {
 
 export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResult {
   const queryClient = useQueryClient();
+  const token = useAuthStore((s) => s.token);
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
   const [cancelReason, setCancelReason] = useState('closing_soon');
   const [cancelDescription, setCancelDescription] = useState('');
+  const pusherRef = useRef<PusherInstance | null>(null);
 
   const { data: order, isLoading, isError } = useQuery({
     queryKey: QUERY_KEYS.ORDER_DETAIL(orderId),
@@ -34,6 +52,57 @@ export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResul
     gcTime: GC_TIME.DEFAULT,
     retry: 0,
   });
+
+  // Real-time status updates via private-order.{orderId} channel.
+  // FoodOrderStatusUpdated now broadcasts on this channel so the merchant
+  // sees payment confirmation and status changes without refreshing.
+  useEffect(() => {
+    if (!token || !PUSHER_APP_KEY) return;
+    let pusher: PusherInstance | null = null;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any
+      const mod = require('pusher-js') as any;
+      const PusherClass: PusherConstructorFn = mod.Pusher ?? mod.default ?? mod;
+      pusher = new PusherClass(PUSHER_APP_KEY, {
+        cluster: PUSHER_APP_CLUSTER,
+        forceTLS: true,
+        channelAuthorization: {
+          customHandler: async (
+            { channelName, socketId }: { channelName: string; socketId: string },
+            callback: (err: Error | null, data: { auth: string } | null) => void,
+          ) => {
+            try {
+              // eslint-disable-next-line @typescript-eslint/no-require-imports
+              const { apiClient } = require('../../../shared/api/client') as {
+                apiClient: { post: <T>(url: string, data: unknown) => Promise<{ data: T }> };
+              };
+              const res = await apiClient.post<{ auth: string }>(
+                BROADCAST_AUTH_URL.replace(_getApiBase(), ''),
+                { socket_id: socketId, channel_name: channelName },
+              );
+              callback(null, res.data);
+            } catch {
+              callback(new Error('Channel auth failed'), null);
+            }
+          },
+        },
+      });
+      const channel = pusher.subscribe(`private-order.${orderId}`);
+      channel.bind('food-order.status-updated', () => {
+        // Re-fetch the full order so all timestamps and status fields update.
+        void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDER_DETAIL(orderId) });
+        void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS() });
+      });
+      pusherRef.current = pusher;
+    } catch { /* pusher-js not installed or network error — REST polling via staleTime continues */ }
+    return () => {
+      try {
+        pusherRef.current?.unsubscribe(`private-order.${orderId}`);
+        pusherRef.current?.disconnect();
+      } catch { /* silent */ }
+      pusherRef.current = null;
+    };
+  }, [token, orderId, queryClient]);
 
   const invalidate = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS() });
@@ -94,4 +163,9 @@ export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResul
     handleCancelDescriptionChange,
     handleCancelConfirm,
   };
+}
+
+function _getApiBase(): string {
+  return (process.env.EXPO_PUBLIC_API_URL as string | undefined) ??
+    'https://api.moiorder.com/api/merchant/v1';
 }

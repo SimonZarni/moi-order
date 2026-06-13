@@ -21,7 +21,7 @@ class OrderChatMessageSent implements ShouldBroadcast
     /** @return Channel|list<Channel> */
     public function broadcastOn(): Channel|array
     {
-        return new PrivateChannel("order.{$this->message->food_order_id}");
+        return new PrivateChannel("order.{$this->message->foodOrder->uuid}");
     }
 
     public function broadcastAs(): string
