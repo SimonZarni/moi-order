@@ -28,7 +28,7 @@ function persist(state: PersistedSettings): void {
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   language: 'en',
   theme: 'light',
-  menuView: 'list',
+  menuView: 'grid',
 
   setLanguage(language) {
     set({ language });
@@ -53,7 +53,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       set({
         language: parsed.language ?? 'en',
         theme: parsed.theme ?? 'light',
-        menuView: parsed.menuView ?? 'list',
+        menuView: parsed.menuView ?? 'grid',
       });
     } catch {}
   },
