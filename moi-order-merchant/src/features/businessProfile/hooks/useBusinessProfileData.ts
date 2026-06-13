@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getBusinessProfile,
   updateBusinessPhone,
+  updateBusinessEmail,
   uploadBusinessProfileDocument,
 } from '../../../api/businessProfile';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
@@ -16,6 +17,7 @@ export interface UseBusinessProfileDataResult {
   isLoading: boolean;
   isError: boolean;
   updatePhone: UseMutationResult<BusinessProfile, Error, string | null>;
+  updateEmail: UseMutationResult<BusinessProfile, Error, string>;
   uploadDocument: UseMutationResult<KycDocument, Error, { type: KycDocType; file: UploadFileRef }>;
 }
 
@@ -35,6 +37,15 @@ export function useBusinessProfileData(): UseBusinessProfileDataResult {
     },
   });
 
+  const updateEmail = useMutation<BusinessProfile, Error, string>({
+    mutationFn: (email) => updateBusinessEmail(email),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(QUERY_KEYS.BUSINESS_PROFILE, updated);
+      // Refresh the auth store's user so their email stays in sync everywhere.
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ME });
+    },
+  });
+
   const uploadDocument = useMutation<KycDocument, Error, { type: KycDocType; file: UploadFileRef }>({
     mutationFn: ({ type, file }) => uploadBusinessProfileDocument(type, file),
     onSuccess: () => {
@@ -47,6 +58,7 @@ export function useBusinessProfileData(): UseBusinessProfileDataResult {
     isLoading,
     isError,
     updatePhone,
+    updateEmail,
     uploadDocument,
   };
 }

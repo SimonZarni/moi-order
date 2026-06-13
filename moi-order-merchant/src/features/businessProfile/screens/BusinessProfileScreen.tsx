@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, Pressable, Platform } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Pressable, TextInput, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useBusinessProfileScreen } from '../hooks/useBusinessProfileScreen';
@@ -29,6 +29,8 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
     profile, isLoading, isError,
     isEditingPhone, phoneValue, phoneError, isSavingPhone,
     handleStartEditPhone, handleCancelEditPhone, handleChangePhone, handleSavePhone,
+    isEditingEmail, emailValue, emailError, isSavingEmail,
+    handleStartEditEmail, handleCancelEditEmail, handleChangeEmail, handleSaveEmail,
     handleUploadDocument, uploadingDocType,
     handleBack,
   } = useBusinessProfileScreen();
@@ -106,7 +108,64 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
                 </View>
               )}
             </View>
-            <Text style={styles.accountDetail}>{profile.user.email}</Text>
+
+            {/* Email — inline editable */}
+            {isEditingEmail ? (
+              <>
+                <View style={styles.emailEditRow}>
+                  <TextInput
+                    style={[styles.emailInput, emailError !== undefined && styles.emailInputError]}
+                    value={emailValue}
+                    onChangeText={handleChangeEmail}
+                    placeholder="you@email.com"
+                    placeholderTextColor={colours.textSubtle}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    autoFocus
+                    accessibilityLabel="Email address input"
+                  />
+                  {isSavingEmail ? (
+                    <ActivityIndicator size="small" color={colours.primary} style={styles.emailAction} />
+                  ) : (
+                    <>
+                      <Pressable
+                        onPress={handleSaveEmail}
+                        style={styles.emailAction}
+                        accessibilityLabel="Save email"
+                        accessibilityRole="button"
+                      >
+                        <Ionicons name="checkmark-circle" size={22} color={colours.primary} />
+                      </Pressable>
+                      <Pressable
+                        onPress={handleCancelEditEmail}
+                        style={styles.emailAction}
+                        accessibilityLabel="Cancel email edit"
+                        accessibilityRole="button"
+                      >
+                        <Ionicons name="close-circle-outline" size={22} color={colours.textMuted} />
+                      </Pressable>
+                    </>
+                  )}
+                </View>
+                {emailError !== undefined && (
+                  <Text style={styles.emailFieldError}>{emailError}</Text>
+                )}
+              </>
+            ) : (
+              <View style={styles.accountDetailRow}>
+                <Text style={styles.accountDetail}>{profile.user.email}</Text>
+                <Pressable
+                  onPress={handleStartEditEmail}
+                  style={styles.editPencil}
+                  accessibilityLabel="Edit email address"
+                  accessibilityRole="button"
+                >
+                  <Ionicons name="pencil-outline" size={14} color={colours.primary} />
+                </Pressable>
+              </View>
+            )}
+
             {profile.user.phone !== null && (
               <Text style={styles.accountDetail}>{profile.user.phone}</Text>
             )}

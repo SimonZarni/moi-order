@@ -18,11 +18,20 @@ export interface UseBusinessProfileScreenResult {
   isEditingPhone: boolean;
   phoneValue: string;
   phoneError: string | undefined;
+  isSavingPhone: boolean;
   handleStartEditPhone: () => void;
   handleCancelEditPhone: () => void;
   handleChangePhone: (val: string) => void;
   handleSavePhone: () => Promise<void>;
-  isSavingPhone: boolean;
+  // email editing
+  isEditingEmail: boolean;
+  emailValue: string;
+  emailError: string | undefined;
+  isSavingEmail: boolean;
+  handleStartEditEmail: () => void;
+  handleCancelEditEmail: () => void;
+  handleChangeEmail: (val: string) => void;
+  handleSaveEmail: () => Promise<void>;
   // document upload
   handleUploadDocument: (type: KycDocType) => Promise<void>;
   uploadingDocType: KycDocType | null;
@@ -33,13 +42,17 @@ export interface UseBusinessProfileScreenResult {
 export function useBusinessProfileScreen(): UseBusinessProfileScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
 
-  const { profile, isLoading, isError, updatePhone, uploadDocument } = useBusinessProfileData();
+  const { profile, isLoading, isError, updatePhone, updateEmail, uploadDocument } = useBusinessProfileData();
   const form = useBusinessProfileForm();
 
   const [uploadingDocType, setUploadingDocType] = useState<KycDocType | null>(null);
 
   const handleStartEditPhone = useCallback(() => {
-    form.handleStartEdit(profile?.kyc?.business_phone ?? null);
+    form.handleStartEditPhone(profile?.kyc?.business_phone ?? null);
+  }, [form, profile]);
+
+  const handleStartEditEmail = useCallback(() => {
+    form.handleStartEditEmail(profile?.user.email ?? '');
   }, [form, profile]);
 
   const handleSavePhone = useCallback(async () => {
@@ -52,6 +65,17 @@ export function useBusinessProfileScreen(): UseBusinessProfileScreenResult {
       form.applyApiError(err as ApiError);
     }
   }, [form, updatePhone]);
+
+  const handleSaveEmail = useCallback(async () => {
+    if (!form.validate()) return;
+    const email = form.values.email.trim();
+    try {
+      await updateEmail.mutateAsync(email);
+      form.handleCancelEdit();
+    } catch (err) {
+      form.applyApiError(err as ApiError);
+    }
+  }, [form, updateEmail]);
 
   const handleUploadDocument = useCallback(
     async (type: KycDocType) => {
@@ -78,14 +102,22 @@ export function useBusinessProfileScreen(): UseBusinessProfileScreenResult {
     profile,
     isLoading,
     isError,
-    isEditingPhone: form.isEditing,
+    isEditingPhone: form.isEditingPhone,
     phoneValue: form.values.business_phone,
     phoneError: form.errors.business_phone,
+    isSavingPhone: updatePhone.isPending,
     handleStartEditPhone,
     handleCancelEditPhone: form.handleCancelEdit,
     handleChangePhone: form.handleChangePhone,
     handleSavePhone,
-    isSavingPhone: updatePhone.isPending,
+    isEditingEmail: form.isEditingEmail,
+    emailValue: form.values.email,
+    emailError: form.errors.email,
+    isSavingEmail: updateEmail.isPending,
+    handleStartEditEmail,
+    handleCancelEditEmail: form.handleCancelEdit,
+    handleChangeEmail: form.handleChangeEmail,
+    handleSaveEmail,
     handleUploadDocument,
     uploadingDocType,
     handleBack,

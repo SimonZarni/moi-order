@@ -16,6 +16,13 @@ export async function updateBusinessPhone(businessPhone: string | null): Promise
   return response.data.data;
 }
 
+export async function updateBusinessEmail(email: string): Promise<BusinessProfile> {
+  const response = await apiClient.patch<{ data: BusinessProfile }>('/business-profile', {
+    email,
+  });
+  return response.data.data;
+}
+
 export async function uploadBusinessProfileDocument(
   type: KycDocType,
   file: UploadFileRef,

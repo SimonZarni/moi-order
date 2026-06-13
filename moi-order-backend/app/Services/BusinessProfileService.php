@@ -15,7 +15,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Principle: SRP — owns the merchant business profile read + phone update only.
+ * Principle: SRP — owns the merchant business profile read + editable field updates.
  * Principle: DIP — delegates document upload to KycService (injected).
  * Principle: Security — all queries scoped to the authenticated user's ID.
  */
@@ -27,7 +27,6 @@ class BusinessProfileService
 
     /**
      * Return all data needed to render the Business Profile screen.
-     * Looks up the user's approved KYC application and their restaurant.
      *
      * @return array{user: User, kyc: KycApplication|null, restaurant: Restaurant|null}
      */
@@ -45,28 +44,32 @@ class BusinessProfileService
     }
 
     /**
-     * Update the business phone on the merchant's approved KYC application.
-     * Returns the full refreshed profile array for a single-call controller action.
+     * Apply partial editable-field updates from the DTO.
+     * Only fields flagged as present in the request are written.
      *
      * @return array{user: User, kyc: KycApplication|null, restaurant: Restaurant|null}
      */
-    public function updateBusinessPhone(User $user, UpdateBusinessProfileDTO $dto): array
+    public function updateProfile(User $user, UpdateBusinessProfileDTO $dto): array
     {
         $app = KycApplication::forUser($user->id)
             ->where('status', KycApplicationStatus::Approved->value)
             ->latest('reviewed_at')
             ->firstOrFail();
 
-        DB::transaction(function () use ($app, $dto): void {
-            $app->update(['business_phone' => $dto->businessPhone]);
+        DB::transaction(function () use ($app, $dto, $user): void {
+            if ($dto->hasBusinessPhone) {
+                $app->update(['business_phone' => $dto->businessPhone]);
+            }
+            if ($dto->hasEmail && $dto->email !== null) {
+                $user->update(['email' => $dto->email]);
+            }
         });
 
-        return $this->getProfile($user);
+        return $this->getProfile($user->fresh());
     }
 
     /**
      * Replace a document on the merchant's approved KYC application.
-     * Delegates actual upload + soft-delete of the old file to KycService.
      */
     public function replaceDocument(User $user, UploadedFile $file, KycDocumentType $type): KycDocument
     {

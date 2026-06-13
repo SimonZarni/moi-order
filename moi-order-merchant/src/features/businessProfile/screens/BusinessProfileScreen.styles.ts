@@ -89,4 +89,25 @@ export const styles = StyleSheet.create({
   unverifiedBannerBody: { flex: 1 },
   unverifiedBannerTitle: { fontSize: typography.sm, fontWeight: '700', color: '#f59e0b' },
   unverifiedBannerSub: { fontSize: typography.xs, color: '#92400e', marginTop: 2 },
+
+  // ── Inline email edit ────────────────────────────────────────────────────────
+  accountDetailRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  editPencil: { padding: 4, minWidth: 28, minHeight: 28, alignItems: 'center', justifyContent: 'center' },
+  emailEditRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flex: 1 },
+  emailInput: {
+    flex: 1,
+    fontSize: typography.sm,
+    color: colours.textOnLight,
+    backgroundColor: colours.surfaceMuted,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    outlineWidth: 0,
+    outlineStyle: 'none',
+  },
+  emailInputError: { borderColor: colours.error },
+  emailAction: { padding: 4, minWidth: 28, minHeight: 28, alignItems: 'center', justifyContent: 'center' },
+  emailFieldError: { fontSize: typography.xs, color: colours.error, marginTop: 2 },
 });

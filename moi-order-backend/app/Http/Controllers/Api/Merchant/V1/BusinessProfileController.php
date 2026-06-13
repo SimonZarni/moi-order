@@ -36,7 +36,7 @@ class BusinessProfileController extends Controller
     /** PATCH /api/merchant/v1/business-profile */
     public function update(UpdateBusinessProfileRequest $request): JsonResponse
     {
-        $profile = $this->businessProfileService->updateBusinessPhone(
+        $profile = $this->businessProfileService->updateProfile(
             $request->user(),
             UpdateBusinessProfileDTO::fromRequest($request),
         );
