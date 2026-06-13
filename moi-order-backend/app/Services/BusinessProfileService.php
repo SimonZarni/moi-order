@@ -51,13 +51,12 @@ class BusinessProfileService
      */
     public function updateProfile(User $user, UpdateBusinessProfileDTO $dto): array
     {
-        $app = KycApplication::forUser($user->id)
-            ->where('status', KycApplicationStatus::Approved->value)
-            ->latest('reviewed_at')
-            ->firstOrFail();
-
-        DB::transaction(function () use ($app, $dto, $user): void {
+        DB::transaction(function () use ($dto, $user): void {
             if ($dto->hasBusinessPhone) {
+                $app = KycApplication::forUser($user->id)
+                    ->where('status', KycApplicationStatus::Approved->value)
+                    ->latest('reviewed_at')
+                    ->firstOrFail();
                 $app->update(['business_phone' => $dto->businessPhone]);
             }
             if ($dto->hasEmail && $dto->email !== null) {
