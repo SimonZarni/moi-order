@@ -119,6 +119,14 @@ export const RESTAURANT_STATUS = {
 
 export type RestaurantStatus = (typeof RESTAURANT_STATUS)[keyof typeof RESTAURANT_STATUS];
 
+// Mirrors App\Enums\RestaurantPlatformStatus
+export const RESTAURANT_PLATFORM_STATUS = {
+  Active:    'active',
+  Suspended: 'suspended',
+} as const;
+
+export type RestaurantPlatformStatus = (typeof RESTAURANT_PLATFORM_STATUS)[keyof typeof RESTAURANT_PLATFORM_STATUS];
+
 // Builtin icon keys — kept as reference constants for the SVG component map
 export const HOME_CARD_ICON_KEY = {
   Calendar: 'calendar',

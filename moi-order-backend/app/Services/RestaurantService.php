@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\FileStorageInterface;
+use App\Enums\RestaurantPlatformStatus;
 use App\Enums\RestaurantStatus;
 use App\Exceptions\DomainException;
 use App\Models\Restaurant;
@@ -164,7 +165,8 @@ class RestaurantService
      */
     public function browse(?float $lat = null, ?float $lng = null, ?string $search = null): LengthAwarePaginator
     {
-        $query = Restaurant::whereIn('status', [RestaurantStatus::Open->value, RestaurantStatus::Closed->value])
+        $query = Restaurant::where('platform_status', RestaurantPlatformStatus::Active->value)
+            ->whereIn('status', [RestaurantStatus::Open->value, RestaurantStatus::Closed->value])
             ->with(['openingHours'])
             ->orderByRaw("FIELD(status, ?, ?) ASC", [RestaurantStatus::Open->value, RestaurantStatus::Closed->value])
             ->select('restaurants.*');

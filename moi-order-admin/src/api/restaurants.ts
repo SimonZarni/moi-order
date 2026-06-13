@@ -1,6 +1,7 @@
 import apiClient from './client';
 
 export type RestaurantStatus = 'open' | 'closed' | 'paused';
+export type RestaurantPlatformStatus = 'active' | 'suspended';
 
 export type RestaurantListItem = {
   id: number;
@@ -8,6 +9,7 @@ export type RestaurantListItem = {
   address: string | null;
   phone: string | null;
   status: RestaurantStatus;
+  platform_status: RestaurantPlatformStatus;
   is_delivery_available: boolean;
   is_pickup_available: boolean;
   min_order_cents: number;
@@ -154,6 +156,11 @@ export const restaurantsApi = {
   updateStatus: (id: number | string, status: RestaurantStatus) =>
     apiClient
       .patch<{ data: { id: number; status: RestaurantStatus } }>(`/restaurants/${id}/status`, { status })
+      .then((r) => r.data.data),
+
+  updatePlatformStatus: (id: number | string, platform_status: RestaurantPlatformStatus) =>
+    apiClient
+      .patch<{ data: { id: number; platform_status: RestaurantPlatformStatus } }>(`/restaurants/${id}/platform-status`, { platform_status })
       .then((r) => r.data.data),
 
   // ─── Categories ──────────────────────────────────────────────────────────

@@ -8,6 +8,7 @@ use App\Contracts\FileStorageInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreAdminRestaurantRequest;
 use App\Http\Requests\Admin\UpdateAdminRestaurantRequest;
+use App\Http\Requests\Admin\UpdateRestaurantPlatformStatusRequest;
 use App\Http\Resources\RestaurantResource;
 use App\Models\Restaurant;
 use App\Models\RestaurantPhoto;
@@ -56,6 +57,7 @@ class AdminRestaurantController extends Controller
                 'address'               => $r->address,
                 'phone'                 => $r->phone,
                 'status'                => $r->status->value,
+                'platform_status'       => $r->platform_status->value,
                 'is_delivery_available' => $r->is_delivery_available,
                 'is_pickup_available'   => $r->is_pickup_available,
                 'min_order_cents'       => $r->min_order_cents,
@@ -123,7 +125,7 @@ class AdminRestaurantController extends Controller
     {
         $request->validate(['status' => ['required', 'string', 'in:open,closed,paused']]);
 
-        // Admin can force-open without the menu-rule check — merchant self-service enforces it instead.
+        // Admin can force merchant status without the menu-rule check.
         match ($request->string('status')->toString()) {
             'open'   => $restaurant->markAsOpen(),
             'closed' => $restaurant->markAsClosed(),
@@ -132,6 +134,18 @@ class AdminRestaurantController extends Controller
 
         return response()->json([
             'data' => ['id' => $restaurant->id, 'status' => $restaurant->status->value],
+        ]);
+    }
+
+    public function updatePlatformStatus(UpdateRestaurantPlatformStatusRequest $request, Restaurant $restaurant): JsonResponse
+    {
+        match ($request->enum('platform_status', \App\Enums\RestaurantPlatformStatus::class)) {
+            \App\Enums\RestaurantPlatformStatus::Active    => $restaurant->activate(),
+            \App\Enums\RestaurantPlatformStatus::Suspended => $restaurant->suspend(),
+        };
+
+        return response()->json([
+            'data' => ['id' => $restaurant->id, 'platform_status' => $restaurant->platform_status->value],
         ]);
     }
 

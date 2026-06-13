@@ -379,6 +379,8 @@ Route::prefix('restaurants')->name('admin.restaurants.')->group(function (): voi
         ->middleware('check.permission:restaurants.manage');
     Route::patch('/{restaurant}/status', [AdminRestaurantController::class, 'updateStatus'])->name('update-status')
         ->middleware('check.permission:restaurants.manage');
+    Route::patch('/{restaurant}/platform-status', [AdminRestaurantController::class, 'updatePlatformStatus'])->name('update-platform-status')
+        ->middleware('check.permission:restaurants.manage');
 
     Route::post('/{restaurant}/photos', [AdminRestaurantController::class, 'uploadPhoto'])->name('photos.store')
         ->middleware('check.permission:restaurants.manage');

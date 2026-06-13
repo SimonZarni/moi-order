@@ -44,6 +44,7 @@ import {
   type MenuItemDetail,
   type RestaurantDetail,
   type RestaurantStatus,
+  type RestaurantPlatformStatus,
   type MenuCategoryDetail,
 } from 'src/api/restaurants';
 
@@ -93,6 +94,7 @@ export function RestaurantDetailView() {
 
   // Status
   const [statusUpdating, setStatusUpdating] = useState(false);
+  const [platformStatusUpdating, setPlatformStatusUpdating] = useState(false);
 
   // Edit info dialog
   const [editInfoOpen, setEditInfoOpen] = useState(false);
@@ -162,6 +164,16 @@ export function RestaurantDetailView() {
       .then(({ status: s }) => setRestaurant((prev) => prev ? { ...prev, status: s } : prev))
       .catch(() => {})
       .finally(() => setStatusUpdating(false));
+  }, [id, restaurant]);
+
+  const handlePlatformStatusChange = useCallback((platform_status: RestaurantPlatformStatus) => {
+    if (!id || !restaurant) return;
+    setPlatformStatusUpdating(true);
+    restaurantsApi
+      .updatePlatformStatus(id, platform_status)
+      .then(({ platform_status: ps }) => setRestaurant((prev) => prev ? { ...prev, platform_status: ps } : prev))
+      .catch(() => setNotification({ msg: 'Failed to update platform status.', severity: 'error' }))
+      .finally(() => setPlatformStatusUpdating(false));
   }, [id, restaurant]);
 
   // ── Edit info ───────────────────────────────────────────────────────────────
@@ -471,7 +483,27 @@ export function RestaurantDetailView() {
           Back
         </Button>
         <Typography variant="h4" sx={{ flexGrow: 1 }}>{restaurant.name}</Typography>
-        <Label color={STATUS_COLOR[restaurant.status] ?? 'default'}>{restaurant.status}</Label>
+
+        {/* Merchant operational status — read-only in admin; merchants control this */}
+        <Tooltip title="Merchant-controlled status (open/closed/paused)">
+          <Label color={STATUS_COLOR[restaurant.status] ?? 'default'}>{restaurant.status}</Label>
+        </Tooltip>
+
+        {/* Platform status — admin-controlled override (suspend/activate) */}
+        <Tooltip title={restaurant.platform_status === 'suspended' ? 'Restaurant is suspended — hidden from customers. Click to activate.' : 'Restaurant is active. Click to suspend.'}>
+          <Button
+            size="small"
+            variant="outlined"
+            color={restaurant.platform_status === 'suspended' ? 'error' : 'success'}
+            disabled={platformStatusUpdating}
+            onClick={() => handlePlatformStatusChange(restaurant.platform_status === 'suspended' ? 'active' : 'suspended')}
+            startIcon={platformStatusUpdating ? <CircularProgress size={14} /> : undefined}
+          >
+            {restaurant.platform_status === 'suspended' ? 'Suspended' : 'Active'}
+          </Button>
+        </Tooltip>
+
+        {/* Admin can still force-set merchant status if needed */}
         <Select
           size="small"
           value={restaurant.status}
@@ -479,9 +511,9 @@ export function RestaurantDetailView() {
           onChange={(e) => handleStatusChange(e.target.value as RestaurantStatus)}
           sx={{ minWidth: 130 }}
         >
-          <MenuItem value="open">Set Open</MenuItem>
-          <MenuItem value="paused">Set Paused</MenuItem>
-          <MenuItem value="closed">Set Closed</MenuItem>
+          <MenuItem value="open">Force Open</MenuItem>
+          <MenuItem value="paused">Force Paused</MenuItem>
+          <MenuItem value="closed">Force Closed</MenuItem>
         </Select>
         <Button size="small" variant="outlined" startIcon={<Iconify icon="solar:pen-bold" width={14} />} onClick={openEditInfo}>
           Edit Info

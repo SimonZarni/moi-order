@@ -60,6 +60,10 @@ export const styles = StyleSheet.create({
     fontSize: typography.xs,
     color: colours.medium,
   },
+  orderItems: {
+    fontSize: typography.xs,
+    color: colours.textMuted,
+  },
   orderDate: {
     fontSize: typography.xxs,
     color: colours.textMuted,

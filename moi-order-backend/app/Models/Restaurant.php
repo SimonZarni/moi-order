@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\RestaurantPlatformStatus;
 use App\Enums\RestaurantStatus;
 use App\Traits\HasAuditLog;
 use Illuminate\Database\Eloquent\Model;
@@ -26,6 +27,7 @@ class Restaurant extends Model
         'cover_photo_path',
         'logo_path',
         'status',
+        'platform_status',
         'delivery_radius_km',
         'is_delivery_available',
         'is_pickup_available',
@@ -41,6 +43,7 @@ class Restaurant extends Model
     {
         return [
             'status'                => RestaurantStatus::class,
+            'platform_status'       => RestaurantPlatformStatus::class,
             'latitude'              => 'float',
             'longitude'             => 'float',
             'delivery_radius_km'    => 'float',
@@ -67,9 +70,19 @@ class Restaurant extends Model
         $this->update(['status' => RestaurantStatus::Paused]);
     }
 
+    public function suspend(): void
+    {
+        $this->update(['platform_status' => RestaurantPlatformStatus::Suspended]);
+    }
+
+    public function activate(): void
+    {
+        $this->update(['platform_status' => RestaurantPlatformStatus::Active]);
+    }
+
     public function isAcceptingOrders(): bool
     {
-        return $this->status->isAcceptingOrders();
+        return $this->platform_status->isActive() && $this->status->isAcceptingOrders();
     }
 
     // ─── Scopes ───────────────────────────────────────────────────────────────
@@ -77,6 +90,13 @@ class Restaurant extends Model
     public function scopeOpen(\Illuminate\Database\Eloquent\Builder $query): void
     {
         $query->where('status', RestaurantStatus::Open->value);
+    }
+
+    /** Restaurants visible and available to customers: platform active + merchant open. */
+    public function scopeAvailable(\Illuminate\Database\Eloquent\Builder $query): void
+    {
+        $query->where('platform_status', RestaurantPlatformStatus::Active->value)
+              ->where('status', RestaurantStatus::Open->value);
     }
 
     public function scopeForMerchant(\Illuminate\Database\Eloquent\Builder $query, int $userId): void

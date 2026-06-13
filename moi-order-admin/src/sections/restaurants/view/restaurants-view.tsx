@@ -200,19 +200,24 @@ export function RestaurantsView() {
                           </Box>
                         </TableCell>
                         <TableCell>
-                          <Tooltip title={row.status === 'open' ? 'Click to close' : 'Click to open'}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              <Switch
-                                size="small"
-                                checked={row.status === 'open'}
-                                disabled={togglingId === row.id}
-                                onChange={() => handleToggleOpen(row)}
-                              />
-                              <Label color={STATUS_COLOR[row.status] ?? 'default'}>
-                                {row.status}
-                              </Label>
-                            </Box>
-                          </Tooltip>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                            {row.platform_status === 'suspended' && (
+                              <Label color="error">suspended</Label>
+                            )}
+                            <Tooltip title={row.status === 'open' ? 'Click to close' : 'Click to open'}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <Switch
+                                  size="small"
+                                  checked={row.status === 'open'}
+                                  disabled={togglingId === row.id}
+                                  onChange={() => handleToggleOpen(row)}
+                                />
+                                <Label color={STATUS_COLOR[row.status] ?? 'default'}>
+                                  {row.status}
+                                </Label>
+                              </Box>
+                            </Tooltip>
+                          </Box>
                         </TableCell>
                         <TableCell align="right">
                           <IconButton

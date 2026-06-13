@@ -398,6 +398,7 @@ export interface Restaurant {
   cover_photo_url: string | null;
   logo_url: string | null;
   status: import('./enums').RestaurantStatus;
+  platform_status: import('./enums').RestaurantPlatformStatus;
   delivery_radius_km: number | null;
   is_delivery_available: boolean;
   is_pickup_available: boolean;

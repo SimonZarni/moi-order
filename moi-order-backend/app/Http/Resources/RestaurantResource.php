@@ -46,6 +46,7 @@ class RestaurantResource extends JsonResource
             'cover_photo_url'       => $coverUrl,
             'logo_url'              => $logoUrl,
             'status'                => $this->status->value,
+            'platform_status'       => $this->platform_status->value,
             'delivery_radius_km'    => $this->delivery_radius_km,
             'is_delivery_available' => $this->is_delivery_available,
             'is_pickup_available'   => $this->is_pickup_available,

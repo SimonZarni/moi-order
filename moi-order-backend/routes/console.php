@@ -17,6 +17,14 @@ Schedule::command('food-orders:expire-pending')
         \Illuminate\Support\Facades\Log::error('food-orders:expire-pending failed');
     });
 
+// Auto-open / auto-close restaurants based on their merchant-configured opening hours.
+Schedule::command('restaurants:auto-open-close')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        \Illuminate\Support\Facades\Log::error('restaurants:auto-open-close failed');
+    });
+
 // Auto-complete delivered food orders after 10 minutes.
 Schedule::command('food-orders:auto-complete')
     ->everyMinute()

@@ -59,6 +59,11 @@ export function FoodOrdersScreen(): React.JSX.Element {
                     {order.restaurant_name != null && (
                       <Text style={styles.orderRestaurant} numberOfLines={1}>{order.restaurant_name}</Text>
                     )}
+                    {order.items != null && order.items.length > 0 && (
+                      <Text style={styles.orderItems} numberOfLines={1}>
+                        {order.items.map((i) => `${i.name} ×${i.quantity}`).join(', ')}
+                      </Text>
+                    )}
                     <Text style={styles.orderDate}>{formatDateTime(order.created_at)}</Text>
                   </View>
                   <View style={styles.orderRight}>
