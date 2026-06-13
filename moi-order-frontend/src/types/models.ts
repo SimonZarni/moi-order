@@ -403,6 +403,7 @@ export interface Restaurant {
   is_delivery_available: boolean;
   is_pickup_available: boolean;
   min_order_cents: number;
+  is_open_now?: boolean;
   opening_hours?: OpeningHour[];
   photos?: RestaurantPhoto[];
   menu?: MenuCategory[];

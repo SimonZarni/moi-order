@@ -51,6 +51,7 @@ class RestaurantResource extends JsonResource
             'is_delivery_available' => $this->is_delivery_available,
             'is_pickup_available'   => $this->is_pickup_available,
             'min_order_cents'       => $this->min_order_cents,
+            'is_open_now'           => $this->whenLoaded('openingHours', fn () => $this->isOpenNow()),
             'opening_hours'         => $this->whenLoaded('openingHours', fn () =>
                 $this->openingHours->map(fn ($h) => [
                     'day_of_week' => $h->day_of_week,

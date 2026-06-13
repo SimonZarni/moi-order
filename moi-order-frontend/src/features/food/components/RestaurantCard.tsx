@@ -20,9 +20,15 @@ const STATUS_BADGE_STYLE = {
 };
 
 export function RestaurantCard({ restaurant, onPress }: Props): React.JSX.Element {
-  const badge = STATUS_BADGE_STYLE[restaurant.status];
   const thumbUri = restaurant.logo_url ?? restaurant.cover_photo_url;
-  const isOpen = restaurant.status === RESTAURANT_STATUS.Open;
+  // is_open_now is the real-time computation from the server (based on opening hours).
+  // Falls back to status when not present (e.g. old API versions or unloaded relation).
+  const isOpen = restaurant.is_open_now ?? (restaurant.status === RESTAURANT_STATUS.Open);
+  // Show "Closed" badge when real-time hours say closed but DB status hasn't caught up yet.
+  const displayStatus = !isOpen && restaurant.status === RESTAURANT_STATUS.Open
+    ? RESTAURANT_STATUS.Closed
+    : restaurant.status;
+  const badge = STATUS_BADGE_STYLE[displayStatus];
 
   return (
     <Pressable

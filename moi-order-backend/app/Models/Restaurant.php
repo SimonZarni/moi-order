@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class Restaurant extends Model
 {
@@ -83,6 +84,34 @@ class Restaurant extends Model
     public function isAcceptingOrders(): bool
     {
         return $this->platform_status->isActive() && $this->status->isAcceptingOrders();
+    }
+
+    /**
+     * Real-time check: is the restaurant within its configured opening hours right now?
+     * Falls back to the persisted status when openingHours are not loaded or not configured,
+     * so admin/merchant manual overrides still work when the relation isn't eager-loaded.
+     */
+    public function isOpenNow(): bool
+    {
+        if (! $this->relationLoaded('openingHours')) {
+            return $this->status === RestaurantStatus::Open;
+        }
+
+        $now   = Carbon::now('Asia/Bangkok');
+        $hours = $this->openingHours->firstWhere('day_of_week', $now->dayOfWeek);
+
+        if ($hours === null || $hours->is_closed) {
+            return false;
+        }
+
+        // Hours not fully configured — trust the manually set status.
+        if ($hours->opens_at === null || $hours->closes_at === null) {
+            return $this->status === RestaurantStatus::Open;
+        }
+
+        $time = $now->format('H:i:s');
+
+        return $time >= $hours->opens_at && $time < $hours->closes_at;
     }
 
     // ─── Scopes ───────────────────────────────────────────────────────────────
