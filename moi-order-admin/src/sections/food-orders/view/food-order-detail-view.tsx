@@ -168,13 +168,6 @@ export function FoodOrderDetailView() {
                 )}
                 <Divider />
                 <InfoRow label="Placed" value={fDate(order.created_at)} />
-                {order.confirmed_at && <InfoRow label="Confirmed" value={fDate(order.confirmed_at)} />}
-                {order.payment_confirmed_at && <InfoRow label="Payment Confirmed" value={fDate(order.payment_confirmed_at)} />}
-                {order.preparing_at && <InfoRow label="Preparing" value={fDate(order.preparing_at)} />}
-                {order.picked_up_at && <InfoRow label="Picked Up" value={fDate(order.picked_up_at)} />}
-                {order.delivered_at && <InfoRow label="Delivered" value={fDate(order.delivered_at)} />}
-                {order.completed_at && <InfoRow label="Completed" value={fDate(order.completed_at)} />}
-                {order.cancelled_at && <InfoRow label="Cancelled" value={fDate(order.cancelled_at)} />}
               </Stack>
             </CardContent>
           </Card>
