@@ -15,6 +15,7 @@ import { KycNavigator } from './KycNavigator';
 import { MerchantTabsNavigator } from './MerchantTabsNavigator';
 import { usePushNotifications } from '../features/notifications/hooks/usePushNotifications';
 import { useMerchantWebSocket } from '../shared/hooks/useMerchantWebSocket';
+import { useOrderAlarm } from '../shared/hooks/useOrderAlarm';
 import { KYC_STATUS } from '../types/enums';
 import type { RootStackParamList } from '../types/navigation';
 
@@ -30,7 +31,8 @@ function PushNotificationManager(): null {
  * Principle: SRP — manages connection lifecycle only; renders nothing.
  */
 function WebSocketManager(): null {
-  useMerchantWebSocket();
+  const { triggerAlarm } = useOrderAlarm();
+  useMerchantWebSocket({ onNewOrder: triggerAlarm });
   return null;
 }
 

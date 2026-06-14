@@ -36,6 +36,7 @@ import { WEB_SIDEBAR_WIDTH } from '../shared/constants/config';
 import { useAuthStore } from '../store/authStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { useResponsive } from '../shared/hooks/useResponsive';
+import { useOrderAlarm } from '../shared/hooks/useOrderAlarm';
 
 // ── Mobile ─────────────────────────────────────────────────────────────────────
 
@@ -255,6 +256,7 @@ function WebMerchantLayout(): React.JSX.Element {
   const logout = useAuthStore((s) => s.logout);
   const theme = useSettingsStore((s) => s.theme);
   const darkStyle = theme === 'dark' ? ({ filter: 'invert(1) hue-rotate(180deg)' } as object) : null;
+  const { isEnabled: isAlarmEnabled, isUnlocked, toggleEnabled: toggleAlarm } = useOrderAlarm();
 
   // When the page is hard-refreshed at /orders/{uuid}/chat, chatOrderId is
   // restored from the URL but chatOrderNumber/completedAt/status are empty
@@ -424,6 +426,8 @@ function WebMerchantLayout(): React.JSX.Element {
           activeScreen={sidebarActiveScreen}
           onNavigate={handleNavigate}
           onLogout={logout}
+          isAlarmEnabled={isAlarmEnabled}
+          onAlarmToggle={toggleAlarm}
         />
       )}
 
@@ -456,6 +460,14 @@ function WebMerchantLayout(): React.JSX.Element {
                 iconColour={colours.textOnDark}
               />
             </View>
+          </View>
+        )}
+        {isAlarmEnabled && !isUnlocked && (
+          <View style={webStyles.unlockBanner}>
+            <Ionicons name="volume-high-outline" size={14} color={colours.textOnDark} />
+            <Text style={webStyles.unlockBannerText}>
+              Tap anywhere to enable order alarm sound
+            </Text>
           </View>
         )}
         <View nativeID="dark-content" style={[webStyles.contentInner, darkStyle]}>
@@ -520,5 +532,18 @@ const webStyles = StyleSheet.create({
     fontSize: typography.md,
     fontWeight: '700' as const,
     letterSpacing: -0.3,
+  },
+  unlockBanner: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: spacing.xs,
+    backgroundColor: colours.primary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  unlockBannerText: {
+    color: colours.textOnDark,
+    fontSize: typography.xs,
+    fontWeight: '600' as const,
   },
 });

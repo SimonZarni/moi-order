@@ -137,4 +137,8 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     fontWeight: '500',
   },
+  alarmLabelActive: {
+    color: colours.primary,
+    fontWeight: '600',
+  },
 });

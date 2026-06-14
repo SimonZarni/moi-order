@@ -31,9 +31,18 @@ interface WebSidebarProps {
   onNavigate: (screen: WebScreen) => void;
   onLogout: () => void;
   pendingCount?: number;
+  isAlarmEnabled?: boolean;
+  onAlarmToggle?: () => void;
 }
 
-export function WebSidebar({ activeScreen, onNavigate, onLogout, pendingCount = 0 }: WebSidebarProps): React.JSX.Element {
+export function WebSidebar({
+  activeScreen,
+  onNavigate,
+  onLogout,
+  pendingCount = 0,
+  isAlarmEnabled = true,
+  onAlarmToggle,
+}: WebSidebarProps): React.JSX.Element {
   const handleNavPress = useCallback(
     (screen: WebScreen) => () => onNavigate(screen),
     [onNavigate],
@@ -108,6 +117,23 @@ export function WebSidebar({ activeScreen, onNavigate, onLogout, pendingCount = 
       </View>
 
       <View style={styles.bottomSection}>
+        {onAlarmToggle != null && (
+          <Pressable
+            style={({ pressed }) => [styles.navItem, pressed && styles.navItemPressed]}
+            onPress={onAlarmToggle}
+            accessibilityLabel={isAlarmEnabled ? 'Disable order alarm' : 'Enable order alarm'}
+            accessibilityRole="button"
+          >
+            <Ionicons
+              name={isAlarmEnabled ? 'volume-high-outline' : 'volume-mute-outline'}
+              size={16}
+              color={isAlarmEnabled ? colours.primary : 'rgba(255,255,255,0.4)'}
+            />
+            <Text style={[styles.logoutLabel, isAlarmEnabled && styles.alarmLabelActive]}>
+              {isAlarmEnabled ? 'Alarm On' : 'Alarm Off'}
+            </Text>
+          </Pressable>
+        )}
         <Pressable
           style={({ pressed }) => [styles.navItem, pressed && styles.navItemPressed]}
           onPress={onLogout}

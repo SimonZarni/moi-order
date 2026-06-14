@@ -64,10 +64,15 @@ interface OrderStatusUpdatedPayload {
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
-export function useMerchantWebSocket(): void {
+interface UseMerchantWebSocketOptions {
+  onNewOrder?: () => void;
+}
+
+export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): void {
   const queryClient = useQueryClient();
   const token  = useAuthStore((s) => s.token);
   const userId = useAuthStore((s) => s.user?.id ?? null);
+  const onNewOrder = options?.onNewOrder;
 
   const pusherRef  = useRef<PusherInstance | null>(null);
   const channelRef = useRef<PusherChannel | null>(null);
@@ -77,8 +82,9 @@ export function useMerchantWebSocket(): void {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS() });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ANALYTICS });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT });
+      onNewOrder?.();
     },
-    [queryClient],
+    [queryClient, onNewOrder],
   );
 
   const handleNotificationCreated = useCallback(
