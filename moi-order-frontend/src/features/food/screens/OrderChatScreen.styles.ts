@@ -93,7 +93,8 @@ export const styles = StyleSheet.create({
   bubbleText: { fontSize: typography.sm, lineHeight: 20 },
   bubbleTextCustomer: { color: colours.white },
   bubbleTextOther: { color: colours.textOnLight },
-  bubbleTime: { fontSize: typography.xxs, alignSelf: 'flex-end' },
+  bubbleFooter: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-end', gap: 3 },
+  bubbleTime: { fontSize: typography.xxs },
   bubbleTimeCustomer: { color: 'rgba(255,255,255,0.6)' },
   bubbleTimeOther: { color: colours.textMuted },
   // Date separator
@@ -197,10 +198,19 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
     textAlign: 'center',
   },
-  // Swipe-to-reply hint (left side, fades in as bubble is dragged right)
-  replyHint: {
+  // Swipe-to-reply hints (bidirectional)
+  replyHintLeft: {
     position: 'absolute',
     left: 2,
+    top: 0,
+    bottom: 0,
+    width: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  replyHintRight: {
+    position: 'absolute',
+    right: 2,
     top: 0,
     bottom: 0,
     width: 32,

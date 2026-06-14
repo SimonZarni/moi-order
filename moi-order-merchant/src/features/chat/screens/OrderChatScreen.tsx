@@ -17,6 +17,11 @@ import { useTranslation } from '../../../shared/hooks/useTranslation';
 
 type Route = RouteProp<MerchantStackParamList, 'OrderChat'>;
 
+// React Native Web does not support the `inverted` FlatList prop — it uses a
+// CSS transform that breaks in browser rendering. We detect web once at module
+// scope so the flag is stable across renders.
+const IS_WEB = Platform.OS === 'web';
+
 // ── Notice banner ─────────────────────────────────────────────────────────────
 
 interface NoticeBannerProps {
@@ -48,9 +53,10 @@ interface ReplyBarProps {
   photoLabel: string;
   onCancel: () => void;
   cancelLabel: string;
+  replyToLabel: string;
 }
 
-function ReplyBar({ replyingTo, photoLabel, onCancel, cancelLabel }: ReplyBarProps): React.JSX.Element {
+function ReplyBar({ replyingTo, photoLabel, onCancel, cancelLabel, replyToLabel }: ReplyBarProps): React.JSX.Element {
   const preview =
     replyingTo.image_url !== null && replyingTo.body === null
       ? `📷 ${photoLabel}`
@@ -59,7 +65,7 @@ function ReplyBar({ replyingTo, photoLabel, onCancel, cancelLabel }: ReplyBarPro
     <View style={styles.replyBar}>
       <View style={styles.replyBarIndicator} />
       <View style={styles.replyBarContent}>
-        <Text style={styles.replyBarSender}>{replyingTo.sender_name}</Text>
+        <Text style={styles.replyBarSender}>{replyToLabel} {replyingTo.sender_name}</Text>
         <Text style={styles.replyBarText} numberOfLines={1}>{preview}</Text>
       </View>
       <Pressable
@@ -74,7 +80,7 @@ function ReplyBar({ replyingTo, photoLabel, onCancel, cancelLabel }: ReplyBarPro
   );
 }
 
-// ── Animated message bubble with entrance + swipe-to-reply ───────────────────
+// ── Animated message bubble ───────────────────────────────────────────────────
 
 interface BubbleProps {
   msg: OrderChatMessage;
@@ -95,91 +101,75 @@ function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): Rea
   const isMerchant = msg.sender_type === 'merchant';
   const time = new Date(msg.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 
-  // ── Entrance animation (native driver — runs on UI thread) ─────────────────
+  // ── Entrance animation (native driver) ─────────────────────────────────────
   const entranceOpacity = useRef(new Animated.Value(isNew ? 0 : 1)).current;
   const entranceSlide   = useRef(new Animated.Value(isNew ? (isMerchant ? 20 : -20) : 0)).current;
 
   useEffect(() => {
     if (!isNew) return;
     Animated.parallel([
-      Animated.timing(entranceOpacity, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.spring(entranceSlide, {
-        toValue: 0,
-        damping: 18,
-        mass: 0.5,
-        stiffness: 220,
-        useNativeDriver: true,
-      }),
+      Animated.timing(entranceOpacity, { toValue: 1, duration: 200, useNativeDriver: true }),
+      Animated.spring(entranceSlide, { toValue: 0, damping: 18, mass: 0.5, stiffness: 220, useNativeDriver: true }),
     ]).start();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Swipe-to-reply (JS driver — PanResponder requires it) ──────────────────
-  // Swipe RIGHT on all messages. Clamp 0..72px.
+  // ── Bidirectional swipe-to-reply (JS driver) ───────────────────────────────
+  // Right swipe (+dx) → left hint visible   Left swipe (−dx) → right hint visible
   const swipeX          = useRef(new Animated.Value(0)).current;
   const hasTriggeredRef = useRef(false);
   const THRESHOLD       = 60;
 
+  const springBack = () => {
+    Animated.spring(swipeX, { toValue: 0, damping: 20, stiffness: 300, mass: 0.5, useNativeDriver: false }).start();
+  };
+
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, g) =>
-        g.dx > 8 && Math.abs(g.dx) > Math.abs(g.dy) * 1.5,
+        Math.abs(g.dx) > 8 && Math.abs(g.dx) > Math.abs(g.dy) * 1.5,
       onPanResponderGrant: () => {
         hasTriggeredRef.current = false;
       },
       onPanResponderMove: (_, g) => {
-        const clamped = Math.min(Math.max(g.dx, 0), 72);
-        swipeX.setValue(clamped);
-        if (!hasTriggeredRef.current && g.dx >= THRESHOLD) {
+        swipeX.setValue(Math.min(Math.max(g.dx, -72), 72));
+        if (!hasTriggeredRef.current && Math.abs(g.dx) >= THRESHOLD) {
           hasTriggeredRef.current = true;
           onReply(msg);
         }
       },
-      onPanResponderRelease: () => {
-        hasTriggeredRef.current = false;
-        Animated.spring(swipeX, {
-          toValue: 0,
-          damping: 20,
-          stiffness: 300,
-          mass: 0.5,
-          useNativeDriver: false,
-        }).start();
-      },
-      onPanResponderTerminate: () => {
-        Animated.spring(swipeX, {
-          toValue: 0,
-          damping: 20,
-          stiffness: 300,
-          mass: 0.5,
-          useNativeDriver: false,
-        }).start();
-      },
+      onPanResponderRelease: springBack,
+      onPanResponderTerminate: springBack,
     }),
   ).current;
 
-  const replyIconOpacity = swipeX.interpolate({
+  // Left hint: fades in when swiping RIGHT (+swipeX)
+  const leftHintOpacity = swipeX.interpolate({
     inputRange: [0, THRESHOLD * 0.4, THRESHOLD],
-    outputRange: [0, 0.4, 1],
+    outputRange: [0, 0.5, 1],
+    extrapolate: 'clamp',
+  });
+  // Right hint: fades in when swiping LEFT (−swipeX)
+  const rightHintOpacity = swipeX.interpolate({
+    inputRange: [-THRESHOLD, -THRESHOLD * 0.4, 0],
+    outputRange: [1, 0.5, 0],
     extrapolate: 'clamp',
   });
 
   const hasReply = msg.reply_to_body != null && msg.reply_to_sender_name != null;
 
   return (
-    // Outer: entrance animation on native thread
+    // Outer: entrance (native thread — zero JS cost per frame)
     <Animated.View style={{ opacity: entranceOpacity, transform: [{ translateX: entranceSlide }] }}>
-      {/* Container for reply hint + swipeable bubble */}
       <View style={{ position: 'relative' }}>
-        {/* Reply icon revealed as bubble slides right */}
-        <Animated.View style={[styles.replyHint, { opacity: replyIconOpacity }]}>
-          <Ionicons name="return-up-back-outline" size={18} color={colours.primary} />
+        <Animated.View style={[styles.replyHintLeft,  { opacity: leftHintOpacity }]}>
+          <Ionicons name="return-up-back-outline"    size={18} color={colours.primary} />
+        </Animated.View>
+        <Animated.View style={[styles.replyHintRight, { opacity: rightHintOpacity }]}>
+          <Ionicons name="return-up-forward-outline" size={18} color={colours.primary} />
         </Animated.View>
 
-        {/* Inner: swipe translation on JS thread */}
+        {/* Inner: swipe translation (JS thread) */}
         <Animated.View
           {...panResponder.panHandlers}
           style={[
@@ -191,7 +181,6 @@ function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): Rea
           <View style={[styles.bubble, isMerchant ? styles.bubbleMerchant : styles.bubbleOther]}>
             {!isMerchant && <Text style={styles.senderName}>{msg.sender_name}</Text>}
 
-            {/* Quoted reply preview (shown when backend returns reply data) */}
             {hasReply && (
               <View style={styles.replyQuote}>
                 <Text style={styles.replyQuoteSender}>{msg.reply_to_sender_name}</Text>
@@ -200,11 +189,7 @@ function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): Rea
             )}
 
             {msg.image_url !== null && (
-              <Pressable
-                onPress={() => onPhotoPress(msg.image_url!)}
-                accessibilityRole="button"
-                accessibilityLabel="View full photo"
-              >
+              <Pressable onPress={() => onPhotoPress(msg.image_url!)} accessibilityRole="button" accessibilityLabel="View full photo">
                 <Image source={{ uri: msg.image_url }} style={styles.bubbleImage} resizeMode="cover" />
               </Pressable>
             )}
@@ -213,9 +198,20 @@ function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): Rea
                 {msg.body}
               </Text>
             )}
-            <Text style={[styles.bubbleTime, isMerchant ? styles.bubbleTimeMerchant : styles.bubbleTimeOther]}>
-              {time}
-            </Text>
+
+            {/* Time + status tick */}
+            <View style={styles.bubbleFooter}>
+              <Text style={[styles.bubbleTime, isMerchant ? styles.bubbleTimeMerchant : styles.bubbleTimeOther]}>
+                {time}
+              </Text>
+              {isMerchant && (
+                <Ionicons
+                  name={msg.read_at != null ? 'checkmark-done' : 'checkmark'}
+                  size={13}
+                  color={msg.read_at != null ? 'rgba(15,26,20,0.9)' : 'rgba(15,26,20,0.45)'}
+                />
+              )}
+            </View>
           </View>
         </Animated.View>
       </View>
@@ -268,7 +264,6 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
 
   const [showNoticeBanner, setShowNoticeBanner] = useState(true);
 
-  // Track which message IDs were present on first load — those don't animate.
   const initialIdsRef    = useRef<Set<number>>(new Set());
   const hasSeededInitial = useRef(false);
   if (!hasSeededInitial.current && messages.length > 0) {
@@ -278,15 +273,15 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
 
   const canSend = !isSending && !isChatLocked && (text.trim().length > 0 || selectedImages.length > 0);
 
+  // On web: FlatList is not inverted — scroll to end when content changes.
+  const scrollToEndOnWeb = IS_WEB
+    ? () => listRef.current?.scrollToEnd({ animated: false })
+    : undefined;
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.topBar}>
-        <Pressable
-          style={styles.backButton}
-          onPress={onBack}
-          accessibilityLabel="Go back"
-          accessibilityRole="button"
-        >
+        <Pressable style={styles.backButton} onPress={onBack} accessibilityLabel="Go back" accessibilityRole="button">
           <Ionicons name="arrow-back" size={20} color={colours.textOnLight} />
         </Pressable>
         <View style={styles.headerInfo}>
@@ -295,7 +290,6 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
         </View>
       </View>
 
-      {/* Privacy / expiry notice banner */}
       {showNoticeBanner && (
         <NoticeBanner
           text={t('chat_notice_banner')}
@@ -303,7 +297,12 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
         />
       )}
 
-      <KeyboardAvoidingView behavior="padding" enabled={Platform.OS === 'ios'} style={styles.body}>
+      {/* KAV enabled on iOS native and web (web: reduces body height when keyboard opens) */}
+      <KeyboardAvoidingView
+        behavior="padding"
+        enabled={Platform.OS === 'ios' || IS_WEB}
+        style={styles.body}
+      >
         {isLoading ? (
           <Pressable style={styles.loaderWrap} onPress={Keyboard.dismiss}>
             <ActivityIndicator color={colours.primary} />
@@ -327,8 +326,10 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
         ) : (
           <FlatList
             ref={listRef}
-            data={[...messages].reverse()}
-            inverted
+            // Web: pass messages as-is (oldest first) — inverted prop is broken on RN Web.
+            // Native: reverse so newest is first, then invert the list to render bottom-up.
+            data={IS_WEB ? messages : [...messages].reverse()}
+            inverted={!IS_WEB}
             keyExtractor={(m) => String(m.id)}
             renderItem={({ item }) => (
               <AnimatedBubble
@@ -339,7 +340,12 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
               />
             )}
             style={styles.list}
-            contentContainerStyle={styles.listContent}
+            contentContainerStyle={[
+              styles.listContent,
+              IS_WEB && styles.listContentWeb,
+            ]}
+            onContentSizeChange={scrollToEndOnWeb}
+            onLayout={scrollToEndOnWeb}
             accessibilityRole="list"
             showsVerticalScrollIndicator={false}
             keyboardDismissMode="on-drag"
@@ -380,17 +386,17 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
               </View>
             )}
 
-            {/* Reply preview bar */}
             {replyingTo !== null && (
               <ReplyBar
                 replyingTo={replyingTo}
                 photoLabel={t('chat_photo')}
+                replyToLabel={t('chat_reply_to')}
                 onCancel={() => handleSetReply(null)}
                 cancelLabel={t('chat_cancel_reply')}
               />
             )}
 
-            <View style={[styles.inputBar, { paddingBottom: inputBarPadding }]}>
+            <View style={[styles.inputBar, { paddingBottom: IS_WEB ? 8 : inputBarPadding }]}>
               <Pressable
                 style={styles.attachBtn}
                 onPress={handleAttachPress}

@@ -73,7 +73,8 @@ export const styles = StyleSheet.create({
   bubbleText: { fontSize: typography.sm, lineHeight: Platform.select({ web: 20, default: 42 }) },
   bubbleTextMerchant: { color: colours.backgroundDark },
   bubbleTextOther: { color: colours.textOnLight },
-  bubbleTime: { fontSize: typography.xxs, lineHeight: Platform.select({ web: 16, default: 30 }), alignSelf: 'flex-end' },
+  bubbleFooter: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-end', gap: 3 },
+  bubbleTime: { fontSize: typography.xxs, lineHeight: Platform.select({ web: 16, default: 30 }) },
   bubbleTimeMerchant: { color: 'rgba(15,26,20,0.55)' },
   bubbleTimeOther: { color: colours.textSubtle },
 
@@ -98,7 +99,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     fontSize: typography.sm,
-    lineHeight: Platform.select({ web: 20, default: 42 }),
     color: colours.textOnLight,
     maxHeight: 120,
     borderWidth: 1,
@@ -198,8 +198,8 @@ export const styles = StyleSheet.create({
     color: colours.warning,
   },
 
-  // Swipe-to-reply hint icon (appears as bubble is dragged)
-  replyHint: {
+  // Swipe-to-reply hint icons
+  replyHintLeft: {
     position: 'absolute',
     left: 2,
     top: 0,
@@ -207,6 +207,20 @@ export const styles = StyleSheet.create({
     width: 32,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  replyHintRight: {
+    position: 'absolute',
+    right: 2,
+    top: 0,
+    bottom: 0,
+    width: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Web-only: push messages to bottom of flex area (inverted not supported on RN Web)
+  listContentWeb: {
+    flexGrow: 1,
+    justifyContent: 'flex-end',
   },
 
   // Reply bar above input bar
