@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { colours } from '../../../shared/theme/colours';
 import { radius } from '../../../shared/theme/radius';
 import { spacing } from '../../../shared/theme/spacing';
@@ -42,7 +42,7 @@ export const styles = StyleSheet.create({
   },
   systemNoticeText: {
     fontSize: typography.xxs,
-    lineHeight: 30,
+    lineHeight: Platform.select({ web: 16, default: 30 }),
     fontStyle: 'italic',
     color: colours.textSubtle,
     textAlign: 'center',
@@ -68,12 +68,12 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colours.divider,
   },
-  senderName: { fontSize: typography.xxs, lineHeight: 30, fontWeight: '700', color: colours.textSubtle },
+  senderName: { fontSize: typography.xxs, lineHeight: Platform.select({ web: 16, default: 30 }), fontWeight: '700', color: colours.textSubtle },
   bubbleImage: { width: 200, height: 150, borderRadius: radius.lg },
-  bubbleText: { fontSize: typography.sm, lineHeight: 42 },
+  bubbleText: { fontSize: typography.sm, lineHeight: Platform.select({ web: 20, default: 42 }) },
   bubbleTextMerchant: { color: colours.backgroundDark },
   bubbleTextOther: { color: colours.textOnLight },
-  bubbleTime: { fontSize: typography.xxs, lineHeight: 30, alignSelf: 'flex-end' },
+  bubbleTime: { fontSize: typography.xxs, lineHeight: Platform.select({ web: 16, default: 30 }), alignSelf: 'flex-end' },
   bubbleTimeMerchant: { color: 'rgba(15,26,20,0.55)' },
   bubbleTimeOther: { color: colours.textSubtle },
 
@@ -98,7 +98,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     fontSize: typography.sm,
-    lineHeight: 42,
+    lineHeight: Platform.select({ web: 20, default: 42 }),
     color: colours.textOnLight,
     maxHeight: 120,
     borderWidth: 1,
