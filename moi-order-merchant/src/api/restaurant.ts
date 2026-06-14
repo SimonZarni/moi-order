@@ -2,11 +2,15 @@ import type { Restaurant } from '../types/models';
 import type { RestaurantStatus } from '../types/enums';
 import { apiClient } from './client';
 
+export interface SessionInput {
+  opens_at: string;  // "HH:mm"
+  closes_at: string; // "HH:mm"
+}
+
 export interface OpeningHourInput {
   day_of_week: number;
-  opens_at: string | null;
-  closes_at: string | null;
   is_closed: boolean;
+  sessions: SessionInput[];
 }
 
 export interface UpdateRestaurantPayload {

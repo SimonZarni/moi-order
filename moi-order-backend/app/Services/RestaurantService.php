@@ -184,18 +184,41 @@ class RestaurantService
         return $query->latest()->paginate(20);
     }
 
-    /** @param list<array{day_of_week: int, opens_at: string|null, closes_at: string|null, is_closed: bool}> $hours */
+    /**
+     * @param list<array{day_of_week: int, is_closed: bool, sessions: list<array{opens_at: string, closes_at: string}>}> $hours
+     */
     private function syncOpeningHours(Restaurant $restaurant, array $hours): void
     {
-        foreach ($hours as $hour) {
-            RestaurantOpeningHour::updateOrCreate(
-                ['restaurant_id' => $restaurant->id, 'day_of_week' => $hour['day_of_week']],
-                [
-                    'opens_at'  => $hour['opens_at']  ?? null,
-                    'closes_at' => $hour['closes_at'] ?? null,
-                    'is_closed' => $hour['is_closed']  ?? false,
-                ],
-            );
+        foreach ($hours as $dayData) {
+            $dayOfWeek = (int) $dayData['day_of_week'];
+            $isClosed  = (bool) ($dayData['is_closed'] ?? false);
+            $sessions  = $dayData['sessions'] ?? [];
+
+            RestaurantOpeningHour::where('restaurant_id', $restaurant->id)
+                ->where('day_of_week', $dayOfWeek)
+                ->delete();
+
+            if ($isClosed) {
+                RestaurantOpeningHour::create([
+                    'restaurant_id' => $restaurant->id,
+                    'day_of_week'   => $dayOfWeek,
+                    'sort_order'    => 0,
+                    'opens_at'      => null,
+                    'closes_at'     => null,
+                    'is_closed'     => true,
+                ]);
+            } else {
+                foreach ($sessions as $index => $session) {
+                    RestaurantOpeningHour::create([
+                        'restaurant_id' => $restaurant->id,
+                        'day_of_week'   => $dayOfWeek,
+                        'sort_order'    => $index,
+                        'opens_at'      => $session['opens_at'],
+                        'closes_at'     => $session['closes_at'],
+                        'is_closed'     => false,
+                    ]);
+                }
+            }
         }
     }
 

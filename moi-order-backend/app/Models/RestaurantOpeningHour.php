@@ -12,6 +12,7 @@ class RestaurantOpeningHour extends Model
     protected $fillable = [
         'restaurant_id',
         'day_of_week',
+        'sort_order',
         'opens_at',
         'closes_at',
         'is_closed',
@@ -21,6 +22,7 @@ class RestaurantOpeningHour extends Model
     {
         return [
             'day_of_week' => 'integer',
+            'sort_order'  => 'integer',
             'is_closed'   => 'boolean',
         ];
     }

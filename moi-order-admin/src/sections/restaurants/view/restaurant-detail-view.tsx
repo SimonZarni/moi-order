@@ -41,6 +41,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import {
   restaurantsApi,
   type OpeningHour,
+  type OpeningHourSession,
   type MenuItemDetail,
   type RestaurantDetail,
   type RestaurantStatus,
@@ -227,19 +228,59 @@ export function RestaurantDetailView() {
 
   const startEditHours = useCallback(() => {
     if (!restaurant) return;
-    setHoursForm(restaurant.opening_hours.map((h) => ({ ...h })));
+    setHoursForm(restaurant.opening_hours.map((h) => ({
+      day_of_week: h.day_of_week,
+      is_closed: h.is_closed,
+      sessions: h.is_closed
+        ? [{ opens_at: '09:00', closes_at: '22:00', sort_order: 0 }]
+        : h.sessions.map((s) => ({ ...s })),
+    })));
     setEditingHours(true);
   }, [restaurant]);
 
-  const setHourField = useCallback((day: number, field: keyof OpeningHour, value: string | boolean) => {
-    setHoursForm((prev) => prev.map((h) => h.day_of_week === day ? { ...h, [field]: value } : h));
+  const setHourClosed = useCallback((day: number, closed: boolean) => {
+    setHoursForm((prev) => prev.map((h) => h.day_of_week === day ? { ...h, is_closed: closed } : h));
+  }, []);
+
+  const setSessionField = useCallback(
+    (day: number, index: number, field: keyof Omit<OpeningHourSession, 'sort_order'>, value: string) => {
+      setHoursForm((prev) => prev.map((h) => {
+        if (h.day_of_week !== day) return h;
+        const sessions = h.sessions.map((s, i) => i === index ? { ...s, [field]: value } : s);
+        return { ...h, sessions };
+      }));
+    },
+    [],
+  );
+
+  const addSession = useCallback((day: number) => {
+    setHoursForm((prev) => prev.map((h) => {
+      if (h.day_of_week !== day || h.sessions.length >= 4) return h;
+      const last = h.sessions[h.sessions.length - 1];
+      return {
+        ...h,
+        sessions: [...h.sessions, { opens_at: last?.closes_at ?? '09:00', closes_at: '22:00', sort_order: h.sessions.length }],
+      };
+    }));
+  }, []);
+
+  const removeSession = useCallback((day: number, index: number) => {
+    setHoursForm((prev) => prev.map((h) => {
+      if (h.day_of_week !== day || h.sessions.length <= 1) return h;
+      return { ...h, sessions: h.sessions.filter((_, i) => i !== index) };
+    }));
   }, []);
 
   const handleSaveHours = useCallback(() => {
     if (!id) return;
     setHoursSaving(true);
+    const payload: OpeningHour[] = hoursForm.map((h) => ({
+      day_of_week: h.day_of_week,
+      is_closed: h.is_closed,
+      sessions: h.is_closed ? [] : h.sessions.map(({ opens_at, closes_at }, i) => ({ opens_at, closes_at, sort_order: i })),
+    }));
     restaurantsApi
-      .update(id, { opening_hours: hoursForm })
+      .update(id, { opening_hours: payload })
       .then((updated) => {
         setRestaurant((prev) => prev ? { ...prev, opening_hours: updated.opening_hours } : prev);
         setEditingHours(false);
@@ -572,21 +613,39 @@ export function RestaurantDetailView() {
             />
             <CardContent sx={{ pt: 0 }}>
               {editingHours ? (
-                <Stack spacing={1}>
+                <Stack spacing={1.5}>
                   {hoursForm.map((h) => (
                     <Box key={h.day_of_week}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="body2" sx={{ width: 36, flexShrink: 0 }}>{DAY_NAMES[h.day_of_week]}</Typography>
-                        <TextField type="time" size="small" value={h.opens_at ?? ''} onChange={(e) => setHourField(h.day_of_week, 'opens_at', e.target.value)} disabled={h.is_closed} sx={{ width: 120 }} inputProps={{ step: 60 }} />
-                        <Typography variant="caption" color="text.secondary">–</Typography>
-                        <TextField type="time" size="small" value={h.closes_at ?? ''} onChange={(e) => setHourField(h.day_of_week, 'closes_at', e.target.value)} disabled={h.is_closed} sx={{ width: 120 }} inputProps={{ step: 60 }} />
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                        <Typography variant="body2" fontWeight={600} sx={{ width: 36, flexShrink: 0 }}>{DAY_NAMES[h.day_of_week]}</Typography>
                         <FormControlLabel
-                          control={<Checkbox size="small" checked={h.is_closed} onChange={(e) => setHourField(h.day_of_week, 'is_closed', e.target.checked)} />}
+                          control={<Checkbox size="small" checked={h.is_closed} onChange={(e) => setHourClosed(h.day_of_week, e.target.checked)} />}
                           label={<Typography variant="caption">Closed</Typography>}
                           sx={{ ml: 'auto', mr: 0 }}
                         />
                       </Box>
-                      <Divider sx={{ mt: 0.5 }} />
+                      {!h.is_closed && (
+                        <Stack spacing={0.5} sx={{ pl: 5 }}>
+                          {h.sessions.map((sess, idx) => (
+                            <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <TextField type="time" size="small" value={sess.opens_at} onChange={(e) => setSessionField(h.day_of_week, idx, 'opens_at', e.target.value)} sx={{ width: 120 }} inputProps={{ step: 60 }} />
+                              <Typography variant="caption" color="text.secondary">–</Typography>
+                              <TextField type="time" size="small" value={sess.closes_at} onChange={(e) => setSessionField(h.day_of_week, idx, 'closes_at', e.target.value)} sx={{ width: 120 }} inputProps={{ step: 60 }} />
+                              {idx > 0 && (
+                                <IconButton size="small" onClick={() => removeSession(h.day_of_week, idx)} sx={{ color: 'error.main' }}>
+                                  <Iconify icon="mingcute:close-line" width={14} />
+                                </IconButton>
+                              )}
+                            </Box>
+                          ))}
+                          {h.sessions.length < 4 && (
+                            <Button size="small" startIcon={<Iconify icon="mingcute:add-line" width={14} />} onClick={() => addSession(h.day_of_week)} sx={{ alignSelf: 'flex-start', px: 0 }}>
+                              Add session
+                            </Button>
+                          )}
+                        </Stack>
+                      )}
+                      <Divider sx={{ mt: 1 }} />
                     </Box>
                   ))}
                 </Stack>
@@ -595,8 +654,7 @@ export function RestaurantDetailView() {
                   <TableHead>
                     <TableRow>
                       <TableCell>Day</TableCell>
-                      <TableCell>Opens</TableCell>
-                      <TableCell>Closes</TableCell>
+                      <TableCell>Sessions</TableCell>
                       <TableCell>Status</TableCell>
                     </TableRow>
                   </TableHead>
@@ -604,8 +662,9 @@ export function RestaurantDetailView() {
                     {restaurant.opening_hours.map((h) => (
                       <TableRow key={h.day_of_week}>
                         <TableCell>{DAY_NAMES[h.day_of_week]}</TableCell>
-                        <TableCell>{h.is_closed ? '—' : (h.opens_at ?? '—')}</TableCell>
-                        <TableCell>{h.is_closed ? '—' : (h.closes_at ?? '—')}</TableCell>
+                        <TableCell>
+                          {h.is_closed ? '—' : h.sessions.map((s) => `${s.opens_at}–${s.closes_at}`).join(', ')}
+                        </TableCell>
                         <TableCell><Label color={h.is_closed ? 'error' : 'success'}>{h.is_closed ? 'Closed' : 'Open'}</Label></TableCell>
                       </TableRow>
                     ))}

@@ -4,7 +4,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { RESTAURANT_STATUS } from '@/types/enums';
-import { OpeningHour } from '@/types/models';
+import { OpeningHour, OpeningHourSession } from '@/types/models';
 import { useStrings } from '@/shared/i18n';
 import { CategoryTabBar } from '../components/CategoryTabBar';
 import { MenuCategorySection } from '../components/MenuCategorySection';
@@ -16,6 +16,21 @@ import { styles } from './RestaurantDetailScreen.styles';
 function todayHours(hours: OpeningHour[] | undefined): OpeningHour | null {
   if (!hours?.length) return null;
   return hours.find((h) => h.day_of_week === new Date().getDay()) ?? null;
+}
+
+function currentTime(): string {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+}
+
+function activeSession(sessions: OpeningHourSession[]): OpeningHourSession | null {
+  const time = currentTime();
+  return sessions.find((s) => time >= s.opens_at && time < s.closes_at) ?? null;
+}
+
+function nextSession(sessions: OpeningHourSession[]): OpeningHourSession | null {
+  const time = currentTime();
+  return sessions.find((s) => s.opens_at > time) ?? null;
 }
 
 export function RestaurantDetailScreen(): React.JSX.Element {
@@ -45,6 +60,8 @@ export function RestaurantDetailScreen(): React.JSX.Element {
 
   const badge    = STATUS_BADGE[restaurant.status] ?? { bg: colours.infoBg, color: colours.textMuted, label: restaurant.status };
   const todayHr  = todayHours(restaurant.opening_hours);
+  const activeSess = todayHr && !todayHr.is_closed ? activeSession(todayHr.sessions) : null;
+  const nextSess   = todayHr && !todayHr.is_closed && activeSess === null ? nextSession(todayHr.sessions) : null;
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -74,7 +91,20 @@ export function RestaurantDetailScreen(): React.JSX.Element {
             <Text style={styles.restaurantName}>{restaurant.name}</Text>
             {restaurant.description ? <Text style={styles.description}>{restaurant.description}</Text> : null}
             {restaurant.address ? <Text style={styles.address}>{restaurant.address}</Text> : null}
-            {todayHr && !todayHr.is_closed && todayHr.closes_at ? <View style={styles.closingRow}><Ionicons name="time-outline" size={14} color={colours.medium} /><Text style={styles.closingText}>{s.restaurant.closesAt.replace('{time}', todayHr.closes_at)}</Text></View> : null}
+            {todayHr && !todayHr.is_closed && todayHr.sessions.length > 0 ? (
+              <View style={styles.closingRow}>
+                <Ionicons name="time-outline" size={14} color={colours.medium} />
+                {activeSess !== null ? (
+                  <Text style={styles.closingText}>{s.restaurant.closesAt.replace('{time}', activeSess.closes_at)}</Text>
+                ) : nextSess !== null ? (
+                  <Text style={styles.closingText}>{s.restaurant.reopensAt.replace('{time}', nextSess.opens_at)}</Text>
+                ) : (
+                  <Text style={styles.closingText}>
+                    {todayHr.sessions.map((sess) => `${sess.opens_at}–${sess.closes_at}`).join('  ·  ')}
+                  </Text>
+                )}
+              </View>
+            ) : null}
             <View style={styles.statusRow}><View style={[styles.statusBadge, { backgroundColor: badge.bg }]}><Text style={[styles.statusText, { color: badge.color }]}>{badge.label}</Text></View></View>
           </View>
         </View>

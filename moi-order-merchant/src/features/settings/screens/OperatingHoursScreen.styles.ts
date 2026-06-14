@@ -5,9 +5,10 @@ import { typography } from '../../../shared/theme/typography';
 import { radius } from '../../../shared/theme/radius';
 
 export const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colours.surface },
+  safe: { flex: 1, backgroundColor: colours.backgroundLight },
   scroll: { flex: 1 },
   scrollContent: { padding: spacing.lg, paddingBottom: spacing.xxl },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 
   backBtn: {
     flexDirection: 'row',
@@ -27,42 +28,70 @@ export const styles = StyleSheet.create({
     color: colours.textOnLight,
     letterSpacing: -0.5,
     lineHeight: 60,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
 
-  tableHeader: {
-    flexDirection: 'row',
-    paddingVertical: spacing.xs,
-    marginBottom: spacing.xs,
+  // ── Day card ──────────────────────────────────────────────────────────────
+  dayCard: {
+    backgroundColor: colours.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    marginBottom: spacing.sm,
+    overflow: 'hidden',
   },
-  headerCell: {
-    fontSize: typography.xxs,
-    fontWeight: '700',
-    color: colours.textMuted,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
-  colDay:    { width: 48 },
-  colTime:   { flex: 1, paddingHorizontal: spacing.xs },
-  colToggle: { width: 56, alignItems: 'center' },
-
-  row: {
+  dayHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.xs,
-    borderBottomWidth: 1,
-    borderBottomColor: colours.divider,
-    minHeight: 48,
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colours.surfaceMuted,
   },
-  dayLabel: {
-    width: 48,
+  dayName: {
     fontSize: typography.sm,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colours.textOnLight,
+  },
+  dayHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  closedBadge: {
+    fontSize: typography.xxs,
+    fontWeight: '600',
+    color: colours.textSubtle,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+
+  // ── Sessions ──────────────────────────────────────────────────────────────
+  sessionsContainer: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xs,
+  },
+  sessionRow: {
+    marginBottom: spacing.sm,
+  },
+  sessionLabel: {
+    marginBottom: spacing.xs,
+  },
+  sessionLabelText: {
+    fontSize: typography.xxs,
+    fontWeight: '600',
+    color: colours.textSubtle,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  sessionInputs: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
   timeInput: {
     flex: 1,
-    marginHorizontal: spacing.xs,
     backgroundColor: colours.surfaceMuted,
     borderWidth: 1,
     borderColor: colours.divider,
@@ -71,24 +100,37 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     fontSize: typography.sm,
     color: colours.textOnLight,
-    minHeight: 36,
+    minHeight: 40,
     textAlign: 'center',
   },
-  timeInputDisabled: {
-    opacity: 0.3,
-  },
-  closedLabel: {
-    flex: 1,
-    paddingHorizontal: spacing.sm,
-    fontSize: typography.xs,
+  timeSep: {
+    fontSize: typography.sm,
     color: colours.textSubtle,
-    textAlign: 'center',
+    fontWeight: '600',
+    paddingHorizontal: spacing.xs,
   },
-  toggleCell: {
-    width: 56,
+  removeBtn: {
+    width: 36,
+    height: 36,
     alignItems: 'center',
+    justifyContent: 'center',
   },
 
+  addSessionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.xs,
+    alignSelf: 'flex-start',
+    marginBottom: spacing.xs,
+  },
+  addSessionText: {
+    fontSize: typography.sm,
+    color: colours.primary,
+    fontWeight: '600',
+  },
+
+  // ── Footer ────────────────────────────────────────────────────────────────
   errorBanner: {
     backgroundColor: colours.errorBg,
     borderRadius: radius.md,
@@ -101,7 +143,6 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     color: colours.error,
   },
-
   saveBtn: {
     backgroundColor: colours.primary,
     borderRadius: radius.md,

@@ -53,12 +53,21 @@ class RestaurantResource extends JsonResource
             'min_order_cents'       => $this->min_order_cents,
             'is_open_now'           => $this->whenLoaded('openingHours', fn () => $this->isOpenNow()),
             'opening_hours'         => $this->whenLoaded('openingHours', fn () =>
-                $this->openingHours->map(fn ($h) => [
-                    'day_of_week' => $h->day_of_week,
-                    'opens_at'    => $h->opens_at,
-                    'closes_at'   => $h->closes_at,
-                    'is_closed'   => $h->is_closed,
-                ])
+                $this->openingHours
+                    ->groupBy('day_of_week')
+                    ->map(function ($sessions, $day) {
+                        $primary = $sessions->sortBy('sort_order')->first();
+                        return [
+                            'day_of_week' => (int) $day,
+                            'is_closed'   => $primary->is_closed,
+                            'sessions'    => $primary->is_closed ? [] : $sessions->sortBy('sort_order')->map(fn ($s) => [
+                                'opens_at'   => $s->opens_at,
+                                'closes_at'  => $s->closes_at,
+                                'sort_order' => $s->sort_order,
+                            ])->values()->all(),
+                        ];
+                    })
+                    ->values()
             ),
             'photos'                => $this->whenLoaded('photos', fn () =>
                 $this->photos->map(fn ($p) => [

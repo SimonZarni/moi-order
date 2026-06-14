@@ -20,11 +20,16 @@ export type RestaurantListItem = {
   created_at: string;
 };
 
+export type OpeningHourSession = {
+  opens_at: string;
+  closes_at: string;
+  sort_order: number;
+};
+
 export type OpeningHour = {
   day_of_week: number;
-  opens_at: string | null;
-  closes_at: string | null;
   is_closed: boolean;
+  sessions: OpeningHourSession[];
 };
 
 export type MenuItemDetail = {

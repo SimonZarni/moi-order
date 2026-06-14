@@ -97,21 +97,31 @@ class Restaurant extends Model
             return $this->status === RestaurantStatus::Open;
         }
 
-        $now   = Carbon::now('Asia/Bangkok');
-        $hours = $this->openingHours->firstWhere('day_of_week', $now->dayOfWeek);
+        $now      = Carbon::now('Asia/Bangkok');
+        $sessions = $this->openingHours->where('day_of_week', $now->dayOfWeek);
 
-        if ($hours === null || $hours->is_closed) {
+        if ($sessions->isEmpty()) {
             return false;
         }
 
-        // Hours not fully configured — trust the manually set status.
-        if ($hours->opens_at === null || $hours->closes_at === null) {
-            return $this->status === RestaurantStatus::Open;
+        // Primary session (sort_order=0) carries the is_closed flag for the whole day.
+        $primary = $sessions->sortBy('sort_order')->first();
+        if ($primary->is_closed) {
+            return false;
         }
 
         $time = $now->format('H:i:s');
 
-        return $time >= $hours->opens_at && $time < $hours->closes_at;
+        foreach ($sessions as $session) {
+            if ($session->opens_at === null || $session->closes_at === null) {
+                continue;
+            }
+            if ($time >= $session->opens_at && $time < $session->closes_at) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // ─── Scopes ───────────────────────────────────────────────────────────────
@@ -142,7 +152,9 @@ class Restaurant extends Model
 
     public function openingHours(): HasMany
     {
-        return $this->hasMany(RestaurantOpeningHour::class)->orderBy('day_of_week');
+        return $this->hasMany(RestaurantOpeningHour::class)
+            ->orderBy('day_of_week')
+            ->orderBy('sort_order');
     }
 
     public function photos(): HasMany

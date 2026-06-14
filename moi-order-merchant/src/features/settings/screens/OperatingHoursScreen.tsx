@@ -16,14 +16,20 @@ const DAY_KEYS = [
   'hours_day_thu', 'hours_day_fri', 'hours_day_sat',
 ] as const;
 
+const MAX_SESSIONS = 4;
+
 export function OperatingHoursScreen({ onBack }: OperatingHoursScreenProps): React.JSX.Element {
-  const { isLoading, isSaving, hoursInput, error, handleHourChange, handleHourToggle, handleSave, handleClearError } = useOperatingHoursScreen();
+  const {
+    isLoading, isSaving, hoursInput, error,
+    handleToggleClosed, handleSessionChange, handleAddSession, handleRemoveSession,
+    handleSave, handleClearError,
+  } = useOperatingHoursScreen();
   const t = useTranslation();
 
   if (isLoading) {
     return (
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={styles.centered}>
           <ActivityIndicator size="large" color={colours.primary} />
         </View>
       </SafeAreaView>
@@ -40,47 +46,80 @@ export function OperatingHoursScreen({ onBack }: OperatingHoursScreenProps): Rea
 
         <Text style={styles.title}>{t('hours_title')}</Text>
 
-        <View style={styles.tableHeader}>
-          <Text style={[styles.headerCell, styles.colDay]}>{''}</Text>
-          <Text style={[styles.headerCell, styles.colTime, { textAlign: 'center' }]}>{t('hours_opens')}</Text>
-          <Text style={[styles.headerCell, styles.colTime, { textAlign: 'center' }]}>{t('hours_closes')}</Text>
-          <Text style={[styles.headerCell, styles.colToggle]}>{t('hours_open')}</Text>
-        </View>
-
-        {hoursInput.map((h) => (
-          <View key={h.day_of_week} style={styles.row}>
-            <Text style={styles.dayLabel}>{t(DAY_KEYS[h.day_of_week])}</Text>
-            {h.is_closed ? (
-              <Text style={styles.closedLabel}>{t('hours_closed')}</Text>
-            ) : (
-              <>
-                <TextInput
-                  style={styles.timeInput}
-                  value={h.opens_at ?? ''}
-                  onChangeText={(v) => handleHourChange(h.day_of_week, 'opens_at', v)}
-                  placeholder="09:00"
-                  placeholderTextColor={colours.textSubtle}
-                  accessibilityLabel={`Opening time for day ${h.day_of_week}`}
+        {hoursInput.map((day) => (
+          <View key={day.day_of_week} style={styles.dayCard}>
+            {/* Day header row */}
+            <View style={styles.dayHeader}>
+              <Text style={styles.dayName}>{t(DAY_KEYS[day.day_of_week])}</Text>
+              <View style={styles.dayHeaderRight}>
+                {day.is_closed
+                  ? <Text style={styles.closedBadge}>{t('hours_closed')}</Text>
+                  : null
+                }
+                <Switch
+                  value={!day.is_closed}
+                  onValueChange={(v) => handleToggleClosed(day.day_of_week, !v)}
+                  trackColor={{ false: colours.surfaceMuted, true: colours.primary + '66' }}
+                  thumbColor={!day.is_closed ? colours.primary : colours.medium}
+                  accessibilityLabel={`Toggle open for ${t(DAY_KEYS[day.day_of_week])}`}
                 />
-                <TextInput
-                  style={styles.timeInput}
-                  value={h.closes_at ?? ''}
-                  onChangeText={(v) => handleHourChange(h.day_of_week, 'closes_at', v)}
-                  placeholder="22:00"
-                  placeholderTextColor={colours.textSubtle}
-                  accessibilityLabel={`Closing time for day ${h.day_of_week}`}
-                />
-              </>
-            )}
-            <View style={styles.toggleCell}>
-              <Switch
-                value={!h.is_closed}
-                onValueChange={(v) => handleHourToggle(h.day_of_week, !v)}
-                trackColor={{ false: colours.surfaceMuted, true: colours.primary + '66' }}
-                thumbColor={!h.is_closed ? colours.primary : colours.medium}
-                accessibilityLabel={`Toggle open for day ${h.day_of_week}`}
-              />
+              </View>
             </View>
+
+            {!day.is_closed && (
+              <View style={styles.sessionsContainer}>
+                {day.sessions.map((session, index) => (
+                  <View key={index} style={styles.sessionRow}>
+                    <View style={styles.sessionLabel}>
+                      <Text style={styles.sessionLabelText}>
+                        {t('hours_session')} {index + 1}
+                      </Text>
+                    </View>
+                    <View style={styles.sessionInputs}>
+                      <TextInput
+                        style={styles.timeInput}
+                        value={session.opens_at}
+                        onChangeText={(v) => handleSessionChange(day.day_of_week, index, 'opens_at', v)}
+                        placeholder="09:00"
+                        placeholderTextColor={colours.textSubtle}
+                        accessibilityLabel={`Session ${index + 1} open time for ${t(DAY_KEYS[day.day_of_week])}`}
+                      />
+                      <Text style={styles.timeSep}>→</Text>
+                      <TextInput
+                        style={styles.timeInput}
+                        value={session.closes_at}
+                        onChangeText={(v) => handleSessionChange(day.day_of_week, index, 'closes_at', v)}
+                        placeholder="22:00"
+                        placeholderTextColor={colours.textSubtle}
+                        accessibilityLabel={`Session ${index + 1} close time for ${t(DAY_KEYS[day.day_of_week])}`}
+                      />
+                      {index > 0 && (
+                        <Pressable
+                          style={styles.removeBtn}
+                          onPress={() => handleRemoveSession(day.day_of_week, index)}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Remove session ${index + 1}`}
+                        >
+                          <Ionicons name="remove-circle-outline" size={20} color={colours.error} />
+                        </Pressable>
+                      )}
+                    </View>
+                  </View>
+                ))}
+
+                {day.sessions.length < MAX_SESSIONS && (
+                  <Pressable
+                    style={styles.addSessionBtn}
+                    onPress={() => handleAddSession(day.day_of_week)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Add session for ${t(DAY_KEYS[day.day_of_week])}`}
+                  >
+                    <Ionicons name="add-circle-outline" size={16} color={colours.primary} />
+                    <Text style={styles.addSessionText}>{t('hours_add_session')}</Text>
+                  </Pressable>
+                )}
+              </View>
+            )}
           </View>
         ))}
 
@@ -90,8 +129,13 @@ export function OperatingHoursScreen({ onBack }: OperatingHoursScreenProps): Rea
           </Pressable>
         )}
 
-        <Pressable style={[styles.saveBtn, isSaving && styles.saveBtnDisabled]}
-          onPress={handleSave} disabled={isSaving} accessibilityRole="button" accessibilityLabel="Save operating hours">
+        <Pressable
+          style={[styles.saveBtn, isSaving && styles.saveBtnDisabled]}
+          onPress={handleSave}
+          disabled={isSaving}
+          accessibilityRole="button"
+          accessibilityLabel="Save operating hours"
+        >
           <Text style={styles.saveBtnText}>{isSaving ? t('common_saving') : t('common_save')}</Text>
         </Pressable>
       </ScrollView>

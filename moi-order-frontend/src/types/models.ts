@@ -334,11 +334,16 @@ export interface UserAddress {
 
 // ── Food ordering ──────────────────────────────────────────────────────────
 
+export interface OpeningHourSession {
+  opens_at: string;   // "HH:mm"
+  closes_at: string;  // "HH:mm"
+  sort_order: number;
+}
+
 export interface OpeningHour {
   day_of_week: number; // 0 = Sunday … 6 = Saturday
-  opens_at: string | null;  // "HH:mm"
-  closes_at: string | null; // "HH:mm"
   is_closed: boolean;
+  sessions: OpeningHourSession[];
 }
 
 export interface RestaurantPhoto {

@@ -377,6 +377,7 @@ export interface AppStrings {
     listTitle:               string; // "Restaurants" — header title on the restaurant list screen
     couldNotLoad:            string; // "Could not load restaurant."
     closesAt:                string; // "Closes at {time}"
+    reopensAt:               string; // "Reopens at {time}"
     statusOpen:              string;
     statusClosed:            string;
     statusPaused:            string;
@@ -733,6 +734,7 @@ const en: AppStrings = {
     listTitle:               'Restaurants',
     couldNotLoad:            'Could not load restaurant.',
     closesAt:                'Closes at {time}',
+    reopensAt:               'Reopens at {time}',
     statusOpen:              'Open',
     statusClosed:            'Closed',
     statusPaused:            'Paused',
@@ -1089,6 +1091,7 @@ const mm: AppStrings = {
     listTitle:               'စားသောက်ဆိုင်များ',
     couldNotLoad:            'စားသောက်ဆိုင်ကို ဖွင့်မရပါ။',
     closesAt:                '{time} တွင် ပိတ်သည်',
+    reopensAt:               '{time} တွင် ပြန်ဖွင့်သည်',
     statusOpen:              'ဖွင့်ထား',
     statusClosed:            'ပိတ်ထား',
     statusPaused:            'ယာယီရပ်ဆိုင်း',
@@ -1445,6 +1448,7 @@ const th: AppStrings = {
     listTitle:               'ร้านอาหาร',
     couldNotLoad:            'ไม่สามารถโหลดร้านอาหารได้',
     closesAt:                'ปิดเวลา {time}',
+    reopensAt:               'เปิดอีกครั้งเวลา {time}',
     statusOpen:              'เปิด',
     statusClosed:            'ปิด',
     statusPaused:            'หยุดชั่วคราว',
