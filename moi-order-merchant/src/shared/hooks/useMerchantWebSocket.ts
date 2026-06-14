@@ -71,7 +71,7 @@ interface UseMerchantWebSocketOptions {
 export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): void {
   const queryClient = useQueryClient();
   const token  = useAuthStore((s) => s.token);
-  const userId = useAuthStore((s) => s.user?.id ?? null);
+  const userId = useAuthStore((s) => s.user?.int_id ?? null);
   const onNewOrder = options?.onNewOrder;
 
   const pusherRef  = useRef<PusherInstance | null>(null);

@@ -1,7 +1,8 @@
 import type { KycDocType, KycStatus, MenuItemStatus, OrderStatus, RestaurantStatus } from './enums';
 
 export interface MerchantUser {
-  id: number;
+  id: string;     // UUID — used for identity/display
+  int_id: number; // integer PK — used for Pusher channel subscription
   name: string;
   email: string | null;
   phone: string | null;

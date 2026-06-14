@@ -42,7 +42,7 @@ export function usePusherNotifications(): void {
       channelAuthorization: {
         customHandler: async ({ channelName, socketId }, callback) => {
           try {
-            const res = await apiClient.post<{ auth: string }>('/broadcasting/auth', {
+            const res = await apiClient.post<{ auth: string }>('/api/v1/broadcasting/auth', {
               socket_id:    socketId,
               channel_name: channelName,
             });
