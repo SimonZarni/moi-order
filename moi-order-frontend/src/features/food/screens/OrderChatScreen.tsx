@@ -143,7 +143,9 @@ function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): Rea
     extrapolate: 'clamp',
   });
 
-  const hasReply = msg.reply_to_body != null && msg.reply_to_sender_name != null;
+  // reply_to_body can be null when the original message was image-only, so
+  // gate on reply_to_id (the FK) not body.
+  const hasReply = msg.reply_to_id != null;
 
   return (
     <Animated.View style={{ opacity: entranceOpacity, transform: [{ translateX: entranceSlide }] }}>

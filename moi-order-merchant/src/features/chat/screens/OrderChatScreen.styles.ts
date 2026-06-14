@@ -253,33 +253,35 @@ export const styles = StyleSheet.create({
     color: colours.textSubtle,
   },
 
-  // Quoted reply inside a bubble
+  // Quoted reply inside a bubble — default style for received (light) bubbles
   replyQuote: {
     borderLeftWidth: 3,
-    borderLeftColor: colours.primary + '88',
-    borderRadius: 2,
+    borderLeftColor: colours.primary,
+    borderRadius: 4,
     paddingLeft: spacing.sm,
-    paddingVertical: 3,
-    marginBottom: 4,
+    paddingRight: spacing.xs,
+    paddingVertical: spacing.xs,
+    marginBottom: 6,
     gap: 2,
-    backgroundColor: colours.primary + '14',
+    backgroundColor: colours.primary + '22',
   },
-  // Merchant's own bubble is primary-coloured — use dark ink on that background
+  // Merchant's own bubble has a primary-coloured background — use a dark overlay
+  // so the quote block is clearly visible as a distinct darker patch inside the bubble.
   replyQuoteMerchant: {
-    borderLeftColor: 'rgba(15,26,20,0.35)',
-    backgroundColor: 'rgba(15,26,20,0.12)',
+    borderLeftColor: 'rgba(255,255,255,0.60)',
+    backgroundColor: 'rgba(0,0,0,0.22)',
   },
   replyQuoteSender: {
     fontSize: typography.xxs,
-    lineHeight: Platform.select({ web: 14, default: 18 }),
+    lineHeight: Platform.select({ web: 15, default: 20 }),
     fontWeight: '700',
     color: colours.primary,
   },
-  replyQuoteSenderMerchant: { color: 'rgba(15,26,20,0.85)' },
+  replyQuoteSenderMerchant: { color: '#ffffff' },
   replyQuoteText: {
     fontSize: typography.xxs,
     lineHeight: Platform.select({ web: 14, default: 18 }),
-    color: colours.textSubtle,
+    color: colours.textOnLight,
   },
-  replyQuoteTextMerchant: { color: 'rgba(15,26,20,0.65)' },
+  replyQuoteTextMerchant: { color: 'rgba(255,255,255,0.80)' },
 });

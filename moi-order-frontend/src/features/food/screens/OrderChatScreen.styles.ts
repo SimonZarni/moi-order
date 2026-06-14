@@ -246,35 +246,37 @@ export const styles = StyleSheet.create({
     lineHeight: Platform.select({ web: 14, default: 18 }),
     color: colours.textMuted,
   },
-  // Quoted reply inside bubble
+  // Quoted reply inside bubble — default for received (light) bubbles
   replyQuote: {
     borderLeftWidth: 3,
-    borderLeftColor: colours.primary + '88',
-    borderRadius: 2,
+    borderLeftColor: colours.primary,
+    borderRadius: 4,
     paddingLeft: spacing.sm,
-    paddingVertical: 3,
-    marginBottom: 4,
+    paddingRight: spacing.xs,
+    paddingVertical: spacing.xs,
+    marginBottom: 6,
     gap: 2,
-    backgroundColor: colours.primary + '14',
+    backgroundColor: colours.primary + '22',
   },
-  // Customer's own bubble is primary-coloured — use white tones on that background
+  // Customer's own bubble has a primary-coloured background — dark overlay so
+  // the quote block reads as a clearly distinct darker patch.
   replyQuoteCustomer: {
-    borderLeftColor: 'rgba(255,255,255,0.5)',
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderLeftColor: 'rgba(255,255,255,0.60)',
+    backgroundColor: 'rgba(0,0,0,0.20)',
   },
   replyQuoteSender: {
     fontSize: typography.xxs,
-    lineHeight: Platform.select({ web: 14, default: 18 }),
+    lineHeight: Platform.select({ web: 15, default: 20 }),
     fontWeight: '700',
     color: colours.primary,
   },
-  replyQuoteSenderCustomer: { color: 'rgba(255,255,255,0.95)' },
+  replyQuoteSenderCustomer: { color: '#ffffff' },
   replyQuoteText: {
     fontSize: typography.xxs,
     lineHeight: Platform.select({ web: 14, default: 18 }),
-    color: colours.textMuted,
+    color: colours.textOnLight,
   },
-  replyQuoteTextCustomer: { color: 'rgba(255,255,255,0.75)' },
+  replyQuoteTextCustomer: { color: 'rgba(255,255,255,0.80)' },
   // Photo lightbox
   photoOverlay: {
     flex: 1,
