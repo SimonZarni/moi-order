@@ -123,5 +123,6 @@ Route::post('/food-orders/{id}/complete',        [FoodOrderController::class, 'c
 Route::post('/food-orders/{id}/notify-line-pay', [FoodOrderController::class, 'notifyLinePay']);
 Route::get('/food-orders/{id}/chat',          [\App\Http\Controllers\Api\V1\OrderChatController::class, 'index']);
 Route::post('/food-orders/{id}/chat',         [\App\Http\Controllers\Api\V1\OrderChatController::class, 'store']);
-Route::post('/food-orders/{id}/chat/read',    [\App\Http\Controllers\Api\V1\OrderChatController::class, 'markRead']);
+Route::post('/food-orders/{id}/chat/read',              [\App\Http\Controllers\Api\V1\OrderChatController::class, 'markRead']);
+Route::delete('/food-orders/{id}/chat/{messageId}',     [\App\Http\Controllers\Api\V1\OrderChatController::class, 'destroy']);
 

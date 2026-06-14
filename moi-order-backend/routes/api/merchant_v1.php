@@ -63,7 +63,8 @@ Route::patch('/orders/{id}/status',          [MerchantOrderController::class, 'u
 // ── Order chat ────────────────────────────────────────────────────────────────
 Route::get('/orders/{id}/chat',        [MerchantOrderChatController::class, 'index']);
 Route::post('/orders/{id}/chat',       [MerchantOrderChatController::class, 'store']);
-Route::post('/orders/{id}/chat/read',  [MerchantOrderChatController::class, 'markRead']);
+Route::post('/orders/{id}/chat/read',            [MerchantOrderChatController::class, 'markRead']);
+Route::delete('/orders/{id}/chat/{messageId}',   [MerchantOrderChatController::class, 'destroy']);
 
 // ── In-app notifications ──────────────────────────────────────────────────────
 Route::get('/notifications',              [MerchantNotificationController::class, 'index']);

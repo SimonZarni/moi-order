@@ -37,7 +37,7 @@ class OrderChatMessageSent implements ShouldBroadcastNow
         // Signed URL TTL matches OrderChatMessageResource (30 min).
         $imageUrl = null;
         if ($this->message->image_path !== null) {
-            $imageUrl = app(FileStorageInterface::class)->temporaryUrl($this->message->image_path, 1800);
+            $imageUrl = app(FileStorageInterface::class)->url($this->message->image_path, 30);
         }
 
         return [

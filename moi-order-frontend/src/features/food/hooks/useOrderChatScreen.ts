@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, FlatList, Keyboard } from 'react-native';
+import { Alert, FlatList, Keyboard, Share } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 import { RootStackParamList } from '@/types/navigation';
 import { FOOD_ORDER_STATUS, FoodOrderStatus } from '@/types/enums';
 import { OrderChatMessage } from '@/types/models';
-import { useOrderChatData, useSendChatMessage } from './useOrderChatData';
+import { QUERY_KEYS } from '@/shared/constants/queryKeys';
+import { useOrderChatData, useSendChatMessage, useDeleteChatMessage } from './useOrderChatData';
 
 type Route = RouteProp<RootStackParamList, 'OrderChat'>;
 
@@ -37,6 +39,7 @@ export interface UseOrderChatScreenResult {
   handleRemoveImage: (index: number) => void;
   handlePhotoPress: (uri: string) => void;
   handlePhotoClose: () => void;
+  handleLongPress: (msg: OrderChatMessage) => void;
 }
 
 function computeIsChatLocked(
@@ -61,8 +64,10 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
   const { orderId, orderNumber, restaurantName, completedAt, orderStatus } = route.params;
   const { bottom: bottomInset } = useSafeAreaInsets();
 
+  const queryClient = useQueryClient();
   const { messages, isLoading, isError } = useOrderChatData(orderId);
   const { mutateAsync }  = useSendChatMessage();
+  const { mutate: deleteMessage } = useDeleteChatMessage();
   const [text, setText]             = useState('');
   const [sendError, setSendError]   = useState<string | null>(null);
   const [isSending, setIsSending]   = useState(false);
@@ -115,6 +120,7 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
 
     const replyExtra = replyToId !== undefined ? { replyToId } : {};
 
+    const hadImages = selectedImages.length > 0;
     const sends: Array<() => Promise<unknown>> = [];
     if (trimmed) {
       sends.push(() => mutateAsync({ orderId, body: trimmed, image: null, ...replyExtra, replyingToMsg: replySnapshot }));
@@ -131,13 +137,21 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
         }
         setText('');
         setSelectedImages([]);
-      } catch {
-        setSendError('Failed to send. Please try again.');
+      } catch (err) {
+        const status = (err as { status?: number })?.status;
+        // 5xx: server saved the photo/message but returned an error response.
+        // Refetch so the message appears and clear the stuck preview.
+        if (typeof status === 'number' && status >= 500 && hadImages) {
+          void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOOD_ORDERS.CHAT(orderId) });
+          setSelectedImages([]);
+        } else {
+          setSendError('Failed to send. Please try again.');
+        }
       } finally {
         setIsSending(false);
       }
     })();
-  }, [text, selectedImages, isSending, mutateAsync, orderId]);
+  }, [text, selectedImages, isSending, mutateAsync, orderId, queryClient]);
 
   const handlePickImage = useCallback(async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -161,6 +175,28 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
 
   const handlePhotoPress = useCallback((uri: string) => setSelectedPhoto(uri), []);
   const handlePhotoClose = useCallback(() => setSelectedPhoto(null), []);
+
+  const handleLongPress = useCallback((msg: OrderChatMessage) => {
+    const isOwn = msg.sender_type === 'customer';
+    const options: Array<{ text: string; onPress?: () => void; style?: 'cancel' | 'destructive' }> = [];
+    if (msg.body) {
+      options.push({ text: 'Copy text', onPress: () => { void Share.share({ message: msg.body ?? '' }); } });
+    }
+    if (isOwn) {
+      options.push({
+        text: 'Delete message',
+        style: 'destructive',
+        onPress: () => {
+          Alert.alert('Delete message', 'This will remove the message for everyone.', [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Delete', style: 'destructive', onPress: () => deleteMessage({ orderId, messageId: msg.id }) },
+          ]);
+        },
+      });
+    }
+    options.push({ text: 'Cancel', style: 'cancel' });
+    Alert.alert('', '', options);
+  }, [orderId, deleteMessage]);
 
   return {
     orderId,
@@ -186,5 +222,6 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
     handleRemoveImage,
     handlePhotoPress,
     handlePhotoClose,
+    handleLongPress,
   };
 }

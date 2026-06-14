@@ -21,6 +21,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { OrderChatMessage } from '@/types/models';
 import { useStrings } from '@/shared/i18n';
+import { LinkedText } from '@/shared/components/LinkedText';
 import { useOrderChatScreen, SelectedImage } from '../hooks/useOrderChatScreen';
 import { styles } from './OrderChatScreen.styles';
 
@@ -79,9 +80,10 @@ interface BubbleProps {
   isNew: boolean;
   onPhotoPress: (uri: string) => void;
   onReply: (msg: OrderChatMessage) => void;
+  onLongPress: (msg: OrderChatMessage) => void;
 }
 
-function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): React.JSX.Element {
+function AnimatedBubble({ msg, isNew, onPhotoPress, onReply, onLongPress }: BubbleProps): React.JSX.Element {
   if (msg.sender_type === 'system') {
     return (
       <View style={styles.systemNotice}>
@@ -165,7 +167,12 @@ function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): Rea
             { transform: [{ translateX: swipeX }] },
           ]}
         >
-          <View style={[styles.bubble, isCustomer ? styles.bubbleCustomer : styles.bubbleOther]}>
+          <Pressable
+            onLongPress={() => onLongPress(msg)}
+            delayLongPress={350}
+            accessibilityRole="none"
+            style={[styles.bubble, isCustomer ? styles.bubbleCustomer : styles.bubbleOther]}
+          >
             {!isCustomer && <Text style={styles.senderName}>{msg.sender_name}</Text>}
 
             {hasReply && (
@@ -185,9 +192,11 @@ function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): Rea
               </Pressable>
             )}
             {msg.body !== null && (
-              <Text style={[styles.bubbleText, isCustomer ? styles.bubbleTextCustomer : styles.bubbleTextOther]}>
-                {msg.body}
-              </Text>
+              <LinkedText
+                text={msg.body}
+                style={[styles.bubbleText, isCustomer ? styles.bubbleTextCustomer : styles.bubbleTextOther]}
+                linkStyle={isCustomer ? styles.bubbleLinkCustomer : styles.bubbleLinkOther}
+              />
             )}
 
             {/* Time + status tick (tick only on customer's own sent messages) */}
@@ -203,7 +212,7 @@ function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): Rea
                 />
               )}
             </View>
-          </View>
+          </Pressable>
         </Animated.View>
       </View>
     </Animated.View>
@@ -239,6 +248,7 @@ export function OrderChatScreen(): React.JSX.Element {
     selectedImages, selectedPhoto, listRef, replyingTo,
     handleBack, handleTextChange, handleSend, handleSetReply,
     handlePickImage, handleRemoveImage, handlePhotoPress, handlePhotoClose,
+    handleLongPress,
   } = useOrderChatScreen();
 
   const [showNoticeBanner, setShowNoticeBanner] = useState(true);
@@ -293,6 +303,7 @@ export function OrderChatScreen(): React.JSX.Element {
                 isNew={!initialIdsRef.current.has(item.id)}
                 onPhotoPress={handlePhotoPress}
                 onReply={handleSetReply}
+                onLongPress={handleLongPress}
               />
             )}
             style={styles.list}
@@ -315,11 +326,13 @@ export function OrderChatScreen(): React.JSX.Element {
         {!isChatLocked && (
           <>
             {selectedImages.length > 0 && (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imagePreviewStrip} contentContainerStyle={{ gap: 8 }}>
-                {selectedImages.map((img, i) => (
-                  <ImagePreviewItem key={`${img.uri}-${i}`} img={img} index={i} onRemove={handleRemoveImage} />
-                ))}
-              </ScrollView>
+              <View style={styles.imagePreviewStrip}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.imagePreviewStripContent}>
+                  {selectedImages.map((img, i) => (
+                    <ImagePreviewItem key={`${img.uri}-${i}`} img={img} index={i} onRemove={handleRemoveImage} />
+                  ))}
+                </ScrollView>
+              </View>
             )}
 
             {replyingTo !== null && (

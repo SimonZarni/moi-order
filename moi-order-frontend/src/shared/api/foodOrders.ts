@@ -88,17 +88,25 @@ export async function sendOrderChatMessage(
     const ext  = mime.split('/')[1] ?? 'jpg';
     form.append('image', { uri: image.uri, name: `chat.${ext}`, type: mime } as unknown as Blob);
   }
-  // Set Content-Type to multipart/form-data (without boundary) so Axios overrides
-  // the instance default 'application/json'. React Native XHR then appends the
-  // correct boundary automatically when it serialises the FormData body.
+  // Bypass Axios transformRequest so RN's native XHR receives the FormData
+  // directly and sets Content-Type: multipart/form-data; boundary=... itself.
+  // Without this, Axios 1.x fails instanceof-FormData check on RN's FormData
+  // class and JSON-serialises the body to "[object FormData]".
   const res = await apiClient.post<ApiResponse<OrderChatMessage>>(
     `/api/v1/food-orders/${orderId}/chat`,
     form,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
+    {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      transformRequest: [(data: unknown) => data as FormData],
+    },
   );
   return res.data.data;
 }
 
 export async function markOrderChatRead(orderId: string): Promise<void> {
   await apiClient.post(`/api/v1/food-orders/${orderId}/chat/read`);
+}
+
+export async function deleteOrderChatMessage(orderId: string, messageId: number): Promise<void> {
+  await apiClient.delete(`/api/v1/food-orders/${orderId}/chat/${messageId}`);
 }

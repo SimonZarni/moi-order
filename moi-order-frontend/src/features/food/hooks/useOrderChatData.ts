@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchOrderChat, sendOrderChatMessage, markOrderChatRead } from '@/shared/api/foodOrders';
+import { fetchOrderChat, sendOrderChatMessage, markOrderChatRead, deleteOrderChatMessage } from '@/shared/api/foodOrders';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { PUSHER_APP_KEY, PUSHER_APP_CLUSTER } from '@/shared/constants/config';
 import apiClient from '@/shared/api/client';
@@ -87,6 +87,14 @@ export function useOrderChatData(orderId: string): UseOrderChatDataResult {
           void markOrderChatRead(orderId);
         }
       });
+      // Remove deleted messages from cache for all participants.
+      channel.bind('chat.message-deleted', (data: unknown) => {
+        const { message_id } = data as { message_id: number };
+        queryClient.setQueryData<OrderChatMessage[]>(
+          QUERY_KEYS.FOOD_ORDERS.CHAT(orderId),
+          (prev) => prev?.filter((m) => m.id !== message_id),
+        );
+      });
       // When merchant/admin reads our messages → update read_at so 2 ticks show.
       channel.bind('chat.messages-read', (data: unknown) => {
         const evt = data as { reader_type: string; message_ids: number[]; read_at: string };
@@ -155,6 +163,20 @@ export function useSendChatMessage() {
           }
           return [...existing, withReply];
         },
+      );
+    },
+  });
+}
+
+export function useDeleteChatMessage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ orderId, messageId }: { orderId: string; messageId: number }) =>
+      deleteOrderChatMessage(orderId, messageId),
+    onSuccess: (_, { orderId, messageId }) => {
+      queryClient.setQueryData<OrderChatMessage[]>(
+        QUERY_KEYS.FOOD_ORDERS.CHAT(orderId),
+        (prev) => prev?.filter((m) => m.id !== messageId),
       );
     },
   });

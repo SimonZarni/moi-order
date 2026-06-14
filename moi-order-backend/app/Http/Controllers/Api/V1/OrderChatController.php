@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Contracts\FileStorageInterface;
+use App\Events\OrderChatMessageDeleted;
 use App\Events\OrderChatMessageSent;
 use App\Events\OrderChatMessagesRead;
 use App\Http\Controllers\Controller;
@@ -96,6 +97,22 @@ class OrderChatController extends Controller
             OrderChatMessage::whereIn('id', $ids)->update(['read_at' => $now]);
             event(new OrderChatMessagesRead($order->uuid, 'customer', $ids, $now->toIso8601String()));
         }
+
+        return response()->json(null, 204);
+    }
+
+    /** DELETE /api/v1/food-orders/{id}/chat/{messageId} */
+    public function destroy(Request $request, string $id, int $messageId): JsonResponse
+    {
+        $order   = FoodOrder::forUser($request->user()->id)->where('uuid', $id)->firstOrFail();
+        $message = OrderChatMessage::forOrder($order->id)
+            ->where('id', $messageId)
+            ->where('sender_type', 'customer')
+            ->where('sender_id', $request->user()->id)
+            ->firstOrFail();
+
+        $message->delete();
+        event(new OrderChatMessageDeleted($order->uuid, $messageId));
 
         return response()->json(null, 204);
     }

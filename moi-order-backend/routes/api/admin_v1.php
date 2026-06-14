@@ -413,7 +413,8 @@ Route::prefix('food-orders')->name('admin.food-orders.')->group(function (): voi
     Route::post('/{foodOrder}/confirm-payment', [AdminFoodOrderController::class, 'confirmPayment'])->name('confirm-payment');
     Route::get('/{foodOrderId}/chat',       [\App\Http\Controllers\Api\Admin\V1\AdminOrderChatController::class, 'index'])->name('chat.index');
     Route::post('/{foodOrderId}/chat',      [\App\Http\Controllers\Api\Admin\V1\AdminOrderChatController::class, 'store'])->name('chat.store');
-    Route::post('/{foodOrderId}/chat/read', [\App\Http\Controllers\Api\Admin\V1\AdminOrderChatController::class, 'markRead'])->name('chat.read');
+    Route::post('/{foodOrderId}/chat/read',             [\App\Http\Controllers\Api\Admin\V1\AdminOrderChatController::class, 'markRead'])->name('chat.read');
+    Route::delete('/{foodOrderId}/chat/{messageId}',    [\App\Http\Controllers\Api\Admin\V1\AdminOrderChatController::class, 'destroy'])->name('chat.destroy');
 });
 
 // ── Home Cards ────────────────────────────────────────────────────────────────
