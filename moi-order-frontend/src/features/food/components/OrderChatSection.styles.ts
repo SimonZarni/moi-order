@@ -88,6 +88,8 @@ export const styles = StyleSheet.create({
   },
   bubbleTextCustomer: { color: colours.white },
   bubbleTextAdmin:    { color: colours.textOnLight },
+  bubbleLinkCustomer: { color: colours.white, textDecorationLine: 'underline' } as const,
+  bubbleLinkAdmin:    { color: colours.primary, textDecorationLine: 'underline' } as const,
   bubbleTime: {
     fontSize: typography.xxs,
     alignSelf: 'flex-end',

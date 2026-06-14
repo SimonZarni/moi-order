@@ -14,6 +14,7 @@ import type { MerchantStackParamList } from '../../../types/navigation';
 import { useOrderChatScreen, SelectedImage } from '../hooks/useOrderChatScreen';
 import { styles } from './OrderChatScreen.styles';
 import { useTranslation } from '../../../shared/hooks/useTranslation';
+import { LinkedText } from '../../../shared/components/LinkedText';
 
 type Route = RouteProp<MerchantStackParamList, 'OrderChat'>;
 
@@ -200,9 +201,11 @@ function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): Rea
               </Pressable>
             )}
             {msg.body !== null && (
-              <Text style={[styles.bubbleText, isMerchant ? styles.bubbleTextMerchant : styles.bubbleTextOther]}>
-                {msg.body}
-              </Text>
+              <LinkedText
+                text={msg.body}
+                style={[styles.bubbleText, isMerchant ? styles.bubbleTextMerchant : styles.bubbleTextOther]}
+                linkStyle={isMerchant ? styles.bubbleLinkMerchant : styles.bubbleLinkOther}
+              />
             )}
 
             {/* Time + status tick */}

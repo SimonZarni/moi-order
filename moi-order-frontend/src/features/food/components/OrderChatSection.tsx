@@ -17,6 +17,7 @@ import { FOOD_ORDER_STATUS } from '@/types/enums';
 import { FoodOrder, OrderChatMessage } from '@/types/models';
 import { useOrderChatData, useSendChatMessage } from '../hooks/useOrderChatData';
 import { styles } from './OrderChatSection.styles';
+import { LinkedText } from '@/shared/components/LinkedText';
 
 interface Props {
   order: FoodOrder;
@@ -54,9 +55,11 @@ function MessageBubble({ msg }: MessageBubbleProps): React.JSX.Element {
           <Image source={{ uri: msg.image_url }} style={styles.bubbleImage} resizeMode="cover" />
         )}
         {msg.body !== null && (
-          <Text style={[styles.bubbleText, isCustomer ? styles.bubbleTextCustomer : styles.bubbleTextAdmin]}>
-            {msg.body}
-          </Text>
+          <LinkedText
+            text={msg.body}
+            style={[styles.bubbleText, isCustomer ? styles.bubbleTextCustomer : styles.bubbleTextAdmin]}
+            linkStyle={isCustomer ? styles.bubbleLinkCustomer : styles.bubbleLinkAdmin}
+          />
         )}
         <Text style={[styles.bubbleTime, isCustomer ? styles.bubbleTimeCustomer : styles.bubbleTimeAdmin]}>
           {new Date(msg.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}

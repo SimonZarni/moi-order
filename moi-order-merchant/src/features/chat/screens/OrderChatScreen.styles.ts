@@ -73,6 +73,8 @@ export const styles = StyleSheet.create({
   bubbleText: { fontSize: typography.sm, lineHeight: Platform.select({ web: 20, default: 42 }) },
   bubbleTextMerchant: { color: colours.backgroundDark },
   bubbleTextOther: { color: colours.textOnLight },
+  bubbleLinkMerchant: { color: colours.backgroundDark, textDecorationLine: 'underline' } as const,
+  bubbleLinkOther: { color: colours.primary, textDecorationLine: 'underline' } as const,
   bubbleFooter: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-end', gap: 3 },
   bubbleTime: { fontSize: typography.xxs, lineHeight: Platform.select({ web: 16, default: 30 }) },
   bubbleTimeMerchant: { color: 'rgba(15,26,20,0.55)' },
