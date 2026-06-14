@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchOrderChat, sendOrderChatMessage } from '@/shared/api/foodOrders';
+import { fetchOrderChat, sendOrderChatMessage, markOrderChatRead } from '@/shared/api/foodOrders';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { PUSHER_APP_KEY, PUSHER_APP_CLUSTER } from '@/shared/constants/config';
 import apiClient from '@/shared/api/client';
@@ -31,6 +31,14 @@ export function useOrderChatData(orderId: string): UseOrderChatDataResult {
     queryFn:  () => fetchOrderChat(orderId),
     enabled:  orderId.length > 0,
   });
+
+  // Mark incoming messages as read when chat first loads.
+  useEffect(() => {
+    if (query.data && query.data.length > 0) {
+      void markOrderChatRead(orderId);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderId, !!query.data]);
 
   // Real-time updates via Pusher private-order.{orderId} channel.
   useEffect(() => {
@@ -73,6 +81,20 @@ export function useOrderChatData(orderId: string): UseOrderChatDataResult {
             if (existing.some((m) => m.id === msg.id)) return existing;
             return [...existing, msg];
           },
+        );
+        // Mark incoming merchant/admin messages as read immediately.
+        if (msg.sender_type !== 'customer') {
+          void markOrderChatRead(orderId);
+        }
+      });
+      // When merchant/admin reads our messages → update read_at so 2 ticks show.
+      channel.bind('chat.messages-read', (data: unknown) => {
+        const evt = data as { reader_type: string; message_ids: number[]; read_at: string };
+        if (evt.reader_type === 'customer') return;
+        const idSet = new Set(evt.message_ids);
+        queryClient.setQueryData<OrderChatMessage[]>(
+          QUERY_KEYS.FOOD_ORDERS.CHAT(orderId),
+          (prev) => prev?.map((m) => idSet.has(m.id) ? { ...m, read_at: evt.read_at } : m),
         );
       });
     } catch { /* pusher-js unavailable or network error */ }

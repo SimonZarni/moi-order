@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\Merchant\V1;
 
 use App\Contracts\FileStorageInterface;
 use App\Events\OrderChatMessageSent;
+use App\Events\OrderChatMessagesRead;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreOrderChatMessageRequest;
 use App\Http\Resources\OrderChatMessageResource;
@@ -71,5 +72,27 @@ class MerchantOrderChatController extends Controller
             ['data' => new OrderChatMessageResource($message, $this->storage)],
             201,
         );
+    }
+
+    /** POST /api/merchant/v1/orders/{id}/chat/read */
+    public function markRead(Request $request, string $id): JsonResponse
+    {
+        $restaurant = $request->user()->restaurant()->firstOrFail();
+        $order      = $restaurant->foodOrders()->where('uuid', $id)->firstOrFail();
+
+        $now = now();
+        $ids = OrderChatMessage::query()
+            ->forOrder($order->id)
+            ->whereNull('read_at')
+            ->where('sender_type', '!=', 'merchant')
+            ->pluck('id')
+            ->all();
+
+        if (!empty($ids)) {
+            OrderChatMessage::whereIn('id', $ids)->update(['read_at' => $now]);
+            event(new OrderChatMessagesRead($order->uuid, 'merchant', $ids, $now->toIso8601String()));
+        }
+
+        return response()->json(null, 204);
     }
 }

@@ -15,6 +15,34 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import CircularProgress from '@mui/material/CircularProgress';
 
+const URL_PATTERN = /(https?:\/\/[^\s<>'"]+)/g;
+
+function LinkifiedText({ text }: { text: string }) {
+  const parts = text.split(URL_PATTERN);
+  URL_PATTERN.lastIndex = 0;
+  return (
+    <>
+      {parts.map((part, i) =>
+        i % 2 === 1 ? (
+          <Typography
+            key={i}
+            component="a"
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="body2"
+            sx={{ color: 'primary.main', textDecoration: 'underline', wordBreak: 'break-all' }}
+          >
+            {part}
+          </Typography>
+        ) : (
+          part || null
+        )
+      )}
+    </>
+  );
+}
+
 import { fDateTime } from 'src/utils/format-time';
 
 import { orderChatApi, type OrderChatMessage } from 'src/api/orderChat';
@@ -130,7 +158,10 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
   const loadMessages = useCallback(() => {
     orderChatApi
       .list(orderId)
-      .then(setMessages)
+      .then((msgs) => {
+        setMessages(msgs);
+        if (msgs.length > 0) void orderChatApi.markRead(orderId);
+      })
       .catch(() => setError('Failed to load chat messages.'))
       .finally(() => setLoading(false));
   }, [orderId]);
@@ -188,6 +219,18 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
         if (prev.some((m) => m.id === msg.id)) return prev;
         return [...prev, msg];
       });
+      if ((data as OrderChatMessage).sender_type !== 'admin') {
+        void orderChatApi.markRead(orderId);
+      }
+    });
+    // When customer/merchant reads our messages → update read_at for 2 ticks.
+    channel.bind('chat.messages-read', (data: unknown) => {
+      const evt = data as { reader_type: string; message_ids: number[]; read_at: string };
+      if (evt.reader_type === 'admin') return;
+      const idSet = new Set(evt.message_ids);
+      setMessages((prev) =>
+        prev.map((m) => (idSet.has(m.id) ? { ...m, read_at: evt.read_at } : m))
+      );
     });
 
     return () => {
@@ -311,11 +354,18 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
                     {message.sender_name.charAt(0).toUpperCase()}
                   </Avatar>
                   <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                    <Stack direction="row" spacing={1} alignItems="baseline">
+                    <Stack direction="row" spacing={1} alignItems="center">
                       <Typography variant="subtitle2">{message.sender_name}</Typography>
                       <Typography variant="caption" color="text.secondary">
                         {SENDER_LABEL[message.sender_type]} · {fDateTime(message.created_at)}
                       </Typography>
+                      {message.sender_type === 'admin' && (
+                        <Iconify
+                          icon={message.read_at != null ? 'eva:done-all-fill' : 'eva:checkmark-fill'}
+                          width={14}
+                          sx={{ color: message.read_at != null ? 'primary.main' : 'text.disabled', flexShrink: 0 }}
+                        />
+                      )}
                     </Stack>
 
                     {/* Reply quote block */}
@@ -327,8 +377,8 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
                     )}
 
                     {message.body && (
-                      <Typography variant="body2" sx={{ mt: 0.5 }}>
-                        {message.body}
+                      <Typography variant="body2" sx={{ mt: 0.5, wordBreak: 'break-word' }}>
+                        <LinkifiedText text={message.body} />
                       </Typography>
                     )}
                     {message.image_url && (

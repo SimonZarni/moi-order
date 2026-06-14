@@ -61,8 +61,9 @@ Route::put('/orders/{id}/status',            [MerchantOrderController::class, 'u
 Route::patch('/orders/{id}/status',          [MerchantOrderController::class, 'updateStatus']);
 
 // ── Order chat ────────────────────────────────────────────────────────────────
-Route::get('/orders/{id}/chat',   [MerchantOrderChatController::class, 'index']);
-Route::post('/orders/{id}/chat',  [MerchantOrderChatController::class, 'store']);
+Route::get('/orders/{id}/chat',        [MerchantOrderChatController::class, 'index']);
+Route::post('/orders/{id}/chat',       [MerchantOrderChatController::class, 'store']);
+Route::post('/orders/{id}/chat/read',  [MerchantOrderChatController::class, 'markRead']);
 
 // ── In-app notifications ──────────────────────────────────────────────────────
 Route::get('/notifications',              [MerchantNotificationController::class, 'index']);

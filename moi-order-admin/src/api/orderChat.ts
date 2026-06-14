@@ -28,4 +28,6 @@ export const orderChatApi = {
         ...(replyToId !== undefined ? { reply_to_id: replyToId } : {}),
       })
       .then((r) => r.data.data),
+  markRead: (orderId: string | number) =>
+    apiClient.post(`/food-orders/${orderId}/chat/read`),
 };

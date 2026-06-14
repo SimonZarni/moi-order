@@ -98,3 +98,7 @@ export async function sendOrderChatMessage(
   );
   return res.data.data;
 }
+
+export async function markOrderChatRead(orderId: string): Promise<void> {
+  await apiClient.post(`/api/v1/food-orders/${orderId}/chat/read`);
+}

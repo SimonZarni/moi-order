@@ -10,6 +10,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
@@ -61,9 +62,18 @@ function MessageBubble({ msg }: MessageBubbleProps): React.JSX.Element {
             linkStyle={isCustomer ? styles.bubbleLinkCustomer : styles.bubbleLinkAdmin}
           />
         )}
-        <Text style={[styles.bubbleTime, isCustomer ? styles.bubbleTimeCustomer : styles.bubbleTimeAdmin]}>
-          {new Date(msg.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
-        </Text>
+        <View style={styles.bubbleFooter}>
+          <Text style={[styles.bubbleTime, isCustomer ? styles.bubbleTimeCustomer : styles.bubbleTimeAdmin]}>
+            {new Date(msg.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+          </Text>
+          {isCustomer && (
+            <Ionicons
+              name={msg.read_at != null ? 'checkmark-done' : 'checkmark'}
+              size={13}
+              color={msg.read_at != null ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)'}
+            />
+          )}
+        </View>
       </View>
     </View>
   );

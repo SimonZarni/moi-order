@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\Admin\V1;
 
 use App\Contracts\FileStorageInterface;
 use App\Events\OrderChatMessageSent;
+use App\Events\OrderChatMessagesRead;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreOrderChatMessageRequest;
 use App\Http\Resources\OrderChatMessageResource;
@@ -73,5 +74,26 @@ class AdminOrderChatController extends Controller
             ['data' => new OrderChatMessageResource($message, $this->storage)],
             201,
         );
+    }
+
+    /** POST /api/admin/v1/food-orders/{foodOrderId}/chat/read */
+    public function markRead(Request $request, string $foodOrderId): JsonResponse
+    {
+        $order = FoodOrder::where('uuid', $foodOrderId)->firstOrFail();
+
+        $now = now();
+        $ids = OrderChatMessage::query()
+            ->forOrder($order->id)
+            ->whereNull('read_at')
+            ->where('sender_type', '!=', 'admin')
+            ->pluck('id')
+            ->all();
+
+        if (!empty($ids)) {
+            OrderChatMessage::whereIn('id', $ids)->update(['read_at' => $now]);
+            event(new OrderChatMessagesRead($order->uuid, 'admin', $ids, $now->toIso8601String()));
+        }
+
+        return response()->json(null, 204);
     }
 }

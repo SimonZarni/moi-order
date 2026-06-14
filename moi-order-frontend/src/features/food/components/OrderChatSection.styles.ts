@@ -90,6 +90,7 @@ export const styles = StyleSheet.create({
   bubbleTextAdmin:    { color: colours.textOnLight },
   bubbleLinkCustomer: { color: colours.white, textDecorationLine: 'underline' } as const,
   bubbleLinkAdmin:    { color: colours.primary, textDecorationLine: 'underline' } as const,
+  bubbleFooter: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-end', gap: 3 },
   bubbleTime: {
     fontSize: typography.xxs,
     alignSelf: 'flex-end',

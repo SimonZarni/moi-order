@@ -37,3 +37,7 @@ export async function sendOrderChatMessage(
   );
   return response.data.data;
 }
+
+export async function markOrderChatRead(orderId: string): Promise<void> {
+  await apiClient.post(`/orders/${orderId}/chat/read`);
+}

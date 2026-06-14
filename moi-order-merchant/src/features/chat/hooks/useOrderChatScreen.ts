@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import { apiClient } from '../../../api/client';
-import { fetchOrderChat, sendOrderChatMessage } from '../../../api/chat';
+import { fetchOrderChat, sendOrderChatMessage, markOrderChatRead } from '../../../api/chat';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { PUSHER_APP_KEY, PUSHER_APP_CLUSTER } from '../../../shared/constants/config';
 import { useAuthStore } from '../../../store/authStore';
@@ -116,6 +116,20 @@ export function useOrderChatScreen(
             return [...existing, msg];
           },
         );
+        // Mark incoming customer/admin messages as read immediately.
+        if (msg.sender_type !== 'merchant') {
+          void markOrderChatRead(orderId);
+        }
+      });
+      // When customer/admin reads our messages → update read_at so 2 ticks show.
+      channel.bind('chat.messages-read', (data: unknown) => {
+        const evt = data as { reader_type: string; message_ids: number[]; read_at: string };
+        if (evt.reader_type === 'merchant') return;
+        const idSet = new Set(evt.message_ids);
+        queryClient.setQueryData<OrderChatMessage[]>(
+          QUERY_KEYS.ORDER_CHAT(orderId),
+          (prev) => prev?.map((m) => idSet.has(m.id) ? { ...m, read_at: evt.read_at } : m),
+        );
       });
     } catch { /* pusher-js not installed or network error */ }
     return () => {
@@ -131,6 +145,14 @@ export function useOrderChatScreen(
     queryFn: () => fetchOrderChat(orderId),
     retry: 2,
   });
+
+  // Mark all incoming messages as read when chat first loads.
+  useEffect(() => {
+    if (data && data.length > 0) {
+      void markOrderChatRead(orderId);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderId, !!data]);
 
   const isNetworkError =
     isError && axios.isAxiosError(error) && error.response === undefined;
