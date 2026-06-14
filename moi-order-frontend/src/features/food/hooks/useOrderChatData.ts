@@ -121,7 +121,16 @@ export function useSendChatMessage() {
         QUERY_KEYS.FOOD_ORDERS.CHAT(orderId),
         (prev) => {
           const existing = prev ?? [];
-          if (existing.some((m) => m.id === withReply.id)) return existing;
+          // ShouldBroadcastNow fires Pusher before the HTTP response is sent, so
+          // Pusher often wins and inserts the message first — WITHOUT reply_to_*
+          // fields if the backend broadcastWith hasn't been deployed yet.
+          // MERGE so the reply quote block always appears on the sender's side.
+          const idx = existing.findIndex((m) => m.id === withReply.id);
+          if (idx !== -1) {
+            const updated = [...existing];
+            updated[idx] = { ...existing[idx], ...withReply };
+            return updated;
+          }
           return [...existing, withReply];
         },
       );

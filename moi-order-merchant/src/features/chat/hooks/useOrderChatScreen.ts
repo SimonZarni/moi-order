@@ -156,8 +156,6 @@ useEffect(() => {
     mutationFn: ({ body, image, replyToId }: { body: string | null; image: SelectedImage | null; replyToId?: number; replyingToMsg?: OrderChatMessage | null }) =>
       sendOrderChatMessage(orderId, body, image, replyToId),
     onSuccess: (newMsg, variables) => {
-      // Attach reply snapshot so the UI shows the quoted block immediately,
-      // before Pusher or a refetch can deliver the server's reply_to_* fields.
       const { replyingToMsg } = variables;
       const withReply: OrderChatMessage = replyingToMsg != null
         ? {
@@ -171,9 +169,17 @@ useEffect(() => {
         QUERY_KEYS.ORDER_CHAT(orderId),
         (prev) => {
           const existing = prev ?? [];
-          // Pusher may have already inserted this message before the HTTP response
-          // arrived — skip the append to avoid duplicates regardless of race order.
-          if (existing.some((m) => m.id === withReply.id)) return existing;
+          // ShouldBroadcastNow fires Pusher before the HTTP response is sent, so
+          // Pusher often wins and adds the message first — WITHOUT reply_to_* fields
+          // because broadcastWith may lag behind the controller change on the server.
+          // Instead of skipping, MERGE reply data into the existing entry so the
+          // quote block always renders for the sender's own sent replies.
+          const idx = existing.findIndex((m) => m.id === withReply.id);
+          if (idx !== -1) {
+            const updated = [...existing];
+            updated[idx] = { ...existing[idx], ...withReply };
+            return updated;
+          }
           return [...existing, withReply];
         },
       );

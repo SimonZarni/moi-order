@@ -234,7 +234,14 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
             }
           : message;
         setMessages((prev) => {
-          if (prev.some((m) => m.id === withReply.id)) return prev;
+          // Pusher may add the message first (without reply_to_* if backend
+          // broadcastWith hasn't deployed yet) — merge to ensure quote renders.
+          const idx = prev.findIndex((m) => m.id === withReply.id);
+          if (idx !== -1) {
+            const updated = [...prev];
+            updated[idx] = { ...prev[idx], ...withReply };
+            return updated;
+          }
           return [...prev, withReply];
         });
         setDraft('');
