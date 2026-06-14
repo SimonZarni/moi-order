@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { FOOD_ORDER_STATUS } from '@/types/enums';
 import { FoodOrder, OrderChatMessage } from '@/types/models';
