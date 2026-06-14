@@ -181,9 +181,9 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
               <View style={styles.overrideBadge}>
                 <Ionicons name="time-outline" size={12} color={colours.primary} />
                 <Text style={styles.overrideBadgeText}>
-                  {'Manual override · Reverts at '}
+                  {'The shop will follow schedule at '}
                   {new Date(overrideUntil).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
-                  {' (3 h)'}
+                  {' (3 hr)'}
                 </Text>
               </View>
             )}
