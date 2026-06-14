@@ -23,7 +23,7 @@ import { useRouter } from 'src/routes/hooks';
 
 import { usersApi, type UserData } from 'src/api/users';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { restaurantsApi, type OpeningHour } from 'src/api/restaurants';
+import { restaurantsApi, type OpeningHour, type OpeningHourSession } from 'src/api/restaurants';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -33,9 +33,8 @@ const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frid
 
 const DEFAULT_HOURS: OpeningHour[] = DAY_NAMES.map((_, i) => ({
   day_of_week: i,
-  opens_at: '10:00',
-  closes_at: '22:00',
   is_closed: false,
+  sessions: [{ opens_at: '10:00', closes_at: '22:00', sort_order: 0 }],
 }));
 
 type FormState = {
@@ -103,11 +102,24 @@ export function RestaurantCreateView() {
     setForm((prev) => ({ ...prev, [field]: value }));
   }, []);
 
-  const setHour = useCallback((dayIndex: number, field: keyof OpeningHour, value: string | boolean) => {
+  const setHourClosed = useCallback((dayIndex: number, closed: boolean) => {
     setHours((prev) =>
-      prev.map((h) => h.day_of_week === dayIndex ? { ...h, [field]: value } : h)
+      prev.map((h) => h.day_of_week === dayIndex ? { ...h, is_closed: closed } : h)
     );
   }, []);
+
+  const setSessionField = useCallback(
+    (dayIndex: number, field: keyof Omit<OpeningHourSession, 'sort_order'>, value: string) => {
+      setHours((prev) =>
+        prev.map((h) => {
+          if (h.day_of_week !== dayIndex) return h;
+          const sessions = h.sessions.map((s, i) => i === 0 ? { ...s, [field]: value } : s);
+          return { ...h, sessions };
+        })
+      );
+    },
+    [],
+  );
 
   const handleSubmit = useCallback(() => {
     if (!form.name.trim()) { setFieldErrors({ name: 'Restaurant name is required.' }); return; }
@@ -290,8 +302,8 @@ export function RestaurantCreateView() {
                         <TextField
                           type="time"
                           size="small"
-                          value={h.opens_at ?? ''}
-                          onChange={(e) => setHour(h.day_of_week, 'opens_at', e.target.value)}
+                          value={h.sessions[0]?.opens_at ?? ''}
+                          onChange={(e) => setSessionField(h.day_of_week, 'opens_at', e.target.value)}
                           disabled={h.is_closed}
                           sx={{ width: 130 }}
                           inputProps={{ step: 60 }}
@@ -300,8 +312,8 @@ export function RestaurantCreateView() {
                         <TextField
                           type="time"
                           size="small"
-                          value={h.closes_at ?? ''}
-                          onChange={(e) => setHour(h.day_of_week, 'closes_at', e.target.value)}
+                          value={h.sessions[0]?.closes_at ?? ''}
+                          onChange={(e) => setSessionField(h.day_of_week, 'closes_at', e.target.value)}
                           disabled={h.is_closed}
                           sx={{ width: 130 }}
                           inputProps={{ step: 60 }}
@@ -311,7 +323,7 @@ export function RestaurantCreateView() {
                             <Checkbox
                               size="small"
                               checked={h.is_closed}
-                              onChange={(e) => setHour(h.day_of_week, 'is_closed', e.target.checked)}
+                              onChange={(e) => setHourClosed(h.day_of_week, e.target.checked)}
                             />
                           }
                           label={<Typography variant="body2" color="text.secondary">Closed</Typography>}
