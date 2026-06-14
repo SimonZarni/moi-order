@@ -149,6 +149,9 @@ export interface OrderChatMessage {
   body: string | null;
   image_url: string | null;
   created_at: string;
+  reply_to_id?: number | null;
+  reply_to_body?: string | null;
+  reply_to_sender_name?: string | null;
 }
 
 export interface PeriodStats {

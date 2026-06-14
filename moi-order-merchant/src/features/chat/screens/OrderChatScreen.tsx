@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator, FlatList, Image, Keyboard, KeyboardAvoidingView,
-  Modal, Platform, Pressable, ScrollView, Text, TextInput, View,
+  ActivityIndicator, Animated, FlatList, Image, Keyboard, KeyboardAvoidingView,
+  Modal, PanResponder, Platform, Pressable, ScrollView, Text, TextInput, View,
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,12 +17,73 @@ import { useTranslation } from '../../../shared/hooks/useTranslation';
 
 type Route = RouteProp<MerchantStackParamList, 'OrderChat'>;
 
-interface BubbleProps {
-  msg: OrderChatMessage;
-  onPhotoPress: (uri: string) => void;
+// ── Notice banner ─────────────────────────────────────────────────────────────
+
+interface NoticeBannerProps {
+  text: string;
+  onDismiss: () => void;
 }
 
-function MessageBubble({ msg, onPhotoPress }: BubbleProps): React.JSX.Element {
+function NoticeBanner({ text, onDismiss }: NoticeBannerProps): React.JSX.Element {
+  return (
+    <View style={styles.noticeBanner}>
+      <Ionicons name="information-circle-outline" size={14} color={colours.warning} />
+      <Text style={styles.noticeText}>{text}</Text>
+      <Pressable
+        onPress={onDismiss}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel="Dismiss notice"
+      >
+        <Ionicons name="close" size={14} color={colours.textSubtle} />
+      </Pressable>
+    </View>
+  );
+}
+
+// ── Reply bar ─────────────────────────────────────────────────────────────────
+
+interface ReplyBarProps {
+  replyingTo: OrderChatMessage;
+  photoLabel: string;
+  onCancel: () => void;
+  cancelLabel: string;
+}
+
+function ReplyBar({ replyingTo, photoLabel, onCancel, cancelLabel }: ReplyBarProps): React.JSX.Element {
+  const preview =
+    replyingTo.image_url !== null && replyingTo.body === null
+      ? `📷 ${photoLabel}`
+      : (replyingTo.body ?? '');
+  return (
+    <View style={styles.replyBar}>
+      <View style={styles.replyBarIndicator} />
+      <View style={styles.replyBarContent}>
+        <Text style={styles.replyBarSender}>{replyingTo.sender_name}</Text>
+        <Text style={styles.replyBarText} numberOfLines={1}>{preview}</Text>
+      </View>
+      <Pressable
+        onPress={onCancel}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={cancelLabel}
+      >
+        <Ionicons name="close" size={18} color={colours.textSubtle} />
+      </Pressable>
+    </View>
+  );
+}
+
+// ── Animated message bubble with entrance + swipe-to-reply ───────────────────
+
+interface BubbleProps {
+  msg: OrderChatMessage;
+  isNew: boolean;
+  onPhotoPress: (uri: string) => void;
+  onReply: (msg: OrderChatMessage) => void;
+}
+
+function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): React.JSX.Element {
   if (msg.sender_type === 'system') {
     return (
       <View style={styles.systemNotice}>
@@ -33,27 +94,136 @@ function MessageBubble({ msg, onPhotoPress }: BubbleProps): React.JSX.Element {
 
   const isMerchant = msg.sender_type === 'merchant';
   const time = new Date(msg.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+  // ── Entrance animation (native driver — runs on UI thread) ─────────────────
+  const entranceOpacity = useRef(new Animated.Value(isNew ? 0 : 1)).current;
+  const entranceSlide   = useRef(new Animated.Value(isNew ? (isMerchant ? 20 : -20) : 0)).current;
+
+  useEffect(() => {
+    if (!isNew) return;
+    Animated.parallel([
+      Animated.timing(entranceOpacity, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.spring(entranceSlide, {
+        toValue: 0,
+        damping: 18,
+        mass: 0.5,
+        stiffness: 220,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Swipe-to-reply (JS driver — PanResponder requires it) ──────────────────
+  // Swipe RIGHT on all messages. Clamp 0..72px.
+  const swipeX          = useRef(new Animated.Value(0)).current;
+  const hasTriggeredRef = useRef(false);
+  const THRESHOLD       = 60;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, g) =>
+        g.dx > 8 && Math.abs(g.dx) > Math.abs(g.dy) * 1.5,
+      onPanResponderGrant: () => {
+        hasTriggeredRef.current = false;
+      },
+      onPanResponderMove: (_, g) => {
+        const clamped = Math.min(Math.max(g.dx, 0), 72);
+        swipeX.setValue(clamped);
+        if (!hasTriggeredRef.current && g.dx >= THRESHOLD) {
+          hasTriggeredRef.current = true;
+          onReply(msg);
+        }
+      },
+      onPanResponderRelease: () => {
+        hasTriggeredRef.current = false;
+        Animated.spring(swipeX, {
+          toValue: 0,
+          damping: 20,
+          stiffness: 300,
+          mass: 0.5,
+          useNativeDriver: false,
+        }).start();
+      },
+      onPanResponderTerminate: () => {
+        Animated.spring(swipeX, {
+          toValue: 0,
+          damping: 20,
+          stiffness: 300,
+          mass: 0.5,
+          useNativeDriver: false,
+        }).start();
+      },
+    }),
+  ).current;
+
+  const replyIconOpacity = swipeX.interpolate({
+    inputRange: [0, THRESHOLD * 0.4, THRESHOLD],
+    outputRange: [0, 0.4, 1],
+    extrapolate: 'clamp',
+  });
+
+  const hasReply = msg.reply_to_body != null && msg.reply_to_sender_name != null;
+
   return (
-    <View style={[styles.bubbleRow, isMerchant ? styles.bubbleRowRight : styles.bubbleRowLeft]}>
-      <View style={[styles.bubble, isMerchant ? styles.bubbleMerchant : styles.bubbleOther]}>
-        {!isMerchant && <Text style={styles.senderName}>{msg.sender_name}</Text>}
-        {msg.image_url !== null && (
-          <Pressable onPress={() => onPhotoPress(msg.image_url!)} accessibilityRole="button" accessibilityLabel="View full photo">
-            <Image source={{ uri: msg.image_url }} style={styles.bubbleImage} resizeMode="cover" />
-          </Pressable>
-        )}
-        {msg.body !== null && (
-          <Text style={[styles.bubbleText, isMerchant ? styles.bubbleTextMerchant : styles.bubbleTextOther]}>
-            {msg.body}
-          </Text>
-        )}
-        <Text style={[styles.bubbleTime, isMerchant ? styles.bubbleTimeMerchant : styles.bubbleTimeOther]}>
-          {time}
-        </Text>
+    // Outer: entrance animation on native thread
+    <Animated.View style={{ opacity: entranceOpacity, transform: [{ translateX: entranceSlide }] }}>
+      {/* Container for reply hint + swipeable bubble */}
+      <View style={{ position: 'relative' }}>
+        {/* Reply icon revealed as bubble slides right */}
+        <Animated.View style={[styles.replyHint, { opacity: replyIconOpacity }]}>
+          <Ionicons name="return-up-back-outline" size={18} color={colours.primary} />
+        </Animated.View>
+
+        {/* Inner: swipe translation on JS thread */}
+        <Animated.View
+          {...panResponder.panHandlers}
+          style={[
+            styles.bubbleRow,
+            isMerchant ? styles.bubbleRowRight : styles.bubbleRowLeft,
+            { transform: [{ translateX: swipeX }] },
+          ]}
+        >
+          <View style={[styles.bubble, isMerchant ? styles.bubbleMerchant : styles.bubbleOther]}>
+            {!isMerchant && <Text style={styles.senderName}>{msg.sender_name}</Text>}
+
+            {/* Quoted reply preview (shown when backend returns reply data) */}
+            {hasReply && (
+              <View style={styles.replyQuote}>
+                <Text style={styles.replyQuoteSender}>{msg.reply_to_sender_name}</Text>
+                <Text style={styles.replyQuoteText} numberOfLines={1}>{msg.reply_to_body}</Text>
+              </View>
+            )}
+
+            {msg.image_url !== null && (
+              <Pressable
+                onPress={() => onPhotoPress(msg.image_url!)}
+                accessibilityRole="button"
+                accessibilityLabel="View full photo"
+              >
+                <Image source={{ uri: msg.image_url }} style={styles.bubbleImage} resizeMode="cover" />
+              </Pressable>
+            )}
+            {msg.body !== null && (
+              <Text style={[styles.bubbleText, isMerchant ? styles.bubbleTextMerchant : styles.bubbleTextOther]}>
+                {msg.body}
+              </Text>
+            )}
+            <Text style={[styles.bubbleTime, isMerchant ? styles.bubbleTimeMerchant : styles.bubbleTimeOther]}>
+              {time}
+            </Text>
+          </View>
+        </Animated.View>
       </View>
-    </View>
+    </Animated.View>
   );
 }
+
+// ── Image preview strip item ──────────────────────────────────────────────────
 
 interface ImagePreviewItemProps {
   img: SelectedImage;
@@ -77,7 +247,7 @@ function ImagePreviewItem({ img, index, onRemove }: ImagePreviewItemProps): Reac
   );
 }
 
-// ── Shared content (used by both mobile route and web prop variant) ───────────
+// ── Shared content ────────────────────────────────────────────────────────────
 
 interface ContentProps {
   orderId: string;
@@ -91,10 +261,20 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
   const t = useTranslation();
   const {
     messages, isLoading, isError, isNetworkError, sendError, text, isSending, inputBarPadding,
-    selectedImages, selectedPhoto, listRef, isChatLocked, isCompletedButNotLocked,
-    handleTextChange, handleSend, handleAttachPress, handleRemoveImage,
+    selectedImages, selectedPhoto, listRef, isChatLocked, isCompletedButNotLocked, replyingTo,
+    handleTextChange, handleSend, handleSetReply, handleAttachPress, handleRemoveImage,
     handlePhotoPress, handlePhotoClose,
   } = useOrderChatScreen(orderId, orderStatus, completedAt);
+
+  const [showNoticeBanner, setShowNoticeBanner] = useState(true);
+
+  // Track which message IDs were present on first load — those don't animate.
+  const initialIdsRef    = useRef<Set<number>>(new Set());
+  const hasSeededInitial = useRef(false);
+  if (!hasSeededInitial.current && messages.length > 0) {
+    messages.forEach((m) => initialIdsRef.current.add(m.id));
+    hasSeededInitial.current = true;
+  }
 
   const canSend = !isSending && !isChatLocked && (text.trim().length > 0 || selectedImages.length > 0);
 
@@ -115,6 +295,14 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
         </View>
       </View>
 
+      {/* Privacy / expiry notice banner */}
+      {showNoticeBanner && (
+        <NoticeBanner
+          text={t('chat_notice_banner')}
+          onDismiss={() => setShowNoticeBanner(false)}
+        />
+      )}
+
       <KeyboardAvoidingView behavior="padding" enabled={Platform.OS === 'ios'} style={styles.body}>
         {isLoading ? (
           <Pressable style={styles.loaderWrap} onPress={Keyboard.dismiss}>
@@ -128,9 +316,7 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
               color={colours.textSubtle}
             />
             <Text style={styles.emptyText}>
-              {isNetworkError
-                ? t('chat_check_internet')
-                : t('chat_cannot_load')}
+              {isNetworkError ? t('chat_check_internet') : t('chat_cannot_load')}
             </Text>
           </Pressable>
         ) : messages.length === 0 ? (
@@ -144,7 +330,14 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
             data={[...messages].reverse()}
             inverted
             keyExtractor={(m) => String(m.id)}
-            renderItem={({ item }) => <MessageBubble msg={item} onPhotoPress={handlePhotoPress} />}
+            renderItem={({ item }) => (
+              <AnimatedBubble
+                msg={item}
+                isNew={!initialIdsRef.current.has(item.id)}
+                onPhotoPress={handlePhotoPress}
+                onReply={handleSetReply}
+              />
+            )}
             style={styles.list}
             contentContainerStyle={styles.listContent}
             accessibilityRole="list"
@@ -186,6 +379,17 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
                 <Text style={styles.chatWarningText}>{t('chat_will_close')}</Text>
               </View>
             )}
+
+            {/* Reply preview bar */}
+            {replyingTo !== null && (
+              <ReplyBar
+                replyingTo={replyingTo}
+                photoLabel={t('chat_photo')}
+                onCancel={() => handleSetReply(null)}
+                cancelLabel={t('chat_cancel_reply')}
+              />
+            )}
+
             <View style={[styles.inputBar, { paddingBottom: inputBarPadding }]}>
               <Pressable
                 style={styles.attachBtn}

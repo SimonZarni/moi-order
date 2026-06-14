@@ -49,8 +49,10 @@ interface UseOrderChatScreenResult {
   listRef: React.RefObject<FlatList | null>;
   isChatLocked: boolean;
   isCompletedButNotLocked: boolean;
+  replyingTo: OrderChatMessage | null;
   handleTextChange: (v: string) => void;
   handleSend: () => void;
+  handleSetReply: (msg: OrderChatMessage | null) => void;
   handleAttachPress: () => void;
   handleRemoveImage: (index: number) => void;
   handlePhotoPress: (uri: string) => void;
@@ -71,6 +73,7 @@ export function useOrderChatScreen(
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
   const [selectedPhoto, setSelectedPhoto]   = useState<string | null>(null);
+  const [replyingTo, setReplyingTo]         = useState<OrderChatMessage | null>(null);
   const listRef = useRef<FlatList>(null);
 
   // Real-time chat updates via Pusher private-order.{orderId} channel.
@@ -146,9 +149,12 @@ useEffect(() => {
   // Collapse safe-area gap when keyboard is visible (keyboard fills that space)
   const inputBarPadding = keyboardVisible ? 8 : Math.max(bottomInset, 8) + 8;
 
+  const replyingToRef = useRef<OrderChatMessage | null>(null);
+  replyingToRef.current = replyingTo;
+
   const { mutateAsync } = useMutation({
-    mutationFn: ({ body, image }: { body: string | null; image: SelectedImage | null }) =>
-      sendOrderChatMessage(orderId, body, image),
+    mutationFn: ({ body, image, replyToId }: { body: string | null; image: SelectedImage | null; replyToId?: number }) =>
+      sendOrderChatMessage(orderId, body, image, replyToId),
     onSuccess: (newMsg) => {
       queryClient.setQueryData<OrderChatMessage[]>(
         QUERY_KEYS.ORDER_CHAT(orderId),
@@ -173,6 +179,8 @@ useEffect(() => {
     [],
   );
 
+  const handleSetReply = useCallback((msg: OrderChatMessage | null) => setReplyingTo(msg), []);
+
   const handleSend = useCallback(() => {
     const trimmed = text.trim();
     if ((!trimmed && selectedImages.length === 0) || isSending) return;
@@ -180,13 +188,16 @@ useEffect(() => {
     setIsSending(true);
     setSendError(null);
 
+    const replyToId = replyingToRef.current?.id;
+    setReplyingTo(null);
+
     const sends: Array<() => Promise<unknown>> = [];
     if (trimmed) {
-      sends.push(() => mutateAsync({ body: trimmed, image: null }));
+      sends.push(() => mutateAsync({ body: trimmed, image: null, replyToId }));
     }
     for (const img of selectedImages) {
       const captured = img;
-      sends.push(() => mutateAsync({ body: null, image: captured }));
+      sends.push(() => mutateAsync({ body: null, image: captured, replyToId }));
     }
 
     (async () => {
@@ -256,8 +267,8 @@ useEffect(() => {
   return {
     messages, isLoading, isError, isNetworkError, sendError, text, isSending,
     inputBarPadding, selectedImages, selectedPhoto, listRef,
-    isChatLocked, isCompletedButNotLocked,
-    handleTextChange, handleSend, handleAttachPress, handleRemoveImage,
+    isChatLocked, isCompletedButNotLocked, replyingTo,
+    handleTextChange, handleSend, handleSetReply, handleAttachPress, handleRemoveImage,
     handlePhotoPress, handlePhotoClose,
   };
 }

@@ -175,4 +175,88 @@ export const styles = StyleSheet.create({
   photoOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.96)', justifyContent: 'center', alignItems: 'center' },
   photoFull: { width: '100%', height: '80%' },
   photoCloseBtn: { position: 'absolute', top: 52, right: spacing.md, width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
+
+  // Notice banner (privacy + expiry warning)
+  noticeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.sm,
+    marginBottom: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colours.warning + '18',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colours.warning + '40',
+  },
+  noticeText: {
+    flex: 1,
+    fontSize: typography.xxs,
+    lineHeight: Platform.select({ web: 14, default: 18 }),
+    color: colours.warning,
+  },
+
+  // Swipe-to-reply hint icon (appears as bubble is dragged)
+  replyHint: {
+    position: 'absolute',
+    left: 2,
+    top: 0,
+    bottom: 0,
+    width: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  // Reply bar above input bar
+  replyBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colours.surfaceMuted,
+    borderTopWidth: 1,
+    borderTopColor: colours.divider,
+  },
+  replyBarIndicator: {
+    width: 3,
+    alignSelf: 'stretch',
+    borderRadius: 2,
+    backgroundColor: colours.primary,
+  },
+  replyBarContent: { flex: 1, gap: 2 },
+  replyBarSender: {
+    fontSize: typography.xxs,
+    lineHeight: Platform.select({ web: 14, default: 18 }),
+    fontWeight: '700',
+    color: colours.primary,
+  },
+  replyBarText: {
+    fontSize: typography.xxs,
+    lineHeight: Platform.select({ web: 14, default: 18 }),
+    color: colours.textSubtle,
+  },
+
+  // Quoted reply inside a bubble
+  replyQuote: {
+    borderLeftWidth: 3,
+    borderLeftColor: colours.primary + '88',
+    paddingLeft: spacing.sm,
+    paddingVertical: 2,
+    marginBottom: 4,
+    gap: 2,
+  },
+  replyQuoteSender: {
+    fontSize: typography.xxs,
+    lineHeight: Platform.select({ web: 14, default: 18 }),
+    fontWeight: '700',
+    color: colours.primary,
+  },
+  replyQuoteText: {
+    fontSize: typography.xxs,
+    lineHeight: Platform.select({ web: 14, default: 18 }),
+    color: colours.textSubtle,
+  },
 });

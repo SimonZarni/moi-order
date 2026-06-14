@@ -13,9 +13,11 @@ export async function sendOrderChatMessage(
   orderId: string,
   body: string | null,
   image: { uri: string; name: string; type: string } | null,
+  replyToId?: number,
 ): Promise<OrderChatMessage> {
   const formData = new FormData();
   if (body !== null) formData.append('body', body);
+  if (replyToId !== undefined) formData.append('reply_to_id', String(replyToId));
   if (image !== null) {
     if (Platform.OS === 'web') {
       const blob = await fetch(image.uri).then((r) => r.blob());

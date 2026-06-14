@@ -76,6 +76,7 @@ export type TranslationKey =
   // ── Chat ─────────────────────────────────────────────────────────────────
   | 'chat_title' | 'chat_no_messages' | 'chat_check_internet' | 'chat_cannot_load'
   | 'chat_type_message' | 'chat_locked' | 'chat_will_close' | 'chat_add_photo'
+  | 'chat_notice_banner' | 'chat_reply_to' | 'chat_cancel_reply' | 'chat_photo'
   // ── Reviews ───────────────────────────────────────────────────────────────
   | 'reviews_title' | 'reviews_total' | 'reviews_loading' | 'reviews_cannot_load'
   | 'reviews_no_reviews' | 'reviews_no_reviews_body'
@@ -348,6 +349,10 @@ const EN: Translations = {
   chat_locked: 'Chat has closed. Messages are deleted 3 hours after order completion.',
   chat_will_close: 'Chat will close 3 hours after order completion.',
   chat_add_photo: 'Add photo',
+  chat_notice_banner: 'Chat will disappear 3 hours after order complete. Do not share sensitive info. Admin are watching!',
+  chat_reply_to: 'Reply to',
+  chat_cancel_reply: 'Cancel reply',
+  chat_photo: 'Photo',
   // Reviews
   reviews_title: 'Reviews',
   reviews_total: 'total',
@@ -722,6 +727,10 @@ const MY: Translations = {
   chat_locked: 'ချတ် ပိတ်သွားပြီ။ မှာယူမှု ပြီးဆုံးပြီး ၃ နာရီ အကြာတွင် မက်ဆေ့များ ဖျက်မည်။',
   chat_will_close: 'မှာယူမှု ပြီးဆုံးပြီး ၃ နာရီ အကြာတွင် ချတ် ပိတ်မည်။',
   chat_add_photo: 'ဓာတ်ပုံ ထည့်ရန်',
+  chat_notice_banner: 'ချတ်သည် မှာယူမှု ပြီးဆုံးပြီး ၃ နာရီ အကြာတွင် ပျောက်ကွယ်သွားမည်။ လျှို့ဝှက်သော အချက်အလက်များ မျှဝေခြင်း မပြုပါနှင့်။ Admin မှ ကြည့်ရှုနေသည်!',
+  chat_reply_to: 'ပြန်ဆိုရန်',
+  chat_cancel_reply: 'ပြန်ဆိုမှု ပယ်ဖျက်ရန်',
+  chat_photo: 'ဓာတ်ပုံ',
   // Reviews
   reviews_title: 'သုံးသပ်ချက်များ',
   reviews_total: 'စုစုပေါင်း',
