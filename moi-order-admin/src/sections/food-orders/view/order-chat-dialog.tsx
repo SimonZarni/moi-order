@@ -7,6 +7,7 @@ import Stack from '@mui/material/Stack';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+import Tooltip from '@mui/material/Tooltip';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
@@ -22,7 +23,6 @@ import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-
 const SENDER_LABEL: Record<OrderChatMessage['sender_type'], string> = {
   customer: 'Customer',
   merchant: 'Merchant',
@@ -37,6 +37,78 @@ const SENDER_COLOR: Record<OrderChatMessage['sender_type'], string> = {
   system: 'text.disabled',
 };
 
+// ── Reply quote block (shown inside a bubble when reply_to_body is set) ────────
+
+function ReplyQuote({ senderName, body }: { senderName: string; body: string }) {
+  return (
+    <Box
+      sx={{
+        borderLeft: '3px solid',
+        borderColor: 'primary.main',
+        borderRadius: 0.5,
+        pl: 1,
+        py: 0.5,
+        mb: 0.75,
+        bgcolor: 'primary.main',
+        // Subtle tinted background that works on both light/dark surfaces
+        opacity: 1,
+        backgroundColor: 'rgba(16,185,129,0.10)',
+      }}
+    >
+      <Typography variant="caption" fontWeight={700} color="primary.main" display="block" noWrap>
+        {senderName}
+      </Typography>
+      <Typography variant="caption" color="text.secondary" display="block" noWrap>
+        {body || '📷 Photo'}
+      </Typography>
+    </Box>
+  );
+}
+
+// ── Reply bar above the text field ────────────────────────────────────────────
+
+function ReplyBar({ replyingTo, onCancel }: { replyingTo: OrderChatMessage; onCancel: () => void }) {
+  const preview = replyingTo.body ?? '📷 Photo';
+  return (
+    <Stack
+      direction="row"
+      alignItems="center"
+      spacing={1}
+      sx={{
+        px: 1.5,
+        py: 0.75,
+        bgcolor: 'rgba(16,185,129,0.06)',
+        borderTop: '1px solid',
+        borderColor: 'divider',
+        borderRadius: 1,
+      }}
+    >
+      <Box
+        sx={{
+          width: 3,
+          alignSelf: 'stretch',
+          borderRadius: 1,
+          bgcolor: 'primary.main',
+          flexShrink: 0,
+        }}
+      />
+      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+        <Typography variant="caption" fontWeight={700} color="primary.main" noWrap display="block">
+          Replying to {replyingTo.sender_name}
+        </Typography>
+        <Typography variant="caption" color="text.secondary" noWrap display="block">
+          {preview}
+        </Typography>
+      </Box>
+      <IconButton size="small" onClick={onCancel} aria-label="Cancel reply">
+        <Iconify icon="mingcute:close-line" width={16} />
+      </IconButton>
+    </Stack>
+  );
+}
+
+// ── Chat dialog ───────────────────────────────────────────────────────────────
+
 type OrderChatDialogProps = {
   open: boolean;
   orderId: string;
@@ -44,11 +116,12 @@ type OrderChatDialogProps = {
 };
 
 export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps) {
-  const [messages, setMessages] = useState<OrderChatMessage[]>([]);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState<string | null>(null);
-  const [draft, setDraft]       = useState('');
-  const [sending, setSending]   = useState(false);
+  const [messages, setMessages]     = useState<OrderChatMessage[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState<string | null>(null);
+  const [draft, setDraft]           = useState('');
+  const [sending, setSending]       = useState(false);
+  const [replyingTo, setReplyingTo] = useState<OrderChatMessage | null>(null);
 
   // Scroll container ref — we set scrollTop directly (no smooth animation)
   // so it works reliably even while the MUI Dialog open-animation is running.
@@ -67,11 +140,11 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
     if (!open) return;
     setLoading(true);
     setError(null);
+    setReplyingTo(null);
     loadMessages();
   }, [open, loadMessages]);
 
   // Real-time updates via Pusher private-order.{orderId}.
-  // Polling above stays active as a fallback when Pusher is unavailable.
   useEffect(() => {
     if (!open || !orderId) return undefined;
 
@@ -112,7 +185,6 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
     channel.bind('chat.message-sent', (data: unknown) => {
       const msg = data as OrderChatMessage;
       setMessages((prev) => {
-        // Dedup: the polling interval may have already added this message.
         if (prev.some((m) => m.id === msg.id)) return prev;
         return [...prev, msg];
       });
@@ -125,9 +197,6 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
   }, [open, orderId]);
 
   // Scroll to bottom on every messages change.
-  // Double rAF: first frame lets React commit the new nodes; second frame lets
-  // the browser paint them (and the MUI Dialog animation settle) so scrollHeight
-  // is accurate before we set scrollTop.
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -138,20 +207,41 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
     });
   }, [messages]);
 
+  const handleReply = useCallback((msg: OrderChatMessage) => {
+    setReplyingTo(msg);
+  }, []);
+
+  const handleCancelReply = useCallback(() => setReplyingTo(null), []);
+
   const handleSend = useCallback(() => {
     const body = draft.trim();
     if (!body) return;
 
+    const replySnapshot = replyingTo;
+    setReplyingTo(null);
+
     setSending(true);
     orderChatApi
-      .send(orderId, body)
+      .send(orderId, body, replySnapshot?.id)
       .then((message) => {
-        setMessages((prev) => [...prev, message]);
+        // Attach reply snapshot so the quote renders immediately (optimistic).
+        const withReply: OrderChatMessage = replySnapshot != null
+          ? {
+              ...message,
+              reply_to_id:          replySnapshot.id,
+              reply_to_body:        replySnapshot.body,
+              reply_to_sender_name: replySnapshot.sender_name,
+            }
+          : message;
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === withReply.id)) return prev;
+          return [...prev, withReply];
+        });
         setDraft('');
       })
       .catch(() => setError('Failed to send message. Please try again.'))
       .finally(() => setSending(false));
-  }, [draft, orderId]);
+  }, [draft, orderId, replyingTo]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -163,7 +253,7 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
         </IconButton>
       </DialogTitle>
 
-      <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2, minHeight: 540 }}>
+      <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, minHeight: 540 }}>
         {error && <Alert severity="error">{error}</Alert>}
 
         {loading ? (
@@ -174,7 +264,7 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
           <Stack
             ref={containerRef}
             spacing={1.5}
-            sx={{ flexGrow: 1, overflowY: 'auto', maxHeight: 480 }}
+            sx={{ flexGrow: 1, overflowY: 'auto', maxHeight: 460 }}
           >
             {messages.length === 0 && (
               <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
@@ -193,24 +283,42 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
                   {message.body} · {fDateTime(message.created_at)}
                 </Typography>
               ) : (
-                <Stack key={message.id} direction="row" spacing={1.5} alignItems="flex-start">
+                <Stack
+                  key={message.id}
+                  direction="row"
+                  spacing={1.5}
+                  alignItems="flex-start"
+                  sx={{
+                    '&:hover .reply-btn': { opacity: 1 },
+                  }}
+                >
                   <Avatar
                     sx={{
                       width: 32,
                       height: 32,
                       fontSize: 14,
+                      flexShrink: 0,
                       bgcolor: SENDER_COLOR[message.sender_type],
                     }}
                   >
                     {message.sender_name.charAt(0).toUpperCase()}
                   </Avatar>
-                  <Box sx={{ flexGrow: 1 }}>
+                  <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                     <Stack direction="row" spacing={1} alignItems="baseline">
                       <Typography variant="subtitle2">{message.sender_name}</Typography>
                       <Typography variant="caption" color="text.secondary">
                         {SENDER_LABEL[message.sender_type]} · {fDateTime(message.created_at)}
                       </Typography>
                     </Stack>
+
+                    {/* Reply quote block */}
+                    {message.reply_to_body != null && message.reply_to_sender_name != null && (
+                      <ReplyQuote
+                        senderName={message.reply_to_sender_name}
+                        body={message.reply_to_body}
+                      />
+                    )}
+
                     {message.body && (
                       <Typography variant="body2" sx={{ mt: 0.5 }}>
                         {message.body}
@@ -225,35 +333,54 @@ export function OrderChatDialog({ open, orderId, onClose }: OrderChatDialogProps
                       />
                     )}
                   </Box>
+
+                  {/* Reply button — visible on row hover */}
+                  <Tooltip title="Reply">
+                    <IconButton
+                      size="small"
+                      className="reply-btn"
+                      onClick={() => handleReply(message)}
+                      aria-label={`Reply to ${message.sender_name}`}
+                      sx={{ opacity: 0, transition: 'opacity 0.15s', flexShrink: 0, mt: 0.25 }}
+                    >
+                      <Iconify icon="eva:arrow-ios-forward-fill" width={16} />
+                    </IconButton>
+                  </Tooltip>
                 </Stack>
               )
             )}
           </Stack>
         )}
 
-        <Stack direction="row" spacing={1}>
-          <TextField
-            fullWidth
-            size="small"
-            autoComplete="off"
-            placeholder="Type a message…"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-            disabled={sending}
-          />
-          <Button
-            variant="contained"
-            onClick={handleSend}
-            disabled={sending || !draft.trim()}
-          >
-            Send
-          </Button>
+        {/* Reply bar + input */}
+        <Stack spacing={1} sx={{ mt: 'auto' }}>
+          {replyingTo !== null && (
+            <ReplyBar replyingTo={replyingTo} onCancel={handleCancelReply} />
+          )}
+          <Stack direction="row" spacing={1}>
+            <TextField
+              fullWidth
+              size="small"
+              autoComplete="off"
+              placeholder="Type a message…"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              disabled={sending}
+            />
+            <Button
+              variant="contained"
+              onClick={handleSend}
+              disabled={sending || !draft.trim()}
+            >
+              Send
+            </Button>
+          </Stack>
         </Stack>
       </DialogContent>
     </Dialog>

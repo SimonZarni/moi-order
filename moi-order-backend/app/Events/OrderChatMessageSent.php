@@ -41,13 +41,17 @@ class OrderChatMessageSent implements ShouldBroadcastNow
         }
 
         return [
-            'id'          => $this->message->id,
-            'sender_type' => $this->message->sender_type,
-            'sender_id'   => $this->message->sender_id,
-            'sender_name' => $this->message->sender_name,
-            'body'        => $this->message->body,
-            'image_url'   => $imageUrl,
-            'created_at'  => $this->message->created_at?->toIso8601String(),
+            'id'                   => $this->message->id,
+            'sender_type'          => $this->message->sender_type,
+            'sender_id'            => $this->message->sender_id,
+            'sender_name'          => $this->message->sender_name,
+            'body'                 => $this->message->body,
+            'image_url'            => $imageUrl,
+            'read_at'              => $this->message->read_at?->toIso8601String(),
+            'reply_to_id'          => $this->message->reply_to_id,
+            'reply_to_body'        => $this->message->reply_to_body,
+            'reply_to_sender_name' => $this->message->reply_to_sender_name,
+            'created_at'           => $this->message->created_at?->toIso8601String(),
         ];
     }
 }
