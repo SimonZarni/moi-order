@@ -400,6 +400,18 @@ export interface AppStrings {
     contactNoPlaceholder:    string; // "Your phone number"
     contactNoRequired:       string; // "Contact number is required"
   };
+  chat: {
+    notice:          string;
+    noMessages:      string;
+    cannotLoad:      string;
+    locked:          string;
+    willClose:       string;
+    typePlaceholder: string;
+    addPhoto:        string;
+    replyTo:         string;
+    cancelReply:     string;
+    photo:           string;
+  };
 }
 
 // ─── English ─────────────────────────────────────────────────────────────────
@@ -743,6 +755,18 @@ const en: AppStrings = {
     contactNoLabel:          'Contact No',
     contactNoPlaceholder:    'Your phone number',
     contactNoRequired:       'Contact number is required',
+  },
+  chat: {
+    notice:          'Chat disappears 3 hours after order complete. Do not share sensitive info. Admin are watching!',
+    noMessages:      'No messages yet. Say hello!',
+    cannotLoad:      'Could not load messages.',
+    locked:          'Chat has closed. Messages are deleted 3 hours after order completion.',
+    willClose:       'Chat will close 3 hours after order completion.',
+    typePlaceholder: 'Type a message…',
+    addPhoto:        'Attach photo',
+    replyTo:         'Reply to',
+    cancelReply:     'Cancel reply',
+    photo:           'Photo',
   },
 };
 
@@ -1088,6 +1112,18 @@ const mm: AppStrings = {
     contactNoPlaceholder:    'ဖုန်းနံပါတ်',
     contactNoRequired:       'ဆက်သွယ်ရန် နံပါတ် ဖြည့်ပေးပါ',
   },
+  chat: {
+    notice:          'ချတ်သည် မှာယူမှု ပြီးဆုံးပြီး ၃ နာရီ အကြာတွင် ပျောက်ကွယ်သွားမည်။ လျှို့ဝှက်သော အချက်အလက်များ မျှဝေခြင်း မပြုပါနှင့်။ Admin မှ ကြည့်ရှုနေသည်!',
+    noMessages:      'မက်ဆေ့ မရှိသေးပါ။ မင်္ဂလာပါ ဆိုပြောလိုက်ပါ!',
+    cannotLoad:      'မက်ဆေ့များ ဖတ်မရနိုင်ပါ။',
+    locked:          'ချတ် ပိတ်သွားပြီ။ မှာယူမှု ပြီးဆုံးပြီး ၃ နာရီ အကြာတွင် မက်ဆေ့များ ဖျက်မည်။',
+    willClose:       'မှာယူမှု ပြီးဆုံးပြီး ၃ နာရီ အကြာတွင် ချတ် ပိတ်မည်။',
+    typePlaceholder: 'မက်ဆေ့ ရေးရန်…',
+    addPhoto:        'ဓာတ်ပုံ ပူးတွဲရန်',
+    replyTo:         'ပြန်ဆိုရန်',
+    cancelReply:     'ပြန်ဆိုမှု ပယ်ဖျက်ရန်',
+    photo:           'ဓာတ်ပုံ',
+  },
 };
 
 // ─── Thai ─────────────────────────────────────────────────────────────────────
@@ -1431,6 +1467,18 @@ const th: AppStrings = {
     contactNoLabel:          'เบอร์ติดต่อ',
     contactNoPlaceholder:    'หมายเลขโทรศัพท์ของคุณ',
     contactNoRequired:       'กรุณากรอกเบอร์ติดต่อ',
+  },
+  chat: {
+    notice:          'แชทจะหายไปภายใน 3 ชั่วโมงหลังจากคำสั่งซื้อเสร็จสิ้น อย่าแชร์ข้อมูลส่วนตัว ผู้ดูแลกำลังตรวจสอบอยู่!',
+    noMessages:      'ยังไม่มีข้อความ ทักทายกันก่อนเลย!',
+    cannotLoad:      'โหลดข้อความไม่ได้',
+    locked:          'แชทถูกปิดแล้ว ข้อความจะถูกลบหลังจาก 3 ชั่วโมงหลังคำสั่งซื้อเสร็จ',
+    willClose:       'แชทจะปิดภายใน 3 ชั่วโมงหลังจากคำสั่งซื้อเสร็จสิ้น',
+    typePlaceholder: 'พิมพ์ข้อความ…',
+    addPhoto:        'แนบรูปภาพ',
+    replyTo:         'ตอบกลับ',
+    cancelReply:     'ยกเลิกการตอบกลับ',
+    photo:           'รูปภาพ',
   },
 };
 

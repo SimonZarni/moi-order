@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Animated,
   FlatList,
   Image,
   Keyboard,
   KeyboardAvoidingView,
   Modal,
+  PanResponder,
   Platform,
   Pressable,
   ScrollView,
@@ -18,15 +20,78 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { OrderChatMessage } from '@/types/models';
+import { useStrings } from '@/shared/i18n';
 import { useOrderChatScreen, SelectedImage } from '../hooks/useOrderChatScreen';
 import { styles } from './OrderChatScreen.styles';
 
-interface BubbleProps {
-  msg: OrderChatMessage;
-  onPhotoPress: (uri: string) => void;
+// ── Notice banner ─────────────────────────────────────────────────────────────
+
+interface NoticeBannerProps {
+  text: string;
+  onDismiss: () => void;
 }
 
-function MessageBubble({ msg, onPhotoPress }: BubbleProps): React.JSX.Element {
+function NoticeBanner({ text, onDismiss }: NoticeBannerProps): React.JSX.Element {
+  return (
+    <View style={styles.noticeBanner}>
+      <Ionicons name="information-circle-outline" size={14} color={colours.warning} />
+      <Text style={styles.noticeText}>{text}</Text>
+      <Pressable
+        onPress={onDismiss}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel="Dismiss notice"
+      >
+        <Ionicons name="close" size={14} color={colours.textMuted} />
+      </Pressable>
+    </View>
+  );
+}
+
+// ── Reply bar ─────────────────────────────────────────────────────────────────
+
+interface ReplyBarProps {
+  replyingTo: OrderChatMessage;
+  photoLabel: string;
+  replyToLabel: string;
+  cancelLabel: string;
+  onCancel: () => void;
+}
+
+function ReplyBar({ replyingTo, photoLabel, replyToLabel, cancelLabel, onCancel }: ReplyBarProps): React.JSX.Element {
+  const preview =
+    replyingTo.image_url !== null && replyingTo.body === null
+      ? `📷 ${photoLabel}`
+      : (replyingTo.body ?? '');
+  return (
+    <View style={styles.replyBar}>
+      <View style={styles.replyBarIndicator} />
+      <View style={styles.replyBarContent}>
+        <Text style={styles.replyBarSender}>{replyToLabel} {replyingTo.sender_name}</Text>
+        <Text style={styles.replyBarText} numberOfLines={1}>{preview}</Text>
+      </View>
+      <Pressable
+        onPress={onCancel}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={cancelLabel}
+      >
+        <Ionicons name="close" size={18} color={colours.textMuted} />
+      </Pressable>
+    </View>
+  );
+}
+
+// ── Animated message bubble ───────────────────────────────────────────────────
+
+interface BubbleProps {
+  msg: OrderChatMessage;
+  isNew: boolean;
+  onPhotoPress: (uri: string) => void;
+  onReply: (msg: OrderChatMessage) => void;
+}
+
+function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): React.JSX.Element {
   if (msg.sender_type === 'system') {
     return (
       <View style={styles.systemNotice}>
@@ -34,29 +99,137 @@ function MessageBubble({ msg, onPhotoPress }: BubbleProps): React.JSX.Element {
       </View>
     );
   }
+
   const isCustomer = msg.sender_type === 'customer';
   const time = new Date(msg.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+  // ── Entrance animation (native driver) ──────────────────────────────────────
+  const entranceOpacity = useRef(new Animated.Value(isNew ? 0 : 1)).current;
+  const entranceSlide   = useRef(new Animated.Value(isNew ? (isCustomer ? 20 : -20) : 0)).current;
+
+  useEffect(() => {
+    if (!isNew) return;
+    Animated.parallel([
+      Animated.timing(entranceOpacity, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.spring(entranceSlide, {
+        toValue: 0,
+        damping: 18,
+        mass: 0.5,
+        stiffness: 220,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Swipe-to-reply (JS driver — PanResponder) ────────────────────────────────
+  const swipeX          = useRef(new Animated.Value(0)).current;
+  const hasTriggeredRef = useRef(false);
+  const THRESHOLD       = 60;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, g) =>
+        g.dx > 8 && Math.abs(g.dx) > Math.abs(g.dy) * 1.5,
+      onPanResponderGrant: () => {
+        hasTriggeredRef.current = false;
+      },
+      onPanResponderMove: (_, g) => {
+        const clamped = Math.min(Math.max(g.dx, 0), 72);
+        swipeX.setValue(clamped);
+        if (!hasTriggeredRef.current && g.dx >= THRESHOLD) {
+          hasTriggeredRef.current = true;
+          onReply(msg);
+        }
+      },
+      onPanResponderRelease: () => {
+        hasTriggeredRef.current = false;
+        Animated.spring(swipeX, {
+          toValue: 0,
+          damping: 20,
+          stiffness: 300,
+          mass: 0.5,
+          useNativeDriver: false,
+        }).start();
+      },
+      onPanResponderTerminate: () => {
+        Animated.spring(swipeX, {
+          toValue: 0,
+          damping: 20,
+          stiffness: 300,
+          mass: 0.5,
+          useNativeDriver: false,
+        }).start();
+      },
+    }),
+  ).current;
+
+  const replyIconOpacity = swipeX.interpolate({
+    inputRange: [0, THRESHOLD * 0.4, THRESHOLD],
+    outputRange: [0, 0.4, 1],
+    extrapolate: 'clamp',
+  });
+
+  const hasReply = msg.reply_to_body != null && msg.reply_to_sender_name != null;
+
   return (
-    <View style={[styles.bubbleRow, isCustomer ? styles.bubbleRowRight : styles.bubbleRowLeft]}>
-      <View style={[styles.bubble, isCustomer ? styles.bubbleCustomer : styles.bubbleOther]}>
-        {!isCustomer && <Text style={styles.senderName}>{msg.sender_name}</Text>}
-        {msg.image_url !== null && (
-          <Pressable onPress={() => onPhotoPress(msg.image_url!)} accessibilityRole="button" accessibilityLabel="View full photo">
-            <Image source={{ uri: msg.image_url }} style={styles.bubbleImage} resizeMode="cover" />
-          </Pressable>
-        )}
-        {msg.body !== null && (
-          <Text style={[styles.bubbleText, isCustomer ? styles.bubbleTextCustomer : styles.bubbleTextOther]}>
-            {msg.body}
-          </Text>
-        )}
-        <Text style={[styles.bubbleTime, isCustomer ? styles.bubbleTimeCustomer : styles.bubbleTimeOther]}>
-          {time}
-        </Text>
+    // Outer: entrance animation on native thread
+    <Animated.View style={{ opacity: entranceOpacity, transform: [{ translateX: entranceSlide }] }}>
+      <View style={{ position: 'relative' }}>
+        {/* Reply icon revealed on right swipe */}
+        <Animated.View style={[styles.replyHint, { opacity: replyIconOpacity }]}>
+          <Ionicons name="return-up-back-outline" size={18} color={colours.primary} />
+        </Animated.View>
+
+        {/* Inner: swipe translation on JS thread */}
+        <Animated.View
+          {...panResponder.panHandlers}
+          style={[
+            styles.bubbleRow,
+            isCustomer ? styles.bubbleRowRight : styles.bubbleRowLeft,
+            { transform: [{ translateX: swipeX }] },
+          ]}
+        >
+          <View style={[styles.bubble, isCustomer ? styles.bubbleCustomer : styles.bubbleOther]}>
+            {!isCustomer && <Text style={styles.senderName}>{msg.sender_name}</Text>}
+
+            {/* Quoted reply preview (backend support pending) */}
+            {hasReply && (
+              <View style={styles.replyQuote}>
+                <Text style={styles.replyQuoteSender}>{msg.reply_to_sender_name}</Text>
+                <Text style={styles.replyQuoteText} numberOfLines={1}>{msg.reply_to_body}</Text>
+              </View>
+            )}
+
+            {msg.image_url !== null && (
+              <Pressable
+                onPress={() => onPhotoPress(msg.image_url!)}
+                accessibilityRole="button"
+                accessibilityLabel="View full photo"
+              >
+                <Image source={{ uri: msg.image_url }} style={styles.bubbleImage} resizeMode="cover" />
+              </Pressable>
+            )}
+            {msg.body !== null && (
+              <Text style={[styles.bubbleText, isCustomer ? styles.bubbleTextCustomer : styles.bubbleTextOther]}>
+                {msg.body}
+              </Text>
+            )}
+            <Text style={[styles.bubbleTime, isCustomer ? styles.bubbleTimeCustomer : styles.bubbleTimeOther]}>
+              {time}
+            </Text>
+          </View>
+        </Animated.View>
       </View>
-    </View>
+    </Animated.View>
   );
 }
+
+// ── Image preview strip item ──────────────────────────────────────────────────
 
 interface ImagePreviewItemProps {
   img: SelectedImage;
@@ -80,14 +253,27 @@ function ImagePreviewItem({ img, index, onRemove }: ImagePreviewItemProps): Reac
   );
 }
 
+// ── Main screen ───────────────────────────────────────────────────────────────
+
 export function OrderChatScreen(): React.JSX.Element {
+  const s = useStrings();
   const {
     restaurantName, orderNumber, messages, isLoading, isError,
     sendError, text, isSending, isChatLocked, inputBarPadding,
-    selectedImages, selectedPhoto, listRef,
-    handleBack, handleTextChange, handleSend, handlePickImage,
-    handleRemoveImage, handlePhotoPress, handlePhotoClose,
+    selectedImages, selectedPhoto, listRef, replyingTo,
+    handleBack, handleTextChange, handleSend, handleSetReply,
+    handlePickImage, handleRemoveImage, handlePhotoPress, handlePhotoClose,
   } = useOrderChatScreen();
+
+  const [showNoticeBanner, setShowNoticeBanner] = useState(true);
+
+  // Track initial message IDs so historical messages don't animate on load.
+  const initialIdsRef    = useRef<Set<number>>(new Set());
+  const hasSeededInitial = useRef(false);
+  if (!hasSeededInitial.current && messages.length > 0) {
+    messages.forEach((m) => initialIdsRef.current.add(m.id));
+    hasSeededInitial.current = true;
+  }
 
   const canSend = !isSending && (text.trim().length > 0 || selectedImages.length > 0);
 
@@ -98,18 +284,19 @@ export function OrderChatScreen(): React.JSX.Element {
           <Ionicons name="chevron-back" size={22} color={colours.textOnDark} />
         </Pressable>
         <View style={styles.headerInfo}>
-          <Text style={styles.headerTitle} numberOfLines={1}>{restaurantName ?? 'Chat with Restaurant'}</Text>
+          <Text style={styles.headerTitle} numberOfLines={1}>{restaurantName ?? s.restaurant.chatWithRestaurant}</Text>
           {orderNumber !== null && <Text style={styles.headerSub}>Order #{orderNumber}</Text>}
         </View>
       </View>
 
       <KeyboardAvoidingView behavior="padding" enabled={Platform.OS === 'ios'} style={styles.body}>
-        <View style={styles.noticeBanner}>
-          <Ionicons name="information-circle-outline" size={14} color={colours.textMuted} />
-          <Text style={styles.noticeText}>
-            Messages are automatically deleted 3 hours after the order is completed.
-          </Text>
-        </View>
+        {/* Privacy + expiry notice banner */}
+        {showNoticeBanner && (
+          <NoticeBanner
+            text={s.chat.notice}
+            onDismiss={() => setShowNoticeBanner(false)}
+          />
+        )}
 
         {isLoading ? (
           <Pressable style={styles.loaderWrap} onPress={Keyboard.dismiss}>
@@ -117,19 +304,26 @@ export function OrderChatScreen(): React.JSX.Element {
           </Pressable>
         ) : isError ? (
           <Pressable style={styles.emptyWrap} onPress={Keyboard.dismiss}>
-            <Text style={styles.emptyText}>Could not load messages.</Text>
+            <Text style={styles.emptyText}>{s.chat.cannotLoad}</Text>
           </Pressable>
         ) : messages.length === 0 ? (
           <Pressable style={styles.emptyWrap} onPress={Keyboard.dismiss}>
             <Ionicons name="chatbubbles-outline" size={44} color={colours.textMuted} />
-            <Text style={[styles.emptyText, { marginTop: 8 }]}>No messages yet. Say hello!</Text>
+            <Text style={[styles.emptyText, { marginTop: 8 }]}>{s.chat.noMessages}</Text>
           </Pressable>
         ) : (
           <FlatList
             ref={listRef}
             data={messages}
             keyExtractor={(m) => String(m.id)}
-            renderItem={({ item }) => <MessageBubble msg={item} onPhotoPress={handlePhotoPress} />}
+            renderItem={({ item }) => (
+              <AnimatedBubble
+                msg={item}
+                isNew={!initialIdsRef.current.has(item.id)}
+                onPhotoPress={handlePhotoPress}
+                onReply={handleSetReply}
+              />
+            )}
             style={styles.list}
             contentContainerStyle={styles.listContent}
             onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
@@ -161,18 +355,30 @@ export function OrderChatScreen(): React.JSX.Element {
                 ))}
               </ScrollView>
             )}
+
+            {/* Reply preview bar */}
+            {replyingTo !== null && (
+              <ReplyBar
+                replyingTo={replyingTo}
+                photoLabel={s.chat.photo}
+                replyToLabel={s.chat.replyTo}
+                cancelLabel={s.chat.cancelReply}
+                onCancel={() => handleSetReply(null)}
+              />
+            )}
+
             <View style={[styles.inputBar, { paddingBottom: inputBarPadding }]}>
               <Pressable
                 style={styles.attachBtn}
                 onPress={handlePickImage}
                 accessibilityRole="button"
-                accessibilityLabel="Attach images"
+                accessibilityLabel={s.chat.addPhoto}
               >
                 <Ionicons name="image-outline" size={22} color={colours.primary} />
               </Pressable>
               <TextInput
                 style={styles.textInput}
-                placeholder="Type a message…"
+                placeholder={s.chat.typePlaceholder}
                 placeholderTextColor={colours.textMuted}
                 value={text}
                 onChangeText={handleTextChange}

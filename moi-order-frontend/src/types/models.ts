@@ -471,6 +471,9 @@ export interface OrderChatMessage {
   image_url: string | null;
   read_at: string | null;
   created_at: string;
+  reply_to_id?: number | null;
+  reply_to_body?: string | null;
+  reply_to_sender_name?: string | null;
 }
 
 // ── Home Cards ─────────────────────────────────────────────────────────────

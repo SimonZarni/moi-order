@@ -96,14 +96,15 @@ export interface SendMessageInput {
   orderId: string;
   body: string | null;
   image: { uri: string; name: string; type: string } | null;
+  replyToId?: number;
 }
 
 export function useSendChatMessage() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ orderId, body, image }: SendMessageInput) =>
-      sendOrderChatMessage(orderId, body, image),
+    mutationFn: ({ orderId, body, image, replyToId }: SendMessageInput) =>
+      sendOrderChatMessage(orderId, body, image, replyToId),
     onSuccess: (newMsg, { orderId }) => {
       queryClient.setQueryData<OrderChatMessage[]>(
         QUERY_KEYS.FOOD_ORDERS.CHAT(orderId),

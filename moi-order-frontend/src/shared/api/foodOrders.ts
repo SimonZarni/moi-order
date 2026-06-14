@@ -77,9 +77,11 @@ export async function sendOrderChatMessage(
   orderId: string,
   body: string | null,
   image: { uri: string; name: string; type: string } | null,
+  replyToId?: number,
 ): Promise<OrderChatMessage> {
   const form = new FormData();
   if (body) form.append('body', body);
+  if (replyToId !== undefined) form.append('reply_to_id', String(replyToId));
   if (image) {
     // Normalise to lowercase; fall back to jpeg when MIME is missing.
     const mime = image.type.toLowerCase() || 'image/jpeg';

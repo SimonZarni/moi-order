@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { RootStackParamList } from '@/types/navigation';
 import { FOOD_ORDER_STATUS, FoodOrderStatus } from '@/types/enums';
+import { OrderChatMessage } from '@/types/models';
 import { useOrderChatData, useSendChatMessage } from './useOrderChatData';
 
 type Route = RouteProp<RootStackParamList, 'OrderChat'>;
@@ -27,9 +28,11 @@ export interface UseOrderChatScreenResult {
   selectedImages: SelectedImage[];
   selectedPhoto: string | null;
   listRef: React.RefObject<FlatList | null>;
+  replyingTo: OrderChatMessage | null;
   handleBack: () => void;
   handleTextChange: (v: string) => void;
   handleSend: () => void;
+  handleSetReply: (msg: OrderChatMessage | null) => void;
   handlePickImage: () => Promise<void>;
   handleRemoveImage: (index: number) => void;
   handlePhotoPress: (uri: string) => void;
@@ -66,7 +69,10 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [selectedImages, setSelectedImages]   = useState<SelectedImage[]>([]);
   const [selectedPhoto, setSelectedPhoto]     = useState<string | null>(null);
+  const [replyingTo, setReplyingTo]           = useState<OrderChatMessage | null>(null);
   const listRef = useRef<FlatList>(null);
+  const replyingToRef = useRef<OrderChatMessage | null>(null);
+  replyingToRef.current = replyingTo;
 
   const isChatLocked = computeIsChatLocked(orderStatus, completedAt);
 
@@ -90,6 +96,7 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
 
   const handleBack        = useCallback(() => navigation.goBack(), [navigation]);
   const handleTextChange  = useCallback((v: string) => setText(v), []);
+  const handleSetReply    = useCallback((msg: OrderChatMessage | null) => setReplyingTo(msg), []);
   const handleRemoveImage = useCallback(
     (index: number) => setSelectedImages((prev) => prev.filter((_, i) => i !== index)),
     [],
@@ -102,13 +109,18 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
     setIsSending(true);
     setSendError(null);
 
+    const replyToId = replyingToRef.current?.id;
+    setReplyingTo(null);
+
+    const replyExtra = replyToId !== undefined ? { replyToId } : {};
+
     const sends: Array<() => Promise<unknown>> = [];
     if (trimmed) {
-      sends.push(() => mutateAsync({ orderId, body: trimmed, image: null }));
+      sends.push(() => mutateAsync({ orderId, body: trimmed, image: null, ...replyExtra }));
     }
     for (const img of selectedImages) {
       const captured = img;
-      sends.push(() => mutateAsync({ orderId, body: null, image: captured }));
+      sends.push(() => mutateAsync({ orderId, body: null, image: captured, ...replyExtra }));
     }
 
     (async () => {
@@ -164,9 +176,11 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
     selectedImages,
     selectedPhoto,
     listRef,
+    replyingTo,
     handleBack,
     handleTextChange,
     handleSend,
+    handleSetReply,
     handlePickImage,
     handleRemoveImage,
     handlePhotoPress,

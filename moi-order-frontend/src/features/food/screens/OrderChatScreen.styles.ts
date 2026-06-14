@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { colours } from '@/shared/theme/colours';
 import { radius } from '@/shared/theme/radius';
 import { spacing } from '@/shared/theme/spacing';
@@ -36,19 +36,23 @@ export const styles = StyleSheet.create({
   body: { flex: 1, backgroundColor: colours.backgroundLight },
   noticeBanner: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: 6,
-    backgroundColor: colours.infoBg,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.sm,
+    marginBottom: spacing.xs,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colours.divider,
+    backgroundColor: colours.warning + '18',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colours.warning + '40',
   },
   noticeText: {
     flex: 1,
     fontSize: typography.xxs,
-    color: colours.textMuted,
-    lineHeight: 16,
+    lineHeight: Platform.select({ web: 14, default: 18 }),
+    color: colours.warning,
   },
   list: { flex: 1, backgroundColor: colours.backgroundLight },
   listContent: {
@@ -192,6 +196,65 @@ export const styles = StyleSheet.create({
     fontStyle: 'italic',
     color: colours.textMuted,
     textAlign: 'center',
+  },
+  // Swipe-to-reply hint (left side, fades in as bubble is dragged right)
+  replyHint: {
+    position: 'absolute',
+    left: 2,
+    top: 0,
+    bottom: 0,
+    width: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Reply bar above input
+  replyBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colours.card,
+    borderTopWidth: 1,
+    borderTopColor: colours.divider,
+  },
+  replyBarIndicator: {
+    width: 3,
+    alignSelf: 'stretch',
+    borderRadius: 2,
+    backgroundColor: colours.primary,
+  },
+  replyBarContent: { flex: 1, gap: 2 },
+  replyBarSender: {
+    fontSize: typography.xxs,
+    lineHeight: Platform.select({ web: 14, default: 18 }),
+    fontWeight: '700',
+    color: colours.primary,
+  },
+  replyBarText: {
+    fontSize: typography.xxs,
+    lineHeight: Platform.select({ web: 14, default: 18 }),
+    color: colours.textMuted,
+  },
+  // Quoted reply inside bubble (shown when backend returns reply data)
+  replyQuote: {
+    borderLeftWidth: 3,
+    borderLeftColor: colours.primary + '88',
+    paddingLeft: spacing.sm,
+    paddingVertical: 2,
+    marginBottom: 4,
+    gap: 2,
+  },
+  replyQuoteSender: {
+    fontSize: typography.xxs,
+    lineHeight: Platform.select({ web: 14, default: 18 }),
+    fontWeight: '700',
+    color: colours.primary,
+  },
+  replyQuoteText: {
+    fontSize: typography.xxs,
+    lineHeight: Platform.select({ web: 14, default: 18 }),
+    color: colours.textMuted,
   },
   // Photo lightbox
   photoOverlay: {
