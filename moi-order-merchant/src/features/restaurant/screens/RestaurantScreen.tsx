@@ -33,8 +33,8 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
   const {
     restaurant, isLoading, isEditing, isSaving, isNewRestaurant,
     isUploadingCover, isUploadingLogo, isUploadingGalleryPhoto,
-    isEditingDelivery, isEditingPhone, isEditingHours,
-    minOrderInput, phoneInput, openingHoursInput, descriptionForm,
+    isEditingDelivery, isEditingPhone, /* isEditingHours, */
+    minOrderInput, phoneInput, /* openingHoursInput, */ descriptionForm,
     resubmitModal, resubmitForm,
     handleStartEdit, handleCancelEdit, handleDescriptionChange, handleSave,
     handleToggleStatus,
@@ -43,8 +43,8 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
     handleUploadGalleryPhoto, handleRemoveGalleryPhoto, handleMoveGalleryPhoto,
     handleEditDelivery, handleCancelDelivery, handleMinOrderChange, handleSaveDelivery,
     handleEditPhone, handleCancelPhone, handlePhoneChange, handleSavePhone,
-    handleEditHours, handleCancelHours, handleClearHoursError, handleHourChange, handleHourToggle, handleSaveHours,
-    hoursError,
+    // handleEditHours, handleCancelHours, handleClearHoursError, handleHourChange, handleHourToggle, handleSaveHours,
+    // hoursError,
     handleOpenResubmit, handleCloseResubmit,
     handleResubmitFieldChange, handleResubmitSubmitForm,
     handleResubmitUploadDoc, handleResubmitFinalSubmit,
@@ -54,10 +54,10 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
 
   const t = useTranslation();
 
-  const DAY_SHORT = [
-    t('hours_day_sun'), t('hours_day_mon'), t('hours_day_tue'), t('hours_day_wed'),
-    t('hours_day_thu'), t('hours_day_fri'), t('hours_day_sat'),
-  ];
+  // const DAY_SHORT = [
+  //   t('hours_day_sun'), t('hours_day_mon'), t('hours_day_tue'), t('hours_day_wed'),
+  //   t('hours_day_thu'), t('hours_day_fri'), t('hours_day_sat'),
+  // ];
 
   const RESUBMIT_DOC_TYPES: Array<{ type: KycDocType; label: string }> = [
     { type: KYC_DOC_TYPE.NationalId,           label: t('kyc_doc_national_id') },
@@ -358,8 +358,8 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
           )}
         </View>
 
-        {/* Opening Hours */}
-        {restaurant != null && (
+        {/* Opening Hours — managed in Settings > Operating Hours; hidden here for now */}
+        {/* {restaurant != null && (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={styles.cardTitle}>{t('restaurant_opening_hours_card')}</Text>
@@ -443,7 +443,7 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
               </View>
             )}
           </View>
-        )}
+        )} */}
 
         {/* Min Order */}
         {restaurant != null && (
