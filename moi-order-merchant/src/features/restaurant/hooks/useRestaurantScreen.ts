@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getRestaurant, updateRestaurant, createRestaurant,
+  setRestaurantStatus,
   uploadRestaurantPhoto, removeRestaurantPhoto,
   uploadRestaurantGalleryPhoto, deleteRestaurantGalleryPhoto, reorderRestaurantGalleryPhotos,
   type OpeningHourInput,
@@ -73,6 +74,9 @@ interface UseRestaurantScreenResult {
   handleDescriptionChange: (v: string) => void;
   handleSave: () => void;
   handleToggleStatus: (status: RestaurantStatus) => void;
+  isTogglingStatus: boolean;
+  overrideActive: boolean;
+  overrideUntil: string | null;
   statusWarning: string | null;
   handleDismissStatusWarning: () => void;
   handleUploadCoverPhoto: (uri: string, name: string, type: string) => void;
@@ -173,6 +177,16 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     onError: (error) => {
       const apiError = extractApiError(error);
       setHoursError(apiError.message ?? 'Could not save opening hours. Check the time format (HH:MM).');
+    },
+  });
+
+  const { mutate: mutateStatus, isPending: isTogglingStatus } = useMutation({
+    mutationFn: (status: RestaurantStatus) => setRestaurantStatus(status),
+    onSuccess: (updated) => { setCache(updated); },
+    onError: (error) => {
+      const apiError = extractApiError(error);
+      const message = apiError.code ? DOMAIN_MESSAGES[apiError.code] : undefined;
+      if (message) setStatusWarning(message);
     },
   });
 
@@ -291,7 +305,9 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
   // ── Status ────────────────────────────────────────────────────────────────────
 
   const handleToggleStatus = useCallback((status: RestaurantStatus) => {
-    // Block opening if required system categories have no items.
+    // Client-side guard: block opening if required system categories are empty.
+    // The server validates this too (validateOpenReady), but we surface a clear
+    // message before the round-trip so the merchant knows what to fix.
     if (status === RESTAURANT_STATUS.Open) {
       void (async () => {
         const menuData = await queryClient.ensureQueryData<MenuCategory[]>({
@@ -308,12 +324,12 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
           setStatusWarning(`Add at least 1 item to ${labels} before opening your restaurant.`);
           return;
         }
-        save({ status });
+        mutateStatus(status);
       })();
       return;
     }
-    save({ status });
-  }, [save, queryClient]);
+    mutateStatus(status);
+  }, [mutateStatus, queryClient]);
 
   const handleDismissStatusWarning = useCallback(() => setStatusWarning(null), []);
 
@@ -538,6 +554,9 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     handleDescriptionChange,
     handleSave,
     handleToggleStatus,
+    isTogglingStatus,
+    overrideActive: restaurant?.override_active ?? false,
+    overrideUntil: restaurant?.override_until ?? null,
     statusWarning,
     handleDismissStatusWarning,
     handleUploadCoverPhoto,

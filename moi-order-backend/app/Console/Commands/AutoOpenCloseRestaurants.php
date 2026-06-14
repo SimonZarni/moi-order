@@ -31,6 +31,12 @@ class AutoOpenCloseRestaurants extends Command
         $closed = 0;
 
         foreach ($restaurants as $restaurant) {
+            // Merchant has manually overridden the status — leave it alone until
+            // the 3-hour window expires, then it will be corrected on the next run.
+            if ($restaurant->isOverrideActive()) {
+                continue;
+            }
+
             $hours = $restaurant->openingHours->first();
 
             // No hours record for today, or day explicitly marked closed → close

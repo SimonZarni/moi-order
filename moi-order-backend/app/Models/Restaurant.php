@@ -29,6 +29,7 @@ class Restaurant extends Model
         'logo_path',
         'status',
         'platform_status',
+        'override_until',
         'delivery_radius_km',
         'is_delivery_available',
         'is_pickup_available',
@@ -45,6 +46,7 @@ class Restaurant extends Model
         return [
             'status'                => RestaurantStatus::class,
             'platform_status'       => RestaurantPlatformStatus::class,
+            'override_until'        => 'datetime',
             'latitude'              => 'float',
             'longitude'             => 'float',
             'delivery_radius_km'    => 'float',
@@ -71,6 +73,44 @@ class Restaurant extends Model
         $this->update(['status' => RestaurantStatus::Paused]);
     }
 
+    /**
+     * Merchant manual override — sets status AND arms a 3-hour expiry timer.
+     * After expiry the effective status reverts to what the opening hours say.
+     * Do NOT call this from automated schedulers or admin actions; use
+     * markAsOpen/Closed/Paused for those so override_until is left untouched.
+     */
+    public function overrideStatus(RestaurantStatus $status): void
+    {
+        $this->update([
+            'status'         => $status,
+            'override_until' => now()->addHours(3),
+        ]);
+    }
+
+    public function isOverrideActive(): bool
+    {
+        return $this->override_until !== null && $this->override_until->isFuture();
+    }
+
+    /**
+     * The status customers and the merchant UI should see.
+     * - While override_until is in the future: respect the stored status column.
+     * - After expiry: derive Open/Closed from opening hours sessions.
+     * - Falls back to stored status if opening hours relation is not loaded.
+     */
+    public function effectiveStatus(): RestaurantStatus
+    {
+        if ($this->isOverrideActive()) {
+            return $this->status;
+        }
+
+        if (! $this->relationLoaded('openingHours')) {
+            return $this->status;
+        }
+
+        return $this->isOpenNow() ? RestaurantStatus::Open : RestaurantStatus::Closed;
+    }
+
     public function suspend(): void
     {
         $this->update(['platform_status' => RestaurantPlatformStatus::Suspended]);
@@ -83,7 +123,7 @@ class Restaurant extends Model
 
     public function isAcceptingOrders(): bool
     {
-        return $this->platform_status->isActive() && $this->status->isAcceptingOrders();
+        return $this->platform_status->isActive() && $this->effectiveStatus()->isAcceptingOrders();
     }
 
     /**

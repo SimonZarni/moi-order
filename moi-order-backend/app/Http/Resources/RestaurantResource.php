@@ -45,13 +45,15 @@ class RestaurantResource extends JsonResource
             'phone'                 => $this->phone,
             'cover_photo_url'       => $coverUrl,
             'logo_url'              => $logoUrl,
-            'status'                => $this->status->value,
+            'status'                => $this->effectiveStatus()->value,
             'platform_status'       => $this->platform_status->value,
+            'override_active'       => $this->isOverrideActive(),
+            'override_until'        => $this->override_until?->toIso8601String(),
             'delivery_radius_km'    => $this->delivery_radius_km,
             'is_delivery_available' => $this->is_delivery_available,
             'is_pickup_available'   => $this->is_pickup_available,
             'min_order_cents'       => $this->min_order_cents,
-            'is_open_now'           => $this->whenLoaded('openingHours', fn () => $this->isOpenNow()),
+            'is_open_now'           => $this->whenLoaded('openingHours', fn () => $this->effectiveStatus()->isAcceptingOrders()),
             'opening_hours'         => $this->whenLoaded('openingHours', fn () =>
                 $this->openingHours
                     ->groupBy('day_of_week')

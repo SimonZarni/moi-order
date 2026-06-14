@@ -55,6 +55,11 @@ export async function updateRestaurant(
   return response.data.data;
 }
 
+export async function setRestaurantStatus(status: RestaurantStatus): Promise<Restaurant> {
+  const response = await apiClient.patch<{ data: Restaurant }>('/restaurant/status', { status });
+  return response.data.data;
+}
+
 export async function uploadRestaurantPhoto(
   field: 'cover_photo' | 'logo',
   formData: FormData,

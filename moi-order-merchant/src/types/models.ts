@@ -136,6 +136,8 @@ export interface Restaurant {
   latitude: number | null;
   longitude: number | null;
   status: RestaurantStatus;
+  override_active: boolean;
+  override_until: string | null;
   cover_photo_url: string | null;
   logo_url: string | null;
   photos: RestaurantPhoto[];

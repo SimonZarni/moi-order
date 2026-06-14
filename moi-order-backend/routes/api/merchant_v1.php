@@ -30,10 +30,11 @@ Route::patch('/business-profile',           [BusinessProfileController::class, '
 Route::post('/business-profile/documents',  [BusinessProfileController::class, 'uploadDocument']);
 
 // ── Restaurant ────────────────────────────────────────────────────────────────
-Route::get('/restaurant',    [MerchantRestaurantController::class, 'show']);
-Route::post('/restaurant',   [MerchantRestaurantController::class, 'store']);
-Route::put('/restaurant',    [MerchantRestaurantController::class, 'update']);
-Route::patch('/restaurant',  [MerchantRestaurantController::class, 'update']);
+Route::get('/restaurant',          [MerchantRestaurantController::class, 'show']);
+Route::post('/restaurant',         [MerchantRestaurantController::class, 'store']);
+Route::put('/restaurant',          [MerchantRestaurantController::class, 'update']);
+Route::patch('/restaurant',        [MerchantRestaurantController::class, 'update']);
+Route::patch('/restaurant/status', [MerchantRestaurantController::class, 'updateStatus']);
 
 // ── Menu categories ───────────────────────────────────────────────────────────
 Route::get('/menu/categories',          [MenuCategoryController::class, 'index']);

@@ -112,6 +112,22 @@ class RestaurantService
         });
     }
 
+    /**
+     * Merchant manual 3-hour status override.
+     * Validates open-readiness before allowing Open; then arms override_until.
+     * The scheduler (AutoOpenCloseRestaurants) skips this restaurant until expiry.
+     */
+    public function setStatusOverride(Restaurant $restaurant, RestaurantStatus $status): Restaurant
+    {
+        if ($status === RestaurantStatus::Open) {
+            $this->menuService->validateOpenReady($restaurant);
+        }
+
+        $restaurant->overrideStatus($status);
+
+        return $restaurant->fresh(['openingHours', 'photos', 'menuCategories.menuItems']);
+    }
+
     public const MAX_GALLERY_PHOTOS = 8;
 
     public function addPhoto(Restaurant $restaurant, UploadedFile $file): RestaurantPhoto

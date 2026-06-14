@@ -9,7 +9,9 @@ use App\Exceptions\DomainException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Merchant\StoreRestaurantRequest;
 use App\Http\Requests\Merchant\UpdateRestaurantRequest;
+use App\Http\Requests\Merchant\UpdateRestaurantStatusRequest;
 use App\Http\Resources\RestaurantResource;
+use App\Enums\RestaurantStatus;
 use App\Models\KycApplication;
 use App\Models\RestaurantPhoto;
 use App\Services\RestaurantService;
@@ -61,6 +63,16 @@ class MerchantRestaurantController extends Controller
         $restaurant = $request->user()->restaurant()->firstOrFail();
 
         $restaurant = $this->restaurantService->update($restaurant, $request->validated());
+
+        return response()->json(['data' => new RestaurantResource($restaurant, $this->storage)]);
+    }
+
+    /** PATCH /api/merchant/v1/restaurant/status */
+    public function updateStatus(UpdateRestaurantStatusRequest $request): JsonResponse
+    {
+        $restaurant = $request->user()->restaurant()->firstOrFail();
+        $status     = RestaurantStatus::from($request->string('status')->toString());
+        $restaurant = $this->restaurantService->setStatusOverride($restaurant, $status);
 
         return response()->json(['data' => new RestaurantResource($restaurant, $this->storage)]);
     }

@@ -37,7 +37,7 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
     minOrderInput, phoneInput, /* openingHoursInput, */ descriptionForm,
     resubmitModal, resubmitForm,
     handleStartEdit, handleCancelEdit, handleDescriptionChange, handleSave,
-    handleToggleStatus,
+    handleToggleStatus, isTogglingStatus, overrideActive, overrideUntil,
     handleUploadCoverPhoto, handleRemoveCoverPhoto,
     handleUploadLogo, handleRemoveLogo,
     handleUploadGalleryPhoto, handleRemoveGalleryPhoto, handleMoveGalleryPhoto,
@@ -168,14 +168,25 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
                 const isActive = currentStatus === s;
                 return (
                   <Pressable key={s}
-                    style={[styles.statusChip, isActive && [styles.statusChipActive, { backgroundColor: cfg.bg }]]}
-                    onPress={() => handleToggleStatus(s)}
-                    accessibilityLabel={`Set status to ${s}`} accessibilityRole="button">
+                    style={[styles.statusChip, isActive && [styles.statusChipActive, { backgroundColor: cfg.bg }], isTogglingStatus && styles.statusChipDisabled]}
+                    onPress={() => { if (!isTogglingStatus) handleToggleStatus(s); }}
+                    accessibilityLabel={`Set status to ${s}`} accessibilityRole="button"
+                    disabled={isTogglingStatus}>
                     <Text style={[styles.statusChipText, isActive && { color: cfg.color }]}>{cfg.label}</Text>
                   </Pressable>
                 );
               })}
             </View>
+            {overrideActive && overrideUntil !== null && (
+              <View style={styles.overrideBadge}>
+                <Ionicons name="time-outline" size={12} color={colours.primary} />
+                <Text style={styles.overrideBadgeText}>
+                  {'Manual override · Reverts at '}
+                  {new Date(overrideUntil).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                  {' (3 h)'}
+                </Text>
+              </View>
+            )}
           </View>
         )}
 

@@ -88,7 +88,22 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.surface,
   },
   statusChipActive: { borderColor: 'transparent' },
+  statusChipDisabled: { opacity: 0.5 },
   statusChipText: { fontSize: typography.sm, fontWeight: '600', color: colours.textMuted },
+  overrideBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    backgroundColor: colours.primaryBg,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colours.primary + '40',
+  },
+  overrideBadgeText: { fontSize: typography.xxs, color: colours.primary, fontWeight: '600' },
 
   // ── Profile info rows ─────────────────────────────────────────────────────────
   infoRow: { flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' },
