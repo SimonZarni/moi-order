@@ -11,6 +11,7 @@ import type {
   MerchantStackParamList,
   WebScreen,
 } from '../types/navigation';
+import { getOrder } from '../api/orders';
 import { DashboardScreen } from '../features/dashboard/screens/DashboardScreen';
 import { OrdersScreen } from '../features/orders/screens/OrdersScreen';
 import { CancelledOrdersScreen } from '../features/orders/screens/CancelledOrdersScreen';
@@ -255,6 +256,20 @@ function WebMerchantLayout(): React.JSX.Element {
   const theme = useSettingsStore((s) => s.theme);
   const darkStyle = theme === 'dark' ? ({ filter: 'invert(1) hue-rotate(180deg)' } as object) : null;
 
+  // When the page is hard-refreshed at /orders/{uuid}/chat, chatOrderId is
+  // restored from the URL but chatOrderNumber/completedAt/status are empty
+  // because handleChatOpen was never called. Fetch the order to fill them in.
+  useEffect(() => {
+    if (chatOrderId === null || chatOrderNumber !== '') return;
+    getOrder(chatOrderId)
+      .then((order) => {
+        setChatOrderNumber(order.order_number ?? '');
+        setChatCompletedAt(order.completed_at);
+        setChatOrderStatus(order.status);
+      })
+      .catch(() => { /* silent — header sub will show fallback */ });
+  }, [chatOrderId, chatOrderNumber]);
+
   // Push URL when navigation state changes. Skips if already matches (no extra
   // history entry on mount since initial state is derived from the current URL).
   useEffect(() => {
@@ -324,7 +339,7 @@ function WebMerchantLayout(): React.JSX.Element {
 
   const renderContent = (): React.JSX.Element => {
     if (chatOrderId !== null) {
-      return <OrderChatContent orderId={chatOrderId} orderNumber={chatOrderNumber} completedAt={chatCompletedAt} orderStatus={chatOrderStatus} onBack={handleChatClose} />;
+      return <OrderChatContent orderId={chatOrderId} orderNumber={chatOrderNumber || undefined} completedAt={chatCompletedAt} orderStatus={chatOrderStatus} onBack={handleChatClose} />;
     }
     if (selectedOrderId !== null) {
       return (
@@ -370,6 +385,10 @@ function WebMerchantLayout(): React.JSX.Element {
               const orderId = String(n.order_id);
               if (n.type === 'chat_message') {
                 setChatOrderId(orderId);
+                // Clear metadata so the boot-fetch useEffect re-runs for this order.
+                setChatOrderNumber('');
+                setChatCompletedAt(null);
+                setChatOrderStatus('');
               } else {
                 setSelectedOrderId(orderId);
               }
