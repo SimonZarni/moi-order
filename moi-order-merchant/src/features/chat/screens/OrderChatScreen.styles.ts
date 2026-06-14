@@ -86,18 +86,18 @@ export const styles = StyleSheet.create({
     alignItems: 'flex-end',
     gap: spacing.xs,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs,
     backgroundColor: colours.surfaceMuted,
     borderTopWidth: 1,
     borderTopColor: colours.divider,
   },
-  attachBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  attachBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   textInput: {
     flex: 1,
     backgroundColor: colours.surface,
     borderRadius: radius.xl,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: 6,
     fontSize: typography.sm,
     color: colours.textOnLight,
     maxHeight: 120,
@@ -105,9 +105,9 @@ export const styles = StyleSheet.create({
     borderColor: colours.divider,
   },
   sendBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: colours.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -116,7 +116,7 @@ export const styles = StyleSheet.create({
   // Image preview strip (above input bar)
   imagePreviewStrip: {
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
+    paddingTop: spacing.xs,
     paddingBottom: spacing.xs,
     backgroundColor: colours.surfaceMuted,
     borderTopWidth: 1,
@@ -257,10 +257,17 @@ export const styles = StyleSheet.create({
   replyQuote: {
     borderLeftWidth: 3,
     borderLeftColor: colours.primary + '88',
+    borderRadius: 2,
     paddingLeft: spacing.sm,
-    paddingVertical: 2,
+    paddingVertical: 3,
     marginBottom: 4,
     gap: 2,
+    backgroundColor: colours.primary + '14',
+  },
+  // Merchant's own bubble is primary-coloured — use dark ink on that background
+  replyQuoteMerchant: {
+    borderLeftColor: 'rgba(15,26,20,0.35)',
+    backgroundColor: 'rgba(15,26,20,0.12)',
   },
   replyQuoteSender: {
     fontSize: typography.xxs,
@@ -268,9 +275,11 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.primary,
   },
+  replyQuoteSenderMerchant: { color: 'rgba(15,26,20,0.85)' },
   replyQuoteText: {
     fontSize: typography.xxs,
     lineHeight: Platform.select({ web: 14, default: 18 }),
     color: colours.textSubtle,
   },
+  replyQuoteTextMerchant: { color: 'rgba(15,26,20,0.65)' },
 });

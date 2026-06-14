@@ -153,17 +153,28 @@ useEffect(() => {
   replyingToRef.current = replyingTo;
 
   const { mutateAsync } = useMutation({
-    mutationFn: ({ body, image, replyToId }: { body: string | null; image: SelectedImage | null; replyToId?: number }) =>
+    mutationFn: ({ body, image, replyToId }: { body: string | null; image: SelectedImage | null; replyToId?: number; replyingToMsg?: OrderChatMessage | null }) =>
       sendOrderChatMessage(orderId, body, image, replyToId),
-    onSuccess: (newMsg) => {
+    onSuccess: (newMsg, variables) => {
+      // Attach reply snapshot so the UI shows the quoted block immediately,
+      // before Pusher or a refetch can deliver the server's reply_to_* fields.
+      const { replyingToMsg } = variables;
+      const withReply: OrderChatMessage = replyingToMsg != null
+        ? {
+            ...newMsg,
+            reply_to_id:          replyingToMsg.id,
+            reply_to_body:        replyingToMsg.body,
+            reply_to_sender_name: replyingToMsg.sender_name,
+          }
+        : newMsg;
       queryClient.setQueryData<OrderChatMessage[]>(
         QUERY_KEYS.ORDER_CHAT(orderId),
         (prev) => {
           const existing = prev ?? [];
           // Pusher may have already inserted this message before the HTTP response
           // arrived — skip the append to avoid duplicates regardless of race order.
-          if (existing.some((m) => m.id === newMsg.id)) return existing;
-          return [...existing, newMsg];
+          if (existing.some((m) => m.id === withReply.id)) return existing;
+          return [...existing, withReply];
         },
       );
     },
@@ -188,16 +199,17 @@ useEffect(() => {
     setIsSending(true);
     setSendError(null);
 
-    const replyToId = replyingToRef.current?.id;
+    const replySnapshot = replyingToRef.current;
+    const replyToId     = replySnapshot?.id;
     setReplyingTo(null);
 
     const sends: Array<() => Promise<unknown>> = [];
     if (trimmed) {
-      sends.push(() => mutateAsync({ body: trimmed, image: null, replyToId }));
+      sends.push(() => mutateAsync({ body: trimmed, image: null, replyToId, replyingToMsg: replySnapshot }));
     }
     for (const img of selectedImages) {
       const captured = img;
-      sends.push(() => mutateAsync({ body: null, image: captured, replyToId }));
+      sends.push(() => mutateAsync({ body: null, image: captured, replyToId, replyingToMsg: replySnapshot }));
     }
 
     (async () => {

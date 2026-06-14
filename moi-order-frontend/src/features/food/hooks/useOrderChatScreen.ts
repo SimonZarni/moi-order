@@ -109,18 +109,19 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
     setIsSending(true);
     setSendError(null);
 
-    const replyToId = replyingToRef.current?.id;
+    const replySnapshot = replyingToRef.current;
+    const replyToId     = replySnapshot?.id;
     setReplyingTo(null);
 
     const replyExtra = replyToId !== undefined ? { replyToId } : {};
 
     const sends: Array<() => Promise<unknown>> = [];
     if (trimmed) {
-      sends.push(() => mutateAsync({ orderId, body: trimmed, image: null, ...replyExtra }));
+      sends.push(() => mutateAsync({ orderId, body: trimmed, image: null, ...replyExtra, replyingToMsg: replySnapshot }));
     }
     for (const img of selectedImages) {
       const captured = img;
-      sends.push(() => mutateAsync({ orderId, body: null, image: captured, ...replyExtra }));
+      sends.push(() => mutateAsync({ orderId, body: null, image: captured, ...replyExtra, replyingToMsg: replySnapshot }));
     }
 
     (async () => {

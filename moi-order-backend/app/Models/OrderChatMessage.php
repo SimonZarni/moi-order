@@ -16,6 +16,7 @@ class OrderChatMessage extends Model
     protected $fillable = [
         'food_order_id', 'sender_type', 'sender_id', 'sender_name',
         'body', 'image_path', 'read_at',
+        'reply_to_id', 'reply_to_body', 'reply_to_sender_name',
     ];
 
     protected function casts(): array

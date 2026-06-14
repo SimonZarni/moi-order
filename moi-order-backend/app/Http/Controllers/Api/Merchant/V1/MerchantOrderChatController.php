@@ -49,13 +49,20 @@ class MerchantOrderChatController extends Controller
             );
         }
 
+        $replyMsg = $request->filled('reply_to_id')
+            ? OrderChatMessage::find($request->integer('reply_to_id'))
+            : null;
+
         $message = OrderChatMessage::create([
-            'food_order_id' => $order->id,
-            'sender_type'   => 'merchant',
-            'sender_id'     => $user->id,
-            'sender_name'   => $restaurant->name ?? $user->name,
-            'body'          => $request->filled('body') ? $request->string('body')->toString() : null,
-            'image_path'    => $imagePath,
+            'food_order_id'        => $order->id,
+            'sender_type'          => 'merchant',
+            'sender_id'            => $user->id,
+            'sender_name'          => $restaurant->name ?? $user->name,
+            'body'                 => $request->filled('body') ? $request->string('body')->toString() : null,
+            'image_path'           => $imagePath,
+            'reply_to_id'          => $replyMsg?->id,
+            'reply_to_body'        => $replyMsg?->body,
+            'reply_to_sender_name' => $replyMsg?->sender_name,
         ]);
 
         event(new OrderChatMessageSent($message));

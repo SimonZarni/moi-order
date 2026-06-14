@@ -97,6 +97,7 @@ export interface SendMessageInput {
   body: string | null;
   image: { uri: string; name: string; type: string } | null;
   replyToId?: number;
+  replyingToMsg?: OrderChatMessage | null;
 }
 
 export function useSendChatMessage() {
@@ -105,10 +106,24 @@ export function useSendChatMessage() {
   return useMutation({
     mutationFn: ({ orderId, body, image, replyToId }: SendMessageInput) =>
       sendOrderChatMessage(orderId, body, image, replyToId),
-    onSuccess: (newMsg, { orderId }) => {
+    onSuccess: (newMsg, { orderId, replyingToMsg }) => {
+      // Optimistically attach reply snapshot so the quoted block appears immediately
+      // without waiting for a Pusher broadcast or cache refetch.
+      const withReply: OrderChatMessage = replyingToMsg != null
+        ? {
+            ...newMsg,
+            reply_to_id:          replyingToMsg.id,
+            reply_to_body:        replyingToMsg.body,
+            reply_to_sender_name: replyingToMsg.sender_name,
+          }
+        : newMsg;
       queryClient.setQueryData<OrderChatMessage[]>(
         QUERY_KEYS.FOOD_ORDERS.CHAT(orderId),
-        (prev) => [...(prev ?? []), newMsg],
+        (prev) => {
+          const existing = prev ?? [];
+          if (existing.some((m) => m.id === withReply.id)) return existing;
+          return [...existing, withReply];
+        },
       );
     },
   });

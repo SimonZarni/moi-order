@@ -124,15 +124,15 @@ export const styles = StyleSheet.create({
     alignItems: 'flex-end',
     gap: spacing.xs,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs,
     backgroundColor: colours.card,
     borderTopWidth: 1,
     borderTopColor: colours.divider,
   },
   attachBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -141,7 +141,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.backgroundLight,
     borderRadius: radius.xl,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: 6,
     fontSize: typography.sm,
     color: colours.textOnLight,
     maxHeight: 100,
@@ -149,9 +149,9 @@ export const styles = StyleSheet.create({
     borderColor: colours.divider,
   },
   sendBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: colours.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -161,7 +161,7 @@ export const styles = StyleSheet.create({
   imagePreviewStrip: {
     flexDirection: 'row',
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
+    paddingTop: spacing.xs,
     paddingBottom: spacing.xs,
     gap: spacing.xs,
     backgroundColor: colours.card,
@@ -246,14 +246,21 @@ export const styles = StyleSheet.create({
     lineHeight: Platform.select({ web: 14, default: 18 }),
     color: colours.textMuted,
   },
-  // Quoted reply inside bubble (shown when backend returns reply data)
+  // Quoted reply inside bubble
   replyQuote: {
     borderLeftWidth: 3,
     borderLeftColor: colours.primary + '88',
+    borderRadius: 2,
     paddingLeft: spacing.sm,
-    paddingVertical: 2,
+    paddingVertical: 3,
     marginBottom: 4,
     gap: 2,
+    backgroundColor: colours.primary + '14',
+  },
+  // Customer's own bubble is primary-coloured — use white tones on that background
+  replyQuoteCustomer: {
+    borderLeftColor: 'rgba(255,255,255,0.5)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
   },
   replyQuoteSender: {
     fontSize: typography.xxs,
@@ -261,11 +268,13 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.primary,
   },
+  replyQuoteSenderCustomer: { color: 'rgba(255,255,255,0.95)' },
   replyQuoteText: {
     fontSize: typography.xxs,
     lineHeight: Platform.select({ web: 14, default: 18 }),
     color: colours.textMuted,
   },
+  replyQuoteTextCustomer: { color: 'rgba(255,255,255,0.75)' },
   // Photo lightbox
   photoOverlay: {
     flex: 1,

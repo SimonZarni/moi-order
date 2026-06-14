@@ -18,8 +18,9 @@ class StoreOrderChatMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'body'  => ['nullable', 'string', 'max:2000'],
-            'image' => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp,gif,heic,heif,bmp,tiff', 'max:51200'],
+            'body'        => ['nullable', 'string', 'max:2000'],
+            'image'       => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp,gif,heic,heif,bmp,tiff', 'max:51200'],
+            'reply_to_id' => ['nullable', 'integer', 'exists:order_chat_messages,id'],
         ];
     }
 
@@ -46,8 +47,9 @@ class StoreOrderChatMessageRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'body'  => 'message',
-            'image' => 'image',
+            'body'        => 'message',
+            'image'       => 'image',
+            'reply_to_id' => 'reply-to message',
         ];
     }
 }

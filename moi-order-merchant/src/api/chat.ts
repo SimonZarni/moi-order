@@ -26,10 +26,14 @@ export async function sendOrderChatMessage(
       formData.append('image', { uri: image.uri, name: image.name, type: image.type } as unknown as Blob);
     }
   }
+  // On web the browser must set Content-Type (it appends the boundary automatically).
+  // On React Native, RN's XHR does the same when we declare multipart/form-data.
   const response = await apiClient.post<{ data: OrderChatMessage }>(
     `/orders/${orderId}/chat`,
     formData,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
+    Platform.OS === 'web'
+      ? undefined
+      : { headers: { 'Content-Type': 'multipart/form-data' } },
   );
   return response.data.data;
 }

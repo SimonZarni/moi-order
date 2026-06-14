@@ -167,9 +167,13 @@ function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): Rea
             {!isCustomer && <Text style={styles.senderName}>{msg.sender_name}</Text>}
 
             {hasReply && (
-              <View style={styles.replyQuote}>
-                <Text style={styles.replyQuoteSender}>{msg.reply_to_sender_name}</Text>
-                <Text style={styles.replyQuoteText} numberOfLines={1}>{msg.reply_to_body}</Text>
+              <View style={[styles.replyQuote, isCustomer && styles.replyQuoteCustomer]}>
+                <Text style={[styles.replyQuoteSender, isCustomer && styles.replyQuoteSenderCustomer]}>
+                  {msg.reply_to_sender_name}
+                </Text>
+                <Text style={[styles.replyQuoteText, isCustomer && styles.replyQuoteTextCustomer]} numberOfLines={1}>
+                  {msg.reply_to_body ?? '📷 Photo'}
+                </Text>
               </View>
             )}
 
