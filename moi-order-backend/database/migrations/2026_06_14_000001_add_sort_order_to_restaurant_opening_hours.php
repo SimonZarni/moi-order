@@ -21,14 +21,14 @@ return new class extends Migration
 
             // Allow multiple sessions per day — replace the single-session unique.
             $table->dropUnique('restaurant_opening_hours_restaurant_id_day_of_week_unique');
-            $table->unique(['restaurant_id', 'day_of_week', 'sort_order']);
+            $table->unique(['restaurant_id', 'day_of_week', 'sort_order'], 'roh_restaurant_day_sort_unique');
         });
     }
 
     public function down(): void
     {
         Schema::table('restaurant_opening_hours', function (Blueprint $table): void {
-            $table->dropUnique(['restaurant_id', 'day_of_week', 'sort_order']);
+            $table->dropUnique('roh_restaurant_day_sort_unique');
             $table->dropColumn('sort_order');
             // Restore the original single-session unique (which also backs the FK).
             $table->unique(['restaurant_id', 'day_of_week']);
