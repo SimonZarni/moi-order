@@ -161,21 +161,27 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
         cluster:  PUSHER_APP_CLUSTER,
         forceTLS: true,
         channelAuthorization: {
-          customHandler: async (
+          customHandler: (
             { channelName, socketId }: { channelName: string; socketId: string },
             callback: (err: Error | null, data: { auth: string } | null) => void,
           ) => {
-            try {
-              const res = await apiClient.post<{ auth: string }>(
+            // Read token directly from store — apiClient._token may not be synced yet
+            // when this handler fires immediately after Pusher initialises.
+            const currentToken = useAuthStore.getState().token;
+            apiClient
+              .post<{ auth: string }>(
                 BROADCAST_AUTH_URL.replace(_getBase(), ''),
                 { socket_id: socketId, channel_name: channelName },
-              );
-              callback(null, res.data);
-            } catch (err) {
-              const msg = err instanceof Error ? err.message : String(err);
-              _setChannel('auth_failed', `Auth POST failed: ${msg}`);
-              callback(new Error(msg), null);
-            }
+                currentToken
+                  ? { headers: { Authorization: `Bearer ${currentToken}` } }
+                  : undefined,
+              )
+              .then((res) => callback(null, res.data))
+              .catch((err: unknown) => {
+                const msg = err instanceof Error ? err.message : String(err);
+                _setChannel('auth_failed', `Auth POST failed: ${msg}`);
+                callback(new Error(msg), null);
+              });
           },
         },
       });
