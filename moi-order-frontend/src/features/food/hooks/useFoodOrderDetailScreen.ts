@@ -44,6 +44,7 @@ export interface UseFoodOrderDetailScreenResult {
   handleReviewChange: (t: string) => void;
   handleCallRestaurant: () => void;
   handleOrderAgain: () => void;
+  handleBrowseRestaurants: () => void;
   handleCancelOrder: () => void;
   isCancelling: boolean;
 }
@@ -225,6 +226,10 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
     navigation.navigate('RestaurantDetail', { restaurantId: order.restaurant_id });
   }, [order, navigation]);
 
+  const handleBrowseRestaurants = useCallback(() => {
+    navigation.navigate('Food');
+  }, [navigation]);
+
   return {
     order,
     isLoading,
@@ -253,6 +258,7 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
     handleReviewChange,
     handleCallRestaurant,
     handleOrderAgain,
+    handleBrowseRestaurants,
     handleCancelOrder,
     isCancelling,
   };

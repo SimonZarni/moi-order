@@ -24,7 +24,7 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
     handleBack, handlePromptPayPress, handleCopyMessage, handleChatPress,
     handleSlideComplete, handleCompleteConfirm, handleCompleteCancel,
     handleRatingChange, handleReviewChange,
-    handleCallRestaurant, handleOrderAgain,
+    handleCallRestaurant, handleOrderAgain, handleBrowseRestaurants,
     handleCancelOrder, isCancelling,
   } = useFoodOrderDetailScreen();
 
@@ -186,6 +186,18 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
             </Text>
           </Pressable>
         )}
+
+        <Pressable
+          style={({ pressed }) => [styles.browseBtn, { opacity: pressed ? 0.7 : 1 }]}
+          onPress={handleBrowseRestaurants}
+          accessibilityRole="button"
+          accessibilityLabel="Browse more restaurants"
+        >
+          <Ionicons name="storefront-outline" size={18} color={colours.textMuted} />
+          <Text style={styles.browseBtnText}>
+            {locale === 'mm' ? 'စားသောက်ဆိုင်များ ကြည့်ရှုမည်' : locale === 'th' ? 'ดูร้านอาหารเพิ่มเติม' : 'Browse More Restaurants'}
+          </Text>
+        </Pressable>
 
         {order.customer_notes !== null && (
           <>

@@ -238,6 +238,24 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.white,
   },
+  // Browse more restaurants button
+  browseBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: colours.card,
+    borderRadius: radius.xl,
+    paddingVertical: spacing.md,
+    marginTop: spacing.xs,
+    borderWidth: 1.5,
+    borderColor: colours.divider,
+  },
+  browseBtnText: {
+    fontSize: typography.md,
+    fontWeight: '600',
+    color: colours.textMuted,
+  },
   // Confirmation modal
   modalOverlay: {
     flex: 1,
