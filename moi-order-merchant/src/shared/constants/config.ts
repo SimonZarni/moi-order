@@ -1,3 +1,5 @@
+export const PLATFORM_FEE_RATE = 0.05 as const;
+
 export const POLL_INTERVAL = {
   ORDERS:       5_000,
   ORDER_DETAIL: 5_000,

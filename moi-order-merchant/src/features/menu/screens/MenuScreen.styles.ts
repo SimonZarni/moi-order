@@ -315,9 +315,10 @@ export const styles = StyleSheet.create({
   deleteConfirmText: { color: '#fff', fontSize: typography.xs, fontWeight: '700' },
 
   // ── Item form: price row ──────────────────────────────────────────────────
-  priceRow:     { flexDirection: 'row', gap: spacing.sm },
-  priceLabel:   { fontSize: typography.xs, color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: 3 },
-  discountBadge:{ fontSize: typography.xs, color: colours.success, fontWeight: '700', marginBottom: spacing.sm },
+  priceRow:          { flexDirection: 'row', gap: spacing.sm },
+  priceLabel:        { fontSize: typography.xs, color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: 3 },
+  customerPriceHint: { fontSize: typography.xxs, color: colours.primary, fontWeight: '700', marginTop: 3, marginBottom: spacing.xs },
+  discountBadge:     { fontSize: typography.xs, color: colours.success, fontWeight: '700', marginBottom: spacing.sm },
 
   // ── Item form: option groups ──────────────────────────────────────────────
   sectionDivider:  { height: 1, backgroundColor: colours.dividerDark, marginVertical: spacing.sm },

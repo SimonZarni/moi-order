@@ -15,7 +15,7 @@ import {
 import { getRestaurant } from '../../../api/restaurant';
 import { extractApiError } from '../../../api/client';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
-import { CACHE_TTL } from '../../../shared/constants/config';
+import { CACHE_TTL, PLATFORM_FEE_RATE } from '../../../shared/constants/config';
 import { DOMAIN_MESSAGES, MESSAGES } from '../../../shared/constants/messages';
 import { RESTAURANT_STATUS } from '../../../types/enums';
 import { normalizePickedImage } from '../../../shared/utils/imageUtils';
@@ -128,10 +128,11 @@ async function buildItemFormData(form: AddItemForm): Promise<FormData> {
   const fd = new FormData();
   fd.append('name', form.name.trim());
   if (form.description.trim()) fd.append('description', form.description.trim());
-  const priceCents = Math.round(parseFloat(form.price) * 100);
+  const FEE = 1 + PLATFORM_FEE_RATE;
+  const priceCents = Math.round(parseFloat(form.price) * 100 * FEE);
   fd.append('price_cents', String(isNaN(priceCents) ? 0 : priceCents));
   if (form.original_price.trim()) {
-    const origCents = Math.round(parseFloat(form.original_price) * 100);
+    const origCents = Math.round(parseFloat(form.original_price) * 100 * FEE);
     if (!isNaN(origCents)) fd.append('original_price_cents', String(origCents));
   }
   form.option_groups.forEach((group, gi) => {
@@ -495,11 +496,12 @@ export function useMenuScreen(): UseMenuScreenResult {
   const editHandlers = makeOptionGroupHandlers(setEditItemForm);
 
   const handleOpenEditItem = useCallback((item: MenuItem) => {
+    const FEE = 1 + PLATFORM_FEE_RATE;
     setEditItemForm({
       name: item.name,
       description: item.description ?? '',
-      price: String(item.price_cents / 100),
-      original_price: item.original_price_cents != null ? String(item.original_price_cents / 100) : '',
+      price: String(Math.round(item.price_cents / FEE) / 100),
+      original_price: item.original_price_cents != null ? String(Math.round(item.original_price_cents / FEE) / 100) : '',
       photo: null,
       option_groups: item.option_groups.map((g) => ({
         name: g.name,

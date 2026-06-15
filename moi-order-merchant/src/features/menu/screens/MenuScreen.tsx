@@ -15,6 +15,7 @@ import { styles } from './MenuScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { spacing } from '../../../shared/theme/spacing';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
+import { PLATFORM_FEE_RATE } from '../../../shared/constants/config';
 import { useTranslation } from '../../../shared/hooks/useTranslation';
 import type { MenuItem } from '../../../types/models';
 import type { AddItemForm } from '../hooks/useMenuScreen';
@@ -475,7 +476,7 @@ function ItemFormContent({
 
       <View style={styles.priceRow}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.priceLabel}>{t('menu_price_label')}</Text>
+          <Text style={styles.priceLabel}>{t('menu_price_label')} (your take)</Text>
           <TextInput
             style={styles.modalInput}
             placeholder="100.00"
@@ -485,6 +486,11 @@ function ItemFormContent({
             keyboardType="decimal-pad"
             accessibilityLabel="Item price"
           />
+          {form.price.trim() !== '' && !isNaN(parseFloat(form.price)) && (
+            <Text style={styles.customerPriceHint}>
+              Customer sees: {formatPrice(Math.round(parseFloat(form.price) * 100 * (1 + PLATFORM_FEE_RATE)))}
+            </Text>
+          )}
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.priceLabel}>{t('menu_original_price_label')}</Text>
@@ -497,6 +503,11 @@ function ItemFormContent({
             keyboardType="decimal-pad"
             accessibilityLabel="Original price before discount"
           />
+          {form.original_price.trim() !== '' && !isNaN(parseFloat(form.original_price)) && (
+            <Text style={styles.customerPriceHint}>
+              Customer sees: {formatPrice(Math.round(parseFloat(form.original_price) * 100 * (1 + PLATFORM_FEE_RATE)))}
+            </Text>
+          )}
         </View>
       </View>
 
