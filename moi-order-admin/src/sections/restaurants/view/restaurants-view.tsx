@@ -155,7 +155,7 @@ export function RestaurantsView() {
                 ) : (
                   <>
                     {rows.map((row) => (
-                      <TableRow key={row.id} hover>
+                      <TableRow key={row.id} hover sx={{ cursor: 'pointer' }} onClick={() => router.push(`/restaurants/${row.id}`)}>
                         <TableCell>
                           <Typography variant="body2" fontWeight={600} color="primary.main">
                             #{row.id}
@@ -199,7 +199,7 @@ export function RestaurantsView() {
                             )}
                           </Box>
                         </TableCell>
-                        <TableCell>
+                        <TableCell onClick={(e) => e.stopPropagation()}>
                           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                             <Tooltip title={row.platform_status === 'active' ? 'Platform active — click to suspend' : 'Platform suspended — click to activate'}>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -219,7 +219,7 @@ export function RestaurantsView() {
                             </Label>
                           </Box>
                         </TableCell>
-                        <TableCell align="right">
+                        <TableCell align="right" onClick={(e) => e.stopPropagation()}>
                           <IconButton
                             size="small"
                             onClick={() => router.push(`/restaurants/${row.id}`)}
