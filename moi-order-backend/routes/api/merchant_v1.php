@@ -40,6 +40,7 @@ Route::patch('/restaurant/status', [MerchantRestaurantController::class, 'update
 Route::get('/menu/categories',          [MenuCategoryController::class, 'index']);
 Route::post('/menu/categories',         [MenuCategoryController::class, 'store']);
 Route::put('/menu/categories/{id}',     [MenuCategoryController::class, 'update']);
+Route::patch('/menu/categories/{id}',   [MenuCategoryController::class, 'update']);
 Route::delete('/menu/categories/{id}',  [MenuCategoryController::class, 'destroy']);
 
 // ── Menu items ────────────────────────────────────────────────────────────────
