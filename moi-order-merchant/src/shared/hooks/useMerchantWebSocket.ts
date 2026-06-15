@@ -1,22 +1,15 @@
-/**
- * Principle: SRP — manages the Pusher WebSocket connection for real-time merchant updates.
- * Principle: DIP — abstracts Pusher behind this hook; no component imports pusher-js directly.
- *
- * Uses the same Pusher account as the user frontend (usePusherNotifications) and admin
- * dashboard (NotificationsProvider) — key from EXPO_PUBLIC_PUSHER_KEY.
- *
- * Graceful degradation: if EXPO_PUBLIC_PUSHER_KEY is not set or pusher-js is not installed,
- * the hook is a no-op. Polling via TanStack Query refetchInterval continues regardless.
- *
- * Install: npm install pusher-js  (same package already used by moi-order-frontend)
- */
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useSyncExternalStore } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/authStore';
 import { QUERY_KEYS } from '../constants/queryKeys';
 import { PUSHER_APP_KEY, PUSHER_APP_CLUSTER, BROADCAST_AUTH_URL } from '../constants/config';
 
-// ── Local Pusher type shims (avoids hard dep on @types/pusher-js) ─────────────
+// ── Pusher type shims ─────────────────────────────────────────────────────────
+
+interface PusherConnection {
+  state: string;
+  bind(event: string, callback: (data: unknown) => void): void;
+}
 
 interface PusherChannel {
   bind(event: string, callback: (data: unknown) => void): void;
@@ -27,7 +20,7 @@ interface PusherInstance {
   subscribe(channel: string): PusherChannel;
   unsubscribe(channel: string): void;
   disconnect(): void;
-  connection: { state: string };
+  connection: PusherConnection;
 }
 
 type PusherOptions = {
@@ -62,7 +55,52 @@ interface OrderStatusUpdatedPayload {
   status: string;
 }
 
-// ── Hook ──────────────────────────────────────────────────────────────────────
+// ── Module-level status (shared across all hook instances) ────────────────────
+
+export type WsStatus = 'idle' | 'connecting' | 'connected' | 'unavailable' | 'failed' | 'disconnected';
+export type ChannelStatus = 'idle' | 'pending' | 'subscribed' | 'auth_failed' | 'error';
+
+let _wsStatus: WsStatus     = 'idle';
+let _wsError: string | null = null;
+let _channelStatus: ChannelStatus   = 'idle';
+let _channelError: string | null    = null;
+
+const _statusListeners = new Set<() => void>();
+
+function _notify(): void { _statusListeners.forEach((fn) => fn()); }
+
+function _setWs(status: WsStatus, error: string | null = null): void {
+  _wsStatus = status; _wsError = error; _notify();
+}
+
+function _setChannel(status: ChannelStatus, error: string | null = null): void {
+  _channelStatus = status; _channelError = error; _notify();
+}
+
+function _subscribe(cb: () => void): () => void {
+  _statusListeners.add(cb);
+  return () => { _statusListeners.delete(cb); };
+}
+
+// ── Read-only hook (safe to call from any component) ─────────────────────────
+
+export interface WsStatusResult {
+  wsStatus: WsStatus;
+  wsError: string | null;
+  channelStatus: ChannelStatus;
+  channelError: string | null;
+  pusherKey: string;
+}
+
+export function useWsStatus(): WsStatusResult {
+  const wsStatus     = useSyncExternalStore(_subscribe, () => _wsStatus,     () => 'idle' as WsStatus);
+  const wsError      = useSyncExternalStore(_subscribe, () => _wsError,      () => null);
+  const channelStatus = useSyncExternalStore(_subscribe, () => _channelStatus, () => 'idle' as ChannelStatus);
+  const channelError = useSyncExternalStore(_subscribe, () => _channelError, () => null);
+  return { wsStatus, wsError, channelStatus, channelError, pusherKey: PUSHER_APP_KEY };
+}
+
+// ── Connection hook (call once in WebSocketManager) ───────────────────────────
 
 interface UseMerchantWebSocketOptions {
   onNewOrder?: () => void;
@@ -95,8 +133,6 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
     [queryClient],
   );
 
-  // FoodOrderStatusUpdated now also broadcasts on the merchant channel so the order
-  // detail screen updates without a separate per-order Pusher connection.
   const handleOrderStatusUpdated = useCallback(
     (data: OrderStatusUpdatedPayload) => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDER_DETAIL(data.order_uuid) });
@@ -106,29 +142,29 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
   );
 
   useEffect(() => {
-    if (!token || !userId || !PUSHER_APP_KEY) return;
+    if (!token) { _setWs('idle', 'No auth token'); return; }
+    if (!userId) { _setWs('idle', 'No user id'); return; }
+    if (!PUSHER_APP_KEY) { _setWs('idle', 'EXPO_PUBLIC_PUSHER_KEY is not set'); return; }
 
     let pusher: PusherInstance | null = null;
 
     try {
-      // Dynamic require: gracefully handles case where pusher-js is not installed.
-      // Note: pusher-js React Native bundle exports { Pusher: class }, not a default export.
       // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any
       const mod = require('pusher-js') as any;
       const PusherClass: PusherConstructorFn = mod.Pusher ?? mod.default ?? mod;
 
+      _setWs('connecting');
+      _setChannel('pending');
+
       pusher = new PusherClass(PUSHER_APP_KEY, {
         cluster:  PUSHER_APP_CLUSTER,
         forceTLS: true,
-        // Mirror the channelAuthorization pattern used by usePusherNotifications
-        // in the user frontend — custom handler attaches the Bearer token.
         channelAuthorization: {
           customHandler: async (
             { channelName, socketId }: { channelName: string; socketId: string },
             callback: (err: Error | null, data: { auth: string } | null) => void,
           ) => {
             try {
-              // Use the same apiClient so the interceptor attaches the Bearer token.
               // eslint-disable-next-line @typescript-eslint/no-require-imports
               const { apiClient } = require('../api/client') as { apiClient: { post: <T>(url: string, data: unknown) => Promise<{ data: T }> } };
               const res = await apiClient.post<{ auth: string }>(
@@ -136,14 +172,33 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
                 { socket_id: socketId, channel_name: channelName },
               );
               callback(null, res.data);
-            } catch {
-              callback(new Error('Channel auth failed'), null);
+            } catch (err) {
+              const msg = err instanceof Error ? err.message : String(err);
+              _setChannel('auth_failed', `Auth POST failed: ${msg}`);
+              callback(new Error(msg), null);
             }
           },
         },
       });
 
+      pusher.connection.bind('state_change', (data: unknown) => {
+        const { current } = data as { current: string };
+        _setWs(current as WsStatus);
+      });
+      pusher.connection.bind('error', (err: unknown) => {
+        const msg = err instanceof Error ? err.message : JSON.stringify(err);
+        _setWs('failed', `Connection error: ${msg}`);
+      });
+
       const channel = pusher.subscribe(`private-merchant.${userId}`);
+
+      channel.bind('pusher:subscription_succeeded', () => {
+        _setChannel('subscribed');
+      });
+      channel.bind('pusher:subscription_error', (data: unknown) => {
+        const msg = data instanceof Error ? data.message : JSON.stringify(data);
+        _setChannel('error', `Subscription error: ${msg}`);
+      });
       channel.bind('food-order.new', (data: unknown) => {
         handleNewOrder(data as NewOrderPayload);
       });
@@ -156,8 +211,9 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
 
       pusherRef.current  = pusher;
       channelRef.current = channel;
-    } catch {
-      // pusher-js not installed or connection failed — silent degradation.
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      _setWs('failed', `Pusher init failed: ${msg}`);
     }
 
     return () => {
@@ -168,11 +224,12 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
       } catch { /* silent */ }
       pusherRef.current  = null;
       channelRef.current = null;
+      _setWs('idle');
+      _setChannel('idle');
     };
   }, [token, userId, handleNewOrder, handleNotificationCreated, handleOrderStatusUpdated]);
 }
 
-/** Strips the path suffix to get the API origin for the auth endpoint. */
 function _getBase(): string {
   return (process.env.EXPO_PUBLIC_API_URL as string | undefined) ??
     'https://api.moiorder.com/api/merchant/v1';

@@ -26,6 +26,16 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Settings',      icon: 'settings-outline',        activeIcon: 'settings',          screen: 'Settings',      section: 'ACCOUNT' },
 ];
 
+interface DiagnosticInfo {
+  wsStatus: string;
+  wsError: string | null;
+  channelStatus: string;
+  channelError: string | null;
+  pusherKey: string;
+  audioStatus: string;
+  audioError: string | null;
+}
+
 interface WebSidebarProps {
   activeScreen: WebScreen;
   onNavigate: (screen: WebScreen) => void;
@@ -34,6 +44,7 @@ interface WebSidebarProps {
   isAlarmEnabled?: boolean;
   onAlarmToggle?: () => void;
   onAlarmTest?: () => void;
+  diagnostic?: DiagnosticInfo;
 }
 
 export function WebSidebar({
@@ -44,6 +55,7 @@ export function WebSidebar({
   isAlarmEnabled = true,
   onAlarmToggle,
   onAlarmTest,
+  diagnostic,
 }: WebSidebarProps): React.JSX.Element {
   const handleNavPress = useCallback(
     (screen: WebScreen) => () => onNavigate(screen),
@@ -152,6 +164,17 @@ export function WebSidebar({
             )}
           </View>
         )}
+        {diagnostic !== undefined && (
+          <View style={diagStyles.panel}>
+            <DiagRow label="Pusher key" value={diagnostic.pusherKey ? `…${diagnostic.pusherKey.slice(-6)}` : 'NOT SET'} ok={!!diagnostic.pusherKey} />
+            <DiagRow label="WS" value={diagnostic.wsStatus} ok={diagnostic.wsStatus === 'connected'} />
+            {diagnostic.wsError !== null && <Text style={diagStyles.err}>{diagnostic.wsError}</Text>}
+            <DiagRow label="Channel" value={diagnostic.channelStatus} ok={diagnostic.channelStatus === 'subscribed'} />
+            {diagnostic.channelError !== null && <Text style={diagStyles.err}>{diagnostic.channelError}</Text>}
+            <DiagRow label="Audio" value={diagnostic.audioStatus} ok={diagnostic.audioStatus === 'running'} />
+            {diagnostic.audioError !== null && <Text style={diagStyles.err}>{diagnostic.audioError}</Text>}
+          </View>
+        )}
         <Pressable
           style={({ pressed }) => [styles.navItem, pressed && styles.navItemPressed]}
           onPress={onLogout}
@@ -165,3 +188,22 @@ export function WebSidebar({
     </View>
   );
 }
+
+function DiagRow({ label, value, ok }: { label: string; value: string; ok: boolean }): React.JSX.Element {
+  return (
+    <View style={diagStyles.row}>
+      <Text style={[diagStyles.dot, { color: ok ? '#4ade80' : '#f87171' }]}>●</Text>
+      <Text style={diagStyles.label}>{label}: </Text>
+      <Text style={diagStyles.value}>{value}</Text>
+    </View>
+  );
+}
+
+const diagStyles = {
+  panel: { marginHorizontal: 8, marginBottom: 8, padding: 8, backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: 6 },
+  row:   { flexDirection: 'row' as const, alignItems: 'center' as const, marginBottom: 2 },
+  dot:   { fontSize: 8, marginRight: 4 },
+  label: { fontSize: 10, color: 'rgba(255,255,255,0.5)' },
+  value: { fontSize: 10, color: 'rgba(255,255,255,0.85)', flexShrink: 1 },
+  err:   { fontSize: 9, color: '#f87171', marginBottom: 2, marginLeft: 16 },
+};

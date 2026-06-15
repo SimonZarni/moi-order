@@ -1,47 +1,58 @@
-/**
- * Principle: SRP — manages order alarm audio for the merchant dashboard.
- *
- * AudioContext is a module-level singleton so every useOrderAlarm() call shares
- * the same context. This means clicking the alarm button in the sidebar (one
- * component) also unlocks the context used by WebSocketManager (another component)
- * when triggerAlarm() is eventually called.
- *
- * Browser autoplay policy: AudioContext starts suspended until a user gesture
- * calls resume(). We attempt resume() on any click/keydown/pointerdown on the
- * page. Once running it stays running for the life of the tab.
- */
 import { useEffect, useCallback, useSyncExternalStore } from 'react';
 import { useSettingsStore } from '../../store/settingsStore';
 
 // ── Singleton AudioContext ─────────────────────────────────────────────────────
 
+export type AudioStatus = 'unsupported' | 'suspended' | 'running' | 'error';
+
 let _ctx: AudioContext | null = null;
 let _unlocked = false;
+let _audioError: string | null = null;
 const _listeners = new Set<() => void>();
+
+function _notify(): void { _listeners.forEach((fn) => fn()); }
+
+function _subscribe(cb: () => void): () => void {
+  _listeners.add(cb);
+  return () => { _listeners.delete(cb); };
+}
 
 function getCtx(): AudioContext | null {
   if (typeof window === 'undefined' || !('AudioContext' in window)) return null;
-  if (!_ctx) _ctx = new AudioContext();
+  if (!_ctx) {
+    try {
+      _ctx = new AudioContext();
+    } catch (err) {
+      _audioError = `AudioContext creation failed: ${err instanceof Error ? err.message : String(err)}`;
+      _notify();
+      return null;
+    }
+  }
   return _ctx;
-}
-
-function notifyListeners(): void {
-  _listeners.forEach((fn) => fn());
 }
 
 function attemptUnlock(): void {
   const ctx = getCtx();
   if (!ctx) return;
   if (ctx.state === 'running') {
-    if (!_unlocked) { _unlocked = true; notifyListeners(); }
+    if (!_unlocked) { _unlocked = true; _audioError = null; _notify(); }
     return;
   }
-  ctx.resume().then(() => {
-    if (ctx.state === 'running' && !_unlocked) {
-      _unlocked = true;
-      notifyListeners();
-    }
-  }).catch(() => {});
+  ctx.resume()
+    .then(() => {
+      if (ctx.state === 'running') {
+        _unlocked = true;
+        _audioError = null;
+        _notify();
+      } else {
+        _audioError = `resume() called but state is still: ${ctx.state}`;
+        _notify();
+      }
+    })
+    .catch((err: unknown) => {
+      _audioError = `AudioContext.resume() failed: ${err instanceof Error ? err.message : String(err)}`;
+      _notify();
+    });
 }
 
 // ── Alarm pattern ─────────────────────────────────────────────────────────────
@@ -59,20 +70,27 @@ const FREQ = 880;
 const GAIN = 0.30;
 
 function playBeeps(ctx: AudioContext): void {
-  const now = ctx.currentTime;
-  for (const [start, end] of BEEP_PATTERN) {
-    const osc  = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type = 'square';
-    osc.frequency.value = FREQ;
-    gain.gain.setValueAtTime(0, now + start);
-    gain.gain.linearRampToValueAtTime(GAIN, now + start + 0.005);
-    gain.gain.setValueAtTime(GAIN, now + end - 0.005);
-    gain.gain.linearRampToValueAtTime(0, now + end);
-    osc.start(now + start);
-    osc.stop(now + end);
+  try {
+    const now = ctx.currentTime;
+    for (const [start, end] of BEEP_PATTERN) {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'square';
+      osc.frequency.value = FREQ;
+      gain.gain.setValueAtTime(0, now + start);
+      gain.gain.linearRampToValueAtTime(GAIN, now + start + 0.005);
+      gain.gain.setValueAtTime(GAIN, now + end - 0.005);
+      gain.gain.linearRampToValueAtTime(0, now + end);
+      osc.start(now + start);
+      osc.stop(now + end);
+    }
+    _audioError = null;
+    _notify();
+  } catch (err) {
+    _audioError = `playBeeps failed: ${err instanceof Error ? err.message : String(err)}`;
+    _notify();
   }
 }
 
@@ -81,6 +99,8 @@ function playBeeps(ctx: AudioContext): void {
 export interface UseOrderAlarmResult {
   isEnabled: boolean;
   isUnlocked: boolean;
+  audioStatus: AudioStatus;
+  audioError: string | null;
   toggleEnabled: () => void;
   triggerAlarm: () => void;
   unlockAudio: () => void;
@@ -90,18 +110,16 @@ export function useOrderAlarm(): UseOrderAlarmResult {
   const isEnabled       = useSettingsStore((s) => s.alarmEnabled);
   const setAlarmEnabled = useSettingsStore((s) => s.setAlarmEnabled);
 
-  // Subscribe to the module-level _unlocked flag so all hook instances
-  // re-render together when the AudioContext becomes running.
-  const isUnlocked = useSyncExternalStore(
-    (onStoreChange) => {
-      _listeners.add(onStoreChange);
-      return () => { _listeners.delete(onStoreChange); };
-    },
-    () => _unlocked,
-    () => false,
-  );
+  const isUnlocked = useSyncExternalStore(_subscribe, () => _unlocked, () => false);
+  const audioError = useSyncExternalStore(_subscribe, () => _audioError, () => null);
 
-  // Attach unlock listeners on mount — any user gesture unlocks the singleton.
+  const audioStatus = useSyncExternalStore(_subscribe, (): AudioStatus => {
+    if (typeof window === 'undefined' || !('AudioContext' in window)) return 'unsupported';
+    if (_audioError) return 'error';
+    if (_unlocked) return 'running';
+    return 'suspended';
+  }, () => 'suspended' as AudioStatus);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const handler = () => attemptUnlock();
@@ -115,18 +133,23 @@ export function useOrderAlarm(): UseOrderAlarmResult {
     };
   }, []);
 
-  const unlockAudio = useCallback(() => {
-    attemptUnlock();
-  }, []);
+  const unlockAudio = useCallback(() => { attemptUnlock(); }, []);
 
   const triggerAlarm = useCallback(() => {
-    if (!isEnabled) return;
+    if (!isEnabled) {
+      return;
+    }
     const ctx = getCtx();
     if (!ctx) return;
     if (ctx.state === 'running') {
       playBeeps(ctx);
     } else {
-      ctx.resume().then(() => { if (ctx.state === 'running') playBeeps(ctx); }).catch(() => {});
+      ctx.resume()
+        .then(() => { if (ctx.state === 'running') playBeeps(ctx); })
+        .catch((err: unknown) => {
+          _audioError = `triggerAlarm resume failed: ${err instanceof Error ? err.message : String(err)}`;
+          _notify();
+        });
     }
   }, [isEnabled]);
 
@@ -134,5 +157,5 @@ export function useOrderAlarm(): UseOrderAlarmResult {
     setAlarmEnabled(!isEnabled);
   }, [isEnabled, setAlarmEnabled]);
 
-  return { isEnabled, isUnlocked, toggleEnabled, triggerAlarm, unlockAudio };
+  return { isEnabled, isUnlocked, audioStatus, audioError, toggleEnabled, triggerAlarm, unlockAudio };
 }

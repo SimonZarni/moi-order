@@ -37,6 +37,7 @@ import { useAuthStore } from '../store/authStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { useResponsive } from '../shared/hooks/useResponsive';
 import { useOrderAlarm } from '../shared/hooks/useOrderAlarm';
+import { useWsStatus } from '../shared/hooks/useMerchantWebSocket';
 
 // ── Mobile ─────────────────────────────────────────────────────────────────────
 
@@ -256,7 +257,8 @@ function WebMerchantLayout(): React.JSX.Element {
   const logout = useAuthStore((s) => s.logout);
   const theme = useSettingsStore((s) => s.theme);
   const darkStyle = theme === 'dark' ? ({ filter: 'invert(1) hue-rotate(180deg)' } as object) : null;
-  const { isEnabled: isAlarmEnabled, toggleEnabled: toggleAlarm, triggerAlarm } = useOrderAlarm();
+  const { isEnabled: isAlarmEnabled, toggleEnabled: toggleAlarm, triggerAlarm, audioStatus, audioError } = useOrderAlarm();
+  const { wsStatus, wsError, channelStatus, channelError, pusherKey } = useWsStatus();
 
   // When the page is hard-refreshed at /orders/{uuid}/chat, chatOrderId is
   // restored from the URL but chatOrderNumber/completedAt/status are empty
@@ -429,6 +431,7 @@ function WebMerchantLayout(): React.JSX.Element {
           isAlarmEnabled={isAlarmEnabled}
           onAlarmToggle={toggleAlarm}
           onAlarmTest={triggerAlarm}
+          diagnostic={{ wsStatus, wsError, channelStatus, channelError, pusherKey, audioStatus, audioError }}
         />
       )}
 
