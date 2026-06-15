@@ -143,6 +143,13 @@ export function SettingsView() {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const imageTargetIdRef = useRef<number | null>(null);
 
+  // ── Order Alarm Sound (super-admin only) ──────────────────────────────────
+  const [alarmSoundUrl, setAlarmSoundUrl] = useState<string | null>(null);
+  const [alarmUploading, setAlarmUploading] = useState(false);
+  const [alarmRemoving, setAlarmRemoving] = useState(false);
+  const [alarmError, setAlarmError] = useState<string | null>(null);
+  const alarmInputRef = useRef<HTMLInputElement>(null);
+
   // ── Effects ───────────────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -200,6 +207,11 @@ export function SettingsView() {
   }, []);
 
   useEffect(() => { fetchAlerts(); }, [fetchAlerts]);
+
+  useEffect(() => {
+    if (!superAdmin) return;
+    settingsApi.getAlarmSound().then((d) => setAlarmSoundUrl(d.alarm_sound_url)).catch(() => {});
+  }, [superAdmin]);
 
   // ── Handlers — password ───────────────────────────────────────────────────
 
@@ -436,6 +448,38 @@ export function SettingsView() {
       setAlertsError('Failed to remove image.');
     } finally {
       setImageRemoving(null);
+    }
+  }, []);
+
+  // ── Handlers — alarm sound ────────────────────────────────────────────────
+
+  const handleAlarmFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAlarmUploading(true);
+    setAlarmError(null);
+    try {
+      const result = await settingsApi.uploadAlarmSound(file);
+      setAlarmSoundUrl(result.alarm_sound_url);
+    } catch (err: any) {
+      const msg = err?.response?.data?.errors?.sound?.[0] ?? err?.response?.data?.message;
+      setAlarmError(msg ?? 'Upload failed. File must be MP3, WAV, or OGG and under 2 MB.');
+    } finally {
+      setAlarmUploading(false);
+      e.target.value = '';
+    }
+  }, []);
+
+  const handleAlarmRemove = useCallback(async () => {
+    setAlarmRemoving(true);
+    setAlarmError(null);
+    try {
+      await settingsApi.removeAlarmSound();
+      setAlarmSoundUrl(null);
+    } catch {
+      setAlarmError('Failed to remove alarm sound. Please try again.');
+    } finally {
+      setAlarmRemoving(false);
     }
   }, []);
 
@@ -890,6 +934,65 @@ export function SettingsView() {
           </Card>
         </Grid>
 
+        {/* ── Order Alarm Sound ────────────────────────────────────────── */}
+        {superAdmin && (
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Card>
+              <CardHeader
+                title="Order Alarm Sound"
+                subheader="Audio played on the merchant dashboard when a new order arrives"
+              />
+              <Divider />
+              <CardContent>
+                {alarmError && (
+                  <Alert severity="error" sx={{ mb: 2 }} onClose={() => setAlarmError(null)}>
+                    {alarmError}
+                  </Alert>
+                )}
+                <Stack spacing={2}>
+                  {alarmSoundUrl ? (
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                        Current alarm sound
+                      </Typography>
+                      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                      <Box component="audio" controls src={alarmSoundUrl} sx={{ width: '100%', mb: 1.5 }} />
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="error"
+                        disabled={alarmRemoving}
+                        onClick={handleAlarmRemove}
+                        startIcon={alarmRemoving ? <CircularProgress size={14} color="inherit" /> : <Iconify icon="solar:trash-bin-trash-bold" width={16} />}
+                      >
+                        {alarmRemoving ? 'Removing…' : 'Remove Sound'}
+                      </Button>
+                    </Box>
+                  ) : (
+                    <Box sx={{ py: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        No alarm sound uploaded. Merchants hear the default beep pattern.
+                      </Typography>
+                    </Box>
+                  )}
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    disabled={alarmUploading}
+                    onClick={() => alarmInputRef.current?.click()}
+                    startIcon={alarmUploading ? <CircularProgress size={16} color="inherit" /> : <Iconify icon="solar:share-bold" width={18} />}
+                  >
+                    {alarmUploading ? 'Uploading…' : alarmSoundUrl ? 'Replace Sound' : 'Upload Sound'}
+                  </Button>
+                  <Typography variant="caption" color="text.secondary">
+                    MP3, WAV, or OGG · max 2 MB · recommended duration 2–5 s
+                  </Typography>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
+
         {/* ── In-App Alerts ────────────────────────────────────────────── */}
         <Grid size={{ xs: 12 }}>
           <Card>
@@ -1038,6 +1141,15 @@ export function SettingsView() {
         ref={imageInputRef}
         style={{ display: 'none' }}
         onChange={handleImageFileChange}
+      />
+
+      {/* Hidden alarm sound file input */}
+      <input
+        type="file"
+        accept=".mp3,.wav,.ogg,audio/mpeg,audio/wav,audio/ogg"
+        ref={alarmInputRef}
+        style={{ display: 'none' }}
+        onChange={handleAlarmFileChange}
       />
 
       {/* ── Alert Create / Edit dialog ───────────────────────────────── */}

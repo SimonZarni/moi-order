@@ -62,4 +62,24 @@ export const settingsApi = {
 
   ping: () =>
     apiClient.get<{ pong: boolean; time: string }>('/ping').then((r) => r.data),
+
+  getAlarmSound: () =>
+    apiClient
+      .get<{ data: { alarm_sound_url: string | null } }>('/alarm-sound')
+      .then((r) => r.data.data),
+
+  uploadAlarmSound: (file: File) => {
+    const fd = new FormData();
+    fd.append('sound', file);
+    return apiClient
+      .post<{ data: { alarm_sound_url: string } }>('/alarm-sound', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((r) => r.data.data);
+  },
+
+  removeAlarmSound: () =>
+    apiClient
+      .delete<{ data: { alarm_sound_url: null } }>('/alarm-sound')
+      .then((r) => r.data.data),
 };
