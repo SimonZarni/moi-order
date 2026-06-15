@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { ActivityIndicator, View, StyleSheet, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -6,9 +6,10 @@ import { useAuthStore } from '../store/authStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMe } from '../api/auth';
+import { getOrders } from '../api/orders';
 import { getMenuCategories } from '../api/menu';
 import { QUERY_KEYS } from '../shared/constants/queryKeys';
-import { CACHE_TTL } from '../shared/constants/config';
+import { CACHE_TTL, POLL_INTERVAL } from '../shared/constants/config';
 import { colours } from '../shared/theme/colours';
 import { AuthNavigator } from './AuthNavigator';
 import { KycNavigator } from './KycNavigator';
@@ -28,11 +29,41 @@ function PushNotificationManager(): null {
 
 /**
  * Holds the Pusher WebSocket connection for the lifetime of the authenticated session.
+ * Also polls for new orders every 5 s as a fallback alarm trigger while the Pusher
+ * channel subscription is initialising or temporarily unavailable.
  * Principle: SRP — manages connection lifecycle only; renders nothing.
  */
 function WebSocketManager(): null {
   const { triggerAlarm } = useOrderAlarm();
   useMerchantWebSocket({ onNewOrder: triggerAlarm });
+
+  // today string is stable for the lifetime of the session (remounts at midnight via token cycle).
+  const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
+
+  const { data } = useQuery({
+    queryKey:       ['orders-alarm-poll', today],
+    queryFn:        () => getOrders({ date: today, per_page: 1 }),
+    refetchInterval: POLL_INTERVAL.ORDERS,
+    staleTime:      0,
+    gcTime:         0,
+  });
+
+  // latestId starts as undefined (uninitialised) so the very first data load sets the
+  // baseline without triggering the alarm. Subsequent polls compare against it.
+  const latestIdRef = useRef<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    const newestId = data?.data?.[0]?.id ?? null;
+    if (latestIdRef.current === undefined) {
+      latestIdRef.current = newestId;
+      return;
+    }
+    if (newestId !== null && newestId !== latestIdRef.current) {
+      triggerAlarm();
+      latestIdRef.current = newestId;
+    }
+  }, [data, triggerAlarm]);
+
   return null;
 }
 

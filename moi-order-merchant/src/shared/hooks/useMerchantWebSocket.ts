@@ -112,7 +112,9 @@ interface UseMerchantWebSocketOptions {
 export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): void {
   const queryClient = useQueryClient();
   const token  = useAuthStore((s) => s.token);
-  const userId = useAuthStore((s) => s.user?.id ?? null);
+  // int_id is the integer PK — backend broadcasts to merchant.{user_id} (integer FK).
+  // user.id is the UUID and PHP casts it to 0, so it never matches.
+  const userId = useAuthStore((s) => s.user?.int_id ?? null);
   const onNewOrder = options?.onNewOrder;
 
   const pusherRef  = useRef<PusherInstance | null>(null);
