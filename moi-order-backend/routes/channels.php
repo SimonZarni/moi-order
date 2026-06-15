@@ -40,9 +40,9 @@ Broadcast::channel('presence-online-users', function ($user): array|false {
 
 // Merchant private channel — real-time dashboard (NewFoodOrder broadcasts here).
 // Only the owning merchant may subscribe to their own channel.
-Broadcast::channel('merchant.{merchantId}', function ($user, int $merchantId): bool {
+Broadcast::channel('merchant.{merchantId}', function ($user, string $merchantId): bool {
     return $user->currentAccessToken()?->can('merchant')
-        && (int) $user->id === $merchantId;
+        && $user->id === (int) $merchantId;
 });
 
 // Order chat + status updates — customer who owns the order, merchant who received it, or any admin.
