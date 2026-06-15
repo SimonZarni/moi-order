@@ -55,8 +55,13 @@ function WebSocketManager(): null {
   const latestIdRef = useRef<string | null | undefined>(undefined);
 
   useEffect(() => {
-    const newestId = data?.data?.[0]?.id ?? null;
+    // data === undefined means the query hasn't resolved yet (loading state).
+    // Setting the baseline from undefined data produces null, which then causes
+    // the first real response to look like a new order and trigger the alarm on refresh.
+    if (data === undefined) return;
+    const newestId = data.data?.[0]?.id ?? null;
     if (latestIdRef.current === undefined) {
+      // First real API response — establish baseline without alarming.
       latestIdRef.current = newestId;
       return;
     }
