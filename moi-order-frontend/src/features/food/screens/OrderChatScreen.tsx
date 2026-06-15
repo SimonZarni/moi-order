@@ -274,7 +274,7 @@ export function OrderChatScreen(): React.JSX.Element {
         </View>
       </View>
 
-      <KeyboardAvoidingView behavior="padding" enabled={Platform.OS === 'ios'} style={styles.body}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.body}>
         {showNoticeBanner && (
           <NoticeBanner text={s.chat.notice} onDismiss={() => setShowNoticeBanner(false)} />
         )}
