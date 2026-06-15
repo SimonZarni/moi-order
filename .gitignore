@@ -6,6 +6,12 @@ system-manual/
 # APKPure store assets (local only)
 moi-order-frontend/assets/apkpure/
 
+# Expo native build artifacts (contain baked env vars — never commit)
+moi-order-frontend/ios/
+moi-order-frontend/android/
+moi-order-merchant/ios/
+moi-order-merchant/android/
+
 # Business documents (local only)
 BUSINESS_PROPOSAL_EN.md
 
