@@ -16,7 +16,7 @@ import { AuthNavigator } from './AuthNavigator';
 import { KycNavigator } from './KycNavigator';
 import { MerchantTabsNavigator } from './MerchantTabsNavigator';
 import { usePushNotifications } from '../features/notifications/hooks/usePushNotifications';
-import { useMerchantWebSocket } from '../shared/hooks/useMerchantWebSocket';
+import { useMerchantWebSocket, useWsStatus } from '../shared/hooks/useMerchantWebSocket';
 import { useOrderAlarm } from '../shared/hooks/useOrderAlarm';
 import { KYC_STATUS } from '../types/enums';
 import type { RootStackParamList } from '../types/navigation';
@@ -36,6 +36,7 @@ function PushNotificationManager(): null {
  */
 function WebSocketManager(): null {
   const { triggerAlarm } = useOrderAlarm();
+  const { channelStatus } = useWsStatus();
   useMerchantWebSocket({ onNewOrder: triggerAlarm });
 
   // today string is stable for the lifetime of the session (remounts at midnight via token cycle).
@@ -60,10 +61,15 @@ function WebSocketManager(): null {
       return;
     }
     if (newestId !== null && newestId !== latestIdRef.current) {
-      triggerAlarm();
+      // Always advance the baseline so it stays current if Pusher reconnects later.
       latestIdRef.current = newestId;
+      // Polling is fallback only — skip when Pusher channel is subscribed to prevent
+      // the alarm firing twice (once from Pusher, once from this poll 5 s later).
+      if (channelStatus !== 'subscribed') {
+        triggerAlarm();
+      }
     }
-  }, [data, triggerAlarm]);
+  }, [data, triggerAlarm, channelStatus]);
 
   return null;
 }
