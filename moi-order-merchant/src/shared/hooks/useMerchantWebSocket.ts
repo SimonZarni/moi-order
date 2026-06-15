@@ -1,7 +1,6 @@
 import { useEffect, useRef, useCallback, useSyncExternalStore } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/authStore';
-import { apiClient } from '../../api/client';
 import { QUERY_KEYS } from '../constants/queryKeys';
 import { PUSHER_APP_KEY, PUSHER_APP_CLUSTER, BROADCAST_AUTH_URL } from '../constants/config';
 
@@ -28,7 +27,10 @@ type PusherOptions = {
   cluster: string;
   forceTLS: boolean;
   channelAuthorization: {
-    customHandler: (
+    endpoint: string;
+    transport: 'ajax' | 'jsonp';
+    headers?: Record<string, string>;
+    customHandler?: (
       params: { channelName: string; socketId: string },
       callback: (err: Error | null, data: { auth: string } | null) => void,
     ) => void;
@@ -161,27 +163,13 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
         cluster:  PUSHER_APP_CLUSTER,
         forceTLS: true,
         channelAuthorization: {
-          customHandler: (
-            { channelName, socketId }: { channelName: string; socketId: string },
-            callback: (err: Error | null, data: { auth: string } | null) => void,
-          ) => {
-            // Read token directly from store — apiClient._token may not be synced yet
-            // when this handler fires immediately after Pusher initialises.
-            const currentToken = useAuthStore.getState().token;
-            apiClient
-              .post<{ auth: string }>(
-                BROADCAST_AUTH_URL.replace(_getBase(), ''),
-                { socket_id: socketId, channel_name: channelName },
-                currentToken
-                  ? { headers: { Authorization: `Bearer ${currentToken}` } }
-                  : undefined,
-              )
-              .then((res) => callback(null, res.data))
-              .catch((err: unknown) => {
-                const msg = err instanceof Error ? err.message : String(err);
-                _setChannel('auth_failed', `Auth POST failed: ${msg}`);
-                callback(new Error(msg), null);
-              });
+          // token is non-null here — we guard `if (!token) return` above.
+          // Using endpoint+headers is simpler and avoids any apiClient/_token sync issues.
+          endpoint:  BROADCAST_AUTH_URL,
+          transport: 'ajax',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept:        'application/json',
           },
         },
       });
