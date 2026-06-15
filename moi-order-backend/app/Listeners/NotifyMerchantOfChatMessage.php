@@ -11,7 +11,6 @@ use App\Events\OrderChatMessageSent;
 use App\Models\DeviceToken;
 use App\Models\MerchantNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -67,7 +66,7 @@ class NotifyMerchantOfChatMessage implements ShouldQueue
                 ->latest()
                 ->first();
             if ($existing !== null) {
-                DB::afterCommit(fn () => event(new MerchantNotificationReceived($existing)));
+                event(new MerchantNotificationReceived($existing));
             }
             return;
         }
@@ -84,10 +83,8 @@ class NotifyMerchantOfChatMessage implements ShouldQueue
             'order_id'    => $order->id,
         ]);
 
-        // Broadcast only after the row is committed so the app sees it on refetch.
-        DB::afterCommit(function () use ($notification): void {
-            event(new MerchantNotificationReceived($notification));
-        });
+        // create() auto-commits; fire the broadcast directly.
+        event(new MerchantNotificationReceived($notification));
 
         $tokens = DeviceToken::forUser($merchantId)
             ->where('platform', 'merchant')
