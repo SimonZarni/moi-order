@@ -61,6 +61,10 @@ const IN_PROGRESS_STATUSES: ReadonlySet<OrderStatus> = new Set<OrderStatus>([
 const DONE_STATUSES: ReadonlySet<OrderStatus> = new Set<OrderStatus>([
   ORDER_STATUS.Completed,
 ]);
+const TERMINAL_STATUSES: ReadonlySet<OrderStatus> = new Set<OrderStatus>([
+  ORDER_STATUS.Cancelled,
+  ORDER_STATUS.Expired,
+]);
 
 function toDateString(d: Date): string {
   const y   = d.getFullYear();
@@ -168,9 +172,10 @@ export function useOrdersScreen(): UseOrdersScreenResult {
       return d.length > 0 ? [{ title: 'Completed', data: d }] : [];
     }
     return [
-      { title: 'New Orders',              data: filtered.filter((o) => NEW_STATUSES.has(o.status)) },
-      { title: 'In Progress',             data: filtered.filter((o) => IN_PROGRESS_STATUSES.has(o.status)) },
-      { title: 'Completed',   data: filtered.filter((o) => DONE_STATUSES.has(o.status)) },
+      { title: 'New Orders',          data: filtered.filter((o) => NEW_STATUSES.has(o.status)) },
+      { title: 'In Progress',         data: filtered.filter((o) => IN_PROGRESS_STATUSES.has(o.status)) },
+      { title: 'Completed',           data: filtered.filter((o) => DONE_STATUSES.has(o.status)) },
+      { title: 'Cancelled & Expired', data: filtered.filter((o) => TERMINAL_STATUSES.has(o.status)) },
     ].filter((s) => s.data.length > 0);
   }, [orders, statusFilter, matchesSearch]);
 

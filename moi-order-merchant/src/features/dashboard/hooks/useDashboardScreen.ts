@@ -93,7 +93,7 @@ export function useDashboardScreen(): UseDashboardScreenResult {
     () => {
       if (pendingOnly) return pendingOrdersData?.data ?? [];
       return (ordersData?.data ?? [])
-        .filter((o) => o.status !== ORDER_STATUS.Cancelled)
+        .filter((o) => o.status !== ORDER_STATUS.Cancelled && o.status !== ORDER_STATUS.Expired)
         .slice(0, 5);
     },
     [pendingOnly, pendingOrdersData, ordersData],
