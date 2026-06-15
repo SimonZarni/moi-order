@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property int         $id
  * @property int         $merchant_id
- * @property string      $type          new_order | order_status | system
+ * @property string      $type          new_order | order_status | chat_message | system
  * @property string      $title
  * @property string      $body
  * @property int|null    $order_id
