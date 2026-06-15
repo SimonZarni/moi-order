@@ -18,8 +18,13 @@ Broadcast::channel('App.Models.User.{uuid}', function ($user, string $uuid): boo
 // Admin notification bell — admin-only (AdminNotificationReceived broadcasts here).
 // Separate channel so mobile app clients subscribed to App.Models.User.{uuid} never
 // receive signals for admin-only notifications, even for dual-role users.
-// Extra is_admin guard prevents a non-admin user who knows a UUID from subscribing.
+// Token ability check (can('admin')) prevents a customer token belonging to a
+// dual-role user (e.g. igzy who is both admin and customer) from subscribing here
+// via the mobile app's /api/v1/broadcasting/auth endpoint.
 Broadcast::channel('App.Admin.User.{uuid}', function ($user, string $uuid): bool {
+    if (! $user->currentAccessToken()?->can('admin')) {
+        return false;
+    }
     return $user->uuid === $uuid && $user->is_admin === true;
 });
 
