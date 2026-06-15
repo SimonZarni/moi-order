@@ -227,7 +227,7 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
   }, [order, navigation]);
 
   const handleBrowseRestaurants = useCallback(() => {
-    navigation.navigate('Food');
+    navigation.reset({ index: 1, routes: [{ name: 'MainTabs' }, { name: 'Food' }] });
   }, [navigation]);
 
   return {

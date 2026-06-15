@@ -27,7 +27,7 @@ export function MenuScreen(): React.JSX.Element {
     selectedCategoryId, searchQuery, handleSelectCategory, handleSearchChange,
     showAddCategoryModal, newCategoryName, setShowAddCategoryModal,
     handleNewCategoryNameChange, handleConfirmAddCategory,
-    renamingCategoryId, renamingCategoryName,
+    renamingCategoryId, renamingCategoryName, isRenamingCategory,
     handleOpenRename, handleRenameNameChange, handleConfirmRename, handleCancelRename,
     deletingCategoryId, deletingCategoryName,
     handleOpenDeleteConfirm, handleConfirmDelete, handleCancelDelete,
@@ -257,8 +257,17 @@ export function MenuScreen(): React.JSX.Element {
               <Pressable style={styles.cancelButton} onPress={handleCancelRename} accessibilityLabel="Cancel" accessibilityRole="button">
                 <Text style={styles.cancelText}>{t('common_cancel')}</Text>
               </Pressable>
-              <Pressable style={styles.confirmButton} onPress={handleConfirmRename} accessibilityLabel="Save name" accessibilityRole="button">
-                <Text style={styles.confirmText}>{t('common_save')}</Text>
+              <Pressable
+                style={[styles.confirmButton, isRenamingCategory && { opacity: 0.6 }]}
+                onPress={handleConfirmRename}
+                disabled={isRenamingCategory}
+                accessibilityLabel="Save name"
+                accessibilityRole="button"
+              >
+                {isRenamingCategory
+                  ? <ActivityIndicator size="small" color={colours.backgroundDark} />
+                  : <Text style={styles.confirmText}>{t('common_save')}</Text>
+                }
               </Pressable>
             </View>
           </View>

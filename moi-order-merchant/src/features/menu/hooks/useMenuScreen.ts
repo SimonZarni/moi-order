@@ -69,6 +69,7 @@ interface UseMenuScreenResult {
   // Rename category modal
   renamingCategoryId:     number | null;
   renamingCategoryName:   string;
+  isRenamingCategory:     boolean;
   handleOpenRename:       (id: number, currentName: string) => void;
   handleRenameNameChange: (v: string) => void;
   handleConfirmRename:    () => void;
@@ -324,9 +325,18 @@ export function useMenuScreen(): UseMenuScreenResult {
     onSuccess: () => { void invalidateMenu(); },
   });
 
-  const { mutate: mutateUpdateCategory } = useMutation({
+  const { mutate: mutateUpdateCategory, isPending: isRenamingCategory } = useMutation({
     mutationFn: ({ id, name }: { id: number; name: string }) => updateCategory(id, name),
-    onSuccess: () => { void invalidateMenu(); },
+    onSuccess: () => {
+      void invalidateMenu();
+      setRenamingCategoryId(null);
+      setRenamingCategoryName('');
+    },
+    onError: (error) => {
+      const apiError = extractApiError(error);
+      const message = (apiError.code ? DOMAIN_MESSAGES[apiError.code] : undefined) ?? MESSAGES.genericError;
+      Alert.alert('Could not rename category', message);
+    },
   });
 
   const { mutate: mutateDeleteCategory } = useMutation({
@@ -420,11 +430,9 @@ export function useMenuScreen(): UseMenuScreenResult {
   const handleRenameNameChange = useCallback((v: string) => setRenamingCategoryName(v), []);
 
   const handleConfirmRename = useCallback(() => {
-    if (renamingCategoryId === null || !renamingCategoryName.trim()) return;
+    if (renamingCategoryId === null || !renamingCategoryName.trim() || isRenamingCategory) return;
     mutateUpdateCategory({ id: renamingCategoryId, name: renamingCategoryName.trim() });
-    setRenamingCategoryId(null);
-    setRenamingCategoryName('');
-  }, [renamingCategoryId, renamingCategoryName, mutateUpdateCategory]);
+  }, [renamingCategoryId, renamingCategoryName, isRenamingCategory, mutateUpdateCategory]);
 
   const handleCancelRename = useCallback(() => {
     setRenamingCategoryId(null);
@@ -562,7 +570,7 @@ export function useMenuScreen(): UseMenuScreenResult {
     selectedCategoryId, searchQuery, handleSelectCategory, handleSearchChange,
     showAddCategoryModal, newCategoryName, setShowAddCategoryModal,
     handleNewCategoryNameChange, handleConfirmAddCategory,
-    renamingCategoryId, renamingCategoryName,
+    renamingCategoryId, renamingCategoryName, isRenamingCategory,
     handleOpenRename, handleRenameNameChange, handleConfirmRename, handleCancelRename,
     deletingCategoryId, deletingCategoryName,
     handleOpenDeleteConfirm, handleConfirmDelete, handleCancelDelete,
