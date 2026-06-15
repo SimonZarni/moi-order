@@ -85,7 +85,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         onClose={handleClosePopover}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        slotProps={{ paper: { sx: { width: 200 } } }}
+        slotProps={{ paper: { sx: { width: 240 } } }}
       >
         <Box sx={{ p: 2, pb: 1.5 }}>
           <Typography variant="subtitle2" noWrap>
