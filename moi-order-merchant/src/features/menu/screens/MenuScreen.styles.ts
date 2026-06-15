@@ -5,8 +5,8 @@ import { typography } from '../../../shared/theme/typography';
 import { radius } from '../../../shared/theme/radius';
 
 export const styles = StyleSheet.create({
-  safe:    { flex: 1, backgroundColor: colours.backgroundLight },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colours.backgroundLight },
+  safe:    { flex: 1, backgroundColor: colours.surface },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colours.surface },
 
   // ── Header ────────────────────────────────────────────────────────────────
   header: {
