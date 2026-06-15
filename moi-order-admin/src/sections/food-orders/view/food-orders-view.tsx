@@ -174,7 +174,7 @@ export function FoodOrdersView() {
                 ) : (
                   <>
                     {rows.map((row) => (
-                      <TableRow key={row.id} hover>
+                      <TableRow key={row.id} hover sx={{ cursor: 'pointer' }} onClick={() => router.push(`/food-orders/${row.id}`)}>
                         <TableCell>
                           <Typography variant="body2" fontWeight={600} color="primary.main">
                             {row.order_number ?? `#${row.id.slice(0, 8)}`}
@@ -205,7 +205,7 @@ export function FoodOrdersView() {
                             {row.status}
                           </Label>
                         </TableCell>
-                        <TableCell align="right">
+                        <TableCell align="right" onClick={(e) => e.stopPropagation()}>
                           <IconButton
                             size="small"
                             onClick={() => router.push(`/food-orders/${row.id}`)}

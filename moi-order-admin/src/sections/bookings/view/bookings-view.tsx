@@ -222,7 +222,7 @@ export function BookingsView() {
                 ) : (
                   <>
                     {bookings.map((row) => (
-                      <TableRow key={row.id} hover>
+                      <TableRow key={row.id} hover sx={{ cursor: 'pointer' }} onClick={() => router.push(`/bookings/${row.id}`)}>
                         <TableCell>
                           <Typography variant="body2" fontWeight={600} color="primary.main">
                             #{row.id}
@@ -253,7 +253,7 @@ export function BookingsView() {
                         <TableCell>
                           <Label color={statusColor(row.status)}>{row.status_label}</Label>
                         </TableCell>
-                        <TableCell align="right">
+                        <TableCell align="right" onClick={(e) => e.stopPropagation()}>
                           <IconButton size="small" onClick={() => router.push(`/bookings/${row.id}`)}>
                             <Iconify icon="solar:eye-bold" width={16} />
                           </IconButton>

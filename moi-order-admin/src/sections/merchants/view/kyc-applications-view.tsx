@@ -220,7 +220,7 @@ export function KycApplicationsView() {
                 ) : (
                   <>
                     {rows.map((row) => (
-                      <TableRow key={row.id} hover>
+                      <TableRow key={row.id} hover sx={{ cursor: 'pointer' }} onClick={() => router.push(`/merchants/kyc/${row.id}`)}>
                         <TableCell>
                           <Typography variant="body2" fontWeight={600}>
                             {row.user_name}
@@ -256,7 +256,7 @@ export function KycApplicationsView() {
                         <TableCell>
                           {row.submitted_at ? fDate(row.submitted_at) : '—'}
                         </TableCell>
-                        <TableCell align="right">
+                        <TableCell align="right" onClick={(e) => e.stopPropagation()}>
                           <IconButton
                             size="small"
                             onClick={() => router.push(`/merchants/kyc/${row.id}`)}
