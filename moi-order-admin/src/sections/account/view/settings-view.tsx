@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -955,7 +955,6 @@ export function SettingsView() {
                       <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
                         Current alarm sound
                       </Typography>
-                      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
                       <Box component="audio" controls src={alarmSoundUrl} sx={{ width: '100%', mb: 1.5 }} />
                       <Button
                         size="small"
