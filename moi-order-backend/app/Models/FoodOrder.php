@@ -96,6 +96,17 @@ class FoodOrder extends Model
         $this->update(array_merge(['status' => $next], $timestamps));
     }
 
+    public function isChatLocked(): bool
+    {
+        if (in_array($this->status, [FoodOrderStatus::Cancelled, FoodOrderStatus::Expired], true)) {
+            return true;
+        }
+        if ($this->status === FoodOrderStatus::Completed && $this->completed_at !== null) {
+            return $this->completed_at->addHours(3)->isPast();
+        }
+        return false;
+    }
+
     public function canShowPromptPay(): bool
     {
         // Payment is processed via LINE channel regardless of payment_method.

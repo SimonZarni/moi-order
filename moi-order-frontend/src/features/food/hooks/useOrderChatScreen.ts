@@ -65,7 +65,7 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
   const { bottom: bottomInset } = useSafeAreaInsets();
 
   const queryClient = useQueryClient();
-  const { messages, isLoading, isError } = useOrderChatData(orderId);
+  const { messages, isLoading, isError, liveOrderStatus, liveCompletedAt } = useOrderChatData(orderId, { orderStatus, completedAt: completedAt ?? null });
   const { mutateAsync }  = useSendChatMessage();
   const { mutate: deleteMessage } = useDeleteChatMessage();
   const [text, setText]             = useState('');
@@ -79,7 +79,7 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
   const replyingToRef = useRef<OrderChatMessage | null>(null);
   replyingToRef.current = replyingTo;
 
-  const isChatLocked = computeIsChatLocked(orderStatus, completedAt);
+  const isChatLocked = computeIsChatLocked(liveOrderStatus, liveCompletedAt);
 
   useEffect(() => {
     const show = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));

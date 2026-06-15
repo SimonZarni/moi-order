@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchOrderChat, sendOrderChatMessage, markOrderChatRead, deleteOrderChatMessage } from '@/shared/api/foodOrders';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { PUSHER_APP_KEY, PUSHER_APP_CLUSTER } from '@/shared/constants/config';
 import apiClient from '@/shared/api/client';
+import { type FoodOrderStatus } from '@/types/enums';
 import { OrderChatMessage } from '@/types/models';
 
 // Minimal Pusher types — avoids importing the full pusher-js namespace.
@@ -17,14 +18,23 @@ interface PusherInstance {
 }
 type PusherConstructorFn = new (key: string, options: object) => PusherInstance;
 
+interface LiveOrderState {
+  orderStatus?: FoodOrderStatus;
+  completedAt?: string | null;
+}
+
 export interface UseOrderChatDataResult {
   messages: OrderChatMessage[];
   isLoading: boolean;
   isError: boolean;
+  liveOrderStatus: FoodOrderStatus | undefined;
+  liveCompletedAt: string | null | undefined;
 }
 
-export function useOrderChatData(orderId: string): UseOrderChatDataResult {
+export function useOrderChatData(orderId: string, initialState?: LiveOrderState): UseOrderChatDataResult {
   const queryClient = useQueryClient();
+  const [liveOrderStatus, setLiveOrderStatus] = useState<FoodOrderStatus | undefined>(initialState?.orderStatus);
+  const [liveCompletedAt, setLiveCompletedAt] = useState<string | null | undefined>(initialState?.completedAt);
 
   const query = useQuery({
     queryKey: QUERY_KEYS.FOOD_ORDERS.CHAT(orderId),
@@ -71,6 +81,13 @@ export function useOrderChatData(orderId: string): UseOrderChatDataResult {
       });
 
       const channel = pusher.subscribe(`private-order.${orderId}`);
+      channel.bind('food-order.status-updated', (data: unknown) => {
+        const evt = data as { status: FoodOrderStatus; completed_at?: string | null };
+        setLiveOrderStatus(evt.status);
+        if (evt.completed_at !== undefined) {
+          setLiveCompletedAt(evt.completed_at);
+        }
+      });
       channel.bind('chat.message-sent', (data: unknown) => {
         const msg = data as OrderChatMessage;
         queryClient.setQueryData<OrderChatMessage[]>(
@@ -116,9 +133,11 @@ export function useOrderChatData(orderId: string): UseOrderChatDataResult {
   }, [orderId, queryClient]);
 
   return {
-    messages:  query.data ?? [],
-    isLoading: query.isLoading,
-    isError:   query.isError,
+    messages:        query.data ?? [],
+    isLoading:       query.isLoading,
+    isError:         query.isError,
+    liveOrderStatus,
+    liveCompletedAt,
   };
 }
 

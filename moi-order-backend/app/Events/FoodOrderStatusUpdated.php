@@ -49,6 +49,7 @@ class FoodOrderStatusUpdated implements ShouldBroadcast
             'status_label'        => $this->order->status->label(),
             'prompt_pay_url'      => $this->order->prompt_pay_url,
             'can_show_prompt_pay' => $this->order->canShowPromptPay(),
+            'completed_at'        => $this->order->completed_at?->toIso8601String(),
         ];
     }
 }

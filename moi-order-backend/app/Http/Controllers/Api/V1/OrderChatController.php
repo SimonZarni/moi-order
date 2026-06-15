@@ -8,6 +8,7 @@ use App\Contracts\FileStorageInterface;
 use App\Events\OrderChatMessageDeleted;
 use App\Events\OrderChatMessageSent;
 use App\Events\OrderChatMessagesRead;
+use App\Exceptions\DomainException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreOrderChatMessageRequest;
 use App\Http\Resources\OrderChatMessageResource;
@@ -43,6 +44,11 @@ class OrderChatController extends Controller
         $order = FoodOrder::forUser($request->user()->id)
             ->where('uuid', $id)
             ->firstOrFail();
+
+        if ($order->isChatLocked()) {
+            throw new DomainException('order.chat_locked');
+        }
+
         $user  = $request->user();
 
         $imagePath = null;
