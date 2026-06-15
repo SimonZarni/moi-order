@@ -57,13 +57,13 @@ export function RestaurantsView() {
   const [filterSearch, setFilterSearch] = useState('');
   const [togglingId, setTogglingId] = useState<number | null>(null);
 
-  const handleToggleOpen = useCallback((row: RestaurantListItem) => {
-    const next = row.status === 'open' ? 'closed' : 'open';
+  const handleTogglePlatformStatus = useCallback((row: RestaurantListItem) => {
+    const next = row.platform_status === 'active' ? 'suspended' : 'active';
     setTogglingId(row.id);
     restaurantsApi
-      .updateStatus(row.id, next as RestaurantListItem['status'])
-      .then(({ status }) => {
-        setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, status } : r)));
+      .updatePlatformStatus(row.id, next)
+      .then(({ platform_status }) => {
+        setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, platform_status } : r)));
       })
       .catch(() => {})
       .finally(() => setTogglingId(null));
@@ -201,22 +201,22 @@ export function RestaurantsView() {
                         </TableCell>
                         <TableCell>
                           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                            {row.platform_status === 'suspended' && (
-                              <Label color="error">suspended</Label>
-                            )}
-                            <Tooltip title={row.status === 'open' ? 'Click to close' : 'Click to open'}>
+                            <Tooltip title={row.platform_status === 'active' ? 'Platform active — click to suspend' : 'Platform suspended — click to activate'}>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                 <Switch
                                   size="small"
-                                  checked={row.status === 'open'}
+                                  checked={row.platform_status === 'active'}
                                   disabled={togglingId === row.id}
-                                  onChange={() => handleToggleOpen(row)}
+                                  onChange={() => handleTogglePlatformStatus(row)}
                                 />
-                                <Label color={STATUS_COLOR[row.status] ?? 'default'}>
-                                  {row.status}
+                                <Label color={row.platform_status === 'active' ? 'success' : 'error'}>
+                                  {row.platform_status}
                                 </Label>
                               </Box>
                             </Tooltip>
+                            <Label color={STATUS_COLOR[row.status] ?? 'default'}>
+                              {row.status}
+                            </Label>
                           </Box>
                         </TableCell>
                         <TableCell align="right">
