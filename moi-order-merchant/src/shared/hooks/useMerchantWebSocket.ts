@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback, useSyncExternalStore } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/authStore';
+import { apiClient } from '../../api/client';
 import { QUERY_KEYS } from '../constants/queryKeys';
 import { PUSHER_APP_KEY, PUSHER_APP_CLUSTER, BROADCAST_AUTH_URL } from '../constants/config';
 
@@ -165,8 +166,6 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
             callback: (err: Error | null, data: { auth: string } | null) => void,
           ) => {
             try {
-              // eslint-disable-next-line @typescript-eslint/no-require-imports
-              const { apiClient } = require('../api/client') as { apiClient: { post: <T>(url: string, data: unknown) => Promise<{ data: T }> } };
               const res = await apiClient.post<{ auth: string }>(
                 BROADCAST_AUTH_URL.replace(_getBase(), ''),
                 { socket_id: socketId, channel_name: channelName },
