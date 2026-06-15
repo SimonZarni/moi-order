@@ -10,6 +10,7 @@ import { CategoryTabBar } from '../components/CategoryTabBar';
 import { MenuCategorySection } from '../components/MenuCategorySection';
 import { RestaurantPhotoCarousel } from '../components/RestaurantPhotoCarousel';
 import { CartBar } from '../components/CartBar';
+import { RestaurantReviewsSection } from '../components/RestaurantReviewsSection/RestaurantReviewsSection';
 import { useRestaurantDetailScreen } from '../hooks/useRestaurantDetailScreen';
 import { styles } from './RestaurantDetailScreen.styles';
 
@@ -112,6 +113,9 @@ export function RestaurantDetailScreen(): React.JSX.Element {
         {sortedCategories.map((cat, i) => (
           <MenuCategorySection key={cat.id} category={cat} sectionIndex={i} onSectionMeasured={handleSectionLayout} getQuantity={getQuantity} onAdd={handleAddItem} onRemove={handleRemoveItem} onPress={handleItemPress} />
         ))}
+        {restaurant.id !== undefined && (
+          <RestaurantReviewsSection restaurantId={restaurant.id} />
+        )}
         <View style={styles.cartBarSpace} />
       </ScrollView>
       <CartBar itemCount={cartItemCount} totalCents={cartTotalCents} onPress={handleCartPress} orderCount={activeOrderCount} onOrdersPress={handleOrdersPress} />

@@ -275,11 +275,31 @@ export interface TicketOrder {
   payment?: Payment;
 }
 
+// ── Reviews ───────────────────────────────────────────────────────────────
+
+export interface RestaurantReview {
+  user_name: string;
+  rating: number;
+  review: string | null;
+  created_at: string;
+}
+
+export interface RestaurantReviewsResponse {
+  data: RestaurantReview[];
+  meta: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    average_rating: number | null;
+  };
+}
+
 // ── Notifications ──────────────────────────────────────────────────────────
 
 export interface AppNotification {
   id: string;
-  type: 'submission_status' | 'ticket_order_status' | 'custom_announcement' | string;
+  type: 'food_order_status' | 'chat_message' | 'submission_status' | 'ticket_order_status' | 'custom_announcement' | string;
   title: string;
   body: string;
   data: {

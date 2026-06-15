@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\GooglePlacesController;
 use App\Http\Controllers\Api\V1\HomeCardController;
 use App\Http\Controllers\Api\V1\PlaceController;
 use App\Http\Controllers\Api\V1\RestaurantBrowseController;
+use App\Http\Controllers\Api\V1\RestaurantReviewController;
 use App\Http\Controllers\Api\V1\ServiceCategoryController;
 use App\Http\Controllers\Api\V1\ServiceController;
 use App\Http\Controllers\Api\V1\TagController;
@@ -67,8 +68,9 @@ Route::get('/tickets', [TicketController::class, 'index']);
 Route::get('/tickets/{ticket}', [TicketController::class, 'show']);
 
 // Restaurants — public browsing, no auth required
-Route::get('/restaurants',      [RestaurantBrowseController::class, 'index']);
-Route::get('/restaurants/{id}', [RestaurantBrowseController::class, 'show']);
+Route::get('/restaurants',              [RestaurantBrowseController::class, 'index']);
+Route::get('/restaurants/{id}',         [RestaurantBrowseController::class, 'show']);
+Route::get('/restaurants/{id}/reviews', [RestaurantReviewController::class, 'index']);
 
 // Home cards — public, no auth required (shown on home screen before login)
 Route::get('/home-cards', [HomeCardController::class, 'index']);

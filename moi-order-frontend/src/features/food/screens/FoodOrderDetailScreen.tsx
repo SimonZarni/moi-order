@@ -9,6 +9,7 @@ import { formatPrice } from '@/shared/utils/formatCurrency';
 import { InvoiceModal } from '../components/InvoiceModal';
 import { OrderProgressBar } from '../components/OrderProgressBar';
 import { OrderRatingInput } from '../components/OrderRatingInput';
+import { PostOrderReviewCard } from '../components/PostOrderReviewCard/PostOrderReviewCard';
 import { SlideToComplete } from '../components/SlideToComplete';
 import { useFoodOrderDetailScreen } from '../hooks/useFoodOrderDetailScreen';
 import { styles } from './FoodOrderDetailScreen.styles';
@@ -26,6 +27,8 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
     handleRatingChange, handleReviewChange,
     handleCallRestaurant, handleOrderAgain, handleBrowseRestaurants,
     handleCancelOrder, isCancelling,
+    postReviewRating, postReviewText, isSubmittingReview,
+    handlePostReviewRatingChange, handlePostReviewTextChange, handlePostReviewSubmit,
   } = useFoodOrderDetailScreen();
 
   if (isLoading || !order) {
@@ -156,6 +159,18 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
             <Ionicons name="refresh-outline" size={16} color={colours.white} />
             <Text style={styles.orderAgainBtnText}>Order Again</Text>
           </Pressable>
+        )}
+
+        {isCompleted && order.rating === null && (
+          <PostOrderReviewCard
+            restaurantName={order.restaurant_name}
+            rating={postReviewRating}
+            review={postReviewText}
+            isSubmitting={isSubmittingReview}
+            onRatingChange={handlePostReviewRatingChange}
+            onReviewChange={handlePostReviewTextChange}
+            onSubmit={handlePostReviewSubmit}
+          />
         )}
 
         {canComplete && (

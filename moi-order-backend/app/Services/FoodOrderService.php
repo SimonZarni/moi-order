@@ -254,6 +254,26 @@ class FoodOrderService
     }
 
     /**
+     * Submit or update a star rating + optional review on a completed order.
+     * Guards: order must be Completed; only the owning user may call this.
+     *
+     * @throws DomainException when order is not yet completed.
+     */
+    public function saveReview(FoodOrder $order, int $rating, ?string $review): FoodOrder
+    {
+        if ($order->status !== FoodOrderStatus::Completed) {
+            throw new DomainException('order.not_completed', 409);
+        }
+
+        $order->update([
+            'rating'          => $rating,
+            'customer_review' => $review,
+        ]);
+
+        return $order->fresh(['items', 'restaurant', 'user']);
+    }
+
+    /**
      * Customer completes a delivered order, optionally leaving a rating + review.
      * Also used by the auto-complete command (rating/review are null in that case).
      */

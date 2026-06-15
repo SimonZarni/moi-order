@@ -13,6 +13,7 @@ import { cancelFoodOrder, completeFoodOrder, notifyLinePayment } from '@/shared/
 import { ApiError } from '@/types/models';
 import { useLocaleStore, Locale } from '@/shared/store/localeStore';
 import { useFoodOrderDetailData } from './useFoodOrdersData';
+import { useOrderReview } from './useOrderReview';
 
 type DetailRoute = RouteProp<RootStackParamList, 'FoodOrderDetail'>;
 
@@ -47,6 +48,12 @@ export interface UseFoodOrderDetailScreenResult {
   handleBrowseRestaurants: () => void;
   handleCancelOrder: () => void;
   isCancelling: boolean;
+  postReviewRating: number | null;
+  postReviewText: string;
+  isSubmittingReview: boolean;
+  handlePostReviewRatingChange: (r: number) => void;
+  handlePostReviewTextChange: (t: string) => void;
+  handlePostReviewSubmit: () => void;
 }
 
 export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
@@ -57,6 +64,14 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
 
   const { order, isLoading, isError, refetch } = useFoodOrderDetailData(orderId);
   const { locale } = useLocaleStore();
+  const {
+    rating: postReviewRating,
+    review: postReviewText,
+    isSubmitting: isSubmittingReview,
+    handleRatingChange: handlePostReviewRatingChange,
+    handleReviewChange: handlePostReviewTextChange,
+    handleSubmit: handlePostReviewSubmit,
+  } = useOrderReview(orderId);
 
   const [invoiceVisible,    setInvoiceVisible]    = useState(false);
   const [completeModalVisible, setCompleteModal]  = useState(false);
@@ -261,5 +276,11 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
     handleBrowseRestaurants,
     handleCancelOrder,
     isCancelling,
+    postReviewRating,
+    postReviewText,
+    isSubmittingReview,
+    handlePostReviewRatingChange,
+    handlePostReviewTextChange,
+    handlePostReviewSubmit,
   };
 }

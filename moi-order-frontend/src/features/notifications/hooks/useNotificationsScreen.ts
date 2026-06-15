@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -39,7 +40,14 @@ export function useNotificationsScreen(): UseNotificationsScreenResult {
   }, [markAllRead]);
 
   const handleDeleteOne = useCallback((id: string): void => {
-    deleteOne(id);
+    Alert.alert(
+      'Delete Notification',
+      'Remove this notification?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => deleteOne(id) },
+      ],
+    );
   }, [deleteOne]);
 
   const handleDeleteAll = useCallback((): void => {
@@ -52,11 +60,15 @@ export function useNotificationsScreen(): UseNotificationsScreenResult {
     }
 
     if (notification.data.food_order_id !== undefined) {
-      navigation.navigate('OrderChat', {
-        orderId:        notification.data.food_order_id,
-        orderNumber:    null,
-        restaurantName: null,
-      });
+      if (notification.type === 'chat_message') {
+        navigation.navigate('OrderChat', {
+          orderId:        notification.data.food_order_id,
+          orderNumber:    null,
+          restaurantName: null,
+        });
+      } else {
+        navigation.navigate('FoodOrderDetail', { orderId: notification.data.food_order_id });
+      }
     } else if (notification.data.submission_id !== undefined) {
       navigation.navigate('OrderDetail', { submissionId: notification.data.submission_id });
     } else if (notification.data.ticket_order_id !== undefined) {

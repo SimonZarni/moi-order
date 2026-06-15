@@ -120,6 +120,7 @@ Route::get('/food-orders/{id}',           [FoodOrderController::class, 'show']);
 Route::post('/food-orders/{id}/cancel',   [FoodOrderController::class, 'cancel']);
 Route::delete('/food-orders/{id}',        [FoodOrderController::class, 'destroy']);
 Route::post('/food-orders/{id}/complete',        [FoodOrderController::class, 'complete']);
+Route::post('/food-orders/{id}/review',          [FoodOrderController::class, 'review']);
 Route::post('/food-orders/{id}/notify-line-pay', [FoodOrderController::class, 'notifyLinePay']);
 Route::get('/food-orders/{id}/chat',          [\App\Http\Controllers\Api\V1\OrderChatController::class, 'index']);
 Route::post('/food-orders/{id}/chat',         [\App\Http\Controllers\Api\V1\OrderChatController::class, 'store']);

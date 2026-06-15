@@ -49,8 +49,9 @@ export const QUERY_KEYS = {
     UPLOAD_STATS: ['documents', 'upload-stats'] as const,
   },
   RESTAURANTS: {
-    LIST:   (search?: string) => ['restaurants', 'list', search ?? ''] as const,
-    DETAIL: (id: number)      => ['restaurants', 'detail', id] as const,
+    LIST:    (search?: string) => ['restaurants', 'list', search ?? ''] as const,
+    DETAIL:  (id: number)      => ['restaurants', 'detail', id] as const,
+    REVIEWS: (id: number)      => ['restaurants', 'reviews', id] as const,
   },
   FOOD_ORDERS: {
     LIST:   ['food-orders', 'list'] as const,

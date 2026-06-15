@@ -11,6 +11,7 @@ use App\DTOs\StoreFoodOrderDTO;
 use App\Exceptions\DomainException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\CompleteFoodOrderRequest;
+use App\Http\Requests\Api\StoreOrderReviewRequest;
 use App\Http\Requests\Api\StoreFoodOrderRequest;
 use App\Http\Requests\CancelFoodOrderRequest;
 use App\Http\Requests\DeleteFoodOrderRequest;
@@ -56,6 +57,7 @@ class FoodOrderController extends Controller
             ->whereNotIn('status', [
                 FoodOrderStatus::Completed->value,
                 FoodOrderStatus::Cancelled->value,
+                FoodOrderStatus::Expired->value,
             ])
             ->latest()
             ->get();
@@ -141,6 +143,22 @@ class FoodOrderController extends Controller
         $preFilled = 'I have ordered ' . ($order->order_number ?? '#' . $order->id) . ' and ready to pay via LINE.';
 
         return response()->json(['pre_filled_message' => $preFilled], 200);
+    }
+
+    /** POST /api/v1/food-orders/{id}/review */
+    public function review(StoreOrderReviewRequest $request, string $id): JsonResponse
+    {
+        $order = FoodOrder::forUser($request->user()->id)
+            ->where('uuid', $id)
+            ->firstOrFail();
+
+        $order = $this->orderService->saveReview(
+            $order,
+            (int) $request->validated('rating'),
+            $request->validated('review'),
+        );
+
+        return response()->json(['data' => new FoodOrderResource($order, $this->storage)]);
     }
 
     /** POST /api/v1/food-orders/{id}/complete */
