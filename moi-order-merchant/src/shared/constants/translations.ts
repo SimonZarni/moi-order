@@ -43,6 +43,7 @@ export type TranslationKey =
   // ── Order Card ───────────────────────────────────────────────────────────
   | 'card_accept_order' | 'card_start_preparing' | 'card_mark_ready'
   | 'card_rider_picked_up' | 'card_mark_delivered' | 'card_complete_order'
+  | 'prep_time_modal_title' | 'prep_time_modal_subtitle' | 'prep_time_modal_confirm'
   // ── Order Detail ─────────────────────────────────────────────────────────
   | 'order_detail_cannot_load' | 'order_detail_go_back'
   | 'order_detail_customer' | 'order_detail_name' | 'order_detail_phone'
@@ -262,6 +263,9 @@ const EN: Translations = {
   // Order Card
   card_accept_order: 'Accept Order',
   card_start_preparing: 'Start Preparing',
+  prep_time_modal_title: 'How long will it take?',
+  prep_time_modal_subtitle: 'Customer will see this estimated time.',
+  prep_time_modal_confirm: 'Start Preparing',
   card_mark_ready: 'Mark Ready',
   card_rider_picked_up: 'Rider Picked Up',
   card_mark_delivered: 'Mark Delivered',
@@ -642,6 +646,9 @@ const MY: Translations = {
   // Order Card
   card_accept_order: 'အော်ဒါ လက်ခံ',
   card_start_preparing: 'ချက်ပြုတ်ရန် စတင်',
+  prep_time_modal_title: 'အချိန်မည်မျှ ကြာမည်နည်း?',
+  prep_time_modal_subtitle: 'ဖောက်သည်သည် ခန့်မှန်းချိန်ကို မြင်ရမည်။',
+  prep_time_modal_confirm: 'ချက်ပြုတ်ရန် စတင်',
   card_mark_ready: 'အဆင်သင့် မှတ်',
   card_rider_picked_up: 'ရိုက်ဒါ ယူပြီ',
   card_mark_delivered: 'ပို့ဆောင်ပြီ မှတ်',

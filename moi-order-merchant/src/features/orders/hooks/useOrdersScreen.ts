@@ -29,7 +29,13 @@ interface UseOrdersScreenResult {
   searchQuery: string;
   totalVisible: number;
   isActionsOpen: boolean;
+  prepTimeModalVisible: boolean;
+  prepTimeMinutes: number;
   handleUpdateStatus: (orderId: number, newStatus: string) => void;
+  handleStartPreparing: (orderId: number) => void;
+  handlePrepTimeSelect: (minutes: number) => void;
+  handleConfirmPrepTime: () => void;
+  handleCancelPrepTime: () => void;
   handleStatusFilterChange: (filter: StatusFilter) => void;
   handleDatePreset: (preset: DatePreset) => void;
   handleDatePrev: () => void;
@@ -99,6 +105,9 @@ export function useOrdersScreen(): UseOrdersScreenResult {
   const [dateTo, setDateTo]             = useState<string | null>(null);
   const [searchQuery, setSearchQuery]   = useState('');
   const [isActionsOpen, setActionsOpen] = useState(false);
+  const [prepTimeModalVisible, setPrepTimeModalVisible] = useState(false);
+  const [prepTimeOrderId, setPrepTimeOrderId] = useState<number | null>(null);
+  const [prepTimeMinutes, setPrepTimeMinutes] = useState(15);
 
   // Build API params from current preset state
   const queryParams = useMemo(() => {
@@ -123,8 +132,8 @@ export function useOrdersScreen(): UseOrdersScreenResult {
   });
 
   const { mutate: mutateStatus } = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: string }) =>
-      updateOrderStatus(id, status),
+    mutationFn: ({ id, status, prepTime }: { id: number; status: string; prepTime?: number }) =>
+      updateOrderStatus(id, status, prepTime),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS() });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ANALYTICS });
@@ -178,6 +187,28 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     },
     [mutateStatus],
   );
+
+  const handleStartPreparing = useCallback((orderId: number) => {
+    setPrepTimeOrderId(orderId);
+    setPrepTimeMinutes(15);
+    setPrepTimeModalVisible(true);
+  }, []);
+
+  const handlePrepTimeSelect = useCallback((minutes: number) => {
+    setPrepTimeMinutes(minutes);
+  }, []);
+
+  const handleConfirmPrepTime = useCallback(() => {
+    if (prepTimeOrderId === null) return;
+    mutateStatus({ id: prepTimeOrderId, status: ORDER_STATUS.PreparingFood, prepTime: prepTimeMinutes });
+    setPrepTimeModalVisible(false);
+    setPrepTimeOrderId(null);
+  }, [mutateStatus, prepTimeOrderId, prepTimeMinutes]);
+
+  const handleCancelPrepTime = useCallback(() => {
+    setPrepTimeModalVisible(false);
+    setPrepTimeOrderId(null);
+  }, []);
 
   const handleStatusFilterChange = useCallback((filter: StatusFilter) => {
     setStatusFilter(filter);
@@ -265,7 +296,13 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     searchQuery,
     totalVisible,
     isActionsOpen,
+    prepTimeModalVisible,
+    prepTimeMinutes,
     handleUpdateStatus,
+    handleStartPreparing,
+    handlePrepTimeSelect,
+    handleConfirmPrepTime,
+    handleCancelPrepTime,
     handleStatusFilterChange,
     handleDatePreset,
     handleDatePrev,

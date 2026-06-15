@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Skeleton } from '../../../shared/components/Skeleton';
 import { useOrdersScreen, type StatusFilter, type DatePreset } from '../hooks/useOrdersScreen';
 import { OrderCard } from '../components/OrderCard';
+import { PrepTimeModal } from '../components/PrepTimeModal';
 import { styles } from './OrdersScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { spacing } from '../../../shared/theme/spacing';
@@ -24,7 +25,10 @@ export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenP
     sections, isLoading,
     statusFilter, dateFilter, dateFrom, dateTo, datePreset,
     searchQuery, totalVisible, isActionsOpen,
-    handleUpdateStatus, handleStatusFilterChange,
+    prepTimeModalVisible, prepTimeMinutes,
+    handleUpdateStatus, handleStartPreparing,
+    handlePrepTimeSelect, handleConfirmPrepTime, handleCancelPrepTime,
+    handleStatusFilterChange,
     handleDatePreset, handleDatePrev, handleDateNext, handleDateToday,
     handleSearchChange, handleExportCsv,
     handleToggleActions, handleCloseActions,
@@ -287,6 +291,7 @@ export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenP
                   order={item}
                   variant="light"
                   onUpdateStatus={handleUpdateStatus}
+                  onStartPreparing={handleStartPreparing}
                   onPress={onSelectOrder !== undefined ? () => onSelectOrder(item.id) : undefined}
                 />
               ))}
@@ -294,6 +299,14 @@ export function OrdersScreen({ onSelectOrder, onCancelledOrders }: OrdersScreenP
           ))
         )}
       </ScrollView>
+
+      <PrepTimeModal
+        visible={prepTimeModalVisible}
+        selectedMinutes={prepTimeMinutes}
+        onSelectMinutes={handlePrepTimeSelect}
+        onConfirm={handleConfirmPrepTime}
+        onCancel={handleCancelPrepTime}
+      />
     </SafeAreaView>
   );
 }

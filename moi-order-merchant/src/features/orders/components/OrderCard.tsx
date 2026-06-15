@@ -31,11 +31,12 @@ const STATUS_COLOURS: Record<string, string> = {
 interface OrderCardProps {
   order: FoodOrder;
   onUpdateStatus: (orderId: number, newStatus: string) => void;
+  onStartPreparing: (orderId: number) => void;
   onPress?: () => void;
   variant?: 'light' | 'dark';
 }
 
-export function OrderCard({ order, onUpdateStatus, onPress, variant = 'dark' }: OrderCardProps): React.JSX.Element {
+export function OrderCard({ order, onUpdateStatus, onStartPreparing, onPress, variant = 'dark' }: OrderCardProps): React.JSX.Element {
   const { isDesktop } = useResponsive();
   const t = useTranslation();
   const isLight = variant === 'light';
@@ -56,8 +57,13 @@ export function OrderCard({ order, onUpdateStatus, onPress, variant = 'dark' }: 
   const extraItems = (order.items?.length ?? 0) - 2;
 
   const handleAction = useCallback(() => {
-    if (action) onUpdateStatus(order.id, action.nextStatus);
-  }, [action, order.id, onUpdateStatus]);
+    if (!action) return;
+    if (action.nextStatus === ORDER_STATUS.PreparingFood) {
+      onStartPreparing(order.id);
+    } else {
+      onUpdateStatus(order.id, action.nextStatus);
+    }
+  }, [action, order.id, onUpdateStatus, onStartPreparing]);
 
   const textPrimary = isLight ? colours.textOnLight : colours.textOnDark;
   const textMuted = isLight ? colours.textMuted : 'rgba(255,255,255,0.4)';
