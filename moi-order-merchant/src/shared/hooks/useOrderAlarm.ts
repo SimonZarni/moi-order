@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useSyncExternalStore } from 'react';
 import { useSettingsStore } from '../../store/settingsStore';
 
-// ── Singleton AudioContext ─────────────────────────────────────────────────────
+// ── Singleton AudioContext + decoded buffer ────────────────────────────────────
 
 export type AudioStatus = 'unsupported' | 'suspended' | 'running' | 'error';
 
@@ -9,6 +9,8 @@ let _ctx: AudioContext | null = null;
 let _unlocked = false;
 let _pendingAlarm = false; // alarm fired while context was suspended — replay on next unlock
 let _audioError: string | null = null;
+let _buffer: AudioBuffer | null = null;     // pre-decoded custom alarm sound
+let _fetchedUrl: string | null = null;      // tracks which URL populated _buffer
 const _listeners = new Set<() => void>();
 
 function _notify(): void { _listeners.forEach((fn) => fn()); }
@@ -32,13 +34,30 @@ function getCtx(): AudioContext | null {
   return _ctx;
 }
 
+// Plays custom buffer if available, otherwise falls back to synth beeps.
+function playSound(ctx: AudioContext): void {
+  if (_buffer) {
+    try {
+      const source = ctx.createBufferSource();
+      source.buffer = _buffer;
+      source.connect(ctx.destination);
+      source.start();
+      _audioError = null;
+      _notify();
+      return;
+    } catch {
+      // Buffer play failed — fall through to synth beeps.
+    }
+  }
+  playBeeps(ctx);
+}
+
 function attemptUnlock(): void {
   const ctx = getCtx();
   if (!ctx) return;
   if (ctx.state === 'running') {
     if (!_unlocked) { _unlocked = true; _audioError = null; _notify(); }
-    // Replay any alarm that fired while the context was suspended.
-    if (_pendingAlarm) { _pendingAlarm = false; playBeeps(ctx); }
+    if (_pendingAlarm) { _pendingAlarm = false; playSound(ctx); }
     return;
   }
   ctx.resume()
@@ -47,7 +66,7 @@ function attemptUnlock(): void {
         _unlocked = true;
         _audioError = null;
         _notify();
-        if (_pendingAlarm) { _pendingAlarm = false; playBeeps(ctx); }
+        if (_pendingAlarm) { _pendingAlarm = false; playSound(ctx); }
       } else {
         _audioError = `resume() called but state is still: ${ctx.state}`;
         _notify();
@@ -59,7 +78,7 @@ function attemptUnlock(): void {
     });
 }
 
-// ── Alarm pattern ─────────────────────────────────────────────────────────────
+// ── Synth beep fallback ────────────────────────────────────────────────────────
 
 const BEEP_PATTERN: Array<[number, number]> = [
   [0.000, 0.100],
@@ -113,6 +132,7 @@ export interface UseOrderAlarmResult {
 export function useOrderAlarm(): UseOrderAlarmResult {
   const isEnabled       = useSettingsStore((s) => s.alarmEnabled);
   const setAlarmEnabled = useSettingsStore((s) => s.setAlarmEnabled);
+  const alarmSoundUrl   = useSettingsStore((s) => s.alarmSoundUrl);
 
   const isUnlocked = useSyncExternalStore(_subscribe, () => _unlocked, () => false);
   const audioError = useSyncExternalStore(_subscribe, () => _audioError, () => null);
@@ -123,6 +143,37 @@ export function useOrderAlarm(): UseOrderAlarmResult {
     if (_unlocked) return 'running';
     return 'suspended';
   }, () => 'suspended' as AudioStatus);
+
+  // Pre-fetch and decode the admin-uploaded alarm sound when the URL arrives.
+  useEffect(() => {
+    if (!alarmSoundUrl || alarmSoundUrl === _fetchedUrl) return;
+    const ctx = getCtx();
+    if (!ctx) return;
+
+    let cancelled = false;
+    fetch(alarmSoundUrl)
+      .then((res) => res.arrayBuffer())
+      .then((ab)  => ctx.decodeAudioData(ab))
+      .then((buf) => {
+        if (!cancelled) {
+          _buffer     = buf;
+          _fetchedUrl = alarmSoundUrl;
+        }
+      })
+      .catch(() => {
+        // Fetch/decode failed — silently fall back to synth beeps.
+      });
+
+    return () => { cancelled = true; };
+  }, [alarmSoundUrl]);
+
+  // Clear the buffer when the admin removes the alarm sound.
+  useEffect(() => {
+    if (alarmSoundUrl === null) {
+      _buffer     = null;
+      _fetchedUrl = null;
+    }
+  }, [alarmSoundUrl]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -143,22 +194,18 @@ export function useOrderAlarm(): UseOrderAlarmResult {
     if (!isEnabled) return;
     const ctx = getCtx();
     if (!ctx) {
-      // Context doesn't exist yet (no user gesture ever happened).
-      // Mark pending so it fires as soon as the merchant next clicks anything.
       _pendingAlarm = true;
       return;
     }
     if (ctx.state === 'running') {
-      playBeeps(ctx);
+      playSound(ctx);
     } else {
-      // Context exists but is suspended (browser autoplay policy).
-      // Mark pending so attemptUnlock() replays it on next user gesture.
       _pendingAlarm = true;
       ctx.resume()
         .then(() => {
           if (ctx.state === 'running') {
             _pendingAlarm = false;
-            playBeeps(ctx);
+            playSound(ctx);
           }
         })
         .catch((err: unknown) => {

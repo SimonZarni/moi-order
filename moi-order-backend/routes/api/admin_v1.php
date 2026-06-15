@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\Admin\V1\AdminNotificationController;
 use App\Http\Controllers\Api\Admin\V1\AdminCustomNotificationController;
 use App\Http\Controllers\Api\Admin\V1\AdminCategoryController;
 use App\Http\Controllers\Api\Admin\V1\AdminPaymentController;
+use App\Http\Controllers\Api\Admin\V1\AdminAlarmSettingController;
 use App\Http\Controllers\Api\Admin\V1\AdminPaymentSettingController;
 use App\Http\Controllers\Api\Admin\V1\AdminEmergencyContactController;
 use App\Http\Controllers\Api\Admin\V1\AdminGooglePlaceController;
@@ -333,6 +334,12 @@ Route::prefix('tickets')->name('admin.tickets.')->group(function (): void {
     Route::post('/{ticket}/images',           [AdminTicketController::class, 'uploadImages'])->name('images.store');
     Route::delete('/{ticket}/images/{image}', [AdminTicketController::class, 'deleteImage'])->name('images.destroy');
 });
+
+Route::get('/alarm-sound',    [AdminAlarmSettingController::class, 'show'])->name('admin.alarm-sound.show');
+Route::post('/alarm-sound',   [AdminAlarmSettingController::class, 'upload'])->name('admin.alarm-sound.store')
+    ->middleware('ensure.super_admin');
+Route::delete('/alarm-sound', [AdminAlarmSettingController::class, 'remove'])->name('admin.alarm-sound.destroy')
+    ->middleware('ensure.super_admin');
 
 Route::get('/payment-settings',       [AdminPaymentSettingController::class, 'show'])->name('admin.payment-settings.show');
 Route::put('/payment-settings',       [AdminPaymentSettingController::class, 'update'])->name('admin.payment-settings.update')

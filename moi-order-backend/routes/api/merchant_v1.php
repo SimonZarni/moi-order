@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\Merchant\V1\MerchantOrderController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantRestaurantController;
 use App\Http\Controllers\Api\Merchant\V1\MenuCategoryController;
 use App\Http\Controllers\Api\Merchant\V1\MenuItemController;
+use App\Http\Controllers\Api\Merchant\V1\MerchantAlarmSettingController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantReviewController;
 use Illuminate\Support\Facades\Route;
 
@@ -94,3 +95,6 @@ Route::delete('/restaurant/logo', [MerchantRestaurantController::class, 'removeL
 Route::post('/restaurant/photos', [MerchantRestaurantController::class, 'uploadPhoto']);
 Route::delete('/restaurant/photos/{photoId}', [MerchantRestaurantController::class, 'removePhoto']);
 Route::patch('/restaurant/photos/reorder', [MerchantRestaurantController::class, 'reorderPhotos']);
+
+// ── Platform alarm sound (universal, admin-set) ───────────────────────────────
+Route::get('/alarm-sound', [MerchantAlarmSettingController::class, 'show'])->name('merchant.alarm-sound.show');

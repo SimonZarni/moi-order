@@ -9,20 +9,6 @@ export const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: spacing.xxl },
 
-  header: {
-    backgroundColor: colours.backgroundDark,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.sm,
-  },
-  headerTitle: {
-    fontSize: typography.xl,
-    fontWeight: '800',
-    color: colours.textOnDark,
-    letterSpacing: -0.5,
-    lineHeight: 60,
-  },
-
   sectionHeader: {
     fontSize: typography.xs,
     fontWeight: '700',

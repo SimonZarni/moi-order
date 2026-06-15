@@ -20,10 +20,6 @@ export function SettingsScreen({ onChangePassword, onOperatingHours }: SettingsS
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>{t('settings_title')}</Text>
-        </View>
-
         <Text style={styles.sectionHeader}>{t('settings_preferences')}</Text>
         <View style={styles.card}>
           <SegmentRow label={t('settings_language')} options={[

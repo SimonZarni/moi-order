@@ -8,6 +8,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMe } from '../api/auth';
 import { getOrders } from '../api/orders';
 import { getMenuCategories } from '../api/menu';
+import { getAlarmSound } from '../api/settings';
 import { QUERY_KEYS } from '../shared/constants/queryKeys';
 import { CACHE_TTL, POLL_INTERVAL } from '../shared/constants/config';
 import { colours } from '../shared/theme/colours';
@@ -70,6 +71,7 @@ function WebSocketManager(): null {
 export function AppNavigator(): React.JSX.Element {
   const { token, user, isLoading, initFromStorage, setUser } = useAuthStore();
   const initSettingsFromStorage = useSettingsStore((s) => s.initFromStorage);
+  const setAlarmSoundUrl = useSettingsStore((s) => s.setAlarmSoundUrl);
   const theme = useSettingsStore((s) => s.theme);
   const queryClient = useQueryClient();
 
@@ -106,6 +108,18 @@ export function AppNavigator(): React.JSX.Element {
       queryClient.clear();
     }
   }, [token, queryClient]);
+
+  const { data: alarmSoundData } = useQuery({
+    queryKey: QUERY_KEYS.ALARM_SOUND,
+    queryFn:  getAlarmSound,
+    enabled:  !!token,
+    staleTime: CACHE_TTL.USER,
+    retry: false,
+  });
+
+  useEffect(() => {
+    setAlarmSoundUrl(alarmSoundData?.data?.alarm_sound_url ?? null);
+  }, [alarmSoundData, setAlarmSoundUrl]);
 
   const { isLoading: isMeLoading } = useQuery({
     queryKey: QUERY_KEYS.ME,

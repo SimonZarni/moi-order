@@ -88,4 +88,17 @@ class AppSetting extends Model
         static::set('promptpay_bank_account_number', $accountNumber ?? '');
         static::set('promptpay_bank_account_name', $accountName ?? '');
     }
+
+    // ─── Alarm sound ──────────────────────────────────────────────────────────
+
+    public static function getAlarmSoundPath(): ?string
+    {
+        $value = static::get('alarm_sound_path');
+        return $value !== null && $value !== '' ? (string) $value : null;
+    }
+
+    public static function setAlarmSoundPath(?string $path): void
+    {
+        static::set('alarm_sound_path', $path ?? '');
+    }
 }

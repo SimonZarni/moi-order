@@ -18,4 +18,5 @@ export const QUERY_KEYS = {
     UNREAD_COUNT: ['notifications', 'unread-count'] as const,
   },
   REVIEWS: (page?: number, rating?: number) => ['reviews', page ?? 1, rating ?? null] as const,
+  ALARM_SOUND: ['alarm-sound'] as const,
 } as const;

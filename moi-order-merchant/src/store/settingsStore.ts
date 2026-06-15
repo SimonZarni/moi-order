@@ -16,6 +16,10 @@ interface PersistedSettings {
 }
 
 interface SettingsState extends PersistedSettings {
+  // Server-sourced — not persisted to localStorage.
+  alarmSoundUrl: string | null;
+  setAlarmSoundUrl: (url: string | null) => void;
+
   setLanguage: (lang: Language) => void;
   setTheme: (theme: Theme) => void;
   setMenuView: (view: MenuView) => void;
@@ -37,6 +41,11 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   theme: 'light',
   menuView: 'grid',
   alarmEnabled: true,
+  alarmSoundUrl: null,
+
+  setAlarmSoundUrl(alarmSoundUrl) {
+    set({ alarmSoundUrl });
+  },
 
   setLanguage(language) {
     set({ language });
