@@ -256,7 +256,7 @@ function WebMerchantLayout(): React.JSX.Element {
   const logout = useAuthStore((s) => s.logout);
   const theme = useSettingsStore((s) => s.theme);
   const darkStyle = theme === 'dark' ? ({ filter: 'invert(1) hue-rotate(180deg)' } as object) : null;
-  const { isEnabled: isAlarmEnabled, isUnlocked, toggleEnabled: toggleAlarm, unlockAudio } = useOrderAlarm();
+  const { isEnabled: isAlarmEnabled, toggleEnabled: toggleAlarm } = useOrderAlarm();
 
   // When the page is hard-refreshed at /orders/{uuid}/chat, chatOrderId is
   // restored from the URL but chatOrderNumber/completedAt/status are empty
@@ -462,14 +462,7 @@ function WebMerchantLayout(): React.JSX.Element {
             </View>
           </View>
         )}
-        {isAlarmEnabled && !isUnlocked && (
-          <Pressable style={webStyles.unlockBanner} onPress={unlockAudio} accessibilityRole="button" accessibilityLabel="Click to enable alarm sound">
-            <Ionicons name="volume-high-outline" size={14} color={colours.textOnDark} />
-            <Text style={webStyles.unlockBannerText}>
-              Click here to enable order alarm sound
-            </Text>
-          </Pressable>
-        )}
+        {/* Audio unlocks passively on first click anywhere via window listeners in useOrderAlarm */}
         <View nativeID="dark-content" style={[webStyles.contentInner, darkStyle]}>
           {renderContent()}
         </View>
