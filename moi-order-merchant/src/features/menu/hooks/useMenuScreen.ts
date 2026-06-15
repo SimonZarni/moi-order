@@ -7,7 +7,6 @@ import {
   createCategory,
   createMenuItem,
   updateCategory,
-  updateMenuItem,
   deleteCategory,
   toggleMenuItemStatus,
   deleteMenuItem,
@@ -99,33 +98,16 @@ interface UseMenuScreenResult {
   handleRemoveOption: (groupIndex: number, optIndex: number) => void;
   handleOptionChange: (groupIndex: number, optIndex: number, field: 'name' | 'additional_price_cents', value: string | number) => void;
   handleAddItemSubmit: () => void;
-  // Edit item modal
-  editItemId: number | null;
-  editItemForm: AddItemForm;
-  editItemExistingPhotoUrl: string | null;
-  isEditingItem: boolean;
-  handleOpenEditItem: (item: MenuItem) => void;
-  handleCloseEditItem: () => void;
-  handleEditItemFieldChange: (field: 'name' | 'description' | 'price' | 'original_price', value: string) => void;
-  handleEditItemPhotoChange: (photo: AddItemForm['photo']) => void;
-  handlePickEditPhoto: () => void;
-  handleEditAddOptionGroup: () => void;
-  handleEditRemoveOptionGroup: (index: number) => void;
-  handleEditOptionGroupChange: (groupIndex: number, field: 'name' | 'is_required' | 'min_selections' | 'max_selections', value: string | boolean | number) => void;
-  handleEditAddOption: (groupIndex: number) => void;
-  handleEditRemoveOption: (groupIndex: number, optIndex: number) => void;
-  handleEditOptionChange: (groupIndex: number, optIndex: number, field: 'name' | 'additional_price_cents', value: string | number) => void;
-  handleEditItemSubmit: () => void;
 }
 
-const EMPTY_FORM: AddItemForm = {
+export const EMPTY_FORM: AddItemForm = {
   name: '', description: '', price: '', original_price: '', photo: null, option_groups: [],
 };
 
 const SYSTEM_SORT: Record<string, number> = { popular_picks: 0, promotions: 1, recommendations: 2 };
 const REQUIRED_SYSTEM_TYPES = ['popular_picks', 'recommendations'] as const;
 
-async function buildItemFormData(form: AddItemForm): Promise<FormData> {
+export async function buildItemFormData(form: AddItemForm): Promise<FormData> {
   const fd = new FormData();
   fd.append('name', form.name.trim());
   if (form.description.trim()) fd.append('description', form.description.trim());
@@ -158,7 +140,7 @@ async function buildItemFormData(form: AddItemForm): Promise<FormData> {
   return fd;
 }
 
-function makeOptionGroupHandlers(setForm: Dispatch<SetStateAction<AddItemForm>>) {
+export function makeOptionGroupHandlers(setForm: Dispatch<SetStateAction<AddItemForm>>) {
   const addOptionGroup = () =>
     setForm((prev) => ({
       ...prev,
@@ -219,7 +201,7 @@ function makeOptionGroupHandlers(setForm: Dispatch<SetStateAction<AddItemForm>>)
   return { addOptionGroup, removeOptionGroup, changeOptionGroup, addOption, removeOption, changeOption };
 }
 
-async function pickPhoto(): Promise<AddItemForm['photo'] | null> {
+export async function pickPhoto(): Promise<AddItemForm['photo'] | null> {
   const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'images', quality: 0.8 });
   if (result.canceled || result.assets.length === 0) return null;
   const asset = result.assets[0];
@@ -251,9 +233,6 @@ export function useMenuScreen(): UseMenuScreenResult {
   // ── Item modals ───────────────────────────────────────────────────────────
   const [addItemCategoryId, setAddItemCategoryId] = useState<number | null>(null);
   const [addItemForm, setAddItemForm] = useState<AddItemForm>(EMPTY_FORM);
-  const [editItemId, setEditItemId] = useState<number | null>(null);
-  const [editItemForm, setEditItemForm] = useState<AddItemForm>(EMPTY_FORM);
-  const [editItemExistingPhotoUrl, setEditItemExistingPhotoUrl] = useState<string | null>(null);
 
   // ── Queries ───────────────────────────────────────────────────────────────
   const { data, isLoading, isError } = useQuery({
@@ -369,23 +348,6 @@ export function useMenuScreen(): UseMenuScreenResult {
     },
   });
 
-  const { mutate: mutateUpdateItem, isPending: isEditingItem } = useMutation({
-    mutationFn: async ({ id, form }: { id: number; form: AddItemForm }) =>
-      updateMenuItem(id, await buildItemFormData(form)),
-    onSuccess: (updatedItem) => {
-      queryClient.setQueryData<MenuCategory[]>(QUERY_KEYS.MENU_CATEGORIES, (old) => {
-        if (!old) return old;
-        return old.map((cat) => ({
-          ...cat,
-          items: cat.items.map((item) => (item.id === updatedItem.id ? updatedItem : item)),
-        }));
-      });
-      void invalidateMenu();
-      setEditItemId(null);
-      setEditItemForm(EMPTY_FORM);
-      setEditItemExistingPhotoUrl(null);
-    },
-  });
 
   // ── Tab + search handlers ─────────────────────────────────────────────────
   const handleSelectCategory = useCallback((id: number | 'all') => {
@@ -500,69 +462,6 @@ export function useMenuScreen(): UseMenuScreenResult {
     mutateAddItem({ categoryId: addItemCategoryId, form: addItemForm });
   }, [addItemCategoryId, addItemForm, mutateAddItem]);
 
-  // ── Edit item handlers ────────────────────────────────────────────────────
-  const editHandlers = makeOptionGroupHandlers(setEditItemForm);
-
-  const handleOpenEditItem = useCallback((item: MenuItem) => {
-    const FEE = 1 + PLATFORM_FEE_RATE;
-    setEditItemForm({
-      name: item.name,
-      description: item.description ?? '',
-      price: String(Math.round(item.price_cents / FEE) / 100),
-      original_price: item.original_price_cents != null ? String(Math.round(item.original_price_cents / FEE) / 100) : '',
-      photo: null,
-      option_groups: item.option_groups.map((g) => ({
-        name: g.name,
-        is_required: g.is_required,
-        min_selections: g.min_selections,
-        max_selections: g.max_selections,
-        options: g.options.map((o) => ({ name: o.name, additional_price_cents: o.additional_price_cents })),
-      })),
-    });
-    setEditItemExistingPhotoUrl(item.photo_url);
-    setEditItemId(item.id);
-  }, []);
-
-  const handleCloseEditItem = useCallback(() => {
-    setEditItemId(null);
-    setEditItemExistingPhotoUrl(null);
-  }, []);
-
-  const handleEditItemFieldChange = useCallback(
-    (field: 'name' | 'description' | 'price' | 'original_price', value: string) =>
-      setEditItemForm((prev) => ({ ...prev, [field]: value })),
-    [],
-  );
-
-  const handleEditItemPhotoChange = useCallback(
-    (photo: AddItemForm['photo']) => setEditItemForm((prev) => ({ ...prev, photo })),
-    [],
-  );
-
-  const handlePickEditPhoto = useCallback(async () => {
-    const photo = await pickPhoto();
-    if (photo) handleEditItemPhotoChange(photo);
-  }, [handleEditItemPhotoChange]);
-
-  const handleEditAddOptionGroup = useCallback(() => editHandlers.addOptionGroup(), []);
-  const handleEditRemoveOptionGroup = useCallback((i: number) => editHandlers.removeOptionGroup(i), []);
-  const handleEditOptionGroupChange = useCallback(
-    (gi: number, field: 'name' | 'is_required' | 'min_selections' | 'max_selections', value: string | boolean | number) =>
-      editHandlers.changeOptionGroup(gi, field, value),
-    [],
-  );
-  const handleEditAddOption = useCallback((gi: number) => editHandlers.addOption(gi), []);
-  const handleEditRemoveOption = useCallback((gi: number, oi: number) => editHandlers.removeOption(gi, oi), []);
-  const handleEditOptionChange = useCallback(
-    (gi: number, oi: number, field: 'name' | 'additional_price_cents', value: string | number) =>
-      editHandlers.changeOption(gi, oi, field, value),
-    [],
-  );
-
-  const handleEditItemSubmit = useCallback(() => {
-    if (editItemId === null || !editItemForm.name.trim() || !editItemForm.price.trim()) return;
-    mutateUpdateItem({ id: editItemId, form: editItemForm });
-  }, [editItemId, editItemForm, mutateUpdateItem]);
 
   return {
     categories, filteredItems, guardedItemIds, isLoading, isError,
@@ -580,10 +479,5 @@ export function useMenuScreen(): UseMenuScreenResult {
     handleAddItemFieldChange, handleAddItemPhotoChange, handlePickAddPhoto,
     handleAddOptionGroup, handleRemoveOptionGroup, handleOptionGroupChange,
     handleAddOption, handleRemoveOption, handleOptionChange, handleAddItemSubmit,
-    editItemId, editItemForm, editItemExistingPhotoUrl, isEditingItem,
-    handleOpenEditItem, handleCloseEditItem,
-    handleEditItemFieldChange, handleEditItemPhotoChange, handlePickEditPhoto,
-    handleEditAddOptionGroup, handleEditRemoveOptionGroup, handleEditOptionGroupChange,
-    handleEditAddOption, handleEditRemoveOption, handleEditOptionChange, handleEditItemSubmit,
   };
 }

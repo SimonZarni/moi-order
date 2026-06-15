@@ -28,6 +28,7 @@ export type MerchantStackParamList = {
   Settings: undefined;
   ChangePassword: undefined;
   OperatingHours: undefined;
+  EditMenuItem: { itemId: number };
 };
 
 export type RootStackParamList = {

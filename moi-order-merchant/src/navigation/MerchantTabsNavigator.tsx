@@ -18,6 +18,7 @@ import { CancelledOrdersScreen } from '../features/orders/screens/CancelledOrder
 import { OrderDetailScreen } from '../features/orders/screens/OrderDetailScreen';
 import { OrderChatContent, OrderChatScreen } from '../features/chat/screens/OrderChatScreen';
 import { MenuScreen } from '../features/menu/screens/MenuScreen';
+import { EditMenuItemScreen } from '../features/menu/screens/EditMenuItemScreen';
 import { RestaurantScreen } from '../features/restaurant/screens/RestaurantScreen';
 import { AnalyticsScreen } from '../features/analytics/screens/AnalyticsScreen';
 import { NotificationsScreen } from '../features/notifications/screens/NotificationsScreen';
@@ -87,6 +88,15 @@ function RestaurantTab(): React.JSX.Element {
   return <RestaurantScreen onReviewsPress={handleReviews} />;
 }
 
+function MenuTab(): React.JSX.Element {
+  const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
+  const handleEditItem = useCallback(
+    (itemId: number) => navigation.navigate('EditMenuItem', { itemId }),
+    [navigation],
+  );
+  return <MenuScreen onEditItem={handleEditItem} />;
+}
+
 function MobileTabNavigator(): React.JSX.Element {
   return (
     <Tab.Navigator
@@ -113,7 +123,7 @@ function MobileTabNavigator(): React.JSX.Element {
     >
       <Tab.Screen name="Dashboard"     component={DashboardTab}        options={{ title: 'Dashboard' }} />
       <Tab.Screen name="Orders"        component={OrdersTab}           options={{ title: 'Orders' }} />
-      <Tab.Screen name="Menu"          component={MenuScreen}          options={{ title: 'Menu' }} />
+      <Tab.Screen name="Menu"          component={MenuTab}             options={{ title: 'Menu' }} />
       <Tab.Screen name="Restaurant"    component={RestaurantTab}       options={{ title: 'Restaurant' }} />
       <Tab.Screen
         name="Notifications"
@@ -180,10 +190,19 @@ function OperatingHoursRoute(
   return <OperatingHoursScreen onBack={handleBack} />;
 }
 
+function EditMenuItemRoute(
+  { route, navigation }: NativeStackScreenProps<MerchantStackParamList, 'EditMenuItem'>,
+): React.JSX.Element {
+  const { itemId } = route.params;
+  const handleBack = useCallback(() => navigation.goBack(), [navigation]);
+  return <EditMenuItemScreen itemId={itemId} onBack={handleBack} />;
+}
+
 function MobileNavigator(): React.JSX.Element {
   return (
     <MobileStack.Navigator screenOptions={{ headerShown: false }}>
       <MobileStack.Screen name="Tabs" component={MobileTabNavigator} />
+      <MobileStack.Screen name="EditMenuItem" component={EditMenuItemRoute} options={{ headerShown: false }} />
       <MobileStack.Screen name="OrderDetail" component={OrderDetailRoute} />
       <MobileStack.Screen name="OrderChat" component={OrderChatScreen} />
       <MobileStack.Screen name="BusinessProfile" component={BusinessProfileScreen} options={{ headerShown: false }} />
@@ -246,6 +265,7 @@ type SettingsSubView = 'list' | 'changePassword' | 'operatingHours';
 
 function WebMerchantLayout(): React.JSX.Element {
   const [activeScreen, setActiveScreen]     = useState<WebScreen>(_BOOT_URL.screen);
+  const [editingItemId, setEditingItemId]   = useState<number | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(_BOOT_URL.orderId);
   const [chatOrderId, setChatOrderId]       = useState<string | null>(_BOOT_URL.chatId);
   const [chatOrderNumber, setChatOrderNumber] = useState<string>('');
@@ -307,6 +327,7 @@ function WebMerchantLayout(): React.JSX.Element {
 
   const handleNavigate = useCallback((screen: WebScreen) => {
     setActiveScreen(screen);
+    setEditingItemId(null);
     setSelectedOrderId(null);
     setChatOrderId(null);
     setChatOrderNumber('');
@@ -376,7 +397,10 @@ function WebMerchantLayout(): React.JSX.Element {
           />
         );
       case 'Menu':
-        return <MenuScreen />;
+        if (editingItemId !== null) {
+          return <EditMenuItemScreen itemId={editingItemId} onBack={() => setEditingItemId(null)} />;
+        }
+        return <MenuScreen onEditItem={(id) => setEditingItemId(id)} />;
       case 'Restaurant':
         return <RestaurantScreen />;
       case 'Analytics':

@@ -20,7 +20,11 @@ import { useTranslation } from '../../../shared/hooks/useTranslation';
 import type { MenuItem } from '../../../types/models';
 import type { AddItemForm } from '../hooks/useMenuScreen';
 
-export function MenuScreen(): React.JSX.Element {
+interface MenuScreenProps {
+  onEditItem: (itemId: number) => void;
+}
+
+export function MenuScreen({ onEditItem }: MenuScreenProps): React.JSX.Element {
   const t = useTranslation();
   const {
     categories, filteredItems, guardedItemIds, isLoading, hasMissingSystemCategories, menuView,
@@ -37,11 +41,6 @@ export function MenuScreen(): React.JSX.Element {
     handleAddItemFieldChange, handleAddItemPhotoChange, handlePickAddPhoto,
     handleAddOptionGroup, handleRemoveOptionGroup, handleOptionGroupChange,
     handleAddOption, handleRemoveOption, handleOptionChange, handleAddItemSubmit,
-    editItemId, editItemForm, editItemExistingPhotoUrl, isEditingItem,
-    handleOpenEditItem, handleCloseEditItem,
-    handleEditItemFieldChange, handleEditItemPhotoChange, handlePickEditPhoto,
-    handleEditAddOptionGroup, handleEditRemoveOptionGroup, handleEditOptionGroupChange,
-    handleEditAddOption, handleEditRemoveOption, handleEditOptionChange, handleEditItemSubmit,
   } = useMenuScreen();
 
   const { width } = useWindowDimensions();
@@ -165,7 +164,7 @@ export function MenuScreen(): React.JSX.Element {
                 isLastInRequiredCategory={guardedItemIds.has(item.id)}
                 onToggleStatus={handleToggleItemStatus}
                 onDelete={handleDeleteItem}
-                onEdit={handleOpenEditItem}
+                onEdit={(it) => onEditItem(it.id)}
               />
             ))}
           </View>
@@ -178,7 +177,7 @@ export function MenuScreen(): React.JSX.Element {
                   isGuarded={guardedItemIds.has(item.id)}
                   onToggleStatus={handleToggleItemStatus}
                   onDelete={handleDeleteItem}
-                  onEdit={handleOpenEditItem}
+                  onEdit={(it) => onEditItem(it.id)}
                 />
               </View>
             ))}
@@ -317,35 +316,6 @@ export function MenuScreen(): React.JSX.Element {
               onCancel={handleCloseAddItem}
               onSubmit={handleAddItemSubmit}
               submitLabel={t('menu_add_item')}
-            />
-          </ScrollView>
-        </View>
-      </Modal>
-
-      {/* ── Edit menu item modal ─────────────────────────────────────────── */}
-      <Modal visible={editItemId !== null} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <ScrollView
-            style={styles.modalScrollView}
-            contentContainerStyle={styles.modalCard}
-            keyboardShouldPersistTaps="handled"
-          >
-            <ItemFormContent
-              title={t('menu_edit_item_title')}
-              form={editItemForm}
-              existingPhotoUrl={editItemExistingPhotoUrl}
-              isSaving={isEditingItem}
-              onFieldChange={handleEditItemFieldChange}
-              onPickPhoto={handlePickEditPhoto}
-              onAddOptionGroup={handleEditAddOptionGroup}
-              onRemoveOptionGroup={handleEditRemoveOptionGroup}
-              onOptionGroupChange={handleEditOptionGroupChange}
-              onAddOption={handleEditAddOption}
-              onRemoveOption={handleEditRemoveOption}
-              onOptionChange={handleEditOptionChange}
-              onCancel={handleCloseEditItem}
-              onSubmit={handleEditItemSubmit}
-              submitLabel={t('menu_save_changes')}
             />
           </ScrollView>
         </View>
