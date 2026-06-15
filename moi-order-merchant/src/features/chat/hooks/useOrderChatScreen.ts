@@ -4,10 +4,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
-import { apiClient } from '../../../api/client';
 import { fetchOrderChat, sendOrderChatMessage, markOrderChatRead } from '../../../api/chat';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
-import { PUSHER_APP_KEY, PUSHER_APP_CLUSTER } from '../../../shared/constants/config';
+import { PUSHER_APP_KEY, PUSHER_APP_CLUSTER, BROADCAST_AUTH_URL } from '../../../shared/constants/config';
 import { useAuthStore } from '../../../store/authStore';
 import type { OrderChatMessage } from '../../../types/models';
 import { ORDER_STATUS } from '../../../types/enums';
@@ -85,22 +84,14 @@ export function useOrderChatScreen(
       const mod = require('pusher-js') as any;
       const PusherClass: PusherConstructorFn = mod.Pusher ?? mod.default ?? mod;
       pusher = new PusherClass(PUSHER_APP_KEY, {
-        cluster: PUSHER_APP_CLUSTER,
+        cluster:  PUSHER_APP_CLUSTER,
         forceTLS: true,
         channelAuthorization: {
-          customHandler: async (
-            { channelName, socketId }: { channelName: string; socketId: string },
-            callback: (err: Error | null, data: { auth: string } | null) => void,
-          ) => {
-            try {
-              const res = await apiClient.post<{ auth: string }>(
-                '/broadcasting/auth',
-                { socket_id: socketId, channel_name: channelName },
-              );
-              callback(null, res.data);
-            } catch {
-              callback(new Error('Channel auth failed'), null);
-            }
+          endpoint:  BROADCAST_AUTH_URL,
+          transport: 'ajax',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept:        'application/json',
           },
         },
       });

@@ -49,16 +49,20 @@ Broadcast::channel('merchant.{merchantId}', function ($user, string $merchantId)
 // Order chat + status updates — customer who owns the order, merchant who received it, or any admin.
 // Channel name uses the order UUID (not integer PK) so it matches HasUuid::getRouteKeyName().
 Broadcast::channel('order.{foodOrderUuid}', function ($user, string $foodOrderUuid): bool {
-    // Admin token carries the 'admin' ability.
+    // Admin token: can('admin') works here because admins auth via a separate guard where
+    // currentAccessToken() is properly populated.
     if ($user->currentAccessToken()?->can('admin')) {
         return true;
     }
 
-    // Merchant: must own the restaurant that received this order.
-    if ($user->currentAccessToken()?->can('merchant')) {
-        return $user->restaurant()
-            ->whereHas('foodOrders', fn ($q) => $q->where('uuid', $foodOrderUuid))
-            ->exists();
+    // Merchant: data-level check only — do NOT use currentAccessToken()?->can('merchant')
+    // because currentAccessToken() returns null in the broadcasting context for Sanctum
+    // merchant tokens (same bug fixed on the merchant.{merchantId} channel).
+    if ($user->restaurant()
+        ->whereHas('foodOrders', fn ($q) => $q->where('uuid', $foodOrderUuid))
+        ->exists()
+    ) {
+        return true;
     }
 
     // Customer: must own the order.

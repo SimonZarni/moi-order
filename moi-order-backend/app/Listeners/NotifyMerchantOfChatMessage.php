@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Log;
  * Principle: DIP — depends on PushNotificationInterface, not Expo SDK directly.
  *
  * Guards:
- *   - sender_type must be 'customer'; merchant/admin/system never self-notify.
+ *   - sender_type must not be 'merchant'; customer and admin messages both notify.
  *   - 5-minute throttle per order: one chat_message notification per order per 5 min
  *     so a rapid burst of messages creates only a single inbox entry.
  *
@@ -35,7 +35,8 @@ class NotifyMerchantOfChatMessage implements ShouldQueue
     {
         $message = $event->message;
 
-        if ($message->sender_type !== 'customer') {
+        // Notify for any sender that isn't the merchant — both customer and admin messages.
+        if ($message->sender_type === 'merchant') {
             return;
         }
 
