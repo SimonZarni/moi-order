@@ -256,7 +256,7 @@ function WebMerchantLayout(): React.JSX.Element {
   const logout = useAuthStore((s) => s.logout);
   const theme = useSettingsStore((s) => s.theme);
   const darkStyle = theme === 'dark' ? ({ filter: 'invert(1) hue-rotate(180deg)' } as object) : null;
-  const { isEnabled: isAlarmEnabled, toggleEnabled: toggleAlarm } = useOrderAlarm();
+  const { isEnabled: isAlarmEnabled, toggleEnabled: toggleAlarm, triggerAlarm } = useOrderAlarm();
 
   // When the page is hard-refreshed at /orders/{uuid}/chat, chatOrderId is
   // restored from the URL but chatOrderNumber/completedAt/status are empty
@@ -428,6 +428,7 @@ function WebMerchantLayout(): React.JSX.Element {
           onLogout={logout}
           isAlarmEnabled={isAlarmEnabled}
           onAlarmToggle={toggleAlarm}
+          onAlarmTest={triggerAlarm}
         />
       )}
 

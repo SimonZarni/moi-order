@@ -33,6 +33,7 @@ interface WebSidebarProps {
   pendingCount?: number;
   isAlarmEnabled?: boolean;
   onAlarmToggle?: () => void;
+  onAlarmTest?: () => void;
 }
 
 export function WebSidebar({
@@ -42,6 +43,7 @@ export function WebSidebar({
   pendingCount = 0,
   isAlarmEnabled = true,
   onAlarmToggle,
+  onAlarmTest,
 }: WebSidebarProps): React.JSX.Element {
   const handleNavPress = useCallback(
     (screen: WebScreen) => () => onNavigate(screen),
@@ -118,21 +120,37 @@ export function WebSidebar({
 
       <View style={styles.bottomSection}>
         {onAlarmToggle != null && (
-          <Pressable
-            style={({ pressed }) => [styles.navItem, pressed && styles.navItemPressed]}
-            onPress={onAlarmToggle}
-            accessibilityLabel={isAlarmEnabled ? 'Disable order alarm' : 'Enable order alarm'}
-            accessibilityRole="button"
-          >
-            <Ionicons
-              name={isAlarmEnabled ? 'volume-high-outline' : 'volume-mute-outline'}
-              size={16}
-              color={isAlarmEnabled ? colours.primary : 'rgba(255,255,255,0.4)'}
-            />
-            <Text style={[styles.logoutLabel, isAlarmEnabled && styles.alarmLabelActive]}>
-              {isAlarmEnabled ? 'Alarm On' : 'Alarm Off'}
-            </Text>
-          </Pressable>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Pressable
+              style={({ pressed }) => [styles.navItem, { flex: 1 }, pressed && styles.navItemPressed]}
+              onPress={onAlarmToggle}
+              accessibilityLabel={isAlarmEnabled ? 'Disable order alarm' : 'Enable order alarm'}
+              accessibilityRole="button"
+            >
+              <Ionicons
+                name={isAlarmEnabled ? 'volume-high-outline' : 'volume-mute-outline'}
+                size={16}
+                color={isAlarmEnabled ? colours.primary : 'rgba(255,255,255,0.4)'}
+              />
+              <Text style={[styles.logoutLabel, isAlarmEnabled && styles.alarmLabelActive]}>
+                {isAlarmEnabled ? 'Alarm On' : 'Alarm Off'}
+              </Text>
+            </Pressable>
+            {isAlarmEnabled && onAlarmTest != null && (
+              <Pressable
+                onPress={onAlarmTest}
+                accessibilityLabel="Test alarm sound"
+                accessibilityRole="button"
+                style={({ pressed }) => ({
+                  paddingHorizontal: 8,
+                  paddingVertical: 6,
+                  opacity: pressed ? 0.5 : 1,
+                })}
+              >
+                <Text style={{ fontSize: 10, color: colours.primary, fontWeight: '700' }}>TEST</Text>
+              </Pressable>
+            )}
+          </View>
         )}
         <Pressable
           style={({ pressed }) => [styles.navItem, pressed && styles.navItemPressed]}
