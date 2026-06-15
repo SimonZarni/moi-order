@@ -40,9 +40,10 @@ Broadcast::channel('presence-online-users', function ($user): array|false {
 
 // Merchant private channel — real-time dashboard (NewFoodOrder broadcasts here).
 // Only the owning merchant may subscribe to their own channel.
+// Middleware (auth:sanctum + abilities:merchant) already enforces token validity,
+// so we only need to verify the user owns this merchant channel by ID.
 Broadcast::channel('merchant.{merchantId}', function ($user, string $merchantId): bool {
-    return $user->currentAccessToken()?->can('merchant')
-        && $user->id === (int) $merchantId;
+    return (int) $user->id === (int) $merchantId;
 });
 
 // Order chat + status updates — customer who owns the order, merchant who received it, or any admin.
