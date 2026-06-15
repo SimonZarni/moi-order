@@ -1,4 +1,5 @@
 export const POLL_INTERVAL = {
+  ORDERS:       5_000,
   ORDER_DETAIL: 5_000,
 } as const;
 

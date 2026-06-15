@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getOrders, updateOrderStatus } from '../../../api/orders';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
-import { CACHE_TTL, GC_TIME, QUERY_RETRY } from '../../../shared/constants/config';
+import { CACHE_TTL, GC_TIME, POLL_INTERVAL, QUERY_RETRY } from '../../../shared/constants/config';
 import { ORDER_STATUS, type OrderStatus } from '../../../types/enums';
 import { formatDateTime } from '../../../shared/utils/formatDate';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
@@ -111,12 +111,15 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     return { date: dateFilter ?? undefined };
   }, [datePreset, dateFilter, dateFrom, dateTo]);
 
+  const shouldPoll = datePreset === 'today' || datePreset === 'custom';
+
   const { data, isLoading, isError } = useQuery({
     queryKey: [...QUERY_KEYS.ORDERS(), datePreset, dateFilter, dateFrom, dateTo],
     queryFn:  () => getOrders(queryParams),
     staleTime: CACHE_TTL.ORDERS,
     gcTime:    GC_TIME.DEFAULT,
     retry:     QUERY_RETRY,
+    refetchInterval: shouldPoll ? POLL_INTERVAL.ORDERS : false,
   });
 
   const { mutate: mutateStatus } = useMutation({
