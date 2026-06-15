@@ -31,8 +31,8 @@ interface UseOrdersScreenResult {
   isActionsOpen: boolean;
   prepTimeModalVisible: boolean;
   prepTimeMinutes: number;
-  handleUpdateStatus: (orderId: number, newStatus: string) => void;
-  handleStartPreparing: (orderId: number) => void;
+  handleUpdateStatus: (orderId: string, newStatus: string) => void;
+  handleStartPreparing: (orderId: string) => void;
   handlePrepTimeSelect: (minutes: number) => void;
   handleConfirmPrepTime: () => void;
   handleCancelPrepTime: () => void;
@@ -106,7 +106,7 @@ export function useOrdersScreen(): UseOrdersScreenResult {
   const [searchQuery, setSearchQuery]   = useState('');
   const [isActionsOpen, setActionsOpen] = useState(false);
   const [prepTimeModalVisible, setPrepTimeModalVisible] = useState(false);
-  const [prepTimeOrderId, setPrepTimeOrderId] = useState<number | null>(null);
+  const [prepTimeOrderId, setPrepTimeOrderId] = useState<string | null>(null);
   const [prepTimeMinutes, setPrepTimeMinutes] = useState(15);
 
   // Build API params from current preset state
@@ -132,7 +132,7 @@ export function useOrdersScreen(): UseOrdersScreenResult {
   });
 
   const { mutate: mutateStatus } = useMutation({
-    mutationFn: ({ id, status, prepTime }: { id: number; status: string; prepTime?: number }) =>
+    mutationFn: ({ id, status, prepTime }: { id: string; status: string; prepTime?: number }) =>
       updateOrderStatus(id, status, prepTime),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS() });
@@ -182,13 +182,13 @@ export function useOrdersScreen(): UseOrdersScreenResult {
   // ── Handlers ──────────────────────────────────────────────────────────────
 
   const handleUpdateStatus = useCallback(
-    (orderId: number, newStatus: string) => {
+    (orderId: string, newStatus: string) => {
       mutateStatus({ id: orderId, status: newStatus });
     },
     [mutateStatus],
   );
 
-  const handleStartPreparing = useCallback((orderId: number) => {
+  const handleStartPreparing = useCallback((orderId: string) => {
     setPrepTimeOrderId(orderId);
     setPrepTimeMinutes(15);
     setPrepTimeModalVisible(true);

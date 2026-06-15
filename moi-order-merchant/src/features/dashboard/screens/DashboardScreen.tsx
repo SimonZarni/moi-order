@@ -131,6 +131,7 @@ export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.
             order={order}
             variant="light"
             onUpdateStatus={handleUpdateStatus}
+            onStartPreparing={onSelectOrder !== undefined ? () => onSelectOrder(order.id) : () => {}}
             onPress={onSelectOrder !== undefined ? () => onSelectOrder(order.id) : undefined}
           />
         ))

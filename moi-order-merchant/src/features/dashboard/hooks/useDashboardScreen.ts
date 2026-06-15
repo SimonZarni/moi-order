@@ -19,7 +19,7 @@ interface UseDashboardScreenResult {
   isLoading: boolean;
   isError: boolean;
   refetch: () => void;
-  handleUpdateStatus: (orderId: number, newStatus: string) => void;
+  handleUpdateStatus: (orderId: string, newStatus: string) => void;
   handleTopPeriodChange: (period: TopPeriod) => void;
   handlePendingToggle: () => void;
 }
@@ -80,7 +80,7 @@ export function useDashboardScreen(): UseDashboardScreenResult {
   });
 
   const { mutate: mutateStatus } = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: string }) =>
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
       updateOrderStatus(id, status),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['orders'] });
@@ -109,7 +109,7 @@ export function useDashboardScreen(): UseDashboardScreenResult {
   }, [refetchAnalytics, refetchOrders, refetchTop, refetchPending, pendingOnly]);
 
   const handleUpdateStatus = useCallback(
-    (orderId: number, newStatus: string) => {
+    (orderId: string, newStatus: string) => {
       mutateStatus({ id: orderId, status: newStatus });
     },
     [mutateStatus],

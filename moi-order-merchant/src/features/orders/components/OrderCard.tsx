@@ -30,8 +30,8 @@ const STATUS_COLOURS: Record<string, string> = {
 
 interface OrderCardProps {
   order: FoodOrder;
-  onUpdateStatus: (orderId: number, newStatus: string) => void;
-  onStartPreparing: (orderId: number) => void;
+  onUpdateStatus: (orderId: string, newStatus: string) => void;
+  onStartPreparing?: (orderId: string) => void;
   onPress?: () => void;
   variant?: 'light' | 'dark';
 }
@@ -59,7 +59,7 @@ export function OrderCard({ order, onUpdateStatus, onStartPreparing, onPress, va
   const handleAction = useCallback(() => {
     if (!action) return;
     if (action.nextStatus === ORDER_STATUS.PreparingFood) {
-      onStartPreparing(order.id);
+      onStartPreparing?.(order.id);
     } else {
       onUpdateStatus(order.id, action.nextStatus);
     }
