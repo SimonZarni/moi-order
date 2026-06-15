@@ -30,13 +30,9 @@ class UpdateFoodOrderStatusRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $v): void {
-            $requiresTime = in_array($this->input('status'), [
-                FoodOrderStatus::WaitingForPayment->value,
-                FoodOrderStatus::PreparingFood->value,
-            ], true);
-
-            if ($requiresTime && $this->input('preparation_time_minutes') === null) {
-                $v->errors()->add('preparation_time_minutes', 'Preparation time is required when accepting or preparing the order.');
+            if ($this->input('status') === FoodOrderStatus::PreparingFood->value
+                && $this->input('preparation_time_minutes') === null) {
+                $v->errors()->add('preparation_time_minutes', 'Preparation time is required when starting to prepare the order.');
             }
         });
     }
