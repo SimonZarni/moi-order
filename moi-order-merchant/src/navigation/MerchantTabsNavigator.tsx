@@ -462,14 +462,14 @@ function WebMerchantLayout(): React.JSX.Element {
             </View>
           </View>
         )}
-        {isAlarmEnabled && !isUnlocked && (
+        {/* isAlarmEnabled && !isUnlocked && (
           <View style={webStyles.unlockBanner}>
             <Ionicons name="volume-high-outline" size={14} color={colours.textOnDark} />
             <Text style={webStyles.unlockBannerText}>
               Tap anywhere to enable order alarm sound
             </Text>
           </View>
-        )}
+        ) */}
         <View nativeID="dark-content" style={[webStyles.contentInner, darkStyle]}>
           {renderContent()}
         </View>
