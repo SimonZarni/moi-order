@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { styles } from './MenuItemRow.styles';
 import { colours } from '../../../shared/theme/colours';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
+import { PLATFORM_FEE_RATE } from '../../../shared/constants/config';
 import { MENU_ITEM_STATUS, type MenuItemStatus } from '../../../types/enums';
 import type { MenuItem } from '../../../types/models';
 
@@ -35,7 +36,10 @@ export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleSt
 
   const statusColour = STATUS_COLOURS[item.status];
   const hasModifiers = item.option_groups.length > 0;
-  const hasDiscount = item.original_price_cents != null && item.original_price_cents > item.price_cents;
+  const FEE = 1 + PLATFORM_FEE_RATE;
+  const netPriceCents = Math.round(item.price_cents / FEE);
+  const netOrigPriceCents = item.original_price_cents != null ? Math.round(item.original_price_cents / FEE) : null;
+  const hasDiscount = netOrigPriceCents !== null && netOrigPriceCents > netPriceCents;
 
   const handleRowPress = useCallback(() => {
     if (hasModifiers) setExpanded((prev) => !prev);
@@ -85,9 +89,9 @@ export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleSt
           <View style={styles.info}>
             <Text style={styles.name}>{item.name}</Text>
             <View style={styles.priceRow}>
-              <Text style={styles.price}>{formatPrice(item.price_cents)}</Text>
+              <Text style={styles.price}>{formatPrice(netPriceCents)}</Text>
               {hasDiscount && (
-                <Text style={styles.originalPrice}>{formatPrice(item.original_price_cents!)}</Text>
+                <Text style={styles.originalPrice}>{formatPrice(netOrigPriceCents!)}</Text>
               )}
               {hasModifiers && (
                 <Text style={styles.modifierCount}>{item.option_groups.length} modifier{item.option_groups.length !== 1 ? 's' : ''}</Text>
