@@ -7,6 +7,7 @@ export type AudioStatus = 'unsupported' | 'suspended' | 'running' | 'error';
 
 let _ctx: AudioContext | null = null;
 let _unlocked = false;
+let _pendingAlarm = false; // alarm fired while context was suspended — replay on next unlock
 let _audioError: string | null = null;
 const _listeners = new Set<() => void>();
 
@@ -36,6 +37,8 @@ function attemptUnlock(): void {
   if (!ctx) return;
   if (ctx.state === 'running') {
     if (!_unlocked) { _unlocked = true; _audioError = null; _notify(); }
+    // Replay any alarm that fired while the context was suspended.
+    if (_pendingAlarm) { _pendingAlarm = false; playBeeps(ctx); }
     return;
   }
   ctx.resume()
@@ -44,6 +47,7 @@ function attemptUnlock(): void {
         _unlocked = true;
         _audioError = null;
         _notify();
+        if (_pendingAlarm) { _pendingAlarm = false; playBeeps(ctx); }
       } else {
         _audioError = `resume() called but state is still: ${ctx.state}`;
         _notify();
@@ -136,16 +140,27 @@ export function useOrderAlarm(): UseOrderAlarmResult {
   const unlockAudio = useCallback(() => { attemptUnlock(); }, []);
 
   const triggerAlarm = useCallback(() => {
-    if (!isEnabled) {
+    if (!isEnabled) return;
+    const ctx = getCtx();
+    if (!ctx) {
+      // Context doesn't exist yet (no user gesture ever happened).
+      // Mark pending so it fires as soon as the merchant next clicks anything.
+      _pendingAlarm = true;
       return;
     }
-    const ctx = getCtx();
-    if (!ctx) return;
     if (ctx.state === 'running') {
       playBeeps(ctx);
     } else {
+      // Context exists but is suspended (browser autoplay policy).
+      // Mark pending so attemptUnlock() replays it on next user gesture.
+      _pendingAlarm = true;
       ctx.resume()
-        .then(() => { if (ctx.state === 'running') playBeeps(ctx); })
+        .then(() => {
+          if (ctx.state === 'running') {
+            _pendingAlarm = false;
+            playBeeps(ctx);
+          }
+        })
         .catch((err: unknown) => {
           _audioError = `triggerAlarm resume failed: ${err instanceof Error ? err.message : String(err)}`;
           _notify();
