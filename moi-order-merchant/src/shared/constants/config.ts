@@ -1,3 +1,7 @@
+export const POLL_INTERVAL = {
+  ORDER_DETAIL: 5_000,
+} as const;
+
 export const CACHE_TTL = {
   DEFAULT:       30_000,
   ORDERS:        60_000,

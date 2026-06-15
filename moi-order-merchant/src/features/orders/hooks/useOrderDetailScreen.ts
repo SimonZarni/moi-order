@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getOrder, updateOrderStatus, cancelOrderWithReason, CancelOrderPayload } from '../../../api/orders';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
-import { CACHE_TTL, GC_TIME } from '../../../shared/constants/config';
+import { CACHE_TTL, GC_TIME, POLL_INTERVAL } from '../../../shared/constants/config';
 import { ORDER_STATUS } from '../../../types/enums';
 import type { FoodOrder } from '../../../types/models';
 
@@ -43,12 +43,23 @@ export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResul
   const [cancelDescription, setCancelDescription] = useState('');
   const [preparationTimeMinutes, setPreparationTimeMinutes] = useState(PREP_TIME_DEFAULT);
 
+  const TERMINAL_STATUSES = new Set([
+    ORDER_STATUS.Completed,
+    ORDER_STATUS.Cancelled,
+    ORDER_STATUS.Expired,
+  ]);
+
   const { data: order, isLoading, isError } = useQuery({
     queryKey: QUERY_KEYS.ORDER_DETAIL(orderId),
     queryFn: () => getOrder(orderId),
     staleTime: CACHE_TTL.ORDERS,
     gcTime: GC_TIME.DEFAULT,
     retry: 0,
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      if (!status || TERMINAL_STATUSES.has(status)) return false;
+      return POLL_INTERVAL.ORDER_DETAIL;
+    },
   });
 
   const invalidate = useCallback(() => {
@@ -78,7 +89,7 @@ export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResul
     (newStatus: string) => mutate({
       status: newStatus,
       preparationTimeMinutes:
-        newStatus === ORDER_STATUS.WaitingForPayment || newStatus === ORDER_STATUS.PreparingFood
+        newStatus === ORDER_STATUS.WaitingForPayment
           ? preparationTimeMinutes
           : undefined,
     }),
