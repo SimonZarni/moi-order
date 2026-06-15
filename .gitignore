@@ -3,6 +3,9 @@
 # System manual (local only — generated PDFs, videos, HTML ads)
 system-manual/
 
+# APKPure store assets (local only)
+moi-order-frontend/assets/apkpure/
+
 # Business documents (local only)
 BUSINESS_PROPOSAL_EN.md
 
