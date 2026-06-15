@@ -37,7 +37,7 @@ function PushNotificationManager(): null {
 function WebSocketManager(): null {
   const { triggerAlarm } = useOrderAlarm();
   const { channelStatus } = useWsStatus();
-  useMerchantWebSocket({ onNewOrder: triggerAlarm });
+  useMerchantWebSocket({ onNewOrder: triggerAlarm, onNewChatMessage: triggerAlarm });
 
   // today string is stable for the lifetime of the session (remounts at midnight via token cycle).
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
