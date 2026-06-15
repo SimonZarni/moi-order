@@ -107,7 +107,6 @@ export function useWsStatus(): WsStatusResult {
 
 interface UseMerchantWebSocketOptions {
   onNewOrder?: () => void;
-  onChatMessage?: () => void;
 }
 
 export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): void {
@@ -116,8 +115,7 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
   // int_id is the integer PK — backend broadcasts to merchant.{user_id} (integer FK).
   // user.id is the UUID and PHP casts it to 0, so it never matches.
   const userId = useAuthStore((s) => s.user?.int_id ?? null);
-  const onNewOrder    = options?.onNewOrder;
-  const onChatMessage = options?.onChatMessage;
+  const onNewOrder = options?.onNewOrder;
 
   const pusherRef  = useRef<PusherInstance | null>(null);
   const channelRef = useRef<PusherChannel | null>(null);
@@ -133,14 +131,11 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
   );
 
   const handleNotificationCreated = useCallback(
-    (data: NotificationCreatedPayload) => {
+    (_data: NotificationCreatedPayload) => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.LIST });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT });
-      if (data.type === 'chat_message') {
-        onChatMessage?.();
-      }
     },
-    [queryClient, onChatMessage],
+    [queryClient],
   );
 
   const handleOrderStatusUpdated = useCallback(
