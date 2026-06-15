@@ -9,8 +9,10 @@ let _ctx: AudioContext | null = null;
 let _unlocked = false;
 let _pendingAlarm = false; // alarm fired while context was suspended — replay on next unlock
 let _audioError: string | null = null;
-let _buffer: AudioBuffer | null = null;     // pre-decoded custom alarm sound
-let _fetchedUrl: string | null = null;      // tracks which URL populated _buffer
+// HTMLAudioElement used for custom sounds — avoids CORS (fetch() is blocked on R2 without CORS rules;
+// media elements load cross-origin audio without triggering CORS preflight).
+let _audio: HTMLAudioElement | null = null;
+let _audioUrl: string | null = null;
 const _listeners = new Set<() => void>();
 
 function _notify(): void { _listeners.forEach((fn) => fn()); }
@@ -34,20 +36,12 @@ function getCtx(): AudioContext | null {
   return _ctx;
 }
 
-// Plays custom buffer if available, otherwise falls back to synth beeps.
+// Plays custom audio element if available, otherwise falls back to synth beeps.
 function playSound(ctx: AudioContext): void {
-  if (_buffer) {
-    try {
-      const source = ctx.createBufferSource();
-      source.buffer = _buffer;
-      source.connect(ctx.destination);
-      source.start();
-      _audioError = null;
-      _notify();
-      return;
-    } catch {
-      // Buffer play failed — fall through to synth beeps.
-    }
+  if (_audio) {
+    _audio.currentTime = 0;
+    _audio.play().catch(() => { playBeeps(ctx); });
+    return;
   }
   playBeeps(ctx);
 }
@@ -144,35 +138,21 @@ export function useOrderAlarm(): UseOrderAlarmResult {
     return 'suspended';
   }, () => 'suspended' as AudioStatus);
 
-  // Pre-fetch and decode the admin-uploaded alarm sound when the URL arrives.
+  // Preload the admin-uploaded alarm sound via HTMLAudioElement.
+  // Media elements load cross-origin audio without triggering CORS preflight,
+  // unlike fetch() which is blocked by R2/CDN unless CORS is explicitly configured.
   useEffect(() => {
-    if (!alarmSoundUrl || alarmSoundUrl === _fetchedUrl) return;
-    const ctx = getCtx();
-    if (!ctx) return;
-
-    let cancelled = false;
-    fetch(alarmSoundUrl)
-      .then((res) => res.arrayBuffer())
-      .then((ab)  => ctx.decodeAudioData(ab))
-      .then((buf) => {
-        if (!cancelled) {
-          _buffer     = buf;
-          _fetchedUrl = alarmSoundUrl;
-        }
-      })
-      .catch(() => {
-        // Fetch/decode failed — silently fall back to synth beeps.
-      });
-
-    return () => { cancelled = true; };
-  }, [alarmSoundUrl]);
-
-  // Clear the buffer when the admin removes the alarm sound.
-  useEffect(() => {
-    if (alarmSoundUrl === null) {
-      _buffer     = null;
-      _fetchedUrl = null;
+    if (!alarmSoundUrl) {
+      _audio    = null;
+      _audioUrl = null;
+      return;
     }
+    if (alarmSoundUrl === _audioUrl) return;
+    if (typeof Audio === 'undefined') return;
+    const el = new Audio(alarmSoundUrl);
+    el.preload = 'auto';
+    _audio    = el;
+    _audioUrl = alarmSoundUrl;
   }, [alarmSoundUrl]);
 
   useEffect(() => {
