@@ -89,7 +89,7 @@ export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResul
     (newStatus: string) => mutate({
       status: newStatus,
       preparationTimeMinutes:
-        newStatus === ORDER_STATUS.WaitingForPayment || newStatus === ORDER_STATUS.PreparingFood
+        newStatus === ORDER_STATUS.PreparingFood
           ? preparationTimeMinutes
           : undefined,
     }),
