@@ -5,8 +5,8 @@ import { typography } from '../../../shared/theme/typography';
 import { radius } from '../../../shared/theme/radius';
 
 export const styles = StyleSheet.create({
-  safe:    { flex: 1, backgroundColor: colours.backgroundDark },
-  loading: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colours.backgroundDark },
+  safe:    { flex: 1, backgroundColor: colours.surface },
+  loading: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colours.surface },
 
   // ── Header ────────────────────────────────────────────────────────────────
   header: {
@@ -15,7 +15,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
     borderBottomWidth: 1,
-    borderBottomColor: colours.dividerDark,
+    borderBottomColor: colours.divider,
     gap: spacing.sm,
   },
   backBtn: {
@@ -32,12 +32,12 @@ export const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.md,
     fontWeight: '800',
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     letterSpacing: -0.3,
   },
   headerSubtitle: {
     fontSize: typography.xs,
-    color: 'rgba(255,255,255,0.4)',
+    color: colours.textSubtle,
     marginTop: 1,
   },
   saveBtn: {
@@ -52,7 +52,7 @@ export const styles = StyleSheet.create({
   },
   saveBtnDisabled: { opacity: 0.45 },
   saveBtnText: {
-    color: colours.backgroundDark,
+    color: colours.surface,
     fontSize: typography.xs,
     fontWeight: '800',
   },
@@ -70,15 +70,17 @@ export const styles = StyleSheet.create({
 
   // ── Section card ──────────────────────────────────────────────────────────
   card: {
-    backgroundColor: colours.backgroundMid,
+    backgroundColor: colours.surfaceMuted,
     borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colours.divider,
     padding: spacing.md,
     gap: spacing.sm,
   },
   sectionLabel: {
     fontSize: typography.xxs,
     fontWeight: '800',
-    color: 'rgba(255,255,255,0.35)',
+    color: colours.textMuted,
     letterSpacing: 1.2,
     textTransform: 'uppercase',
     marginBottom: 2,
@@ -86,20 +88,20 @@ export const styles = StyleSheet.create({
 
   // ── Photo ─────────────────────────────────────────────────────────────────
   photoWrap: { position: 'relative', borderRadius: radius.md, overflow: 'hidden' },
-  photo:     { width: '100%', height: 200, backgroundColor: colours.backgroundDark },
+  photo:     { width: '100%', height: 200, backgroundColor: colours.surfaceMuted },
   noPhoto: {
     width: '100%',
     height: 120,
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.surfaceMuted,
     borderWidth: 1.5,
-    borderColor: colours.dividerDark,
+    borderColor: colours.divider,
     borderStyle: 'dashed',
     borderRadius: radius.md,
     justifyContent: 'center',
     alignItems: 'center',
     gap: spacing.xs,
   },
-  noPhotoText: { fontSize: typography.xs, color: 'rgba(255,255,255,0.3)' },
+  noPhotoText: { fontSize: typography.xs, color: colours.textSubtle },
   newBadge: {
     position: 'absolute',
     top: 8,
@@ -109,7 +111,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
   },
-  newBadgeText: { fontSize: typography.xxs, color: colours.backgroundDark, fontWeight: '800' },
+  newBadgeText: { fontSize: typography.xxs, color: colours.surface, fontWeight: '800' },
   changePhotoBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -128,18 +130,18 @@ export const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: typography.xs,
     fontWeight: '600',
-    color: 'rgba(255,255,255,0.55)',
+    color: colours.textMuted,
     marginBottom: 4,
   },
   input: {
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.surface,
     borderWidth: 1,
-    borderColor: colours.dividerDark,
+    borderColor: colours.divider,
     borderRadius: radius.md,
     paddingHorizontal: spacing.sm + 2,
     paddingVertical: spacing.sm,
     fontSize: typography.sm,
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     minHeight: 44,
   },
   inputMultiline: {
@@ -151,7 +153,7 @@ export const styles = StyleSheet.create({
   priceRow: { flexDirection: 'row', gap: spacing.sm },
   priceCol: { flex: 1, gap: 4 },
   customerSeesRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 },
-  customerSeesLabel: { fontSize: typography.xxs, color: 'rgba(255,255,255,0.35)', fontWeight: '600' },
+  customerSeesLabel: { fontSize: typography.xxs, color: colours.textSubtle, fontWeight: '600' },
   customerSeesValue: { fontSize: typography.xs, color: colours.primary, fontWeight: '800' },
   discountBadge: {
     flexDirection: 'row',
@@ -182,9 +184,9 @@ export const styles = StyleSheet.create({
   },
   addGroupBtnText: { fontSize: typography.xs, color: colours.primary, fontWeight: '700' },
   groupCard: {
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.surface,
     borderWidth: 1,
-    borderColor: colours.dividerDark,
+    borderColor: colours.divider,
     borderRadius: radius.md,
     padding: spacing.sm,
     gap: spacing.xs,
@@ -197,18 +199,18 @@ export const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  metaLabel: { fontSize: typography.xxs, color: 'rgba(255,255,255,0.4)', fontWeight: '600' },
+  metaLabel: { fontSize: typography.xxs, color: colours.textMuted, fontWeight: '600' },
   numInput: {
     borderWidth: 1,
-    borderColor: colours.dividerDark,
+    borderColor: colours.divider,
     borderRadius: radius.sm,
     paddingHorizontal: 6,
     paddingVertical: 3,
     fontSize: typography.sm,
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     width: 40,
     textAlign: 'center',
-    backgroundColor: colours.backgroundMid,
+    backgroundColor: colours.surfaceMuted,
   },
   optionRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   optionNameInput: { flex: 2 },

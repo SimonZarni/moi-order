@@ -41,7 +41,7 @@ export function EditMenuItemScreen({ itemId, onBack }: EditMenuItemScreenProps):
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <View style={styles.header}>
         <Pressable style={styles.backBtn} onPress={onBack} accessibilityLabel="Go back" accessibilityRole="button">
-          <Ionicons name="arrow-back" size={20} color={colours.textOnDark} />
+          <Ionicons name="arrow-back" size={20} color={colours.textOnLight} />
         </Pressable>
         <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>Edit Item</Text>
@@ -55,7 +55,7 @@ export function EditMenuItemScreen({ itemId, onBack }: EditMenuItemScreenProps):
           accessibilityRole="button"
         >
           {isSaving
-            ? <ActivityIndicator size="small" color={colours.backgroundDark} />
+            ? <ActivityIndicator size="small" color={colours.surface} />
             : <Text style={styles.saveBtnText}>Save Changes</Text>
           }
         </Pressable>
@@ -84,7 +84,7 @@ export function EditMenuItemScreen({ itemId, onBack }: EditMenuItemScreenProps):
               value={form.name}
               onChangeText={(v) => handleFieldChange('name', v)}
               placeholder="Item name"
-              placeholderTextColor="rgba(255,255,255,0.2)"
+              placeholderTextColor={colours.textSubtle}
               accessibilityLabel="Item name"
             />
           </View>
@@ -96,7 +96,7 @@ export function EditMenuItemScreen({ itemId, onBack }: EditMenuItemScreenProps):
               value={form.description}
               onChangeText={(v) => handleFieldChange('description', v)}
               placeholder="Describe this item (optional)"
-              placeholderTextColor="rgba(255,255,255,0.2)"
+              placeholderTextColor={colours.textSubtle}
               multiline
               accessibilityLabel="Item description"
             />
@@ -116,7 +116,7 @@ export function EditMenuItemScreen({ itemId, onBack }: EditMenuItemScreenProps):
                 value={form.price}
                 onChangeText={(v) => handleFieldChange('price', v)}
                 placeholder="0.00"
-                placeholderTextColor="rgba(255,255,255,0.2)"
+                placeholderTextColor={colours.textSubtle}
                 keyboardType="decimal-pad"
                 accessibilityLabel="Net price"
               />
@@ -136,14 +136,14 @@ export function EditMenuItemScreen({ itemId, onBack }: EditMenuItemScreenProps):
                 value={form.original_price}
                 onChangeText={(v) => handleFieldChange('original_price', v)}
                 placeholder="Optional"
-                placeholderTextColor="rgba(255,255,255,0.2)"
+                placeholderTextColor={colours.textSubtle}
                 keyboardType="decimal-pad"
                 accessibilityLabel="Original price before discount"
               />
               {customerOriginalPriceCents !== null && customerOriginalPriceCents > 0 && (
                 <View style={styles.customerSeesRow}>
                   <Text style={styles.customerSeesLabel}>Was</Text>
-                  <Text style={[styles.customerSeesValue, { color: 'rgba(255,255,255,0.45)', textDecorationLine: 'line-through' }]}>
+                  <Text style={[styles.customerSeesValue, { color: colours.textSubtle, textDecorationLine: 'line-through' }]}>
                     {formatPrice(customerOriginalPriceCents)}
                   </Text>
                 </View>
@@ -213,7 +213,7 @@ function PhotoSection({ newPhoto, existingUrl, onPickPhoto }: PhotoSectionProps)
   if (uri === null || loadError) {
     return (
       <Pressable style={styles.noPhoto} onPress={onPickPhoto} accessibilityRole="button" accessibilityLabel="Add photo">
-        <Ionicons name="image-outline" size={28} color="rgba(255,255,255,0.2)" />
+        <Ionicons name="image-outline" size={28} color={colours.textSubtle} />
         <Text style={styles.noPhotoText}>Tap to add a photo</Text>
       </Pressable>
     );
@@ -252,7 +252,7 @@ function OptionGroupCard({ group, groupIndex: gi, onGroupChange, onRemoveGroup, 
           value={group.name}
           onChangeText={(v) => onGroupChange(gi, 'name', v)}
           placeholder="Group name (e.g. Protein)"
-          placeholderTextColor="rgba(255,255,255,0.2)"
+          placeholderTextColor={colours.textSubtle}
           accessibilityLabel={`Option group ${gi + 1} name`}
         />
         <Pressable style={styles.iconBtn} onPress={() => onRemoveGroup(gi)} accessibilityRole="button" accessibilityLabel="Remove group">
@@ -266,7 +266,7 @@ function OptionGroupCard({ group, groupIndex: gi, onGroupChange, onRemoveGroup, 
           <Switch
             value={group.is_required}
             onValueChange={(v) => onGroupChange(gi, 'is_required', v)}
-            trackColor={{ false: colours.dividerDark, true: colours.primary + '66' }}
+            trackColor={{ false: colours.divider, true: colours.primary + '66' }}
             thumbColor={group.is_required ? colours.primary : colours.medium}
             accessibilityLabel={`Group ${gi + 1} required`}
           />
@@ -300,7 +300,7 @@ function OptionGroupCard({ group, groupIndex: gi, onGroupChange, onRemoveGroup, 
             value={opt.name}
             onChangeText={(v) => onOptionChange(gi, oi, 'name', v)}
             placeholder="Option name"
-            placeholderTextColor="rgba(255,255,255,0.2)"
+            placeholderTextColor={colours.textSubtle}
             accessibilityLabel={`Option ${oi + 1} name`}
           />
           <TextInput
@@ -308,7 +308,7 @@ function OptionGroupCard({ group, groupIndex: gi, onGroupChange, onRemoveGroup, 
             value={opt.additional_price_cents === 0 ? '' : String(opt.additional_price_cents / 100)}
             onChangeText={(v) => onOptionChange(gi, oi, 'additional_price_cents', Math.round(parseFloat(v || '0') * 100))}
             placeholder="+0 ฿"
-            placeholderTextColor="rgba(255,255,255,0.2)"
+            placeholderTextColor={colours.textSubtle}
             keyboardType="decimal-pad"
             accessibilityLabel={`Option ${oi + 1} additional price`}
           />
