@@ -150,7 +150,7 @@ export function WebSidebar({
             </Pressable>
             {isAlarmEnabled && onAlarmTest != null && (
               <Pressable
-                onPress={onAlarmTest}
+                onPress={() => onAlarmTest?.()}
                 accessibilityLabel="Test alarm sound"
                 accessibilityRole="button"
                 style={({ pressed }) => ({

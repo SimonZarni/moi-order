@@ -5,6 +5,10 @@ import { useSettingsStore } from '../../store/settingsStore';
 
 export type AudioStatus = 'unsupported' | 'suspended' | 'running' | 'error';
 
+// Safari < 14.1 exposes only webkitAudioContext, not AudioContext.
+type AudioContextCtor = typeof AudioContext;
+type ExtWindow = Window & { webkitAudioContext?: AudioContextCtor };
+
 let _ctx: AudioContext | null = null;
 let _unlocked = false;
 let _pendingAlarm = false; // alarm fired while context was suspended — replay on next unlock
@@ -23,10 +27,13 @@ function _subscribe(cb: () => void): () => void {
 }
 
 function getCtx(): AudioContext | null {
-  if (typeof window === 'undefined' || !('AudioContext' in window)) return null;
+  if (typeof window === 'undefined') return null;
+  const win = window as ExtWindow;
+  const Ctor = win.AudioContext ?? win.webkitAudioContext;
+  if (!Ctor) return null;
   if (!_ctx) {
     try {
-      _ctx = new AudioContext();
+      _ctx = new Ctor();
     } catch (err) {
       _audioError = `AudioContext creation failed: ${err instanceof Error ? err.message : String(err)}`;
       _notify();
@@ -36,9 +43,15 @@ function getCtx(): AudioContext | null {
   return _ctx;
 }
 
-// Plays custom audio element if available, otherwise falls back to synth beeps.
-function playSound(ctx: AudioContext): void {
-  if (_audio) {
+// fromGesture must be true only when called synchronously inside a user interaction handler.
+// HTMLAudioElement.play() is gated behind fromGesture because:
+//   Chrome: autoplay policy may silently abort play() from Pusher/async contexts even when
+//           the AudioContext is running — the Promise resolves but no audio is heard.
+//   Safari: play() called inside Promise.then() is blocked regardless of the originating gesture.
+// When fromGesture is false the Web Audio API beep path is used directly; it works as long
+// as the AudioContext is running and requires no per-call user gesture.
+function playSound(ctx: AudioContext, fromGesture: boolean): void {
+  if (_audio && fromGesture) {
     _audio.currentTime = 0;
     _audio.play().catch(() => { playBeeps(ctx); });
     return;
@@ -51,7 +64,8 @@ function attemptUnlock(): void {
   if (!ctx) return;
   if (ctx.state === 'running') {
     if (!_unlocked) { _unlocked = true; _audioError = null; _notify(); }
-    if (_pendingAlarm) { _pendingAlarm = false; playSound(ctx); }
+    // We are inside a synchronous window click/keydown handler — fromGesture = true is safe.
+    if (_pendingAlarm) { _pendingAlarm = false; playSound(ctx, true); }
     return;
   }
   ctx.resume()
@@ -60,7 +74,8 @@ function attemptUnlock(): void {
         _unlocked = true;
         _audioError = null;
         _notify();
-        if (_pendingAlarm) { _pendingAlarm = false; playSound(ctx); }
+        // .then() is outside the user gesture window — use beeps only.
+        if (_pendingAlarm) { _pendingAlarm = false; playSound(ctx, false); }
       } else {
         _audioError = `resume() called but state is still: ${ctx.state}`;
         _notify();
@@ -119,7 +134,7 @@ export interface UseOrderAlarmResult {
   audioStatus: AudioStatus;
   audioError: string | null;
   toggleEnabled: () => void;
-  triggerAlarm: () => void;
+  triggerAlarm: (fromGesture?: boolean) => void;
   unlockAudio: () => void;
 }
 
@@ -132,7 +147,9 @@ export function useOrderAlarm(): UseOrderAlarmResult {
   const audioError = useSyncExternalStore(_subscribe, () => _audioError, () => null);
 
   const audioStatus = useSyncExternalStore(_subscribe, (): AudioStatus => {
-    if (typeof window === 'undefined' || !('AudioContext' in window)) return 'unsupported';
+    if (typeof window === 'undefined') return 'suspended';
+    const win = window as ExtWindow;
+    if (!win.AudioContext && !win.webkitAudioContext) return 'unsupported';
     if (_audioError) return 'error';
     if (_unlocked) return 'running';
     return 'suspended';
@@ -170,7 +187,7 @@ export function useOrderAlarm(): UseOrderAlarmResult {
 
   const unlockAudio = useCallback(() => { attemptUnlock(); }, []);
 
-  const triggerAlarm = useCallback(() => {
+  const triggerAlarm = useCallback((fromGesture = false) => {
     if (!isEnabled) return;
     const ctx = getCtx();
     if (!ctx) {
@@ -178,14 +195,15 @@ export function useOrderAlarm(): UseOrderAlarmResult {
       return;
     }
     if (ctx.state === 'running') {
-      playSound(ctx);
+      playSound(ctx, fromGesture);
     } else {
       _pendingAlarm = true;
       ctx.resume()
         .then(() => {
           if (ctx.state === 'running') {
             _pendingAlarm = false;
-            playSound(ctx);
+            // .then() is outside the user gesture window — use beeps only.
+            playSound(ctx, false);
           }
         })
         .catch((err: unknown) => {
