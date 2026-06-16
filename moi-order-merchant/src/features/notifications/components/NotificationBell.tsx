@@ -20,7 +20,7 @@ interface NotificationBellProps {
 }
 
 export function NotificationBell({ onPress, iconColour = 'rgba(255,255,255,0.6)' }: NotificationBellProps): React.JSX.Element {
-  const { data: unreadCount = 0 } = useQuery({
+  const { data: ordersCount = 0 } = useQuery({
     queryKey:        QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT,
     queryFn:         () => getUnreadCount('orders'),
     staleTime:       CACHE_TTL.NOTIFICATIONS,
@@ -29,6 +29,16 @@ export function NotificationBell({ onPress, iconColour = 'rgba(255,255,255,0.6)'
     refetchInterval: CACHE_TTL.NOTIFICATIONS,
   });
 
+  const { data: chatCount = 0 } = useQuery({
+    queryKey:        QUERY_KEYS.NOTIFICATIONS.CHAT_UNREAD_COUNT,
+    queryFn:         () => getUnreadCount('chat'),
+    staleTime:       CACHE_TTL.NOTIFICATIONS,
+    gcTime:          GC_TIME.DEFAULT,
+    retry:           QUERY_RETRY,
+    refetchInterval: CACHE_TTL.NOTIFICATIONS,
+  });
+
+  const unreadCount = ordersCount + chatCount;
   const displayCount = unreadCount > 99 ? '99+' : String(unreadCount);
 
   return (
