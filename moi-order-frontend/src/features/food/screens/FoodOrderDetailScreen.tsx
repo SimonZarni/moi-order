@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Keyboard, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
@@ -67,7 +67,7 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
         )}
       </View>
 
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {/* Payment timeout banner — restaurant hasn't responded for 15+ minutes */}
         {isPaymentTimedOut && (
           <View style={styles.timeoutBanner}>
@@ -238,7 +238,7 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
 
       {/* Complete order confirmation modal */}
       <Modal visible={completeModalVisible} transparent animationType="fade" onRequestClose={handleCompleteCancel}>
-        <View style={styles.modalOverlay}>
+        <Pressable style={styles.modalOverlay} onPress={Keyboard.dismiss}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Mark this order as complete?</Text>
             <Text style={styles.modalSub}>You can also leave a rating and review.</Text>
@@ -260,7 +260,7 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
               </Pressable>
             </View>
           </View>
-        </View>
+        </Pressable>
       </Modal>
     </SafeAreaView>
   );
