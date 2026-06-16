@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTOs\EditFoodOrderDTO;
 use App\DTOs\StoreFoodOrderDTO;
 use App\Enums\FoodOrderStatus;
+use App\Events\FoodOrderEdited;
 use App\Events\FoodOrderStatusUpdated;
 use App\Events\NewFoodOrder;
 use App\Exceptions\DomainException;
@@ -293,6 +295,96 @@ class FoodOrderService
         });
 
         return $order->fresh(['items', 'restaurant', 'user']);
+    }
+
+    /**
+     * Merchant edits order items: adjust quantities, remove unavailable items, add replacements.
+     * Only allowed while status is OrderPlaced, WaitingForPayment, or PaymentConfirmed.
+     * Prices are always read from the DB — client values for new items are ignored.
+     *
+     * @throws DomainException when order is not in an editable status or items are invalid.
+     */
+    public function editItems(FoodOrder $order, EditFoodOrderDTO $dto): FoodOrder
+    {
+        $editableStatuses = [
+            FoodOrderStatus::OrderPlaced,
+            FoodOrderStatus::WaitingForPayment,
+            FoodOrderStatus::PaymentConfirmed,
+        ];
+
+        if (! in_array($order->status, $editableStatuses, true)) {
+            throw new DomainException('order.not_editable', 409);
+        }
+
+        return DB::transaction(function () use ($order, $dto): FoodOrder {
+            $existingItems = $order->items()->lockForUpdate()->get()->keyBy('id');
+
+            $keepIds = array_column($dto->existingItems, 'id');
+
+            foreach ($keepIds as $itemId) {
+                if (! $existingItems->has($itemId)) {
+                    throw new DomainException('order.item_not_found', 422);
+                }
+            }
+
+            // Hard-delete removed items (no soft-delete on FoodOrderItem).
+            if (! empty($keepIds)) {
+                $order->items()->whereNotIn('id', $keepIds)->delete();
+            } else {
+                $order->items()->delete();
+            }
+
+            // Update quantities on kept items; unit price from DB (price_cents + additional_price_cents).
+            foreach ($dto->existingItems as $line) {
+                $item      = $existingItems[$line['id']];
+                $unitPrice = $item->price_cents + $item->additional_price_cents;
+                $item->update([
+                    'quantity'       => $line['quantity'],
+                    'subtotal_cents' => $unitPrice * $line['quantity'],
+                ]);
+            }
+
+            // Add new items at base price only (options not re-selected; agreed by chat).
+            if (! empty($dto->newItems)) {
+                $menuItemIds = array_column($dto->newItems, 'menu_item_id');
+                $menuItems   = MenuItem::whereIn('id', $menuItemIds)
+                    ->where('restaurant_id', $order->restaurant_id)
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id');
+
+                $newLines = [];
+                foreach ($dto->newItems as $line) {
+                    if (! $menuItems->has($line['menu_item_id'])) {
+                        throw new DomainException('order.item_unavailable', 422);
+                    }
+                    $menuItem   = $menuItems[$line['menu_item_id']];
+                    $newLines[] = [
+                        'menu_item_id'           => $menuItem->id,
+                        'name'                   => $menuItem->name,
+                        'price_cents'            => $menuItem->price_cents,
+                        'additional_price_cents' => 0,
+                        'quantity'               => $line['quantity'],
+                        'notes'                  => null,
+                        'selected_options'       => null,
+                        'subtotal_cents'         => $menuItem->price_cents * $line['quantity'],
+                    ];
+                }
+                $order->items()->createMany($newLines);
+            }
+
+            // Recompute order totals from fresh line-items.
+            $newSubtotal = $order->items()->sum('subtotal_cents');
+            $order->update([
+                'subtotal_cents'        => $newSubtotal,
+                'total_cents'           => $newSubtotal,
+                'edited_by_merchant_at' => now(),
+            ]);
+
+            event(new FoodOrderEdited($order->fresh(['items', 'user', 'restaurant'])));
+
+            return $order->fresh(['items', 'user']);
+        });
     }
 
     public function listForUser(int $userId, int $perPage = 20): LengthAwarePaginator

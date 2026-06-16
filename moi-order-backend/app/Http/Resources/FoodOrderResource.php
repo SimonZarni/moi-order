@@ -60,6 +60,7 @@ class FoodOrderResource extends JsonResource
             'delivered_at'           => $this->delivered_at?->toIso8601String(),
             'completed_at'           => $this->completed_at?->toIso8601String(),
             'cancelled_at'           => $this->cancelled_at?->toIso8601String(),
+            'edited_by_merchant_at'  => $this->edited_by_merchant_at?->toIso8601String(),
             'created_at'             => $this->created_at?->toIso8601String(),
         ];
     }

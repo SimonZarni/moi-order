@@ -31,6 +31,13 @@ interface FoodOrderStatusPayload {
   status_label: string;
 }
 
+interface FoodOrderEditedPayload {
+  order_id: number;
+  order_uuid: string;
+  total_cents: number;
+  subtotal_cents: number;
+}
+
 export function usePusherNotifications(): void {
   const userId          = useAuthStore((state) => state.user?.id ?? null);
   const queryClient     = useQueryClient();
@@ -109,6 +116,35 @@ export function usePusherNotifications(): void {
             ],
           );
         }
+      }
+    });
+
+    orderChannel.bind('food-order.edited', (payload: FoodOrderEditedPayload) => {
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOOD_ORDERS.DETAIL(payload.order_uuid) });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOOD_ORDERS.LIST });
+      incrementUnread();
+
+      const route = navigationRef.isReady() ? navigationRef.getCurrentRoute() : null;
+      const alreadyOnThisOrder =
+        route?.name === 'FoodOrderDetail' &&
+        (route.params as { orderId?: string } | undefined)?.orderId === payload.order_uuid;
+
+      if (!alreadyOnThisOrder) {
+        Alert.alert(
+          'Order Updated',
+          'The restaurant has updated your order items. Tap to view the changes.',
+          [
+            { text: 'Later', style: 'cancel' },
+            {
+              text: 'View Order',
+              onPress: () => {
+                if (navigationRef.isReady()) {
+                  navigationRef.navigate('FoodOrderDetail', { orderId: payload.order_uuid });
+                }
+              },
+            },
+          ],
+        );
       }
     });
 

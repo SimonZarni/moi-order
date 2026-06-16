@@ -484,6 +484,7 @@ export interface FoodOrder {
   delivered_at: string | null;
   completed_at: string | null;
   cancelled_at: string | null;
+  edited_by_merchant_at: string | null;
   created_at: string;
 }
 

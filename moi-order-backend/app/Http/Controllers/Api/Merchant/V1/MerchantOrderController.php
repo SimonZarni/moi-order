@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Merchant\V1;
 
 use App\Contracts\FileStorageInterface;
+use App\DTOs\EditFoodOrderDTO;
 use App\Enums\FoodOrderStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Merchant\EditFoodOrderRequest;
 use App\Http\Requests\Merchant\UpdateFoodOrderStatusRequest;
 use App\Http\Resources\FoodOrderResource;
 use App\Models\FoodOrder;
@@ -77,6 +79,23 @@ class MerchantOrderController extends Controller
         }
 
         $updated = $this->orderService->updateStatus($order, FoodOrderStatus::PaymentConfirmed);
+
+        return response()->json(['data' => new FoodOrderResource($updated, $this->storage)]);
+    }
+
+    /** PATCH /api/merchant/v1/orders/{id}/items */
+    public function editItems(EditFoodOrderRequest $request, string $id): JsonResponse
+    {
+        $restaurant = $request->user()->restaurant()->firstOrFail();
+        $order      = $restaurant->foodOrders()->with(['items', 'user'])->where('uuid', $id)->firstOrFail();
+
+        $dto = new EditFoodOrderDTO(
+            orderId:       $order->id,
+            existingItems: $request->validated('existing_items'),
+            newItems:      $request->validated('new_items'),
+        );
+
+        $updated = $this->orderService->editItems($order, $dto);
 
         return response()->json(['data' => new FoodOrderResource($updated, $this->storage)]);
     }

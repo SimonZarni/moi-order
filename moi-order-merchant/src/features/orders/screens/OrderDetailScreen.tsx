@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { EditOrderModal } from '../components/EditOrderModal/EditOrderModal';
 import { useOrderDetailScreen } from '../hooks/useOrderDetailScreen';
 import { styles } from './OrderDetailScreen.styles';
 import { colours } from '../../../shared/theme/colours';
@@ -31,6 +32,12 @@ const CANCELLABLE_STATUSES = new Set<string>([
   ORDER_STATUS.PreparingFood,
   ORDER_STATUS.WaitingForDelivery,
   ORDER_STATUS.DeliveryOnTheWay,
+]);
+
+const EDITABLE_STATUSES = new Set<string>([
+  ORDER_STATUS.OrderPlaced,
+  ORDER_STATUS.WaitingForPayment,
+  ORDER_STATUS.PaymentConfirmed,
 ]);
 
 const STATUS_COLOURS: Record<string, string> = {
@@ -93,9 +100,11 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
     order, isLoading, isError, isUpdating,
     cancelModalVisible, cancelReason, cancelDescription,
     preparationTimeMinutes,
+    editModalVisible,
     handleUpdateStatus, handleCancelPress, handleCancelModalClose,
     handleCancelReasonChange, handleCancelDescriptionChange, handleCancelConfirm,
     handlePreparationTimeDecrease, handlePreparationTimeIncrease, handlePreparationTimePreset,
+    handleEditPress, handleEditClose,
   } = useOrderDetailScreen(orderId);
 
   if (isLoading) {
@@ -124,6 +133,7 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
   const actionLabel = ACTION_LABELS[order.status];
   const waitingNote = WAITING_NOTES[order.status];
   const canCancel = CANCELLABLE_STATUSES.has(order.status);
+  const canEdit   = EDITABLE_STATUSES.has(order.status);
   const statusColour = STATUS_COLOURS[order.status] ?? colours.medium;
   const canChat = isChatWindowOpen(order.status, order.completed_at);
 
@@ -243,8 +253,19 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
         </View>
 
         <View style={styles.card}>
-          <View style={styles.cardHeader}>
+          <View style={[styles.cardHeader, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
             <Text style={styles.cardTitle}>{t('order_detail_items')} ({order.items.length})</Text>
+            {canEdit && (
+              <Pressable
+                onPress={handleEditPress}
+                accessibilityRole="button"
+                accessibilityLabel="Edit order items"
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+              >
+                <Ionicons name="pencil-outline" size={13} color={colours.primary} />
+                <Text style={{ fontSize: 12, fontWeight: '700', color: colours.primary }}>Edit</Text>
+              </Pressable>
+            )}
           </View>
           <View style={styles.cardBody}>
             {order.items.map((item) => (
@@ -361,6 +382,12 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
           </Pressable>
         )}
       </ScrollView>
+
+      <EditOrderModal
+        order={order}
+        visible={editModalVisible}
+        onClose={handleEditClose}
+      />
 
       <Modal
         visible={cancelModalVisible}

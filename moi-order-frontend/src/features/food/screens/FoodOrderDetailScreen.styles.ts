@@ -112,6 +112,23 @@ export const styles = StyleSheet.create({
     color: '#92400e',
     lineHeight: 20,
   },
+  // Order edited by merchant notice
+  editedBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.xs,
+    backgroundColor: '#eff6ff',
+    borderRadius: radius.xl,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: '#93c5fd',
+  },
+  editedBannerText: {
+    flex: 1,
+    fontSize: typography.sm,
+    color: '#1d4ed8',
+    lineHeight: 20,
+  },
   // Order Again button
   orderAgainBtn: {
     flexDirection: 'row',

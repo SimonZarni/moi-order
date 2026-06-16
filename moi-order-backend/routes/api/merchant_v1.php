@@ -61,6 +61,7 @@ Route::get('/orders/{id}',                   [MerchantOrderController::class, 's
 Route::post('/orders/{id}/confirm-payment',  [MerchantOrderController::class, 'confirmPayment']);
 Route::put('/orders/{id}/status',            [MerchantOrderController::class, 'updateStatus']);
 Route::patch('/orders/{id}/status',          [MerchantOrderController::class, 'updateStatus']);
+Route::patch('/orders/{id}/items',           [MerchantOrderController::class, 'editItems']);
 
 // ── Order chat ────────────────────────────────────────────────────────────────
 Route::get('/orders/{id}/chat',        [MerchantOrderChatController::class, 'index']);

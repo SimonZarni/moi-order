@@ -25,6 +25,7 @@ interface UseOrderDetailScreenResult {
   cancelReason: string;
   cancelDescription: string;
   preparationTimeMinutes: number;
+  editModalVisible: boolean;
   handleUpdateStatus: (newStatus: string) => void;
   handleCancelPress: () => void;
   handleCancelModalClose: () => void;
@@ -34,6 +35,8 @@ interface UseOrderDetailScreenResult {
   handlePreparationTimeDecrease: () => void;
   handlePreparationTimeIncrease: () => void;
   handlePreparationTimePreset: (val: number) => void;
+  handleEditPress: () => void;
+  handleEditClose: () => void;
 }
 
 export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResult {
@@ -42,6 +45,7 @@ export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResul
   const [cancelReason, setCancelReason] = useState('closing_soon');
   const [cancelDescription, setCancelDescription] = useState('');
   const [preparationTimeMinutes, setPreparationTimeMinutes] = useState(PREP_TIME_DEFAULT);
+  const [editModalVisible, setEditModalVisible] = useState(false);
 
   const TERMINAL_STATUSES = new Set([
     ORDER_STATUS.Completed,
@@ -125,6 +129,9 @@ export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResul
     setPreparationTimeMinutes(val);
   }, []);
 
+  const handleEditPress  = useCallback(() => setEditModalVisible(true), []);
+  const handleEditClose  = useCallback(() => setEditModalVisible(false), []);
+
   return {
     order,
     isLoading,
@@ -134,6 +141,7 @@ export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResul
     cancelReason,
     cancelDescription,
     preparationTimeMinutes,
+    editModalVisible,
     handleUpdateStatus,
     handleCancelPress,
     handleCancelModalClose,
@@ -143,5 +151,7 @@ export function useOrderDetailScreen(orderId: string): UseOrderDetailScreenResul
     handlePreparationTimeDecrease,
     handlePreparationTimeIncrease,
     handlePreparationTimePreset,
+    handleEditPress,
+    handleEditClose,
   };
 }

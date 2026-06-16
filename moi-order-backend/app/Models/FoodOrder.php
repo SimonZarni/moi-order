@@ -28,6 +28,7 @@ class FoodOrder extends Model
         'picked_up_at', 'delivered_at', 'completed_at', 'cancelled_at',
         'cancel_reason', 'cancel_description',
         'rating', 'customer_review',
+        'edited_by_merchant_at',
     ];
 
     protected function casts(): array
@@ -45,7 +46,8 @@ class FoodOrder extends Model
             'picked_up_at'         => 'datetime',
             'delivered_at'         => 'datetime',
             'completed_at'         => 'datetime',
-            'cancelled_at'         => 'datetime',
+            'cancelled_at'            => 'datetime',
+            'edited_by_merchant_at'   => 'datetime',
             'preparation_time_minutes' => 'integer',
             'rating'                   => 'integer',
         ];

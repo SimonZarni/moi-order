@@ -78,6 +78,16 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
           </View>
         )}
 
+        {/* Order edited by merchant banner */}
+        {order.edited_by_merchant_at !== null && !isTerminal && (
+          <View style={styles.editedBanner}>
+            <Ionicons name="pencil-outline" size={15} color="#1d4ed8" />
+            <Text style={styles.editedBannerText}>
+              The restaurant updated your order items. Please review the changes below.
+            </Text>
+          </View>
+        )}
+
         {isCancelled ? (
           <View style={styles.cancelledCard}>
             <Text style={styles.cancelledText}>This order has been cancelled.</Text>

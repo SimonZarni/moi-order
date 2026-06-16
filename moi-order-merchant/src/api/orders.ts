@@ -56,4 +56,19 @@ export async function cancelOrderWithReason(
   return response.data.data;
 }
 
+export interface EditOrderItemsPayload {
+  existing_items: Array<{ id: number; quantity: number }>;
+  new_items: Array<{ menu_item_id: number; quantity: number }>;
+}
+
+export async function editOrderItems(
+  id: string,
+  payload: EditOrderItemsPayload,
+): Promise<FoodOrder> {
+  const response = await apiClient.patch<{ data: FoodOrder }>(
+    `/orders/${id}/items`,
+    payload,
+  );
+  return response.data.data;
+}
 
