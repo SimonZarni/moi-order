@@ -3,10 +3,11 @@ import { Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { formatDate } from '@/shared/utils/formatDate';
 import { RestaurantReview } from '@/types/models';
+import { colours } from '@/shared/theme/colours';
 import { styles } from './ReviewCard.styles';
 
-const STAR_ACTIVE = '#f59e0b';
-const STAR_EMPTY  = '#e2e8f0';
+const STAR_ACTIVE = colours.star;
+const STAR_EMPTY  = colours.divider;
 
 interface ReviewCardProps {
   review: RestaurantReview;

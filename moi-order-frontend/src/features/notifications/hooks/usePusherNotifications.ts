@@ -23,7 +23,8 @@ import { useAuthStore } from '@/shared/store/authStore';
 import { useNotificationStore } from '@/shared/store/notificationStore';
 
 interface FoodOrderStatusPayload {
-  order_id: string;
+  order_id: number;
+  order_uuid: string;
   status: string;
   status_label: string;
 }
@@ -77,8 +78,9 @@ export function usePusherNotifications(): void {
     const orderChannel     = pusher.subscribe(orderChannelName);
 
     orderChannel.bind('food-order.status-updated', (payload: FoodOrderStatusPayload) => {
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOOD_ORDERS.DETAIL(payload.order_id) });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOOD_ORDERS.DETAIL(payload.order_uuid) });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOOD_ORDERS.LIST });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOOD_ORDERS.ACTIVE });
       // Badge increment because a status notification is also written to the database channel.
       incrementUnread();
     });

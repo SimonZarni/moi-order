@@ -17,6 +17,7 @@ export const ERROR_CODES = {
   MENU_SYSTEM_CATEGORY_EMPTY:    'menu.system_category_empty',
   LINE_NOT_LINKED:               'order.line_not_linked',
   LINE_NOT_FOLLOWING:            'order.line_not_following',
+  ORDER_NOT_COMPLETED:           'order.not_completed',
 } as const;
 
 export const DOMAIN_ERROR_MESSAGES: Record<string, string> = {
@@ -37,6 +38,7 @@ export const DOMAIN_ERROR_MESSAGES: Record<string, string> = {
   [ERROR_CODES.MENU_SYSTEM_CATEGORY_EMPTY]:   'Please add at least one item to Popular Picks and Recommendations before opening your restaurant.',
   [ERROR_CODES.LINE_NOT_LINKED]:              'Please sign in with LINE to use LINE Pay.',
   [ERROR_CODES.LINE_NOT_FOLLOWING]:           'Please follow Moi Order on LINE to receive your order confirmation.',
+  [ERROR_CODES.ORDER_NOT_COMPLETED]:          'Reviews can only be submitted for completed orders.',
 };
 
 /**

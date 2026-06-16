@@ -49,6 +49,9 @@ export const colours = {
   googleBg:  '#ffffff',
   lineBg:    '#06C755',
 
+  // Reviews / ratings
+  star: '#f59e0b', // Amber-400 — star fill colour used across review components
+
   // Destructive
   destructive: '#ff4961',
 

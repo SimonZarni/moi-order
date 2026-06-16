@@ -51,6 +51,6 @@ export const styles = StyleSheet.create({
   reviewText: {
     fontSize: typography.sm,
     color: colours.textMuted,
-    lineHeight: 18,
+    lineHeight: 40,
   },
 });

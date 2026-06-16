@@ -3,7 +3,8 @@ import { Alert } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { submitOrderReview } from '@/shared/api/reviews';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
-import { FoodOrder } from '@/types/models';
+import { DOMAIN_ERROR_MESSAGES } from '@/shared/constants/errorCodes';
+import { ApiError, FoodOrder } from '@/types/models';
 
 export interface UseOrderReviewResult {
   rating: number | null;
@@ -30,8 +31,12 @@ export function useOrderReview(orderId: string): UseOrderReviewResult {
       const updated = await submitOrderReview(orderId, rating, review.trim() || null);
       queryClient.setQueryData<FoodOrder>(QUERY_KEYS.FOOD_ORDERS.DETAIL(orderId), updated);
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOOD_ORDERS.LIST });
-    } catch {
-      Alert.alert('Error', 'Could not submit review. Please try again.');
+      Alert.alert('Thank You!', 'Your review has been submitted.');
+    } catch (err: unknown) {
+      const code = (err as ApiError)?.code;
+      const message = (code !== undefined ? DOMAIN_ERROR_MESSAGES[code] : undefined)
+        ?? 'Could not submit review. Please try again.';
+      Alert.alert('Error', message);
     } finally {
       setSubmitting(false);
     }

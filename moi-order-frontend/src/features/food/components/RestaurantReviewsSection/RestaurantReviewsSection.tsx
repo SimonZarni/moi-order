@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { colours } from '@/shared/theme/colours';
 import { useRestaurantReviews } from '../../hooks/useRestaurantReviews';
 import { ReviewCard } from '../ReviewCard/ReviewCard';
 import { styles } from './RestaurantReviewsSection.styles';
@@ -13,6 +14,7 @@ interface RestaurantReviewsSectionProps {
 
 export function RestaurantReviewsSection({ restaurantId }: RestaurantReviewsSectionProps): React.JSX.Element | null {
   const { reviews, averageRating, totalReviews, isLoading } = useRestaurantReviews(restaurantId);
+  const [showAll, setShowAll] = useState(false);
 
   if (isLoading) {
     return (
@@ -24,8 +26,8 @@ export function RestaurantReviewsSection({ restaurantId }: RestaurantReviewsSect
 
   if (totalReviews === 0) return null;
 
-  const preview = reviews.slice(0, PREVIEW_COUNT);
-  const hasMore = totalReviews > PREVIEW_COUNT;
+  const displayed = showAll ? reviews : reviews.slice(0, PREVIEW_COUNT);
+  const hasMore   = reviews.length > PREVIEW_COUNT;
 
   return (
     <View style={styles.section}>
@@ -34,7 +36,7 @@ export function RestaurantReviewsSection({ restaurantId }: RestaurantReviewsSect
           <Text style={styles.title}>Reviews</Text>
           {averageRating !== null && (
             <View style={styles.avgBadge}>
-              <Ionicons name="star" size={11} color="#f59e0b" />
+              <Ionicons name="star" size={11} color={colours.star} />
               <Text style={styles.avgText}>{averageRating.toFixed(1)}</Text>
             </View>
           )}
@@ -42,19 +44,22 @@ export function RestaurantReviewsSection({ restaurantId }: RestaurantReviewsSect
         <Text style={styles.countText}>{totalReviews} review{totalReviews !== 1 ? 's' : ''}</Text>
       </View>
 
-      {preview.length === 0 ? (
+      {displayed.length === 0 ? (
         <Text style={styles.empty}>No reviews yet.</Text>
       ) : (
-        preview.map((r, i) => <ReviewCard key={i} review={r} />)
+        displayed.map((r, i) => <ReviewCard key={i} review={r} />)
       )}
 
       {hasMore && (
         <Pressable
           style={styles.seeAllBtn}
+          onPress={() => setShowAll((prev) => !prev)}
           accessibilityRole="button"
-          accessibilityLabel={`See all ${totalReviews} reviews`}
+          accessibilityLabel={showAll ? 'Show fewer reviews' : `See all ${totalReviews} reviews`}
         >
-          <Text style={styles.seeAllText}>See all {totalReviews} reviews →</Text>
+          <Text style={styles.seeAllText}>
+            {showAll ? 'Show less ↑' : `See all ${totalReviews} reviews →`}
+          </Text>
         </Pressable>
       )}
     </View>

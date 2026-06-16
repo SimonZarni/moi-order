@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { styles } from './PostOrderReviewCard.styles';
 
-const STAR_COLOUR_ACTIVE  = '#f59e0b';
+const STAR_COLOUR_ACTIVE  = colours.star;
 const STAR_COLOUR_EMPTY   = colours.divider;
 
 interface PostOrderReviewCardProps {

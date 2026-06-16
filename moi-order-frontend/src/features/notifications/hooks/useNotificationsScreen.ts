@@ -51,7 +51,14 @@ export function useNotificationsScreen(): UseNotificationsScreenResult {
   }, [deleteOne]);
 
   const handleDeleteAll = useCallback((): void => {
-    deleteAll();
+    Alert.alert(
+      'Clear All Notifications',
+      'Remove all notifications? This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Clear All', style: 'destructive', onPress: () => deleteAll() },
+      ],
+    );
   }, [deleteAll]);
 
   const handleNotificationPress = useCallback((notification: AppNotification): void => {
