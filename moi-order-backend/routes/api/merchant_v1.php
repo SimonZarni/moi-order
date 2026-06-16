@@ -69,10 +69,11 @@ Route::post('/orders/{id}/chat/read',            [MerchantOrderChatController::c
 Route::delete('/orders/{id}/chat/{messageId}',   [MerchantOrderChatController::class, 'destroy']);
 
 // ── In-app notifications ──────────────────────────────────────────────────────
-Route::get('/notifications',              [MerchantNotificationController::class, 'index']);
-Route::get('/notifications/unread-count', [MerchantNotificationController::class, 'unreadCount']);
-Route::post('/notifications/read-all',    [MerchantNotificationController::class, 'markAllRead']);
-Route::post('/notifications/{id}/read',   [MerchantNotificationController::class, 'markRead']);
+Route::get('/notifications',                         [MerchantNotificationController::class, 'index']);
+Route::get('/notifications/unread-count',            [MerchantNotificationController::class, 'unreadCount']);
+Route::post('/notifications/read-all',               [MerchantNotificationController::class, 'markAllRead']);
+Route::post('/notifications/read-by-order/{uuid}',   [MerchantNotificationController::class, 'readByOrder']);
+Route::post('/notifications/{id}/read',              [MerchantNotificationController::class, 'markRead']);
 
 // ── KYC resubmission (name/address change) ────────────────────────────────────
 Route::post('/kyc/resubmit',                                  [KycController::class, 'resubmit']);

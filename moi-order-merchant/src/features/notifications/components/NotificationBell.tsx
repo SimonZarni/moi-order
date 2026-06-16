@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { styles } from './NotificationBell.styles';
 import { useQuery } from '@tanstack/react-query';
 import { getUnreadCount } from '../../../api/merchantNotifications';
+// Bell shows order notifications only; chat notifications have a separate icon in NotificationsScreen.
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { CACHE_TTL, GC_TIME, QUERY_RETRY } from '../../../shared/constants/config';
 
@@ -21,7 +22,7 @@ interface NotificationBellProps {
 export function NotificationBell({ onPress, iconColour = 'rgba(255,255,255,0.6)' }: NotificationBellProps): React.JSX.Element {
   const { data: unreadCount = 0 } = useQuery({
     queryKey:        QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT,
-    queryFn:         getUnreadCount,
+    queryFn:         () => getUnreadCount('orders'),
     staleTime:       CACHE_TTL.NOTIFICATIONS,
     gcTime:          GC_TIME.DEFAULT,
     retry:           QUERY_RETRY,

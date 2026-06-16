@@ -132,8 +132,8 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
 
   const handleNotificationCreated = useCallback(
     (_data: NotificationCreatedPayload) => {
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.LIST });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT });
+      // Invalidate all notification queries (list + counts for both groups) in one call.
+      void queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
     [queryClient],
   );

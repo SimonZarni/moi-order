@@ -47,6 +47,7 @@ export function LoginScreen(): React.JSX.Element {
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
+          autoComplete="off"
           returnKeyType="next"
           onSubmitEditing={() => passwordInputRef.current?.focus()}
           accessibilityLabel="Email address"
@@ -64,6 +65,7 @@ export function LoginScreen(): React.JSX.Element {
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
+            autoComplete="new-password"
             returnKeyType="go"
             onSubmitEditing={() => { void handleSubmit(); }}
             onFocus={handlePasswordFocus}

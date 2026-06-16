@@ -51,6 +51,52 @@ export const styles = StyleSheet.create({
     color: colours.primaryDark,
   },
 
+  // ── Tab switcher ─────────────────────────────────────────────────────────
+  tabs: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
+    backgroundColor: colours.surface,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabActive: {
+    borderBottomColor: colours.primary,
+  },
+  tabInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  tabLabel: {
+    fontSize: typography.sm,
+    fontWeight: '600',
+    color: colours.textSubtle,
+  },
+  tabLabelActive: {
+    color: colours.primary,
+  },
+  tabBadge: {
+    minWidth: 18,
+    height: 18,
+    borderRadius: radius.full,
+    backgroundColor: colours.error,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  tabBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: colours.white,
+    lineHeight: 14,
+  },
+
   // ── Divider between list items ────────────────────────────────────────────
   divider: {
     height: 1,

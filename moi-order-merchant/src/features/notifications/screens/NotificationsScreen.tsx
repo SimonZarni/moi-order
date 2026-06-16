@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View, Text, FlatList, ActivityIndicator, Pressable, ListRenderItem,
 } from 'react-native';
@@ -10,6 +10,7 @@ import { styles } from './NotificationsScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { useTranslation } from '../../../shared/hooks/useTranslation';
 import type { MerchantNotification } from '../../../types/models';
+import type { NotificationGroup } from '../../../api/merchantNotifications';
 
 interface NotificationsScreenProps {
   onPressNotification?: (notification: MerchantNotification) => void;
@@ -17,10 +18,13 @@ interface NotificationsScreenProps {
 
 export function NotificationsScreen({ onPressNotification }: NotificationsScreenProps = {}): React.JSX.Element {
   const t = useTranslation();
+  const [group, setGroup] = useState<NotificationGroup>('orders');
+
   const {
-    notifications, unreadCount, isLoading, isError, isMarkingAllRead,
+    notifications, unreadCount, ordersUnreadCount, chatUnreadCount,
+    isLoading, isError, isMarkingAllRead,
     handlePressNotification, handleMarkAllRead, handleRefresh,
-  } = useNotificationsScreen({ onPressNotification });
+  } = useNotificationsScreen({ group, onPressNotification });
 
   const renderItem: ListRenderItem<MerchantNotification> = ({ item, index }) => (
     <>
@@ -51,6 +55,61 @@ export function NotificationsScreen({ onPressNotification }: NotificationsScreen
         )}
       </View>
 
+      {/* Tab switcher */}
+      <View style={styles.tabs}>
+        <Pressable
+          style={[styles.tab, group === 'orders' && styles.tabActive]}
+          onPress={() => setGroup('orders')}
+          accessibilityRole="tab"
+          accessibilityLabel="Order notifications"
+          accessibilityState={{ selected: group === 'orders' }}
+        >
+          <View style={styles.tabInner}>
+            <Ionicons
+              name={group === 'orders' ? 'notifications' : 'notifications-outline'}
+              size={18}
+              color={group === 'orders' ? colours.primary : colours.textSubtle}
+            />
+            <Text style={[styles.tabLabel, group === 'orders' && styles.tabLabelActive]}>
+              Orders
+            </Text>
+            {ordersUnreadCount > 0 && (
+              <View style={styles.tabBadge}>
+                <Text style={styles.tabBadgeText}>
+                  {ordersUnreadCount > 99 ? '99+' : String(ordersUnreadCount)}
+                </Text>
+              </View>
+            )}
+          </View>
+        </Pressable>
+
+        <Pressable
+          style={[styles.tab, group === 'chat' && styles.tabActive]}
+          onPress={() => setGroup('chat')}
+          accessibilityRole="tab"
+          accessibilityLabel="Chat notifications"
+          accessibilityState={{ selected: group === 'chat' }}
+        >
+          <View style={styles.tabInner}>
+            <Ionicons
+              name={group === 'chat' ? 'chatbubble-ellipses' : 'chatbubble-ellipses-outline'}
+              size={18}
+              color={group === 'chat' ? colours.primary : colours.textSubtle}
+            />
+            <Text style={[styles.tabLabel, group === 'chat' && styles.tabLabelActive]}>
+              Chats
+            </Text>
+            {chatUnreadCount > 0 && (
+              <View style={styles.tabBadge}>
+                <Text style={styles.tabBadgeText}>
+                  {chatUnreadCount > 99 ? '99+' : String(chatUnreadCount)}
+                </Text>
+              </View>
+            )}
+          </View>
+        </Pressable>
+      </View>
+
       {isLoading && (
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={colours.primary} />
@@ -77,7 +136,11 @@ export function NotificationsScreen({ onPressNotification }: NotificationsScreen
           refreshing={false}
           ListEmptyComponent={
             <View style={styles.centered}>
-              <Ionicons name="notifications-off-outline" size={40} color={colours.textSubtle} />
+              <Ionicons
+                name={group === 'chat' ? 'chatbubble-ellipses-outline' : 'notifications-off-outline'}
+                size={40}
+                color={colours.textSubtle}
+              />
               <Text style={styles.emptyTitle}>{t('notif_no_notifications')}</Text>
               <Text style={styles.emptySubtitle}>{t('notif_subtitle')}</Text>
             </View>

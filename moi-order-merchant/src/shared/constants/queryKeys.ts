@@ -14,8 +14,10 @@ export const QUERY_KEYS = {
   ORDER_CHAT: (orderId: string) => ['orders', orderId, 'chat'] as const,
   BUSINESS_PROFILE: ['business-profile'] as const,
   NOTIFICATIONS: {
-    LIST: ['notifications'] as const,
-    UNREAD_COUNT: ['notifications', 'unread-count'] as const,
+    LIST:              ['notifications', 'list', 'orders'] as const,
+    CHAT_LIST:         ['notifications', 'list', 'chat'] as const,
+    UNREAD_COUNT:      ['notifications', 'count', 'orders'] as const,
+    CHAT_UNREAD_COUNT: ['notifications', 'count', 'chat'] as const,
   },
   REVIEWS: (page?: number, rating?: number) => ['reviews', page ?? 1, rating ?? null] as const,
   ALARM_SOUND: ['alarm-sound'] as const,

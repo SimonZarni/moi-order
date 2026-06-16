@@ -8,19 +8,27 @@
  * instead. On mobile the hook falls back to React Navigation.
  */
 import { useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMerchantNotifications } from './useMerchantNotifications';
+import { getUnreadCount } from '../../../api/merchantNotifications';
+import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
+import { CACHE_TTL, GC_TIME, QUERY_RETRY } from '../../../shared/constants/config';
 import type { MerchantNotification } from '../../../types/models';
 import type { MerchantStackParamList } from '../../../types/navigation';
+import type { NotificationGroup } from '../../../api/merchantNotifications';
 
 interface UseNotificationsScreenParams {
+  group: NotificationGroup;
   onPressNotification?: (notification: MerchantNotification) => void;
 }
 
 export interface UseNotificationsScreenResult {
   notifications: MerchantNotification[];
   unreadCount: number;
+  ordersUnreadCount: number;
+  chatUnreadCount: number;
   isLoading: boolean;
   isError: boolean;
   isMarkingAllRead: boolean;
@@ -30,7 +38,7 @@ export interface UseNotificationsScreenResult {
 }
 
 export function useNotificationsScreen(
-  { onPressNotification }: UseNotificationsScreenParams = {},
+  { group, onPressNotification }: UseNotificationsScreenParams,
 ): UseNotificationsScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
 
@@ -43,7 +51,25 @@ export function useNotificationsScreen(
     markRead,
     markAllRead,
     refetch,
-  } = useMerchantNotifications();
+  } = useMerchantNotifications(group);
+
+  const { data: ordersUnreadCount = 0 } = useQuery({
+    queryKey:        QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT,
+    queryFn:         () => getUnreadCount('orders'),
+    staleTime:       CACHE_TTL.NOTIFICATIONS,
+    gcTime:          GC_TIME.DEFAULT,
+    retry:           QUERY_RETRY,
+    refetchInterval: CACHE_TTL.NOTIFICATIONS,
+  });
+
+  const { data: chatUnreadCount = 0 } = useQuery({
+    queryKey:        QUERY_KEYS.NOTIFICATIONS.CHAT_UNREAD_COUNT,
+    queryFn:         () => getUnreadCount('chat'),
+    staleTime:       CACHE_TTL.NOTIFICATIONS,
+    gcTime:          GC_TIME.DEFAULT,
+    retry:           QUERY_RETRY,
+    refetchInterval: CACHE_TTL.NOTIFICATIONS,
+  });
 
   const handlePressNotification = useCallback((notification: MerchantNotification) => {
     if (!notification.is_read) {
@@ -75,6 +101,8 @@ export function useNotificationsScreen(
   return {
     notifications,
     unreadCount,
+    ordersUnreadCount,
+    chatUnreadCount,
     isLoading,
     isError,
     isMarkingAllRead,

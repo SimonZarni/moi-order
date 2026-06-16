@@ -6,12 +6,14 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import { useQueryClient } from '@tanstack/react-query';
 import type {
   MerchantTabParamList,
   MerchantStackParamList,
   WebScreen,
 } from '../types/navigation';
 import { getOrder } from '../api/orders';
+import { markReadByOrder } from '../api/merchantNotifications';
 import { DashboardScreen } from '../features/dashboard/screens/DashboardScreen';
 import { OrdersScreen } from '../features/orders/screens/OrdersScreen';
 import { CancelledOrdersScreen } from '../features/orders/screens/CancelledOrdersScreen';
@@ -279,6 +281,7 @@ function WebMerchantLayout(): React.JSX.Element {
   const darkStyle = theme === 'dark' ? ({ filter: 'invert(1) hue-rotate(180deg)' } as object) : null;
   const { isEnabled: isAlarmEnabled, toggleEnabled: toggleAlarm, triggerAlarm, audioStatus, audioError } = useOrderAlarm();
   const { wsStatus, wsError, channelStatus, channelError, pusherKey } = useWsStatus();
+  const queryClient = useQueryClient();
 
   // When the page is hard-refreshed at /orders/{uuid}/chat, chatOrderId is
   // restored from the URL but chatOrderNumber/completedAt/status are empty
@@ -339,7 +342,10 @@ function WebMerchantLayout(): React.JSX.Element {
     setSelectedOrderId(orderId);
     setChatOrderId(null);
     setChatOrderNumber('');
-  }, []);
+    void markReadByOrder(orderId).then(() => {
+      void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    }).catch(() => { /* non-critical — badge will self-correct on next poll */ });
+  }, [queryClient]);
 
   const handleBackFromOrder = useCallback(() => {
     setSelectedOrderId(null);
