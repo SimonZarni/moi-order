@@ -10,7 +10,7 @@
  *                                    (admin dashboard reads membership to show online status)
  */
 import { useEffect } from 'react';
-import { AppState } from 'react-native';
+import { Alert, AppState } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 // pusher-js React Native bundle exports { Pusher: class } — not a default export.
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any
@@ -19,8 +19,10 @@ const Pusher: typeof import('pusher-js').default = (require('pusher-js') as any)
 import apiClient from '@/shared/api/client';
 import { PUSHER_APP_KEY, PUSHER_APP_CLUSTER } from '@/shared/constants/config';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
+import { navigationRef } from '@/shared/navigation/navigationRef';
 import { useAuthStore } from '@/shared/store/authStore';
 import { useNotificationStore } from '@/shared/store/notificationStore';
+import { FOOD_ORDER_STATUS } from '@/types/enums';
 
 interface FoodOrderStatusPayload {
   order_id: number;
@@ -83,6 +85,31 @@ export function usePusherNotifications(): void {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOOD_ORDERS.ACTIVE });
       // Badge increment because a status notification is also written to the database channel.
       incrementUnread();
+
+      if (payload.status === FOOD_ORDER_STATUS.Completed) {
+        const route = navigationRef.isReady() ? navigationRef.getCurrentRoute() : null;
+        const alreadyOnThisOrder =
+          route?.name === 'FoodOrderDetail' &&
+          (route.params as { orderId?: string } | undefined)?.orderId === payload.order_uuid;
+
+        if (!alreadyOnThisOrder) {
+          Alert.alert(
+            'Order Complete',
+            'Your order has been completed. Would you like to leave a review?',
+            [
+              { text: 'Later', style: 'cancel' },
+              {
+                text: 'Leave a Review',
+                onPress: () => {
+                  if (navigationRef.isReady()) {
+                    navigationRef.navigate('FoodOrderDetail', { orderId: payload.order_uuid });
+                  }
+                },
+              },
+            ],
+          );
+        }
+      }
     });
 
     // ── Presence channel — signals this user is online to the admin dashboard ─
