@@ -47,9 +47,8 @@ export function HomeCardGroup({
     [navigation, airportServiceTypeId, airportServiceId, airportServiceName, airportPrice]
   );
 
-  const title    = locale === 'mm' ? card.title_mm    : card.title_en;
-  const subtitle = locale === 'mm' ? (card.subtitle_mm ?? card.subtitle_en) : card.subtitle_en;
-  const tag      = locale === 'mm' ? card.tag_mm      : card.tag_en;
+  const title = locale === 'mm' ? card.title_mm : card.title_en;
+  const tag   = locale === 'mm' ? card.tag_mm   : card.tag_en;
   // Myanmar syllable clusters break with any letterSpacing > 0.
   const isMM = locale === 'mm';
 
@@ -62,7 +61,6 @@ export function HomeCardGroup({
 
       <Text style={[styles.cardTag, { color: card.accent_color }, isMM && styles.mmCardTag]} allowFontScaling={!isMM}>{tag}</Text>
       <Text style={[styles.cardTitle, isMM && styles.mmCardTitle]} allowFontScaling={!isMM}>{title}</Text>
-      {subtitle ? <Text style={[styles.cardSubtitle, isMM && styles.mmCardSubtitle]} allowFontScaling={!isMM}>{subtitle}</Text> : null}
 
       {/* Tile row — one tile per child service */}
       <View style={styles.tileRow}>

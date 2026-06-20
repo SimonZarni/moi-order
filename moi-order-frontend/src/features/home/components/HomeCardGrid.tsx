@@ -106,9 +106,8 @@ interface SingleCardProps {
 }
 
 function SingleCard({ card, locale, orderCount, onPress }: SingleCardProps): React.JSX.Element {
-  const title    = locale === 'mm' ? card.title_mm    : card.title_en;
-  const tag      = locale === 'mm' ? card.tag_mm      : card.tag_en;
-  const subtitle = locale === 'mm' ? (card.subtitle_mm ?? card.subtitle_en) : card.subtitle_en;
+  const title = locale === 'mm' ? card.title_mm : card.title_en;
+  const tag   = locale === 'mm' ? card.tag_mm   : card.tag_en;
   // Myanmar syllable clusters break with any letterSpacing; also needs taller lineHeight.
   const isMM = locale === 'mm';
 
@@ -121,7 +120,6 @@ function SingleCard({ card, locale, orderCount, onPress }: SingleCardProps): Rea
     >
       <Text style={[styles.cardTag, { color: card.accent_color }, isMM && styles.mmCardTag]} allowFontScaling={!isMM}>{tag}</Text>
       <Text style={[styles.cardTitle, isMM && styles.mmCardTitle]} allowFontScaling={!isMM}>{title}</Text>
-      {subtitle ? <Text style={[styles.cardSubtitle, isMM && styles.mmCardSubtitle]} allowFontScaling={!isMM}>{subtitle}</Text> : null}
       {card.is_coming_soon && (
         <View style={styles.soonPill}>
           <Text style={styles.soonText}>SOON</Text>
