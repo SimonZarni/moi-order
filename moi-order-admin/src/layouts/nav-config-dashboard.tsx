@@ -93,6 +93,11 @@ export const navData: NavItem[] = [
         path: '/food-orders/reviews',
         icon: icon('solar:star-bold'),
       },
+      {
+        title: 'Daily Invoices',
+        path: '/food-invoices',
+        icon: icon('eva:trending-up-fill'),
+      },
     ],
   },
   {

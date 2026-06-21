@@ -23,6 +23,7 @@ import { MenuScreen } from '../features/menu/screens/MenuScreen';
 import { EditMenuItemScreen } from '../features/menu/screens/EditMenuItemScreen';
 import { RestaurantScreen } from '../features/restaurant/screens/RestaurantScreen';
 import { AnalyticsScreen } from '../features/analytics/screens/AnalyticsScreen';
+import { DailyInvoiceScreen } from '../features/invoice/screens/DailyInvoiceScreen';
 import { NotificationsScreen } from '../features/notifications/screens/NotificationsScreen';
 import { NotificationBell } from '../features/notifications/components/NotificationBell';
 import { ProfileScreen } from '../features/profile/screens/ProfileScreen';
@@ -433,6 +434,8 @@ function WebMerchantLayout(): React.JSX.Element {
         return <BusinessProfileScreen />;
       case 'Reviews':
         return <ReviewsScreen />;
+      case 'Cashout':
+        return <DailyInvoiceScreen />;
       case 'Settings':
         if (settingsSubView === 'changePassword') {
           return <ChangePasswordScreen onBack={() => setSettingsSubView('list')} />;

@@ -43,6 +43,7 @@ export type WebScreen =
   | 'Menu'
   | 'Restaurant'
   | 'Analytics'
+  | 'Cashout'
   | 'Notifications'
   | 'BusinessProfile'
   | 'Reviews'

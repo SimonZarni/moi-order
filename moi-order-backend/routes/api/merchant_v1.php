@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Merchant\V1\MerchantRestaurantController;
 use App\Http\Controllers\Api\Merchant\V1\MenuCategoryController;
 use App\Http\Controllers\Api\Merchant\V1\MenuItemController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantAlarmSettingController;
+use App\Http\Controllers\Api\Merchant\V1\MerchantDailyInvoiceController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantReviewController;
 use Illuminate\Support\Facades\Route;
 
@@ -100,3 +101,8 @@ Route::patch('/restaurant/photos/reorder', [MerchantRestaurantController::class,
 
 // ── Platform alarm sound (universal, admin-set) ───────────────────────────────
 Route::get('/alarm-sound', [MerchantAlarmSettingController::class, 'show'])->name('merchant.alarm-sound.show');
+
+// ── Daily cashout invoices ────────────────────────────────────────────────────
+Route::get('/invoices/today', [MerchantDailyInvoiceController::class, 'today'])->name('merchant.invoices.today');
+Route::get('/invoices',       [MerchantDailyInvoiceController::class, 'index'])->name('merchant.invoices.index');
+Route::post('/restaurant/payment-qr', [MerchantDailyInvoiceController::class, 'uploadQr'])->name('merchant.restaurant.payment-qr');

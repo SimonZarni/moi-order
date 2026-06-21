@@ -1,4 +1,4 @@
-import type { KycDocType, KycStatus, MenuItemStatus, OrderStatus, RestaurantStatus } from './enums';
+import type { DailyInvoiceStatus, KycDocType, KycStatus, MenuItemStatus, OrderStatus, RestaurantStatus } from './enums';
 
 export interface MerchantUser {
   id: string;     // UUID — used for identity/display
@@ -256,6 +256,29 @@ export interface BusinessProfile {
 }
 
 // ── Pagination ────────────────────────────────────────────────────────────────
+
+export interface DailyInvoiceRestaurant {
+  id: number;
+  name: string;
+  payment_qr_url: string | null;
+  has_payment_qr: boolean;
+}
+
+export interface DailyInvoice {
+  id: number | null;
+  date: string;
+  order_count: number;
+  customer_total_cents: number;
+  platform_fee_cents: number;
+  payout_cents: number;
+  status: DailyInvoiceStatus;
+  status_label: string;
+  is_provisional: boolean;
+  paid_at: string | null;
+  confirmed_by_id: number | null;
+  created_at: string | null;
+  restaurant?: DailyInvoiceRestaurant;
+}
 
 export interface PaginationMeta {
   current_page: number;

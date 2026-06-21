@@ -59,5 +59,14 @@ Schedule::command('documents:send-ninety-day-reminders')
         \Illuminate\Support\Facades\Log::error('documents:send-ninety-day-reminders failed');
     });
 
+// Generate daily cashout invoices at 00:05 Bangkok time (UTC+7 = 17:05 UTC previous day).
+// Targets yesterday's completed orders; idempotent if re-run.
+Schedule::command('invoices:generate-daily')
+    ->dailyAt('17:05')
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        \Illuminate\Support\Facades\Log::error('invoices:generate-daily scheduled run failed');
+    });
+
 // Pulse queue worker liveness — System Health dashboard reads this cache key.
 Schedule::job(new QueueHeartbeatJob)->everyMinute()->onOneServer();

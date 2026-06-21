@@ -21,4 +21,8 @@ export const QUERY_KEYS = {
   },
   REVIEWS: (page?: number, rating?: number) => ['reviews', page ?? 1, rating ?? null] as const,
   ALARM_SOUND: ['alarm-sound'] as const,
+  INVOICES: {
+    TODAY:   ['invoices', 'today'] as const,
+    LIST:    (page: number) => ['invoices', 'list', page] as const,
+  },
 } as const;

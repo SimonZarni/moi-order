@@ -105,9 +105,17 @@ export function useWsStatus(): WsStatusResult {
 
 // ── Connection hook (call once in WebSocketManager) ───────────────────────────
 
+interface CashOutConfirmedPayload {
+  invoice_id: number;
+  date: string;
+  payout_cents: number;
+  paid_at: string;
+}
+
 interface UseMerchantWebSocketOptions {
   onNewOrder?: () => void;
   onNewChatMessage?: () => void;
+  onCashOutConfirmed?: () => void;
 }
 
 export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): void {
@@ -118,6 +126,7 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
   const userId = useAuthStore((s) => s.user?.int_id ?? null);
   const onNewOrder = options?.onNewOrder;
   const onNewChatMessage = options?.onNewChatMessage;
+  const onCashOutConfirmed = options?.onCashOutConfirmed;
 
   const pusherRef  = useRef<PusherInstance | null>(null);
   const channelRef = useRef<PusherChannel | null>(null);
@@ -148,6 +157,14 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS() });
     },
     [queryClient],
+  );
+
+  const handleCashOutConfirmed = useCallback(
+    (_data: CashOutConfirmedPayload) => {
+      void queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      onCashOutConfirmed?.();
+    },
+    [queryClient, onCashOutConfirmed],
   );
 
   useEffect(() => {
@@ -207,6 +224,9 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
       channel.bind('food-order.status-updated', (data: unknown) => {
         handleOrderStatusUpdated(data as OrderStatusUpdatedPayload);
       });
+      channel.bind('cashout.confirmed', (data: unknown) => {
+        handleCashOutConfirmed(data as CashOutConfirmedPayload);
+      });
 
       pusherRef.current  = pusher;
       channelRef.current = channel;
@@ -226,7 +246,7 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
       _setWs('idle');
       _setChannel('idle');
     };
-  }, [token, userId, handleNewOrder, handleNotificationCreated, handleOrderStatusUpdated]);
+  }, [token, userId, handleNewOrder, handleNotificationCreated, handleOrderStatusUpdated, handleCashOutConfirmed]);
 }
 
 function _getBase(): string {

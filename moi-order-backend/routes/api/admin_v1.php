@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\Admin\V1\AdminHomeCardRouteController;
 use App\Http\Controllers\Api\Admin\V1\AdminHomeCardIconController;
 use App\Http\Controllers\Api\Admin\V1\AdminDashboardController;
 use App\Http\Controllers\Api\Admin\V1\AdminDocumentTypeController;
+use App\Http\Controllers\Api\Admin\V1\AdminDailyInvoiceController;
 use App\Http\Controllers\Api\Admin\V1\AdminFoodOrderController;
 use App\Http\Controllers\Api\Admin\V1\AdminMenuCategoryController;
 use App\Http\Controllers\Api\Admin\V1\AdminMenuItemController;
@@ -409,6 +410,13 @@ Route::prefix('restaurants')->name('admin.restaurants.')->group(function (): voi
         ->middleware('check.permission:restaurants.manage');
     Route::delete('/{restaurant}/items/{itemId}', [AdminMenuItemController::class, 'destroy'])->name('items.destroy')
         ->middleware('check.permission:restaurants.manage');
+});
+
+// ── Daily Cashout Invoices ────────────────────────────────────────────────────
+Route::prefix('daily-invoices')->name('admin.daily-invoices.')->group(function (): void {
+    Route::get('/',                 [AdminDailyInvoiceController::class, 'index'])->name('index');
+    Route::post('/generate',        [AdminDailyInvoiceController::class, 'generate'])->name('generate');
+    Route::post('/{id}/confirm',    [AdminDailyInvoiceController::class, 'confirm'])->name('confirm')->whereNumber('id');
 });
 
 // ── Food Orders ───────────────────────────────────────────────────────────────

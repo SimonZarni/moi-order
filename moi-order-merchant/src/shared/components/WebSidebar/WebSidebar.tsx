@@ -23,6 +23,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Business Profile', icon: 'briefcase-outline',     activeIcon: 'briefcase',           screen: 'BusinessProfile', section: 'MANAGE' },
   { label: 'Analytics',     icon: 'bar-chart-outline',      activeIcon: 'bar-chart',         screen: 'Analytics',     section: 'INSIGHTS' },
   { label: 'Reviews',       icon: 'star-outline',            activeIcon: 'star',              screen: 'Reviews',       section: 'INSIGHTS' },
+  { label: 'Cashout',       icon: 'cash-outline',            activeIcon: 'cash',              screen: 'Cashout',       section: 'INSIGHTS' },
   { label: 'Settings',      icon: 'settings-outline',        activeIcon: 'settings',          screen: 'Settings',      section: 'ACCOUNT' },
 ];
 

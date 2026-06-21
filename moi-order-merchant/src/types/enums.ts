@@ -37,6 +37,12 @@ export const MENU_ITEM_STATUS = {
 export type MenuItemStatus =
   (typeof MENU_ITEM_STATUS)[keyof typeof MENU_ITEM_STATUS];
 
+export const DAILY_INVOICE_STATUS = {
+  Pending: 'pending',
+  Paid:    'paid',
+} as const;
+export type DailyInvoiceStatus = (typeof DAILY_INVOICE_STATUS)[keyof typeof DAILY_INVOICE_STATUS];
+
 export const RESTAURANT_STATUS = {
   Open: 'open',
   Closed: 'closed',
