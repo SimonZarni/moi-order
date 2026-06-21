@@ -36,8 +36,8 @@ export function useDailyInvoiceScreen(): UseDailyInvoiceScreenResult {
     if (result.canceled || result.assets.length === 0) return;
 
     const asset = result.assets[0];
-    const ext   = asset.uri.split('.').pop() ?? 'jpg';
-    const mime  = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+    const mime  = asset.mimeType ?? 'image/jpeg';
+    const ext   = mime === 'image/png' ? 'png' : mime === 'image/webp' ? 'webp' : 'jpg';
     const name  = `payment-qr.${ext}`;
 
     const fd = new FormData();
