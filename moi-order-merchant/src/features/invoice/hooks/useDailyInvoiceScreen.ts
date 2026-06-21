@@ -36,18 +36,19 @@ export function useDailyInvoiceScreen(): UseDailyInvoiceScreenResult {
     if (result.canceled || result.assets.length === 0) return;
 
     const asset = result.assets[0];
-    const mime  = asset.mimeType ?? 'image/jpeg';
-    const ext   = mime === 'image/png' ? 'png' : mime === 'image/webp' ? 'webp' : 'jpg';
-    const name  = `payment-qr.${ext}`;
-
     const fd = new FormData();
 
     if (Platform.OS === 'web') {
       const blob = await fetch(asset.uri).then((r) => r.blob());
       if (asset.uri.startsWith('blob:')) URL.revokeObjectURL(asset.uri);
-      fd.append('qr_code', new File([blob], name, { type: mime }));
+      // Use blob.type (actual detected type) → asset.mimeType → safe fallback
+      const mime = blob.type || asset.mimeType || 'image/jpeg';
+      const ext  = mime.includes('png') ? 'png' : mime.includes('webp') ? 'webp' : 'jpg';
+      fd.append('qr_code', blob, `payment-qr.${ext}`);
     } else {
-      fd.append('qr_code', { uri: asset.uri, name, type: mime } as unknown as Blob);
+      const mime = asset.mimeType ?? 'image/jpeg';
+      const ext  = mime.includes('png') ? 'png' : mime.includes('webp') ? 'webp' : 'jpg';
+      fd.append('qr_code', { uri: asset.uri, name: `payment-qr.${ext}`, type: mime } as unknown as Blob);
     }
 
     uploadQrMutation.mutate(fd, {

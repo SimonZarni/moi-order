@@ -17,7 +17,7 @@ class UploadPaymentQrRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'qr_code' => ['required', 'file', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'qr_code' => ['required', 'file', 'image', 'max:2048'],
         ];
     }
 
@@ -26,7 +26,7 @@ class UploadPaymentQrRequest extends FormRequest
     {
         return [
             'qr_code.required' => 'A QR code image is required.',
-            'qr_code.mimes'    => 'QR code must be a JPG, PNG, or WebP image.',
+            'qr_code.image'    => 'QR code must be a valid image (JPG, PNG, WebP, etc).',
             'qr_code.max'      => 'QR code image must not exceed 2 MB.',
         ];
     }
