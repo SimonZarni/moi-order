@@ -226,6 +226,7 @@ const SCREEN_TO_PATH: Record<WebScreen, string> = {
   Menu:            '/menu',
   Restaurant:      '/restaurant',
   Analytics:       '/analytics',
+  Cashout:         '/cashout',
   Notifications:   '/notifications',
   BusinessProfile: '/business-profile',
   Reviews:         '/reviews',
