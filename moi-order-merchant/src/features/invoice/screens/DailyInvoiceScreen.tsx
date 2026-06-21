@@ -11,10 +11,19 @@ export function DailyInvoiceScreen(): React.JSX.Element {
     todayInvoice, isTodayLoading,
     historyInvoices, isHistoryLoading,
     hasNextPage, fetchNextPage,
-    isQrUploading, handleUploadQr,
+    isQrUploading, qrUploadSuccess, qrUploadError,
+    handleUploadQr,
   } = useDailyInvoiceScreen();
 
   const hasQr = todayInvoice?.restaurant?.has_payment_qr ?? false;
+
+  const qrBtnLabel = isQrUploading
+    ? 'Uploading…'
+    : qrUploadSuccess
+      ? '✓ QR Saved'
+      : hasQr
+        ? 'Replace QR'
+        : 'Upload QR';
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -24,24 +33,35 @@ export function DailyInvoiceScreen(): React.JSX.Element {
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-<View style={styles.sectionRow}>
+        <View style={styles.sectionRow}>
           <Text style={styles.sectionLabel}>TODAY</Text>
           <Pressable
             onPress={handleUploadQr}
             disabled={isQrUploading}
-            style={[styles.replaceQrBtn, isQrUploading && styles.qrBannerBtnDisabled]}
+            style={[
+              styles.replaceQrBtn,
+              qrUploadSuccess && styles.replaceQrBtnSuccess,
+              isQrUploading && styles.qrBannerBtnDisabled,
+            ]}
             accessibilityLabel="Upload or replace payment QR code"
             accessibilityRole="button"
           >
-            <Text style={styles.replaceQrBtnText}>{isQrUploading ? 'Uploading…' : hasQr ? 'Replace QR' : 'Upload QR'}</Text>
+            <Text style={[styles.replaceQrBtnText, qrUploadSuccess && styles.replaceQrBtnTextSuccess]}>
+              {qrBtnLabel}
+            </Text>
           </Pressable>
         </View>
+
+        {qrUploadError !== null && (
+          <Text style={styles.uploadError}>{qrUploadError}</Text>
+        )}
+
         {isTodayLoading
           ? <ActivityIndicator color={colours.primary} />
           : todayInvoice != null && <InvoiceCard invoice={todayInvoice} />
         }
 
-        <Text style={styles.sectionLabel}>HISTORY</Text>
+        <Text style={[styles.sectionLabel, styles.historySectionLabel]}>HISTORY</Text>
         {isHistoryLoading
           ? <ActivityIndicator color={colours.primary} />
           : historyInvoices.length === 0

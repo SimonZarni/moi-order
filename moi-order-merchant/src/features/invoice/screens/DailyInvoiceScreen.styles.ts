@@ -90,11 +90,27 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colours.primary,
   },
+  replaceQrBtnSuccess: {
+    borderColor: colours.success,
+    backgroundColor: colours.successBg,
+  },
   replaceQrBtnText: {
     fontSize: typography.xxs,
     fontWeight: '700',
     color: colours.primary,
     lineHeight: 16,
+  },
+  replaceQrBtnTextSuccess: {
+    color: colours.success,
+  },
+  uploadError: {
+    fontSize: typography.xs,
+    color: colours.error,
+    marginBottom: spacing.sm,
+    lineHeight: 20,
+  },
+  historySectionLabel: {
+    marginTop: spacing.lg,
   },
   centered: {
     flex: 1,
