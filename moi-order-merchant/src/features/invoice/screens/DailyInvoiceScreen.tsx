@@ -14,7 +14,7 @@ export function DailyInvoiceScreen(): React.JSX.Element {
     isQrUploading, handleUploadQr,
   } = useDailyInvoiceScreen();
 
-  const hasQr = todayInvoice?.restaurant?.has_payment_qr ?? true;
+  const hasQr = todayInvoice?.restaurant?.has_payment_qr ?? false;
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -24,24 +24,18 @@ export function DailyInvoiceScreen(): React.JSX.Element {
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {!hasQr && (
-          <View style={styles.qrBanner}>
-            <Text style={styles.qrBannerText}>
-              ⚠  No payment QR uploaded. Admin cannot pay you until you add one.
-            </Text>
-            <Pressable
-              onPress={handleUploadQr}
-              disabled={isQrUploading}
-              style={[styles.qrBannerBtn, isQrUploading && styles.qrBannerBtnDisabled]}
-              accessibilityLabel="Upload payment QR code"
-              accessibilityRole="button"
-            >
-              <Text style={styles.qrBannerBtnText}>{isQrUploading ? 'Uploading…' : 'Upload QR'}</Text>
-            </Pressable>
-          </View>
-        )}
-
-        <Text style={styles.sectionLabel}>TODAY</Text>
+<View style={styles.sectionRow}>
+          <Text style={styles.sectionLabel}>TODAY</Text>
+          <Pressable
+            onPress={handleUploadQr}
+            disabled={isQrUploading}
+            style={[styles.replaceQrBtn, isQrUploading && styles.qrBannerBtnDisabled]}
+            accessibilityLabel="Upload or replace payment QR code"
+            accessibilityRole="button"
+          >
+            <Text style={styles.replaceQrBtnText}>{isQrUploading ? 'Uploading…' : hasQr ? 'Replace QR' : 'Upload QR'}</Text>
+          </Pressable>
+        </View>
         {isTodayLoading
           ? <ActivityIndicator color={colours.primary} />
           : todayInvoice != null && <InvoiceCard invoice={todayInvoice} />

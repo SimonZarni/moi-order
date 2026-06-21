@@ -68,6 +68,7 @@ class MerchantDailyInvoiceController extends Controller
         }
 
         $invoice = $this->service->calculateForToday($restaurant);
+        $invoice->setRelation('restaurant', $restaurant);
 
         return response()->json([
             'data' => new DailyInvoiceResource($invoice, $this->storage),

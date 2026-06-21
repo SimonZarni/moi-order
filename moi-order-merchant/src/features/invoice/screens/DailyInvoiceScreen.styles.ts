@@ -69,13 +69,31 @@ export const styles = StyleSheet.create({
   qrBannerBtnDisabled: {
     opacity: 0.5,
   },
+  sectionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+    marginTop: spacing.md,
+  },
   sectionLabel: {
     fontSize: typography.xxs,
     fontWeight: '700',
     color: colours.textSubtle,
     letterSpacing: 1.2,
-    marginBottom: spacing.sm,
-    marginTop: spacing.md,
+    lineHeight: 16,
+  },
+  replaceQrBtn: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colours.primary,
+  },
+  replaceQrBtnText: {
+    fontSize: typography.xxs,
+    fontWeight: '700',
+    color: colours.primary,
     lineHeight: 16,
   },
   centered: {
