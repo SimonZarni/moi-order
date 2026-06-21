@@ -460,7 +460,7 @@ function WebMerchantLayout(): React.JSX.Element {
           onLogout={logout}
           isAlarmEnabled={isAlarmEnabled}
           onAlarmToggle={toggleAlarm}
-          onAlarmTest={() => triggerAlarm(true)}
+          // onAlarmTest={() => triggerAlarm(true)}
           diagnostic={{ wsStatus, wsError, channelStatus, channelError, pusherKey, audioStatus, audioError }}
         />
       )}

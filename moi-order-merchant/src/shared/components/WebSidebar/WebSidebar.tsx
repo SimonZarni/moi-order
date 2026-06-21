@@ -43,7 +43,7 @@ interface WebSidebarProps {
   pendingCount?: number;
   isAlarmEnabled?: boolean;
   onAlarmToggle?: () => void;
-  onAlarmTest?: () => void;
+  // onAlarmTest?: () => void;
   diagnostic?: DiagnosticInfo;
 }
 
@@ -54,7 +54,7 @@ export function WebSidebar({
   pendingCount = 0,
   isAlarmEnabled = true,
   onAlarmToggle,
-  onAlarmTest,
+  // onAlarmTest,
   diagnostic,
 }: WebSidebarProps): React.JSX.Element {
   const handleNavPress = useCallback(
@@ -148,7 +148,7 @@ export function WebSidebar({
                 {isAlarmEnabled ? 'Alarm On' : 'Alarm Off'}
               </Text>
             </Pressable>
-            {isAlarmEnabled && onAlarmTest != null && (
+            {/* {isAlarmEnabled && onAlarmTest != null && (
               <Pressable
                 onPress={() => onAlarmTest?.()}
                 accessibilityLabel="Test alarm sound"
@@ -161,7 +161,7 @@ export function WebSidebar({
               >
                 <Text style={{ fontSize: 10, color: colours.primary, fontWeight: '700' }}>TEST</Text>
               </Pressable>
-            )}
+            )} */}
           </View>
         )}
         {diagnostic !== undefined && (
