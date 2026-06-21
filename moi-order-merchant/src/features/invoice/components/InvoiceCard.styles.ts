@@ -5,14 +5,16 @@ import { typography } from '../../../shared/theme/typography';
 
 export const styles = StyleSheet.create({
   card: {
-    backgroundColor: colours.backgroundMid,
+    backgroundColor: colours.surface,
     borderRadius: 12,
     padding: spacing.md,
     marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: colours.divider,
   },
   cardProvisional: {
-    borderWidth: 1,
-    borderColor: colours.primary + '44',
+    borderColor: colours.primary + '55',
+    backgroundColor: colours.primaryBg,
   },
   header: {
     flexDirection: 'row',
@@ -23,14 +25,15 @@ export const styles = StyleSheet.create({
   date: {
     fontSize: typography.sm,
     fontWeight: '600',
-    color: colours.textOnDark,
-    lineHeight: 44,
+    color: colours.textOnLight,
+    lineHeight: 22,
   },
   provLabel: {
     fontSize: typography.xxs,
     fontWeight: '700',
     color: colours.primary,
     letterSpacing: 0.8,
+    lineHeight: 16,
   },
   statusBadge: {
     paddingHorizontal: spacing.sm,
@@ -38,10 +41,10 @@ export const styles = StyleSheet.create({
     borderRadius: 20,
   },
   statusPaid: {
-    backgroundColor: colours.primary + '22',
+    backgroundColor: colours.primaryBg,
   },
   statusPending: {
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.surfaceMuted,
   },
   statusText: {
     fontSize: typography.xxs,
@@ -49,10 +52,10 @@ export const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   statusTextPaid: {
-    color: colours.primary,
+    color: colours.primaryDark,
   },
   statusTextPending: {
-    color: 'rgba(255,255,255,0.5)',
+    color: colours.textSubtle,
   },
   statsRow: {
     flexDirection: 'row',
@@ -65,18 +68,18 @@ export const styles = StyleSheet.create({
   statValue: {
     fontSize: typography.md,
     fontWeight: '700',
-    color: colours.textOnDark,
-    lineHeight: 44,
+    color: colours.textOnLight,
+    lineHeight: 24,
   },
   statLabel: {
     fontSize: typography.xxs,
-    color: 'rgba(255,255,255,0.45)',
+    color: colours.textSubtle,
     marginTop: 2,
-    lineHeight: 18,
+    lineHeight: 16,
   },
   orderCount: {
     fontSize: typography.xs,
-    color: 'rgba(255,255,255,0.55)',
+    color: colours.textSubtle,
     marginTop: spacing.xs,
   },
   liveDot: {
@@ -93,7 +96,7 @@ export const styles = StyleSheet.create({
   },
   liveText: {
     fontSize: typography.xxs,
-    color: 'rgba(255,255,255,0.4)',
+    color: colours.textSubtle,
     lineHeight: 16,
   },
 });

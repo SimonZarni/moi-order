@@ -6,26 +6,28 @@ import { typography } from '../../../shared/theme/typography';
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.backgroundLight,
   },
   header: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     paddingBottom: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colours.dividerDark,
+    borderBottomColor: colours.divider,
+    backgroundColor: colours.surface,
   },
   eyebrow: {
     fontSize: typography.xxs,
     fontWeight: '700',
-    color: colours.primary,
+    color: colours.textSubtle,
     letterSpacing: 1.5,
     lineHeight: 16,
   },
   title: {
-    fontSize: typography.xxl,
+    fontSize: typography.display,
     fontWeight: '800',
-    color: colours.textOnDark,
+    color: colours.textOnLight,
+    letterSpacing: -0.8,
     lineHeight: 60,
   },
   scroll: {
@@ -36,7 +38,7 @@ export const styles = StyleSheet.create({
     paddingBottom: spacing.xxl,
   },
   qrBanner: {
-    backgroundColor: colours.backgroundMid,
+    backgroundColor: '#fff8e1',
     borderRadius: 12,
     padding: spacing.md,
     marginBottom: spacing.md,
@@ -44,12 +46,12 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255,165,0,0.3)',
+    borderColor: 'rgba(245,158,11,0.4)',
   },
   qrBannerText: {
     flex: 1,
     fontSize: typography.xs,
-    color: 'rgba(255,255,255,0.7)',
+    color: '#92400e',
     lineHeight: 20,
   },
   qrBannerBtn: {
@@ -61,7 +63,7 @@ export const styles = StyleSheet.create({
   qrBannerBtnText: {
     fontSize: typography.xxs,
     fontWeight: '700',
-    color: colours.backgroundDark,
+    color: colours.surface,
     lineHeight: 16,
   },
   qrBannerBtnDisabled: {
@@ -70,7 +72,7 @@ export const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: typography.xxs,
     fontWeight: '700',
-    color: 'rgba(255,255,255,0.35)',
+    color: colours.textSubtle,
     letterSpacing: 1.2,
     marginBottom: spacing.sm,
     marginTop: spacing.md,
@@ -80,11 +82,11 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.backgroundLight,
   },
   emptyText: {
     fontSize: typography.sm,
-    color: 'rgba(255,255,255,0.35)',
+    color: colours.textSubtle,
     textAlign: 'center',
     lineHeight: 22,
   },
