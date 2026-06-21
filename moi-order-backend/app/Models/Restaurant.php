@@ -27,6 +27,7 @@ class Restaurant extends Model
         'phone',
         'cover_photo_path',
         'logo_path',
+        'payment_qr_path',
         'status',
         'platform_status',
         'override_until',
@@ -39,6 +40,7 @@ class Restaurant extends Model
     protected $hidden = [
         'cover_photo_path',
         'logo_path',
+        'payment_qr_path',
     ];
 
     protected function casts(): array
