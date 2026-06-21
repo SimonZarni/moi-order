@@ -21,6 +21,11 @@ apiClient.interceptors.request.use((config) => {
   if (_token) {
     config.headers.Authorization = `Bearer ${_token}`;
   }
+  // Let the browser set Content-Type (including multipart boundary) for FormData.
+  // Without this, the application/json default overrides it and files never arrive.
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
   return config;
 });
 
