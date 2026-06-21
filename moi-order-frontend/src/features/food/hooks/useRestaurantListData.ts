@@ -17,16 +17,17 @@ export interface UseRestaurantListDataResult {
   handleRefresh: () => Promise<void>;
 }
 
-export function useRestaurantListData(search?: string): UseRestaurantListDataResult {
+export function useRestaurantListData(search?: string, lat?: number, lng?: number): UseRestaurantListDataResult {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const query = useInfiniteQuery({
-    queryKey:        QUERY_KEYS.RESTAURANTS.LIST(search),
-    queryFn:         ({ pageParam }) => fetchRestaurants(pageParam as number, search),
+    queryKey:         QUERY_KEYS.RESTAURANTS.LIST(search, lat, lng),
+    queryFn:          ({ pageParam }) => fetchRestaurants(pageParam as number, search, lat, lng),
     initialPageParam: 1,
     getNextPageParam: (last) =>
       last.meta.current_page < last.meta.last_page ? last.meta.current_page + 1 : undefined,
     staleTime: CACHE_TTL.LIVE_DATA,
+    enabled:          lat !== undefined && lng !== undefined,
   });
 
   const handleRefresh = useCallback(async () => {

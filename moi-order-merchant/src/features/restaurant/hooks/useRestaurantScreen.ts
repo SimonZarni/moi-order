@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Platform } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRestaurantLocation } from './useRestaurantLocation';
 import {
   getRestaurant, updateRestaurant, createRestaurant,
   setRestaurantStatus,
@@ -96,6 +97,15 @@ interface UseRestaurantScreenResult {
   handleCancelPhone: () => void;
   handlePhoneChange: (v: string) => void;
   handleSavePhone: () => void;
+  isEditingLocation: boolean;
+  locationInput: { latitude: number | null; longitude: number | null };
+  isLocating: boolean;
+  locationError: string | null;
+  handleEditLocation: () => void;
+  handleCancelLocation: () => void;
+  handleGetLocation: () => void;
+  handleClearLocation: () => void;
+  handleSaveLocation: () => void;
   handleEditHours: () => void;
   handleCancelHours: () => void;
   handleClearHoursError: () => void;
@@ -117,6 +127,8 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingDelivery, setIsEditingDelivery] = useState(false);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [locationInput, setLocationInput] = useState<{ latitude: number | null; longitude: number | null }>({ latitude: null, longitude: null });
   const [isEditingHours, setIsEditingHours] = useState(false);
   const [hoursError, setHoursError] = useState<string | null>(null);
   const [minOrderInput, setMinOrderInput] = useState('');
@@ -169,6 +181,13 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
   const { mutate: savePhone, isPending: isSavingPhone } = useMutation({
     mutationFn: (phone: string) => updateRestaurant({ phone }),
     onSuccess: (updated) => { setCache(updated); setIsEditingPhone(false); },
+  });
+
+  const { isLocating, locationError, getLocation } = useRestaurantLocation();
+
+  const { mutate: saveLocation, isPending: isSavingLocation } = useMutation({
+    mutationFn: (payload: { latitude: number | null; longitude: number | null }) => updateRestaurant(payload),
+    onSuccess: (updated) => { setCache(updated); setIsEditingLocation(false); },
   });
 
   const { mutate: saveHours, isPending: isSavingHours } = useMutation({
@@ -411,6 +430,25 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     savePhone(phoneInput.trim());
   }, [phoneInput, savePhone]);
 
+  // ── Location ──────────────────────────────────────────────────────────────────
+
+  const handleEditLocation = useCallback(() => {
+    setLocationInput({ latitude: restaurant?.latitude ?? null, longitude: restaurant?.longitude ?? null });
+    setIsEditingLocation(true);
+  }, [restaurant]);
+
+  const handleCancelLocation = useCallback(() => setIsEditingLocation(false), []);
+
+  const handleGetLocation = useCallback(() => {
+    getLocation(({ latitude, longitude }) => setLocationInput({ latitude, longitude }));
+  }, [getLocation]);
+
+  const handleClearLocation = useCallback(() => setLocationInput({ latitude: null, longitude: null }), []);
+
+  const handleSaveLocation = useCallback(() => {
+    saveLocation(locationInput);
+  }, [saveLocation, locationInput]);
+
   // ── Delivery settings ─────────────────────────────────────────────────────────
 
   const handleEditDelivery = useCallback(() => {
@@ -534,7 +572,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     isNewRestaurant,
     isLoading,
     isEditing,
-    isSaving: isSaving || isSavingDelivery || isSavingPhone || isSavingHours || isCreatingResubmit,
+    isSaving: isSaving || isSavingDelivery || isSavingPhone || isSavingLocation || isSavingHours || isCreatingResubmit,
     isUploadingCover,
     isUploadingLogo,
     isUploadingGalleryPhoto,
@@ -576,6 +614,15 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     handleCancelPhone,
     handlePhoneChange,
     handleSavePhone,
+    isEditingLocation,
+    locationInput,
+    isLocating,
+    locationError,
+    handleEditLocation,
+    handleCancelLocation,
+    handleGetLocation,
+    handleClearLocation,
+    handleSaveLocation,
     handleEditHours,
     handleCancelHours,
     handleClearHoursError,

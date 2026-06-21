@@ -425,6 +425,8 @@ export interface Restaurant {
   status: import('./enums').RestaurantStatus;
   platform_status: import('./enums').RestaurantPlatformStatus;
   delivery_radius_km: number | null;
+  distance_km: number | null;
+  is_within_range: boolean | null;
   is_delivery_available: boolean;
   is_pickup_available: boolean;
   min_order_cents: number;

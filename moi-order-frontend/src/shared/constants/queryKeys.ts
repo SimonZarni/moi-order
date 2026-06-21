@@ -49,9 +49,13 @@ export const QUERY_KEYS = {
     UPLOAD_STATS: ['documents', 'upload-stats'] as const,
   },
   RESTAURANTS: {
-    LIST:    (search?: string) => ['restaurants', 'list', search ?? ''] as const,
-    DETAIL:  (id: number)      => ['restaurants', 'detail', id] as const,
-    REVIEWS: (id: number)      => ['restaurants', 'reviews', id] as const,
+    LIST:    (search?: string, lat?: number, lng?: number) => [
+      'restaurants', 'list', search ?? '',
+      lat !== undefined ? Math.round(lat * 1000) / 1000 : null,
+      lng !== undefined ? Math.round(lng * 1000) / 1000 : null,
+    ] as const,
+    DETAIL:  (id: number) => ['restaurants', 'detail', id] as const,
+    REVIEWS: (id: number) => ['restaurants', 'reviews', id] as const,
   },
   FOOD_ORDERS: {
     LIST:   ['food-orders', 'list'] as const,

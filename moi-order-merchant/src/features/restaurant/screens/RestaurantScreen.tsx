@@ -43,6 +43,8 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
     handleUploadGalleryPhoto, handleRemoveGalleryPhoto, handleMoveGalleryPhoto,
     handleEditDelivery, handleCancelDelivery, handleMinOrderChange, handleSaveDelivery,
     handleEditPhone, handleCancelPhone, handlePhoneChange, handleSavePhone,
+    isEditingLocation, locationInput, isLocating, locationError,
+    handleEditLocation, handleCancelLocation, handleGetLocation, handleClearLocation, handleSaveLocation,
     // handleEditHours, handleCancelHours, handleClearHoursError, handleHourChange, handleHourToggle, handleSaveHours,
     // hoursError,
     handleOpenResubmit, handleCloseResubmit,
@@ -290,6 +292,70 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
 
             {/* Address — read-only, locked by KYC */}
             <InfoRow label={t('restaurant_address_label')} value={restaurant?.address ?? '—'} />
+            <View style={styles.divider} />
+
+            {/* GPS Location — editable */}
+            {isEditingLocation ? (
+              <View>
+                <Text style={styles.inputLabel}>GPS Location</Text>
+                {locationInput.latitude !== null ? (
+                  <View style={styles.locationPreview}>
+                    <Ionicons name="location-outline" size={14} color={colours.primary} />
+                    <Text style={styles.locationPreviewText}>
+                      {locationInput.latitude.toFixed(6)}, {locationInput.longitude?.toFixed(6)}
+                    </Text>
+                  </View>
+                ) : (
+                  <Text style={styles.locationEmpty}>No location set — tap below to get your GPS coordinates.</Text>
+                )}
+                {locationError !== null && (
+                  <Text style={styles.locationErrorText}>{locationError}</Text>
+                )}
+                <View style={styles.locationActions}>
+                  <Pressable style={styles.locationGetBtn} onPress={handleGetLocation}
+                    disabled={isLocating} accessibilityRole="button" accessibilityLabel="Get current location">
+                    {isLocating
+                      ? <ActivityIndicator size="small" color={colours.primary} />
+                      : <><Ionicons name="navigate-outline" size={15} color={colours.primary} /><Text style={styles.locationGetBtnText}>Use Current Location</Text></>
+                    }
+                  </Pressable>
+                  {locationInput.latitude !== null && (
+                    <Pressable style={styles.locationClearBtn} onPress={handleClearLocation}
+                      accessibilityRole="button" accessibilityLabel="Clear location">
+                      <Text style={styles.locationClearBtnText}>Clear</Text>
+                    </Pressable>
+                  )}
+                </View>
+                <View style={styles.formActions}>
+                  <Pressable style={styles.cancelButton} onPress={handleCancelLocation}
+                    accessibilityRole="button" accessibilityLabel="Cancel">
+                    <Text style={styles.cancelButtonText}>{t('common_cancel')}</Text>
+                  </Pressable>
+                  <Pressable style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
+                    onPress={handleSaveLocation} disabled={isSaving}
+                    accessibilityRole="button" accessibilityLabel="Save location">
+                    <Text style={styles.saveButtonText}>{isSaving ? t('common_saving') : t('common_save')}</Text>
+                  </Pressable>
+                </View>
+              </View>
+            ) : (
+              <View style={styles.infoRowWithAction}>
+                <View style={{ flex: 1 }}>
+                  <InfoRow
+                    label="GPS"
+                    value={restaurant?.latitude != null
+                      ? `${restaurant.latitude.toFixed(5)}, ${restaurant.longitude?.toFixed(5)}`
+                      : '—'}
+                  />
+                </View>
+                {restaurant !== null && (
+                  <Pressable style={styles.inlineEditBtn} onPress={handleEditLocation}
+                    accessibilityRole="button" accessibilityLabel="Edit GPS location">
+                    <Ionicons name="pencil-outline" size={13} color={colours.primary} />
+                  </Pressable>
+                )}
+              </View>
+            )}
             <View style={styles.divider} />
 
             {/* Phone — editable */}

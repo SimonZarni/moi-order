@@ -23,6 +23,8 @@ class UpdateRestaurantRequest extends FormRequest
             // name and address locked — only updated via KYC resubmission + admin approval.
             'description'           => ['sometimes', 'nullable', 'string', 'max:2000'],
             'phone'                 => ['sometimes', 'nullable', 'string', 'max:30'],
+            'latitude'              => ['sometimes', 'nullable', 'numeric', 'between:-90,90'],
+            'longitude'             => ['sometimes', 'nullable', 'numeric', 'between:-180,180'],
             'status'                => ['sometimes', Rule::enum(RestaurantStatus::class)],
             'delivery_radius_km'    => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
             'is_delivery_available' => ['sometimes', 'boolean'],
@@ -84,6 +86,8 @@ class UpdateRestaurantRequest extends FormRequest
         return [
             'delivery_radius_km' => 'delivery radius',
             'min_order_cents'    => 'minimum order amount',
+            'latitude'           => 'latitude',
+            'longitude'          => 'longitude',
         ];
     }
 }

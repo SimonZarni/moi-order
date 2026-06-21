@@ -158,4 +158,36 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     marginTop: spacing.md,
   },
+  locationGate: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xxl,
+    gap: spacing.md,
+  },
+  locationGateTitle: {
+    fontSize: typography.xl,
+    fontWeight: '800',
+    color: colours.textOnLight,
+    textAlign: 'center',
+    lineHeight: 60,
+  },
+  locationGateText: {
+    fontSize: typography.sm,
+    color: colours.textMuted,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  locationGateBtn: {
+    marginTop: spacing.sm,
+    backgroundColor: colours.primary,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+    borderRadius: radius.full,
+  },
+  locationGateBtnText: {
+    fontSize: typography.md,
+    fontWeight: '700',
+    color: colours.white,
+  },
 });

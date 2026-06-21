@@ -2,9 +2,18 @@ import apiClient from './client';
 import { Restaurant } from '@/types/models';
 import { ApiResponse, PaginatedResponse } from '@/types/models';
 
-export async function fetchRestaurants(page = 1, search?: string): Promise<PaginatedResponse<Restaurant>> {
+export async function fetchRestaurants(
+  page = 1,
+  search?: string,
+  lat?: number,
+  lng?: number,
+): Promise<PaginatedResponse<Restaurant>> {
   const res = await apiClient.get<PaginatedResponse<Restaurant>>('/api/v1/restaurants', {
-    params: { page, ...(search ? { search } : {}) },
+    params: {
+      page,
+      ...(search ? { search } : {}),
+      ...(lat !== undefined && lng !== undefined ? { lat, lng } : {}),
+    },
   });
   return res.data;
 }

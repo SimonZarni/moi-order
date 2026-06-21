@@ -50,6 +50,8 @@ class RestaurantResource extends JsonResource
             'override_active'       => $this->isOverrideActive(),
             'override_until'        => $this->override_until?->toIso8601String(),
             'delivery_radius_km'    => $this->delivery_radius_km,
+            'distance_km'           => $this->distance_km !== null ? (float) $this->distance_km : null,
+            'is_within_range'       => $this->is_within_range !== null ? (bool) $this->is_within_range : null,
             'is_delivery_available' => $this->is_delivery_available,
             'is_pickup_available'   => $this->is_pickup_available,
             'min_order_cents'       => $this->min_order_cents,

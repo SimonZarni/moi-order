@@ -175,17 +175,43 @@ class RestaurantService
     }
 
     /**
-     * Browse open restaurants for customers, paginated.
-     * Optional lat/lng filtering by delivery radius.
-     * Optional search across name, description, and menu item names.
+     * Browse active restaurants for customers, paginated.
+     * When lat/lng provided: computes distance_km and is_within_range (null = no GPS on restaurant).
+     * Sort: open+in-range → open+out-of-range → open+no-GPS → closed+in-range → ... → closed+no-GPS.
+     * All restaurants are returned — none hidden by radius.
      */
     public function browse(?float $lat = null, ?float $lng = null, ?string $search = null): LengthAwarePaginator
     {
+        $hasLocation = $lat !== null && $lng !== null;
+
         $query = Restaurant::where('platform_status', RestaurantPlatformStatus::Active->value)
             ->whereIn('status', [RestaurantStatus::Open->value, RestaurantStatus::Closed->value])
-            ->with(['openingHours'])
-            ->orderByRaw("FIELD(status, ?, ?) ASC", [RestaurantStatus::Open->value, RestaurantStatus::Closed->value])
-            ->select('restaurants.*');
+            ->with(['openingHours']);
+
+        if ($hasLocation) {
+            // Haversine formula gives distance in km. LEAST(1.0) guards against floating-point rounding
+            // errors that would cause acos to receive a value slightly above 1, producing NaN.
+            $haversine = '(6371 * acos(LEAST(1.0, cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))))';
+
+            // is_within_range: NULL when restaurant has no coordinates, 1 inside radius, 0 outside.
+            // Falls back to 5 km when delivery_radius_km is not set on the restaurant.
+            $isWithinRange = "CASE WHEN latitude IS NULL OR longitude IS NULL THEN NULL WHEN {$haversine} <= COALESCE(delivery_radius_km, 5) THEN 1 ELSE 0 END";
+
+            $query->selectRaw(
+                "restaurants.*, ROUND({$haversine}, 2) AS distance_km, {$isWithinRange} AS is_within_range",
+                [$lat, $lng, $lat, $lat, $lng, $lat],
+            );
+
+            $query
+                ->orderByRaw('FIELD(status, ?, ?) ASC', [RestaurantStatus::Open->value, RestaurantStatus::Closed->value])
+                ->orderByRaw('CASE WHEN is_within_range IS NULL THEN 2 WHEN is_within_range = 1 THEN 0 ELSE 1 END ASC')
+                ->orderByRaw('distance_km ASC');
+        } else {
+            $query
+                ->selectRaw('restaurants.*, NULL AS distance_km, NULL AS is_within_range')
+                ->orderByRaw('FIELD(status, ?, ?) ASC', [RestaurantStatus::Open->value, RestaurantStatus::Closed->value])
+                ->latest('restaurants.created_at');
+        }
 
         if ($search !== null) {
             $query->where(function ($q) use ($search): void {
@@ -197,7 +223,7 @@ class RestaurantService
             });
         }
 
-        return $query->latest()->paginate(20);
+        return $query->paginate(20);
     }
 
     /**

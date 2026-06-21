@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Contracts\FileStorageInterface;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\RestaurantBrowseRequest;
 use App\Http\Resources\RestaurantResource;
 use App\Models\Restaurant;
 use App\Services\RestaurantService;
@@ -20,10 +21,10 @@ class RestaurantBrowseController extends Controller
     ) {}
 
     /** GET /api/v1/restaurants */
-    public function index(Request $request): JsonResponse
+    public function index(RestaurantBrowseRequest $request): JsonResponse
     {
-        $lat    = $request->query('lat')  ? (float) $request->query('lat')  : null;
-        $lng    = $request->query('lng')  ? (float) $request->query('lng')  : null;
+        $lat    = $request->filled('lat') ? (float) $request->input('lat') : null;
+        $lng    = $request->filled('lng') ? (float) $request->input('lng') : null;
         $search = $request->string('search')->trim()->toString();
 
         $restaurants = $this->restaurantService->browse($lat, $lng, $search ?: null);

@@ -5,6 +5,7 @@ import { useCartStore } from '@/shared/store/cartStore';
 import { FOOD_ORDER_STATUS } from '@/types/enums';
 import { RootStackParamList } from '@/types/navigation';
 import { Restaurant } from '@/types/models';
+import { useCustomerLocation, CustomerLocationPermission } from '@/shared/hooks/useCustomerLocation';
 import { useRestaurantListData, UseRestaurantListDataResult } from './useRestaurantListData';
 import { useFoodOrdersData } from './useFoodOrdersData';
 
@@ -12,23 +13,27 @@ export const FOOD_CATEGORIES = ['All', 'Thai', 'Japanese', 'Burger', 'Coffee', '
 export type FoodCategory = (typeof FOOD_CATEGORIES)[number];
 
 export interface UseFoodScreenResult extends UseRestaurantListDataResult {
-  cartItemCount:         number;
-  activeOrderCount:      number;
-  searchText:            string;
-  activeCategory:        FoodCategory;
-  setSearchText:         (t: string) => void;
-  setActiveCategory:     (c: FoodCategory) => void;
-  handleRestaurantPress: (restaurant: Restaurant) => void;
-  handleAddressPress:    () => void;
-  handleCartPress:       () => void;
-  handleOrdersPress:     () => void;
-  handleBack:            () => void;
+  cartItemCount:              number;
+  activeOrderCount:           number;
+  searchText:                 string;
+  activeCategory:             FoodCategory;
+  locationPermissionStatus:   CustomerLocationPermission;
+  setSearchText:              (t: string) => void;
+  setActiveCategory:          (c: FoodCategory) => void;
+  handleRestaurantPress:      (restaurant: Restaurant) => void;
+  handleAddressPress:         () => void;
+  handleCartPress:            () => void;
+  handleOrdersPress:          () => void;
+  handleBack:                 () => void;
+  requestLocationPermission:  () => Promise<void>;
 }
 
 export function useFoodScreen(): UseFoodScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const cartCount  = useCartStore((s) => s.itemCount());
   const { orders } = useFoodOrdersData();
+
+  const { location, permissionStatus, requestPermission } = useCustomerLocation();
 
   const activeOrderCount = useMemo(
     () => orders.filter((o) =>
@@ -44,7 +49,7 @@ export function useFoodScreen(): UseFoodScreenResult {
 
   // Pass effective search string to data hook — empty string means no filter.
   const effectiveSearch = searchText.trim() !== '' ? searchText.trim() : undefined;
-  const listData = useRestaurantListData(effectiveSearch);
+  const listData = useRestaurantListData(effectiveSearch, location?.latitude, location?.longitude);
 
   const setSearchText = useCallback((t: string) => {
     setSearchTextState(t);
@@ -75,10 +80,11 @@ export function useFoodScreen(): UseFoodScreenResult {
 
   return {
     ...listData,
-    cartItemCount: cartCount,
+    cartItemCount:             cartCount,
     activeOrderCount,
     searchText,
     activeCategory,
+    locationPermissionStatus:  permissionStatus,
     setSearchText,
     setActiveCategory,
     handleRestaurantPress,
@@ -86,5 +92,6 @@ export function useFoodScreen(): UseFoodScreenResult {
     handleCartPress,
     handleOrdersPress,
     handleBack,
+    requestLocationPermission: requestPermission,
   };
 }

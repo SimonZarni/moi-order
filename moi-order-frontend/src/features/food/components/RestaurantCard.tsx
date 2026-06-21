@@ -20,11 +20,10 @@ const STATUS_BADGE_STYLE = {
 };
 
 export function RestaurantCard({ restaurant, onPress }: Props): React.JSX.Element {
-  const thumbUri = restaurant.logo_url ?? restaurant.cover_photo_url;
-  // is_open_now is the real-time computation from the server (based on opening hours).
-  // Falls back to status when not present (e.g. old API versions or unloaded relation).
-  const isOpen = restaurant.is_open_now ?? (restaurant.status === RESTAURANT_STATUS.Open);
-  // Show "Closed" badge when real-time hours say closed but DB status hasn't caught up yet.
+  const thumbUri  = restaurant.logo_url ?? restaurant.cover_photo_url;
+  const isOpen    = restaurant.is_open_now ?? (restaurant.status === RESTAURANT_STATUS.Open);
+  const outOfRange = restaurant.is_within_range === false;
+
   const displayStatus = !isOpen && restaurant.status === RESTAURANT_STATUS.Open
     ? RESTAURANT_STATUS.Closed
     : restaurant.status;
@@ -32,10 +31,15 @@ export function RestaurantCard({ restaurant, onPress }: Props): React.JSX.Elemen
 
   return (
     <Pressable
-      style={({ pressed }) => [styles.card, !isOpen && styles.cardClosed, pressed && isOpen && styles.cardPressed]}
+      style={({ pressed }) => [
+        styles.card,
+        !isOpen && styles.cardClosed,
+        isOpen && outOfRange && styles.cardOutOfRange,
+        pressed && isOpen && !outOfRange && styles.cardPressed,
+      ]}
       onPress={isOpen ? () => onPress(restaurant) : undefined}
       accessibilityRole="button"
-      accessibilityLabel={`${restaurant.name}, ${badge.label}`}
+      accessibilityLabel={`${restaurant.name}, ${badge.label}${outOfRange ? ', outside delivery range' : ''}`}
       accessibilityState={{ disabled: !isOpen }}
     >
       <Image
@@ -59,6 +63,12 @@ export function RestaurantCard({ restaurant, onPress }: Props): React.JSX.Elemen
         )}
 
         <View style={styles.metaRow}>
+          {restaurant.distance_km !== null && (
+            <View style={styles.metaChip}>
+              <Ionicons name="location-outline" size={11} color={colours.tertiary} />
+              <Text style={styles.metaText}>{restaurant.distance_km.toFixed(1)} km</Text>
+            </View>
+          )}
           {restaurant.is_delivery_available && (
             <View style={styles.metaChip}>
               <Ionicons name="bicycle-outline" size={11} color={colours.tertiary} />
@@ -72,6 +82,13 @@ export function RestaurantCard({ restaurant, onPress }: Props): React.JSX.Elemen
             </View>
           )}
         </View>
+
+        {outOfRange && (
+          <View style={styles.outOfRangeBanner}>
+            <Ionicons name="location-outline" size={11} color={colours.textMuted} />
+            <Text style={styles.outOfRangeText}>Outside your delivery range</Text>
+          </View>
+        )}
       </View>
     </Pressable>
   );

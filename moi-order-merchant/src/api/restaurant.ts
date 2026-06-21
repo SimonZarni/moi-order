@@ -16,6 +16,8 @@ export interface OpeningHourInput {
 export interface UpdateRestaurantPayload {
   description?: string;
   phone?: string;
+  latitude?: number | null;
+  longitude?: number | null;
   status?: RestaurantStatus;
   delivery_radius_km?: number | null;
   is_delivery_available?: boolean;

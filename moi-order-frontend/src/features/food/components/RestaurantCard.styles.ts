@@ -89,4 +89,21 @@ export const styles = StyleSheet.create({
   statusTextOpen:   { color: '#16a34a' },
   statusTextClosed: { color: colours.textMuted },
   statusTextPaused: { color: '#a16207' },
+  cardOutOfRange: {
+    opacity: 0.6,
+  },
+  outOfRangeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 5,
+    paddingTop: 5,
+    borderTopWidth: 1,
+    borderTopColor: colours.divider,
+  },
+  outOfRangeText: {
+    fontSize: typography.xxs,
+    fontWeight: '600',
+    color: colours.textMuted,
+  },
 });
