@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { RootStackParamList } from '@/types/navigation';
 import { FoodOrder } from '@/types/models';
 import { FOOD_ORDER_STATUS, FOOD_PAYMENT_METHOD } from '@/types/enums';
-import { LINE_OA_URL, ORDER_PAYMENT_TIMEOUT_MS } from '@/shared/constants/config';
+import { LINE_OA_URL, ORDER_PAYMENT_TIMEOUT_MS, CHAT_LOCK_AFTER_COMPLETION_MS } from '@/shared/constants/config';
 import { ERROR_CODES } from '@/shared/constants/errorCodes';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { cancelFoodOrder, completeFoodOrder, notifyLinePayment } from '@/shared/api/foodOrders';
@@ -48,6 +48,7 @@ export interface UseFoodOrderDetailScreenResult {
   handleBrowseRestaurants: () => void;
   handleCancelOrder: () => void;
   isCancelling: boolean;
+  isChatLocked: boolean;
   postReviewRating: number | null;
   postReviewText: string;
   isSubmittingReview: boolean;
@@ -235,6 +236,16 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
     return Date.now() - new Date(order.created_at).getTime() > ORDER_PAYMENT_TIMEOUT_MS;
   }, [order]);
 
+  const isChatLocked = useMemo(() => {
+    if (!order) return false;
+    const { status, completed_at } = order;
+    if (status === FOOD_ORDER_STATUS.Cancelled || status === FOOD_ORDER_STATUS.Expired) return true;
+    if (status === FOOD_ORDER_STATUS.Completed && completed_at !== null) {
+      return Date.now() - new Date(completed_at).getTime() > CHAT_LOCK_AFTER_COMPLETION_MS;
+    }
+    return false;
+  }, [order]);
+
   // Navigate back to the restaurant so the user can re-place the order.
   const handleOrderAgain = useCallback(() => {
     if (!order) return;
@@ -276,6 +287,7 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
     handleBrowseRestaurants,
     handleCancelOrder,
     isCancelling,
+    isChatLocked,
     postReviewRating,
     postReviewText,
     isSubmittingReview,

@@ -26,7 +26,7 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
     handleSlideComplete, handleCompleteConfirm, handleCompleteCancel,
     handleRatingChange, handleReviewChange,
     handleCallRestaurant, handleOrderAgain, handleBrowseRestaurants,
-    handleCancelOrder, isCancelling,
+    handleCancelOrder, isCancelling, isChatLocked,
     postReviewRating, postReviewText, isSubmittingReview,
     handlePostReviewRatingChange, handlePostReviewTextChange, handlePostReviewSubmit,
   } = useFoodOrderDetailScreen();
@@ -201,7 +201,7 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
           </View>
         )}
 
-        {!isCancelled && !isExpired && (
+        {!isChatLocked && (
           <Pressable
             style={styles.chatBtn}
             onPress={handleChatPress}

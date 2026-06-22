@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
 import { FoodOrder } from '@/types/models';
+import { FOOD_ORDER_STATUS } from '@/types/enums';
 import { formatPrice } from '@/shared/utils/formatCurrency';
 import { formatDateTime } from '@/shared/utils/formatDate';
 import { BackButton } from '@/shared/components/BackButton/BackButton';
@@ -13,14 +14,45 @@ import { ORDER_STATUS_COLOURS, styles } from './FoodOrdersScreen.styles';
 export function FoodOrdersScreen(): React.JSX.Element {
   const {
     orders, isOrdersLoading, isOrdersError,
+    isSelecting, selectedIds, isDeletingOrders,
     handleOrderPress, handleBack,
+    handleEnterSelect, handleCancelSelect,
+    handleDeleteSelected,
   } = useFoodOrdersScreen();
+
+  const hasCancelled = orders.some((o) => o.status === FOOD_ORDER_STATUS.Cancelled);
+  const selectedCount = selectedIds.size;
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.header}>
-        <BackButton onPress={handleBack} />
-        <Text style={styles.headerTitle}>My Orders</Text>
+        {isSelecting ? (
+          <>
+            <Pressable onPress={handleCancelSelect} style={styles.selectActionBtn} accessibilityRole="button" accessibilityLabel="Cancel selection">
+              <Text style={styles.selectActionText}>Cancel</Text>
+            </Pressable>
+            <Text style={styles.headerTitle}>{selectedCount > 0 ? `${selectedCount} selected` : 'Select Orders'}</Text>
+            <Pressable
+              onPress={handleDeleteSelected}
+              style={[styles.deleteBtn, (selectedCount === 0 || isDeletingOrders) && styles.deleteBtnDisabled]}
+              disabled={selectedCount === 0 || isDeletingOrders}
+              accessibilityRole="button"
+              accessibilityLabel={`Delete ${selectedCount} orders`}
+            >
+              <Text style={styles.deleteBtnText}>{isDeletingOrders ? '…' : `Delete (${selectedCount})`}</Text>
+            </Pressable>
+          </>
+        ) : (
+          <>
+            <BackButton onPress={handleBack} />
+            <Text style={styles.headerTitle}>My Orders</Text>
+            {hasCancelled && (
+              <Pressable onPress={handleEnterSelect} style={styles.selectActionBtn} accessibilityRole="button" accessibilityLabel="Select orders to delete">
+                <Text style={styles.selectActionText}>Select</Text>
+              </Pressable>
+            )}
+          </>
+        )}
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -43,15 +75,25 @@ export function FoodOrdersScreen(): React.JSX.Element {
         {!isOrdersLoading && orders.length > 0 && (
           <View style={styles.card}>
             {orders.map((order: FoodOrder) => {
-              const statusColour = ORDER_STATUS_COLOURS[order.status] ?? { bg: colours.infoBg, text: colours.textMuted };
+              const statusColour  = ORDER_STATUS_COLOURS[order.status] ?? { bg: colours.infoBg, text: colours.textMuted };
+              const isCancelled   = order.status === FOOD_ORDER_STATUS.Cancelled;
+              const isSelectable  = isSelecting && isCancelled;
+              const isSelected    = selectedIds.has(order.id);
+              const isDimmed      = isSelecting && !isCancelled;
+
               return (
                 <Pressable
                   key={order.id}
-                  style={styles.orderRow}
+                  style={[styles.orderRow, isSelected && styles.orderRowSelected, isDimmed && styles.orderRowDimmed]}
                   onPress={() => handleOrderPress(order)}
                   accessibilityRole="button"
-                  accessibilityLabel={`View order ${order.order_number ?? order.id}`}
+                  accessibilityLabel={`${isSelectable ? (isSelected ? 'Deselect' : 'Select') : 'View'} order ${order.order_number ?? order.id}`}
                 >
+                  {isSelecting && (
+                    <View style={[styles.checkbox, isSelectable && styles.checkboxActive, isSelected && styles.checkboxChecked]}>
+                      {isSelected && <Ionicons name="checkmark" size={14} color={colours.backgroundDark} />}
+                    </View>
+                  )}
                   <View style={styles.orderMeta}>
                     <Text style={styles.orderNumber}>
                       {order.order_number != null ? order.order_number : `#${order.id}`}
@@ -72,7 +114,7 @@ export function FoodOrdersScreen(): React.JSX.Element {
                       <Text style={[styles.orderStatusText, { color: statusColour.text }]}>{order.status_label}</Text>
                     </View>
                   </View>
-                  <Ionicons name="chevron-forward" size={16} color={colours.textMuted} />
+                  {!isSelecting && <Ionicons name="chevron-forward" size={16} color={colours.textMuted} />}
                 </Pressable>
               );
             })}

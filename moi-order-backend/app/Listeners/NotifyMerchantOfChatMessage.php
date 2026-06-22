@@ -71,14 +71,15 @@ class NotifyMerchantOfChatMessage implements ShouldQueue
             return;
         }
 
-        $preview = $message->body !== null
+        $senderName = $message->sender_name ?? 'Customer';
+        $preview    = $message->body !== null
             ? mb_strimwidth($message->body, 0, 80, '…')
-            : 'Customer sent an image';
+            : "{$senderName} sent an image";
 
         $notification = MerchantNotification::create([
             'merchant_id' => $merchantId,
             'type'        => 'chat_message',
-            'title'       => 'New Message',
+            'title'       => $senderName,
             'body'        => $preview,
             'order_id'    => $order->id,
         ]);
@@ -96,7 +97,7 @@ class NotifyMerchantOfChatMessage implements ShouldQueue
         }
 
         $this->push->send($tokens, new ExpoPushMessage(
-            title: 'New Message',
+            title: $senderName,
             body:  $preview,
             data:  ['type' => 'chat_message', 'order_id' => $order->uuid],
         ));

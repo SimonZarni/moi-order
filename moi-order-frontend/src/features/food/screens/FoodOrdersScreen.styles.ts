@@ -94,4 +94,30 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
     textAlign: 'center',
   },
+
+  // ── Selection mode ───────────────────────────────────────────────────────────
+  selectActionBtn: { paddingHorizontal: spacing.sm, paddingVertical: spacing.xs },
+  selectActionText: { fontSize: typography.sm, fontWeight: '600', color: colours.primary },
+  deleteBtn: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    backgroundColor: colours.error,
+    borderRadius: radius.full,
+  },
+  deleteBtnDisabled: { opacity: 0.4 },
+  deleteBtnText: { fontSize: typography.sm, fontWeight: '700', color: colours.white },
+  orderRowSelected: { backgroundColor: colours.primaryBg },
+  orderRowDimmed: { opacity: 0.4 },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: colours.divider,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  checkboxActive: { borderColor: colours.primary },
+  checkboxChecked: { backgroundColor: colours.primary, borderColor: colours.primary },
 });
