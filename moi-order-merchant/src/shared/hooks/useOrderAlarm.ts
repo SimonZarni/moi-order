@@ -11,7 +11,8 @@ type ExtWindow = Window & { webkitAudioContext?: AudioContextCtor };
 
 let _ctx: AudioContext | null = null;
 let _unlocked = false;
-let _pendingAlarm = false; // alarm fired while context was suspended — replay on next unlock
+let _pendingAlarm = false;     // order alarm fired while context was suspended
+let _pendingChatAlarm = false; // chat alarm fired while context was suspended
 let _audioError: string | null = null;
 // HTMLAudioElement used for custom sounds — avoids CORS (fetch() is blocked on R2 without CORS rules;
 // media elements load cross-origin audio without triggering CORS preflight).
@@ -65,7 +66,8 @@ function attemptUnlock(): void {
   if (ctx.state === 'running') {
     if (!_unlocked) { _unlocked = true; _audioError = null; _notify(); }
     // We are inside a synchronous window click/keydown handler — fromGesture = true is safe.
-    if (_pendingAlarm) { _pendingAlarm = false; playSound(ctx, true); }
+    if (_pendingAlarm)     { _pendingAlarm     = false; playSound(ctx, true); }
+    if (_pendingChatAlarm) { _pendingChatAlarm = false; playChatBeeps(ctx);  }
     return;
   }
   ctx.resume()
@@ -75,7 +77,8 @@ function attemptUnlock(): void {
         _audioError = null;
         _notify();
         // .then() is outside the user gesture window — use beeps only.
-        if (_pendingAlarm) { _pendingAlarm = false; playSound(ctx, false); }
+        if (_pendingAlarm)     { _pendingAlarm     = false; playSound(ctx, false); }
+        if (_pendingChatAlarm) { _pendingChatAlarm = false; playChatBeeps(ctx);    }
       } else {
         _audioError = `resume() called but state is still: ${ctx.state}`;
         _notify();
@@ -126,6 +129,41 @@ function playBeeps(ctx: AudioContext): void {
   }
 }
 
+// ── Chat notification beep (sine wave, lower pitch — distinct from order alarm) ─
+
+const CHAT_BEEP_PATTERN: Array<[number, number]> = [
+  [0.000, 0.120],
+  [0.200, 0.320],
+];
+
+const CHAT_FREQ = 520;
+const CHAT_GAIN = 0.25;
+
+function playChatBeeps(ctx: AudioContext): void {
+  try {
+    const now = ctx.currentTime;
+    for (const [start, end] of CHAT_BEEP_PATTERN) {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = CHAT_FREQ;
+      gain.gain.setValueAtTime(0, now + start);
+      gain.gain.linearRampToValueAtTime(CHAT_GAIN, now + start + 0.010);
+      gain.gain.setValueAtTime(CHAT_GAIN, now + end - 0.010);
+      gain.gain.linearRampToValueAtTime(0, now + end);
+      osc.start(now + start);
+      osc.stop(now + end);
+    }
+    _audioError = null;
+    _notify();
+  } catch (err) {
+    _audioError = `playChatBeeps failed: ${err instanceof Error ? err.message : String(err)}`;
+    _notify();
+  }
+}
+
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export interface UseOrderAlarmResult {
@@ -135,6 +173,7 @@ export interface UseOrderAlarmResult {
   audioError: string | null;
   toggleEnabled: () => void;
   triggerAlarm: (fromGesture?: boolean) => void;
+  triggerChatAlarm: () => void;
   unlockAudio: () => void;
 }
 
@@ -213,9 +252,34 @@ export function useOrderAlarm(): UseOrderAlarmResult {
     }
   }, [isEnabled]);
 
+  const triggerChatAlarm = useCallback(() => {
+    if (!isEnabled) return;
+    const ctx = getCtx();
+    if (!ctx) {
+      _pendingChatAlarm = true;
+      return;
+    }
+    if (ctx.state === 'running') {
+      playChatBeeps(ctx);
+    } else {
+      _pendingChatAlarm = true;
+      ctx.resume()
+        .then(() => {
+          if (ctx.state === 'running') {
+            _pendingChatAlarm = false;
+            playChatBeeps(ctx);
+          }
+        })
+        .catch((err: unknown) => {
+          _audioError = `triggerChatAlarm resume failed: ${err instanceof Error ? err.message : String(err)}`;
+          _notify();
+        });
+    }
+  }, [isEnabled]);
+
   const toggleEnabled = useCallback(() => {
     setAlarmEnabled(!isEnabled);
   }, [isEnabled, setAlarmEnabled]);
 
-  return { isEnabled, isUnlocked, audioStatus, audioError, toggleEnabled, triggerAlarm, unlockAudio };
+  return { isEnabled, isUnlocked, audioStatus, audioError, toggleEnabled, triggerAlarm, triggerChatAlarm, unlockAudio };
 }

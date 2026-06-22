@@ -35,9 +35,9 @@ function PushNotificationManager(): null {
  * Principle: SRP — manages connection lifecycle only; renders nothing.
  */
 function WebSocketManager(): null {
-  const { triggerAlarm } = useOrderAlarm();
+  const { triggerAlarm, triggerChatAlarm } = useOrderAlarm();
   const { channelStatus } = useWsStatus();
-  useMerchantWebSocket({ onNewOrder: triggerAlarm, onNewChatMessage: triggerAlarm });
+  useMerchantWebSocket({ onNewOrder: triggerAlarm, onNewChatMessage: triggerChatAlarm });
 
   // today string is stable for the lifetime of the session (remounts at midnight via token cycle).
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);

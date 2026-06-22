@@ -60,21 +60,12 @@ class FoodOrderService
                 }
             }
 
-            // Load option groups for items that have selected options — server validates
-            // ownership and computes additional price from DB (never from client).
-            $itemIdsWithOptions = collect($dto->items)
-                ->filter(fn ($l) => ! empty($l['selected_options'] ?? []))
-                ->pluck('menu_item_id')
-                ->unique()
-                ->all();
-
-            $optionGroupsByItem = collect();
-            if (! empty($itemIdsWithOptions)) {
-                $optionGroupsByItem = MenuItemOptionGroup::with('options')
-                    ->whereIn('menu_item_id', $itemIdsWithOptions)
-                    ->get()
-                    ->groupBy('menu_item_id');
-            }
+            // Load option groups for ALL items so required-group validation always runs,
+            // even when selected_options is absent or an empty array (prevents bypass).
+            $optionGroupsByItem = MenuItemOptionGroup::with('options')
+                ->whereIn('menu_item_id', $itemIds)
+                ->get()
+                ->groupBy('menu_item_id');
 
             // Server-side total calculation — never use client-supplied prices.
             $subtotal = 0;
