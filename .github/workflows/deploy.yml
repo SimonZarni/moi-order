@@ -13,17 +13,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Load SSH key
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Add server to known hosts
-        run: ssh-keyscan -H 157.230.34.59 >> ~/.ssh/known_hosts
+      - name: Setup SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keygen -l -f ~/.ssh/deploy_key
+          ssh-keyscan -H 157.230.34.59 >> ~/.ssh/known_hosts
 
       - name: Deploy
         run: |
-          ssh root@157.230.34.59 bash << 'ENDSSH'
+          ssh -i ~/.ssh/deploy_key root@157.230.34.59 bash << 'ENDSSH'
             set -e
             cd /var/www/moi-order
             git pull origin main
