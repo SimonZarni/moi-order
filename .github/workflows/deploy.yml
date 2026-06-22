@@ -1,0 +1,32 @@
+name: Deploy Backend to Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'moi-order-backend/**'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  deploy:
+    name: SSH deploy → DigitalOcean
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 157.230.34.59
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            cd /var/www/moi-order
+            git pull origin main
+            cd moi-order-backend
+            composer install --no-dev --optimize-autoloader --no-interaction
+            php artisan migrate --force
+            php artisan optimize
+            php artisan queue:restart
+            supervisorctl restart "moi-order-worker:*"
+            echo "Deploy complete: $(date)"
