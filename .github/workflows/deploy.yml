@@ -13,13 +13,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: 157.230.34.59
-          username: root
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H 157.230.34.59 >> ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: |
+          ssh -i ~/.ssh/deploy_key root@157.230.34.59 << 'ENDSSH'
             set -e
             cd /var/www/moi-order
             git pull origin main
@@ -34,3 +37,4 @@ jobs:
             php artisan queue:restart
             supervisorctl restart "moi-order-worker:*"
             echo "Deploy complete: $(date)"
+          ENDSSH
