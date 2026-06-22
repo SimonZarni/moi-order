@@ -26,7 +26,11 @@ jobs:
             cd moi-order-backend
             composer install --no-dev --optimize-autoloader --no-interaction
             php artisan migrate --force
-            php artisan optimize
+            php artisan config:cache
+            php artisan route:clear
+            php artisan route:cache
+            php artisan view:cache
+            php artisan event:cache
             php artisan queue:restart
             supervisorctl restart "moi-order-worker:*"
             echo "Deploy complete: $(date)"
