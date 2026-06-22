@@ -79,9 +79,19 @@ export const styles = StyleSheet.create({
 
   // ── Items ─────────────────────────────────────────────────────────────────────
   itemRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingVertical: spacing.xs + 2, gap: spacing.sm },
-  itemNameCol: { flex: 1, gap: 2 },
-  itemName: { fontSize: typography.sm, fontWeight: '600', color: colours.textOnLight },
-  itemQty: { fontSize: typography.xs, color: colours.textMuted },
+  itemNameCol: { flex: 1, gap: 3 },
+  itemNameRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flexWrap: 'wrap' },
+  itemQtyBadge: {
+    backgroundColor: colours.primaryBg,
+    borderRadius: radius.sm,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderWidth: 1,
+    borderColor: colours.primary + '44',
+  },
+  itemQtyBadgeText: { fontSize: typography.xs, fontWeight: '800', color: colours.primary },
+  itemName: { fontSize: typography.sm, fontWeight: '600', color: colours.textOnLight, flex: 1 },
+  itemUnitPrice: { fontSize: typography.xs, color: colours.textMuted },
   itemModifiers: { fontSize: typography.xs, color: colours.textMuted },
   itemNotes: { fontSize: typography.xs, color: colours.textSubtle, fontStyle: 'italic' },
   itemPrice: { fontSize: typography.sm, fontWeight: '700', color: colours.textOnLight },
