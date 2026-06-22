@@ -272,17 +272,11 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
             {order.items.map((item) => (
               <View key={item.id} style={styles.itemRow}>
                 <View style={styles.itemNameCol}>
-                  <View style={styles.itemNameRow}>
-                    <View style={styles.itemQtyBadge}>
-                      <Text style={styles.itemQtyBadgeText}>×{item.quantity}</Text>
-                    </View>
-                    <Text style={styles.itemName}>{item.name}</Text>
-                  </View>
-                  {item.selected_options.length > 0 && (
-                    <Text style={styles.itemModifiers}>
-                      {item.selected_options.map((o) => o.option_name).join(' · ')}
-                    </Text>
-                  )}
+                  <Text style={styles.itemName}>
+                    {item.selected_options.length > 0
+                      ? `${item.name} (${item.selected_options.map((o) => o.option_name).join(', ')})`
+                      : item.name}{' ×'}{item.quantity}
+                  </Text>
                   <Text style={styles.itemUnitPrice}>{formatPrice(item.price_cents)} each</Text>
                   {item.notes !== null && (
                     <Text style={styles.itemNotes}>{item.notes}</Text>

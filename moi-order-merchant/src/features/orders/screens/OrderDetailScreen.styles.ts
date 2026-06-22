@@ -90,7 +90,7 @@ export const styles = StyleSheet.create({
     borderColor: colours.primary + '44',
   },
   itemQtyBadgeText: { fontSize: typography.xs, fontWeight: '800', color: colours.primary },
-  itemName: { fontSize: typography.sm, fontWeight: '600', color: colours.textOnLight, flex: 1 },
+  itemName: { fontSize: typography.sm, fontWeight: '600', color: colours.textOnLight },
   itemUnitPrice: { fontSize: typography.xs, color: colours.textMuted },
   itemModifiers: { fontSize: typography.xs, color: colours.textMuted },
   itemNotes: { fontSize: typography.xs, color: colours.textSubtle, fontStyle: 'italic' },

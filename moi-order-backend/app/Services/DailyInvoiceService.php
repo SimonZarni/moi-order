@@ -45,7 +45,7 @@ class DailyInvoiceService
                 }
 
                 $customerTotal = (int) $orders->sum('total_cents');
-                $payout        = (int) $orders->sum('subtotal_cents');
+                $payout        = (int) round($customerTotal / 1.05);
                 $platformFee   = $customerTotal - $payout;
 
                 RestaurantDailyInvoice::updateOrCreate(
@@ -82,7 +82,7 @@ class DailyInvoiceService
             ->get(['total_cents', 'subtotal_cents']);
 
         $customerTotal = (int) $orders->sum('total_cents');
-        $payout        = (int) $orders->sum('subtotal_cents');
+        $payout        = (int) round($customerTotal / 1.05);
         $platformFee   = $customerTotal - $payout;
 
         return new RestaurantDailyInvoice([

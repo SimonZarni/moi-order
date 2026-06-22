@@ -51,25 +51,19 @@ export const styles = StyleSheet.create({
   },
   itemRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colours.divider,
   },
-  itemNameCol: { flex: 1 },
   itemName: {
+    flex: 1,
     fontSize: typography.sm,
     color: colours.textOnLight,
     fontWeight: '500',
+    marginRight: spacing.sm,
   },
-  itemModifiers: {
-    fontSize: typography.xs,
-    color: colours.medium,
-    lineHeight: 18,
-    marginTop: 2,
-  },
-  itemQty:   { fontSize: typography.sm, color: colours.medium, marginRight: spacing.sm },
   itemPrice: { fontSize: typography.sm, fontWeight: '700', color: colours.textOnLight },
   totalRow: {
     flexDirection: 'row',

@@ -17,7 +17,7 @@ interface Props {
 
 export function MenuItemRow({ item, quantity, onAdd, onRemove, onPress }: Props): React.JSX.Element {
   const s             = useStrings();
-  const isUnavailable = item.status === MENU_ITEM_STATUS.Unavailable;
+  const isUnavailable = item.status === MENU_ITEM_STATUS.OutOfStock;
   const hasOptions    = item.option_groups.length > 0;
   const isDiscounted  = item.original_price_cents !== null && item.original_price_cents > item.price_cents;
 

@@ -105,7 +105,8 @@ export type MenuCategoryType = (typeof MENU_CATEGORY_TYPE)[keyof typeof MENU_CAT
 // Mirrors App\Enums\MenuItemStatus
 export const MENU_ITEM_STATUS = {
   Available:   'available',
-  Unavailable: 'unavailable',
+  OutOfStock:  'out_of_stock',
+  Hidden:      'hidden',
 } as const;
 
 export type MenuItemStatus = (typeof MENU_ITEM_STATUS)[keyof typeof MENU_ITEM_STATUS];

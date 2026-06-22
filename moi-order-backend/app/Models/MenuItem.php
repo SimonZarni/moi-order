@@ -52,6 +52,12 @@ class MenuItem extends Model
         $query->where('status', MenuItemStatus::Available->value);
     }
 
+    /** Excludes only Hidden items — OutOfStock items are shown dimmed to customers. */
+    public function scopeVisibleToCustomer(\Illuminate\Database\Eloquent\Builder $query): void
+    {
+        $query->whereIn('status', [MenuItemStatus::Available->value, MenuItemStatus::OutOfStock->value]);
+    }
+
     // ─── Relationships ────────────────────────────────────────────────────────
 
     public function category(): BelongsTo

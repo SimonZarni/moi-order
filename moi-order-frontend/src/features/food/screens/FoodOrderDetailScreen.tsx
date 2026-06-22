@@ -123,15 +123,11 @@ export function FoodOrderDetailScreen(): React.JSX.Element {
         <View style={styles.card}>
           {(order.items ?? []).map((item: FoodOrderItem) => (
             <View key={item.id} style={styles.itemRow}>
-              <View style={styles.itemNameCol}>
-                <Text style={styles.itemName}>{item.name}</Text>
-                {item.selected_options.length > 0 && (
-                  <Text style={styles.itemModifiers}>
-                    {item.selected_options.map((o) => o.option_name).join(' · ')}
-                  </Text>
-                )}
-              </View>
-              <Text style={styles.itemQty}>×{item.quantity}</Text>
+              <Text style={styles.itemName}>
+                {item.selected_options.length > 0
+                  ? `${item.name} (${item.selected_options.map((o) => o.option_name).join(', ')})`
+                  : item.name}{' ×'}{item.quantity}
+              </Text>
               <Text style={styles.itemPrice}>{formatPrice(item.subtotal_cents / 100)}</Text>
             </View>
           ))}
