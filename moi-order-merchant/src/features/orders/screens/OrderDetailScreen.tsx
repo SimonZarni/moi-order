@@ -38,6 +38,7 @@ const EDITABLE_STATUSES = new Set<string>([
   ORDER_STATUS.OrderPlaced,
   ORDER_STATUS.WaitingForPayment,
   ORDER_STATUS.PaymentConfirmed,
+  ORDER_STATUS.PreparingFood,
 ]);
 
 const STATUS_COLOURS: Record<string, string> = {

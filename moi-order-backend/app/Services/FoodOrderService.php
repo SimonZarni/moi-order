@@ -301,6 +301,7 @@ class FoodOrderService
             FoodOrderStatus::OrderPlaced,
             FoodOrderStatus::WaitingForPayment,
             FoodOrderStatus::PaymentConfirmed,
+            FoodOrderStatus::PreparingFood,
         ];
 
         if (! in_array($order->status, $editableStatuses, true)) {
