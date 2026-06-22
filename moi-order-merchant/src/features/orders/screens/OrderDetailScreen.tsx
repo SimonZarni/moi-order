@@ -282,7 +282,7 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
                       {item.selected_options.map((o) => o.option_name).join(' · ')}
                     </Text>
                   )}
-                  <Text style={styles.itemUnitPrice}>@ {formatPrice(item.price_cents)} each</Text>
+                  <Text style={styles.itemUnitPrice}>{formatPrice(item.price_cents)} each</Text>
                   {item.notes !== null && (
                     <Text style={styles.itemNotes}>{item.notes}</Text>
                   )}
