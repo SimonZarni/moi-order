@@ -42,7 +42,7 @@ export function RestaurantDetailScreen(): React.JSX.Element {
     cartItemCount, cartTotalCents, activeOrderCount, getQuantity,
     isRefreshing, handleBack, handleRefresh,
     handleTabPress, handleTabBarLayout, handleSectionLayout,
-    handleScroll, handleAddItem, handleRemoveItem, handleItemPress, handleCartPress, handleOrdersPress,
+    handleScroll, handleScrollEnd, handleAddItem, handleRemoveItem, handleItemPress, handleCartPress, handleOrdersPress,
   } = useRestaurantDetailScreen();
 
   const STATUS_BADGE: Record<string, { bg: string; color: string; label: string }> = {
@@ -73,6 +73,8 @@ export function RestaurantDetailScreen(): React.JSX.Element {
         ref={scrollRef}
         stickyHeaderIndices={[1]}
         onScroll={handleScroll}
+        onScrollEndDrag={handleScrollEnd}
+        onMomentumScrollEnd={handleScrollEnd}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         style={styles.scroll}

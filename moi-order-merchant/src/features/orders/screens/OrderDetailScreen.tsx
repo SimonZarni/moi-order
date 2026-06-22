@@ -272,6 +272,11 @@ export function OrderDetailScreen({ orderId, onBack, onChatPress }: OrderDetailS
               <View key={item.id} style={styles.itemRow}>
                 <View style={styles.itemNameCol}>
                   <Text style={styles.itemName}>{item.name}</Text>
+                  {item.selected_options.length > 0 && (
+                    <Text style={styles.itemModifiers}>
+                      {item.selected_options.map((o) => o.option_name).join(' · ')}
+                    </Text>
+                  )}
                   <Text style={styles.itemQty}>
                     × {item.quantity} @ {formatPrice(item.price_cents)}
                   </Text>

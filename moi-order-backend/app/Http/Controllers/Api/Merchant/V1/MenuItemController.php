@@ -8,6 +8,8 @@ use App\Contracts\FileStorageInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Merchant\StoreMenuItemRequest;
 use App\Http\Requests\Merchant\UpdateMenuItemRequest;
+use App\Http\Requests\Merchant\UpdateMenuItemStatusRequest;
+use App\Enums\MenuItemStatus;
 use App\Http\Resources\MenuItemResource;
 use App\Services\MenuService;
 use Illuminate\Http\JsonResponse;
@@ -40,6 +42,17 @@ class MenuItemController extends Controller
         $item = $this->menuService->updateItem($item, $request->validated());
 
         return response()->json(['data' => new MenuItemResource($item, $this->storage)]);
+    }
+
+    /** PATCH /api/merchant/v1/menu/items/{id}/status */
+    public function updateStatus(UpdateMenuItemStatusRequest $request, int $id): JsonResponse
+    {
+        $restaurant = $request->user()->restaurant()->firstOrFail();
+        $item       = $restaurant->menuItems()->findOrFail($id);
+
+        $item->update(['status' => MenuItemStatus::from($request->validated()['status'])]);
+
+        return response()->json(['data' => new MenuItemResource($item->fresh(), $this->storage)]);
     }
 
     /** DELETE /api/merchant/v1/menu/items/{id} */

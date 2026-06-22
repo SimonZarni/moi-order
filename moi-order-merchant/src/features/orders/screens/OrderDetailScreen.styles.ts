@@ -82,6 +82,7 @@ export const styles = StyleSheet.create({
   itemNameCol: { flex: 1, gap: 2 },
   itemName: { fontSize: typography.sm, fontWeight: '600', color: colours.textOnLight },
   itemQty: { fontSize: typography.xs, color: colours.textMuted },
+  itemModifiers: { fontSize: typography.xs, color: colours.textMuted },
   itemNotes: { fontSize: typography.xs, color: colours.textSubtle, fontStyle: 'italic' },
   itemPrice: { fontSize: typography.sm, fontWeight: '700', color: colours.textOnLight },
   totalRow: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: spacing.sm, marginTop: spacing.xs, borderTopWidth: 1.5, borderTopColor: colours.divider },

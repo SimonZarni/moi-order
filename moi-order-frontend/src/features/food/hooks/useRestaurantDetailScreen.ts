@@ -31,6 +31,7 @@ export interface UseRestaurantDetailScreenResult {
   handleTabBarLayout:   (height: number) => void;
   handleSectionLayout:  (index: number, y: number) => void;
   handleScroll:         (e: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  handleScrollEnd:      () => void;
   handleAddItem:        (item: MenuItem) => void;
   handleRemoveItem:     (cartKey: string) => void;
   handleItemPress:      (item: MenuItem) => void;
@@ -85,9 +86,10 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
   const cartTotal = useCartStore((s) => s.totalCents());
   const getQty    = useCartStore((s) => s.getQuantity);
 
-  const scrollRef        = useRef<ScrollView>(null);
-  const sectionYsRef     = useRef<Record<number, number>>({});
-  const tabBarHeightRef  = useRef(48);
+  const scrollRef              = useRef<ScrollView>(null);
+  const sectionYsRef           = useRef<Record<number, number>>({});
+  const tabBarHeightRef        = useRef(48);
+  const isProgrammaticScrollRef = useRef(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
 
   const sortedCategories = useMemo(
@@ -113,6 +115,7 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
   }, []);
 
   const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>): void => {
+    if (isProgrammaticScrollRef.current) return;
     const y = e.nativeEvent.contentOffset.y;
     const threshold = y + tabBarHeightRef.current + 30;
     let next = 0;
@@ -125,8 +128,15 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
   const handleTabPress = useCallback((index: number): void => {
     const raw = sectionYsRef.current[index] ?? 0;
     const y   = Math.max(0, raw - tabBarHeightRef.current);
-    scrollRef.current?.scrollTo({ y, animated: true });
+    isProgrammaticScrollRef.current = true;
     setActiveTabIndex(index);
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ y, animated: true });
+    });
+  }, []);
+
+  const handleScrollEnd = useCallback((): void => {
+    isProgrammaticScrollRef.current = false;
   }, []);
 
   const handleBack        = useCallback(() => navigation.goBack(),              [navigation]);
@@ -187,6 +197,7 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
     handleTabBarLayout,
     handleSectionLayout,
     handleScroll,
+    handleScrollEnd,
     handleAddItem,
     handleRemoveItem,
     handleItemPress,

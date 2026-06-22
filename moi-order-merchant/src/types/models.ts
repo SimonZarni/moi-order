@@ -36,6 +36,14 @@ export interface KycApplication {
   created_at: string;
 }
 
+export interface FoodOrderSelectedOption {
+  option_group_id: number;
+  option_group_name: string;
+  option_id: number;
+  option_name: string;
+  price_cents: number;
+}
+
 export interface FoodOrderItem {
   id: number;
   menu_item_id: number | null;
@@ -45,6 +53,7 @@ export interface FoodOrderItem {
   additional_price_cents: number;
   subtotal_cents: number;
   notes: string | null;
+  selected_options: FoodOrderSelectedOption[];
 }
 
 export interface FoodOrderUser {

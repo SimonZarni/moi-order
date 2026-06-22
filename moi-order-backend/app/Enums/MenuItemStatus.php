@@ -7,13 +7,15 @@ namespace App\Enums;
 enum MenuItemStatus: string
 {
     case Available   = 'available';
-    case Unavailable = 'unavailable';
+    case OutOfStock  = 'out_of_stock';
+    case Hidden      = 'hidden';
 
     public function label(): string
     {
         return match($this) {
-            self::Available   => 'Available',
-            self::Unavailable => 'Unavailable',
+            self::Available  => 'Available',
+            self::OutOfStock => 'Out of Stock',
+            self::Hidden     => 'Hidden',
         };
     }
 }

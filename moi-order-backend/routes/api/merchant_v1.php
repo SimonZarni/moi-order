@@ -46,10 +46,11 @@ Route::patch('/menu/categories/{id}',   [MenuCategoryController::class, 'update'
 Route::delete('/menu/categories/{id}',  [MenuCategoryController::class, 'destroy']);
 
 // ── Menu items ────────────────────────────────────────────────────────────────
-Route::post('/menu/categories/{categoryId}/items', [MenuItemController::class, 'store']);
-Route::put('/menu/items/{id}',    [MenuItemController::class, 'update']);
-Route::patch('/menu/items/{id}',  [MenuItemController::class, 'update']);
-Route::delete('/menu/items/{id}', [MenuItemController::class, 'destroy']);
+Route::post('/menu/categories/{categoryId}/items',  [MenuItemController::class, 'store']);
+Route::put('/menu/items/{id}',                      [MenuItemController::class, 'update']);
+Route::patch('/menu/items/{id}',                    [MenuItemController::class, 'update']);
+Route::patch('/menu/items/{id}/status',             [MenuItemController::class, 'updateStatus']);
+Route::delete('/menu/items/{id}',                   [MenuItemController::class, 'destroy']);
 
 // ── Analytics ─────────────────────────────────────────────────────────────────
 Route::get('/analytics',       [MerchantAnalyticsController::class, 'index']);
