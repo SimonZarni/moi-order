@@ -17,6 +17,9 @@ export interface UseSessionMenuScreenResult {
   isCreating: boolean;
   isImporting: boolean;
   isRenaming: boolean;
+  // Accordion
+  isCategoryExpanded: (categoryId: number) => boolean;
+  handleToggleExpanded: (categoryId: number) => void;
   // Add category modal
   showAddCategoryModal: boolean;
   newCategoryName: string;
@@ -148,6 +151,23 @@ export function useSessionMenuScreen(
     setImportModalVisible(false);
   }, [selectedImportIds, data]);
 
+  // ── Accordion ─────────────────────────────────────────────────────────────
+  // Tracks collapsed category IDs; empty = all expanded (default)
+  const [collapsedIds, setCollapsedIds] = useState<Set<number>>(new Set());
+
+  const handleToggleExpanded = useCallback((categoryId: number) => {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(categoryId)) { next.delete(categoryId); } else { next.add(categoryId); }
+      return next;
+    });
+  }, []);
+
+  const isCategoryExpanded = useCallback(
+    (categoryId: number) => !collapsedIds.has(categoryId),
+    [collapsedIds],
+  );
+
   // ── Item actions ──────────────────────────────────────────────────────────
   const handleToggleItemStatus = useCallback(
     (itemId: number, status: MenuItemStatus) => data.toggleItemStatus(itemId, status),
@@ -208,6 +228,8 @@ export function useSessionMenuScreen(
     handleToggleItemStatus,
     handleDeleteItem,
     handleEditItem,
+    isCategoryExpanded,
+    handleToggleExpanded,
     handleBack,
   };
 }

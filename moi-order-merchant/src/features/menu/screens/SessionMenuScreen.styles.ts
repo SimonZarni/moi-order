@@ -117,6 +117,17 @@ export const styles = StyleSheet.create({
     color: colours.textSubtle,
     fontWeight: '600',
   },
+  // Expanded state — green header
+  categoryHeaderExpanded: {
+    backgroundColor: colours.primaryBg,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.primaryLight,
+  },
+  categoryNameExpanded: {
+    color: colours.primary,
+  },
+  chevron: { marginRight: 2 },
+
   categoryActions: { flexDirection: 'row', gap: 4 },
   catActionBtn: {
     padding: spacing.xs,

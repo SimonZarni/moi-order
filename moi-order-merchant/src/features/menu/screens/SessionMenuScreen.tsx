@@ -73,44 +73,61 @@ export function SessionMenuScreen({ route, onBack, onEditItem }: Props): React.J
             </Text>
           </View>
         ) : (
-          vm.categories.map((cat) => (
-            <View key={cat.id} style={styles.categorySection}>
-              {/* Category header */}
-              <View style={styles.categoryHeader}>
-                <Text style={styles.categoryName}>{cat.name}</Text>
-                <Text style={styles.categoryCount}>{cat.items.length}</Text>
-                <View style={styles.categoryActions}>
-                  <Pressable
-                    style={[styles.catActionBtn, styles.catRenameBtn]}
-                    onPress={() => vm.handleOpenRename(cat.id, cat.name)}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Rename ${cat.name}`}
-                  >
-                    <Ionicons name="pencil" size={13} color={colours.primaryDark} />
-                  </Pressable>
-                  <Pressable
-                    style={[styles.catActionBtn, styles.catDeleteBtn]}
-                    onPress={() => vm.handleOpenDeleteConfirm(cat.id, cat.name)}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Delete ${cat.name}`}
-                  >
-                    <Ionicons name="trash-outline" size={13} color={colours.error} />
-                  </Pressable>
-                </View>
-              </View>
+          vm.categories.map((cat) => {
+            const expanded = vm.isCategoryExpanded(cat.id);
+            return (
+              <View key={cat.id} style={styles.categorySection}>
+                {/* Category header — tapping toggles accordion */}
+                <Pressable
+                  style={[styles.categoryHeader, expanded && styles.categoryHeaderExpanded]}
+                  onPress={() => vm.handleToggleExpanded(cat.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${cat.name}, ${expanded ? 'collapse' : 'expand'}`}
+                  accessibilityState={{ expanded }}
+                >
+                  <Ionicons
+                    name={expanded ? 'chevron-down' : 'chevron-forward'}
+                    size={14}
+                    color={expanded ? colours.primary : colours.textSubtle}
+                    style={styles.chevron}
+                  />
+                  <Text style={[styles.categoryName, expanded && styles.categoryNameExpanded]}>
+                    {cat.name}
+                  </Text>
+                  <Text style={styles.categoryCount}>{cat.items.length}</Text>
+                  <View style={styles.categoryActions}>
+                    <Pressable
+                      style={[styles.catActionBtn, styles.catRenameBtn]}
+                      onPress={() => vm.handleOpenRename(cat.id, cat.name)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Rename ${cat.name}`}
+                    >
+                      <Ionicons name="pencil" size={13} color={colours.primaryDark} />
+                    </Pressable>
+                    <Pressable
+                      style={[styles.catActionBtn, styles.catDeleteBtn]}
+                      onPress={() => vm.handleOpenDeleteConfirm(cat.id, cat.name)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Delete ${cat.name}`}
+                    >
+                      <Ionicons name="trash-outline" size={13} color={colours.error} />
+                    </Pressable>
+                  </View>
+                </Pressable>
 
-              {/* Items */}
-              {cat.items.map((item) => (
-                <MenuItemRow
-                  key={item.id}
-                  item={item}
-                  onToggleStatus={vm.handleToggleItemStatus}
-                  onDelete={vm.handleDeleteItem}
-                  onEdit={(it) => vm.handleEditItem(it.id)}
-                />
-              ))}
-            </View>
-          ))
+                {/* Items — only rendered when expanded */}
+                {expanded && cat.items.map((item) => (
+                  <MenuItemRow
+                    key={item.id}
+                    item={item}
+                    onToggleStatus={vm.handleToggleItemStatus}
+                    onDelete={vm.handleDeleteItem}
+                    onEdit={(it) => vm.handleEditItem(it.id)}
+                  />
+                ))}
+              </View>
+            );
+          })
         )}
       </ScrollView>
 
