@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { NativeSyntheticEvent, NativeScrollEvent, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -86,11 +86,17 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
   const cartTotal = useCartStore((s) => s.totalCents());
   const getQty    = useCartStore((s) => s.getQuantity);
 
-  const scrollRef              = useRef<ScrollView>(null);
-  const sectionYsRef           = useRef<Record<number, number>>({});
-  const tabBarHeightRef        = useRef(48);
+  const scrollRef               = useRef<ScrollView>(null);
+  const sectionYsRef            = useRef<Record<number, number>>({});
+  const tabBarHeightRef         = useRef(48);
   const isProgrammaticScrollRef = useRef(false);
+  const programmaticTimerRef    = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
+
+  // Clean up the fallback timer on unmount.
+  useEffect(() => () => {
+    if (programmaticTimerRef.current !== null) clearTimeout(programmaticTimerRef.current);
+  }, []);
 
   const sortedCategories = useMemo(
     () => sortCategories(restaurant?.menu ?? []),
@@ -116,7 +122,19 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
 
   const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>): void => {
     if (isProgrammaticScrollRef.current) return;
-    const y = e.nativeEvent.contentOffset.y;
+    const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+    const y        = contentOffset.y;
+    const maxScrollY = contentSize.height - layoutMeasurement.height;
+
+    // At the very bottom: activate the last category regardless of threshold.
+    // Without this, sections whose sectionY > maxScrollY + tabBarHeight + 30 can
+    // never become active — the threshold can never reach them.
+    if (maxScrollY > 0 && y >= maxScrollY - 8) {
+      const lastIndex = sortedCategories.length - 1;
+      setActiveTabIndex((prev) => (prev !== lastIndex ? lastIndex : prev));
+      return;
+    }
+
     const threshold = y + tabBarHeightRef.current + 30;
     let next = 0;
     sortedCategories.forEach((_, i) => {
@@ -128,15 +146,37 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
   const handleTabPress = useCallback((index: number): void => {
     const raw = sectionYsRef.current[index] ?? 0;
     const y   = Math.max(0, raw - tabBarHeightRef.current);
+
+    // Cancel any pending flag-clear timer from a previous tap.
+    if (programmaticTimerRef.current !== null) {
+      clearTimeout(programmaticTimerRef.current);
+    }
+
     isProgrammaticScrollRef.current = true;
     setActiveTabIndex(index);
     requestAnimationFrame(() => {
       scrollRef.current?.scrollTo({ y, animated: true });
     });
+
+    // Fallback: clear the flag after 800 ms in case onMomentumScrollEnd never fires
+    // (a known Android quirk with programmatic scrollTo({ animated: true })).
+    programmaticTimerRef.current = setTimeout(() => {
+      isProgrammaticScrollRef.current = false;
+      programmaticTimerRef.current = null;
+    }, 800);
   }, []);
 
   const handleScrollEnd = useCallback((): void => {
-    isProgrammaticScrollRef.current = false;
+    // Cancel the fallback timer — the scroll-end event fired as expected.
+    if (programmaticTimerRef.current !== null) {
+      clearTimeout(programmaticTimerRef.current);
+      programmaticTimerRef.current = null;
+    }
+    // Small delay before re-enabling handleScroll to absorb any trailing onScroll
+    // event that fires just after onMomentumScrollEnd on Android.
+    setTimeout(() => {
+      isProgrammaticScrollRef.current = false;
+    }, 50);
   }, []);
 
   const handleBack        = useCallback(() => navigation.goBack(),              [navigation]);
