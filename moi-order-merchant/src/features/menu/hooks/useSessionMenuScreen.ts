@@ -1,5 +1,4 @@
 import { useState, useCallback, useMemo } from 'react';
-import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { MerchantStackParamList } from '../../../types/navigation';
@@ -8,31 +7,57 @@ import { getMenuCategories } from '../../../api/menu';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { useSessionMenuData } from './useSessionMenuData';
 import type { MenuCategory } from '../../../types/models';
+import type { MenuItemStatus } from '../../../types/enums';
 
 export interface UseSessionMenuScreenResult {
   categories: MenuCategory[];
   defaultCategories: MenuCategory[];
   isLoading: boolean;
   isError: boolean;
-  error: string | null;
   isCreating: boolean;
   isImporting: boolean;
-  isDeleting: boolean;
+  isRenaming: boolean;
+  // Add category modal
+  showAddCategoryModal: boolean;
+  newCategoryName: string;
+  handleOpenAddModal: () => void;
+  handleNewCategoryNameChange: (name: string) => void;
+  handleConfirmAdd: () => void;
+  handleCancelAdd: () => void;
+  // Rename modal
+  renamingCategoryId: number | null;
+  renamingCategoryName: string;
+  handleOpenRename: (id: number, name: string) => void;
+  handleRenameNameChange: (name: string) => void;
+  handleConfirmRename: () => void;
+  handleCancelRename: () => void;
+  // Delete category
+  deletingCategoryId: number | null;
+  deletingCategoryName: string;
+  handleOpenDeleteConfirm: (id: number, name: string) => void;
+  handleConfirmDelete: () => void;
+  handleCancelDelete: () => void;
+  // Import modal
   isImportModalVisible: boolean;
   selectedImportIds: number[];
-  handleBack: () => void;
-  handleAddCategory: (name: string) => void;
-  handleRenameCategory: (categoryId: number, name: string) => void;
-  handleDeleteCategory: (categoryId: number, categoryName: string) => void;
   handleOpenImportModal: () => void;
   handleCloseImportModal: () => void;
   handleToggleImportId: (id: number) => void;
   handleConfirmImport: () => void;
+  // Item actions
+  handleToggleItemStatus: (itemId: number, status: MenuItemStatus) => void;
+  handleDeleteItem: (itemId: number) => void;
+  handleEditItem: (itemId: number) => void;
+  // Navigation
+  handleBack: () => void;
 }
 
-export function useSessionMenuScreen(openingHourId: number, onBackOverride?: () => void): UseSessionMenuScreenResult {
+export function useSessionMenuScreen(
+  openingHourId: number,
+  onBackOverride?: () => void,
+  onEditItemOverride?: (itemId: number) => void,
+): UseSessionMenuScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
-
   const data = useSessionMenuData(openingHourId);
 
   const { data: defaultCategories = [] } = useQuery({
@@ -41,44 +66,75 @@ export function useSessionMenuScreen(openingHourId: number, onBackOverride?: () 
     staleTime: 60_000,
   });
 
+  // ── Add category modal ────────────────────────────────────────────────────
+  const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+
+  const handleOpenAddModal = useCallback(() => {
+    setNewCategoryName('');
+    setShowAddCategoryModal(true);
+  }, []);
+
+  const handleNewCategoryNameChange = useCallback((name: string) => setNewCategoryName(name), []);
+
+  const handleConfirmAdd = useCallback(() => {
+    if (!newCategoryName.trim()) return;
+    data.createCategory(newCategoryName.trim());
+    setShowAddCategoryModal(false);
+    setNewCategoryName('');
+  }, [newCategoryName, data]);
+
+  const handleCancelAdd = useCallback(() => {
+    setShowAddCategoryModal(false);
+    setNewCategoryName('');
+  }, []);
+
+  // ── Rename modal ──────────────────────────────────────────────────────────
+  const [renamingCategoryId, setRenamingCategoryId] = useState<number | null>(null);
+  const [renamingCategoryName, setRenamingCategoryName] = useState('');
+
+  const handleOpenRename = useCallback((id: number, name: string) => {
+    setRenamingCategoryId(id);
+    setRenamingCategoryName(name);
+  }, []);
+
+  const handleRenameNameChange = useCallback((name: string) => setRenamingCategoryName(name), []);
+
+  const handleConfirmRename = useCallback(() => {
+    if (renamingCategoryId === null || !renamingCategoryName.trim()) return;
+    data.updateCategory(renamingCategoryId, renamingCategoryName.trim());
+    setRenamingCategoryId(null);
+  }, [renamingCategoryId, renamingCategoryName, data]);
+
+  const handleCancelRename = useCallback(() => setRenamingCategoryId(null), []);
+
+  // ── Delete category ───────────────────────────────────────────────────────
+  const [deletingCategoryId, setDeletingCategoryId] = useState<number | null>(null);
+  const [deletingCategoryName, setDeletingCategoryName] = useState('');
+
+  const handleOpenDeleteConfirm = useCallback((id: number, name: string) => {
+    setDeletingCategoryId(id);
+    setDeletingCategoryName(name);
+  }, []);
+
+  const handleConfirmDelete = useCallback(() => {
+    if (deletingCategoryId === null) return;
+    data.deleteCategory(deletingCategoryId);
+    setDeletingCategoryId(null);
+  }, [deletingCategoryId, data]);
+
+  const handleCancelDelete = useCallback(() => setDeletingCategoryId(null), []);
+
+  // ── Import modal ──────────────────────────────────────────────────────────
   const [isImportModalVisible, setImportModalVisible] = useState(false);
   const [selectedImportIds, setSelectedImportIds] = useState<number[]>([]);
-
-  const handleBack = useCallback(() => {
-    if (onBackOverride) { onBackOverride(); } else { navigation.goBack(); }
-  }, [navigation, onBackOverride]);
-
-  const handleAddCategory = useCallback((name: string) => {
-    data.createCategory(name);
-  }, [data]);
-
-  const handleRenameCategory = useCallback((categoryId: number, name: string) => {
-    data.updateCategory(categoryId, name);
-  }, [data]);
-
-  const handleDeleteCategory = useCallback((categoryId: number, categoryName: string) => {
-    Alert.alert(
-      'Delete Category',
-      `Delete "${categoryName}" and all its items from this session menu?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => data.deleteCategory(categoryId),
-        },
-      ],
-    );
-  }, [data]);
 
   const handleOpenImportModal = useCallback(() => {
     setSelectedImportIds([]);
     setImportModalVisible(true);
   }, []);
 
-  const handleCloseImportModal = useCallback(() => {
-    setImportModalVisible(false);
-  }, []);
+  const handleCloseImportModal = useCallback(() => setImportModalVisible(false), []);
 
   const handleToggleImportId = useCallback((id: number) => {
     setSelectedImportIds((prev) =>
@@ -92,29 +148,66 @@ export function useSessionMenuScreen(openingHourId: number, onBackOverride?: () 
     setImportModalVisible(false);
   }, [selectedImportIds, data]);
 
+  // ── Item actions ──────────────────────────────────────────────────────────
+  const handleToggleItemStatus = useCallback(
+    (itemId: number, status: MenuItemStatus) => data.toggleItemStatus(itemId, status),
+    [data],
+  );
+
+  const handleDeleteItem = useCallback((itemId: number) => data.removeItem(itemId), [data]);
+
+  const handleEditItem = useCallback((itemId: number) => {
+    if (onEditItemOverride) {
+      onEditItemOverride(itemId);
+    } else {
+      navigation.navigate('EditMenuItem', { itemId });
+    }
+  }, [navigation, onEditItemOverride]);
+
+  // ── Navigation ────────────────────────────────────────────────────────────
+  const handleBack = useCallback(() => {
+    if (onBackOverride) { onBackOverride(); } else { navigation.goBack(); }
+  }, [navigation, onBackOverride]);
+
   const importableCategories = useMemo(
     () => defaultCategories.filter((c) => c.opening_hour_id === null),
     [defaultCategories],
   );
 
   return {
-    categories:           data.categories,
-    defaultCategories:    importableCategories,
-    isLoading:            data.isLoading,
-    isError:              data.isError,
-    error:                data.error,
-    isCreating:           data.isCreating,
-    isImporting:          data.isImporting,
-    isDeleting:           data.isDeleting,
+    categories:            data.categories,
+    defaultCategories:     importableCategories,
+    isLoading:             data.isLoading,
+    isError:               data.isError,
+    isCreating:            data.isCreating,
+    isImporting:           data.isImporting,
+    isRenaming:            data.isRenaming,
+    showAddCategoryModal,
+    newCategoryName,
+    handleOpenAddModal,
+    handleNewCategoryNameChange,
+    handleConfirmAdd,
+    handleCancelAdd,
+    renamingCategoryId,
+    renamingCategoryName,
+    handleOpenRename,
+    handleRenameNameChange,
+    handleConfirmRename,
+    handleCancelRename,
+    deletingCategoryId,
+    deletingCategoryName,
+    handleOpenDeleteConfirm,
+    handleConfirmDelete,
+    handleCancelDelete,
     isImportModalVisible,
     selectedImportIds,
-    handleBack,
-    handleAddCategory,
-    handleRenameCategory,
-    handleDeleteCategory,
     handleOpenImportModal,
     handleCloseImportModal,
     handleToggleImportId,
     handleConfirmImport,
+    handleToggleItemStatus,
+    handleDeleteItem,
+    handleEditItem,
+    handleBack,
   };
 }
