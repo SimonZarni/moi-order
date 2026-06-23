@@ -116,6 +116,29 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
+  editMenuBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderWidth: 1,
+    borderColor: colours.primary,
+    borderRadius: radius.sm,
+    alignSelf: 'flex-start',
+    marginBottom: spacing.sm,
+  },
+  editMenuBtnText: {
+    fontSize: typography.xs,
+    color: colours.primary,
+    fontWeight: '600',
+  },
+  editMenuCount: {
+    fontSize: typography.xxs,
+    color: colours.textSubtle,
+    marginLeft: spacing.xs,
+  },
+
   addSessionBtn: {
     flexDirection: 'row',
     alignItems: 'center',

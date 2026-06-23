@@ -29,7 +29,11 @@ class RestaurantService
 
     public function getForMerchant(User $merchant): ?Restaurant
     {
-        return $merchant->restaurant()->with(['openingHours', 'photos', 'menuCategories.menuItems'])->first();
+        return $merchant->restaurant()->with([
+            'openingHours' => fn ($q) => $q->withCount('sessionMenuCategories'),
+            'photos',
+            'menuCategories.menuItems',
+        ])->first();
     }
 
     /** @param array<string, mixed> $data */
@@ -229,6 +233,11 @@ class RestaurantService
     /**
      * @param list<array{day_of_week: int, is_closed: bool, sessions: list<array{opens_at: string, closes_at: string}>}> $hours
      */
+    /**
+     * Upserts opening hours by (restaurant_id, day_of_week, sort_order) so that
+     * existing row IDs are preserved. Removing a session slot deletes its row,
+     * which cascades to any session-specific menu categories for that slot.
+     */
     private function syncOpeningHours(Restaurant $restaurant, array $hours): void
     {
         foreach ($hours as $dayData) {
@@ -236,30 +245,28 @@ class RestaurantService
             $isClosed  = (bool) ($dayData['is_closed'] ?? false);
             $sessions  = $dayData['sessions'] ?? [];
 
-            RestaurantOpeningHour::where('restaurant_id', $restaurant->id)
-                ->where('day_of_week', $dayOfWeek)
-                ->delete();
-
             if ($isClosed) {
-                RestaurantOpeningHour::create([
-                    'restaurant_id' => $restaurant->id,
-                    'day_of_week'   => $dayOfWeek,
-                    'sort_order'    => 0,
-                    'opens_at'      => null,
-                    'closes_at'     => null,
-                    'is_closed'     => true,
-                ]);
+                RestaurantOpeningHour::updateOrCreate(
+                    ['restaurant_id' => $restaurant->id, 'day_of_week' => $dayOfWeek, 'sort_order' => 0],
+                    ['opens_at' => null, 'closes_at' => null, 'is_closed' => true],
+                );
+                // Remove any extra slots (e.g., previously had multiple sessions).
+                RestaurantOpeningHour::where('restaurant_id', $restaurant->id)
+                    ->where('day_of_week', $dayOfWeek)
+                    ->where('sort_order', '>', 0)
+                    ->delete();
             } else {
                 foreach ($sessions as $index => $session) {
-                    RestaurantOpeningHour::create([
-                        'restaurant_id' => $restaurant->id,
-                        'day_of_week'   => $dayOfWeek,
-                        'sort_order'    => $index,
-                        'opens_at'      => $session['opens_at'],
-                        'closes_at'     => $session['closes_at'],
-                        'is_closed'     => false,
-                    ]);
+                    RestaurantOpeningHour::updateOrCreate(
+                        ['restaurant_id' => $restaurant->id, 'day_of_week' => $dayOfWeek, 'sort_order' => $index],
+                        ['opens_at' => $session['opens_at'], 'closes_at' => $session['closes_at'], 'is_closed' => false],
+                    );
                 }
+                // Remove slots that are no longer in the submitted list.
+                RestaurantOpeningHour::where('restaurant_id', $restaurant->id)
+                    ->where('day_of_week', $dayOfWeek)
+                    ->where('sort_order', '>=', count($sessions))
+                    ->delete();
             }
         }
     }

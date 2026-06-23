@@ -19,12 +19,13 @@ class MenuCategoryResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'            => $this->id,
-            'restaurant_id' => $this->restaurant_id,
-            'name'          => $this->name,
-            'sort_order'    => $this->sort_order,
-            'category_type' => $this->category_type?->value,
-            'is_system'     => $this->isSystem(),
+            'id'              => $this->id,
+            'restaurant_id'   => $this->restaurant_id,
+            'opening_hour_id' => $this->opening_hour_id,
+            'name'            => $this->name,
+            'sort_order'      => $this->sort_order,
+            'category_type'   => $this->category_type?->value,
+            'is_system'       => $this->isSystem(),
             'items'         => $this->whenLoaded('menuItems', fn () =>
                 $this->menuItems
                     ->map(fn ($item) => (new MenuItemResource($item, $this->storage))->toArray($request))

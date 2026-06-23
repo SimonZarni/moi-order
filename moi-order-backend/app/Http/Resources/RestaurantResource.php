@@ -65,9 +65,11 @@ class RestaurantResource extends JsonResource
                             'day_of_week' => (int) $day,
                             'is_closed'   => $primary->is_closed,
                             'sessions'    => $primary->is_closed ? [] : $sessions->sortBy('sort_order')->map(fn ($s) => [
-                                'opens_at'   => $s->opens_at,
-                                'closes_at'  => $s->closes_at,
-                                'sort_order' => $s->sort_order,
+                                'id'                            => $s->id,
+                                'opens_at'                      => $s->opens_at,
+                                'closes_at'                     => $s->closes_at,
+                                'sort_order'                    => $s->sort_order,
+                                'session_menu_categories_count' => $s->session_menu_categories_count ?? 0,
                             ])->values()->all(),
                         ];
                     })

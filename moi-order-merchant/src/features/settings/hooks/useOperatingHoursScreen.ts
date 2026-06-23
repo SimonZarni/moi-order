@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useOperatingHoursData } from './useOperatingHoursData';
 import type { OpeningHourInput, SessionInput } from '../../../api/restaurant';
+import type { OpeningHourSession } from '../../../types/models';
 
 const MAX_SESSIONS = 4;
 
@@ -15,6 +16,8 @@ export interface UseOperatingHoursScreenResult {
   isSaving: boolean;
   hoursInput: OpeningHourInput[];
   error: string | null;
+  /** Returns the server-side opening_hour row for a given (dayOfWeek, sortIndex), or null if not yet saved. */
+  getSessionHour: (dayOfWeek: number, sortIndex: number) => OpeningHourSession | null;
   handleToggleClosed: (dayOfWeek: number, isClosed: boolean) => void;
   handleSessionChange: (dayOfWeek: number, index: number, field: keyof SessionInput, value: string) => void;
   handleAddSession: (dayOfWeek: number) => void;
@@ -106,11 +109,20 @@ export function useOperatingHoursScreen(): UseOperatingHoursScreenResult {
     saveHours(normalized);
   }, [hoursInput, saveHours]);
 
+  const getSessionHour = useCallback(
+    (dayOfWeek: number, sortIndex: number): OpeningHourSession | null => {
+      const serverDay = restaurant?.opening_hours?.find((h) => h.day_of_week === dayOfWeek);
+      return serverDay?.sessions.find((s) => s.sort_order === sortIndex) ?? null;
+    },
+    [restaurant],
+  );
+
   return {
     isLoading,
     isSaving,
     hoursInput,
     error: saveError,
+    getSessionHour,
     handleToggleClosed,
     handleSessionChange,
     handleAddSession,

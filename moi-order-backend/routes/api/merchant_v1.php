@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\Merchant\V1\MerchantOrderChatController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantOrderController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantRestaurantController;
 use App\Http\Controllers\Api\Merchant\V1\MenuCategoryController;
+use App\Http\Controllers\Api\Merchant\V1\SessionMenuCategoryController;
 use App\Http\Controllers\Api\Merchant\V1\MenuItemController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantAlarmSettingController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantDailyInvoiceController;
@@ -44,6 +45,13 @@ Route::post('/menu/categories',         [MenuCategoryController::class, 'store']
 Route::put('/menu/categories/{id}',     [MenuCategoryController::class, 'update']);
 Route::patch('/menu/categories/{id}',   [MenuCategoryController::class, 'update']);
 Route::delete('/menu/categories/{id}',  [MenuCategoryController::class, 'destroy']);
+
+// ── Session menu categories (per opening-hour slot) ───────────────────────────
+Route::get('/opening-hours/{openingHourId}/session-menu',                  [SessionMenuCategoryController::class, 'index']);
+Route::post('/opening-hours/{openingHourId}/session-menu',                 [SessionMenuCategoryController::class, 'store']);
+Route::post('/opening-hours/{openingHourId}/session-menu/import',          [SessionMenuCategoryController::class, 'import']);
+Route::patch('/opening-hours/{openingHourId}/session-menu/{categoryId}',   [SessionMenuCategoryController::class, 'update']);
+Route::delete('/opening-hours/{openingHourId}/session-menu/{categoryId}',  [SessionMenuCategoryController::class, 'destroy']);
 
 // ── Menu items ────────────────────────────────────────────────────────────────
 Route::post('/menu/categories/{categoryId}/items',  [MenuItemController::class, 'store']);

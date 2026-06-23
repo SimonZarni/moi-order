@@ -25,4 +25,5 @@ export const QUERY_KEYS = {
     TODAY:   ['invoices', 'today'] as const,
     LIST:    (page: number) => ['invoices', 'list', page] as const,
   },
+  SESSION_MENU: (openingHourId: number) => ['session-menu', openingHourId] as const,
 } as const;

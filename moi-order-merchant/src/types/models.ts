@@ -116,16 +116,21 @@ export interface MenuItem {
 
 export interface MenuCategory {
   id: number;
+  restaurant_id: number;
+  opening_hour_id: number | null;
   name: string;
+  sort_order: number;
   category_type: string | null;
   is_system: boolean;
   items: MenuItem[];
 }
 
 export interface OpeningHourSession {
+  id: number;
   opens_at: string;   // "HH:mm"
   closes_at: string;  // "HH:mm"
   sort_order: number;
+  session_menu_categories_count: number;
 }
 
 export interface OpeningHour {

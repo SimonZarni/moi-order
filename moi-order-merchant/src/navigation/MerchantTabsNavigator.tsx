@@ -21,6 +21,7 @@ import { OrderDetailScreen } from '../features/orders/screens/OrderDetailScreen'
 import { OrderChatContent, OrderChatScreen } from '../features/chat/screens/OrderChatScreen';
 import { MenuScreen } from '../features/menu/screens/MenuScreen';
 import { EditMenuItemScreen } from '../features/menu/screens/EditMenuItemScreen';
+import { SessionMenuScreen } from '../features/menu/screens/SessionMenuScreen';
 import { RestaurantScreen } from '../features/restaurant/screens/RestaurantScreen';
 import { AnalyticsScreen } from '../features/analytics/screens/AnalyticsScreen';
 import { DailyInvoiceScreen } from '../features/invoice/screens/DailyInvoiceScreen';
@@ -214,6 +215,7 @@ function MobileNavigator(): React.JSX.Element {
       <MobileStack.Screen name="Settings" component={SettingsRoute} options={{ headerShown: false }} />
       <MobileStack.Screen name="ChangePassword" component={ChangePasswordRoute} options={{ headerShown: false }} />
       <MobileStack.Screen name="OperatingHours" component={OperatingHoursRoute} options={{ headerShown: false }} />
+      <MobileStack.Screen name="SessionMenu" component={SessionMenuScreen} options={{ headerShown: false }} />
     </MobileStack.Navigator>
   );
 }

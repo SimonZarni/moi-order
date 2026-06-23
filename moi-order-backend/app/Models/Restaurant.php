@@ -204,9 +204,40 @@ class Restaurant extends Model
         return $this->hasMany(RestaurantPhoto::class)->orderBy('sort_order');
     }
 
+    /**
+     * Default (non-session) categories only. Session-specific categories are
+     * accessed via RestaurantOpeningHour::sessionMenuCategories().
+     */
     public function menuCategories(): HasMany
     {
-        return $this->hasMany(MenuCategory::class)->orderBy('sort_order');
+        return $this->hasMany(MenuCategory::class)
+            ->whereNull('opening_hour_id')
+            ->orderBy('sort_order');
+    }
+
+    /**
+     * Returns the DB ID of the opening-hour row whose session window covers
+     * the current Bangkok time, or null if no session is active.
+     */
+    public function getCurrentOpeningHourId(): ?int
+    {
+        if (! $this->relationLoaded('openingHours')) {
+            $this->load('openingHours');
+        }
+
+        $now  = Carbon::now('Asia/Bangkok');
+        $time = $now->format('H:i:s');
+
+        foreach ($this->openingHours->where('day_of_week', $now->dayOfWeek) as $session) {
+            if ($session->is_closed || $session->opens_at === null || $session->closes_at === null) {
+                continue;
+            }
+            if ($time >= $session->opens_at && $time < $session->closes_at) {
+                return $session->id;
+            }
+        }
+
+        return null;
     }
 
     public function menuItems(): HasMany

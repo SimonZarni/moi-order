@@ -16,6 +16,7 @@ class MenuCategory extends Model
 
     protected $fillable = [
         'restaurant_id',
+        'opening_hour_id',
         'name',
         'sort_order',
         'category_type',
@@ -29,14 +30,25 @@ class MenuCategory extends Model
         ];
     }
 
+    public function isSession(): bool
+    {
+        return $this->opening_hour_id !== null;
+    }
+
     public function isSystem(): bool
     {
-        return $this->category_type !== null;
+        // Session categories are never system categories — merchant can freely edit/delete them.
+        return $this->category_type !== null && ! $this->isSession();
     }
 
     public function restaurant(): BelongsTo
     {
         return $this->belongsTo(Restaurant::class);
+    }
+
+    public function openingHour(): BelongsTo
+    {
+        return $this->belongsTo(RestaurantOpeningHour::class);
     }
 
     public function menuItems(): HasMany

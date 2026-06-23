@@ -23,7 +23,7 @@ export type TranslationKey =
   | 'hours_day_sun' | 'hours_day_mon' | 'hours_day_tue' | 'hours_day_wed'
   | 'hours_day_thu' | 'hours_day_fri' | 'hours_day_sat'
   | 'hours_opens' | 'hours_closes' | 'hours_open' | 'hours_closed' | 'hours_not_set'
-  | 'hours_session' | 'hours_add_session'
+  | 'hours_session' | 'hours_add_session' | 'hours_edit_session_menu' | 'hours_session_menu_count'
   // ── Dashboard ─────────────────────────────────────────────────────────────
   | 'dashboard_title' | 'dashboard_greeting_morning' | 'dashboard_greeting_afternoon' | 'dashboard_greeting_evening'
   | 'dashboard_today_revenue' | 'dashboard_this_week' | 'dashboard_this_month'
@@ -216,6 +216,8 @@ const EN: Translations = {
   hours_not_set: 'Not set',
   hours_session: 'Session',
   hours_add_session: '+ Add session',
+  hours_edit_session_menu: 'Edit Session Menu',
+  hours_session_menu_count: 'categories',
   // Dashboard
   dashboard_title: 'Dashboard',
   dashboard_greeting_morning: 'Good Morning',
@@ -599,6 +601,8 @@ const MY: Translations = {
   hours_not_set: 'မသတ်မှတ်ရသေး',
   hours_session: 'အချိန်ကာလ',
   hours_add_session: '+ အချိန်ကာလ ထပ်ထည့်',
+  hours_edit_session_menu: 'Session Menu တည်းဖြတ်ရန်',
+  hours_session_menu_count: 'အမျိုးအစားများ',
   // Dashboard
   dashboard_title: 'ဒက်ရှ်ဘုတ်',
   dashboard_greeting_morning: 'မင်္ဂလာနံနက်ခင်းပါ',

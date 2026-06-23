@@ -2,6 +2,9 @@ import React from 'react';
 import { View, Text, TextInput, ScrollView, Pressable, Switch, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { MerchantStackParamList } from '../../../types/navigation';
 import { useOperatingHoursScreen } from '../hooks/useOperatingHoursScreen';
 import { useTranslation } from '../../../shared/hooks/useTranslation';
 import { styles } from './OperatingHoursScreen.styles';
@@ -19,8 +22,9 @@ const DAY_KEYS = [
 const MAX_SESSIONS = 4;
 
 export function OperatingHoursScreen({ onBack }: OperatingHoursScreenProps): React.JSX.Element {
+  const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
   const {
-    isLoading, isSaving, hoursInput, error,
+    isLoading, isSaving, hoursInput, error, getSessionHour,
     handleToggleClosed, handleSessionChange, handleAddSession, handleRemoveSession,
     handleSave, handleClearError,
   } = useOperatingHoursScreen();
@@ -104,6 +108,27 @@ export function OperatingHoursScreen({ onBack }: OperatingHoursScreenProps): Rea
                         </Pressable>
                       )}
                     </View>
+                    {(() => {
+                      const serverSession = getSessionHour(day.day_of_week, index);
+                      if (!serverSession) return null;
+                      const label = `${session.opens_at}–${session.closes_at} ${t(DAY_KEYS[day.day_of_week])}`;
+                      return (
+                        <Pressable
+                          style={styles.editMenuBtn}
+                          onPress={() => navigation.navigate('SessionMenu', { openingHourId: serverSession.id, label })}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Edit session menu for ${label}`}
+                        >
+                          <Ionicons name="restaurant-outline" size={14} color={colours.primary} />
+                          <Text style={styles.editMenuBtnText}>{t('hours_edit_session_menu')}</Text>
+                          {serverSession.session_menu_categories_count > 0 && (
+                            <Text style={styles.editMenuCount}>
+                              ({serverSession.session_menu_categories_count} {t('hours_session_menu_count')})
+                            </Text>
+                          )}
+                        </Pressable>
+                      );
+                    })()}
                   </View>
                 ))}
 

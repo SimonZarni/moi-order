@@ -29,6 +29,7 @@ export type MerchantStackParamList = {
   ChangePassword: undefined;
   OperatingHours: undefined;
   EditMenuItem: { itemId: number };
+  SessionMenu: { openingHourId: number; label: string };
 };
 
 export type RootStackParamList = {

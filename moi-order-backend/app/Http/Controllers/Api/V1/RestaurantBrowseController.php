@@ -51,6 +51,21 @@ class RestaurantBrowseController extends Controller
             'menuCategories.menuItems' => fn ($q) => $q->with('optionGroups.options')->visibleToCustomer(),
         ])->findOrFail($id);
 
+        $activeHourId = $restaurant->getCurrentOpeningHourId();
+
+        if ($activeHourId !== null) {
+            $sessionCategories = $restaurant->openingHours
+                ->firstWhere('id', $activeHourId)
+                ?->sessionMenuCategories()
+                ->with(['menuItems' => fn ($q) => $q->with('optionGroups.options')->visibleToCustomer()])
+                ->get();
+
+            if ($sessionCategories !== null && $sessionCategories->isNotEmpty()) {
+                // Swap the default menu for the session-specific one.
+                $restaurant->setRelation('menuCategories', $sessionCategories);
+            }
+        }
+
         return response()->json(['data' => new RestaurantResource($restaurant, $this->storage)]);
     }
 }

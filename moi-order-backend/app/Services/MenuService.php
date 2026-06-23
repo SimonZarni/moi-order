@@ -12,6 +12,8 @@ use App\Models\MenuCategory;
 use App\Models\MenuItem;
 use App\Models\MenuItemOptionGroup;
 use App\Models\Restaurant;
+use App\Models\RestaurantOpeningHour;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -85,6 +87,103 @@ class MenuService
                 throw new DomainException('menu.system_category_empty');
             }
         }
+    }
+
+    // ─── Session menu categories ──────────────────────────────────────────────
+
+    /**
+     * Resolves and authorises the opening-hour row, throwing 404 if it doesn't
+     * belong to the restaurant. Used by all session menu endpoints.
+     */
+    public function resolveSessionHour(Restaurant $restaurant, int $openingHourId): RestaurantOpeningHour
+    {
+        $hour = RestaurantOpeningHour::where('restaurant_id', $restaurant->id)
+            ->findOrFail($openingHourId);
+
+        return $hour;
+    }
+
+    /** @return Collection<int, MenuCategory> */
+    public function getSessionCategories(RestaurantOpeningHour $hour): Collection
+    {
+        return $hour->sessionMenuCategories()->with('menuItems.optionGroups.options')->get();
+    }
+
+    public function createSessionCategory(RestaurantOpeningHour $hour, string $name): MenuCategory
+    {
+        return MenuCategory::create([
+            'restaurant_id'   => $hour->restaurant_id,
+            'opening_hour_id' => $hour->id,
+            'name'            => $name,
+            'sort_order'      => MenuCategory::where('opening_hour_id', $hour->id)->max('sort_order') + 1,
+        ]);
+    }
+
+    /**
+     * Deep-copies the given default categories (and their items) into the session.
+     * Items are copied without option groups to keep the operation simple and fast.
+     *
+     * @param  array<int> $categoryIds  IDs of default (non-session) categories to copy.
+     * @return Collection<int, MenuCategory>
+     */
+    public function importCategoriesToSession(Restaurant $restaurant, RestaurantOpeningHour $hour, array $categoryIds): Collection
+    {
+        return DB::transaction(function () use ($restaurant, $hour, $categoryIds): Collection {
+            $sources = $restaurant->menuCategories()
+                ->with('menuItems')
+                ->whereIn('id', $categoryIds)
+                ->get();
+
+            $nextSort = (int) (MenuCategory::where('opening_hour_id', $hour->id)->max('sort_order') ?? -1) + 1;
+            $created  = new Collection();
+
+            foreach ($sources as $source) {
+                $category = MenuCategory::create([
+                    'restaurant_id'   => $restaurant->id,
+                    'opening_hour_id' => $hour->id,
+                    'name'            => $source->name,
+                    'sort_order'      => $nextSort++,
+                ]);
+
+                foreach ($source->menuItems as $item) {
+                    MenuItem::create([
+                        'menu_category_id'     => $category->id,
+                        'restaurant_id'        => $restaurant->id,
+                        'name'                 => $item->name,
+                        'description'          => $item->description,
+                        'price_cents'          => $item->price_cents,
+                        'original_price_cents' => $item->original_price_cents,
+                        'photo_path'           => $item->photo_path,
+                        'status'               => $item->status,
+                        'sort_order'           => $item->sort_order,
+                    ]);
+                }
+
+                $created->push($category->load('menuItems'));
+            }
+
+            return $created;
+        });
+    }
+
+    public function updateSessionCategory(MenuCategory $category, string $name): MenuCategory
+    {
+        $category->update(['name' => $name]);
+        return $category->fresh();
+    }
+
+    public function deleteSessionCategory(MenuCategory $category): void
+    {
+        // Allow deletion even if items exist — cascade handled by DB/soft-delete.
+        DB::transaction(function () use ($category): void {
+            $category->menuItems()->each(function (MenuItem $item): void {
+                if ($item->photo_path !== null) {
+                    $this->storage->delete($item->photo_path);
+                }
+                $item->delete();
+            });
+            $category->delete();
+        });
     }
 
     // ─── Categories ───────────────────────────────────────────────────────────

@@ -74,3 +74,53 @@ export async function toggleMenuItemStatus(
   );
   return response.data.data;
 }
+
+// ── Session menu ─────────────────────────────────────────────────────────────
+
+export async function getSessionMenuCategories(openingHourId: number): Promise<MenuCategory[]> {
+  const response = await apiClient.get<{ data: MenuCategory[] }>(
+    `/opening-hours/${openingHourId}/session-menu`,
+  );
+  return response.data.data;
+}
+
+export async function createSessionMenuCategory(
+  openingHourId: number,
+  name: string,
+): Promise<MenuCategory> {
+  const response = await apiClient.post<{ data: MenuCategory }>(
+    `/opening-hours/${openingHourId}/session-menu`,
+    { name },
+  );
+  return response.data.data;
+}
+
+export async function importSessionMenuCategories(
+  openingHourId: number,
+  categoryIds: number[],
+): Promise<MenuCategory[]> {
+  const response = await apiClient.post<{ data: MenuCategory[] }>(
+    `/opening-hours/${openingHourId}/session-menu/import`,
+    { category_ids: categoryIds },
+  );
+  return response.data.data;
+}
+
+export async function updateSessionMenuCategory(
+  openingHourId: number,
+  categoryId: number,
+  name: string,
+): Promise<MenuCategory> {
+  const response = await apiClient.patch<{ data: MenuCategory }>(
+    `/opening-hours/${openingHourId}/session-menu/${categoryId}`,
+    { name },
+  );
+  return response.data.data;
+}
+
+export async function deleteSessionMenuCategory(
+  openingHourId: number,
+  categoryId: number,
+): Promise<void> {
+  await apiClient.delete(`/opening-hours/${openingHourId}/session-menu/${categoryId}`);
+}
