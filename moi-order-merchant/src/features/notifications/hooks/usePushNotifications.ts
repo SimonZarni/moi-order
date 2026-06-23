@@ -40,7 +40,7 @@ if (!IS_EXPO_GO && Platform.OS !== 'web') {
 }
 
 interface MerchantPushData {
-  type?: 'new_order' | 'chat_message' | string;
+  type?: 'new_order' | 'chat_message' | 'payment_confirmed' | string;
   order_id?: string;
 }
 
@@ -102,7 +102,7 @@ export function usePushNotifications(): void {
 
     if (data.type === 'chat_message') {
       navigation.navigate('OrderChat', { orderId: data.order_id });
-    } else if (data.type === 'new_order') {
+    } else if (data.type === 'new_order' || data.type === 'payment_confirmed') {
       navigation.navigate('OrderDetail', { orderId: data.order_id });
     }
   }
