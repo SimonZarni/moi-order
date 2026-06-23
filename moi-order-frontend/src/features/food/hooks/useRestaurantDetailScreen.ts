@@ -167,15 +167,15 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
   }, []);
 
   const handleScrollEnd = useCallback((): void => {
-    // Cancel the fallback timer — the scroll-end event fired as expected.
+    // Cancel whatever timer is pending (800ms fallback or a previous 50ms delay).
     if (programmaticTimerRef.current !== null) {
       clearTimeout(programmaticTimerRef.current);
-      programmaticTimerRef.current = null;
     }
-    // Small delay before re-enabling handleScroll to absorb any trailing onScroll
-    // event that fires just after onMomentumScrollEnd on Android.
-    setTimeout(() => {
+    // Store the 50ms delay in the same ref so a rapid second tap can cancel it
+    // before it fires and prematurely clears the flag for the new scroll.
+    programmaticTimerRef.current = setTimeout(() => {
       isProgrammaticScrollRef.current = false;
+      programmaticTimerRef.current = null;
     }, 50);
   }, []);
 
