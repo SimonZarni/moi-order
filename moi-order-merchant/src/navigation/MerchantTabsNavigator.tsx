@@ -191,7 +191,11 @@ function OperatingHoursRoute(
   { navigation }: NativeStackScreenProps<MerchantStackParamList, 'OperatingHours'>,
 ): React.JSX.Element {
   const handleBack = useCallback(() => navigation.goBack(), [navigation]);
-  return <OperatingHoursScreen onBack={handleBack} />;
+  const handleEditSessionMenu = useCallback(
+    (openingHourId: number, label: string) => navigation.navigate('SessionMenu', { openingHourId, label }),
+    [navigation],
+  );
+  return <OperatingHoursScreen onBack={handleBack} onEditSessionMenu={handleEditSessionMenu} />;
 }
 
 function EditMenuItemRoute(
@@ -267,7 +271,7 @@ const _BOOT_URL: ParsedUrl =
     ? parseUrlPath(window.location.pathname)
     : { screen: 'Dashboard', orderId: null, chatId: null };
 
-type SettingsSubView = 'list' | 'changePassword' | 'operatingHours';
+type SettingsSubView = 'list' | 'changePassword' | 'operatingHours' | 'sessionMenu';
 
 function WebMerchantLayout(): React.JSX.Element {
   const [activeScreen, setActiveScreen]     = useState<WebScreen>(_BOOT_URL.screen);
@@ -279,6 +283,7 @@ function WebMerchantLayout(): React.JSX.Element {
   const [chatOrderStatus, setChatOrderStatus] = useState<string>('');
   const [sidebarOpen, setSidebarOpen]       = useState(false);
   const [settingsSubView, setSettingsSubView] = useState<SettingsSubView>('list');
+  const [sessionMenuParams, setSessionMenuParams] = useState<{ openingHourId: number; label: string } | null>(null);
   const { isDesktop } = useResponsive();
   const logout = useAuthStore((s) => s.logout);
   const theme = useSettingsStore((s) => s.theme);
@@ -443,8 +448,25 @@ function WebMerchantLayout(): React.JSX.Element {
         if (settingsSubView === 'changePassword') {
           return <ChangePasswordScreen onBack={() => setSettingsSubView('list')} />;
         }
+        if (settingsSubView === 'sessionMenu' && sessionMenuParams !== null) {
+          return (
+            <SessionMenuScreen
+              route={{ params: sessionMenuParams, key: 'SessionMenu', name: 'SessionMenu' } as never}
+              navigation={null as never}
+              onBack={() => setSettingsSubView('operatingHours')}
+            />
+          );
+        }
         if (settingsSubView === 'operatingHours') {
-          return <OperatingHoursScreen onBack={() => setSettingsSubView('list')} />;
+          return (
+            <OperatingHoursScreen
+              onBack={() => setSettingsSubView('list')}
+              onEditSessionMenu={(openingHourId, label) => {
+                setSessionMenuParams({ openingHourId, label });
+                setSettingsSubView('sessionMenu');
+              }}
+            />
+          );
         }
         return (
           <SettingsScreen

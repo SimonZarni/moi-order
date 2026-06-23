@@ -30,7 +30,7 @@ export interface UseSessionMenuScreenResult {
   handleConfirmImport: () => void;
 }
 
-export function useSessionMenuScreen(openingHourId: number): UseSessionMenuScreenResult {
+export function useSessionMenuScreen(openingHourId: number, onBackOverride?: () => void): UseSessionMenuScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
 
   const data = useSessionMenuData(openingHourId);
@@ -44,7 +44,9 @@ export function useSessionMenuScreen(openingHourId: number): UseSessionMenuScree
   const [isImportModalVisible, setImportModalVisible] = useState(false);
   const [selectedImportIds, setSelectedImportIds] = useState<number[]>([]);
 
-  const handleBack = useCallback(() => { navigation.goBack(); }, [navigation]);
+  const handleBack = useCallback(() => {
+    if (onBackOverride) { onBackOverride(); } else { navigation.goBack(); }
+  }, [navigation, onBackOverride]);
 
   const handleAddCategory = useCallback((name: string) => {
     data.createCategory(name);

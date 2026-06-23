@@ -8,11 +8,13 @@ import { useSessionMenuScreen } from '../hooks/useSessionMenuScreen';
 import { styles } from './SessionMenuScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 
-type Props = NativeStackScreenProps<MerchantStackParamList, 'SessionMenu'>;
+type Props = NativeStackScreenProps<MerchantStackParamList, 'SessionMenu'> & {
+  onBack?: () => void;
+};
 
-export function SessionMenuScreen({ route }: Props): React.JSX.Element {
+export function SessionMenuScreen({ route, onBack }: Props): React.JSX.Element {
   const { openingHourId, label } = route.params;
-  const vm = useSessionMenuScreen(openingHourId);
+  const vm = useSessionMenuScreen(openingHourId, onBack);
   const [addName, setAddName] = useState('');
 
   if (vm.isLoading) {

@@ -2,9 +2,6 @@ import React from 'react';
 import { View, Text, TextInput, ScrollView, Pressable, Switch, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { MerchantStackParamList } from '../../../types/navigation';
 import { useOperatingHoursScreen } from '../hooks/useOperatingHoursScreen';
 import { useTranslation } from '../../../shared/hooks/useTranslation';
 import { styles } from './OperatingHoursScreen.styles';
@@ -12,6 +9,7 @@ import { colours } from '../../../shared/theme/colours';
 
 interface OperatingHoursScreenProps {
   onBack: () => void;
+  onEditSessionMenu: (openingHourId: number, label: string) => void;
 }
 
 const DAY_KEYS = [
@@ -21,8 +19,7 @@ const DAY_KEYS = [
 
 const MAX_SESSIONS = 4;
 
-export function OperatingHoursScreen({ onBack }: OperatingHoursScreenProps): React.JSX.Element {
-  const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
+export function OperatingHoursScreen({ onBack, onEditSessionMenu }: OperatingHoursScreenProps): React.JSX.Element {
   const {
     isLoading, isSaving, hoursInput, error, getSessionHour,
     handleToggleClosed, handleSessionChange, handleAddSession, handleRemoveSession,
@@ -115,7 +112,7 @@ export function OperatingHoursScreen({ onBack }: OperatingHoursScreenProps): Rea
                       return (
                         <Pressable
                           style={styles.editMenuBtn}
-                          onPress={() => navigation.navigate('SessionMenu', { openingHourId: serverSession.id, label })}
+                          onPress={() => onEditSessionMenu(serverSession.id, label)}
                           accessibilityRole="button"
                           accessibilityLabel={`Edit session menu for ${label}`}
                         >
