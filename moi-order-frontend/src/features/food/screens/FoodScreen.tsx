@@ -127,7 +127,7 @@ export function FoodScreen(): React.JSX.Element {
     <SafeAreaView style={styles.root} edges={['top']}>
       {hero}
       <View style={styles.body}>
-        {isLoading && <ActivityIndicator color={colours.primary} style={{ marginTop: 32 }} />}
+        {(isLoading || locationPermissionStatus === 'loading') && <ActivityIndicator color={colours.primary} style={{ marginTop: 32 }} />}
         {isError && <Text style={styles.errorText}>Could not load restaurants. Pull to retry.</Text>}
         <FlatList
           data={restaurants}
@@ -141,7 +141,7 @@ export function FoodScreen(): React.JSX.Element {
           onEndReachedThreshold={0.4}
           refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={colours.primary} colors={[colours.primary]} />}
           ListFooterComponent={isFetchingNextPage ? <ActivityIndicator color={colours.primary} /> : null}
-          ListEmptyComponent={!isLoading ? <View style={styles.emptyState}><Text style={styles.emptyText}>No restaurants found</Text></View> : null}
+          ListEmptyComponent={(!isLoading && locationPermissionStatus !== 'loading') ? <View style={styles.emptyState}><Text style={styles.emptyText}>No restaurants found</Text></View> : null}
           showsVerticalScrollIndicator={false}
         />
       </View>

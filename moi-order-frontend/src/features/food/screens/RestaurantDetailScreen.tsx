@@ -38,7 +38,7 @@ export function RestaurantDetailScreen(): React.JSX.Element {
   const insets = useSafeAreaInsets();
   const s      = useStrings();
   const {
-    restaurant, isLoading, isError, sortedCategories, activeTabIndex, scrollRef,
+    restaurant, isLoading, isError, sortedCategories, activeTabIndex, tabBarScrolledPast, scrollRef,
     cartItemCount, cartTotalCents, activeOrderCount, getQuantity,
     isRefreshing, handleBack, handleRefresh,
     handleTabPress, handleTabBarLayout, handleSectionLayout,
@@ -71,7 +71,6 @@ export function RestaurantDetailScreen(): React.JSX.Element {
       </Pressable>
       <ScrollView
         ref={scrollRef}
-        stickyHeaderIndices={[1]}
         onScroll={handleScroll}
         onScrollEndDrag={handleScrollEnd}
         onMomentumScrollEnd={handleScrollEnd}
@@ -111,6 +110,7 @@ export function RestaurantDetailScreen(): React.JSX.Element {
             <View style={styles.statusRow}><View style={[styles.statusBadge, { backgroundColor: badge.bg }]}><Text style={[styles.statusText, { color: badge.color }]}>{badge.label}</Text></View></View>
           </View>
         </View>
+        {/* In-scroll tab bar — not sticky; stays with content so sectionYs remain correct */}
         <CategoryTabBar categories={sortedCategories} activeIndex={activeTabIndex} onTabPress={handleTabPress} onHeightMeasured={handleTabBarLayout} />
         {sortedCategories.map((cat, i) => (
           <MenuCategorySection key={cat.id} category={cat} sectionIndex={i} onSectionMeasured={handleSectionLayout} getQuantity={getQuantity} onAdd={handleAddItem} onRemove={handleRemoveItem} onPress={handleItemPress} />
@@ -120,6 +120,12 @@ export function RestaurantDetailScreen(): React.JSX.Element {
         )}
         <View style={styles.cartBarSpace} />
       </ScrollView>
+      {/* Floating tab bar — rendered outside the ScrollView so Android touch events always work */}
+      {tabBarScrolledPast && (
+        <View style={[styles.floatingTabBar, { top: insets.top }]}>
+          <CategoryTabBar categories={sortedCategories} activeIndex={activeTabIndex} onTabPress={handleTabPress} onHeightMeasured={handleTabBarLayout} />
+        </View>
+      )}
       <CartBar itemCount={cartItemCount} totalCents={cartTotalCents} onPress={handleCartPress} orderCount={activeOrderCount} onOrdersPress={handleOrdersPress} />
     </SafeAreaView>
   );

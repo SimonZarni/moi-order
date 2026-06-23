@@ -19,6 +19,7 @@ export interface UseRestaurantDetailScreenResult {
   isLoading:        boolean;
   isError:          boolean;
   activeTabIndex:   number;
+  tabBarScrolledPast: boolean;
   scrollRef:        React.RefObject<ScrollView | null>;
   cartItemCount:    number;
   cartTotalCents:   number;
@@ -91,7 +92,9 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
   const tabBarHeightRef         = useRef(48);
   const isProgrammaticScrollRef = useRef(false);
   const programmaticTimerRef    = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const tabBarScrolledPastRef   = useRef(false);
+  const [activeTabIndex,    setActiveTabIndex]    = useState(0);
+  const [tabBarScrolledPast, setTabBarScrolledPast] = useState(false);
 
   // Clean up the fallback timer on unmount.
   useEffect(() => () => {
@@ -121,9 +124,21 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
   }, []);
 
   const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>): void => {
-    if (isProgrammaticScrollRef.current) return;
     const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
     const y        = contentOffset.y;
+
+    // Update floating-tab-bar visibility even during programmatic scrolls so the
+    // overlay appears/disappears in sync with the animation.
+    const tabBarOriginalY = (sectionYsRef.current[0] ?? 0) - tabBarHeightRef.current;
+    if (tabBarOriginalY > 0) {
+      const nowPast = y >= tabBarOriginalY;
+      if (nowPast !== tabBarScrolledPastRef.current) {
+        tabBarScrolledPastRef.current = nowPast;
+        setTabBarScrolledPast(nowPast);
+      }
+    }
+
+    if (isProgrammaticScrollRef.current) return;
     const maxScrollY = contentSize.height - layoutMeasurement.height;
 
     // At the very bottom: activate the last category regardless of threshold.
@@ -225,6 +240,7 @@ export function useRestaurantDetailScreen(): UseRestaurantDetailScreenResult {
     isLoading,
     isError,
     activeTabIndex,
+    tabBarScrolledPast,
     scrollRef,
     cartItemCount:  cartCount,
     cartTotalCents: cartTotal,

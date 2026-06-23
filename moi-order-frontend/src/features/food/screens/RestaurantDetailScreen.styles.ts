@@ -12,7 +12,7 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     top: spacing.md,
     left: spacing.md,
-    zIndex: 10,
+    zIndex: 30,
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -101,6 +101,12 @@ export const styles = StyleSheet.create({
   cartBarSpace: {
     height: 200,
     backgroundColor: colours.backgroundLight,
+  },
+  floatingTabBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    zIndex: 20,
   },
   stateBox: {
     flex: 1,
