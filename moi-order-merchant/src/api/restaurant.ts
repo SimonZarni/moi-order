@@ -57,6 +57,10 @@ export async function updateRestaurant(
   return response.data.data;
 }
 
+export async function toggleOpeningHourSessionMenu(id: number, enabled: boolean): Promise<void> {
+  await apiClient.patch(`/opening-hours/${id}/session-menu-enabled`, { enabled });
+}
+
 export async function setRestaurantStatus(status: RestaurantStatus): Promise<Restaurant> {
   const response = await apiClient.patch<{ data: Restaurant }>('/restaurant/status', { status });
   return response.data.data;

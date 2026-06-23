@@ -116,6 +116,28 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
+  sessionMenuRow: {
+    marginTop: spacing.xs,
+  },
+  sessionMenuToggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  sessionMenuToggleLabel: {
+    flex: 1,
+    fontSize: typography.xs,
+    fontWeight: '600',
+    color: colours.textOnLight,
+  },
+  sessionMenuToggleDisabledHint: {
+    fontSize: typography.xxs,
+    color: colours.textSubtle,
+    marginBottom: spacing.xs,
+    marginLeft: 22,
+  },
+
   editMenuBtn: {
     flexDirection: 'row',
     alignItems: 'center',

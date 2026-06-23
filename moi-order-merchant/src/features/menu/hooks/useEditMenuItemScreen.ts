@@ -57,12 +57,21 @@ export function useEditMenuItemScreen({ itemId, onBack }: UseEditMenuItemScreenP
   });
 
   const item = useMemo<MenuItem | null>(() => {
+    // Search default menu categories first
     for (const cat of categories ?? []) {
       const found = cat.items.find((i) => i.id === itemId);
       if (found) return found;
     }
+    // Fallback: item may belong to a session category (not in MENU_CATEGORIES cache)
+    const sessionCaches = queryClient.getQueriesData<MenuCategory[]>({ queryKey: ['session-menu'] });
+    for (const [, sessionCats] of sessionCaches) {
+      for (const cat of sessionCats ?? []) {
+        const found = cat.items.find((i) => i.id === itemId);
+        if (found) return found;
+      }
+    }
     return null;
-  }, [categories, itemId]);
+  }, [categories, itemId, queryClient]);
 
   // Initialize form once when item resolves from cache
   useEffect(() => {

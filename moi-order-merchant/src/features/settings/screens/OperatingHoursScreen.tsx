@@ -23,7 +23,7 @@ export function OperatingHoursScreen({ onBack, onEditSessionMenu }: OperatingHou
   const {
     isLoading, isSaving, hoursInput, error, getSessionHour,
     handleToggleClosed, handleSessionChange, handleAddSession, handleRemoveSession,
-    handleSave, handleClearError,
+    handleToggleSessionMenu, handleSave, handleClearError,
   } = useOperatingHoursScreen();
   const t = useTranslation();
 
@@ -110,20 +110,40 @@ export function OperatingHoursScreen({ onBack, onEditSessionMenu }: OperatingHou
                       if (!serverSession) return null;
                       const label = `${session.opens_at}–${session.closes_at} ${t(DAY_KEYS[day.day_of_week])}`;
                       return (
-                        <Pressable
-                          style={styles.editMenuBtn}
-                          onPress={() => onEditSessionMenu(serverSession.id, label)}
-                          accessibilityRole="button"
-                          accessibilityLabel={`Edit session menu for ${label}`}
-                        >
-                          <Ionicons name="restaurant-outline" size={14} color={colours.primary} />
-                          <Text style={styles.editMenuBtnText}>{t('hours_edit_session_menu')}</Text>
-                          {serverSession.session_menu_categories_count > 0 && (
-                            <Text style={styles.editMenuCount}>
-                              ({serverSession.session_menu_categories_count} {t('hours_session_menu_count')})
+                        <View style={styles.sessionMenuRow}>
+                          {/* On/Off toggle */}
+                          <View style={styles.sessionMenuToggleRow}>
+                            <Ionicons name="restaurant-outline" size={14} color={colours.primary} />
+                            <Text style={styles.sessionMenuToggleLabel}>Session Menu</Text>
+                            <Switch
+                              value={serverSession.session_menu_enabled}
+                              onValueChange={(v) => handleToggleSessionMenu(serverSession.id, v)}
+                              trackColor={{ false: colours.surfaceMuted, true: colours.primary + '66' }}
+                              thumbColor={serverSession.session_menu_enabled ? colours.primary : colours.medium}
+                              accessibilityLabel={`Session menu on/off for ${label}`}
+                            />
+                          </View>
+                          {!serverSession.session_menu_enabled && (
+                            <Text style={styles.sessionMenuToggleDisabledHint}>
+                              Off — customers see the default menu during this slot
                             </Text>
                           )}
-                        </Pressable>
+                          {/* Edit session menu button */}
+                          <Pressable
+                            style={styles.editMenuBtn}
+                            onPress={() => onEditSessionMenu(serverSession.id, label)}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Edit session menu for ${label}`}
+                          >
+                            <Ionicons name="pencil-outline" size={14} color={colours.primary} />
+                            <Text style={styles.editMenuBtnText}>{t('hours_edit_session_menu')}</Text>
+                            {serverSession.session_menu_categories_count > 0 && (
+                              <Text style={styles.editMenuCount}>
+                                ({serverSession.session_menu_categories_count} {t('hours_session_menu_count')})
+                              </Text>
+                            )}
+                          </Pressable>
+                        </View>
                       );
                     })()}
                   </View>

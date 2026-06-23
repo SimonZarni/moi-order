@@ -131,6 +131,7 @@ export interface OpeningHourSession {
   closes_at: string;  // "HH:mm"
   sort_order: number;
   session_menu_categories_count: number;
+  session_menu_enabled: boolean;
 }
 
 export interface OpeningHour {

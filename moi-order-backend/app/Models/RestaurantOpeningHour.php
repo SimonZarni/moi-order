@@ -17,14 +17,16 @@ class RestaurantOpeningHour extends Model
         'opens_at',
         'closes_at',
         'is_closed',
+        'session_menu_enabled',
     ];
 
     protected function casts(): array
     {
         return [
-            'day_of_week' => 'integer',
-            'sort_order'  => 'integer',
-            'is_closed'   => 'boolean',
+            'day_of_week'          => 'integer',
+            'sort_order'           => 'integer',
+            'is_closed'            => 'boolean',
+            'session_menu_enabled' => 'boolean',
         ];
     }
 

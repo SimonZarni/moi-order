@@ -229,7 +229,7 @@ class Restaurant extends Model
         $time = $now->format('H:i:s');
 
         foreach ($this->openingHours->where('day_of_week', $now->dayOfWeek) as $session) {
-            if ($session->is_closed || $session->opens_at === null || $session->closes_at === null) {
+            if ($session->is_closed || ! $session->session_menu_enabled || $session->opens_at === null || $session->closes_at === null) {
                 continue;
             }
             if ($time >= $session->opens_at && $time < $session->closes_at) {

@@ -22,12 +22,13 @@ export interface UseOperatingHoursScreenResult {
   handleSessionChange: (dayOfWeek: number, index: number, field: keyof SessionInput, value: string) => void;
   handleAddSession: (dayOfWeek: number) => void;
   handleRemoveSession: (dayOfWeek: number, index: number) => void;
+  handleToggleSessionMenu: (openingHourId: number, enabled: boolean) => void;
   handleSave: () => void;
   handleClearError: () => void;
 }
 
 export function useOperatingHoursScreen(): UseOperatingHoursScreenResult {
-  const { restaurant, isLoading, isSaving, saveError, saveHours, clearSaveError } = useOperatingHoursData();
+  const { restaurant, isLoading, isSaving, saveError, saveHours, toggleSessionMenu, clearSaveError } = useOperatingHoursData();
 
   const hoursFromServer = useMemo((): OpeningHourInput[] => {
     if (!restaurant?.opening_hours?.length) return DEFAULT_HOURS;
@@ -117,6 +118,11 @@ export function useOperatingHoursScreen(): UseOperatingHoursScreenResult {
     [restaurant],
   );
 
+  const handleToggleSessionMenu = useCallback(
+    (openingHourId: number, enabled: boolean) => toggleSessionMenu(openingHourId, enabled),
+    [toggleSessionMenu],
+  );
+
   return {
     isLoading,
     isSaving,
@@ -127,6 +133,7 @@ export function useOperatingHoursScreen(): UseOperatingHoursScreenResult {
     handleSessionChange,
     handleAddSession,
     handleRemoveSession,
+    handleToggleSessionMenu,
     handleSave,
     handleClearError: clearSaveError,
   };

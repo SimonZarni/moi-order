@@ -70,6 +70,7 @@ class RestaurantResource extends JsonResource
                                 'closes_at'                     => $s->closes_at,
                                 'sort_order'                    => $s->sort_order,
                                 'session_menu_categories_count' => $s->session_menu_categories_count ?? 0,
+                                'session_menu_enabled'          => (bool) ($s->session_menu_enabled ?? true),
                             ])->values()->all(),
                         ];
                     })
