@@ -1,9 +1,12 @@
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getInvoices, getTodayInvoice, uploadPaymentQr } from '../../../api/invoice';
+import { getInvoices, getInvoiceSummary, getTodayInvoice, uploadPaymentQr } from '../../../api/invoice';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
+import type { InvoiceSummary } from '../../../types/models';
 
 export interface UseDailyInvoiceDataResult {
   today: ReturnType<typeof useQuery<Awaited<ReturnType<typeof getTodayInvoice>>>>;
+  weekSummary: ReturnType<typeof useQuery<InvoiceSummary>>;
+  monthSummary: ReturnType<typeof useQuery<InvoiceSummary>>;
   history: ReturnType<typeof useInfiniteQuery>;
   uploadQrMutation: ReturnType<typeof useMutation>;
 }
@@ -16,6 +19,20 @@ export function useDailyInvoiceData(): UseDailyInvoiceDataResult {
     queryFn:  getTodayInvoice,
     staleTime: 30_000,
     refetchInterval: 60_000,
+  });
+
+  const weekSummary = useQuery<InvoiceSummary>({
+    queryKey: ['invoices', 'summary', 'week'],
+    queryFn:  () => getInvoiceSummary('week'),
+    staleTime: 60_000,
+    refetchInterval: 120_000,
+  });
+
+  const monthSummary = useQuery<InvoiceSummary>({
+    queryKey: ['invoices', 'summary', 'month'],
+    queryFn:  () => getInvoiceSummary('month'),
+    staleTime: 60_000,
+    refetchInterval: 120_000,
   });
 
   const history = useInfiniteQuery({
@@ -34,5 +51,5 @@ export function useDailyInvoiceData(): UseDailyInvoiceDataResult {
     },
   });
 
-  return { today, history, uploadQrMutation };
+  return { today, weekSummary, monthSummary, history, uploadQrMutation };
 }

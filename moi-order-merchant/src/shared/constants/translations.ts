@@ -68,6 +68,12 @@ export type TranslationKey =
   | 'analytics_revenue' | 'analytics_pending_now' | 'analytics_need_attention'
   | 'analytics_week_revenue' | 'analytics_month_revenue' | 'analytics_avg_order_value'
   | 'analytics_this_month'
+  | 'analytics_performance_eyebrow' | 'analytics_page_title' | 'analytics_pending_suffix'
+  | 'analytics_chart_revenue' | 'analytics_chart_orders'
+  | 'analytics_chart_sub_today_week_month' | 'analytics_no_revenue' | 'analytics_no_orders'
+  | 'analytics_chart_hourly' | 'analytics_chart_daily_7' | 'analytics_chart_daily_30'
+  | 'analytics_no_period_data'
+  | 'analytics_comparison_title' | 'analytics_col_period' | 'analytics_col_revenue' | 'analytics_col_orders'
   // ── Notifications ─────────────────────────────────────────────────────────
   | 'notif_title' | 'notif_inbox' | 'notif_mark_all_read'
   | 'notif_failed_load' | 'notif_retry' | 'notif_no_notifications' | 'notif_subtitle'
@@ -142,7 +148,14 @@ export type TranslationKey =
   // ── Business Profile ──────────────────────────────────────────────────────
   | 'biz_title' | 'biz_email_not_verified' | 'biz_tap_to_verify'
   | 'biz_account' | 'biz_unverified' | 'biz_verified'
-  | 'biz_add_email' | 'biz_verify_email_password' | 'biz_verification_docs' | 'biz_failed_load';
+  | 'biz_add_email' | 'biz_verify_email_password' | 'biz_verification_docs' | 'biz_failed_load'
+  // ── Cashout / Invoice ─────────────────────────────────────────────────────
+  | 'cashout_eyebrow' | 'cashout_title'
+  | 'cashout_period_today' | 'cashout_period_week' | 'cashout_period_month'
+  | 'cashout_section_today' | 'cashout_section_history'
+  | 'cashout_qr_upload' | 'cashout_qr_replace' | 'cashout_qr_uploading' | 'cashout_qr_saved'
+  | 'cashout_load_more' | 'cashout_no_invoices' | 'cashout_no_week' | 'cashout_no_month'
+  | 'cashout_orders' | 'cashout_customer_total' | 'cashout_platform_fee' | 'cashout_payout';
 
 type Translations = Record<TranslationKey, string>;
 
@@ -330,6 +343,22 @@ const EN: Translations = {
   analytics_month_revenue: 'Month Revenue',
   analytics_avg_order_value: 'Avg Order Value',
   analytics_this_month: 'this month',
+  analytics_performance_eyebrow: 'PERFORMANCE',
+  analytics_page_title: 'Analytics',
+  analytics_pending_suffix: 'pending',
+  analytics_chart_revenue: 'Revenue',
+  analytics_chart_orders: 'Order Volume',
+  analytics_chart_sub_today_week_month: 'Today / Week / Month',
+  analytics_no_revenue: 'No revenue data yet',
+  analytics_no_orders: 'No orders yet',
+  analytics_chart_hourly: 'Hourly Breakdown',
+  analytics_chart_daily_7: 'Daily – Last 7 Days',
+  analytics_chart_daily_30: 'Daily – Last 30 Days',
+  analytics_no_period_data: 'No data for this period yet',
+  analytics_comparison_title: 'Period Comparison',
+  analytics_col_period: 'Period',
+  analytics_col_revenue: 'Revenue',
+  analytics_col_orders: 'Orders',
   // Notifications
   notif_title: 'Notifications',
   notif_inbox: 'INBOX',
@@ -529,6 +558,26 @@ const EN: Translations = {
   biz_verify_email_password: 'Verify Email & Set Password',
   biz_verification_docs: 'Verification Documents',
   biz_failed_load: 'Failed to load profile.',
+  // Cashout / Invoice
+  cashout_eyebrow: 'CASHOUT',
+  cashout_title: 'Daily Invoice',
+  cashout_period_today: 'Today',
+  cashout_period_week: 'This Week',
+  cashout_period_month: 'This Month',
+  cashout_section_today: 'TODAY',
+  cashout_section_history: 'HISTORY',
+  cashout_qr_upload: 'Upload QR',
+  cashout_qr_replace: 'Replace QR',
+  cashout_qr_uploading: 'Uploading…',
+  cashout_qr_saved: '✓ QR Saved',
+  cashout_load_more: 'Load more',
+  cashout_no_invoices: 'No past invoices yet.',
+  cashout_no_week: 'No data for this week yet.',
+  cashout_no_month: 'No data for this month yet.',
+  cashout_orders: 'Orders',
+  cashout_customer_total: 'Customer Total',
+  cashout_platform_fee: 'Platform Fee (5%)',
+  cashout_payout: 'Your Payout',
 } as const;
 
 const MY: Translations = {
@@ -715,6 +764,22 @@ const MY: Translations = {
   analytics_month_revenue: 'လ ဝင်ငွေ',
   analytics_avg_order_value: 'ပျမ်းမျှ အော်ဒါတန်ဖိုး',
   analytics_this_month: 'ဤလ',
+  analytics_performance_eyebrow: 'စွမ်းဆောင်ရည်',
+  analytics_page_title: 'အနုဆန်းစစ်',
+  analytics_pending_suffix: 'ဆိုင်းငံ့နေ',
+  analytics_chart_revenue: 'ဝင်ငွေ',
+  analytics_chart_orders: 'အော်ဒါ ပမာဏ',
+  analytics_chart_sub_today_week_month: 'ယနေ့ / သတ်ပတ် / လ',
+  analytics_no_revenue: 'ဝင်ငွေ ဒေတာ မရှိသေးပါ',
+  analytics_no_orders: 'အော်ဒါ မရှိသေးပါ',
+  analytics_chart_hourly: 'နာရီအလိုက် ပြသချက်',
+  analytics_chart_daily_7: 'နေ့အလိုက် – ၇ ရက်',
+  analytics_chart_daily_30: 'နေ့အလိုက် – ၃၀ ရက်',
+  analytics_no_period_data: 'ဤကာလအတွက် ဒေတာ မရှိသေးပါ',
+  analytics_comparison_title: 'ကာလ နှိုင်းယှဉ်ချက်',
+  analytics_col_period: 'ကာလ',
+  analytics_col_revenue: 'ဝင်ငွေ',
+  analytics_col_orders: 'အော်ဒါများ',
   // Notifications
   notif_title: 'အကြောင်းကြားချက်များ',
   notif_inbox: 'ကြိုဆိုချက်',
@@ -914,6 +979,26 @@ const MY: Translations = {
   biz_verify_email_password: 'အီးမေးလ် စစ်ဆေး & စကားဝှက် သတ်မှတ်ရန်',
   biz_verification_docs: 'စစ်ဆေးရေး စာရွက်စာတမ်းများ',
   biz_failed_load: 'ပရိုဖိုင် ဖတ်မရပါ',
+  // Cashout / Invoice
+  cashout_eyebrow: 'ငွေထုတ်',
+  cashout_title: 'နေ့စဉ် ငွေစာရင်း',
+  cashout_period_today: 'ယနေ့',
+  cashout_period_week: 'ဤသီတင်းပတ်',
+  cashout_period_month: 'ဤလ',
+  cashout_section_today: 'ယနေ့',
+  cashout_section_history: 'မှတ်တမ်း',
+  cashout_qr_upload: 'QR တင်ရန်',
+  cashout_qr_replace: 'QR အစားထိုးရန်',
+  cashout_qr_uploading: 'တင်နေသည်…',
+  cashout_qr_saved: '✓ QR သိမ်းပြီး',
+  cashout_load_more: 'ပိုမိုကြည့်ရန်',
+  cashout_no_invoices: 'ယခင် ငွေစာရင်း မရှိသေးပါ။',
+  cashout_no_week: 'ဤသီတင်းပတ်အတွက် ဒေတာ မရှိသေးပါ။',
+  cashout_no_month: 'ဤလအတွက် ဒေတာ မရှိသေးပါ။',
+  cashout_orders: 'အော်ဒါများ',
+  cashout_customer_total: 'ဖောက်သည် စုစုပေါင်း',
+  cashout_platform_fee: 'ပလက်ဖောင်း ကြေး (၅%)',
+  cashout_payout: 'သင့်ရငွေ',
 };
 
 export const TRANSLATIONS: Record<Language, Translations> = { en: EN, my: MY };

@@ -120,6 +120,7 @@ Route::patch('/restaurant/photos/reorder', [MerchantRestaurantController::class,
 Route::get('/alarm-sound', [MerchantAlarmSettingController::class, 'show'])->name('merchant.alarm-sound.show');
 
 // ── Daily cashout invoices ────────────────────────────────────────────────────
-Route::get('/invoices/today', [MerchantDailyInvoiceController::class, 'today'])->name('merchant.invoices.today');
-Route::get('/invoices',       [MerchantDailyInvoiceController::class, 'index'])->name('merchant.invoices.index');
+Route::get('/invoices/today',   [MerchantDailyInvoiceController::class, 'today'])->name('merchant.invoices.today');
+Route::get('/invoices/summary', [MerchantDailyInvoiceController::class, 'summary'])->name('merchant.invoices.summary');
+Route::get('/invoices',         [MerchantDailyInvoiceController::class, 'index'])->name('merchant.invoices.index');
 Route::post('/restaurant/payment-qr', [MerchantDailyInvoiceController::class, 'uploadQr'])->name('merchant.restaurant.payment-qr');

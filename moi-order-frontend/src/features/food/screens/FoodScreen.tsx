@@ -14,7 +14,7 @@ export function FoodScreen(): React.JSX.Element {
   const {
     restaurants, isLoading, isError, isRefreshing, isFetchingNextPage,
     hasNextPage, fetchNextPage, cartItemCount, activeOrderCount,
-    searchText, activeCategory, locationPermissionStatus,
+    searchText, activeCategory, locationPermissionStatus, locationError,
     setSearchText, setActiveCategory,
     handleRestaurantPress, handleAddressPress, handleCartPress, handleOrdersPress, handleBack,
     handleRefresh, requestLocationPermission,
@@ -116,6 +116,31 @@ export function FoodScreen(): React.JSX.Element {
               accessibilityLabel="Enable location access"
             >
               <Text style={styles.locationGateBtnText}>Enable Location</Text>
+            </Pressable>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (locationPermissionStatus === 'granted' && locationError) {
+    return (
+      <SafeAreaView style={styles.root} edges={['top']}>
+        {hero}
+        <View style={styles.body}>
+          <View style={styles.locationGate}>
+            <Ionicons name="locate-outline" size={52} color={colours.primary} />
+            <Text style={styles.locationGateTitle}>Location unavailable</Text>
+            <Text style={styles.locationGateText}>
+              We couldn't determine your location. Please try again.
+            </Text>
+            <Pressable
+              style={styles.locationGateBtn}
+              onPress={() => { void requestLocationPermission(); }}
+              accessibilityRole="button"
+              accessibilityLabel="Retry getting location"
+            >
+              <Text style={styles.locationGateBtnText}>Retry</Text>
             </Pressable>
           </View>
         </View>

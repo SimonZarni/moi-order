@@ -1,8 +1,15 @@
-import type { DailyInvoice, PaginatedResponse } from '../types/models';
+import type { DailyInvoice, InvoiceSummary, PaginatedResponse } from '../types/models';
 import { apiClient } from './client';
 
 export async function getTodayInvoice(): Promise<DailyInvoice> {
   const response = await apiClient.get<{ data: DailyInvoice }>('/invoices/today');
+  return response.data.data;
+}
+
+export async function getInvoiceSummary(period: 'week' | 'month'): Promise<InvoiceSummary> {
+  const response = await apiClient.get<{ data: InvoiceSummary }>('/invoices/summary', {
+    params: { period },
+  });
   return response.data.data;
 }
 

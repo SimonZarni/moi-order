@@ -30,18 +30,32 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// On notification click: focus the existing admin tab or open a new one.
+// On notification click: navigate to the relevant detail page.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+
+  const data = event.notification.data ?? {};
+  let targetPath = '/';
+
+  if (data.type === 'food_order' && data.order_id) {
+    targetPath = `/food-orders/${data.order_id}`;
+  } else if (data.type === 'submission' && data.submission_id) {
+    targetPath = `/services/submissions/${data.submission_id}`;
+  } else if (data.type === 'ticket_order' && data.ticket_order_id) {
+    targetPath = `/bookings/${data.ticket_order_id}`;
+  }
 
   event.waitUntil(
     clients
       .matchAll({ type: 'window', includeUncontrolled: true })
       .then((windowClients) => {
-        if (windowClients.length > 0) {
-          return windowClients[0].focus();
+        for (const client of windowClients) {
+          if (client.url.startsWith(self.registration.scope)) {
+            const origin = new URL(client.url).origin;
+            return clients.openWindow(origin + targetPath);
+          }
         }
-        return clients.openWindow('/');
+        return clients.openWindow(targetPath);
       })
   );
 });

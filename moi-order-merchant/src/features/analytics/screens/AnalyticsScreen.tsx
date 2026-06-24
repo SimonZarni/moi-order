@@ -9,9 +9,16 @@ import { styles } from './AnalyticsScreen.styles';
 import { colours } from '../../../shared/theme/colours';
 import { formatPrice } from '../../../shared/utils/formatCurrency';
 import { useTranslation } from '../../../shared/hooks/useTranslation';
+import type { TranslationKey } from '../../../shared/constants/translations';
 import type { AnalyticsPeriod } from '../../../types/models';
 
-export function AnalyticsScreen(): React.JSX.Element {
+type TranslateFn = (key: TranslationKey) => string;
+
+interface AnalyticsScreenProps {
+  onPendingPress?: () => void;
+}
+
+export function AnalyticsScreen({ onPendingPress }: AnalyticsScreenProps): React.JSX.Element {
   const t = useTranslation();
   const {
     period, analytics, chartData, isLoading, isChartLoading,
@@ -69,41 +76,45 @@ export function AnalyticsScreen(): React.JSX.Element {
       </View>
     );
     // 'all' — show all three + pending
+    const periodToday = t('analytics_today');
+    const periodWeek  = t('analytics_week');
+    const periodMonth = t('analytics_month');
+    const ordersLabel = t('common_orders');
     const revenueBars: BarChartBar[] = [
-      { label: 'Today',      sublabel: `${today?.order_count ?? 0} orders`,  value: today?.revenue_cents ?? 0,  valueLabel: formatPrice(today?.revenue_cents ?? 0),  colour: colours.primary + 'AA' },
-      { label: 'This Week',  sublabel: `${week?.order_count ?? 0} orders`,   value: week?.revenue_cents ?? 0,   valueLabel: formatPrice(week?.revenue_cents ?? 0),   colour: colours.primary + 'CC' },
-      { label: 'This Month', sublabel: `${month?.order_count ?? 0} orders`,  value: month?.revenue_cents ?? 0,  valueLabel: formatPrice(month?.revenue_cents ?? 0),  colour: colours.primary },
+      { label: periodToday, sublabel: `${today?.order_count ?? 0} ${ordersLabel}`, value: today?.revenue_cents ?? 0,  valueLabel: formatPrice(today?.revenue_cents ?? 0),  colour: colours.primary + 'AA' },
+      { label: periodWeek,  sublabel: `${week?.order_count ?? 0} ${ordersLabel}`,  value: week?.revenue_cents ?? 0,   valueLabel: formatPrice(week?.revenue_cents ?? 0),   colour: colours.primary + 'CC' },
+      { label: periodMonth, sublabel: `${month?.order_count ?? 0} ${ordersLabel}`, value: month?.revenue_cents ?? 0,  valueLabel: formatPrice(month?.revenue_cents ?? 0),  colour: colours.primary },
     ];
     const orderBars: BarChartBar[] = [
-      { label: 'Today',      sublabel: formatPrice(today?.revenue_cents ?? 0), value: today?.order_count ?? 0,  valueLabel: String(today?.order_count ?? 0),  colour: colours.success + 'AA' },
-      { label: 'This Week',  sublabel: formatPrice(week?.revenue_cents ?? 0),  value: week?.order_count ?? 0,   valueLabel: String(week?.order_count ?? 0),   colour: colours.success + 'CC' },
-      { label: 'This Month', sublabel: formatPrice(month?.revenue_cents ?? 0), value: month?.order_count ?? 0,  valueLabel: String(month?.order_count ?? 0),  colour: colours.success },
+      { label: periodToday, sublabel: formatPrice(today?.revenue_cents ?? 0), value: today?.order_count ?? 0, valueLabel: String(today?.order_count ?? 0), colour: colours.success + 'AA' },
+      { label: periodWeek,  sublabel: formatPrice(week?.revenue_cents ?? 0),  value: week?.order_count ?? 0,  valueLabel: String(week?.order_count ?? 0),  colour: colours.success + 'CC' },
+      { label: periodMonth, sublabel: formatPrice(month?.revenue_cents ?? 0), value: month?.order_count ?? 0, valueLabel: String(month?.order_count ?? 0), colour: colours.success },
     ];
     return (
       <>
         <View style={styles.kpiRow}>
-          <StatCard label={t('dashboard_today_revenue')} value={formatPrice(today?.revenue_cents ?? 0)} sub={`${today?.order_count ?? 0} ${t('common_orders')}`} accent={colours.primary} />
-          <StatCard label={t('analytics_this_month')} value={formatPrice(month?.revenue_cents ?? 0)} sub={`${month?.order_count ?? 0} ${t('common_orders')}`} accent={colours.primary} highlight />
+          <StatCard label={t('dashboard_today_revenue')} value={formatPrice(today?.revenue_cents ?? 0)} sub={`${today?.order_count ?? 0} ${ordersLabel}`} accent={colours.primary} />
+          <StatCard label={t('analytics_this_month')} value={formatPrice(month?.revenue_cents ?? 0)} sub={`${month?.order_count ?? 0} ${ordersLabel}`} accent={colours.primary} highlight />
           <StatCard label={t('analytics_avg_order_value')} value={formatPrice(avgOrderCents)} sub={t('analytics_this_month')} accent={colours.success} />
           {pending > 0 && <StatCard label={t('analytics_pending_now')} value={String(pending)} sub={t('analytics_need_attention')} accent={colours.warning} />}
         </View>
         <View style={styles.chartCard}>
           <View style={styles.chartHeader}>
             <View style={[styles.chartDot, { backgroundColor: colours.primary }]} />
-            <Text style={styles.chartTitle}>Revenue</Text>
-            <Text style={styles.chartSub}>Today / Week / Month</Text>
+            <Text style={styles.chartTitle}>{t('analytics_chart_revenue')}</Text>
+            <Text style={styles.chartSub}>{t('analytics_chart_sub_today_week_month')}</Text>
           </View>
-          <BarChart bars={revenueBars} trackHeight={130} emptyMessage="No revenue data yet" />
+          <BarChart bars={revenueBars} trackHeight={130} emptyMessage={t('analytics_no_revenue')} />
         </View>
         <View style={styles.chartCard}>
           <View style={styles.chartHeader}>
             <View style={[styles.chartDot, { backgroundColor: colours.success }]} />
-            <Text style={styles.chartTitle}>Order Volume</Text>
-            <Text style={styles.chartSub}>Today / Week / Month</Text>
+            <Text style={styles.chartTitle}>{t('analytics_chart_orders')}</Text>
+            <Text style={styles.chartSub}>{t('analytics_chart_sub_today_week_month')}</Text>
           </View>
-          <BarChart bars={orderBars} trackHeight={130} emptyMessage="No orders yet" />
+          <BarChart bars={orderBars} trackHeight={130} emptyMessage={t('analytics_no_orders')} />
         </View>
-        <ComparisonTable today={today} week={week} month={month} />
+        <ComparisonTable today={today} week={week} month={month} t={t} />
       </>
     );
   })();
@@ -113,14 +124,19 @@ export function AnalyticsScreen(): React.JSX.Element {
       <View style={styles.pageHeader}>
         <View style={styles.headerRow}>
           <View>
-            <Text style={styles.eyebrow}>PERFORMANCE</Text>
-            <Text style={styles.pageTitle}>Analytics</Text>
+            <Text style={styles.eyebrow}>{t('analytics_performance_eyebrow')}</Text>
+            <Text style={styles.pageTitle}>{t('analytics_page_title')}</Text>
           </View>
           {pending > 0 && (
-            <View style={styles.pendingPill}>
+            <Pressable
+              style={styles.pendingPill}
+              onPress={onPendingPress}
+              accessibilityRole="button"
+              accessibilityLabel={`${pending} ${t('analytics_pending_suffix')}`}
+            >
               <View style={styles.pendingDot} />
-              <Text style={styles.pendingText}>{pending} pending</Text>
-            </View>
+              <Text style={styles.pendingText}>{pending} {t('analytics_pending_suffix')}</Text>
+            </Pressable>
           )}
         </View>
         {/* Period filter */}
@@ -152,7 +168,7 @@ export function AnalyticsScreen(): React.JSX.Element {
             <View style={styles.chartHeader}>
               <View style={[styles.chartDot, { backgroundColor: colours.primary }]} />
               <Text style={styles.chartTitle}>
-                {period === 'today' ? 'Hourly Breakdown' : period === 'week' ? 'Daily – Last 7 Days' : 'Daily – Last 30 Days'}
+                {period === 'today' ? t('analytics_chart_hourly') : period === 'week' ? t('analytics_chart_daily_7') : t('analytics_chart_daily_30')}
               </Text>
             </View>
             {isChartLoading ? (
@@ -161,7 +177,7 @@ export function AnalyticsScreen(): React.JSX.Element {
               <TimeSeriesChart
                 points={chartData?.points ?? []}
                 trackHeight={110}
-                emptyMessage="No data for this period yet"
+                emptyMessage={t('analytics_no_period_data')}
               />
             )}
           </View>
@@ -177,18 +193,19 @@ interface ComparisonTableProps {
   today:  { order_count: number; revenue_cents: number } | undefined;
   week:   { order_count: number; revenue_cents: number } | undefined;
   month:  { order_count: number; revenue_cents: number } | undefined;
+  t: TranslateFn;
 }
 
-function ComparisonTable({ today, week, month }: ComparisonTableProps): React.JSX.Element {
+function ComparisonTable({ today, week, month, t }: ComparisonTableProps): React.JSX.Element {
   return (
     <View style={styles.tableCard}>
       <View style={styles.tableHeaderRow}>
-        <Text style={styles.tableTitle}>Period Comparison</Text>
+        <Text style={styles.tableTitle}>{t('analytics_comparison_title')}</Text>
       </View>
-      <TableRow label="Period" valueA="Revenue" valueB="Orders" isHead />
-      <TableRow label="Today"      valueA={formatPrice(today?.revenue_cents ?? 0)}  valueB={String(today?.order_count ?? 0)} />
-      <TableRow label="This Week"  valueA={formatPrice(week?.revenue_cents ?? 0)}   valueB={String(week?.order_count ?? 0)} />
-      <TableRow label="This Month" valueA={formatPrice(month?.revenue_cents ?? 0)}  valueB={String(month?.order_count ?? 0)} isLast />
+      <TableRow label={t('analytics_col_period')} valueA={t('analytics_col_revenue')} valueB={t('analytics_col_orders')} isHead />
+      <TableRow label={t('analytics_today')}     valueA={formatPrice(today?.revenue_cents ?? 0)}  valueB={String(today?.order_count ?? 0)} />
+      <TableRow label={t('analytics_week')}      valueA={formatPrice(week?.revenue_cents ?? 0)}   valueB={String(week?.order_count ?? 0)} />
+      <TableRow label={t('analytics_month')}     valueA={formatPrice(month?.revenue_cents ?? 0)}  valueB={String(month?.order_count ?? 0)} isLast />
     </View>
   );
 }

@@ -35,7 +35,7 @@ class NotifyAdminsOfTicketPayment
                     'user_name'       => $userName,
                     'object_name'     => $ticketName,
                 ]));
-                event(new AdminNotificationReceived($admin));
+                event(new AdminNotificationReceived($admin, 'new_payment'));
             });
         });
     }

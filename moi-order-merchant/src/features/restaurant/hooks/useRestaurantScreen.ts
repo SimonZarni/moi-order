@@ -250,8 +250,9 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     onSuccess: setCache,
     onError: (error) => {
       const apiError = extractApiError(error);
-      const message = apiError.code ? DOMAIN_MESSAGES[apiError.code] : undefined;
-      if (message) setStatusWarning(message);
+      const message = (apiError.code ? DOMAIN_MESSAGES[apiError.code] : undefined)
+        ?? 'Could not upload photo. Please try again.';
+      setStatusWarning(message);
     },
   });
 

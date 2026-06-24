@@ -7,8 +7,9 @@ import { useBusinessProfileForm } from './useBusinessProfileForm';
 import type { MerchantStackParamList } from '../../../types/navigation';
 import type { BusinessProfile } from '../../../types/models';
 import type { KycDocType } from '../../../types/enums';
-import type { ApiError } from '../../../api/client';
+import { extractApiError, type ApiError } from '../../../api/client';
 import { normalizePickedImage } from '../../../shared/utils/imageUtils';
+import { DOMAIN_MESSAGES, MESSAGES } from '../../../shared/constants/messages';
 
 export interface UseBusinessProfileScreenResult {
   profile: BusinessProfile | null;
@@ -35,6 +36,7 @@ export interface UseBusinessProfileScreenResult {
   // document upload
   handleUploadDocument: (type: KycDocType) => Promise<void>;
   uploadingDocType: KycDocType | null;
+  docUploadError: string | null;
   // navigation
   handleBack: () => void;
 }
@@ -46,6 +48,7 @@ export function useBusinessProfileScreen(): UseBusinessProfileScreenResult {
   const form = useBusinessProfileForm();
 
   const [uploadingDocType, setUploadingDocType] = useState<KycDocType | null>(null);
+  const [docUploadError, setDocUploadError] = useState<string | null>(null);
 
   const handleStartEditPhone = useCallback(() => {
     form.handleStartEditPhone(profile?.kyc?.business_phone ?? null);
@@ -87,8 +90,13 @@ export function useBusinessProfileScreen(): UseBusinessProfileScreenResult {
       if (result.canceled || !result.assets[0]) return;
       const img = await normalizePickedImage(result.assets[0], 'document');
       setUploadingDocType(type);
+      setDocUploadError(null);
       try {
         await uploadDocument.mutateAsync({ type, file: img });
+      } catch (err) {
+        const apiError = extractApiError(err as Error);
+        const message = (apiError.code ? DOMAIN_MESSAGES[apiError.code] : undefined) ?? MESSAGES.genericError;
+        setDocUploadError(message);
       } finally {
         setUploadingDocType(null);
       }
@@ -120,6 +128,7 @@ export function useBusinessProfileScreen(): UseBusinessProfileScreenResult {
     handleSaveEmail,
     handleUploadDocument,
     uploadingDocType,
+    docUploadError,
     handleBack,
   };
 }

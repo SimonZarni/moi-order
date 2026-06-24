@@ -420,7 +420,7 @@ function WebMerchantLayout(): React.JSX.Element {
       case 'Restaurant':
         return <RestaurantScreen />;
       case 'Analytics':
-        return <AnalyticsScreen />;
+        return <AnalyticsScreen onPendingPress={() => handleNavigate('Orders')} />;
       case 'Notifications':
         return (
           <NotificationsScreen

@@ -82,6 +82,8 @@ function getNavigationPath(data: AdminNotificationData): string | null {
       if (data.submission_id) return `/services/submissions/${data.submission_id}`;
       if (data.ticket_order_id) return `/bookings/${data.ticket_order_id}`;
       return null;
+    case 'new_food_order':
+      return data.food_order_id ? `/food-orders/${data.food_order_id}` : null;
     default:
       return null;
   }
@@ -336,6 +338,9 @@ function NotificationIcon({ type }: { type: AdminNotification['type'] }) {
   }
   if (type === 'new_ticket_order') {
     return <Iconify icon="solar:cart-3-bold" width={20} sx={{ color: 'info.main' }} />;
+  }
+  if (type === 'new_food_order') {
+    return <Iconify icon="solar:cart-3-bold" width={20} sx={{ color: 'warning.main' }} />;
   }
   return <Iconify icon="eva:trending-up-fill" width={20} sx={{ color: 'warning.main' }} />;
 }

@@ -188,8 +188,27 @@ export function SubmissionDetailView() {
     setConfirmError('');
     paymentsApi
       .confirm(submission.payment.id)
-      .then(() => {
-        if (id) submissionsApi.get(id).then((data) => { setSubmission(data); }).catch(() => {});
+      .then((confirmedPayment) => {
+        // Update payment status immediately from API response so the button
+        // disappears without waiting for the background re-fetch.
+        setSubmission((prev) =>
+          prev && prev.payment
+            ? {
+                ...prev,
+                payment: {
+                  ...prev.payment,
+                  status:       confirmedPayment.status,
+                  status_label: confirmedPayment.status_label,
+                  qr_image_url: confirmedPayment.qr_image_url,
+                  expires_at:   confirmedPayment.expires_at,
+                },
+              }
+            : prev
+        );
+        // Background sync for any other fields (status, documents, etc.)
+        if (id) {
+          submissionsApi.get(id).then((data) => { setSubmission(data); }).catch(() => {});
+        }
       })
       .catch(() => setConfirmError('Could not confirm payment. Try again.'))
       .finally(() => setConfirming(false));

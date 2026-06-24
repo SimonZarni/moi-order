@@ -275,7 +275,7 @@ export type ServiceSubmission = {
 // ----------------------------------------------------------------------
 // Admin Notifications
 
-export type AdminNotificationType = 'new_submission' | 'new_ticket_order' | 'new_payment';
+export type AdminNotificationType = 'new_submission' | 'new_ticket_order' | 'new_payment' | 'new_food_order';
 
 export type AdminNotificationData = {
   notification_type: AdminNotificationType;
@@ -285,6 +285,7 @@ export type AdminNotificationData = {
   object_name?: string;
   submission_id?: string;
   ticket_order_id?: string;
+  food_order_id?: number;
 };
 
 export type AdminNotification = {

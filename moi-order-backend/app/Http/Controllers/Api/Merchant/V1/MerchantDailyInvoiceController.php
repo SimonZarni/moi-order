@@ -57,6 +57,50 @@ class MerchantDailyInvoiceController extends Controller
     }
 
     /**
+     * Aggregated summary for the current week or month from stored daily invoices.
+     * GET /merchant/v1/invoices/summary?period=week|month
+     */
+    public function summary(Request $request): JsonResponse
+    {
+        $restaurant = $request->user()->restaurant()->first();
+        if ($restaurant === null) {
+            return response()->json(['message' => 'Restaurant not found.', 'code' => 'not_found'], 404);
+        }
+
+        $period = $request->input('period', 'week');
+
+        if ($period === 'month') {
+            $dateFrom = now()->startOfMonth()->toDateString();
+            $dateTo   = now()->toDateString();
+        } else {
+            $dateFrom = now()->startOfWeek()->toDateString();
+            $dateTo   = now()->toDateString();
+        }
+
+        $row = RestaurantDailyInvoice::forRestaurant($restaurant->id)
+            ->whereBetween('date', [$dateFrom, $dateTo])
+            ->selectRaw('
+                SUM(order_count)          AS order_count,
+                SUM(customer_total_cents) AS customer_total_cents,
+                SUM(platform_fee_cents)   AS platform_fee_cents,
+                SUM(payout_cents)         AS payout_cents
+            ')
+            ->first();
+
+        return response()->json([
+            'data' => [
+                'period'               => $period,
+                'date_from'            => $dateFrom,
+                'date_to'              => $dateTo,
+                'order_count'          => (int) ($row->order_count          ?? 0),
+                'customer_total_cents' => (int) ($row->customer_total_cents ?? 0),
+                'platform_fee_cents'   => (int) ($row->platform_fee_cents   ?? 0),
+                'payout_cents'         => (int) ($row->payout_cents         ?? 0),
+            ],
+        ]);
+    }
+
+    /**
      * Today's live (provisional) invoice — calculated from orders, never persisted here.
      * GET /merchant/v1/invoices/today
      */

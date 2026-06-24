@@ -1,5 +1,4 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { Alert } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getMenuCategories, updateMenuItem } from '../../../api/menu';
 import { extractApiError } from '../../../api/client';
@@ -23,6 +22,7 @@ export interface UseEditMenuItemScreenResult {
   form: AddItemForm;
   existingPhotoUrl: string | null;
   isSaving: boolean;
+  saveError: string | null;
   canSubmit: boolean;
   customerPriceCents: number;
   customerOriginalPriceCents: number | null;
@@ -49,6 +49,7 @@ export function useEditMenuItemScreen({ itemId, onBack }: UseEditMenuItemScreenP
 
   const [form, setForm] = useState<AddItemForm>(EMPTY_FORM);
   const [existingPhotoUrl, setExistingPhotoUrl] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const { data: categories, isLoading } = useQuery({
     queryKey: QUERY_KEYS.MENU_CATEGORIES,
@@ -121,6 +122,7 @@ export function useEditMenuItemScreen({ itemId, onBack }: UseEditMenuItemScreenP
   const { mutate: mutateUpdate, isPending: isSaving } = useMutation({
     mutationFn: async (f: AddItemForm) => updateMenuItem(itemId, await buildItemFormData(f)),
     onSuccess: (updatedItem) => {
+      setSaveError(null);
       queryClient.setQueryData<MenuCategory[]>(QUERY_KEYS.MENU_CATEGORIES, (old) => {
         if (!old) return old;
         return old.map((cat) => ({
@@ -134,7 +136,7 @@ export function useEditMenuItemScreen({ itemId, onBack }: UseEditMenuItemScreenP
     onError: (error) => {
       const apiError = extractApiError(error);
       const message = (apiError.code ? DOMAIN_MESSAGES[apiError.code] : undefined) ?? MESSAGES.genericError;
-      Alert.alert('Could not save changes', message);
+      setSaveError(message);
     },
   });
 
@@ -175,6 +177,7 @@ export function useEditMenuItemScreen({ itemId, onBack }: UseEditMenuItemScreenP
 
   const handleSubmit = useCallback(() => {
     if (!form.name.trim() || !form.price.trim() || isSaving) return;
+    setSaveError(null);
     mutateUpdate(form);
   }, [form, isSaving, mutateUpdate]);
 
@@ -184,6 +187,7 @@ export function useEditMenuItemScreen({ itemId, onBack }: UseEditMenuItemScreenP
     form,
     existingPhotoUrl,
     isSaving,
+    saveError,
     canSubmit: !!form.name.trim() && !!form.price.trim() && !isSaving,
     customerPriceCents,
     customerOriginalPriceCents,

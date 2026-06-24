@@ -298,6 +298,16 @@ export interface DailyInvoice {
   restaurant?: DailyInvoiceRestaurant;
 }
 
+export interface InvoiceSummary {
+  period: 'week' | 'month';
+  date_from: string;
+  date_to: string;
+  order_count: number;
+  customer_total_cents: number;
+  platform_fee_cents: number;
+  payout_cents: number;
+}
+
 export interface PaginationMeta {
   current_page: number;
   last_page: number;

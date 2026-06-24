@@ -29,6 +29,7 @@ class AdminNotificationReceived implements ShouldBroadcastNow
 
     public function __construct(
         public readonly User $user,
+        public readonly string $notificationType = '',
     ) {}
 
     /**
@@ -49,6 +50,6 @@ class AdminNotificationReceived implements ShouldBroadcastNow
      */
     public function broadcastWith(): array
     {
-        return [];
+        return ['notification_type' => $this->notificationType];
     }
 }

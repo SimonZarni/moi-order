@@ -47,7 +47,7 @@ class NotifyAdminsOfServicePayment
                     'user_name'     => $userName,
                     'object_name'   => $serviceName,
                 ]));
-                event(new AdminNotificationReceived($admin));
+                event(new AdminNotificationReceived($admin, 'new_payment'));
             });
         });
     }

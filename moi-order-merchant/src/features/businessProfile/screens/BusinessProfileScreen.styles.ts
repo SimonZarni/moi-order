@@ -112,4 +112,11 @@ export const styles = StyleSheet.create({
   emailFieldError: { fontSize: typography.xs, color: colours.error, marginTop: 2 },
   addEmailPrompt: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingVertical: 2 },
   addEmailPromptText: { fontSize: typography.sm, color: colours.primary, fontWeight: '500' },
+  docUploadError: {
+    fontSize: typography.sm,
+    color: colours.error,
+    fontWeight: '600',
+    marginBottom: spacing.xs,
+    paddingHorizontal: spacing.xs,
+  },
 });

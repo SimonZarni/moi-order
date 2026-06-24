@@ -25,7 +25,7 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
     handleStartEditPhone, handleCancelEditPhone, handleChangePhone, handleSavePhone,
     isEditingEmail, emailValue, emailError, isSavingEmail,
     handleStartEditEmail, handleCancelEditEmail, handleChangeEmail, handleSaveEmail,
-    handleUploadDocument, uploadingDocType,
+    handleUploadDocument, uploadingDocType, docUploadError,
     handleBack,
   } = useBusinessProfileScreen();
 
@@ -210,6 +210,9 @@ export function BusinessProfileScreen({ onBack }: BusinessProfileScreenProps): R
         {profile.kyc !== null && (
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>{t('biz_verification_docs')}</Text>
+            {docUploadError !== null && (
+              <Text style={styles.docUploadError}>{docUploadError}</Text>
+            )}
             {DOC_TYPES.map(({ type, label }) => (
               <KycDocumentCard
                 key={type}

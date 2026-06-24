@@ -21,6 +21,30 @@ type NotificationsContextValue = {
 
 const NotificationsContext = createContext<NotificationsContextValue | null>(null);
 
+// Plays a double-beep alarm when a new food order notification arrives.
+// Uses the Web Audio API so no audio file asset is needed.
+function playFoodOrderAlarm(): void {
+  try {
+    const ctx = new AudioContext();
+    const now = ctx.currentTime;
+
+    [0, 0.25].forEach((delay) => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.3, now + delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.2);
+      osc.start(now + delay);
+      osc.stop(now + delay + 0.2);
+    });
+  } catch {
+    // AudioContext not available (e.g., tab focus not yet received) — silently skip
+  }
+}
+
 export function useNotifications(): NotificationsContextValue {
   const ctx = useContext(NotificationsContext);
   if (!ctx) throw new Error('useNotifications must be used inside NotificationsProvider');
@@ -104,10 +128,15 @@ export function NotificationsProvider({ children }: Props) {
     const channelName = `private-App.Admin.User.${admin.id}`;
     const channel = pusher.subscribe(channelName);
 
-    channel.bind('notification.created', () => {
+    channel.bind('notification.created', (data?: { notification_type?: string }) => {
       // Increment badge immediately for instant UX, then sync with server truth.
       setUnreadCount((prev) => prev + 1);
       fetchNotifications();
+
+      // Play alarm sound for food orders
+      if (data?.notification_type === 'new_food_order') {
+        playFoodOrderAlarm();
+      }
     });
 
     const handleVisibilityChange = () => {

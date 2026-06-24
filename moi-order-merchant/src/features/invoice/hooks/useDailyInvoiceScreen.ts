@@ -2,11 +2,18 @@ import { useState, useCallback } from 'react';
 import { Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useDailyInvoiceData } from './useDailyInvoiceData';
-import type { DailyInvoice } from '../../../types/models';
+import type { DailyInvoice, InvoiceSummary } from '../../../types/models';
+
+export type CashoutPeriod = 'today' | 'week' | 'month';
 
 export interface UseDailyInvoiceScreenResult {
+  activePeriod: CashoutPeriod;
   todayInvoice: DailyInvoice | undefined;
+  weekSummary: InvoiceSummary | undefined;
+  monthSummary: InvoiceSummary | undefined;
   isTodayLoading: boolean;
+  isWeekLoading: boolean;
+  isMonthLoading: boolean;
   historyInvoices: DailyInvoice[];
   isHistoryLoading: boolean;
   hasNextPage: boolean;
@@ -14,11 +21,13 @@ export interface UseDailyInvoiceScreenResult {
   isQrUploading: boolean;
   qrUploadSuccess: boolean;
   qrUploadError: string | null;
+  handlePeriodChange: (period: CashoutPeriod) => void;
   handleUploadQr: () => Promise<void>;
 }
 
 export function useDailyInvoiceScreen(): UseDailyInvoiceScreenResult {
-  const { today, history, uploadQrMutation } = useDailyInvoiceData();
+  const { today, weekSummary, monthSummary, history, uploadQrMutation } = useDailyInvoiceData();
+  const [activePeriod, setActivePeriod] = useState<CashoutPeriod>('today');
   const [qrUploadError, setQrUploadError] = useState<string | null>(null);
 
   const historyInvoices: DailyInvoice[] =
@@ -59,9 +68,18 @@ export function useDailyInvoiceScreen(): UseDailyInvoiceScreenResult {
     });
   }, [uploadQrMutation]);
 
+  const handlePeriodChange = useCallback((period: CashoutPeriod) => {
+    setActivePeriod(period);
+  }, []);
+
   return {
+    activePeriod,
     todayInvoice:     today.data,
+    weekSummary:      weekSummary.data,
+    monthSummary:     monthSummary.data,
     isTodayLoading:   today.isLoading,
+    isWeekLoading:    weekSummary.isLoading,
+    isMonthLoading:   monthSummary.isLoading,
     historyInvoices,
     isHistoryLoading: history.isLoading,
     hasNextPage:      history.hasNextPage ?? false,
@@ -69,6 +87,7 @@ export function useDailyInvoiceScreen(): UseDailyInvoiceScreenResult {
     isQrUploading:    uploadQrMutation.isPending,
     qrUploadSuccess:  uploadQrMutation.isSuccess,
     qrUploadError,
+    handlePeriodChange,
     handleUploadQr,
   };
 }

@@ -19,7 +19,7 @@ interface EditMenuItemScreenProps {
 
 export function EditMenuItemScreen({ itemId, onBack }: EditMenuItemScreenProps): React.JSX.Element {
   const {
-    item, isLoading, form, existingPhotoUrl, isSaving, canSubmit,
+    item, isLoading, form, existingPhotoUrl, isSaving, saveError, canSubmit,
     customerPriceCents, customerOriginalPriceCents, discountCents,
     handleFieldChange, handlePhotoChange, handlePickPhoto,
     handleAddOptionGroup, handleRemoveOptionGroup, handleOptionGroupChange,
@@ -60,6 +60,12 @@ export function EditMenuItemScreen({ itemId, onBack }: EditMenuItemScreenProps):
           }
         </Pressable>
       </View>
+
+      {saveError !== null && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorBannerText}>{saveError}</Text>
+        </View>
+      )}
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
 

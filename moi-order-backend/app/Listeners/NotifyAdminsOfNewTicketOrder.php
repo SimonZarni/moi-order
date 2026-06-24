@@ -22,7 +22,7 @@ class NotifyAdminsOfNewTicketOrder
 
         User::where('is_admin', true)->each(function (User $admin) use ($order): void {
             $admin->notify(new NewTicketOrderNotification($order));
-            event(new AdminNotificationReceived($admin));
+            event(new AdminNotificationReceived($admin, 'new_ticket_order'));
         });
     }
 }

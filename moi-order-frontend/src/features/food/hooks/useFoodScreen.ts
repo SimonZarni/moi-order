@@ -18,6 +18,7 @@ export interface UseFoodScreenResult extends UseRestaurantListDataResult {
   searchText:                 string;
   activeCategory:             FoodCategory;
   locationPermissionStatus:   CustomerLocationPermission;
+  locationError:              boolean;
   setSearchText:              (t: string) => void;
   setActiveCategory:          (c: FoodCategory) => void;
   handleRestaurantPress:      (restaurant: Restaurant) => void;
@@ -33,7 +34,7 @@ export function useFoodScreen(): UseFoodScreenResult {
   const cartCount  = useCartStore((s) => s.itemCount());
   const { orders } = useFoodOrdersData();
 
-  const { location, permissionStatus, requestPermission } = useCustomerLocation();
+  const { location, permissionStatus, locationError, requestPermission } = useCustomerLocation();
 
   const activeOrderCount = useMemo(
     () => orders.filter((o) =>
@@ -85,6 +86,7 @@ export function useFoodScreen(): UseFoodScreenResult {
     searchText,
     activeCategory,
     locationPermissionStatus:  permissionStatus,
+    locationError,
     setSearchText,
     setActiveCategory,
     handleRestaurantPress,

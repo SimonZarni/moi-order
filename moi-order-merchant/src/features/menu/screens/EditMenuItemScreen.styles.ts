@@ -224,4 +224,14 @@ export const styles = StyleSheet.create({
   },
   addOptionText: { fontSize: typography.xs, color: colours.primary, fontWeight: '700' },
   iconBtn: { padding: 6, minWidth: 32, alignItems: 'center' },
+  errorBanner: {
+    backgroundColor: colours.error,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  errorBannerText: {
+    color: colours.surface,
+    fontSize: typography.sm,
+    fontWeight: '600',
+  },
 });

@@ -135,4 +135,73 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 20,
   },
+  periodRow: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    backgroundColor: colours.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
+  },
+  periodTab: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colours.divider,
+  },
+  periodTabActive: {
+    backgroundColor: colours.primary,
+    borderColor: colours.primary,
+  },
+  periodTabText: {
+    fontSize: typography.xs,
+    fontWeight: '600',
+    color: colours.textSubtle,
+    lineHeight: 20,
+  },
+  periodTabTextActive: {
+    color: colours.surface,
+  },
+  summaryCard: {
+    backgroundColor: colours.surface,
+    borderRadius: 12,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    gap: spacing.sm,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  summaryLabel: {
+    fontSize: typography.xs,
+    color: colours.textSubtle,
+    lineHeight: 20,
+  },
+  summaryValue: {
+    fontSize: typography.sm,
+    fontWeight: '700',
+    color: colours.textOnLight,
+    lineHeight: 22,
+  },
+  summaryValueAccent: {
+    color: colours.primary,
+  },
+  summaryDivider: {
+    height: 1,
+    backgroundColor: colours.divider,
+    marginVertical: spacing.xs,
+  },
+  summaryDateRange: {
+    fontSize: typography.xxs,
+    color: colours.textSubtle,
+    letterSpacing: 0.5,
+    lineHeight: 16,
+    marginBottom: spacing.xs,
+  },
 });
