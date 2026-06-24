@@ -132,6 +132,13 @@ class FoodOrder extends Model
 
         foreach ($this->items as $item) {
             $lines[] = sprintf('• %s x%d — ฿%s', $item->name, $item->quantity, number_format($item->subtotal_cents / 100, 0));
+            foreach ($item->selected_options ?? [] as $opt) {
+                $price = $opt['price_cents'] > 0 ? ' (+฿' . number_format($opt['price_cents'] / 100, 0) . ')' : '';
+                $lines[] = sprintf('  ↳ %s: %s%s', $opt['option_group_name'], $opt['option_name'], $price);
+            }
+            if (! empty($item->notes)) {
+                $lines[] = '  📝 ' . $item->notes;
+            }
         }
 
         $lines[] = '';
@@ -159,6 +166,13 @@ class FoodOrder extends Model
 
         foreach ($this->items as $item) {
             $lines[] = sprintf('• %s x%d — ฿%s', $item->name, $item->quantity, number_format($item->subtotal_cents / 100, 0));
+            foreach ($item->selected_options ?? [] as $opt) {
+                $price = $opt['price_cents'] > 0 ? ' (+฿' . number_format($opt['price_cents'] / 100, 0) . ')' : '';
+                $lines[] = sprintf('  ↳ %s: %s%s', $opt['option_group_name'], $opt['option_name'], $price);
+            }
+            if (! empty($item->notes)) {
+                $lines[] = '  📝 ' . $item->notes;
+            }
         }
 
         $lines[] = '';
