@@ -85,6 +85,7 @@ class RestaurantService
                 'delivery_radius_km'    => $data['delivery_radius_km'] ?? null,
                 'is_delivery_available' => $data['is_delivery_available'] ?? null,
                 'is_pickup_available'   => $data['is_pickup_available'] ?? null,
+                'use_stock_system'      => $data['use_stock_system'] ?? null,
                 'min_order_cents'       => $data['min_order_cents'] ?? null,
             ], fn ($v) => $v !== null);
 
