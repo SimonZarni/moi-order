@@ -30,7 +30,7 @@ class RestaurantService
     public function getForMerchant(User $merchant): ?Restaurant
     {
         return $merchant->restaurant()->with([
-            'openingHours' => fn ($q) => $q->withCount('sessionMenuCategories'),
+            'openingHours' => fn ($q) => $q->withCount(['sessionMenuCategories', 'sessionMenuItems']),
             'photos',
             'menuCategories.menuItems',
         ])->first();

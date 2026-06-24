@@ -131,6 +131,9 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: colours.textOnLight,
   },
+  sessionMenuToggleLabelDisabled: {
+    color: colours.textSubtle,
+  },
   sessionMenuToggleDisabledHint: {
     fontSize: typography.xxs,
     color: colours.textSubtle,
@@ -150,10 +153,17 @@ export const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginBottom: spacing.sm,
   },
+  editMenuBtnDisabled: {
+    borderColor: colours.divider,
+    opacity: 0.5,
+  },
   editMenuBtnText: {
     fontSize: typography.xs,
     color: colours.primary,
     fontWeight: '600',
+  },
+  editMenuBtnTextDisabled: {
+    color: colours.textSubtle,
   },
   editMenuCount: {
     fontSize: typography.xxs,

@@ -7,6 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class RestaurantOpeningHour extends Model
 {
@@ -38,5 +39,18 @@ class RestaurantOpeningHour extends Model
     public function sessionMenuCategories(): HasMany
     {
         return $this->hasMany(MenuCategory::class, 'opening_hour_id')->orderBy('sort_order');
+    }
+
+    /** All menu items in every session category for this slot. */
+    public function sessionMenuItems(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            MenuItem::class,
+            MenuCategory::class,
+            'opening_hour_id',  // FK on MenuCategory → RestaurantOpeningHour
+            'menu_category_id', // FK on MenuItem → MenuCategory
+            'id',
+            'id',
+        );
     }
 }

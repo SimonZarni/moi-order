@@ -107,37 +107,66 @@ export function OperatingHoursScreen({ onBack, onEditSessionMenu }: OperatingHou
                     </View>
                     {(() => {
                       const serverSession = getSessionHour(day.day_of_week, index);
-                      if (!serverSession) return null;
                       const label = `${session.opens_at}–${session.closes_at} ${t(DAY_KEYS[day.day_of_week])}`;
+                      const hasItems = (serverSession?.session_menu_items_count ?? 0) > 0;
+                      const toggleOn = hasItems && (serverSession?.session_menu_enabled ?? false);
+
                       return (
                         <View style={styles.sessionMenuRow}>
-                          {/* On/Off toggle */}
+                          {/* On/Off toggle — only interactive when saved + has items */}
                           <View style={styles.sessionMenuToggleRow}>
-                            <Ionicons name="restaurant-outline" size={14} color={colours.primary} />
-                            <Text style={styles.sessionMenuToggleLabel}>Session Menu</Text>
+                            <Ionicons
+                              name="restaurant-outline"
+                              size={14}
+                              color={serverSession && hasItems ? colours.primary : colours.textSubtle}
+                            />
+                            <Text style={[styles.sessionMenuToggleLabel, !serverSession && styles.sessionMenuToggleLabelDisabled]}>
+                              Session Menu
+                            </Text>
                             <Switch
-                              value={serverSession.session_menu_enabled}
-                              onValueChange={(v) => handleToggleSessionMenu(serverSession.id, v)}
+                              value={toggleOn}
+                              onValueChange={(v) => { if (serverSession && hasItems) handleToggleSessionMenu(serverSession.id, v); }}
+                              disabled={!serverSession || !hasItems}
                               trackColor={{ false: colours.surfaceMuted, true: colours.primary + '66' }}
-                              thumbColor={serverSession.session_menu_enabled ? colours.primary : colours.medium}
+                              thumbColor={toggleOn ? colours.primary : colours.medium}
                               accessibilityLabel={`Session menu on/off for ${label}`}
                             />
                           </View>
-                          {!serverSession.session_menu_enabled && (
+
+                          {/* Contextual hint */}
+                          {!serverSession && (
+                            <Text style={styles.sessionMenuToggleDisabledHint}>
+                              Save operating hours first to manage this session's menu
+                            </Text>
+                          )}
+                          {serverSession && !hasItems && (
+                            <Text style={styles.sessionMenuToggleDisabledHint}>
+                              Add menu items to this session to enable
+                            </Text>
+                          )}
+                          {serverSession && hasItems && !toggleOn && (
                             <Text style={styles.sessionMenuToggleDisabledHint}>
                               Off — customers see the default menu during this slot
                             </Text>
                           )}
+
                           {/* Edit session menu button */}
                           <Pressable
-                            style={styles.editMenuBtn}
-                            onPress={() => onEditSessionMenu(serverSession.id, label)}
+                            style={[styles.editMenuBtn, !serverSession && styles.editMenuBtnDisabled]}
+                            onPress={() => serverSession && onEditSessionMenu(serverSession.id, label)}
+                            disabled={!serverSession}
                             accessibilityRole="button"
-                            accessibilityLabel={`Edit session menu for ${label}`}
+                            accessibilityLabel={serverSession ? `Edit session menu for ${label}` : 'Save hours first'}
                           >
-                            <Ionicons name="pencil-outline" size={14} color={colours.primary} />
-                            <Text style={styles.editMenuBtnText}>{t('hours_edit_session_menu')}</Text>
-                            {serverSession.session_menu_categories_count > 0 && (
+                            <Ionicons
+                              name="pencil-outline"
+                              size={14}
+                              color={serverSession ? colours.primary : colours.textSubtle}
+                            />
+                            <Text style={[styles.editMenuBtnText, !serverSession && styles.editMenuBtnTextDisabled]}>
+                              {t('hours_edit_session_menu')}
+                            </Text>
+                            {serverSession && serverSession.session_menu_categories_count > 0 && (
                               <Text style={styles.editMenuCount}>
                                 ({serverSession.session_menu_categories_count} {t('hours_session_menu_count')})
                               </Text>
