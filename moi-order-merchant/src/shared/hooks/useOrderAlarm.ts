@@ -137,7 +137,7 @@ const CHAT_BEEP_PATTERN: Array<[number, number]> = [
 ];
 
 const CHAT_FREQ = 520;
-const CHAT_GAIN = 0.25;
+const CHAT_GAIN = 0.60;
 
 function playChatBeeps(ctx: AudioContext): void {
   try {
