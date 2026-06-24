@@ -37,7 +37,14 @@ export function CartScreen(): React.JSX.Element {
             <View style={styles.card}>
               {cartItems.map((item: CartItem) => (
                 <View key={item.cartKey} style={styles.cartItemRow}>
-                  <Text style={styles.cartItemName} numberOfLines={1}>{item.name}</Text>
+                  <View style={styles.cartItemInfo}>
+                    <Text style={styles.cartItemName} numberOfLines={1}>{item.name}</Text>
+                    {item.selectedOptions.length > 0 && (
+                      <Text style={styles.cartItemOptions} numberOfLines={2}>
+                        {item.selectedOptions.map((o) => o.optionName).join(' · ')}
+                      </Text>
+                    )}
+                  </View>
                   <Text style={styles.cartItemQty}>×{item.quantity}</Text>
                   <Text style={styles.cartItemPrice}>
                     {formatPrice(((item.basePriceCents + item.additionalPriceCents) * item.quantity) / 100)}

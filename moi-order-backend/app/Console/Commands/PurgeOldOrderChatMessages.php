@@ -6,6 +6,7 @@ namespace App\Console\Commands;
 
 use App\Contracts\FileStorageInterface;
 use App\Enums\FoodOrderStatus;
+use App\Models\MerchantNotification;
 use App\Models\OrderChatMessage;
 use Illuminate\Console\Command;
 
@@ -41,6 +42,19 @@ class PurgeOldOrderChatMessages extends Command
 
             $message->forceDelete();
         }
+
+        // Remove chat_message notifications whose chats are now permanently closed.
+        MerchantNotification::query()
+            ->where('type', 'chat_message')
+            ->whereHas('order', fn ($q) => $q
+                ->where(fn ($q2) => $q2
+                    ->where('status', FoodOrderStatus::Completed->value)
+                    ->where('completed_at', '<=', $cutoff))
+                ->orWhere(fn ($q2) => $q2
+                    ->where('status', FoodOrderStatus::Cancelled->value)
+                    ->where('cancelled_at', '<=', $cutoff))
+            )
+            ->forceDelete();
 
         return self::SUCCESS;
     }

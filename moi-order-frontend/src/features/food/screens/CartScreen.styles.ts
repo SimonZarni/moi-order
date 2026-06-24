@@ -45,17 +45,25 @@ export const styles = StyleSheet.create({
   },
   cartItemRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colours.divider,
   },
-  cartItemName: {
+  cartItemInfo: {
     flex: 1,
+  },
+  cartItemName: {
     fontSize: typography.sm,
     color: colours.textOnLight,
     fontWeight: '500',
+  },
+  cartItemOptions: {
+    fontSize: typography.xxs,
+    color: colours.textMuted,
+    marginTop: 2,
+    lineHeight: 16,
   },
   cartItemQty: { fontSize: typography.sm, color: colours.medium, marginRight: spacing.sm },
   cartItemPrice: { fontSize: typography.sm, fontWeight: '700', color: colours.textOnLight },
