@@ -29,6 +29,7 @@ class UpdateRestaurantRequest extends FormRequest
             'delivery_radius_km'    => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
             'is_delivery_available' => ['sometimes', 'boolean'],
             'is_pickup_available'   => ['sometimes', 'boolean'],
+            'use_stock_system'      => ['sometimes', 'boolean'],
             'min_order_cents'       => ['sometimes', 'integer', 'min:0'],
             'cover_photo'           => ['sometimes', 'nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:51200'],
             'logo'                  => ['sometimes', 'nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:51200'],

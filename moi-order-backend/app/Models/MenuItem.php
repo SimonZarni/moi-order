@@ -24,6 +24,7 @@ class MenuItem extends Model
         'photo_path',
         'status',
         'sort_order',
+        'stock_quantity',
     ];
 
     protected $hidden = ['photo_path'];
@@ -35,6 +36,7 @@ class MenuItem extends Model
             'original_price_cents' => 'integer',
             'sort_order'           => 'integer',
             'status'               => MenuItemStatus::class,
+            'stock_quantity'       => 'integer',
         ];
     }
 

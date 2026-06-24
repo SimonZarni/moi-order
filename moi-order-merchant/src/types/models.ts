@@ -111,6 +111,7 @@ export interface MenuItem {
   original_price_cents: number | null;
   status: MenuItemStatus;
   photo_url: string | null;
+  stock_quantity: number | null;
   option_groups: MenuItemOptionGroup[];
 }
 
@@ -164,6 +165,7 @@ export interface Restaurant {
   delivery_radius_km: number | null;
   is_delivery_available: boolean;
   is_pickup_available: boolean;
+  use_stock_system: boolean;
   min_order_cents: number;
   opening_hours: OpeningHour[] | null;
 }

@@ -75,6 +75,17 @@ export async function toggleMenuItemStatus(
   return response.data.data;
 }
 
+export async function updateMenuItemStock(
+  id: number,
+  stockQuantity: number | null,
+): Promise<MenuItem> {
+  const response = await apiClient.patch<{ data: MenuItem }>(
+    `/menu/items/${id}/stock`,
+    { stock_quantity: stockQuantity },
+  );
+  return response.data.data;
+}
+
 // ── Session menu ─────────────────────────────────────────────────────────────
 
 export async function getSessionMenuCategories(openingHourId: number): Promise<MenuCategory[]> {

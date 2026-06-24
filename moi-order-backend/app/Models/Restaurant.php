@@ -35,6 +35,7 @@ class Restaurant extends Model
         'is_delivery_available',
         'is_pickup_available',
         'min_order_cents',
+        'use_stock_system',
     ];
 
     protected $hidden = [
@@ -55,6 +56,7 @@ class Restaurant extends Model
             'is_delivery_available' => 'boolean',
             'is_pickup_available'   => 'boolean',
             'min_order_cents'       => 'integer',
+            'use_stock_system'      => 'boolean',
         ];
     }
 

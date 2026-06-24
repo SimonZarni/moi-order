@@ -60,6 +60,16 @@ class FoodOrderService
                 }
             }
 
+            // Stock system: reject order lines where tracked stock is insufficient.
+            if ($restaurant->use_stock_system) {
+                foreach ($dto->items as $line) {
+                    $item = $menuItems[$line['menu_item_id']];
+                    if ($item->stock_quantity !== null && $item->stock_quantity < $line['quantity']) {
+                        throw new DomainException('order.insufficient_stock', 409);
+                    }
+                }
+            }
+
             // Load option groups for ALL items so required-group validation always runs,
             // even when selected_options is absent or an empty array (prevents bypass).
             $optionGroupsByItem = MenuItemOptionGroup::with('options')
@@ -166,6 +176,19 @@ class FoodOrderService
             ]);
 
             $order->items()->createMany($lines);
+
+            // Decrement tracked stock while still holding the lockForUpdate() row-lock.
+            if ($restaurant->use_stock_system) {
+                foreach ($dto->items as $line) {
+                    $item = $menuItems[$line['menu_item_id']];
+                    if ($item->stock_quantity !== null) {
+                        \DB::table('menu_items')
+                            ->where('id', $item->id)
+                            ->where('stock_quantity', '>=', $line['quantity'])
+                            ->decrement('stock_quantity', $line['quantity']);
+                    }
+                }
+            }
 
             $order->update(['order_number' => FoodOrder::generateOrderNumber()]);
 

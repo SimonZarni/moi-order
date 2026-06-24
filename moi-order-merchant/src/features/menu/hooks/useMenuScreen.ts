@@ -10,6 +10,7 @@ import {
   deleteCategory,
   toggleMenuItemStatus,
   deleteMenuItem,
+  updateMenuItemStock,
 } from '../../../api/menu';
 import { getRestaurant } from '../../../api/restaurant';
 import { extractApiError } from '../../../api/client';
@@ -53,6 +54,7 @@ interface UseMenuScreenResult {
   isError: boolean;
   hasMissingSystemCategories: boolean;
   restaurantStatus: RestaurantStatus | null;
+  useStockSystem: boolean;
   menuView: MenuView;
   // Tab + search
   selectedCategoryId: number | 'all';
@@ -82,6 +84,7 @@ interface UseMenuScreenResult {
   // Item mutations
   handleToggleItemStatus: (itemId: number, status: MenuItemStatus) => void;
   handleDeleteItem: (id: number) => void;
+  handleUpdateItemStock: (itemId: number, quantity: number | null) => void;
   // Add item modal
   addItemCategoryId: number | null;
   addItemForm: AddItemForm;
@@ -248,6 +251,7 @@ export function useMenuScreen(): UseMenuScreenResult {
     staleTime: CACHE_TTL.MENU,
   });
   const restaurantStatus = restaurantData?.restaurant?.status ?? null;
+  const useStockSystem   = restaurantData?.restaurant?.use_stock_system ?? false;
 
   // ── Derived data ──────────────────────────────────────────────────────────
   const categories = useMemo(() => {
@@ -330,6 +334,11 @@ export function useMenuScreen(): UseMenuScreenResult {
 
   const { mutate: mutateToggleStatus } = useMutation({
     mutationFn: ({ id, status }: { id: number; status: MenuItemStatus }) => toggleMenuItemStatus(id, status),
+    onSuccess: () => { void invalidateMenu(); },
+  });
+
+  const { mutate: mutateUpdateStock } = useMutation({
+    mutationFn: ({ id, quantity }: { id: number; quantity: number | null }) => updateMenuItemStock(id, quantity),
     onSuccess: () => { void invalidateMenu(); },
   });
 
@@ -416,6 +425,11 @@ export function useMenuScreen(): UseMenuScreenResult {
     [guardedItemIds, mutateDeleteItem],
   );
 
+  const handleUpdateItemStock = useCallback(
+    (itemId: number, quantity: number | null) => mutateUpdateStock({ id: itemId, quantity }),
+    [mutateUpdateStock],
+  );
+
   // ── Add item handlers ─────────────────────────────────────────────────────
   const addHandlers = makeOptionGroupHandlers(setAddItemForm);
 
@@ -465,7 +479,7 @@ export function useMenuScreen(): UseMenuScreenResult {
 
   return {
     categories, filteredItems, guardedItemIds, isLoading, isError,
-    hasMissingSystemCategories, restaurantStatus, menuView,
+    hasMissingSystemCategories, restaurantStatus, useStockSystem, menuView,
     selectedCategoryId, searchQuery, handleSelectCategory, handleSearchChange,
     showAddCategoryModal, newCategoryName, setShowAddCategoryModal,
     handleNewCategoryNameChange, handleConfirmAddCategory,
@@ -473,7 +487,7 @@ export function useMenuScreen(): UseMenuScreenResult {
     handleOpenRename, handleRenameNameChange, handleConfirmRename, handleCancelRename,
     deletingCategoryId, deletingCategoryName,
     handleOpenDeleteConfirm, handleConfirmDelete, handleCancelDelete,
-    handleToggleItemStatus, handleDeleteItem,
+    handleToggleItemStatus, handleDeleteItem, handleUpdateItemStock,
     addItemCategoryId, addItemForm, isAddingItem,
     handleOpenAddItem, handleCloseAddItem,
     handleAddItemFieldChange, handleAddItemPhotoChange, handlePickAddPhoto,

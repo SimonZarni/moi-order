@@ -93,6 +93,7 @@ interface UseRestaurantScreenResult {
   handleSaveDelivery: () => void;
   handleToggleDelivery: (v: boolean) => void;
   handleTogglePickup: (v: boolean) => void;
+  handleToggleStockSystem: (v: boolean) => void;
   handleEditPhone: () => void;
   handleCancelPhone: () => void;
   handlePhoneChange: (v: string) => void;
@@ -216,6 +217,11 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
 
   const { mutate: mutateTogglePickup } = useMutation({
     mutationFn: (v: boolean) => updateRestaurant({ is_pickup_available: v }),
+    onSuccess: (updated) => { setCache(updated); },
+  });
+
+  const { mutate: mutateToggleStockSystem } = useMutation({
+    mutationFn: (v: boolean) => updateRestaurant({ use_stock_system: v }),
     onSuccess: (updated) => { setCache(updated); },
   });
 
@@ -478,6 +484,11 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     [mutateTogglePickup],
   );
 
+  const handleToggleStockSystem = useCallback(
+    (v: boolean) => mutateToggleStockSystem(v),
+    [mutateToggleStockSystem],
+  );
+
   // ── Opening hours ─────────────────────────────────────────────────────────────
 
   const handleEditHours = useCallback(() => {
@@ -610,6 +621,7 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     handleSaveDelivery,
     handleToggleDelivery,
     handleTogglePickup,
+    handleToggleStockSystem,
     handleEditPhone,
     handleCancelPhone,
     handlePhoneChange,

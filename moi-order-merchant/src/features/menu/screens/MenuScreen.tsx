@@ -28,6 +28,7 @@ export function MenuScreen({ onEditItem }: MenuScreenProps): React.JSX.Element {
   const t = useTranslation();
   const {
     categories, filteredItems, guardedItemIds, isLoading, hasMissingSystemCategories, menuView,
+    useStockSystem,
     selectedCategoryId, searchQuery, handleSelectCategory, handleSearchChange,
     showAddCategoryModal, newCategoryName, setShowAddCategoryModal,
     handleNewCategoryNameChange, handleConfirmAddCategory,
@@ -35,7 +36,7 @@ export function MenuScreen({ onEditItem }: MenuScreenProps): React.JSX.Element {
     handleOpenRename, handleRenameNameChange, handleConfirmRename, handleCancelRename,
     deletingCategoryId, deletingCategoryName,
     handleOpenDeleteConfirm, handleConfirmDelete, handleCancelDelete,
-    handleToggleItemStatus, handleDeleteItem,
+    handleToggleItemStatus, handleDeleteItem, handleUpdateItemStock,
     addItemCategoryId, addItemForm, isAddingItem,
     handleOpenAddItem, handleCloseAddItem,
     handleAddItemFieldChange, handleAddItemPhotoChange, handlePickAddPhoto,
@@ -162,9 +163,11 @@ export function MenuScreen({ onEditItem }: MenuScreenProps): React.JSX.Element {
                 key={item.id}
                 item={item}
                 isLastInRequiredCategory={guardedItemIds.has(item.id)}
+                useStockSystem={useStockSystem}
                 onToggleStatus={handleToggleItemStatus}
                 onDelete={handleDeleteItem}
                 onEdit={(it) => onEditItem(it.id)}
+                onUpdateStock={handleUpdateItemStock}
               />
             ))}
           </View>

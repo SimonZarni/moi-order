@@ -60,6 +60,7 @@ Route::post('/menu/categories/{categoryId}/items',  [MenuItemController::class, 
 Route::put('/menu/items/{id}',                      [MenuItemController::class, 'update']);
 Route::patch('/menu/items/{id}',                    [MenuItemController::class, 'update']);
 Route::patch('/menu/items/{id}/status',             [MenuItemController::class, 'updateStatus']);
+Route::patch('/menu/items/{id}/stock',              [MenuItemController::class, 'updateStock']);
 Route::delete('/menu/items/{id}',                   [MenuItemController::class, 'destroy']);
 
 // ── Analytics ─────────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, Pressable, Image } from 'react-native';
+import { View, Text, Pressable, Image, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './MenuItemRow.styles';
 import { colours } from '../../../shared/theme/colours';
@@ -23,16 +23,20 @@ const STATUS_COLOURS: Record<MenuItemStatus, string> = {
 interface MenuItemRowProps {
   item: MenuItem;
   isLastInRequiredCategory?: boolean;
+  useStockSystem?: boolean;
   onToggleStatus: (id: number, status: MenuItemStatus) => void;
   onDelete: (id: number) => void;
   onEdit: (item: MenuItem) => void;
+  onUpdateStock?: (id: number, quantity: number | null) => void;
 }
 
-export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleStatus, onDelete, onEdit }: MenuItemRowProps): React.JSX.Element {
+export function MenuItemRow({ item, isLastInRequiredCategory = false, useStockSystem = false, onToggleStatus, onDelete, onEdit, onUpdateStock }: MenuItemRowProps): React.JSX.Element {
   const [expanded, setExpanded] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [showGuardWarning, setShowGuardWarning] = useState(false);
   const [confirmingStatus, setConfirmingStatus] = useState(false);
+  const [editingStock, setEditingStock] = useState(false);
+  const [stockInput, setStockInput] = useState('');
 
   const statusColour = STATUS_COLOURS[item.status];
   const hasModifiers = item.option_groups.length > 0;
@@ -78,6 +82,20 @@ export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleSt
 
   const handleCancelStatus = useCallback(() => setConfirmingStatus(false), []);
 
+  const handleEditStock = useCallback(() => {
+    setStockInput(item.stock_quantity !== null ? String(item.stock_quantity) : '');
+    setEditingStock(true);
+  }, [item.stock_quantity]);
+
+  const handleSaveStock = useCallback(() => {
+    const qty = stockInput === '' ? null : parseInt(stockInput, 10);
+    if (qty !== null && (isNaN(qty) || qty < 0)) return;
+    setEditingStock(false);
+    onUpdateStock?.(item.id, qty);
+  }, [stockInput, item.id, onUpdateStock]);
+
+  const handleCancelStockEdit = useCallback(() => setEditingStock(false), []);
+
   return (
     <View style={styles.wrapper}>
       <View style={styles.row}>
@@ -97,6 +115,35 @@ export function MenuItemRow({ item, isLastInRequiredCategory = false, onToggleSt
                 <Text style={styles.modifierCount}>{item.option_groups.length} modifier{item.option_groups.length !== 1 ? 's' : ''}</Text>
               )}
             </View>
+            {useStockSystem && (
+              editingStock ? (
+                <View style={styles.stockEditRow}>
+                  <TextInput
+                    style={styles.stockInput}
+                    value={stockInput}
+                    onChangeText={setStockInput}
+                    keyboardType="number-pad"
+                    placeholder="qty (blank = unlimited)"
+                    placeholderTextColor={colours.textSubtle}
+                    accessibilityLabel="Stock quantity"
+                    autoFocus
+                  />
+                  <Pressable style={styles.stockSaveBtn} onPress={handleSaveStock} accessibilityRole="button" accessibilityLabel="Save stock">
+                    <Text style={styles.stockSaveText}>OK</Text>
+                  </Pressable>
+                  <Pressable onPress={handleCancelStockEdit} accessibilityRole="button" accessibilityLabel="Cancel stock edit">
+                    <Ionicons name="close" size={16} color={colours.textSubtle} />
+                  </Pressable>
+                </View>
+              ) : (
+                <Pressable style={styles.stockBadge} onPress={handleEditStock} accessibilityRole="button" accessibilityLabel={`Stock: ${item.stock_quantity !== null ? String(item.stock_quantity) : 'unlimited'}`}>
+                  <Ionicons name="cube-outline" size={11} color={colours.primary} />
+                  <Text style={styles.stockBadgeText}>
+                    {item.stock_quantity !== null ? `${item.stock_quantity} left` : '∞ unlimited'}
+                  </Text>
+                </Pressable>
+              )
+            )}
           </View>
         </View>
         <View style={styles.actions}>

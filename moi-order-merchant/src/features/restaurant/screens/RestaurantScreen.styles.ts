@@ -252,6 +252,13 @@ export const styles = StyleSheet.create({
   infoRowWithAction: { flexDirection: 'row', alignItems: 'center' },
   inlineEditBtn: { padding: 6, marginLeft: spacing.xs },
 
+  // ── Stock toggle ──────────────────────────────────────────────────────────────
+  stockToggleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  stockToggleInfo: { flex: 1, flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
+  stockToggleLabels: { flex: 1 },
+  stockToggleTitle: { fontSize: typography.sm, fontWeight: '600', color: colours.textOnLight },
+  stockToggleSubtitle: { fontSize: typography.xxs, color: colours.textSubtle, marginTop: 2, lineHeight: 16 },
+
   // ── Location ─────────────────────────────────────────────────────────────────
   locationPreview: {
     flexDirection: 'row',

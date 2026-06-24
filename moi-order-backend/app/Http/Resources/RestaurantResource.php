@@ -54,6 +54,7 @@ class RestaurantResource extends JsonResource
             'is_within_range'       => $this->is_within_range !== null ? (bool) $this->is_within_range : null,
             'is_delivery_available' => $this->is_delivery_available,
             'is_pickup_available'   => $this->is_pickup_available,
+            'use_stock_system'      => (bool) $this->use_stock_system,
             'min_order_cents'       => $this->min_order_cents,
             'is_open_now'           => $this->whenLoaded('openingHours', fn () => $this->effectiveStatus()->isAcceptingOrders()),
             'opening_hours'         => $this->whenLoaded('openingHours', fn () =>

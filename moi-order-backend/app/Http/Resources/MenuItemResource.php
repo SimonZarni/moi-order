@@ -34,6 +34,7 @@ class MenuItemResource extends JsonResource
             'photo_url'            => $photoUrl,
             'status'               => $this->status->value,
             'sort_order'           => $this->sort_order,
+            'stock_quantity'       => $this->stock_quantity,
             'option_groups'        => $this->whenLoaded('optionGroups', fn () =>
                 $this->optionGroups->map(fn ($g) => [
                     'id'             => $g->id,

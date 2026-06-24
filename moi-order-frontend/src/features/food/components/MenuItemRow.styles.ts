@@ -115,4 +115,10 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 0.2,
   },
+  stockWarning: {
+    fontSize: typography.xxs,
+    color: colours.warning,
+    fontWeight: '600',
+    marginTop: 2,
+  },
 });

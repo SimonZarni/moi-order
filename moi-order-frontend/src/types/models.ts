@@ -399,6 +399,7 @@ export interface MenuItem {
   photo_url: string | null;
   status: import('./enums').MenuItemStatus;
   sort_order: number;
+  stock_quantity: number | null;
   option_groups: MenuItemOptionGroup[];
 }
 
@@ -429,6 +430,7 @@ export interface Restaurant {
   is_within_range: boolean | null;
   is_delivery_available: boolean;
   is_pickup_available: boolean;
+  use_stock_system: boolean;
   min_order_cents: number;
   is_open_now?: boolean;
   opening_hours?: OpeningHour[];

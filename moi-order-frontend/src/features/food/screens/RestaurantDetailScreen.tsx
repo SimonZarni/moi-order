@@ -113,7 +113,7 @@ export function RestaurantDetailScreen(): React.JSX.Element {
         {/* In-scroll tab bar — not sticky; stays with content so sectionYs remain correct */}
         <CategoryTabBar categories={sortedCategories} activeIndex={activeTabIndex} onTabPress={handleTabPress} onHeightMeasured={handleTabBarLayout} />
         {sortedCategories.map((cat, i) => (
-          <MenuCategorySection key={cat.id} category={cat} sectionIndex={i} onSectionMeasured={handleSectionLayout} getQuantity={getQuantity} onAdd={handleAddItem} onRemove={handleRemoveItem} onPress={handleItemPress} />
+          <MenuCategorySection key={cat.id} category={cat} sectionIndex={i} useStockSystem={restaurant.use_stock_system} onSectionMeasured={handleSectionLayout} getQuantity={getQuantity} onAdd={handleAddItem} onRemove={handleRemoveItem} onPress={handleItemPress} />
         ))}
         {restaurant.id !== undefined && (
           <RestaurantReviewsSection restaurantId={restaurant.id} />

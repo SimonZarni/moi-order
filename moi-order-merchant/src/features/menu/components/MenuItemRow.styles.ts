@@ -144,4 +144,22 @@ export const styles = StyleSheet.create({
   optionRow: { flexDirection: 'row', justifyContent: 'space-between', paddingLeft: spacing.sm, paddingVertical: 3 },
   optionName: { fontSize: typography.xs, color: colours.textMuted },
   optionPrice: { fontSize: typography.xs, color: colours.primary, fontWeight: '700' },
+  // Stock
+  stockBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 3, alignSelf: 'flex-start' },
+  stockBadgeText: { fontSize: typography.xxs, color: colours.primary, fontWeight: '600' },
+  stockEditRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs },
+  stockInput: {
+    flex: 1,
+    fontSize: typography.xs,
+    color: colours.textOnLight,
+    backgroundColor: colours.surfaceMuted,
+    borderWidth: 1,
+    borderColor: colours.primary,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: 4,
+    minHeight: 32,
+  },
+  stockSaveBtn: { backgroundColor: colours.primary, paddingHorizontal: spacing.sm, paddingVertical: 4, borderRadius: radius.sm, minHeight: 32, justifyContent: 'center' },
+  stockSaveText: { fontSize: typography.xs, color: colours.white, fontWeight: '700' },
 });

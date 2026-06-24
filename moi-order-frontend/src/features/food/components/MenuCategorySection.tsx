@@ -6,17 +6,18 @@ import { MenuItemRow } from './MenuItemRow';
 import { styles } from './MenuCategorySection.styles';
 
 interface Props {
-  category:         MenuCategory;
-  sectionIndex:     number;
+  category:          MenuCategory;
+  sectionIndex:      number;
+  useStockSystem?:   boolean;
   onSectionMeasured: (index: number, y: number) => void;
-  getQuantity:      (menuItemId: number) => number;
-  onAdd:            (item: MenuItem) => void;
-  onRemove:         (cartKey: string) => void;
-  onPress:          (item: MenuItem) => void;
+  getQuantity:       (menuItemId: number) => number;
+  onAdd:             (item: MenuItem) => void;
+  onRemove:          (cartKey: string) => void;
+  onPress:           (item: MenuItem) => void;
 }
 
 export function MenuCategorySection({
-  category, sectionIndex, onSectionMeasured, getQuantity, onAdd, onRemove, onPress,
+  category, sectionIndex, useStockSystem = false, onSectionMeasured, getQuantity, onAdd, onRemove, onPress,
 }: Props): React.JSX.Element {
   const s = useStrings();
   const handleLayout = useCallback(
@@ -35,6 +36,7 @@ export function MenuCategorySection({
             key={item.id}
             item={item}
             quantity={getQuantity(item.id)}
+            useStockSystem={useStockSystem}
             onAdd={onAdd}
             onRemove={onRemove}
             onPress={onPress}

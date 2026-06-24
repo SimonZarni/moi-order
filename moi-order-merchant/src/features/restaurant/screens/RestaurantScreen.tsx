@@ -52,6 +52,7 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
     handleResubmitUploadDoc, handleResubmitFinalSubmit,
     handleUseExistingDocs, isUsingExistingDocs,
     statusWarning, handleDismissStatusWarning,
+    handleToggleStockSystem,
   } = useRestaurantScreen();
 
   const t = useTranslation();
@@ -419,6 +420,33 @@ export function RestaurantScreen({ onReviewsPress }: RestaurantScreenProps): Rea
               </View>
             ) : (
               <InfoRow label={t('restaurant_description_label')} value={restaurant?.description ?? '—'} />
+            )}
+
+            {/* Stock system toggle */}
+            {restaurant !== null && (
+              <>
+                <View style={styles.divider} />
+                <View style={styles.stockToggleRow}>
+                  <View style={styles.stockToggleInfo}>
+                    <Ionicons name="cube-outline" size={16} color={colours.primary} />
+                    <View style={styles.stockToggleLabels}>
+                      <Text style={styles.stockToggleTitle}>Stock Management</Text>
+                      <Text style={styles.stockToggleSubtitle}>
+                        {restaurant.use_stock_system
+                          ? 'Tracking stock per item — customers see remaining quantities'
+                          : 'Off — items use Available / Sold Out / Hidden status'}
+                      </Text>
+                    </View>
+                  </View>
+                  <Switch
+                    value={restaurant.use_stock_system}
+                    onValueChange={handleToggleStockSystem}
+                    trackColor={{ false: colours.surfaceMuted, true: colours.primary + '66' }}
+                    thumbColor={restaurant.use_stock_system ? colours.primary : colours.medium}
+                    accessibilityLabel="Toggle stock management system"
+                  />
+                </View>
+              </>
             )}
           </View>
 

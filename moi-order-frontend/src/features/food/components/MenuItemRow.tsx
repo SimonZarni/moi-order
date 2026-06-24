@@ -8,18 +8,22 @@ import { useStrings } from '@/shared/i18n';
 import { styles } from './MenuItemRow.styles';
 
 interface Props {
-  item:       MenuItem;
-  quantity:   number;
-  onAdd:      (item: MenuItem) => void;
-  onRemove:   (cartKey: string) => void;
-  onPress:    (item: MenuItem) => void;
+  item:            MenuItem;
+  quantity:        number;
+  useStockSystem?: boolean;
+  onAdd:           (item: MenuItem) => void;
+  onRemove:        (cartKey: string) => void;
+  onPress:         (item: MenuItem) => void;
 }
 
-export function MenuItemRow({ item, quantity, onAdd, onRemove, onPress }: Props): React.JSX.Element {
-  const s             = useStrings();
-  const isUnavailable = item.status === MENU_ITEM_STATUS.OutOfStock;
-  const hasOptions    = item.option_groups.length > 0;
-  const isDiscounted  = item.original_price_cents !== null && item.original_price_cents > item.price_cents;
+export function MenuItemRow({ item, quantity, useStockSystem = false, onAdd, onRemove, onPress }: Props): React.JSX.Element {
+  const s = useStrings();
+
+  const stockOutOfStock  = useStockSystem && item.stock_quantity !== null && item.stock_quantity === 0;
+  const isUnavailable    = item.status === MENU_ITEM_STATUS.OutOfStock || stockOutOfStock;
+  const hasOptions       = item.option_groups.length > 0;
+  const isDiscounted     = item.original_price_cents !== null && item.original_price_cents > item.price_cents;
+  const showStockWarning = useStockSystem && item.stock_quantity !== null && item.stock_quantity > 0 && item.stock_quantity <= 10;
 
   return (
     <Pressable
@@ -45,6 +49,9 @@ export function MenuItemRow({ item, quantity, onAdd, onRemove, onPress }: Props)
           {hasOptions && <Text style={styles.customizeHint}>{s.restaurant.customizable}</Text>}
         </View>
         {isUnavailable && <Text style={styles.unavailableLabel}>{s.restaurant.unavailable}</Text>}
+        {showStockWarning && (
+          <Text style={styles.stockWarning}>Only {item.stock_quantity} left!</Text>
+        )}
       </View>
 
       {!isUnavailable && (
