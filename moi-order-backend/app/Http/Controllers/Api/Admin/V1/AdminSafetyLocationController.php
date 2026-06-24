@@ -37,14 +37,10 @@ class AdminSafetyLocationController extends Controller
             perPage:  $request->integer('per_page', 20),
         );
 
-        return SafetyLocationResource::collection($paginator)->additional([
-            'meta' => [
-                'current_page' => $paginator->currentPage(),
-                'last_page'    => $paginator->lastPage(),
-                'per_page'     => $paginator->perPage(),
-                'total'        => $paginator->total(),
-            ],
-        ]);
+        // Return plain collection — Laravel's paginated response includes meta.total.
+        // Never use ->additional(['meta'=>...]) here: array_merge_recursive would
+        // produce total:[0,0] instead of total:0, causing NaN in the frontend.
+        return SafetyLocationResource::collection($paginator);
     }
 
     /** POST /api/admin/v1/safety-locations */
@@ -95,6 +91,25 @@ class AdminSafetyLocationController extends Controller
     {
         $location = SafetyLocation::findOrFail($id);
         $updated  = $this->service->removePhoto($location, $index);
+
+        return response()->json(['data' => new SafetyLocationResource($updated, $this->storage)]);
+    }
+
+    /** POST /api/admin/v1/safety-locations/{id}/cover */
+    public function uploadCover(Request $request, int $id): JsonResponse
+    {
+        $request->validate(['photo' => ['required', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120']]);
+        $location = SafetyLocation::findOrFail($id);
+        $updated  = $this->service->setCoverPhoto($location, $request->file('photo'));
+
+        return response()->json(['data' => new SafetyLocationResource($updated, $this->storage)]);
+    }
+
+    /** DELETE /api/admin/v1/safety-locations/{id}/cover */
+    public function removeCover(int $id): JsonResponse
+    {
+        $location = SafetyLocation::findOrFail($id);
+        $updated  = $this->service->removeCoverPhoto($location);
 
         return response()->json(['data' => new SafetyLocationResource($updated, $this->storage)]);
     }

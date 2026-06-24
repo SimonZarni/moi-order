@@ -9,20 +9,21 @@ export const SAFETY_CATEGORY_LABELS: Record<SafetyCategory, string> = {
 };
 
 export type SafetyLocationData = {
-  id:             number;
-  name:           string;
-  category:       SafetyCategory;
-  category_label: string;
-  phone:          string | null;
-  location:       string | null;
-  fb_page_link:   string | null;
-  gmap_link:      string | null;
-  description:    string | null;
-  latitude:       number | null;
-  longitude:      number | null;
-  photo_urls:     string[];
-  created_at:     string;
-  updated_at:     string;
+  id:               number;
+  name:             string;
+  category:         SafetyCategory;
+  category_label:   string;
+  phone:            string | null;
+  location:         string | null;
+  fb_page_link:     string | null;
+  gmap_link:        string | null;
+  description:      string | null;
+  latitude:         number | null;
+  longitude:        number | null;
+  cover_photo_url:  string | null;
+  photo_urls:       string[];
+  created_at:       string;
+  updated_at:       string;
 };
 
 type Meta = { current_page: number; last_page: number; per_page: number; total: number };
@@ -30,15 +31,15 @@ type Meta = { current_page: number; last_page: number; per_page: number; total: 
 type ListParams = { page?: number; per_page?: number; category?: SafetyCategory; search?: string };
 
 export type SafetyLocationPayload = {
-  name:         string;
-  category:     SafetyCategory;
-  phone?:       string | null;
-  location?:    string | null;
+  name:          string;
+  category:      SafetyCategory;
+  phone?:        string | null;
+  location?:     string | null;
   fb_page_link?: string | null;
-  gmap_link?:   string | null;
-  description?: string | null;
-  latitude?:    number | null;
-  longitude?:   number | null;
+  gmap_link?:    string | null;
+  description?:  string | null;
+  latitude?:     number | null;
+  longitude?:    number | null;
 };
 
 export const safetyApi = {
@@ -64,6 +65,20 @@ export const safetyApi = {
 
   remove: async (id: number): Promise<void> => {
     await apiClient.delete(`/safety-locations/${id}`);
+  },
+
+  setCover: async (id: number, file: File): Promise<SafetyLocationData> => {
+    const form = new FormData();
+    form.append('photo', file);
+    const res = await apiClient.post<{ data: SafetyLocationData }>(`/safety-locations/${id}/cover`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data.data;
+  },
+
+  removeCover: async (id: number): Promise<SafetyLocationData> => {
+    const res = await apiClient.delete<{ data: SafetyLocationData }>(`/safety-locations/${id}/cover`);
+    return res.data.data;
   },
 
   addPhoto: async (id: number, file: File): Promise<SafetyLocationData> => {

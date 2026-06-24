@@ -575,20 +575,21 @@ export interface EmergencyContact {
 export type SafetyCategoryValue = 'hospital' | 'police_station' | 'rescue';
 
 export interface SafetyLocation {
-  id:             number;
-  name:           string;
-  category:       SafetyCategoryValue;
-  category_label: string;
-  phone:          string | null;
-  location:       string | null;
-  fb_page_link:   string | null;
-  gmap_link:      string | null;
-  description:    string | null;
-  latitude:       number | null;
-  longitude:      number | null;
-  photo_urls:     string[];
-  created_at:     string;
-  updated_at:     string;
+  id:               number;
+  name:             string;
+  category:         SafetyCategoryValue;
+  category_label:   string;
+  phone:            string | null;
+  location:         string | null;
+  fb_page_link:     string | null;
+  gmap_link:        string | null;
+  description:      string | null;
+  latitude:         number | null;
+  longitude:        number | null;
+  cover_photo_url:  string | null;
+  photo_urls:       string[];
+  created_at:       string;
+  updated_at:       string;
 }
 
 // ── API wrappers ───────────────────────────────────────────────────────────

@@ -23,6 +23,7 @@ class SafetyLocation extends Model
         'latitude',
         'longitude',
         'photo_paths',
+        'cover_photo_path',
     ];
 
     protected function casts(): array

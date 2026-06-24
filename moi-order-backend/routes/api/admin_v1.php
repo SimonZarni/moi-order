@@ -506,6 +506,8 @@ Route::prefix('safety-locations')->name('admin.safety-locations.')->group(functi
     Route::delete('/{id}', [AdminSafetyLocationController::class, 'destroy'])->name('destroy')->whereNumber('id');
     Route::post('/{id}/photos', [AdminSafetyLocationController::class, 'addPhoto'])->name('photos.store')->whereNumber('id');
     Route::delete('/{id}/photos/{index}', [AdminSafetyLocationController::class, 'removePhoto'])->name('photos.destroy')->whereNumber('id');
+    Route::post('/{id}/cover', [AdminSafetyLocationController::class, 'uploadCover'])->name('cover.store')->whereNumber('id');
+    Route::delete('/{id}/cover', [AdminSafetyLocationController::class, 'removeCover'])->name('cover.destroy')->whereNumber('id');
 });
 
 // ── Document Types ────────────────────────────────────────────────────────────

@@ -96,6 +96,21 @@ class SafetyLocationService
         return $location->fresh();
     }
 
+    public function setCoverPhoto(SafetyLocation $location, UploadedFile $file): SafetyLocation
+    {
+        $path = $this->storage->store($file, 'safety-locations/covers');
+        $location->update(['cover_photo_path' => $path]);
+
+        return $location->fresh();
+    }
+
+    public function removeCoverPhoto(SafetyLocation $location): SafetyLocation
+    {
+        $location->update(['cover_photo_path' => null]);
+
+        return $location->fresh();
+    }
+
     public function export(?SafetyCategory $category): BinaryFileResponse
     {
         $filename = ($category?->label() ?? 'Safety-Locations') . '-' . now()->format('Y-m-d') . '.xlsx';

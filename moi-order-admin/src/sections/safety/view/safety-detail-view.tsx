@@ -11,6 +11,7 @@ import Alert from '@mui/material/Alert';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+import Divider from '@mui/material/Divider';
 import Tooltip from '@mui/material/Tooltip';
 import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
@@ -58,31 +59,35 @@ const EMPTY_FORM: SafetyLocationPayload = {
 export function SafetyDetailView() {
   const { category } = useParams<{ category: SafetyCategory }>();
   const router = useRouter();
-  const importRef = useRef<HTMLInputElement>(null);
+  const importRef  = useRef<HTMLInputElement>(null);
+  const coverRef   = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
 
-  const cat = (category as SafetyCategory) ?? 'hospital';
+  const cat      = (category as SafetyCategory) ?? 'hospital';
   const catLabel = SAFETY_CATEGORY_LABELS[cat] ?? cat;
 
-  const [rows, setRows]           = useState<SafetyLocationData[]>([]);
-  const [loading, setLoading]     = useState(false);
-  const [page, setPage]           = useState(0);
-  const [total, setTotal]         = useState(0);
-  const [perPage]                 = useState(20);
-  const [search, setSearch]       = useState('');
-  const [editItem, setEditItem]   = useState<SafetyLocationData | null>(null);
-  const [formOpen, setFormOpen]   = useState(false);
-  const [form, setForm]           = useState<SafetyLocationPayload>({ ...EMPTY_FORM, category: cat });
-  const [saving, setSaving]       = useState(false);
-  const [saveError, setSaveError] = useState('');
-  const [deleteId, setDeleteId]   = useState<number | null>(null);
-  const [importMsg, setImportMsg] = useState('');
-  const [importing, setImporting] = useState(false);
+  const [rows, setRows]             = useState<SafetyLocationData[]>([]);
+  const [loading, setLoading]       = useState(false);
+  const [page, setPage]             = useState(0);
+  const [total, setTotal]           = useState(0);
+  const [perPage]                   = useState(20);
+  const [search, setSearch]         = useState('');
+  const [editItem, setEditItem]     = useState<SafetyLocationData | null>(null);
+  const [formOpen, setFormOpen]     = useState(false);
+  const [form, setForm]             = useState<SafetyLocationPayload>({ ...EMPTY_FORM, category: cat });
+  const [saving, setSaving]         = useState(false);
+  const [saveError, setSaveError]   = useState('');
+  const [deleteId, setDeleteId]     = useState<number | null>(null);
+  const [importMsg, setImportMsg]   = useState('');
+  const [importing, setImporting]   = useState(false);
+  const [photoItem, setPhotoItem]   = useState<SafetyLocationData | null>(null);
+  const [photoWorking, setPhotoWorking] = useState(false);
 
   const fetchRows = useCallback(() => {
     setLoading(true);
     safetyApi
       .list({ category: cat, search: search || undefined, page: page + 1, per_page: perPage })
-      .then(({ data, meta }) => { setRows(data); setTotal(meta.total); })
+      .then(({ data, meta }) => { setRows(data); setTotal(meta?.total ?? 0); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [cat, search, page, perPage]);
@@ -114,11 +119,11 @@ export function SafetyDetailView() {
     setSaveError('');
     const payload: SafetyLocationPayload = {
       ...form,
-      phone:        form.phone       || null,
-      location:     form.location    || null,
+      phone:        form.phone        || null,
+      location:     form.location     || null,
       fb_page_link: form.fb_page_link || null,
-      gmap_link:    form.gmap_link   || null,
-      description:  form.description || null,
+      gmap_link:    form.gmap_link    || null,
+      description:  form.description  || null,
     };
     try {
       if (editItem) {
@@ -167,6 +172,41 @@ export function SafetyDetailView() {
     }
   };
 
+  const patchPhotoItem = (updated: SafetyLocationData) => {
+    setPhotoItem(updated);
+    setRows((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+  };
+
+  const handleUploadCover = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !photoItem) return;
+    setPhotoWorking(true);
+    try { patchPhotoItem(await safetyApi.setCover(photoItem.id, file)); } catch { /* ignore */ }
+    finally { setPhotoWorking(false); if (coverRef.current) coverRef.current.value = ''; }
+  };
+
+  const handleRemoveCover = async () => {
+    if (!photoItem) return;
+    setPhotoWorking(true);
+    try { patchPhotoItem(await safetyApi.removeCover(photoItem.id)); } catch { /* ignore */ }
+    finally { setPhotoWorking(false); }
+  };
+
+  const handleAddGallery = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !photoItem) return;
+    setPhotoWorking(true);
+    try { patchPhotoItem(await safetyApi.addPhoto(photoItem.id, file)); } catch { /* ignore */ }
+    finally { setPhotoWorking(false); if (galleryRef.current) galleryRef.current.value = ''; }
+  };
+
+  const handleRemoveGallery = async (index: number) => {
+    if (!photoItem) return;
+    setPhotoWorking(true);
+    try { patchPhotoItem(await safetyApi.removePhoto(photoItem.id, index)); } catch { /* ignore */ }
+    finally { setPhotoWorking(false); }
+  };
+
   const field = (key: keyof SafetyLocationPayload) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
 
@@ -180,7 +220,7 @@ export function SafetyDetailView() {
         <Chip
           icon={<Iconify icon={CATEGORY_ICONS[cat]} width={16} />}
           label={catLabel}
-          sx={{ bgcolor: CATEGORY_COLOURS[cat] + '22', color: CATEGORY_COLOURS[cat], fontWeight: 700, fontSize: 14 }}
+          sx={{ bgcolor: `${CATEGORY_COLOURS[cat]}22`, color: CATEGORY_COLOURS[cat], fontWeight: 700, fontSize: 14 }}
         />
         <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h5">{catLabel}</Typography>
@@ -216,11 +256,7 @@ export function SafetyDetailView() {
             Export
           </Button>
         </Tooltip>
-        <Button
-          variant="contained"
-          startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={openCreate}
-        >
+        <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={openCreate}>
           Add
         </Button>
       </Box>
@@ -259,12 +295,28 @@ export function SafetyDetailView() {
                   ) : rows.map((row) => (
                     <TableRow key={row.id} hover>
                       <TableCell>
-                        <Typography variant="subtitle2">{row.name}</Typography>
-                        {row.description && (
-                          <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: 220, display: 'block' }}>
-                            {row.description}
-                          </Typography>
-                        )}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          {row.cover_photo_url ? (
+                            <Box
+                              component="img"
+                              src={row.cover_photo_url}
+                              alt={row.name}
+                              sx={{ width: 44, height: 44, objectFit: 'cover', borderRadius: 1, flexShrink: 0 }}
+                            />
+                          ) : (
+                            <Box sx={{ width: 44, height: 44, bgcolor: 'action.hover', borderRadius: 1, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Iconify icon={CATEGORY_ICONS[cat]} width={20} sx={{ color: 'text.disabled' }} />
+                            </Box>
+                          )}
+                          <Box>
+                            <Typography variant="subtitle2">{row.name}</Typography>
+                            {row.description && (
+                              <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: 180, display: 'block' }}>
+                                {row.description}
+                              </Typography>
+                            )}
+                          </Box>
+                        </Box>
                       </TableCell>
                       <TableCell>{row.phone ?? '—'}</TableCell>
                       <TableCell sx={{ maxWidth: 160 }}>
@@ -294,6 +346,11 @@ export function SafetyDetailView() {
                           : '—'}
                       </TableCell>
                       <TableCell align="right">
+                        <Tooltip title="Manage photos">
+                          <IconButton size="small" onClick={() => setPhotoItem(row)}>
+                            <Iconify icon="solar:gallery-bold" width={16} />
+                          </IconButton>
+                        </Tooltip>
                         <IconButton size="small" onClick={() => openEdit(row)}>
                           <Iconify icon="solar:pen-bold" width={16} />
                         </IconButton>
@@ -345,14 +402,7 @@ export function SafetyDetailView() {
                 fullWidth
               />
             </Stack>
-            <TextField
-              label="Description"
-              value={form.description ?? ''}
-              onChange={field('description')}
-              fullWidth
-              multiline
-              rows={3}
-            />
+            <TextField label="Description" value={form.description ?? ''} onChange={field('description')} fullWidth multiline rows={3} />
           </Stack>
         </DialogContent>
         <DialogActions>
@@ -360,6 +410,90 @@ export function SafetyDetailView() {
           <Button variant="contained" onClick={handleSave} disabled={saving || !form.name}>
             {saving ? 'Saving…' : 'Save'}
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Photos Management Dialog */}
+      <Dialog open={photoItem !== null} onClose={() => setPhotoItem(null)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            Photos — {photoItem?.name}
+            {photoWorking && <CircularProgress size={18} />}
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          {/* Cover Photo */}
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>Cover Photo</Typography>
+          {photoItem?.cover_photo_url ? (
+            <Box sx={{ mb: 1.5 }}>
+              <Box
+                component="img"
+                src={photoItem.cover_photo_url}
+                alt="Cover"
+                sx={{ width: '100%', maxHeight: 200, objectFit: 'cover', borderRadius: 1, display: 'block', mb: 1 }}
+              />
+              <Button size="small" color="error" onClick={handleRemoveCover} disabled={photoWorking}>
+                Remove Cover
+              </Button>
+            </Box>
+          ) : (
+            <Box sx={{ mb: 1.5, p: 3, border: '1px dashed', borderColor: 'divider', borderRadius: 1, textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary">No cover photo</Typography>
+            </Box>
+          )}
+          <input ref={coverRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={handleUploadCover} />
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<Iconify icon="solar:gallery-bold" width={16} />}
+            onClick={() => coverRef.current?.click()}
+            disabled={photoWorking}
+            sx={{ mb: 3 }}
+          >
+            {photoItem?.cover_photo_url ? 'Replace Cover' : 'Upload Cover'}
+          </Button>
+
+          <Divider sx={{ mb: 3 }} />
+
+          {/* Gallery */}
+          <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
+            Gallery ({photoItem?.photo_urls.length ?? 0} photos)
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+            {photoItem?.photo_urls.map((url, i) => (
+              <Box key={i} sx={{ position: 'relative', width: 96, height: 96 }}>
+                <Box
+                  component="img"
+                  src={url}
+                  alt={`Gallery ${i + 1}`}
+                  sx={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 1, display: 'block' }}
+                />
+                <IconButton
+                  size="small"
+                  color="error"
+                  sx={{ position: 'absolute', top: 2, right: 2, bgcolor: 'background.paper', p: '2px', '&:hover': { bgcolor: 'error.lighter' } }}
+                  onClick={() => handleRemoveGallery(i)}
+                  disabled={photoWorking}
+                  aria-label={`Remove gallery photo ${i + 1}`}
+                >
+                  <Iconify icon="mingcute:close-line" width={14} />
+                </IconButton>
+              </Box>
+            ))}
+          </Box>
+          <input ref={galleryRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={handleAddGallery} />
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<Iconify icon="mingcute:add-line" width={16} />}
+            onClick={() => galleryRef.current?.click()}
+            disabled={photoWorking}
+          >
+            Add Photo
+          </Button>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPhotoItem(null)}>Done</Button>
         </DialogActions>
       </Dialog>
 
