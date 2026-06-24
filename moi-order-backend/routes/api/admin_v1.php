@@ -32,6 +32,7 @@ use App\Http\Controllers\Api\Admin\V1\AdminGooglePlaceController;
 use App\Http\Controllers\Api\Admin\V1\AdminPlaceController;
 use App\Http\Controllers\Api\Admin\V1\AdminRestaurantController;
 use App\Http\Controllers\Api\Admin\V1\AdminRoleController;
+use App\Http\Controllers\Api\Admin\V1\AdminSafetyLocationController;
 use App\Http\Controllers\Api\Admin\V1\AdminServiceCategoryController;
 use App\Http\Controllers\Api\Admin\V1\AdminServiceController;
 use App\Http\Controllers\Api\Admin\V1\AdminSubmissionController;
@@ -492,6 +493,19 @@ Route::prefix('maintenance')->name('admin.maintenance.')->group(function (): voi
     Route::get('/',        [AdminMaintenanceController::class, 'status'])->name('status');
     Route::post('/enable', [AdminMaintenanceController::class, 'enable'])->name('enable');
     Route::post('/disable',[AdminMaintenanceController::class, 'disable'])->name('disable');
+});
+
+// ── Safety Locations ──────────────────────────────────────────────────────────
+Route::prefix('safety-locations')->name('admin.safety-locations.')->group(function (): void {
+    Route::get('/export', [AdminSafetyLocationController::class, 'export'])->name('export');
+    Route::post('/import', [AdminSafetyLocationController::class, 'import'])->name('import');
+    Route::get('/', [AdminSafetyLocationController::class, 'index'])->name('index');
+    Route::post('/', [AdminSafetyLocationController::class, 'store'])->name('store');
+    Route::get('/{id}', [AdminSafetyLocationController::class, 'show'])->name('show')->whereNumber('id');
+    Route::put('/{id}', [AdminSafetyLocationController::class, 'update'])->name('update')->whereNumber('id');
+    Route::delete('/{id}', [AdminSafetyLocationController::class, 'destroy'])->name('destroy')->whereNumber('id');
+    Route::post('/{id}/photos', [AdminSafetyLocationController::class, 'addPhoto'])->name('photos.store')->whereNumber('id');
+    Route::delete('/{id}/photos/{index}', [AdminSafetyLocationController::class, 'removePhoto'])->name('photos.destroy')->whereNumber('id');
 });
 
 // ── Document Types ────────────────────────────────────────────────────────────

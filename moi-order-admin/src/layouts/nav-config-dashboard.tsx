@@ -128,6 +128,11 @@ export const navData: NavItem[] = [
     icon: icon('solar:play-bold'),
   },
   {
+    title: 'Safety',
+    path: '/safety',
+    icon: icon('solar:shield-bold'),
+  },
+  {
     title: 'Payments',
     path: '/payments',
     icon: icon('eva:trending-up-fill'),

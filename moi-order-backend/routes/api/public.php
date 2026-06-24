@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\RestaurantReviewController;
 use App\Http\Controllers\Api\V1\ServiceCategoryController;
 use App\Http\Controllers\Api\V1\ServiceController;
 use App\Http\Controllers\Api\V1\TagController;
+use App\Http\Controllers\Api\V1\SafetyLocationController;
 use App\Http\Controllers\Api\V1\TicketController;
 use Illuminate\Support\Facades\Route;
 
@@ -81,3 +82,6 @@ Route::get('/emergency/contacts/{contact}', [EmergencyContactController::class, 
 
 // App config — intentionally public — called on every app launch to check update/alert status
 Route::get('/app-config', [AppConfigController::class, 'index']);
+
+// Safety locations — intentionally public — hospitals, police stations, rescue
+Route::get('/safety-locations', [SafetyLocationController::class, 'index']);

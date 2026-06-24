@@ -60,6 +60,8 @@ export const TagsPage = lazy(() => import('src/pages/tags'));
 export const CreateAdminPage = lazy(() => import('src/pages/create-admin'));
 export const AuditLogsPage = lazy(() => import('src/pages/audit-logs'));
 export const SystemHealthPage = lazy(() => import('src/pages/system-health'));
+export const SafetyPage = lazy(() => import('src/pages/safety'));
+export const SafetyDetailPage = lazy(() => import('src/pages/safety-detail'));
 
 // Trusted Brothers workspace pages
 export const TBOverviewPage = lazy(() => import('src/pages/tb-overview'));
@@ -119,6 +121,9 @@ export const routesSection: RouteObject[] = [
       { path: 'attractions', element: <AttractionsPage /> },
       { path: 'attractions/new', element: <AttractionCreatePage /> },
       { path: 'attractions/:id', element: <AttractionDetailPage /> },
+
+      { path: 'safety', element: <SafetyPage /> },
+      { path: 'safety/:category', element: <SafetyDetailPage /> },
 
       // Bookings — no backend permission guard
       { path: 'bookings', element: <BookingsPage /> },

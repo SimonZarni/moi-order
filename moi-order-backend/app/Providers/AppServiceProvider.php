@@ -111,6 +111,13 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(\App\Services\AdminPlaceImportService::class);
 
+        $this->app->bind(
+            \App\Services\SafetyLocationService::class,
+            fn ($app) => new \App\Services\SafetyLocationService(
+                $app->make(\App\Contracts\FileStorageInterface::class),
+            )
+        );
+
         $this->app->bind(\Google\Client::class, function (): \Google\Client {
             $client = new \Google\Client();
             $client->setClientId(config('services.google.client_id'));
