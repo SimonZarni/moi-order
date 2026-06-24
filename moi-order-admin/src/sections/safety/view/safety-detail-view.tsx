@@ -1,22 +1,23 @@
 import type { IconifyName } from 'src/components/iconify';
+import type { SafetyCategory, SafetyLocationData, SafetyLocationPayload } from 'src/api/safety';
 
-import { useRef, useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
-import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import Tooltip from '@mui/material/Tooltip';
 import TableRow from '@mui/material/TableRow';
-import TextField from '@mui/material/TextField';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
+import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -25,13 +26,13 @@ import DialogContent from '@mui/material/DialogContent';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import TableContainer from '@mui/material/TableContainer';
-import CircularProgress from '@mui/material/CircularProgress';
 import TablePagination from '@mui/material/TablePagination';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { useRouter } from 'src/routes/hooks';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { safetyApi, SAFETY_CATEGORY_LABELS, type SafetyCategory, type SafetyLocationData, type SafetyLocationPayload } from 'src/api/safety';
+import { safetyApi, SAFETY_CATEGORY_LABELS } from 'src/api/safety';
 
 import { Iconify } from 'src/components/iconify';
 

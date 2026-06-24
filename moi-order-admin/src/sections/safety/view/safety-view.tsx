@@ -1,23 +1,22 @@
+import type { SafetyCategory } from 'src/api/safety';
 import type { IconifyName } from 'src/components/iconify';
 
 import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
+import Card from '@mui/material/Card';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
+import ListItem from '@mui/material/ListItem';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
 
 import { useRouter } from 'src/routes/hooks';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
-
-import type { SafetyCategory } from 'src/api/safety';
 
 // ----------------------------------------------------------------------
 
