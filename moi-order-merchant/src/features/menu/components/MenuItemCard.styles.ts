@@ -247,4 +247,32 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  // Stock
+  stockChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    borderWidth: 1,
+    borderColor: colours.primary + '44',
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: 3,
+  },
+  stockChipText: {
+    fontSize: typography.xxs,
+    color: colours.primary,
+    fontWeight: '700',
+  },
+  stockInput: {
+    flex: 1,
+    fontSize: typography.xs,
+    color: colours.textOnLight,
+    backgroundColor: colours.surfaceMuted,
+    borderWidth: 1,
+    borderColor: colours.primary,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: 4,
+    minHeight: 32,
+  },
 });

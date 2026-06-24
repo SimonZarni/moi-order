@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, Pressable, Image } from 'react-native';
+import { View, Text, Pressable, Image, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './MenuItemCard.styles';
 import { colours } from '../../../shared/theme/colours';
@@ -23,21 +23,27 @@ const STATUS_COLOURS: Record<MenuItemStatus, string> = {
 interface MenuItemCardProps {
   item: MenuItem;
   isGuarded: boolean;
+  useStockSystem?: boolean;
   onToggleStatus: (id: number, status: MenuItemStatus) => void;
   onDelete: (id: number) => void;
   onEdit: (item: MenuItem) => void;
+  onUpdateStock?: (id: number, quantity: number | null) => void;
 }
 
 export function MenuItemCard({
   item,
   isGuarded,
+  useStockSystem = false,
   onToggleStatus,
   onDelete,
   onEdit,
+  onUpdateStock,
 }: MenuItemCardProps): React.JSX.Element {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [confirmingStatus, setConfirmingStatus] = useState(false);
   const [showGuard, setShowGuard] = useState(false);
+  const [editingStock, setEditingStock] = useState(false);
+  const [stockInput, setStockInput] = useState('');
 
   const statusColour = STATUS_COLOURS[item.status];
   const FEE = 1 + PLATFORM_FEE_RATE;
@@ -64,6 +70,18 @@ export function MenuItemCard({
     },
     [item.id, onToggleStatus],
   );
+
+  const handleEditStock = useCallback(() => {
+    setStockInput(item.stock_quantity !== null ? String(item.stock_quantity) : '');
+    setEditingStock(true);
+  }, [item.stock_quantity]);
+
+  const handleSaveStock = useCallback(() => {
+    const qty = stockInput === '' ? null : parseInt(stockInput, 10);
+    if (qty !== null && (isNaN(qty) || qty < 0)) return;
+    setEditingStock(false);
+    onUpdateStock?.(item.id, qty);
+  }, [stockInput, item.id, onUpdateStock]);
 
   return (
     <View style={styles.card}>
@@ -125,6 +143,21 @@ export function MenuItemCard({
               {STATUS_LABELS[item.status]}
             </Text>
           </Pressable>
+
+          {/* Stock chip — only when stock system is on */}
+          {useStockSystem && (
+            <Pressable
+              style={styles.stockChip}
+              onPress={handleEditStock}
+              accessibilityRole="button"
+              accessibilityLabel={`Stock: ${item.stock_quantity !== null ? String(item.stock_quantity) : 'unlimited'}, tap to set`}
+            >
+              <Ionicons name="cube-outline" size={11} color={colours.primary} />
+              <Text style={styles.stockChipText}>
+                {item.stock_quantity !== null ? String(item.stock_quantity) : '∞'}
+              </Text>
+            </Pressable>
+          )}
 
           {/* Edit + delete icon buttons */}
           <View style={styles.iconRow}>
@@ -231,6 +264,40 @@ export function MenuItemCard({
             <Pressable
               style={styles.actionBtnCancel}
               onPress={() => setShowGuard(false)}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
+            >
+              <Text style={styles.actionBtnCancelText}>Cancel</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+
+      {/* ── Inline: stock quantity editor ─────────────────────────────────── */}
+      {editingStock && (
+        <View style={styles.actionBar}>
+          <TextInput
+            style={styles.stockInput}
+            value={stockInput}
+            onChangeText={setStockInput}
+            keyboardType="number-pad"
+            placeholder="qty (blank = ∞)"
+            placeholderTextColor={colours.textSubtle}
+            accessibilityLabel="Stock quantity"
+            autoFocus
+          />
+          <View style={styles.actionBarBtns}>
+            <Pressable
+              style={styles.actionBtnPrimary}
+              onPress={handleSaveStock}
+              accessibilityRole="button"
+              accessibilityLabel="Save stock"
+            >
+              <Text style={styles.actionBtnPrimaryText}>Save</Text>
+            </Pressable>
+            <Pressable
+              style={styles.actionBtnCancel}
+              onPress={() => setEditingStock(false)}
               accessibilityRole="button"
               accessibilityLabel="Cancel"
             >

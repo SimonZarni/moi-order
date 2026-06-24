@@ -178,9 +178,11 @@ export function MenuScreen({ onEditItem }: MenuScreenProps): React.JSX.Element {
                 <MenuItemCard
                   item={item}
                   isGuarded={guardedItemIds.has(item.id)}
+                  useStockSystem={useStockSystem}
                   onToggleStatus={handleToggleItemStatus}
                   onDelete={handleDeleteItem}
                   onEdit={(it) => onEditItem(it.id)}
+                  onUpdateStock={handleUpdateItemStock}
                 />
               </View>
             ))}
