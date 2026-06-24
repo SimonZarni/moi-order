@@ -7,6 +7,7 @@ namespace App\Services;
 use App\DTOs\EditFoodOrderDTO;
 use App\DTOs\StoreFoodOrderDTO;
 use App\Enums\FoodOrderStatus;
+use App\Enums\MenuItemStatus;
 use App\Events\FoodOrderEdited;
 use App\Events\FoodOrderStatusUpdated;
 use App\Events\NewFoodOrder;
@@ -186,6 +187,14 @@ class FoodOrderService
                             ->where('id', $item->id)
                             ->where('stock_quantity', '>=', $line['quantity'])
                             ->decrement('stock_quantity', $line['quantity']);
+
+                        // Auto-mark OutOfStock when depleted.
+                        // Only when status is Available — never override a Hidden item.
+                        \DB::table('menu_items')
+                            ->where('id', $item->id)
+                            ->where('stock_quantity', 0)
+                            ->where('status', MenuItemStatus::Available->value)
+                            ->update(['status' => MenuItemStatus::OutOfStock->value]);
                     }
                 }
             }

@@ -62,7 +62,18 @@ class MenuItemController extends Controller
         $restaurant = $request->user()->restaurant()->firstOrFail();
         $item       = $restaurant->menuItems()->findOrFail($id);
 
-        $item->update(['stock_quantity' => $request->validated()['stock_quantity']]);
+        $newQty  = $request->validated()['stock_quantity'];
+        $updates = ['stock_quantity' => $newQty];
+
+        // Auto-manage status when stock system is active.
+        // Hidden is always preserved — only Available / OutOfStock are auto-managed.
+        if ($restaurant->use_stock_system && $item->status !== MenuItemStatus::Hidden) {
+            $updates['status'] = ($newQty === null || $newQty > 0)
+                ? MenuItemStatus::Available
+                : MenuItemStatus::OutOfStock;
+        }
+
+        $item->update($updates);
 
         return response()->json(['data' => new MenuItemResource($item->fresh(), $this->storage)]);
     }
