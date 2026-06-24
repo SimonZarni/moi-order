@@ -35,7 +35,7 @@ export function useOperatingHoursData(): UseOperatingHoursDataResult {
 
   const { mutate: saveHours, isPending: isSaving } = useMutation({
     mutationFn: (hours: OpeningHourInput[]) => updateRestaurant({ opening_hours: hours }),
-    onSuccess: setCache,
+    onSuccess: (updated) => { setCache(updated); setSaveError(null); },
     onError: (error) => {
       const apiError = extractApiError(error);
       setSaveError(apiError.message ?? 'Could not save hours. Check the time format (HH:MM).');
