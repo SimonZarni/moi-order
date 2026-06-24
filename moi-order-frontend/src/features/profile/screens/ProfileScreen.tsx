@@ -194,12 +194,7 @@ export function ProfileScreen(): React.JSX.Element {
 
           {/* § Become a Merchant */}
           {user?.is_merchant ? (
-            <Pressable
-              style={styles.card}
-              onPress={handleGoToMerchantMenu}
-              accessibilityRole="button"
-              accessibilityLabel={s.profile.manageMenu}
-            >
+            <View style={styles.card} accessibilityRole="none">
               <View style={styles.row}>
                 <View style={[styles.iconBadge, styles.iconBadgeAmber]}>
                   <Ionicons name="storefront-outline" size={16} color={colours.secondary} />
@@ -208,9 +203,9 @@ export function ProfileScreen(): React.JSX.Element {
                 <View style={styles.approvedBadge}>
                   <Text style={styles.approvedBadgeText}>{s.profile.approvedBadge}</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
               </View>
-            </Pressable>
+              <Text style={styles.merchantHintText}>{s.profile.merchantDashboardHint}</Text>
+            </View>
           ) : (
             <Pressable
               style={styles.card}

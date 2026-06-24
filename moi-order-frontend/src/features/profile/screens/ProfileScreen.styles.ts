@@ -356,6 +356,13 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.success,
   },
+  merchantHintText: {
+    fontSize: typography.xs,
+    color: colours.textMuted,
+    lineHeight: 18,
+    marginTop: spacing.sm,
+    paddingHorizontal: spacing.xs,
+  },
   rowDisabled: {
     opacity: 0.45,
   },
