@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\Merchant\V1\BusinessProfileController;
 use App\Http\Controllers\Api\Merchant\V1\KycController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantProfileController;
+use App\Http\Controllers\Api\Merchant\V1\MerchantPushSubscriptionController;
 use App\Http\Controllers\Api\V1\DeviceTokenController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantEmailVerificationController;
 use App\Http\Controllers\Api\Merchant\V1\MerchantAnalyticsController;
@@ -98,9 +99,13 @@ Route::post('/kyc/resubmit/{id}/submit',                      [KycController::cl
 // ── Reviews ───────────────────────────────────────────────────────────────────
 Route::get('/reviews', [MerchantReviewController::class, 'index']);
 
-// ── Device tokens — push notification registration ────────────────────────────
+// ── Device tokens — Expo push (native mobile) ────────────────────────────────
 Route::post('/device-tokens',   [DeviceTokenController::class, 'store']);
 Route::delete('/device-tokens', [DeviceTokenController::class, 'destroy']);
+
+// ── Web Push subscriptions — VAPID browser push (PWA) ────────────────────────
+Route::post('/push-subscriptions',   [MerchantPushSubscriptionController::class, 'store']);
+Route::delete('/push-subscriptions', [MerchantPushSubscriptionController::class, 'destroy']);
 
 // ── Restaurant photos ─────────────────────────────────────────────────────────
 Route::post('/restaurant/cover_photo', [MerchantRestaurantController::class, 'uploadCoverPhoto']);

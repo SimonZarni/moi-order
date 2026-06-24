@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\DTOs;
 
-use App\Http\Requests\Admin\StorePushSubscriptionRequest;
+use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Principle: SRP — immutable data carrier for push subscription creation.
+ * Accepts the base FormRequest so both Admin and Merchant controllers can use it.
  */
 readonly class StorePushSubscriptionDTO
 {
@@ -17,7 +18,7 @@ readonly class StorePushSubscriptionDTO
         public string $authKey,
     ) {}
 
-    public static function fromRequest(StorePushSubscriptionRequest $request): self
+    public static function fromRequest(FormRequest $request): self
     {
         return new self(
             endpoint:  $request->string('endpoint')->toString(),

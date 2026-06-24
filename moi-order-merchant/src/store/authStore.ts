@@ -1,6 +1,8 @@
+import { Platform } from 'react-native';
 import { create } from 'zustand';
 import { setApiToken } from '../api/client';
 import { storage } from '../shared/utils/storage';
+import { initiateWebPushUnregister } from '../lib/web-push';
 import type { MerchantUser } from '../types/models';
 import { TOKEN_KEY } from '../shared/constants/config';
 
@@ -14,7 +16,7 @@ interface AuthStore {
   initFromStorage: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthStore>((set) => ({
+export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
   token: null,
   isLoading: true,
@@ -30,6 +32,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   logout() {
+    // Dispatch web push unregister BEFORE clearing the token so the DELETE
+    // request is issued with a valid Authorization header. The call is
+    // fire-and-forget — it never blocks or delays the logout.
+    if (Platform.OS === 'web') {
+      const currentToken = get().token;
+      if (currentToken) {
+        initiateWebPushUnregister(currentToken);
+      }
+    }
+
     storage.deleteItemAsync(TOKEN_KEY).catch(() => {});
     setApiToken(null);
     try { localStorage.removeItem('merchant_screen'); } catch {}

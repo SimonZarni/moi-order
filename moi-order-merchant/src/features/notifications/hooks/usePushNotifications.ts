@@ -1,9 +1,9 @@
 /**
- * Registers the device for Expo push notifications after login and cleans up
- * on logout. Handles tap navigation for merchant-specific notification types.
+ * Registers the device for push notifications after login and cleans up on logout.
+ * - Native (iOS/Android): Expo push tokens via expo-notifications.
+ * - Web (PWA): VAPID Web Push via service worker + /push-subscriptions API.
  *
- * Platform: 'merchant' is sent to the backend so NotifyMerchantOfNewOrder
- * only targets merchant device tokens, not customer tokens.
+ * Handles tap/click navigation for merchant-specific notification types.
  */
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../../../store/authStore';
 import { registerDeviceToken } from '../../../api/notifications';
+import { registerMerchantWebPush } from '../../../lib/web-push';
 import type { MerchantStackParamList } from '../../../types/navigation';
 
 const IS_EXPO_GO = Constants.appOwnership === 'expo';
@@ -49,8 +50,18 @@ export function usePushNotifications(): void {
   const navigation = useNavigation<NativeStackNavigationProp<MerchantStackParamList>>();
   const responseListenerRef = useRef<Notifications.Subscription | null>(null);
 
+  // ── Web: VAPID Web Push ──────────────────────────────────────────────────────
   useEffect(() => {
-    // Push notification APIs are native-only — expo-notifications has no web support.
+    if (Platform.OS !== 'web') return;
+    if (userId === null) return;
+
+    // registerMerchantWebPush is idempotent — safe to call on every mount/userId
+    // change. If a subscription already exists it re-syncs keys with the backend.
+    void registerMerchantWebPush();
+  }, [userId]);
+
+  // ── Native: Expo push tokens ─────────────────────────────────────────────────
+  useEffect(() => {
     if (Platform.OS === 'web') return;
     if (userId === null) return;
 
