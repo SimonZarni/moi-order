@@ -68,11 +68,7 @@ export function HomeScreen(): React.JSX.Element {
             </Text>
           </View>
 
-          <Pressable style={styles.searchBox} onPress={handleNavigateToSearch}
-            accessibilityRole="button" accessibilityLabel={s.search.placeholder}>
-            <Text style={styles.searchIcon}>🔍</Text>
-            <Text style={styles.searchPlaceholder}>{s.search.placeholder}</Text>
-          </Pressable>
+          {/* Search bar hidden — space reclaimed for services grid */}
         </View>
 
         {/* ── Body ── */}
