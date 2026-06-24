@@ -53,6 +53,8 @@ class FoodOrderResource extends JsonResource
             ),
             'rating'                 => $this->rating,
             'customer_review'        => $this->customer_review ?? null,
+            'merchant_reply'         => $this->merchant_reply ?? null,
+            'merchant_replied_at'    => $this->merchant_replied_at?->toIso8601String(),
             'confirmed_at'           => $this->confirmed_at?->toIso8601String(),
             'payment_confirmed_at'   => $this->payment_confirmed_at?->toIso8601String(),
             'preparing_at'           => $this->preparing_at?->toIso8601String(),

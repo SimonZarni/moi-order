@@ -6,6 +6,8 @@ export interface ReviewItem {
   order_number: string | null;
   rating: number;
   customer_review: string | null;
+  merchant_reply: string | null;
+  merchant_replied_at: string | null;
   user: { id: string; name: string };
   completed_at: string | null;
 }
@@ -25,3 +27,8 @@ export async function getReviews(
   );
   return response.data;
 }
+
+export async function replyToReview(orderId: string, reply: string): Promise<void> {
+  await apiClient.post(`/reviews/${orderId}/reply`, { reply });
+}
+

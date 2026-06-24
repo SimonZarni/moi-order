@@ -36,7 +36,7 @@ class AdminNotificationController extends Controller
     public function all(Request $request): JsonResponse
     {
         $request->validate([
-            'type'     => ['nullable', 'string', 'in:new_submission,new_ticket_order,new_payment'],
+            'type'     => ['nullable', 'string', 'in:new_submission,new_ticket_order,new_payment,new_food_order,new_kyc'],
             'page'     => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ]);

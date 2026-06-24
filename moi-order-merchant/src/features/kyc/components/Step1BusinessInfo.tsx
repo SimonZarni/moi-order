@@ -36,6 +36,7 @@ export function Step1BusinessInfo({
   );
   const [businessAddress, setBusinessAddress] = useState(initialData.business_address);
   const [businessPhone, setBusinessPhone] = useState(initialData.business_phone);
+  const [phoneError, setPhoneError] = useState('');
 
   const isOtherSelected = selectedChip === 'Other';
 
@@ -45,6 +46,12 @@ export function Step1BusinessInfo({
   }, []);
 
   const handleSubmit = useCallback(() => {
+    const phone = businessPhone.trim();
+    if (phone !== '' && !/^\d{10}$/.test(phone)) {
+      setPhoneError(t('kyc_step1_phone_error'));
+      return;
+    }
+    setPhoneError('');
     const businessType = isOtherSelected
       ? (otherTypeText.trim() || 'Other')
       : selectedChip;
@@ -52,9 +59,9 @@ export function Step1BusinessInfo({
       business_name: businessName.trim(),
       business_type: businessType,
       business_address: businessAddress.trim(),
-      business_phone: businessPhone.trim(),
+      business_phone: phone,
     });
-  }, [businessName, selectedChip, isOtherSelected, otherTypeText, businessAddress, businessPhone, onSubmit]);
+  }, [businessName, selectedChip, isOtherSelected, otherTypeText, businessAddress, businessPhone, onSubmit, t]);
 
   const t = useTranslation();
 
@@ -113,15 +120,17 @@ export function Step1BusinessInfo({
 
       <Text style={styles.label}>{t('kyc_step1_business_phone')} <Text style={styles.labelOptional}>({t('common_optional')})</Text></Text>
       <TextInput
-        style={styles.input}
-        placeholder="e.g. +959 123 456 789"
+        style={[styles.input, phoneError ? styles.inputError : null]}
+        placeholder="0812345678 (10 digits)"
         placeholderTextColor="rgba(255,255,255,0.3)"
         value={businessPhone}
-        onChangeText={setBusinessPhone}
+        onChangeText={(v) => { setBusinessPhone(v); if (phoneError) setPhoneError(''); }}
         keyboardType="phone-pad"
         autoComplete="tel"
+        maxLength={10}
         accessibilityLabel="Business phone number"
       />
+      {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
 
       <Pressable
         style={[styles.button, isLoading && styles.buttonDisabled]}

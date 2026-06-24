@@ -39,6 +39,9 @@ type InfoForm = {
   description: string;
   google_maps_link: string;
   address: string;
+  open_time: string;
+  close_time: string;
+  operating_days: string;
   city: string;
   province: string;
   is_active: boolean;
@@ -77,6 +80,9 @@ export function AttractionDetailView() {
           description: data.description,
           google_maps_link: data.google_maps_link ?? '',
           address: data.address,
+          open_time: data.open_time ?? '',
+          close_time: data.close_time ?? '',
+          operating_days: data.operating_days ?? '',
           city: data.city,
           province: data.province,
           is_active: data.is_active,
@@ -176,6 +182,9 @@ export function AttractionDetailView() {
         description: infoForm.description,
         google_maps_link: infoForm.google_maps_link,
         address: infoForm.address,
+        open_time: infoForm.open_time || null,
+        close_time: infoForm.close_time || null,
+        operating_days: infoForm.operating_days || null,
         city: infoForm.city,
         province: infoForm.province,
         is_active: infoForm.is_active,
@@ -515,6 +524,30 @@ export function AttractionDetailView() {
                       placeholder="https://maps.google.com/..."
                       value={infoForm.google_maps_link}
                       onChange={(e) => updateInfo('google_maps_link', e.target.value)}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <TextField
+                      fullWidth label="Open Time"
+                      placeholder="09:00"
+                      value={infoForm.open_time}
+                      onChange={(e) => updateInfo('open_time', e.target.value)}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <TextField
+                      fullWidth label="Close Time"
+                      placeholder="18:00"
+                      value={infoForm.close_time}
+                      onChange={(e) => updateInfo('close_time', e.target.value)}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <TextField
+                      fullWidth label="Operating Days"
+                      placeholder="Mon – Sun"
+                      value={infoForm.operating_days}
+                      onChange={(e) => updateInfo('operating_days', e.target.value)}
                     />
                   </Grid>
                   <Grid size={{ xs: 12 }}>

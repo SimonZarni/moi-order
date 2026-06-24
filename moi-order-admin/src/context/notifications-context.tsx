@@ -133,8 +133,11 @@ export function NotificationsProvider({ children }: Props) {
       setUnreadCount((prev) => prev + 1);
       fetchNotifications();
 
-      // Play alarm sound for food orders
-      if (data?.notification_type === 'new_food_order') {
+      // Play alarm sound for food orders and new service submissions
+      if (
+        data?.notification_type === 'new_food_order' ||
+        data?.notification_type === 'new_submission'
+      ) {
         playFoodOrderAlarm();
       }
     });

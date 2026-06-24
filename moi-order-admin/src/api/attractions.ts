@@ -21,9 +21,12 @@ export type AttractionData = {
   highlight_description: string;
   description: string;
   google_maps_link: string;
+  address: string;
+  open_time: string | null;
+  close_time: string | null;
+  operating_days: string | null;
   city: string;
   province: string;
-  address: string;
   cover_image_url: string | null;
   starting_from_price: number | null;
   is_active: boolean;

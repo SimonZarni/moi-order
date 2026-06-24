@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View, Text, FlatList, ActivityIndicator, Pressable, ListRenderItem,
 } from 'react-native';
@@ -12,13 +12,23 @@ import { useTranslation } from '../../../shared/hooks/useTranslation';
 import type { MerchantNotification } from '../../../types/models';
 import type { NotificationGroup } from '../../../api/merchantNotifications';
 
+// Module-level variable preserves tab selection across navigation.
+// The screen unmounts when navigating to OrderChat and remounts on back;
+// local useState would reset to 'orders' every time.
+let persistedGroup: NotificationGroup = 'orders';
+
 interface NotificationsScreenProps {
   onPressNotification?: (notification: MerchantNotification) => void;
 }
 
 export function NotificationsScreen({ onPressNotification }: NotificationsScreenProps = {}): React.JSX.Element {
   const t = useTranslation();
-  const [group, setGroup] = useState<NotificationGroup>('orders');
+  const [group, setGroupState] = React.useState<NotificationGroup>(persistedGroup);
+
+  const setGroup = React.useCallback((next: NotificationGroup) => {
+    persistedGroup = next;
+    setGroupState(next);
+  }, []);
 
   const {
     notifications, unreadCount, ordersUnreadCount, chatUnreadCount,

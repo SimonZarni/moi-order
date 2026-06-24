@@ -57,7 +57,9 @@ class MerchantDailyInvoiceController extends Controller
     }
 
     /**
-     * Aggregated summary for the current week or month from stored daily invoices.
+     * Aggregated summary for the current week or month.
+     * Stored daily invoices are summed from the period, then today's provisional
+     * live total is added on top (today's invoice is never stored mid-day).
      * GET /merchant/v1/invoices/summary?period=week|month
      */
     public function summary(Request $request): JsonResponse
@@ -68,17 +70,20 @@ class MerchantDailyInvoiceController extends Controller
         }
 
         $period = $request->input('period', 'week');
+        $today  = now()->toDateString();
 
         if ($period === 'month') {
             $dateFrom = now()->startOfMonth()->toDateString();
-            $dateTo   = now()->toDateString();
+            $dateTo   = $today;
         } else {
             $dateFrom = now()->startOfWeek()->toDateString();
-            $dateTo   = now()->toDateString();
+            $dateTo   = $today;
         }
 
+        // Sum all stored invoices within the period (excludes today — not yet persisted).
+        $yesterdayOrEarlier = now()->subDay()->toDateString();
         $row = RestaurantDailyInvoice::forRestaurant($restaurant->id)
-            ->whereBetween('date', [$dateFrom, $dateTo])
+            ->whereBetween('date', [$dateFrom, $yesterdayOrEarlier])
             ->selectRaw('
                 SUM(order_count)          AS order_count,
                 SUM(customer_total_cents) AS customer_total_cents,
@@ -87,15 +92,18 @@ class MerchantDailyInvoiceController extends Controller
             ')
             ->first();
 
+        // Add today's provisional data so the weekly/monthly total is always current.
+        $todayProvisional = $this->service->calculateForToday($restaurant);
+
         return response()->json([
             'data' => [
                 'period'               => $period,
                 'date_from'            => $dateFrom,
                 'date_to'              => $dateTo,
-                'order_count'          => (int) ($row->order_count          ?? 0),
-                'customer_total_cents' => (int) ($row->customer_total_cents ?? 0),
-                'platform_fee_cents'   => (int) ($row->platform_fee_cents   ?? 0),
-                'payout_cents'         => (int) ($row->payout_cents         ?? 0),
+                'order_count'          => (int) ($row->order_count          ?? 0) + $todayProvisional->order_count,
+                'customer_total_cents' => (int) ($row->customer_total_cents ?? 0) + $todayProvisional->customer_total_cents,
+                'platform_fee_cents'   => (int) ($row->platform_fee_cents   ?? 0) + $todayProvisional->platform_fee_cents,
+                'payout_cents'         => (int) ($row->payout_cents         ?? 0) + $todayProvisional->payout_cents,
             ],
         ]);
     }

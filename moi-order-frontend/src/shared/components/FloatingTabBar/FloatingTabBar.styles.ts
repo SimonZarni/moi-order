@@ -80,4 +80,28 @@ export const styles = StyleSheet.create({
   tabDisabled: {
     opacity: 0.35,
   },
+
+  iconWrap: {
+    position: 'relative',
+  },
+
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -8,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: colours.error,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+
+  badgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    lineHeight: 11,
+  },
 });

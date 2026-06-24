@@ -79,6 +79,7 @@ export function BookingDetailView() {
   const [confirming, setConfirming] = useState(false);
   const [confirmError, setConfirmError] = useState('');
   const [confirmingOrder, setConfirmingOrder] = useState(false);
+  const [confirmOrderError, setConfirmOrderError] = useState('');
 
   useEffect(() => {
     if (!id) return;
@@ -142,10 +143,11 @@ export function BookingDetailView() {
   const handleConfirmOrder = () => {
     if (!id) return;
     setConfirmingOrder(true);
+    setConfirmOrderError('');
     bookingsApi
       .confirmPayment(id)
       .then((updated) => setBooking((prev) => prev ? { ...prev, ...updated } : prev))
-      .catch(() => {})
+      .catch(() => setConfirmOrderError('Could not confirm order. Please try again.'))
       .finally(() => setConfirmingOrder(false));
   };
 
@@ -326,16 +328,23 @@ export function BookingDetailView() {
                       No payment record yet.
                     </Typography>
                     {needsPaymentConfirmation && (
-                      <Button
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        disabled={confirmingOrder}
-                        onClick={handleConfirmOrder}
-                        startIcon={confirmingOrder ? <CircularProgress size={14} color="inherit" /> : <Iconify icon="solar:check-circle-bold" width={16} />}
-                      >
-                        {confirmingOrder ? 'Confirming…' : 'Confirm Order for Payment'}
-                      </Button>
+                      <>
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          color="primary"
+                          disabled={confirmingOrder}
+                          onClick={handleConfirmOrder}
+                          startIcon={confirmingOrder ? <CircularProgress size={14} color="inherit" /> : <Iconify icon="solar:check-circle-bold" width={16} />}
+                        >
+                          {confirmingOrder ? 'Confirming…' : 'Confirm Order for Payment'}
+                        </Button>
+                        {confirmOrderError && (
+                          <Typography variant="caption" color="error.main" sx={{ mt: 0.5 }}>
+                            {confirmOrderError}
+                          </Typography>
+                        )}
+                      </>
                     )}
                     {orderConfirmedAwaitingPayment && (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

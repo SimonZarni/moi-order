@@ -32,6 +32,9 @@ type FormState = {
   description: string;
   google_maps_link: string;
   address: string;
+  open_time: string;
+  close_time: string;
+  operating_days: string;
   city: string;
   province: string;
 };
@@ -50,6 +53,9 @@ const EMPTY_FORM: FormState = {
   description: '',
   google_maps_link: '',
   address: '',
+  open_time: '',
+  close_time: '',
+  operating_days: '',
   city: '',
   province: '',
 };
@@ -103,6 +109,9 @@ export function AttractionCreateView() {
       formData.append('description', form.description);
       formData.append('google_maps_link', form.google_maps_link);
       formData.append('address', form.address);
+      if (form.open_time) formData.append('open_time', form.open_time);
+      if (form.close_time) formData.append('close_time', form.close_time);
+      if (form.operating_days) formData.append('operating_days', form.operating_days);
       formData.append('city', form.city);
       formData.append('province', form.province);
       formData.append('cover_image', coverFile);
@@ -319,6 +328,33 @@ export function AttractionCreateView() {
                       placeholder="https://maps.google.com/..."
                       value={form.google_maps_link}
                       onChange={(e) => update('google_maps_link', e.target.value)}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <TextField
+                      fullWidth
+                      label="Open Time"
+                      placeholder="09:00"
+                      value={form.open_time}
+                      onChange={(e) => update('open_time', e.target.value)}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <TextField
+                      fullWidth
+                      label="Close Time"
+                      placeholder="18:00"
+                      value={form.close_time}
+                      onChange={(e) => update('close_time', e.target.value)}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <TextField
+                      fullWidth
+                      label="Operating Days"
+                      placeholder="Mon – Sun"
+                      value={form.operating_days}
+                      onChange={(e) => update('operating_days', e.target.value)}
                     />
                   </Grid>
                 </Grid>

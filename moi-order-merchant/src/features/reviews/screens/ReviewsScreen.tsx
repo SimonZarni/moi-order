@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, FlatList, Pressable } from 'react-native';
+import { View, Text, TextInput, ScrollView, FlatList, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useReviewsScreen, type RatingFilter } from '../hooks/useReviewsScreen';
@@ -18,6 +18,17 @@ const RATING_FILTERS: { key: RatingFilter; label: string }[] = [
   { key: 1, label: '★ 1' },
 ];
 
+interface ReviewCardProps {
+  item: ReviewItem;
+  replyingTo: string | null;
+  replyDraft: string;
+  isSubmittingReply: boolean;
+  onStartReply: (orderId: string, existingReply: string | null) => void;
+  onReplyDraftChange: (text: string) => void;
+  onSubmitReply: () => void;
+  onCancelReply: () => void;
+}
+
 function StarRow({ rating }: { rating: number }): React.JSX.Element {
   return (
     <View style={styles.starsRow}>
@@ -33,7 +44,19 @@ function StarRow({ rating }: { rating: number }): React.JSX.Element {
   );
 }
 
-function ReviewCard({ item }: { item: ReviewItem }): React.JSX.Element {
+function ReviewCard({
+  item,
+  replyingTo,
+  replyDraft,
+  isSubmittingReply,
+  onStartReply,
+  onReplyDraftChange,
+  onSubmitReply,
+  onCancelReply,
+}: ReviewCardProps): React.JSX.Element {
+  const isEditingThis = replyingTo === item.id;
+  const hasReply = item.merchant_reply !== null && item.merchant_reply.length > 0;
+
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -51,6 +74,59 @@ function ReviewCard({ item }: { item: ReviewItem }): React.JSX.Element {
       {item.completed_at !== null && (
         <Text style={styles.date}>{formatDate(item.completed_at)}</Text>
       )}
+
+      {/* Existing merchant reply */}
+      {hasReply && !isEditingThis && (
+        <View style={styles.replyBlock}>
+          <Text style={styles.replyLabel}>Your reply</Text>
+          <Text style={styles.replyText}>{item.merchant_reply}</Text>
+        </View>
+      )}
+
+      {/* Reply input or reply button */}
+      {isEditingThis ? (
+        <View>
+          <TextInput
+            style={styles.replyInput}
+            value={replyDraft}
+            onChangeText={onReplyDraftChange}
+            placeholder="Write your reply…"
+            placeholderTextColor={colours.textSubtle}
+            multiline
+            accessibilityLabel="Reply text input"
+          />
+          <View style={styles.replyActions}>
+            <Pressable
+              style={styles.replyCancelBtn}
+              onPress={onCancelReply}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel reply"
+            >
+              <Text style={styles.replyCancelText}>Cancel</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.replySubmitBtn, (!replyDraft.trim() || isSubmittingReply) && { opacity: 0.5 }]}
+              onPress={onSubmitReply}
+              disabled={!replyDraft.trim() || isSubmittingReply}
+              accessibilityRole="button"
+              accessibilityLabel="Submit reply"
+            >
+              <Text style={styles.replySubmitText}>
+                {isSubmittingReply ? 'Submitting…' : 'Submit Reply'}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : (
+        <Pressable
+          style={styles.replyBtn}
+          onPress={() => onStartReply(item.id, item.merchant_reply)}
+          accessibilityRole="button"
+          accessibilityLabel={hasReply ? 'Edit reply' : 'Reply to review'}
+        >
+          <Text style={styles.replyBtnText}>{hasReply ? 'Edit Reply' : 'Reply'}</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -61,7 +137,9 @@ export function ReviewsScreen(): React.JSX.Element {
     reviews, isLoading, isError,
     currentPage, lastPage, total,
     ratingFilter,
+    replyingTo, replyDraft, isSubmittingReply,
     handleRatingFilter, handlePageNext, handlePagePrev,
+    handleStartReply, handleReplyDraftChange, handleSubmitReply, handleCancelReply,
   } = useReviewsScreen();
 
   return (
@@ -74,29 +152,29 @@ export function ReviewsScreen(): React.JSX.Element {
       </View>
 
       <View style={styles.filterRowOuter}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filterRow}
-        style={styles.filterRowScroll}
-      >
-        {RATING_FILTERS.map(({ key, label }) => {
-          const active = ratingFilter === key;
-          return (
-            <Pressable
-              key={key}
-              style={[styles.filterPill, active && styles.filterPillActive]}
-              onPress={() => handleRatingFilter(key)}
-              accessibilityRole="button"
-              accessibilityLabel={`Filter by ${label}`}
-            >
-              <Text style={[styles.filterPillText, active && styles.filterPillTextActive]}>
-                {label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterRow}
+          style={styles.filterRowScroll}
+        >
+          {RATING_FILTERS.map(({ key, label }) => {
+            const active = ratingFilter === key;
+            return (
+              <Pressable
+                key={key}
+                style={[styles.filterPill, active && styles.filterPillActive]}
+                onPress={() => handleRatingFilter(key)}
+                accessibilityRole="button"
+                accessibilityLabel={`Filter by ${label}`}
+              >
+                <Text style={[styles.filterPillText, active && styles.filterPillTextActive]}>
+                  {label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
       </View>
 
       {isLoading ? (
@@ -126,7 +204,18 @@ export function ReviewsScreen(): React.JSX.Element {
               <Text style={styles.emptyBody}>{t('reviews_no_reviews_body')}</Text>
             </View>
           }
-          renderItem={({ item }) => <ReviewCard item={item} />}
+          renderItem={({ item }) => (
+            <ReviewCard
+              item={item}
+              replyingTo={replyingTo}
+              replyDraft={replyDraft}
+              isSubmittingReply={isSubmittingReply}
+              onStartReply={handleStartReply}
+              onReplyDraftChange={handleReplyDraftChange}
+              onSubmitReply={handleSubmitReply}
+              onCancelReply={handleCancelReply}
+            />
+          )}
           ListFooterComponent={
             lastPage > 1 ? (
               <View style={styles.paginationRow}>

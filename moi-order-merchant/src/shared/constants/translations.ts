@@ -124,6 +124,7 @@ export type TranslationKey =
   // ── KYC Steps ─────────────────────────────────────────────────────────────
   | 'kyc_step1_title' | 'kyc_step1_business_name' | 'kyc_step1_business_type'
   | 'kyc_step1_business_address' | 'kyc_step1_business_phone' | 'kyc_step1_continue'
+  | 'kyc_step1_phone_error'
   | 'kyc_step2_title' | 'kyc_step2_subtitle' | 'kyc_step2_submit' | 'kyc_step2_reupload'
   | 'kyc_doc_national_id_desc' | 'kyc_doc_business_reg_desc'
   | 'kyc_doc_bank_book_desc' | 'kyc_doc_storefront_desc'
@@ -497,6 +498,7 @@ const EN: Translations = {
   kyc_step1_business_address: 'Business Address',
   kyc_step1_business_phone: 'Business Phone',
   kyc_step1_continue: 'Continue',
+  kyc_step1_phone_error: 'Phone number must be exactly 10 digits',
   kyc_step2_title: 'Required Documents',
   kyc_step2_subtitle: 'Upload all four documents to continue',
   kyc_step2_submit: 'Submit Application',
@@ -918,6 +920,7 @@ const MY: Translations = {
   kyc_step1_business_address: 'စီးပွားရေး လိပ်စာ',
   kyc_step1_business_phone: 'စီးပွားရေး ဖုန်းနံပါတ်',
   kyc_step1_continue: 'ဆက်လက်ရန်',
+  kyc_step1_phone_error: 'ဖုန်းနံပါတ်သည် ဂဏန်း ၁၀ လုံး ဖြစ်ရမည်',
   kyc_step2_title: 'လိုအပ်သော စာရွက်စာတမ်းများ',
   kyc_step2_subtitle: 'ဆက်လက်ရန် စာရွက်စာတမ်း ၄ ခုလုံး တင်ပါ',
   kyc_step2_submit: 'လျှောက်လွှာ တင်ပြရန်',

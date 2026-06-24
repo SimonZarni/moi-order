@@ -60,6 +60,9 @@ Route::delete('/opening-hours/{openingHourId}/session-menu/{categoryId}',  [Sess
 Route::post('/menu/categories/{categoryId}/items',  [MenuItemController::class, 'store']);
 Route::put('/menu/items/{id}',                      [MenuItemController::class, 'update']);
 Route::patch('/menu/items/{id}',                    [MenuItemController::class, 'update']);
+// POST variant for multipart uploads — method spoofing via _method=PUT is unreliable
+// with some multipart parsers; a dedicated POST route is more reliable.
+Route::post('/menu/items/{id}',                     [MenuItemController::class, 'update']);
 Route::patch('/menu/items/{id}/status',             [MenuItemController::class, 'updateStatus']);
 Route::patch('/menu/items/{id}/stock',              [MenuItemController::class, 'updateStock']);
 Route::delete('/menu/items/{id}',                   [MenuItemController::class, 'destroy']);
@@ -97,7 +100,8 @@ Route::post('/kyc/resubmit/{id}/use-existing-documents',      [KycController::cl
 Route::post('/kyc/resubmit/{id}/submit',                      [KycController::class, 'submitResubmission']);
 
 // ── Reviews ───────────────────────────────────────────────────────────────────
-Route::get('/reviews', [MerchantReviewController::class, 'index']);
+Route::get('/reviews',                      [MerchantReviewController::class, 'index']);
+Route::post('/reviews/{orderId}/reply',     [MerchantReviewController::class, 'reply']);
 
 // ── Device tokens — Expo push (native mobile) ────────────────────────────────
 Route::post('/device-tokens',   [DeviceTokenController::class, 'store']);

@@ -120,6 +120,11 @@ export function useCheckoutScreen(): UseCheckoutScreenResult {
       shakeContactInput();
       return;
     }
+    if (!/^\d{10}$/.test(contactNo.trim())) {
+      setContactNoError('Contact number must be exactly 10 digits');
+      shakeContactInput();
+      return;
+    }
     setContactNoError(null);
 
     const idempotencyKey = await Crypto.randomUUID();

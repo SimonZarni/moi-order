@@ -15,10 +15,11 @@ export function RestaurantPhotoCarousel({ photos, coverPhotoUrl }: RestaurantPho
   const [activeIndex, setActiveIndex] = useState(0);
 
   const slideUrls = useMemo<(string | null)[]>(() => {
-    if (photos.length > 0) {
-      return [...photos].sort((a, b) => a.sort_order - b.sort_order).map((p) => p.url);
-    }
-    return [coverPhotoUrl];
+    const galleryUrls = [...photos]
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((p) => p.url)
+      .filter((url): url is string => url !== null);
+    return [coverPhotoUrl, ...galleryUrls].filter((url, i) => i === 0 || url !== null);
   }, [photos, coverPhotoUrl]);
 
   const handleScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {

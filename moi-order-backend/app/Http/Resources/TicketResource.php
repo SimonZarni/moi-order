@@ -24,6 +24,9 @@ class TicketResource extends JsonResource
             'description'           => $this->description,
             'google_maps_link'      => $this->google_maps_link,
             'address'               => $this->address,
+            'open_time'             => $this->open_time,
+            'close_time'            => $this->close_time,
+            'operating_days'        => $this->operating_days,
             'city'                  => $this->city,
             'province'              => $this->province,
             'cover_image_url'       => $this->cover_image_path !== null

@@ -75,6 +75,8 @@ export const styles = StyleSheet.create({
   mapLink: { fontSize: typography.xs, color: colours.primary, fontWeight: '600' },
   directionsBtn: { flexDirection: 'row', alignItems: 'center', gap: 3, marginLeft: spacing.xs },
   directionsBtnText: { fontSize: typography.xs, color: colours.primary, fontWeight: '600' },
+  scheduleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: 4 },
+  scheduleText: { fontSize: typography.xs, color: colours.medium },
 
   // ── Section label ─────────────────────────────────────────────────────────
   sectionLabelRow: {

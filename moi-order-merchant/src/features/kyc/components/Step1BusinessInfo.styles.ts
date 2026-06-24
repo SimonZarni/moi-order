@@ -77,6 +77,15 @@ export const styles = StyleSheet.create({
     color: colours.primary,
     fontWeight: '700',
   },
+  inputError: {
+    borderColor: colours.error,
+    marginBottom: spacing.xs,
+  },
+  errorText: {
+    fontSize: typography.xs,
+    color: colours.error,
+    marginBottom: spacing.md,
+  },
   button: {
     backgroundColor: colours.primary,
     borderRadius: radius.full,

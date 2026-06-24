@@ -107,6 +107,9 @@ export type Ticket = {
   description: string;
   google_maps_link: string;
   address: string;
+  open_time: string | null;
+  close_time: string | null;
+  operating_days: string | null;
   city: string;
   province: string;
   cover_image_path: string | null;
@@ -275,7 +278,7 @@ export type ServiceSubmission = {
 // ----------------------------------------------------------------------
 // Admin Notifications
 
-export type AdminNotificationType = 'new_submission' | 'new_ticket_order' | 'new_payment' | 'new_food_order';
+export type AdminNotificationType = 'new_submission' | 'new_ticket_order' | 'new_payment' | 'new_food_order' | 'new_kyc';
 
 export type AdminNotificationData = {
   notification_type: AdminNotificationType;
@@ -286,6 +289,7 @@ export type AdminNotificationData = {
   submission_id?: string;
   ticket_order_id?: string;
   food_order_id?: number;
+  kyc_application_id?: number;
 };
 
 export type AdminNotification = {

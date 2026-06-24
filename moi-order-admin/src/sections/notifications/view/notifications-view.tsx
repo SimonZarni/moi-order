@@ -40,16 +40,20 @@ import { Scrollbar } from 'src/components/scrollbar';
 type CategoryTab = { value: 'all' | AdminNotificationType; label: string; icon: IconifyName };
 
 const TABS: CategoryTab[] = [
-  { value: 'all',              label: 'All',          icon: 'solar:bell-bing-bold-duotone' },
-  { value: 'new_payment',      label: 'Payments',     icon: 'eva:trending-up-fill' },
+  { value: 'all',              label: 'All',             icon: 'solar:bell-bing-bold-duotone' },
+  { value: 'new_food_order',   label: 'Food Orders',     icon: 'solar:cart-3-bold' },
+  { value: 'new_payment',      label: 'Payments',        icon: 'eva:trending-up-fill' },
   { value: 'new_ticket_order', label: 'Ticket Bookings', icon: 'solar:cart-3-bold' },
-  { value: 'new_submission',   label: 'Submissions',  icon: 'eva:done-all-fill' },
+  { value: 'new_submission',   label: 'Submissions',     icon: 'eva:done-all-fill' },
+  { value: 'new_kyc',          label: 'Merchants',       icon: 'solar:shield-keyhole-bold-duotone' },
 ];
 
-function typeColor(type: string): 'success' | 'warning' | 'info' | 'default' {
+function typeColor(type: string): 'success' | 'warning' | 'info' | 'error' | 'default' {
   if (type === 'new_payment')      return 'success';
   if (type === 'new_ticket_order') return 'warning';
   if (type === 'new_submission')   return 'info';
+  if (type === 'new_food_order')   return 'error';
+  if (type === 'new_kyc')          return 'warning';
   return 'default';
 }
 
@@ -57,12 +61,16 @@ function typeIcon(type: string): IconifyName {
   if (type === 'new_payment')      return 'eva:trending-up-fill';
   if (type === 'new_ticket_order') return 'solar:cart-3-bold';
   if (type === 'new_submission')   return 'eva:done-all-fill';
+  if (type === 'new_food_order')   return 'solar:cart-3-bold';
+  if (type === 'new_kyc')          return 'solar:shield-keyhole-bold-duotone';
   return 'solar:bell-bing-bold-duotone';
 }
 
 function notifLink(notif: AdminNotification): string | null {
-  if (notif.data.submission_id)   return `/services/submissions/${notif.data.submission_id}`;
-  if (notif.data.ticket_order_id) return `/bookings/${notif.data.ticket_order_id}`;
+  if (notif.data.submission_id)      return `/services/submissions/${notif.data.submission_id}`;
+  if (notif.data.ticket_order_id)    return `/bookings/${notif.data.ticket_order_id}`;
+  if (notif.data.food_order_id)      return `/food-orders/${notif.data.food_order_id}`;
+  if (notif.data.kyc_application_id) return `/merchants/kyc/${notif.data.kyc_application_id}`;
   return null;
 }
 

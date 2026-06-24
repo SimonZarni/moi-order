@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, LayoutChangeEvent, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
@@ -12,6 +12,8 @@ import { useMapStore } from '@/shared/store/mapStore';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { Locale } from '@/shared/store/localeStore';
 import { RootStackParamList, TabParamList } from '@/types/navigation';
+import { FOOD_ORDER_STATUS } from '@/types/enums';
+import { useFoodOrdersData } from '@/features/food/hooks/useFoodOrdersData';
 import { useFloatingTabBarPill } from './useFloatingTabBarPill';
 import { styles, TAB_BAR_BOTTOM_OFFSET } from './FloatingTabBar.styles';
 
@@ -65,9 +67,10 @@ interface TabBarViewProps {
   onTabPress: (tab: TabItem) => void;
   bottom: number;
   locale: Locale;
+  pendingOrderCount?: number;
 }
 
-function TabBarView({ activeRoute, activeIndex, onTabPress, bottom, locale }: TabBarViewProps): React.JSX.Element {
+function TabBarView({ activeRoute, activeIndex, onTabPress, bottom, locale, pendingOrderCount = 0 }: TabBarViewProps): React.JSX.Element {
   const onTabChange = useCallback(
     (index: number) => {
       const tab = TABS[index];
@@ -93,7 +96,8 @@ function TabBarView({ activeRoute, activeIndex, onTabPress, bottom, locale }: Ta
         pointerEvents="none"
       />
       {TABS.map((tab) => {
-        const isActive = tab.route === activeRoute;
+        const isActive  = tab.route === activeRoute;
+        const badgeCount = tab.route === 'Orders' ? pendingOrderCount : 0;
         return (
           <Pressable
             key={tab.route}
@@ -103,12 +107,21 @@ function TabBarView({ activeRoute, activeIndex, onTabPress, bottom, locale }: Ta
             accessibilityRole="button"
             accessibilityState={{ selected: isActive }}
           >
-            <Ionicons
-              name={tab.icon}
-              size={20}
-              color={isActive ? colours.primary : colours.textMuted}
-              style={{ opacity: isActive ? 1 : 0.45 }}
-            />
+            <View style={styles.iconWrap}>
+              <Ionicons
+                name={tab.icon}
+                size={20}
+                color={isActive ? colours.primary : colours.textMuted}
+                style={{ opacity: isActive ? 1 : 0.45 }}
+              />
+              {badgeCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {badgeCount > 99 ? '99+' : String(badgeCount)}
+                  </Text>
+                </View>
+              )}
+            </View>
             <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>
               {TAB_LABELS[tab.route]?.[locale] ?? tab.label}
             </Text>
@@ -148,6 +161,16 @@ export function RootFloatingTabBar({ navigationRef }: { navigationRef: NavRef })
   const { locale }         = useLocale();
   const insets             = useSafeAreaInsets();
   const slideAnim          = useRef(new Animated.Value(0)).current;
+  const { orders }         = useFoodOrdersData();
+
+  const pendingOrderCount = useMemo(
+    () => orders.filter((o) =>
+      o.status !== FOOD_ORDER_STATUS.Completed &&
+      o.status !== FOOD_ORDER_STATUS.Cancelled &&
+      o.status !== FOOD_ORDER_STATUS.Expired,
+    ).length,
+    [orders],
+  );
 
   const [activeRouteName, setActiveRouteName] = useState<string>('Home');
   const [isVisible, setIsVisible]             = useState<boolean>(true);
@@ -212,6 +235,7 @@ export function RootFloatingTabBar({ navigationRef }: { navigationRef: NavRef })
         onTabPress={handlePress}
         bottom={bottom}
         locale={locale}
+        pendingOrderCount={pendingOrderCount}
       />
     </Animated.View>
   );

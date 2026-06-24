@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getReviews, type ReviewItem } from '../../../api/reviews';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getReviews, replyToReview, type ReviewItem } from '../../../api/reviews';
 import { QUERY_KEYS } from '../../../shared/constants/queryKeys';
 import { CACHE_TTL, GC_TIME, QUERY_RETRY, PAGINATION } from '../../../shared/constants/config';
 
@@ -14,14 +14,24 @@ export interface UseReviewsScreenResult {
   lastPage: number;
   total: number;
   ratingFilter: RatingFilter;
+  replyingTo: string | null;
+  replyDraft: string;
+  isSubmittingReply: boolean;
   handleRatingFilter: (rating: RatingFilter) => void;
   handlePageNext: () => void;
   handlePagePrev: () => void;
+  handleStartReply: (orderId: string, existingReply: string | null) => void;
+  handleReplyDraftChange: (text: string) => void;
+  handleSubmitReply: () => void;
+  handleCancelReply: () => void;
 }
 
 export function useReviewsScreen(): UseReviewsScreenResult {
+  const queryClient = useQueryClient();
   const [ratingFilter, setRatingFilter] = useState<RatingFilter>(0);
   const [page, setPage] = useState(1);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyDraft, setReplyDraft] = useState('');
 
   const { data, isLoading, isError } = useQuery({
     queryKey: QUERY_KEYS.REVIEWS(page, ratingFilter),
@@ -36,9 +46,19 @@ export function useReviewsScreen(): UseReviewsScreenResult {
     retry:     QUERY_RETRY,
   });
 
-  const reviews   = data?.data ?? [];
-  const lastPage  = data?.meta.last_page ?? 1;
-  const total     = data?.meta.total ?? 0;
+  const { mutate: submitReply, isPending: isSubmittingReply } = useMutation({
+    mutationFn: ({ orderId, reply }: { orderId: string; reply: string }) =>
+      replyToReview(orderId, reply),
+    onSuccess: () => {
+      setReplyingTo(null);
+      setReplyDraft('');
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.REVIEWS(page, ratingFilter) });
+    },
+  });
+
+  const reviews  = data?.data ?? [];
+  const lastPage = data?.meta.last_page ?? 1;
+  const total    = data?.meta.total ?? 0;
 
   const handleRatingFilter = useCallback((rating: RatingFilter) => {
     setRatingFilter(rating);
@@ -53,6 +73,25 @@ export function useReviewsScreen(): UseReviewsScreenResult {
     setPage((p) => Math.max(p - 1, 1));
   }, []);
 
+  const handleStartReply = useCallback((orderId: string, existingReply: string | null) => {
+    setReplyingTo(orderId);
+    setReplyDraft(existingReply ?? '');
+  }, []);
+
+  const handleReplyDraftChange = useCallback((text: string) => {
+    setReplyDraft(text);
+  }, []);
+
+  const handleSubmitReply = useCallback(() => {
+    if (!replyingTo || !replyDraft.trim() || isSubmittingReply) return;
+    submitReply({ orderId: replyingTo, reply: replyDraft.trim() });
+  }, [replyingTo, replyDraft, isSubmittingReply, submitReply]);
+
+  const handleCancelReply = useCallback(() => {
+    setReplyingTo(null);
+    setReplyDraft('');
+  }, []);
+
   return {
     reviews,
     isLoading,
@@ -61,8 +100,15 @@ export function useReviewsScreen(): UseReviewsScreenResult {
     lastPage,
     total,
     ratingFilter,
+    replyingTo,
+    replyDraft,
+    isSubmittingReply,
     handleRatingFilter,
     handlePageNext,
     handlePagePrev,
+    handleStartReply,
+    handleReplyDraftChange,
+    handleSubmitReply,
+    handleCancelReply,
   };
 }

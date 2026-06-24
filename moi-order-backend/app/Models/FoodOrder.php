@@ -28,6 +28,7 @@ class FoodOrder extends Model
         'picked_up_at', 'delivered_at', 'completed_at', 'cancelled_at',
         'cancel_reason', 'cancel_description',
         'rating', 'customer_review',
+        'merchant_reply', 'merchant_replied_at',
         'edited_by_merchant_at',
     ];
 
@@ -47,6 +48,7 @@ class FoodOrder extends Model
             'delivered_at'         => 'datetime',
             'completed_at'         => 'datetime',
             'cancelled_at'            => 'datetime',
+            'merchant_replied_at'     => 'datetime',
             'edited_by_merchant_at'   => 'datetime',
             'preparation_time_minutes' => 'integer',
             'rating'                   => 'integer',

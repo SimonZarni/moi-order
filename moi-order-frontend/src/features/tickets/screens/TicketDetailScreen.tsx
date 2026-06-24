@@ -84,6 +84,21 @@ export function TicketDetailScreen(): React.JSX.Element {
               </Pressable>
             )}
           </View>
+          {(ticket.open_time !== null || ticket.operating_days !== null) && (
+            <View style={styles.scheduleRow}>
+              <Ionicons name="time-outline" size={14} color={colours.textMuted} />
+              <Text style={styles.scheduleText}>
+                {[
+                  ticket.open_time && ticket.close_time
+                    ? `${ticket.open_time} – ${ticket.close_time}`
+                    : ticket.open_time ?? null,
+                  ticket.operating_days,
+                ]
+                  .filter(Boolean)
+                  .join('  ·  ')}
+              </Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.sectionLabelRow}>

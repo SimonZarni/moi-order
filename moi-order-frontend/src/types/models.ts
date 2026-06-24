@@ -233,6 +233,9 @@ export interface Ticket {
   description: string;
   google_maps_link: string;
   address: string;
+  open_time: string | null;
+  close_time: string | null;
+  operating_days: string | null;
   city: string;
   province: string;
   cover_image_url: string;
@@ -481,6 +484,8 @@ export interface FoodOrder {
   items?: FoodOrderItem[];
   rating: number | null;
   customer_review: string | null;
+  merchant_reply: string | null;
+  merchant_replied_at: string | null;
   confirmed_at: string | null;
   payment_confirmed_at: string | null;
   preparing_at: string | null;

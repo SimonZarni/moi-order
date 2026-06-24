@@ -30,6 +30,9 @@ class KycService
     private const ALLOWED_DOCUMENT_MIMES = [
         'image/jpeg',
         'image/png',
+        'image/webp',
+        'image/heic',
+        'image/heif',
         'application/pdf',
     ];
 

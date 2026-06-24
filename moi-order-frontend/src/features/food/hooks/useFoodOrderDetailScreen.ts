@@ -9,6 +9,7 @@ import { FOOD_ORDER_STATUS, FOOD_PAYMENT_METHOD } from '@/types/enums';
 import { LINE_OA_URL, ORDER_PAYMENT_TIMEOUT_MS, CHAT_LOCK_AFTER_COMPLETION_MS } from '@/shared/constants/config';
 import { ERROR_CODES } from '@/shared/constants/errorCodes';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
+import { formatPrice } from '@/shared/utils/formatCurrency';
 import { cancelFoodOrder, completeFoodOrder, notifyLinePayment } from '@/shared/api/foodOrders';
 import { ApiError } from '@/types/models';
 import { useLocaleStore, Locale } from '@/shared/store/localeStore';
@@ -118,42 +119,58 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
   const handleInvoiceOpen  = useCallback(() => setInvoiceVisible(true), []);
   const handleInvoiceClose = useCallback(() => setInvoiceVisible(false), []);
 
+  const buildOrderDetailsMessage = useCallback((): string => {
+    if (!order) return '';
+    const num  = order.order_number ?? String(order.id);
+    const rest = order.restaurant_name ?? '';
+    const lines: string[] = [
+      `--- Order ${num} ---`,
+      `Restaurant: ${rest}`,
+      '',
+      'Items:',
+    ];
+    (order.items ?? []).forEach((item) => {
+      const price = formatPrice(item.subtotal_cents);
+      const opts  = item.selected_options.map((o) => o.name).join(', ');
+      lines.push(`• ${item.name} x${item.quantity}${opts ? ` (${opts})` : ''} — ${price}`);
+    });
+    lines.push('');
+    lines.push(`Total: ${formatPrice(order.total_cents)}`);
+    lines.push('');
+    lines.push('I am ready to pay. Please confirm my order.');
+    return lines.join('\n');
+  }, [order]);
+
   const handlePromptPayPress = useCallback(async () => {
     try {
       await notifyLinePayment(orderId);
-      // oaMessage?text= causes LINE to show "User not found" — LINE doesn't split the
-      // query string when resolving the OA handle. Open the OA chat directly instead.
-      Linking.openURL(LINE_OA_URL).catch(() =>
-        Alert.alert('Cannot open LINE', 'Please open LINE and search for Moi Order to complete your payment.'),
-      );
     } catch (e: unknown) {
       const code = (e as ApiError)?.code;
-
       if (code === ERROR_CODES.LINE_NOT_FOLLOWING) {
         Alert.alert(
           'Follow Moi Order on LINE',
           'Please follow us on LINE to receive your order confirmation.',
           [
             { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'Follow Now',
-              onPress: () => Linking.openURL(LINE_OA_URL).catch(() => {}),
-            },
+            { text: 'Follow Now', onPress: () => Linking.openURL(LINE_OA_URL).catch(() => {}) },
           ],
         );
         return;
       }
-
       if (code === ERROR_CODES.LINE_NOT_LINKED) {
         Alert.alert('LINE Account Required', 'Please sign in with LINE to use LINE Pay.');
         return;
       }
-
+    }
+    // Open LINE with pre-filled order details so the user can paste into the OA chat.
+    const message   = buildOrderDetailsMessage();
+    const lineDeepLink = `https://line.me/R/msg/text/?${encodeURIComponent(message)}`;
+    Linking.openURL(lineDeepLink).catch(() =>
       Linking.openURL(LINE_OA_URL).catch(() =>
         Alert.alert('Cannot open LINE', 'Please open LINE and search for Moi Order to complete your payment.'),
-      );
-    }
-  }, [orderId]);
+      ),
+    );
+  }, [orderId, buildOrderDetailsMessage]);
 
   const handleChatPress = useCallback(() => {
     navigation.navigate('OrderChat', {
