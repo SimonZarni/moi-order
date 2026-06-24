@@ -900,7 +900,7 @@ export function HomeCardFormView({ mode, card }: Props) {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/png,image/jpeg"
+                accept="image/*"
                 hidden
                 onChange={handleIconFileChange}
               />
