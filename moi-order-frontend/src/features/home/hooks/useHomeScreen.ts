@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -11,8 +11,9 @@ import { useNotificationStore } from '@/shared/store/notificationStore';
 import { HomeCard, User } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 
+import { useFoodOrdersData } from '@/features/food/hooks/useFoodOrdersData';
+import { FOOD_ORDER_STATUS } from '@/types/enums';
 import { useHomeCards } from './useHomeCards';
-import { useFoodActiveOrder } from '@/shared/hooks/useFoodActiveOrder';
 
 export interface UseHomeScreenResult {
   user: User | null;
@@ -45,7 +46,15 @@ export function useHomeScreen(): UseHomeScreenResult {
   } = useAirportFastTrackCard();
 
   const { cards, isLoading: isLoadingCards, refetch: refetchCards } = useHomeCards();
-  const activeOrders = useFoodActiveOrder();
+  const { orders } = useFoodOrdersData();
+  const activeOrderCount = useMemo(
+    () => orders.filter((o) =>
+      o.status !== FOOD_ORDER_STATUS.Completed &&
+      o.status !== FOOD_ORDER_STATUS.Cancelled  &&
+      o.status !== FOOD_ORDER_STATUS.Expired,
+    ).length,
+    [orders],
+  );
 
   const handleRefresh = useCallback((): void => {
     refetch();
@@ -84,7 +93,7 @@ export function useHomeScreen(): UseHomeScreenResult {
     isRefreshing,
     cards,
     isLoadingCards,
-    activeOrderCount: activeOrders.length,
+    activeOrderCount,
     airportServiceTypeId,
     airportServiceId,
     airportServiceName,
