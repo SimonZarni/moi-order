@@ -13,16 +13,16 @@ interface Props {
 }
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  [FOOD_ORDER_STATUS.OrderPlaced]:        { bg: '#fef9c3', color: '#a16207', label: 'Order Placed'          },
-  [FOOD_ORDER_STATUS.WaitingForPayment]:  { bg: '#fef3c7', color: '#d97706', label: 'Awaiting Payment'      },
-  [FOOD_ORDER_STATUS.PaymentConfirmed]:   { bg: '#d1fae5', color: '#065f46', label: 'Payment Confirmed'     },
-  [FOOD_ORDER_STATUS.PreparingFood]:      { bg: '#dbeafe', color: '#1d4ed8', label: 'Preparing'             },
-  [FOOD_ORDER_STATUS.WaitingForDelivery]: { bg: '#ede9fe', color: '#5b21b6', label: 'Waiting for Delivery'  },
+  [FOOD_ORDER_STATUS.OrderPlaced]:        { bg: '#fef9c3', color: '#92400e', label: 'Order Placed'          },
+  [FOOD_ORDER_STATUS.WaitingForPayment]:  { bg: '#ffedd5', color: '#c2410c', label: 'Awaiting Payment'      },
+  [FOOD_ORDER_STATUS.PaymentConfirmed]:   { bg: '#dbeafe', color: '#1d4ed8', label: 'Payment Confirmed'     },
+  [FOOD_ORDER_STATUS.PreparingFood]:      { bg: '#ede9fe', color: '#6d28d9', label: 'Preparing'             },
+  [FOOD_ORDER_STATUS.WaitingForDelivery]: { bg: '#ccfbf1', color: '#0f766e', label: 'Waiting for Delivery'  },
   [FOOD_ORDER_STATUS.DeliveryOnTheWay]:   { bg: '#e0f2fe', color: '#0369a1', label: 'On the Way'            },
   [FOOD_ORDER_STATUS.Delivered]:          { bg: '#dcfce7', color: '#15803d', label: 'Delivered'             },
-  [FOOD_ORDER_STATUS.Completed]:          { bg: colours.infoBg, color: colours.medium, label: 'Completed'   },
+  [FOOD_ORDER_STATUS.Completed]:          { bg: '#f0fdf4', color: '#166534', label: 'Completed'             },
   [FOOD_ORDER_STATUS.Cancelled]:          { bg: '#fee2e2', color: '#b91c1c', label: 'Cancelled'             },
-  [FOOD_ORDER_STATUS.Expired]:            { bg: '#fde8d8', color: '#c2410c', label: 'Expired'               },
+  [FOOD_ORDER_STATUS.Expired]:            { bg: '#f3f4f6', color: '#4b5563', label: 'Expired'               },
 };
 
 const FALLBACK_STYLE: { bg: string; color: string; label: string } = {

@@ -4,13 +4,13 @@ import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 
 export const STATUS_DOT_COLOURS: Record<string, string> = {
-  order_placed:          '#f59e0b',
-  waiting_for_payment:   '#f59e0b',
-  payment_confirmed:     '#f59e0b',
-  preparing_food:        '#f97316',
-  waiting_for_delivery:  '#06b6d4',
-  delivery_on_the_way:   '#10b981',
-  delivered:             '#10b981',
+  order_placed:          '#f59e0b',  // amber
+  waiting_for_payment:   '#f97316',  // orange
+  payment_confirmed:     '#60a5fa',  // blue
+  preparing_food:        '#c084fc',  // purple
+  waiting_for_delivery:  '#2dd4bf',  // teal
+  delivery_on_the_way:   '#38bdf8',  // sky
+  delivered:             '#86efac',  // lime
 };
 
 export const styles = StyleSheet.create({
