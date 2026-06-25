@@ -67,7 +67,7 @@ export type TranslationKey =
   | 'analytics_all' | 'analytics_today' | 'analytics_week' | 'analytics_month'
   | 'analytics_revenue' | 'analytics_pending_now' | 'analytics_need_attention'
   | 'analytics_week_revenue' | 'analytics_month_revenue' | 'analytics_avg_order_value'
-  | 'analytics_this_month'
+  | 'analytics_this_month' | 'analytics_daily_avg_revenue' | 'analytics_orders_per_day'
   | 'analytics_performance_eyebrow' | 'analytics_page_title' | 'analytics_pending_suffix'
   | 'analytics_chart_revenue' | 'analytics_chart_orders'
   | 'analytics_chart_sub_today_week_month' | 'analytics_no_revenue' | 'analytics_no_orders'
@@ -344,6 +344,8 @@ const EN: Translations = {
   analytics_month_revenue: 'Month Revenue',
   analytics_avg_order_value: 'Avg Order Value',
   analytics_this_month: 'this month',
+  analytics_daily_avg_revenue: 'Daily Avg Revenue',
+  analytics_orders_per_day: 'orders/day',
   analytics_performance_eyebrow: 'PERFORMANCE',
   analytics_page_title: 'Analytics',
   analytics_pending_suffix: 'pending',
@@ -766,6 +768,8 @@ const MY: Translations = {
   analytics_month_revenue: 'လ ဝင်ငွေ',
   analytics_avg_order_value: 'ပျမ်းမျှ အော်ဒါတန်ဖိုး',
   analytics_this_month: 'ဤလ',
+  analytics_daily_avg_revenue: 'နေ့ပျမ်းမျှ ဝင်ငွေ',
+  analytics_orders_per_day: 'အော်ဒါ/နေ့',
   analytics_performance_eyebrow: 'စွမ်းဆောင်ရည်',
   analytics_page_title: 'အနုဆန်းစစ်',
   analytics_pending_suffix: 'ဆိုင်းငံ့နေ',
