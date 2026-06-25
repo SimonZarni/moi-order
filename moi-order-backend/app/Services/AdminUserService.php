@@ -74,11 +74,27 @@ class AdminUserService
 
     public function update(User $user, AdminUpdateUserDTO $dto): User
     {
-        $user->update(array_filter([
-            'name'          => $dto->name,
-            'email'         => $dto->email,
-            'date_of_birth' => $dto->dateOfBirth,
-        ], fn ($v) => $v !== null));
+        $changes = [];
+
+        if ($dto->name !== null)        $changes['name']          = $dto->name;
+        if ($dto->dateOfBirth !== null) $changes['date_of_birth'] = $dto->dateOfBirth;
+        if ($dto->password !== null)    $changes['password']      = $dto->password;
+
+        // Email change → unverify so the user re-verifies the new address in settings.
+        if ($dto->email !== null && $dto->email !== $user->email) {
+            $changes['email']             = $dto->email;
+            $changes['email_verified_at'] = null;
+        }
+
+        // Phone change (including clearing to null) → unverify new number.
+        if ($dto->phoneNumberSent && $dto->phoneNumber !== $user->phone_number) {
+            $changes['phone_number']      = $dto->phoneNumber;
+            $changes['phone_verified_at'] = null;
+        }
+
+        if (!empty($changes)) {
+            $user->update($changes);
+        }
 
         return $user->fresh();
     }
@@ -89,8 +105,11 @@ class AdminUserService
             'name'          => $dto->name,
             'email'         => $dto->email,
             'password'      => $dto->password,
+            'phone_number'  => $dto->phoneNumber,
             'date_of_birth' => $dto->dateOfBirth,
             'is_admin'      => $dto->isAdmin,
+            // email_verified_at intentionally null — user verifies themselves in settings.
+            // phone_verified_at intentionally null — set on first successful OTP login/verify.
         ]);
     }
 

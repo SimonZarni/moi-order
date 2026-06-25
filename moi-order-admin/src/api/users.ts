@@ -25,6 +25,7 @@ export type UserData = {
   suspended_until: string | null;
   date_of_birth: string | null;
   email_verified_at: string | null;
+  phone_verified_at: string | null;
   created_at: string;
   deleted_at: string | null;
   connected_channels: {
@@ -143,6 +144,10 @@ export const usersApi = {
     apiClient.patch<{ data: UserData }>(`/users/${id}/ban`).then((r) => r.data.data),
   activate: (id: number | string) =>
     apiClient.patch<{ data: UserData }>(`/users/${id}/activate`).then((r) => r.data.data),
+  create: (payload: { name: string; email: string; password: string; phone_number?: string }) =>
+    apiClient.post<{ data: UserData }>('/users', payload).then((r) => r.data.data),
+  updateProfile: (id: number | string, payload: { name?: string; email?: string; phone_number?: string | null; password?: string }) =>
+    apiClient.put<{ data: UserData }>(`/users/${id}`, payload).then((r) => r.data.data),
   activityLog: (id: number | string, page = 1) =>
     apiClient
       .get<{ data: UserActivityLog[]; meta: Meta }>(`/users/${id}/activity-log`, { params: { page, per_page: 50 } })

@@ -435,6 +435,14 @@ export function UserDetailView() {
   const [addDocOpen, setAddDocOpen]     = useState(false);
   const [addDocLoading, setAddDocLoading] = useState(false);
 
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [editName, setEditName]       = useState('');
+  const [editEmail, setEditEmail]     = useState('');
+  const [editPhone, setEditPhone]     = useState('');
+  const [editPassword, setEditPassword] = useState('');
+  const [editSaving, setEditSaving]   = useState(false);
+  const [editErrors, setEditErrors]   = useState<Record<string, string>>({});
+
   const [editDoc, setEditDoc]       = useState<UserDocument | null>(null);
   const [editDocLoading, setEditDocLoading] = useState(false);
 
@@ -487,6 +495,38 @@ export function UserDetailView() {
     },
     [id, editDoc],
   );
+
+  const openEditProfile = useCallback(() => {
+    if (!user) return;
+    setEditName(user.name);
+    setEditEmail(user.email ?? '');
+    setEditPhone(user.phone_number ?? '');
+    setEditPassword('');
+    setEditErrors({});
+    setEditProfileOpen(true);
+  }, [user]);
+
+  const handleSaveProfile = useCallback(() => {
+    if (!id) return;
+    setEditSaving(true);
+    setEditErrors({});
+    const payload: Record<string, string | null> = { name: editName, email: editEmail };
+    payload.phone_number = editPhone.trim() || null;
+    if (editPassword.trim()) payload.password = editPassword.trim();
+    usersApi.updateProfile(id, payload as Parameters<typeof usersApi.updateProfile>[1])
+      .then((updated) => {
+        setUser((prev) => prev ? { ...prev, ...updated } : prev);
+        setEditProfileOpen(false);
+      })
+      .catch((err) => {
+        const apiErrors = err?.response?.data?.errors ?? {};
+        const flat: Record<string, string> = {};
+        Object.entries(apiErrors).forEach(([k, v]) => { flat[k] = Array.isArray(v) ? v[0] : String(v); });
+        if (Object.keys(flat).length === 0) flat.general = err?.response?.data?.message ?? 'Failed to save.';
+        setEditErrors(flat);
+      })
+      .finally(() => setEditSaving(false));
+  }, [id, editName, editEmail, editPhone, editPassword]);
 
   const handleDeleteDoc = useCallback(
     (doc: UserDocument) => {
@@ -557,6 +597,12 @@ export function UserDetailView() {
           <Box sx={{ flexGrow: 1 }}>
             <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
               <Typography variant="h5">{user.name}</Typography>
+              <Box sx={{ flexGrow: 1 }} />
+              {canManage && (
+                <Button size="small" variant="outlined" startIcon={<Iconify icon="solar:pen-bold" />} onClick={openEditProfile}>
+                  Edit Profile
+                </Button>
+              )}
               {user.is_online
                 ? <Chip size="small" label="Online" color="success" />
                 : user.last_active_at
@@ -830,6 +876,26 @@ export function UserDetailView() {
 
       {/* Photo preview */}
       {previewUrl && <PhotoDialog url={previewUrl} onClose={() => setPreviewUrl(null)} />}
+
+      {/* Edit profile dialog */}
+      <Dialog open={editProfileOpen} onClose={() => setEditProfileOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Edit Profile</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ pt: 1 }}>
+            {editErrors.general && <Typography color="error" variant="body2">{editErrors.general}</Typography>}
+            <TextField label="Full name" fullWidth value={editName} onChange={(e) => setEditName(e.target.value)} error={!!editErrors.name} helperText={editErrors.name} />
+            <TextField label="Email" type="email" fullWidth value={editEmail} onChange={(e) => setEditEmail(e.target.value)} error={!!editErrors.email} helperText={editErrors.email ?? 'Changing email resets email verification'} />
+            <TextField label="Phone number" fullWidth value={editPhone} onChange={(e) => setEditPhone(e.target.value)} error={!!editErrors.phone_number} helperText={editErrors.phone_number ?? 'Leave empty to remove. Changing resets phone verification.'} />
+            <TextField label="New password" type="password" fullWidth value={editPassword} onChange={(e) => setEditPassword(e.target.value)} error={!!editErrors.password} helperText={editErrors.password ?? 'Leave empty to keep current password'} />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditProfileOpen(false)} disabled={editSaving}>Cancel</Button>
+          <Button onClick={handleSaveProfile} variant="contained" disabled={editSaving || !editName || !editEmail}>
+            {editSaving ? 'Saving…' : 'Save'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </DashboardContent>
   );
 }

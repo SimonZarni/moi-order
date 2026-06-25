@@ -43,6 +43,7 @@ class User extends Authenticatable
         'email',
         'locale',
         'phone_number',
+        'phone_verified_at',
         'password',
         'date_of_birth',
         'is_admin',
@@ -80,6 +81,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'phone_verified_at' => 'datetime',
             'password'          => 'hashed',
             'date_of_birth'     => 'date:Y-m-d',
             'is_admin'          => 'boolean',

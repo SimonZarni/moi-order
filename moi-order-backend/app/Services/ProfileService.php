@@ -151,7 +151,7 @@ class ProfileService
             $user->id,
         );
 
-        $user->update(['phone_number' => $phoneNumber]);
+        $user->update(['phone_number' => $phoneNumber, 'phone_verified_at' => now()]);
 
         $this->activityLog->record($user->fresh(), UserActivityEvent::PhoneChanged);
 

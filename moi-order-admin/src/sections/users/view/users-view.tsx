@@ -40,6 +40,8 @@ import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 
+import { usersApi } from 'src/api/users';
+
 import { useUsersView } from '../hooks/useUsersView';
 
 // ----------------------------------------------------------------------
@@ -108,6 +110,69 @@ function SuspendDialog({ name, open, onClose, onConfirm }: SuspendDialogProps) {
   );
 }
 
+// ── Create User dialog ────────────────────────────────────────────────────────
+
+interface CreateUserDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onCreated: (user: UserData) => void;
+}
+
+function CreateUserDialog({ open, onClose, onCreated }: CreateUserDialogProps) {
+  const [name, setName]           = useState('');
+  const [email, setEmail]         = useState('');
+  const [password, setPassword]   = useState('');
+  const [phone, setPhone]         = useState('');
+  const [saving, setSaving]       = useState(false);
+  const [errors, setErrors]       = useState<Record<string, string>>({});
+
+  const handleClose = () => {
+    setName(''); setEmail(''); setPassword(''); setPhone('');
+    setErrors({}); setSaving(false); onClose();
+  };
+
+  const handleSubmit = () => {
+    setSaving(true);
+    setErrors({});
+    usersApi.create({
+      name,
+      email,
+      password,
+      ...(phone.trim() ? { phone_number: phone.trim() } : {}),
+    })
+      .then((user) => { onCreated(user); handleClose(); })
+      .catch((err) => {
+        const apiErrors = err?.response?.data?.errors ?? {};
+        const flat: Record<string, string> = {};
+        Object.entries(apiErrors).forEach(([k, v]) => { flat[k] = Array.isArray(v) ? v[0] : String(v); });
+        if (Object.keys(flat).length === 0) flat.general = err?.response?.data?.message ?? 'Failed to create user.';
+        setErrors(flat);
+      })
+      .finally(() => setSaving(false));
+  };
+
+  return (
+    <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
+      <DialogTitle>Create User</DialogTitle>
+      <DialogContent>
+        <Stack spacing={2} sx={{ pt: 1 }}>
+          {errors.general && <Typography color="error" variant="body2">{errors.general}</Typography>}
+          <TextField label="Full name" fullWidth value={name} onChange={(e) => setName(e.target.value)} error={!!errors.name} helperText={errors.name} />
+          <TextField label="Email" type="email" fullWidth value={email} onChange={(e) => setEmail(e.target.value)} error={!!errors.email} helperText={errors.email} />
+          <TextField label="Password" type="password" fullWidth value={password} onChange={(e) => setPassword(e.target.value)} error={!!errors.password} helperText={errors.password ?? 'Minimum 8 characters'} />
+          <TextField label="Phone number (optional)" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} error={!!errors.phone_number} helperText={errors.phone_number ?? 'e.g. 0812345678'} />
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose} disabled={saving}>Cancel</Button>
+        <Button onClick={handleSubmit} variant="contained" disabled={saving || !name || !email || !password}>
+          {saving ? 'Creating…' : 'Create'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 // ── Main view ─────────────────────────────────────────────────────────────────
 
 export function UsersView() {
@@ -137,7 +202,10 @@ export function UsersView() {
     handleRestore,
     handleDelete,
     handleExport,
+    handleUserCreated,
   } = useUsersView();
+
+  const [createOpen, setCreateOpen] = useState(false);
 
   return (
     <DashboardContent>
@@ -145,6 +213,11 @@ export function UsersView() {
         <Typography variant="h4" sx={{ flexGrow: 1 }}>App Users</Typography>
         <Stack direction="row" spacing={1.5} alignItems="center">
           <Typography variant="body2" color="text.secondary">{total} total users</Typography>
+          {canManage && (
+            <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={() => setCreateOpen(true)}>
+              Create User
+            </Button>
+          )}
           <Button variant="outlined" startIcon={<Iconify icon="solar:share-bold" />} onClick={handleExport}>
             Export Excel
           </Button>
@@ -359,6 +432,12 @@ export function UsersView() {
           onConfirm={handleSuspendConfirm}
         />
       )}
+
+      <CreateUserDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={(user) => { handleUserCreated(user); setCreateOpen(false); }}
+      />
     </DashboardContent>
   );
 }

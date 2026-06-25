@@ -43,6 +43,7 @@ export interface UseUsersViewResult {
   handleRestore: (id: number) => void;
   handleDelete: (id: number, name: string) => void;
   handleExport: () => void;
+  handleUserCreated: (user: UserData) => void;
 }
 
 // ----------------------------------------------------------------------
@@ -199,6 +200,8 @@ export function useUsersView(): UseUsersViewResult {
     [router]
   );
 
+  const handleUserCreated = useCallback(() => { invalidateUsers(); }, [invalidateUsers]);
+
   const handleExport = useCallback(() => {
     usersApi.export({ search: filterName.trim() || undefined }).then((blob) => {
       const url = window.URL.createObjectURL(blob);
@@ -238,5 +241,6 @@ export function useUsersView(): UseUsersViewResult {
     handleRestore,
     handleDelete,
     handleExport,
+    handleUserCreated,
   };
 }

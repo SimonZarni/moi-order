@@ -62,6 +62,7 @@ export interface User {
   is_merchant: boolean;
   simulated_date: string | null;  // ISO date "YYYY-MM-DD" — privileged accounts only
   email_verified_at: string | null;
+  phone_verified_at: string | null;
   created_at: string;
 }
 

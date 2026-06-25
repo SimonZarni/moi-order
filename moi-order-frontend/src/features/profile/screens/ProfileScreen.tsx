@@ -350,6 +350,12 @@ export function ProfileScreen(): React.JSX.Element {
                   <Text style={[styles.infoValue, displayEmail === null && styles.infoPlaceholder, { flex: 1 }]}>
                     {displayEmail ?? '—'}
                   </Text>
+                  {displayEmail !== null && user?.email_verified_at === null && (
+                    <View style={styles.unverifiedBadge}>
+                      <Ionicons name="alert-circle-outline" size={11} color={colours.warning} />
+                      <Text style={styles.unverifiedBadgeText}>Unverified</Text>
+                    </View>
+                  )}
                   <Ionicons name="chevron-forward" size={16} color={colours.textMuted} />
                 </Pressable>
 
@@ -366,6 +372,12 @@ export function ProfileScreen(): React.JSX.Element {
                   <Text style={[styles.infoValue, displayPhone === null && styles.infoPlaceholder, { flex: 1 }]}>
                     {displayPhone ? formatPhoneNumber(displayPhone) : '—'}
                   </Text>
+                  {displayPhone !== null && user?.phone_verified_at === null && (
+                    <View style={styles.unverifiedBadge}>
+                      <Ionicons name="alert-circle-outline" size={11} color={colours.warning} />
+                      <Text style={styles.unverifiedBadgeText}>Unverified</Text>
+                    </View>
+                  )}
                   <Ionicons name="chevron-forward" size={16} color={colours.textMuted} />
                 </Pressable>
 

@@ -91,6 +91,11 @@ class OtpAuthService
             ? $this->resolveLoginUser($phoneNumber)
             : $this->registerUser($phoneNumber, $dto->name);
 
+        // OTP success proves ownership of this phone number.
+        if ($user->phone_verified_at === null) {
+            $user->update(['phone_verified_at' => now()]);
+        }
+
         $token = $user->createToken('user-auth', ['user'], now()->addDays(30))->plainTextToken;
 
         return ['user' => $user, 'token' => $token];

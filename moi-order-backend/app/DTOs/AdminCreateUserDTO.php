@@ -12,6 +12,7 @@ readonly class AdminCreateUserDTO
         public string  $name,
         public string  $email,
         public string  $password,
+        public ?string $phoneNumber,
         public ?string $dateOfBirth,
         public bool    $isAdmin,
     ) {}
@@ -22,6 +23,7 @@ readonly class AdminCreateUserDTO
             name:        $request->string('name')->toString(),
             email:       $request->string('email')->lower()->toString(),
             password:    $request->string('password')->toString(),
+            phoneNumber: $request->filled('phone_number') ? $request->string('phone_number')->toString() : null,
             dateOfBirth: $request->input('date_of_birth'),
             isAdmin:     $request->boolean('is_admin', false),
         );

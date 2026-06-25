@@ -675,6 +675,24 @@ export const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
 
+  // ── Unverified badge — shown next to email / phone that hasn't been verified ─
+  unverifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,196,9,0.15)',
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.xs + 2,
+    paddingVertical: 2,
+    marginRight: spacing.xs,
+    gap: 3,
+  },
+  unverifiedBadgeText: {
+    fontSize: typography.xxs,
+    fontWeight: '700',
+    color: colours.warning,
+    letterSpacing: 0.3,
+  },
+
   // ── Delete account ─────────────────────────────────────────────────────────
   deleteAccountBtn: {
     marginTop: spacing.sm,

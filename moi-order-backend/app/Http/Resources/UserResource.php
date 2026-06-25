@@ -35,6 +35,7 @@ class UserResource extends JsonResource
             'is_merchant'       => $this->is_merchant,
             'simulated_date'    => $this->isPrivileged() ? $this->simulated_date?->format('Y-m-d') : null,
             'email_verified_at' => $this->email_verified_at?->toISOString(),
+            'phone_verified_at' => $this->phone_verified_at?->toISOString(),
             'created_at'        => $this->created_at->toISOString(),
         ];
     }
