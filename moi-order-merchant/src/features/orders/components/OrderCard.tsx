@@ -17,15 +17,16 @@ interface OrderAction {
 }
 
 const STATUS_COLOURS: Record<string, string> = {
-  [ORDER_STATUS.OrderPlaced]:        colours.warning,
-  [ORDER_STATUS.WaitingForPayment]:  colours.warning,
-  [ORDER_STATUS.PaymentConfirmed]:   colours.primary,
-  [ORDER_STATUS.PreparingFood]:      colours.primary,
-  [ORDER_STATUS.WaitingForDelivery]: colours.primaryDark,
-  [ORDER_STATUS.DeliveryOnTheWay]:   colours.primaryDark,
-  [ORDER_STATUS.Delivered]:          colours.success,
-  [ORDER_STATUS.Completed]:          colours.success,
-  [ORDER_STATUS.Cancelled]:          colours.error,
+  [ORDER_STATUS.OrderPlaced]:        '#f59e0b',  // amber  — urgent, accept now
+  [ORDER_STATUS.WaitingForPayment]:  '#f97316',  // orange — awaiting payment
+  [ORDER_STATUS.PaymentConfirmed]:   '#60a5fa',  // blue   — ready to start
+  [ORDER_STATUS.PreparingFood]:      '#c084fc',  // purple — in kitchen
+  [ORDER_STATUS.WaitingForDelivery]: '#2dd4bf',  // teal   — ready for pickup
+  [ORDER_STATUS.DeliveryOnTheWay]:   '#38bdf8',  // sky    — rider en route
+  [ORDER_STATUS.Delivered]:          '#86efac',  // lime   — arrived, confirm
+  [ORDER_STATUS.Completed]:          colours.primary,   // green  — done
+  [ORDER_STATUS.Cancelled]:          colours.error,     // red    — cancelled
+  [ORDER_STATUS.Expired]:            colours.medium,    // gray   — expired
 };
 
 interface OrderCardProps {
@@ -117,7 +118,7 @@ export function OrderCard({ order, onUpdateStatus, onStartPreparing, onPress, va
       {action !== undefined && (
         <View style={[styles.actionWrap, isDesktop && styles.actionWrapDesktop]}>
           <Pressable
-            style={[styles.actionBtn, isDesktop && styles.actionBtnDesktop, { shadowColor: statusColour }]}
+            style={[styles.actionBtn, isDesktop && styles.actionBtnDesktop, { backgroundColor: statusColour, shadowColor: statusColour }]}
             onPress={handleAction}
             accessibilityLabel={`${action.label} for order ${order.order_number ?? order.id}`}
             accessibilityRole="button"
