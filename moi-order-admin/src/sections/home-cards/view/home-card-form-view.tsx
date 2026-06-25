@@ -210,6 +210,13 @@ export function HomeCardFormView({ mode, card }: Props) {
       .finally(() => setCreatingIcon(false));
   }, [newIconFile, newIconKey, newIconLabel, handleCloseIconDialog]);
 
+  // ── Main form ───────────────────────────────────────────────────────────────
+  const update = useCallback(<K extends keyof FormState>(field: K, value: FormState[K]) => {
+    setSaved(false);
+    setFieldErrors((prev) => { const n = { ...prev }; delete n[field]; return n; });
+    setForm((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
   // ── Delete Icon ─────────────────────────────────────────────────────────────
   const [deleteIconId, setDeleteIconId] = useState<number | null>(null);
   const [deletingIcon, setDeletingIcon] = useState(false);
@@ -275,13 +282,6 @@ export function HomeCardFormView({ mode, card }: Props) {
       })
       .finally(() => setCreatingRoute(false));
   }, [newRouteKey, newRouteLabelEn, newRouteLabelMm, newRouteType, newRouteUrl, handleCloseRouteDialog]);
-
-  // ── Main form ───────────────────────────────────────────────────────────────
-  const update = useCallback(<K extends keyof FormState>(field: K, value: FormState[K]) => {
-    setSaved(false);
-    setFieldErrors((prev) => { const n = { ...prev }; delete n[field]; return n; });
-    setForm((prev) => ({ ...prev, [field]: value }));
-  }, []);
 
   const handleAccentHexInput = useCallback((raw: string) => {
     const val = raw.startsWith('#') ? raw : `#${raw}`;
