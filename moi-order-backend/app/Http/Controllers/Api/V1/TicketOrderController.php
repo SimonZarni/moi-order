@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\DTOs\CreateTicketOrderDTO;
+use App\Enums\TicketOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CancelTicketOrderRequest;
 use App\Http\Requests\CreateTicketOrderRequest;
@@ -24,6 +25,20 @@ class TicketOrderController extends Controller
     public function __construct(
         private readonly TicketOrderService $service,
     ) {}
+
+    /** GET /api/v1/ticket-orders/active */
+    public function active(Request $request): JsonResponse
+    {
+        $orders = TicketOrder::with(['ticket', 'items.variant'])
+            ->forUser($request->user()->id)
+            ->whereNotIn('status', [TicketOrderStatus::Completed->value, TicketOrderStatus::Cancelled->value])
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'data' => TicketOrderResource::collection($orders),
+        ]);
+    }
 
     public function store(CreateTicketOrderRequest $request): JsonResponse
     {

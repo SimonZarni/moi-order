@@ -18,6 +18,7 @@ export const QUERY_KEYS = {
   },
   SUBMISSIONS: {
     LIST:   ['submissions', 'list'] as const,
+    ACTIVE: ['submissions', 'active'] as const,
     DETAIL: (id: string) => ['submissions', 'detail', id] as const,
   },
   PAYMENTS: {
@@ -36,6 +37,7 @@ export const QUERY_KEYS = {
   },
   TICKET_ORDERS: {
     LIST:   ['ticket-orders', 'list'] as const,
+    ACTIVE: ['ticket-orders', 'active'] as const,
     DETAIL: (id: string) => ['ticket-orders', 'detail', id] as const,
   },
   NOTIFICATIONS: {

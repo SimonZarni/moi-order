@@ -13,6 +13,11 @@ export async function createTicketOrder(payload: CreateTicketOrderPayload): Prom
   return data.data;
 }
 
+export async function fetchActiveTicketOrders(): Promise<TicketOrder[]> {
+  const { data } = await apiClient.get<{ data: TicketOrder[] }>('/api/v1/ticket-orders/active');
+  return data.data;
+}
+
 export async function fetchTicketOrders(page = 1): Promise<PaginatedResponse<TicketOrder>> {
   const { data } = await apiClient.get('/api/v1/ticket-orders', { params: { page } });
   return data;

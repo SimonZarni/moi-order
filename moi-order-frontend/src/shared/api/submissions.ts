@@ -45,6 +45,11 @@ export async function submitDynamic(
   return response.data.data;
 }
 
+export async function fetchActiveSubmissions(): Promise<ServiceSubmission[]> {
+  const response = await apiClient.get<{ data: ServiceSubmission[] }>('/api/v1/submissions/active');
+  return response.data.data;
+}
+
 export async function fetchSubmissions(page: number): Promise<PaginatedResponse<ServiceSubmission>> {
   const response = await apiClient.get<PaginatedResponse<ServiceSubmission>>('/api/v1/submissions', {
     params: { page },

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Enums\SubmissionStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CancelSubmissionRequest;
 use App\Http\Requests\DeleteSubmissionRequest;
@@ -24,6 +25,20 @@ class SubmissionController extends Controller
     public function __construct(
         private readonly SubmissionService $service,
     ) {}
+
+    /** GET /api/v1/submissions/active */
+    public function active(Request $request): JsonResponse
+    {
+        $submissions = ServiceSubmission::with(['serviceType.service'])
+            ->forUser($request->user()->id)
+            ->whereNotIn('status', [SubmissionStatus::Completed->value, SubmissionStatus::Cancelled->value])
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'data' => ServiceSubmissionResource::collection($submissions),
+        ]);
+    }
 
     /** GET /api/v1/submissions */
     public function index(Request $request): AnonymousResourceCollection

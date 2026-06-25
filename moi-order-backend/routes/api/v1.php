@@ -56,6 +56,7 @@ Route::get('/documents/upload-stats', UploadStatsController::class);
 
 // Submissions
 Route::get('/submissions',                 [SubmissionController::class,       'index']);
+Route::get('/submissions/active',          [SubmissionController::class,       'active']);
 Route::get('/submissions/{id}',            [SubmissionController::class,       'show']);
 Route::post('/submissions/{id}/cancel',    [SubmissionController::class,       'cancel']);
 Route::delete('/submissions/{id}',         [SubmissionController::class,       'destroy']);
@@ -71,6 +72,7 @@ Route::post('/submissions/{id}/payment/notify',   [PaymentController::class, 'no
 // Ticket orders
 Route::post('/ticket-orders',                              [TicketOrderController::class,        'store']);
 Route::get('/ticket-orders',                               [TicketOrderController::class,        'index']);
+Route::get('/ticket-orders/active',                        [TicketOrderController::class,        'active']);
 Route::get('/ticket-orders/{id}',                          [TicketOrderController::class,        'show']);
 Route::post('/ticket-orders/{id}/cancel',                  [TicketOrderController::class,        'cancel']);
 Route::delete('/ticket-orders/{id}',                       [TicketOrderController::class,        'destroy']);
