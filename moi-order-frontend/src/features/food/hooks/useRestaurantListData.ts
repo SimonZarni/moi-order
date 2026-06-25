@@ -27,7 +27,6 @@ export function useRestaurantListData(search?: string, lat?: number, lng?: numbe
     getNextPageParam: (last) =>
       last.meta.current_page < last.meta.last_page ? last.meta.current_page + 1 : undefined,
     staleTime: CACHE_TTL.LIVE_DATA,
-    enabled:          lat !== undefined && lng !== undefined,
   });
 
   const handleRefresh = useCallback(async () => {
