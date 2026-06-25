@@ -31,7 +31,11 @@ class HomeCardIconService
 
     public function store(StoreHomeCardIconDTO $dto): HomeCardIcon
     {
-        $path = $this->storage->store($dto->image, 'home-card-icons', ['image/png', 'image/jpeg']);
+        $path = $this->storage->store($dto->image, 'home-card-icons', [
+            'image/png', 'image/jpeg', 'image/webp', 'image/svg+xml',
+            'image/gif', 'image/bmp', 'image/tiff', 'image/heic', 'image/heif',
+            'image/avif', 'image/x-icon', 'image/vnd.microsoft.icon',
+        ]);
 
         $icon = HomeCardIcon::create([
             'key'        => $dto->key,
