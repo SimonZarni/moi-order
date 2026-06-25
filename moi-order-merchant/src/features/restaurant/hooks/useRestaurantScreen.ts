@@ -1,5 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
-import { Platform } from 'react-native';
+import { Platform, Linking } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { normalizePickedImage } from '../../../shared/utils/imageUtils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRestaurantLocation } from './useRestaurantLocation';
 import {
@@ -121,6 +123,15 @@ interface UseRestaurantScreenResult {
   handleResubmitFinalSubmit: () => void;
   handleUseExistingDocs: () => void;
   isUsingExistingDocs: boolean;
+  // Photo pickers (moved from screen to keep screen logic-free)
+  coverCropSource: { uri: string; name: string; type: string; width: number; height: number } | null;
+  handlePickCoverPhoto: () => Promise<void>;
+  handleCoverCropDone: (croppedUri: string) => void;
+  handleCoverCropCancel: () => void;
+  handlePickLogo: () => Promise<void>;
+  handlePickGalleryPhoto: () => Promise<void>;
+  handlePickResubmitDoc: (docType: KycDocType) => Promise<void>;
+  handleContactSupport: () => void;
 }
 
 export function useRestaurantScreen(): UseRestaurantScreenResult {
@@ -579,6 +590,62 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     mutateUseExistingDocs(resubmitForm.resubmissionId);
   }, [resubmitForm.resubmissionId, mutateUseExistingDocs]);
 
+  // ── Photo pickers (moved from screen to keep screen logic-free) ────────────
+  const [coverCropSource, setCoverCropSource] = useState<{
+    uri: string; name: string; type: string; width: number; height: number;
+  } | null>(null);
+
+  const pickAndConvert = useCallback(async (
+    onPick: (uri: string, name: string, type: string) => void,
+    baseName: string,
+  ) => {
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'images', quality: 0.8 });
+    if (result.canceled || !result.assets[0]) return;
+    const img = await normalizePickedImage(result.assets[0], baseName);
+    onPick(img.uri, img.name, img.type);
+  }, []);
+
+  const handlePickCoverPhoto = useCallback(async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'images', quality: 1 });
+    if (result.canceled || !result.assets[0]) return;
+    const asset = result.assets[0];
+    const img = await normalizePickedImage(asset, 'cover');
+    setCoverCropSource({ uri: img.uri, name: img.name, type: img.type, width: asset.width ?? 1200, height: asset.height ?? 675 });
+  }, []);
+
+  const handleCoverCropDone = useCallback((croppedUri: string) => {
+    if (coverCropSource === null) return;
+    const croppedName = coverCropSource.name.replace(/\.[^.]+$/, '.jpg');
+    if (coverCropSource.uri.startsWith('blob:')) URL.revokeObjectURL(coverCropSource.uri);
+    handleUploadCoverPhoto(croppedUri, croppedName, 'image/jpeg');
+    setCoverCropSource(null);
+  }, [coverCropSource, handleUploadCoverPhoto]);
+
+  const handleCoverCropCancel = useCallback(() => {
+    if (coverCropSource?.uri.startsWith('blob:')) URL.revokeObjectURL(coverCropSource.uri);
+    setCoverCropSource(null);
+  }, [coverCropSource]);
+
+  const handlePickLogo = useCallback(async () => {
+    await pickAndConvert(handleUploadLogo, 'logo');
+  }, [pickAndConvert, handleUploadLogo]);
+
+  const handlePickGalleryPhoto = useCallback(async () => {
+    await pickAndConvert(handleUploadGalleryPhoto, 'gallery');
+  }, [pickAndConvert, handleUploadGalleryPhoto]);
+
+  const handlePickResubmitDoc = useCallback(async (docType: KycDocType) => {
+    await pickAndConvert(
+      (uri, name, type) => handleResubmitUploadDoc(docType, { uri, name, type }),
+      docType,
+    );
+  }, [pickAndConvert, handleResubmitUploadDoc]);
+
+  const LINE_OA_URL = 'https://line.me/R/ti/p/%40moiorder';
+  const handleContactSupport = useCallback(() => {
+    Linking.openURL(LINE_OA_URL).catch(() => {});
+  }, []);
+
   return {
     restaurant,
     isNewRestaurant,
@@ -650,5 +717,13 @@ export function useRestaurantScreen(): UseRestaurantScreenResult {
     handleResubmitFinalSubmit,
     handleUseExistingDocs,
     isUsingExistingDocs,
+    coverCropSource,
+    handlePickCoverPhoto,
+    handleCoverCropDone,
+    handleCoverCropCancel,
+    handlePickLogo,
+    handlePickGalleryPhoto,
+    handlePickResubmitDoc,
+    handleContactSupport,
   };
 }
