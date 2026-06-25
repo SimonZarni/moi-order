@@ -5,37 +5,63 @@ import { typography } from '../../../shared/theme/typography';
 import { radius } from '../../../shared/theme/radius';
 
 export const styles = StyleSheet.create({
+  // ── Overlay / backdrop ─────────────────────────────────────────────────────
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.lg,
   },
-  scrollView: {
-    maxHeight: '90%',
-  },
+
+  // ── Simple modal card (add category, rename, delete) ───────────────────────
   card: {
-    backgroundColor: colours.backgroundDark,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
+    backgroundColor: colours.surface,
+    borderRadius: radius.xl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xl,
+    gap: spacing.sm,
+    width: '100%',
+    maxWidth: 420,
+  },
+
+  // ── Scrollable add-item dialog ─────────────────────────────────────────────
+  scrollWrap: {
+    width: '100%',
+    maxWidth: 560,
+    maxHeight: '85%',
+    backgroundColor: colours.surface,
+    borderRadius: radius.xl,
+    overflow: 'hidden',
+  },
+  scrollCardContent: {
     padding: spacing.lg,
     paddingBottom: spacing.xl + spacing.md,
     gap: spacing.sm,
   },
+
+  // ── Typography ─────────────────────────────────────────────────────────────
   title: {
     fontSize: typography.lg,
     fontWeight: '700',
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     marginBottom: spacing.xs,
-    lineHeight: 50,
   },
+  deleteBody: {
+    fontSize: typography.sm,
+    color: colours.textMuted,
+    lineHeight: 24,
+  },
+
+  // ── Inputs ─────────────────────────────────────────────────────────────────
   input: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: colours.surfaceMuted,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
+    borderColor: colours.divider,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     fontSize: typography.sm,
   },
   inputMultiline: {
@@ -54,6 +80,8 @@ export const styles = StyleSheet.create({
   inputML: {
     marginLeft: spacing.xs,
   },
+
+  // ── Actions row ────────────────────────────────────────────────────────────
   actions: {
     flexDirection: 'row',
     gap: spacing.sm,
@@ -66,12 +94,12 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 2,
     borderRadius: radius.full,
     borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.2)',
+    borderColor: colours.divider,
   },
   cancelText: {
     fontSize: typography.sm,
     fontWeight: '700',
-    color: colours.textOnDark,
+    color: colours.textMuted,
   },
   confirmBtn: {
     flex: 1,
@@ -84,7 +112,7 @@ export const styles = StyleSheet.create({
   confirmText: {
     fontSize: typography.sm,
     fontWeight: '700',
-    color: colours.backgroundDark,
+    color: colours.surface,
   },
   deleteBtn: {
     flex: 1,
@@ -102,11 +130,7 @@ export const styles = StyleSheet.create({
   disabled: {
     opacity: 0.4,
   },
-  deleteBody: {
-    fontSize: typography.sm,
-    color: 'rgba(255,255,255,0.6)',
-    lineHeight: 24,
-  },
+
   // ── Price row ──────────────────────────────────────────────────────────────
   priceRow: {
     flexDirection: 'row',
@@ -119,7 +143,7 @@ export const styles = StyleSheet.create({
   priceLabel: {
     fontSize: typography.xs,
     fontWeight: '600',
-    color: 'rgba(255,255,255,0.5)',
+    color: colours.textMuted,
     letterSpacing: 0.3,
   },
   priceHint: {
@@ -139,6 +163,7 @@ export const styles = StyleSheet.create({
     borderColor: colours.success + '40',
     alignSelf: 'flex-start',
   },
+
   // ── Photo ──────────────────────────────────────────────────────────────────
   photoWrap: {
     position: 'relative',
@@ -173,7 +198,7 @@ export const styles = StyleSheet.create({
   newBadgeText: {
     fontSize: typography.xxs,
     fontWeight: '700',
-    color: colours.backgroundDark,
+    color: colours.surface,
     letterSpacing: 0.5,
   },
   changePhotoBtn: {
@@ -183,7 +208,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: radius.full,
@@ -204,10 +229,11 @@ export const styles = StyleSheet.create({
   photoPickerText: {
     color: colours.primary,
   },
+
   // ── Option groups ──────────────────────────────────────────────────────────
   divider: {
     height: 1,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: colours.divider,
     marginVertical: spacing.xs,
   },
   sectionRow: {
@@ -218,11 +244,11 @@ export const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: typography.sm,
     fontWeight: '700',
-    color: colours.textOnDark,
+    color: colours.textOnLight,
   },
   sectionHint: {
     fontSize: typography.xxs,
-    color: 'rgba(255,255,255,0.4)',
+    color: colours.textSubtle,
   },
   addGroupBtn: {
     flexDirection: 'row',
@@ -233,7 +259,7 @@ export const styles = StyleSheet.create({
     borderRadius: radius.full,
     borderWidth: 1,
     borderColor: colours.primary + '55',
-    backgroundColor: colours.primary + '15',
+    backgroundColor: colours.primaryBg,
   },
   addGroupBtnText: {
     fontSize: typography.xs,
@@ -241,10 +267,10 @@ export const styles = StyleSheet.create({
     color: colours.primary,
   },
   optionGroupCard: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: colours.surfaceMuted,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: colours.divider,
     padding: spacing.sm,
     gap: spacing.xs,
   },
@@ -267,16 +293,16 @@ export const styles = StyleSheet.create({
   toggleLabel: {
     fontSize: typography.xxs,
     fontWeight: '600',
-    color: 'rgba(255,255,255,0.5)',
+    color: colours.textMuted,
   },
   numInput: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: colours.surface,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
+    borderColor: colours.divider,
     borderRadius: radius.sm,
     paddingHorizontal: spacing.sm,
     paddingVertical: 3,
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     fontSize: typography.sm,
     fontWeight: '700',
     width: 42,

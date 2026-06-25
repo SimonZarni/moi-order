@@ -56,11 +56,11 @@ export function MenuModals({ addCat, rename, deleteModal, addItem }: MenuModalsP
   return (
     <>
       {/* Add category */}
-      <Modal visible={addCat.show} transparent animationType="slide">
+      <Modal visible={addCat.show} transparent animationType="fade">
         <View style={styles.overlay}>
           <View style={styles.card}>
             <Text style={styles.title}>{t('menu_new_category_title')}</Text>
-            <TextInput style={styles.input} placeholder={t('menu_category_name_placeholder')} placeholderTextColor="rgba(255,255,255,0.3)" value={addCat.name} onChangeText={addCat.onChange} autoFocus returnKeyType="done" onSubmitEditing={addCat.onConfirm} accessibilityLabel="Category name" />
+            <TextInput style={styles.input} placeholder={t('menu_category_name_placeholder')} placeholderTextColor={colours.textSubtle} value={addCat.name} onChangeText={addCat.onChange} autoFocus returnKeyType="done" onSubmitEditing={addCat.onConfirm} accessibilityLabel="Category name" />
             <View style={styles.actions}>
               <Pressable style={styles.cancelBtn} onPress={addCat.onCancel} accessibilityLabel="Cancel" accessibilityRole="button"><Text style={styles.cancelText}>{t('common_cancel')}</Text></Pressable>
               <Pressable style={styles.confirmBtn} onPress={addCat.onConfirm} accessibilityLabel="Add category" accessibilityRole="button"><Text style={styles.confirmText}>{t('common_add')}</Text></Pressable>
@@ -70,15 +70,15 @@ export function MenuModals({ addCat, rename, deleteModal, addItem }: MenuModalsP
       </Modal>
 
       {/* Rename category */}
-      <Modal visible={rename.id !== null} transparent animationType="slide">
+      <Modal visible={rename.id !== null} transparent animationType="fade">
         <View style={styles.overlay}>
           <View style={styles.card}>
             <Text style={styles.title}>{t('menu_rename_category_title')}</Text>
-            <TextInput style={styles.input} placeholder={t('menu_category_name_placeholder')} placeholderTextColor="rgba(255,255,255,0.3)" value={rename.name} onChangeText={rename.onChange} autoFocus returnKeyType="done" onSubmitEditing={rename.onConfirm} accessibilityLabel="Category name" />
+            <TextInput style={styles.input} placeholder={t('menu_category_name_placeholder')} placeholderTextColor={colours.textSubtle} value={rename.name} onChangeText={rename.onChange} autoFocus returnKeyType="done" onSubmitEditing={rename.onConfirm} accessibilityLabel="Category name" />
             <View style={styles.actions}>
               <Pressable style={styles.cancelBtn} onPress={rename.onCancel} accessibilityLabel="Cancel" accessibilityRole="button"><Text style={styles.cancelText}>{t('common_cancel')}</Text></Pressable>
               <Pressable style={[styles.confirmBtn, rename.isSaving && styles.disabled]} onPress={rename.onConfirm} disabled={rename.isSaving} accessibilityLabel="Save name" accessibilityRole="button">
-                {rename.isSaving ? <ActivityIndicator size="small" color={colours.backgroundDark} /> : <Text style={styles.confirmText}>{t('common_save')}</Text>}
+                {rename.isSaving ? <ActivityIndicator size="small" color={colours.surface} /> : <Text style={styles.confirmText}>{t('common_save')}</Text>}
               </Pressable>
             </View>
           </View>
@@ -100,18 +100,20 @@ export function MenuModals({ addCat, rename, deleteModal, addItem }: MenuModalsP
       </Modal>
 
       {/* Add item */}
-      <Modal visible={addItem.categoryId !== null} transparent animationType="slide">
+      <Modal visible={addItem.categoryId !== null} transparent animationType="fade">
         <View style={styles.overlay}>
-          <ScrollView style={styles.scrollView} contentContainerStyle={styles.card} keyboardShouldPersistTaps="handled">
-            <ItemForm t={t} form={addItem.form} isSaving={addItem.isSaving}
-              onFieldChange={addItem.onFieldChange} onPickPhoto={addItem.onPickPhoto}
-              onAddOptionGroup={addItem.onAddOptionGroup} onRemoveOptionGroup={addItem.onRemoveOptionGroup}
-              onOptionGroupChange={addItem.onOptionGroupChange} onAddOption={addItem.onAddOption}
-              onRemoveOption={addItem.onRemoveOption} onOptionChange={addItem.onOptionChange}
-              onCancel={addItem.onClose} onSubmit={addItem.onSubmit}
-              submitLabel={t('menu_add_item')}
-            />
-          </ScrollView>
+          <View style={styles.scrollWrap}>
+            <ScrollView contentContainerStyle={styles.scrollCardContent} keyboardShouldPersistTaps="handled">
+              <ItemForm t={t} form={addItem.form} isSaving={addItem.isSaving}
+                onFieldChange={addItem.onFieldChange} onPickPhoto={addItem.onPickPhoto}
+                onAddOptionGroup={addItem.onAddOptionGroup} onRemoveOptionGroup={addItem.onRemoveOptionGroup}
+                onOptionGroupChange={addItem.onOptionGroupChange} onAddOption={addItem.onAddOption}
+                onRemoveOption={addItem.onRemoveOption} onOptionChange={addItem.onOptionChange}
+                onCancel={addItem.onClose} onSubmit={addItem.onSubmit}
+                submitLabel={t('menu_add_item')}
+              />
+            </ScrollView>
+          </View>
         </View>
       </Modal>
     </>
@@ -143,17 +145,17 @@ function ItemForm({ t, form, isSaving, onFieldChange, onPickPhoto, onAddOptionGr
   return (
     <>
       <Text style={styles.title}>{t('menu_new_item_title')}</Text>
-      <TextInput style={styles.input} placeholder={t('menu_item_name_placeholder')} placeholderTextColor="rgba(255,255,255,0.3)" value={form.name} onChangeText={(v) => onFieldChange('name', v)} accessibilityLabel="Item name" />
-      <TextInput style={[styles.input, styles.inputMultiline]} placeholder={t('menu_item_desc_placeholder')} placeholderTextColor="rgba(255,255,255,0.3)" value={form.description} onChangeText={(v) => onFieldChange('description', v)} multiline accessibilityLabel="Item description" />
+      <TextInput style={styles.input} placeholder={t('menu_item_name_placeholder')} placeholderTextColor={colours.textSubtle} value={form.name} onChangeText={(v) => onFieldChange('name', v)} accessibilityLabel="Item name" />
+      <TextInput style={[styles.input, styles.inputMultiline]} placeholder={t('menu_item_desc_placeholder')} placeholderTextColor={colours.textSubtle} value={form.description} onChangeText={(v) => onFieldChange('description', v)} multiline accessibilityLabel="Item description" />
       <View style={styles.priceRow}>
         <View style={styles.priceCol}>
           <Text style={styles.priceLabel}>{t('menu_price_label')} (your take)</Text>
-          <TextInput style={styles.input} placeholder="100.00" placeholderTextColor="rgba(255,255,255,0.3)" value={form.price} onChangeText={(v) => onFieldChange('price', v)} keyboardType="decimal-pad" accessibilityLabel="Item price" />
+          <TextInput style={styles.input} placeholder="100.00" placeholderTextColor={colours.textSubtle} value={form.price} onChangeText={(v) => onFieldChange('price', v)} keyboardType="decimal-pad" accessibilityLabel="Item price" />
           {priceCents !== null && <Text style={styles.priceHint}>Customer: {formatPrice(priceCents)}</Text>}
         </View>
         <View style={styles.priceCol}>
           <Text style={styles.priceLabel}>{t('menu_original_price_label')}</Text>
-          <TextInput style={styles.input} placeholder={t('common_optional')} placeholderTextColor="rgba(255,255,255,0.3)" value={form.original_price} onChangeText={(v) => onFieldChange('original_price', v)} keyboardType="decimal-pad" accessibilityLabel="Original price" />
+          <TextInput style={styles.input} placeholder={t('common_optional')} placeholderTextColor={colours.textSubtle} value={form.original_price} onChangeText={(v) => onFieldChange('original_price', v)} keyboardType="decimal-pad" accessibilityLabel="Original price" />
           {origCents !== null && <Text style={styles.priceHint}>Customer: {formatPrice(origCents)}</Text>}
         </View>
       </View>
@@ -174,7 +176,7 @@ function ItemForm({ t, form, isSaving, onFieldChange, onPickPhoto, onAddOptionGr
       {form.option_groups.map((group: OptionGroupInput, gi: number) => (
         <View key={gi} style={styles.optionGroupCard}>
           <View style={styles.optionGroupHeader}>
-            <TextInput style={[styles.input, styles.inputFlex]} placeholder={t('menu_group_name_placeholder')} placeholderTextColor="rgba(255,255,255,0.3)" value={group.name} onChangeText={(v) => onOptionGroupChange(gi, 'name', v)} accessibilityLabel={`Option group ${gi + 1} name`} />
+            <TextInput style={[styles.input, styles.inputFlex]} placeholder={t('menu_group_name_placeholder')} placeholderTextColor={colours.textSubtle} value={group.name} onChangeText={(v) => onOptionGroupChange(gi, 'name', v)} accessibilityLabel={`Option group ${gi + 1} name`} />
             <Pressable style={styles.removePad} onPress={() => onRemoveOptionGroup(gi)} accessibilityRole="button" accessibilityLabel="Remove group"><Ionicons name="trash-outline" size={15} color={colours.error} /></Pressable>
           </View>
           <View style={styles.metaRow}>
@@ -184,8 +186,8 @@ function ItemForm({ t, form, isSaving, onFieldChange, onPickPhoto, onAddOptionGr
           </View>
           {group.options.map((opt, oi: number) => (
             <View key={oi} style={styles.optionRow}>
-              <TextInput style={[styles.input, styles.inputFlex2]} placeholder={t('menu_option_name_placeholder')} placeholderTextColor="rgba(255,255,255,0.3)" value={opt.name} onChangeText={(v) => onOptionChange(gi, oi, 'name', v)} accessibilityLabel={`Option ${oi + 1} name`} />
-              <TextInput style={[styles.input, styles.inputFlex1, styles.inputML]} placeholder="+0" placeholderTextColor="rgba(255,255,255,0.3)" value={opt.additional_price_cents === 0 ? '' : String(opt.additional_price_cents / 100)} onChangeText={(v) => onOptionChange(gi, oi, 'additional_price_cents', Math.round(parseFloat(v || '0') * 100))} keyboardType="decimal-pad" accessibilityLabel={`Option ${oi + 1} price`} />
+              <TextInput style={[styles.input, styles.inputFlex2]} placeholder={t('menu_option_name_placeholder')} placeholderTextColor={colours.textSubtle} value={opt.name} onChangeText={(v) => onOptionChange(gi, oi, 'name', v)} accessibilityLabel={`Option ${oi + 1} name`} />
+              <TextInput style={[styles.input, styles.inputFlex1, styles.inputML]} placeholder="+0" placeholderTextColor={colours.textSubtle} value={opt.additional_price_cents === 0 ? '' : String(opt.additional_price_cents / 100)} onChangeText={(v) => onOptionChange(gi, oi, 'additional_price_cents', Math.round(parseFloat(v || '0') * 100))} keyboardType="decimal-pad" accessibilityLabel={`Option ${oi + 1} price`} />
               <Pressable style={styles.removePad} onPress={() => onRemoveOption(gi, oi)} accessibilityRole="button" accessibilityLabel="Remove option"><Ionicons name="close-circle-outline" size={15} color={colours.error} /></Pressable>
             </View>
           ))}
@@ -199,7 +201,7 @@ function ItemForm({ t, form, isSaving, onFieldChange, onPickPhoto, onAddOptionGr
       <View style={styles.actions}>
         <Pressable style={styles.cancelBtn} onPress={onCancel} accessibilityLabel="Cancel" accessibilityRole="button"><Text style={styles.cancelText}>{t('common_cancel')}</Text></Pressable>
         <Pressable style={[styles.confirmBtn, (isSaving || !form.name.trim() || !form.price.trim()) && styles.disabled]} onPress={onSubmit} disabled={isSaving || !form.name.trim() || !form.price.trim()} accessibilityLabel={submitLabel} accessibilityRole="button">
-          {isSaving ? <ActivityIndicator size="small" color={colours.backgroundDark} /> : <Text style={styles.confirmText}>{submitLabel}</Text>}
+          {isSaving ? <ActivityIndicator size="small" color={colours.surface} /> : <Text style={styles.confirmText}>{submitLabel}</Text>}
         </Pressable>
       </View>
     </>
