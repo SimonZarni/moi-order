@@ -114,8 +114,8 @@ export function LoginScreen(): React.JSX.Element {
           accessibilityRole="button"
         >
           {isGoogleLoading
-            ? <ActivityIndicator size="small" color={colours.textOnDark} />
-            : <Ionicons name="logo-google" size={20} color={colours.textOnDark} />}
+            ? <ActivityIndicator size="small" color={colours.textMuted} />
+            : <Ionicons name="logo-google" size={20} color={colours.textOnLight} />}
           <Text style={styles.socialBtnText}>Google</Text>
         </Pressable>
 
@@ -128,8 +128,8 @@ export function LoginScreen(): React.JSX.Element {
             accessibilityRole="button"
           >
             {isAppleLoading
-              ? <ActivityIndicator size="small" color={colours.textOnDark} />
-              : <Ionicons name="logo-apple" size={20} color={colours.textOnDark} />}
+              ? <ActivityIndicator size="small" color={colours.textMuted} />
+              : <Ionicons name="logo-apple" size={20} color={colours.textOnLight} />}
             <Text style={styles.socialBtnText}>Apple</Text>
           </Pressable>
         )}
@@ -142,7 +142,7 @@ export function LoginScreen(): React.JSX.Element {
           accessibilityRole="button"
         >
           {isLineLoading
-            ? <ActivityIndicator size="small" color={colours.textOnDark} />
+            ? <ActivityIndicator size="small" color={colours.textMuted} />
             : <Text style={styles.socialBtnLine}>LINE</Text>}
         </Pressable>
       </View>

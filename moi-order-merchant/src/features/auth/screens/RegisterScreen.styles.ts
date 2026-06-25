@@ -9,27 +9,30 @@ export const styles = StyleSheet.create({
   screen: {
     flex: 1,
     flexDirection: 'row',
+    backgroundColor: colours.surface,
   },
   screenColumn: {
     flexDirection: 'column',
   },
   leftPanel: {
     width: '42%',
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.primaryBg,
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.xxl,
     gap: spacing.md,
+    borderRightWidth: 1,
+    borderRightColor: colours.divider,
   },
   leftPanelMobile: {
     width: '100%',
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.surface,
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.lg,
     gap: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colours.dividerDark,
+    borderBottomColor: colours.divider,
   },
   brandLogo: {
     width: 64,
@@ -40,7 +43,7 @@ export const styles = StyleSheet.create({
   brandName: {
     fontSize: typography.xxl,
     fontWeight: '800',
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     letterSpacing: -0.5,
   },
   brandRole: {
@@ -58,14 +61,14 @@ export const styles = StyleSheet.create({
   },
   brandTagline: {
     fontSize: typography.sm,
-    color: 'rgba(255,255,255,0.45)',
+    color: colours.textMuted,
     textAlign: 'center',
     lineHeight: 22,
     maxWidth: 260,
   },
   rightPanel: {
     flex: 1,
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -94,23 +97,23 @@ export const styles = StyleSheet.create({
   formTitle: {
     fontSize: typography.xxl,
     fontWeight: '800',
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     marginBottom: spacing.xs,
     letterSpacing: -0.5,
   },
   formSubtitle: {
     fontSize: typography.sm,
-    color: 'rgba(255,255,255,0.4)',
+    color: colours.textMuted,
     marginBottom: spacing.xl,
   },
 
   // ── Mobile layout ──────────────────────────────────────────────────────────
   safe: {
     flex: 1,
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.surface,
   },
   container: {
-    backgroundColor: colours.backgroundMid,
+    backgroundColor: colours.surface,
     padding: spacing.lg,
     paddingTop: spacing.xl,
     borderTopLeftRadius: radius.sheet,
@@ -120,13 +123,13 @@ export const styles = StyleSheet.create({
   title: {
     fontSize: typography.xxl,
     fontWeight: '800',
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     marginBottom: spacing.xs,
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: typography.sm,
-    color: 'rgba(255,255,255,0.4)',
+    color: colours.textMuted,
     marginBottom: spacing.xl,
   },
 
@@ -142,19 +145,19 @@ export const styles = StyleSheet.create({
     borderColor: colours.error + '33',
   },
   input: {
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.surfaceMuted,
     borderWidth: 1,
-    borderColor: colours.dividerDark,
+    borderColor: colours.divider,
     borderRadius: radius.lg,
     padding: spacing.md,
     fontSize: typography.md,
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     marginBottom: spacing.xs,
     minHeight: 52,
   },
   inputHint: {
     fontSize: typography.xs,
-    color: 'rgba(255,255,255,0.35)',
+    color: colours.textMuted,
     marginTop: -spacing.xs + 2,
     marginBottom: spacing.sm,
     marginLeft: spacing.xs,
@@ -185,7 +188,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   note: {
-    color: 'rgba(255,255,255,0.35)',
+    color: colours.textMuted,
     fontSize: typography.xs,
     textAlign: 'center',
     lineHeight: 18,
@@ -205,7 +208,7 @@ export const styles = StyleSheet.create({
   },
   otpInfoText: {
     fontSize: typography.sm,
-    color: 'rgba(255,255,255,0.6)',
+    color: colours.textMuted,
     flex: 1,
   },
   pinInput: {
@@ -227,6 +230,6 @@ export const styles = StyleSheet.create({
   },
   linkBtnMuted: {
     fontSize: typography.sm,
-    color: 'rgba(255,255,255,0.35)',
+    color: colours.textMuted,
   },
 });

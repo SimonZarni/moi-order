@@ -60,7 +60,7 @@ export function OtpLoginScreen(): React.JSX.Element {
         <>
           <View style={styles.otpInfo}>
             <Ionicons name="checkmark-circle" size={16} color={colours.primary} />
-            <Text style={styles.otpInfoText}>{t('otp_code_sent_to')} <Text style={{ fontWeight: '700', color: colours.textOnDark }}>{phoneNumber}</Text></Text>
+            <Text style={styles.otpInfoText}>{t('otp_code_sent_to')} <Text style={{ fontWeight: '700', color: colours.textOnLight }}>{phoneNumber}</Text></Text>
           </View>
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>ENTER {OTP_PIN_LENGTH}{t('otp_enter_digit_code').toUpperCase()}</Text>

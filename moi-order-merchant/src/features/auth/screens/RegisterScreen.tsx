@@ -28,7 +28,7 @@ export function RegisterScreen(): React.JSX.Element {
       <TextInput
         style={styles.input}
         placeholder={t('register_full_name')}
-        placeholderTextColor="rgba(255,255,255,0.3)"
+        placeholderTextColor={colours.textSubtle}
         value={name}
         onChangeText={setName}
         accessibilityLabel="Full name"
@@ -37,7 +37,7 @@ export function RegisterScreen(): React.JSX.Element {
       <TextInput
         style={styles.input}
         placeholder={t('register_email_address')}
-        placeholderTextColor="rgba(255,255,255,0.3)"
+        placeholderTextColor={colours.textSubtle}
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -48,7 +48,7 @@ export function RegisterScreen(): React.JSX.Element {
       <TextInput
         style={styles.input}
         placeholder={t('register_password')}
-        placeholderTextColor="rgba(255,255,255,0.3)"
+        placeholderTextColor={colours.textSubtle}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -78,13 +78,13 @@ export function RegisterScreen(): React.JSX.Element {
         <Ionicons name="checkmark-circle" size={16} color={colours.primary} />
         <Text style={styles.otpInfoText}>
           {t('otp_code_sent_to')}{' '}
-          <Text style={{ fontWeight: '700', color: colours.textOnDark }}>{email}</Text>
+          <Text style={{ fontWeight: '700', color: colours.textOnLight }}>{email}</Text>
         </Text>
       </View>
       <TextInput
         style={[styles.input, styles.pinInput]}
         placeholder={'· · · · · ·'.slice(0, OTP_PIN_LENGTH * 2 - 1)}
-        placeholderTextColor="rgba(255,255,255,0.3)"
+        placeholderTextColor={colours.textSubtle}
         value={otp}
         onChangeText={setOtp}
         keyboardType="number-pad"
