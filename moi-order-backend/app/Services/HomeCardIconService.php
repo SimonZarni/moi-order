@@ -35,9 +35,16 @@ class HomeCardIconService
             throw new \DomainException('icon.not_deletable');
         }
 
+        $path = $icon->image_path;
+
         $icon->delete();
 
+        if ($path) {
+            $this->storage->delete($path);
+        }
+
         Cache::forget(CacheKeys::HOME_CARD_ICONS_ACTIVE);
+        Cache::forget(CacheKeys::HOME_CARDS_VISIBLE);
     }
 
     public function store(StoreHomeCardIconDTO $dto): HomeCardIcon

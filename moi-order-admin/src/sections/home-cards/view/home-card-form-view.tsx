@@ -227,7 +227,7 @@ export function HomeCardFormView({ mode, card }: Props) {
     homeCardIconsApi.delete(deleteIconId)
       .then(() => {
         const deleted = icons.find((i) => i.id === deleteIconId);
-        if (deleted && form.icon_key === deleted.key) update('icon_key', '');
+        if (deleted && form.icon_key === deleted.key) update('icon_key', 'calendar');
         setIcons((prev) => prev.filter((i) => i.id !== deleteIconId));
         setDeleteIconId(null);
       })
