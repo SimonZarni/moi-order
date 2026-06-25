@@ -16,4 +16,7 @@ export const homeCardIconsApi = {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       .then((r) => r.data.data),
+
+  delete: (id: number) =>
+    apiClient.delete(`/home-card-icons/${id}`).then(() => undefined),
 };

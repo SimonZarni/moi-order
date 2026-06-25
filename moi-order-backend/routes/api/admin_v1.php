@@ -452,8 +452,9 @@ Route::prefix('home-card-routes')->name('admin.home-card-routes.')->middleware('
 
 // ── Home Card Icons ────────────────────────────────────────────────────────────
 Route::prefix('home-card-icons')->name('admin.home-card-icons.')->middleware('check.permission:home_cards.manage')->group(function (): void {
-    Route::get('/',  [AdminHomeCardIconController::class, 'index'])->name('index');
-    Route::post('/', [AdminHomeCardIconController::class, 'store'])->name('store');
+    Route::get('/',                  [AdminHomeCardIconController::class, 'index'])->name('index');
+    Route::post('/',                 [AdminHomeCardIconController::class, 'store'])->name('store');
+    Route::delete('/{homeCardIcon}', [AdminHomeCardIconController::class, 'destroy'])->name('destroy');
 });
 
 // ── KYC Applications ──────────────────────────────────────────────────────────

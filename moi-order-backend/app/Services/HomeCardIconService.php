@@ -29,6 +29,17 @@ class HomeCardIconService
         });
     }
 
+    public function delete(HomeCardIcon $icon): void
+    {
+        if ($icon->type !== HomeCardIconType::Custom) {
+            throw new \DomainException('icon.not_deletable');
+        }
+
+        $icon->delete();
+
+        Cache::forget(CacheKeys::HOME_CARD_ICONS_ACTIVE);
+    }
+
     public function store(StoreHomeCardIconDTO $dto): HomeCardIcon
     {
         $path = $this->storage->store($dto->image, 'home-card-icons', [

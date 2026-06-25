@@ -8,6 +8,7 @@ use App\DTOs\StoreHomeCardIconDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreHomeCardIconRequest;
 use App\Http\Resources\Admin\AdminHomeCardIconResource;
+use App\Models\HomeCardIcon;
 use App\Services\HomeCardIconService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -28,5 +29,13 @@ class AdminHomeCardIconController extends Controller
         $icon = $this->service->store(StoreHomeCardIconDTO::fromRequest($request));
 
         return response()->json(['data' => new AdminHomeCardIconResource($icon)], 201);
+    }
+
+    /** DELETE /api/admin/v1/home-card-icons/{id} */
+    public function destroy(HomeCardIcon $homeCardIcon): JsonResponse
+    {
+        $this->service->delete($homeCardIcon);
+
+        return response()->json(null, 204);
     }
 }

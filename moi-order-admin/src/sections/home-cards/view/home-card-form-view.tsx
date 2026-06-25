@@ -18,6 +18,7 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import CardHeader from '@mui/material/CardHeader';
+import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
 import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
@@ -38,6 +39,8 @@ import { homeCardsApi } from 'src/api/home-cards';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { homeCardIconsApi } from 'src/api/home-card-icons';
 import { homeCardRoutesApi } from 'src/api/home-card-routes';
+
+import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -206,6 +209,23 @@ export function HomeCardFormView({ mode, card }: Props) {
       })
       .finally(() => setCreatingIcon(false));
   }, [newIconFile, newIconKey, newIconLabel, handleCloseIconDialog]);
+
+  // ── Delete Icon ─────────────────────────────────────────────────────────────
+  const [deleteIconId, setDeleteIconId] = useState<number | null>(null);
+  const [deletingIcon, setDeletingIcon] = useState(false);
+
+  const handleDeleteIcon = useCallback(() => {
+    if (deleteIconId === null) return;
+    setDeletingIcon(true);
+    homeCardIconsApi.delete(deleteIconId)
+      .then(() => {
+        const deleted = icons.find((i) => i.id === deleteIconId);
+        if (deleted && form.icon_key === deleted.key) update('icon_key', '');
+        setIcons((prev) => prev.filter((i) => i.id !== deleteIconId));
+        setDeleteIconId(null);
+      })
+      .finally(() => setDeletingIcon(false));
+  }, [deleteIconId, icons, form.icon_key, update]);
 
   // ── Create Route dialog ─────────────────────────────────────────────────────
   const [createRouteOpen, setCreateRouteOpen] = useState(false);
@@ -672,39 +692,61 @@ export function HomeCardFormView({ mode, card }: Props) {
               ) : (
                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                   {icons.map((icon) => (
-                    <Tooltip key={icon.key} title={icon.label}>
-                      <Box
-                        onClick={() => update('icon_key', icon.key)}
-                        sx={{
-                          width: 64, height: 64, borderRadius: 2,
-                          display: 'flex', flexDirection: 'column',
-                          alignItems: 'center', justifyContent: 'center',
-                          gap: 0.5, cursor: 'pointer', border: '2px solid',
-                          overflow: 'hidden',
-                          borderColor: form.icon_key === icon.key ? 'primary.main' : 'divider',
-                          bgcolor: form.icon_key === icon.key ? 'primary.lighter' : 'background.neutral',
-                          transition: 'all 0.15s',
-                        }}
-                      >
-                        {icon.type === 'custom' && icon.image_url && (
-                          <Box
-                            component="img"
-                            src={icon.image_url}
-                            alt={icon.label}
-                            sx={{ width: 32, height: 32, objectFit: 'contain' }}
-                          />
-                        )}
-                        <Typography
-                          variant="caption" fontWeight={600} noWrap
+                    <Box
+                      key={icon.key}
+                      sx={{ position: 'relative', '&:hover .del-icon-btn': { opacity: 1 } }}
+                    >
+                      {icon.type === 'custom' && (
+                        <IconButton
+                          className="del-icon-btn"
+                          size="small"
+                          aria-label={`Delete ${icon.label} icon`}
+                          onClick={(e) => { e.stopPropagation(); setDeleteIconId(icon.id); }}
                           sx={{
-                            px: 0.5, fontSize: '0.6rem',
-                            color: form.icon_key === icon.key ? 'primary.dark' : 'text.secondary',
+                            position: 'absolute', top: -6, right: -6, zIndex: 1,
+                            width: 20, height: 20, p: 0,
+                            bgcolor: 'error.main', color: 'white',
+                            opacity: 0, transition: 'opacity 0.15s',
+                            '&:hover': { bgcolor: 'error.dark' },
                           }}
                         >
-                          {icon.label}
-                        </Typography>
-                      </Box>
-                    </Tooltip>
+                          <Iconify icon="mingcute:close-line" width={12} />
+                        </IconButton>
+                      )}
+                      <Tooltip title={icon.label}>
+                        <Box
+                          onClick={() => update('icon_key', icon.key)}
+                          sx={{
+                            width: 64, height: 64, borderRadius: 2,
+                            display: 'flex', flexDirection: 'column',
+                            alignItems: 'center', justifyContent: 'center',
+                            gap: 0.5, cursor: 'pointer', border: '2px solid',
+                            overflow: 'hidden',
+                            borderColor: form.icon_key === icon.key ? 'primary.main' : 'divider',
+                            bgcolor: form.icon_key === icon.key ? 'primary.lighter' : 'background.neutral',
+                            transition: 'all 0.15s',
+                          }}
+                        >
+                          {icon.type === 'custom' && icon.image_url && (
+                            <Box
+                              component="img"
+                              src={icon.image_url}
+                              alt={icon.label}
+                              sx={{ width: 32, height: 32, objectFit: 'contain' }}
+                            />
+                          )}
+                          <Typography
+                            variant="caption" fontWeight={600} noWrap
+                            sx={{
+                              px: 0.5, fontSize: '0.6rem',
+                              color: form.icon_key === icon.key ? 'primary.dark' : 'text.secondary',
+                            }}
+                          >
+                            {icon.label}
+                          </Typography>
+                        </Box>
+                      </Tooltip>
+                    </Box>
                   ))}
 
                   {/* New Icon tile */}
@@ -1013,6 +1055,22 @@ export function HomeCardFormView({ mode, card }: Props) {
             onClick={handleSaveRoute}
           >
             {creatingRoute ? 'Saving…' : 'Save Route'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ── Delete Icon Confirm ── */}
+      <Dialog open={deleteIconId !== null} onClose={() => setDeleteIconId(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>Delete this icon?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            Home cards using this icon will need a new icon assigned after deletion.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteIconId(null)} disabled={deletingIcon}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={handleDeleteIcon} disabled={deletingIcon}>
+            {deletingIcon ? 'Deleting…' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>
