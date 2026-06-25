@@ -28,10 +28,11 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   headerTitle: {
-    fontSize: typography.lg,
+    fontSize: 16,
     fontWeight: '800',
     color: colours.textOnDark,
     flex: 1,
+    lineHeight: 44,
   },
   scroll: { flex: 1, backgroundColor: colours.backgroundLight },
   content: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xxl },
@@ -97,11 +98,11 @@ export const styles = StyleSheet.create({
 
   // ── Selection mode ───────────────────────────────────────────────────────────
   selectActionBtn: { paddingHorizontal: spacing.sm, paddingVertical: spacing.xs },
-  selectActionText: { fontSize: typography.sm, fontWeight: '600', color: colours.primary },
+  selectActionText: { fontSize: typography.sm, fontWeight: '600', color: colours.textOnDark },
   deleteBtn: {
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
-    backgroundColor: colours.error,
+    backgroundColor: colours.destructive,
     borderRadius: radius.full,
   },
   deleteBtnDisabled: { opacity: 0.4 },
