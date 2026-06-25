@@ -74,9 +74,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.xl,
     gap: spacing.sm,
-    maxWidth: 920,
-    alignSelf: 'center',
-    width: '100%',
   },
   card: {
     backgroundColor: colours.surface,

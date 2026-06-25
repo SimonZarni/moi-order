@@ -36,9 +36,6 @@ export const styles = StyleSheet.create({
   scrollContent: {
     padding: spacing.md,
     paddingBottom: spacing.xxl,
-    maxWidth: 920,
-    alignSelf: 'center',
-    width: '100%',
   },
   qrBanner: {
     backgroundColor: '#fff8e1',

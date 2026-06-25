@@ -8,7 +8,7 @@ export const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colours.surfaceMuted },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colours.surfaceMuted },
   scroll: { flex: 1 },
-  scrollContent: { paddingBottom: spacing.xl + spacing.lg, maxWidth: 920, alignSelf: 'center', width: '100%' },
+  scrollContent: { paddingBottom: spacing.xl + spacing.lg },
 
   pageHeader: {
     paddingHorizontal: spacing.lg,

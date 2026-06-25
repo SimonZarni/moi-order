@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
     lineHeight: 60,
   },
   scroll: { flex: 1 },
-  scrollContent: { paddingBottom: spacing.xxl, maxWidth: 920, alignSelf: 'center', width: '100%' },
+  scrollContent: { paddingBottom: spacing.xxl },
 
   sectionHeader: {
     fontSize: typography.xs,
