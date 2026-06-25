@@ -416,6 +416,7 @@ Route::prefix('restaurants')->name('admin.restaurants.')->group(function (): voi
 // ── Daily Cashout Invoices ────────────────────────────────────────────────────
 Route::prefix('daily-invoices')->name('admin.daily-invoices.')->group(function (): void {
     Route::get('/',                 [AdminDailyInvoiceController::class, 'index'])->name('index');
+    Route::get('/summary',          [AdminDailyInvoiceController::class, 'summary'])->name('summary');
     Route::post('/generate',        [AdminDailyInvoiceController::class, 'generate'])->name('generate');
     Route::post('/{id}/confirm',    [AdminDailyInvoiceController::class, 'confirm'])->name('confirm')->whereNumber('id');
 });

@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Admin\V1;
 
 use App\Contracts\FileStorageInterface;
+use App\Enums\FoodOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ConfirmCashOutRequest;
 use App\Http\Requests\Admin\GenerateInvoicesRequest;
 use App\Http\Resources\DailyInvoiceResource;
+use App\Models\FoodOrder;
 use App\Models\RestaurantDailyInvoice;
 use App\Services\DailyInvoiceService;
 use Carbon\Carbon;
@@ -82,6 +84,54 @@ class AdminDailyInvoiceController extends Controller
         return response()->json([
             'data'    => new DailyInvoiceResource($invoice->fresh('restaurant'), $this->storage),
             'message' => 'Cashout confirmed.',
+        ]);
+    }
+
+    /**
+     * Aggregated totals across all restaurants for the current week or month.
+     * Sums stored invoices (Mon/1st → yesterday) and adds today's live orders on top.
+     * GET /admin/v1/daily-invoices/summary?period=week|month
+     */
+    public function summary(Request $request): JsonResponse
+    {
+        $period = $request->input('period', 'week');
+        $today  = now()->toDateString();
+
+        $dateFrom = $period === 'month'
+            ? now()->startOfMonth()->toDateString()
+            : now()->startOfWeek()->toDateString();
+
+        $yesterdayOrEarlier = now()->subDay()->toDateString();
+
+        $stored = RestaurantDailyInvoice::whereBetween('date', [$dateFrom, $yesterdayOrEarlier])
+            ->selectRaw('
+                COALESCE(SUM(order_count), 0)          AS order_count,
+                COALESCE(SUM(customer_total_cents), 0) AS customer_total_cents,
+                COALESCE(SUM(platform_fee_cents), 0)   AS platform_fee_cents,
+                COALESCE(SUM(payout_cents), 0)         AS payout_cents
+            ')
+            ->first();
+
+        $todayStats = FoodOrder::where('status', FoodOrderStatus::Completed->value)
+            ->whereDate('created_at', $today)
+            ->selectRaw('COUNT(*) as order_count, COALESCE(SUM(total_cents), 0) as total_cents')
+            ->first();
+
+        $todayTotal      = (int) ($todayStats->total_cents  ?? 0);
+        $todayOrderCount = (int) ($todayStats->order_count  ?? 0);
+        $todayPayout     = (int) round($todayTotal / 1.05);
+        $todayFee        = $todayTotal - $todayPayout;
+
+        return response()->json([
+            'data' => [
+                'period'               => $period,
+                'date_from'            => $dateFrom,
+                'date_to'              => $today,
+                'order_count'          => (int) $stored->order_count          + $todayOrderCount,
+                'customer_total_cents' => (int) $stored->customer_total_cents + $todayTotal,
+                'platform_fee_cents'   => (int) $stored->platform_fee_cents   + $todayFee,
+                'payout_cents'         => (int) $stored->payout_cents         + $todayPayout,
+            ],
         ]);
     }
 

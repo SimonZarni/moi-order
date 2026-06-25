@@ -25,6 +25,16 @@ export type DailyInvoice = {
   restaurant?: InvoiceRestaurant;
 };
 
+export type InvoicePeriodSummary = {
+  period: 'week' | 'month';
+  date_from: string;
+  date_to: string;
+  order_count: number;
+  customer_total_cents: number;
+  platform_fee_cents: number;
+  payout_cents: number;
+};
+
 export type InvoiceMeta = {
   current_page: number;
   last_page: number;
@@ -56,5 +66,12 @@ export const invoicesApi = {
 
   generate: async (date: string): Promise<void> => {
     await apiClient.post('/daily-invoices/generate', { date });
+  },
+
+  summary: async (period: 'week' | 'month'): Promise<InvoicePeriodSummary> => {
+    const res = await apiClient.get<{ data: InvoicePeriodSummary }>('/daily-invoices/summary', {
+      params: { period },
+    });
+    return res.data.data;
   },
 };
