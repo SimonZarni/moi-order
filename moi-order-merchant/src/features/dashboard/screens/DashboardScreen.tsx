@@ -1,316 +1,69 @@
 import React from 'react';
-import { View, Text, ScrollView, Pressable, Platform } from 'react-native';
+import { View, Text, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { useDashboardScreen } from '../hooks/useDashboardScreen';
-import { OrderCard } from '../../orders/components/OrderCard';
+import { HeroBand } from '../components/HeroBand';
+import { KpiCards } from '../components/KpiCards';
+import { OrdersSection } from '../components/OrdersSection';
+import { PerformanceSection } from '../components/PerformanceSection';
 import { Skeleton } from '../../../shared/components/Skeleton';
 import { styles } from './DashboardScreen.styles';
-import { colours } from '../../../shared/theme/colours';
-import { formatPrice } from '../../../shared/utils/formatCurrency';
-import { formatDate } from '../../../shared/utils/formatDate';
 import { useResponsive } from '../../../shared/hooks/useResponsive';
 import { useTranslation } from '../../../shared/hooks/useTranslation';
-import type { TopPeriod } from '../../../api/analytics';
-import type { TopItem, TopCustomer } from '../../../types/models';
 
-interface DashboardScreenProps {
-  onSelectOrder?: (orderId: string) => void;
-}
+interface DashboardScreenProps { onSelectOrder?: (orderId: string) => void; }
 
 export function DashboardScreen({ onSelectOrder }: DashboardScreenProps): React.JSX.Element {
   const t = useTranslation();
   const {
-    analytics, recentOrders, topData, topPeriod, pendingOnly,
-    isLoading, handleUpdateStatus, handleTopPeriodChange, handlePendingToggle,
+    analytics, recentOrders, topData, topPeriod, pendingOnly, activePerformanceTab,
+    isLoading, handleUpdateStatus, handleTopPeriodChange, handlePendingToggle, handlePerformanceTabChange,
   } = useDashboardScreen();
   const { isDesktop } = useResponsive();
 
-  const TOP_PERIOD_TABS: { key: TopPeriod; label: string }[] = [
-    { key: 'today', label: t('dashboard_period_today') },
-    { key: 'week',  label: t('dashboard_period_week') },
-    { key: 'month', label: t('dashboard_period_month') },
-  ];
-
   const hour     = new Date().getHours();
   const greeting = hour < 12 ? t('dashboard_greeting_morning') : hour < 17 ? t('dashboard_greeting_afternoon') : t('dashboard_greeting_evening');
-  const dateLabel = new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-  const pending = analytics?.pending_count ?? 0;
+  const dateLabel = new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+  const pending   = analytics?.pending_count ?? 0;
 
-  const avgOrderValue = analytics?.this_month.order_count
-    ? Math.round((analytics.this_month.revenue_cents ?? 0) / analytics.this_month.order_count)
-    : 0;
-
-  if (isLoading) {
-    return (
-      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-        <View style={styles.topBar}>
-          <View style={{ gap: 4 }}>
-            <Skeleton height={12} width={80} borderRadius={4} />
-            <Skeleton height={28} width={160} borderRadius={6} />
-          </View>
-        </View>
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.revenueCard}>
-            <Skeleton height={14} width={120} borderRadius={4} />
-            <Skeleton height={44} width={180} borderRadius={6} />
-            <Skeleton height={12} width={100} borderRadius={4} />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    );
-  }
-
-  // ── Revenue card ─────────────────────────────────────────────────────────────
-  const revenueCard = (
-    <View style={styles.revenueCard}>
-      <View style={styles.revenueLeft}>
-        <Text style={styles.revenueLabel}>{t('dashboard_today_revenue')}</Text>
-        <Text style={styles.revenueAmount}>{formatPrice(analytics?.today.revenue_cents ?? 0)}</Text>
-        <Text style={styles.revenueOrders}>{analytics?.today.order_count ?? 0} {t('dashboard_orders_count')}</Text>
+  if (isLoading) return (
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      <View style={styles.skeletonPad}>
+        <Skeleton height={14} width={100} borderRadius={4} />
+        <Skeleton height={36} width={180} borderRadius={6} />
+        <Skeleton height={120} width="100%" borderRadius={18} />
       </View>
-      <View style={styles.revenueRight}>
-        <View style={styles.revenueMiniBlock}>
-          <Text style={styles.revenueMiniLabel}>{t('dashboard_this_week')}</Text>
-          <Text style={styles.revenueMiniValue}>{formatPrice(analytics?.this_week.revenue_cents ?? 0)}</Text>
-        </View>
-        <View style={styles.revenueMiniBlock}>
-          <Text style={styles.revenueMiniLabel}>{t('dashboard_this_month')}</Text>
-          <Text style={styles.revenueMiniValue}>{formatPrice(analytics?.this_month.revenue_cents ?? 0)}</Text>
-        </View>
-      </View>
-    </View>
+    </SafeAreaView>
   );
 
-  // ── Top Sales + Top Customers (shared period tabs) ────────────────────────────
-  const topSection = (
-    <View style={styles.topSection}>
-      {/* Shared period tab row */}
-      <View style={styles.topSectionHeader}>
-        <Text style={styles.topSectionTitle}>{t('dashboard_performance')}</Text>
-        <View style={styles.periodTabs}>
-          {TOP_PERIOD_TABS.map((t) => (
-            <Pressable
-              key={t.key}
-              style={[styles.periodTab, topPeriod === t.key && styles.periodTabActive]}
-              onPress={() => handleTopPeriodChange(t.key)}
-              accessibilityRole="button"
-              accessibilityLabel={t.label}
-            >
-              <Text style={[styles.periodTabText, topPeriod === t.key && styles.periodTabTextActive]}>
-                {t.label}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-      </View>
-
-      {/* Two cards side-by-side on desktop, stacked on mobile */}
-      <View style={[styles.topCardsRow, !isDesktop && styles.topCardsRowStack]}>
-        <TopSalesCard items={topData?.top_items ?? []} topSalesLabel={t('dashboard_top_sales')} soldLabel={t('dashboard_sold')} noDataLabel={t('dashboard_no_data_period')} />
-        <TopCustomersCard customers={topData?.top_customers ?? []} topCustomersLabel={t('dashboard_top_customers')} ordersLabel={t('common_orders')} noDataLabel={t('dashboard_no_data_period')} />
-      </View>
-    </View>
-  );
-
-  // ── Recent Orders card ────────────────────────────────────────────────────────
-  const ordersCard = (
-    <View style={styles.ordersCard}>
-      <View style={styles.ordersCardHeader}>
-        <Text style={styles.cardSectionTitle}>{pendingOnly ? t('dashboard_pending_orders') : t('dashboard_recent_orders')}</Text>
-      </View>
-      {recentOrders.length === 0 ? (
-        <View style={styles.emptyOrders}>
-          <Ionicons name="receipt-outline" size={28} color={colours.textSubtle} />
-          <Text style={styles.emptyText}>{t('dashboard_no_recent_orders')}</Text>
-        </View>
-      ) : (
-        recentOrders.map((order) => (
-          <OrderCard
-            key={order.id}
-            order={order}
-            variant="light"
-            onUpdateStatus={handleUpdateStatus}
-            onStartPreparing={onSelectOrder !== undefined ? () => onSelectOrder(order.id) : () => {}}
-            onPress={onSelectOrder !== undefined ? () => onSelectOrder(order.id) : undefined}
-          />
-        ))
-      )}
-    </View>
-  );
-
-  // ── Quick stats card ──────────────────────────────────────────────────────────
-  const statsCard = (
-    <View style={styles.statsCard}>
-      <Text style={styles.cardSectionTitle}>{t('dashboard_quick_stats')}</Text>
-      <View style={styles.statRow}>
-        <Text style={styles.statLabel}>{t('dashboard_total_orders_month')}</Text>
-        <Text style={styles.statValue}>{analytics?.this_month.order_count ?? 0}</Text>
-      </View>
-      <View style={styles.statDivider} />
-      <View style={styles.statRow}>
-        <Text style={styles.statLabel}>{t('dashboard_avg_order_value')}</Text>
-        <Text style={[styles.statValue, styles.statValueGreen]}>{formatPrice(avgOrderValue)}</Text>
-      </View>
-    </View>
-  );
-
-  // ── Activity card ─────────────────────────────────────────────────────────────
-  const activityCard = (
-    <View style={styles.activityCard}>
-      <Text style={styles.cardSectionTitle}>{t('dashboard_activity')}</Text>
-      {recentOrders.length === 0 ? (
-        <Text style={styles.activityEmpty}>{t('dashboard_no_recent_activity')}</Text>
-      ) : (
-        recentOrders.slice(0, 3).map((order) => (
-          <View key={order.id} style={styles.activityRow}>
-            <View style={[styles.activityDot, { backgroundColor: colours.primary }]} />
-            <View style={styles.activityInfo}>
-              <Text style={styles.activityText}>{t('dashboard_new_order_from')} {order.user.name}</Text>
-              <Text style={styles.activityTime}>{formatDate(order.created_at)}</Text>
-            </View>
-          </View>
-        ))
-      )}
-    </View>
-  );
+  const perf   = <PerformanceSection topData={topData} topPeriod={topPeriod} activeTab={activePerformanceTab} onPeriodChange={handleTopPeriodChange} onTabChange={handlePerformanceTabChange} />;
+  const orders = <OrdersSection recentOrders={recentOrders} pendingOnly={pendingOnly} onUpdateStatus={handleUpdateStatus} onSelectOrder={onSelectOrder} onTogglePending={handlePendingToggle} />;
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      {/* Top bar */}
-      <View style={styles.topBar}>
+      <View style={styles.header}>
         <View>
-          <Text style={styles.topBarGreeting}>{greeting}</Text>
-          <Text style={styles.topBarTitle}>{t('dashboard_title')}</Text>
+          <Text style={styles.greeting}>{greeting}</Text>
+          <Text style={styles.title}>{t('dashboard_title')}</Text>
         </View>
-        <View style={styles.topBarRight}>
-          <Text style={styles.topBarDate}>{dateLabel}</Text>
-          <View style={styles.topBarActions}>
-            {pending > 0 && (
-              <Pressable
-                style={[styles.pendingPill, pendingOnly && styles.pendingPillActive]}
-                onPress={handlePendingToggle}
-                accessibilityRole="button"
-                accessibilityLabel={pendingOnly ? 'Showing pending orders, tap to show all' : `${pending} pending orders, tap to filter`}
-              >
-                <View style={styles.pendingDot} />
-                <Text style={[styles.pendingText, pendingOnly && styles.pendingTextActive]}>
-                  {pending} {t('dashboard_pending_count')}
-                </Text>
-              </Pressable>
-            )}
-          </View>
+        <View style={styles.headerRight}>
+          <Text style={styles.date}>{dateLabel}</Text>
+          {pending > 0 && (
+            <Pressable style={[styles.pendingPill, pendingOnly && styles.pendingPillActive]} onPress={handlePendingToggle} accessibilityRole="button" accessibilityLabel={`${pending} pending orders`}>
+              <View style={[styles.pendingDot, pendingOnly && styles.pendingDotActive]} />
+              <Text style={[styles.pendingText, pendingOnly && styles.pendingTextActive]}>{pending} {t('dashboard_pending_count')}</Text>
+            </Pressable>
+          )}
         </View>
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {revenueCard}
-        {topSection}
-
-        {isDesktop ? (
-          <View style={styles.bottomGrid}>
-            <View style={styles.bottomLeft}>{ordersCard}</View>
-            <View style={styles.bottomRight}>
-              {statsCard}
-              {activityCard}
-            </View>
-          </View>
-        ) : (
-          <>
-            {ordersCard}
-            {statsCard}
-            {activityCard}
-          </>
-        )}
+        <HeroBand analytics={analytics} />
+        <KpiCards analytics={analytics} />
+        {isDesktop
+          ? <View style={styles.twoCol}><View style={styles.colLeft}>{orders}</View><View style={styles.colRight}>{perf}</View></View>
+          : <>{orders}{perf}</>}
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-// ── Sub-components ────────────────────────────────────────────────────────────
-
-const TOP_VISIBLE  = 5;
-// Each row is paddingVertical: sm (8) × 2 + ~18px content ≈ 44px. 5 rows = 220.
-const TOP_LIST_MAX = TOP_VISIBLE * 44;
-
-function TopSalesCard({ items, topSalesLabel, soldLabel, noDataLabel }: { items: TopItem[]; topSalesLabel: string; soldLabel: string; noDataLabel: string }): React.JSX.Element {
-  const visible = items.slice(0, TOP_VISIBLE);
-  const hasMore = items.length > TOP_VISIBLE;
-  return (
-    <View style={styles.topCard}>
-      <View style={styles.topCardHeader}>
-        <View style={[styles.topCardIcon, { backgroundColor: colours.primary + '20' }]}>
-          <Ionicons name="flame-outline" size={14} color={colours.primary} />
-        </View>
-        <Text style={styles.topCardTitle}>{topSalesLabel}</Text>
-        {hasMore && <Text style={styles.topCardMore}>+{items.length - TOP_VISIBLE} more</Text>}
-      </View>
-
-      {items.length === 0 ? (
-        <View style={styles.topCardEmpty}>
-          <Text style={styles.topCardEmptyText}>{noDataLabel}</Text>
-        </View>
-      ) : (
-        <ScrollView
-          style={{ maxHeight: TOP_LIST_MAX }}
-          showsVerticalScrollIndicator={Platform.OS === 'web'}
-          nestedScrollEnabled
-        >
-          {visible.map((item, i) => (
-            <View key={item.name} style={[styles.topRow, i < visible.length - 1 && styles.topRowBorder]}>
-              <View style={styles.topRank}>
-                <Text style={styles.topRankText}>{i + 1}</Text>
-              </View>
-              <View style={styles.topRowInfo}>
-                <Text style={styles.topRowName} numberOfLines={1}>{item.name}</Text>
-                <Text style={styles.topRowSub}>{item.total_quantity} {soldLabel}</Text>
-              </View>
-              <Text style={styles.topRowValue}>{formatPrice(item.revenue_cents)}</Text>
-            </View>
-          ))}
-        </ScrollView>
-      )}
-    </View>
-  );
-}
-
-function TopCustomersCard({ customers, topCustomersLabel, ordersLabel, noDataLabel }: { customers: TopCustomer[]; topCustomersLabel: string; ordersLabel: string; noDataLabel: string }): React.JSX.Element {
-  const visible = customers.slice(0, TOP_VISIBLE);
-  const hasMore = customers.length > TOP_VISIBLE;
-  return (
-    <View style={styles.topCard}>
-      <View style={styles.topCardHeader}>
-        <View style={[styles.topCardIcon, { backgroundColor: colours.success + '20' }]}>
-          <Ionicons name="people-outline" size={14} color={colours.success} />
-        </View>
-        <Text style={styles.topCardTitle}>{topCustomersLabel}</Text>
-        {hasMore && <Text style={styles.topCardMore}>+{customers.length - TOP_VISIBLE} more</Text>}
-      </View>
-
-      {customers.length === 0 ? (
-        <View style={styles.topCardEmpty}>
-          <Text style={styles.topCardEmptyText}>{noDataLabel}</Text>
-        </View>
-      ) : (
-        <ScrollView
-          style={{ maxHeight: TOP_LIST_MAX }}
-          showsVerticalScrollIndicator={Platform.OS === 'web'}
-          nestedScrollEnabled
-        >
-          {visible.map((customer, i) => (
-            <View key={customer.name + i} style={[styles.topRow, i < visible.length - 1 && styles.topRowBorder]}>
-              <View style={[styles.topRank, i === 0 && styles.topRankGold]}>
-                <Text style={[styles.topRankText, i === 0 && styles.topRankTextGold]}>{i + 1}</Text>
-              </View>
-              <View style={styles.topRowInfo}>
-                <Text style={styles.topRowName} numberOfLines={1}>{customer.name}</Text>
-                <Text style={styles.topRowSub}>{customer.order_count} {ordersLabel}</Text>
-              </View>
-              <Text style={styles.topRowValue}>{formatPrice(customer.total_cents)}</Text>
-            </View>
-          ))}
-        </ScrollView>
-      )}
-    </View>
   );
 }

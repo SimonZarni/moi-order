@@ -10,24 +10,29 @@ import type { AnalyticsData, FoodOrder, TopData } from '../../../types/models';
 const PENDING_STATUS_PARAM = 'order_placed,waiting_for_payment';
 const PENDING_ORDERS_KEY   = ['orders', 'pending'] as const;
 
+type PerformanceTab = 'items' | 'customers';
+
 interface UseDashboardScreenResult {
   analytics: AnalyticsData | undefined;
   recentOrders: FoodOrder[];
   topData: TopData | undefined;
   topPeriod: TopPeriod;
   pendingOnly: boolean;
+  activePerformanceTab: PerformanceTab;
   isLoading: boolean;
   isError: boolean;
   refetch: () => void;
   handleUpdateStatus: (orderId: string, newStatus: string) => void;
   handleTopPeriodChange: (period: TopPeriod) => void;
   handlePendingToggle: () => void;
+  handlePerformanceTabChange: (tab: PerformanceTab) => void;
 }
 
 export function useDashboardScreen(): UseDashboardScreenResult {
   const queryClient = useQueryClient();
   const [topPeriod, setTopPeriod] = useState<TopPeriod>('today');
   const [pendingOnly, setPendingOnly] = useState(false);
+  const [activePerformanceTab, setActivePerformanceTab] = useState<PerformanceTab>('items');
 
   const {
     data: analyticsData,
@@ -119,17 +124,23 @@ export function useDashboardScreen(): UseDashboardScreenResult {
     setTopPeriod(period);
   }, []);
 
+  const handlePerformanceTabChange = useCallback((tab: PerformanceTab) => {
+    setActivePerformanceTab(tab);
+  }, []);
+
   return {
     analytics: analyticsData,
     recentOrders,
     topData,
     topPeriod,
     pendingOnly,
+    activePerformanceTab,
     isLoading: isAnalyticsLoading || isOrdersLoading || (pendingOnly && isPendingLoading),
     isError:   isAnalyticsError   || isOrdersError   || (pendingOnly && isPendingError),
     refetch,
     handleUpdateStatus,
     handleTopPeriodChange,
     handlePendingToggle,
+    handlePerformanceTabChange,
   };
 }
