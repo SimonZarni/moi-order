@@ -17,6 +17,8 @@ export interface OrderSection {
   data: FoodOrder[];
 }
 
+export interface TabCounts { all: number; new: number; in_progress: number; done: number; }
+
 interface UseOrdersScreenResult {
   sections: OrderSection[];
   isLoading: boolean;
@@ -31,6 +33,10 @@ interface UseOrdersScreenResult {
   isActionsOpen: boolean;
   prepTimeModalVisible: boolean;
   prepTimeMinutes: number;
+  pending: number;
+  isToday: boolean;
+  isRangePreset: boolean;
+  tabCounts: TabCounts;
   handleUpdateStatus: (orderId: string, newStatus: string) => void;
   handleStartPreparing: (orderId: string) => void;
   handlePrepTimeSelect: (minutes: number) => void;
@@ -184,6 +190,24 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     [sections],
   );
 
+  const pending = useMemo(
+    () => orders.filter((o) => NEW_STATUSES.has(o.status)).length,
+    [orders],
+  );
+
+  const tabCounts = useMemo<TabCounts>(() => {
+    const f = orders.filter(matchesSearch);
+    return {
+      all:         f.filter((o) => !TERMINAL_STATUSES.has(o.status)).length,
+      new:         f.filter((o) => NEW_STATUSES.has(o.status)).length,
+      in_progress: f.filter((o) => IN_PROGRESS_STATUSES.has(o.status)).length,
+      done:        f.filter((o) => DONE_STATUSES.has(o.status)).length,
+    };
+  }, [orders, matchesSearch]);
+
+  const isToday       = datePreset === 'today';
+  const isRangePreset = datePreset === 'last7' || datePreset === 'last30';
+
   // ── Handlers ──────────────────────────────────────────────────────────────
 
   const handleUpdateStatus = useCallback(
@@ -303,6 +327,10 @@ export function useOrdersScreen(): UseOrdersScreenResult {
     isActionsOpen,
     prepTimeModalVisible,
     prepTimeMinutes,
+    pending,
+    isToday,
+    isRangePreset,
+    tabCounts,
     handleUpdateStatus,
     handleStartPreparing,
     handlePrepTimeSelect,
