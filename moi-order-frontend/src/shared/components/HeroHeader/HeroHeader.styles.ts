@@ -68,7 +68,7 @@ export const styles = StyleSheet.create({
     fontWeight: '900',
     color: colours.textOnDark,
     letterSpacing: -0.8,
-    lineHeight: 38,
+    lineHeight: 78,
   },
   subtitle: {
     fontSize: typography.xs,
