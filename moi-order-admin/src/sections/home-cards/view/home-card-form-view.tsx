@@ -930,7 +930,7 @@ export function HomeCardFormView({ mode, card }: Props) {
               ) : (
                 <Box sx={{ textAlign: 'center' }}>
                   <Typography variant="body2" color="text.secondary">↑ Drop image here or click to browse</Typography>
-                  <Typography variant="caption" color="text.disabled">PNG or JPEG · max 2 MB</Typography>
+                  <Typography variant="caption" color="text.disabled">PNG, JPEG, WebP, SVG, HEIC and more · max 20 MB</Typography>
                 </Box>
               )}
             </Box>
