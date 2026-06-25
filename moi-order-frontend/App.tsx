@@ -401,8 +401,8 @@ export default function App(): React.JSX.Element {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <SafeAreaProvider>
           <NavigationContainer ref={navigationRef}>
             <StatusBar style="light" translucent />
             <BottomSheetModalProvider>
@@ -410,13 +410,14 @@ export default function App(): React.JSX.Element {
               <AppShell />
             </BottomSheetModalProvider>
           </NavigationContainer>
-          {/* <FloatingOrderStatusBar /> */}
-        </QueryClientProvider>
-        {/* Inside SafeAreaProvider (for safe area insets) but outside
-            NavigationContainer — places the tab bar in a separate hardware
-            compositor layer above the Mapbox SurfaceView on Android. */}
-        <RootFloatingTabBar navigationRef={navigationRef} />
-      </SafeAreaProvider>
+          {/* Inside SafeAreaProvider (for safe area insets) but outside
+              NavigationContainer — places the tab bar in a separate hardware
+              compositor layer above the Mapbox SurfaceView on Android.
+              QueryClientProvider is now the outer wrapper so useFoodOrdersData
+              (useQuery) inside RootFloatingTabBar can access the query client. */}
+          <RootFloatingTabBar navigationRef={navigationRef} />
+        </SafeAreaProvider>
+      </QueryClientProvider>
       {/* Outside NavigationContainer so absoluteFillObject covers the full physical
           screen on Android (including status bar + gesture-nav bar areas). */}
       {!splashGone && (
