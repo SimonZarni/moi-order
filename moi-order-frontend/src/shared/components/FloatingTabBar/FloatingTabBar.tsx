@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, LayoutChangeEvent, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
@@ -12,8 +12,7 @@ import { useMapStore } from '@/shared/store/mapStore';
 import { useLocale } from '@/shared/hooks/useLocale';
 import { Locale } from '@/shared/store/localeStore';
 import { RootStackParamList, TabParamList } from '@/types/navigation';
-import { FOOD_ORDER_STATUS } from '@/types/enums';
-import { useFoodOrdersData } from '@/features/food/hooks/useFoodOrdersData';
+import { usePendingOrderCount } from '@/shared/hooks/usePendingOrderCount';
 import { useFloatingTabBarPill } from './useFloatingTabBarPill';
 import { styles, TAB_BAR_BOTTOM_OFFSET } from './FloatingTabBar.styles';
 
@@ -161,16 +160,7 @@ export function RootFloatingTabBar({ navigationRef }: { navigationRef: NavRef })
   const { locale }         = useLocale();
   const insets             = useSafeAreaInsets();
   const slideAnim          = useRef(new Animated.Value(0)).current;
-  const { orders }         = useFoodOrdersData();
-
-  const pendingOrderCount = useMemo(
-    () => orders.filter((o) =>
-      o.status !== FOOD_ORDER_STATUS.Completed &&
-      o.status !== FOOD_ORDER_STATUS.Cancelled &&
-      o.status !== FOOD_ORDER_STATUS.Expired,
-    ).length,
-    [orders],
-  );
+  const pendingOrderCount  = usePendingOrderCount();
 
   const [activeRouteName, setActiveRouteName] = useState<string>('Home');
   const [isVisible, setIsVisible]             = useState<boolean>(true);
