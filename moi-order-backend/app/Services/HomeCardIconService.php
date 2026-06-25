@@ -37,7 +37,7 @@ class HomeCardIconService
 
         $path = $icon->image_path;
 
-        $icon->delete();
+        $icon->forceDelete();
 
         if ($path) {
             $this->storage->delete($path);
