@@ -9,12 +9,13 @@ import { styles } from './HomeCardGrid.styles';
 
 interface IconProps {
   color: string;
+  size?: number;
 }
 
 // ── 90-Day Report — calendar ──────────────────────────────────────────────────
-export function CalendarIcon({ color }: IconProps): React.JSX.Element {
+export function CalendarIcon({ color, size = 56 }: IconProps): React.JSX.Element {
   return (
-    <Svg width={40} height={40} viewBox="0 0 40 40">
+    <Svg width={size} height={size} viewBox="0 0 40 40">
       {/* Body */}
       <Rect x="2" y="7" width="36" height="30" rx="6" fill={color} />
       {/* Header strip — same base + darkening overlay */}
@@ -40,9 +41,9 @@ export function CalendarIcon({ color }: IconProps): React.JSX.Element {
 }
 
 // ── Tickets — price tag ───────────────────────────────────────────────────────
-export function TicketIcon({ color }: IconProps): React.JSX.Element {
+export function TicketIcon({ color, size = 56 }: IconProps): React.JSX.Element {
   return (
-    <Svg width={40} height={40} viewBox="0 0 40 40">
+    <Svg width={size} height={size} viewBox="0 0 40 40">
       {/* Tag body */}
       <Path d="M5 4 L35 4 Q38 4 38 7 L38 24 L20 37 L2 24 L2 7 Q2 4 5 4 Z" fill={color} />
       {/* Header accent — lightening overlay */}
@@ -58,9 +59,9 @@ export function TicketIcon({ color }: IconProps): React.JSX.Element {
 }
 
 // ── Places — map pin ──────────────────────────────────────────────────────────
-export function LocationIcon({ color }: IconProps): React.JSX.Element {
+export function LocationIcon({ color, size = 56 }: IconProps): React.JSX.Element {
   return (
-    <Svg width={40} height={40} viewBox="0 0 40 40">
+    <Svg width={size} height={size} viewBox="0 0 40 40">
       {/* Pin drop body */}
       <Path
         d="M20 2 C12.3 2 6 8.3 6 16 C6 25 20 39 20 39 C20 39 34 25 34 16 C34 8.3 27.7 2 20 2 Z"
@@ -80,9 +81,9 @@ export function LocationIcon({ color }: IconProps): React.JSX.Element {
 }
 
 // ── Passport / CI — booklet ───────────────────────────────────────────────────
-export function PassportIcon({ color }: IconProps): React.JSX.Element {
+export function PassportIcon({ color, size = 56 }: IconProps): React.JSX.Element {
   return (
-    <Svg width={40} height={40} viewBox="0 0 40 40">
+    <Svg width={size} height={size} viewBox="0 0 40 40">
       {/* Booklet cover */}
       <Rect x="6" y="4" width="28" height="34" rx="3" fill={color} />
       {/* Spine — darkening overlay */}
@@ -102,9 +103,9 @@ export function PassportIcon({ color }: IconProps): React.JSX.Element {
 }
 
 // ── Food ordering — bowl ──────────────────────────────────────────────────────
-export function FoodIcon({ color }: IconProps): React.JSX.Element {
+export function FoodIcon({ color, size = 56 }: IconProps): React.JSX.Element {
   return (
-    <Svg width={40} height={40} viewBox="0 0 40 40">
+    <Svg width={size} height={size} viewBox="0 0 40 40">
       {/* Bowl body */}
       <Path d="M6 18 Q6 34 20 34 Q34 34 34 18 Z" fill={color} />
       {/* Bowl rim — lightening overlay */}
@@ -121,9 +122,9 @@ export function FoodIcon({ color }: IconProps): React.JSX.Element {
 }
 
 // ── Airport Fast Track — plane ────────────────────────────────────────────────
-export function AirportIcon({ color }: IconProps): React.JSX.Element {
+export function AirportIcon({ color, size = 56 }: IconProps): React.JSX.Element {
   return (
-    <Svg width={40} height={40} viewBox="0 0 40 40">
+    <Svg width={size} height={size} viewBox="0 0 40 40">
       {/* Sky glow */}
       <Circle cx="20" cy="20" r="14" fill={color} fillOpacity={0.18} />
       {/* Plane body */}
@@ -135,9 +136,9 @@ export function AirportIcon({ color }: IconProps): React.JSX.Element {
 }
 
 // ── Embassy Services — document with seal ─────────────────────────────────────
-export function EmbassyIcon({ color }: IconProps): React.JSX.Element {
+export function EmbassyIcon({ color, size = 56 }: IconProps): React.JSX.Element {
   return (
-    <Svg width={40} height={40} viewBox="0 0 40 40">
+    <Svg width={size} height={size} viewBox="0 0 40 40">
       {/* Document body */}
       <Rect x="6" y="3" width="28" height="34" rx="4" fill={color} />
       {/* Header strip — darkening overlay */}
@@ -158,9 +159,9 @@ export function EmbassyIcon({ color }: IconProps): React.JSX.Element {
 }
 
 // ── Bus Tickets — bus ─────────────────────────────────────────────────────────
-export function BusIcon({ color }: IconProps): React.JSX.Element {
+export function BusIcon({ color, size = 56 }: IconProps): React.JSX.Element {
   return (
-    <Svg width={40} height={40} viewBox="0 0 40 40">
+    <Svg width={size} height={size} viewBox="0 0 40 40">
       {/* Body */}
       <Rect x="3" y="12" width="34" height="18" rx="3" fill={color} />
       {/* Roof — lightening overlay */}
@@ -188,9 +189,9 @@ export function BusIcon({ color }: IconProps): React.JSX.Element {
 }
 
 // ── Other Services — lightning bolt ───────────────────────────────────────────
-export function FlashIcon({ color }: IconProps): React.JSX.Element {
+export function FlashIcon({ color, size = 56 }: IconProps): React.JSX.Element {
   return (
-    <Svg width={40} height={40} viewBox="0 0 40 40">
+    <Svg width={size} height={size} viewBox="0 0 40 40">
       {/* Soft glow */}
       <Circle cx="20" cy="20" r="14" fill={color} fillOpacity={0.18} />
       {/* Bolt body */}
@@ -202,9 +203,9 @@ export function FlashIcon({ color }: IconProps): React.JSX.Element {
 }
 
 // ── Company Services — building ───────────────────────────────────────────────
-export function CompanyIcon({ color }: IconProps): React.JSX.Element {
+export function CompanyIcon({ color, size = 56 }: IconProps): React.JSX.Element {
   return (
-    <Svg width={40} height={40} viewBox="0 0 40 40">
+    <Svg width={size} height={size} viewBox="0 0 40 40">
       {/* Building body */}
       <Rect x="6" y="13" width="28" height="25" rx="2" fill={color} />
       {/* Roof band — lightening overlay */}
@@ -250,12 +251,13 @@ export interface CardIconProps {
   iconType: string;
   iconUrl: string | null;
   iconColor: string;
+  size?: number;
 }
 
-export function CardIcon({ iconKey, iconType, iconUrl, iconColor }: CardIconProps): React.JSX.Element | null {
+export function CardIcon({ iconKey, iconType, iconUrl, iconColor, size = 56 }: CardIconProps): React.JSX.Element | null {
   if (iconType === HOME_CARD_ICON_TYPE.Custom && iconUrl) {
-    return <Image source={{ uri: iconUrl }} style={styles.customIconImage} contentFit="contain" />;
+    return <Image source={{ uri: iconUrl }} style={[styles.customIconImage, { width: size, height: size }]} contentFit="contain" />;
   }
   const Icon = BUILTIN_ICON_MAP[iconKey];
-  return Icon ? <Icon color={iconColor} /> : null;
+  return Icon ? <Icon color={iconColor} size={size} /> : null;
 }
