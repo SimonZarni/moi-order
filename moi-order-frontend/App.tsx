@@ -32,7 +32,7 @@ configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false });
 import { GoogleSignin } from '@/shared/utils/googleSignin';
 import { Line } from '@/shared/utils/lineLogin';
 
-import { setMemoryToken, setMemoryLocale } from '@/shared/api/client';
+import apiClient, { setMemoryToken, setMemoryLocale } from '@/shared/api/client';
 import { fetchMe } from '@/shared/api/auth';
 import { TOKEN_KEY, LOCALE_KEY, CACHE_TTL, GOOGLE_WEB_CLIENT_ID, GOOGLE_IOS_CLIENT_ID, LINE_CHANNEL_ID } from '@/shared/constants/config';
 
@@ -363,15 +363,25 @@ export default function App(): React.JSX.Element {
           SecureStore.getItemAsync(LOCALE_KEY),
         ]);
 
-        if (localeVal === 'en' || localeVal === 'mm') {
-          setMemoryLocale(localeVal);
-          useLocaleStore.getState().setLocale(localeVal as Locale);
+        // Restore locale into memory + store without calling the backend —
+        // the token isn't set yet so any API call here would trigger a spurious 401.
+        const restoredLocale: Locale | null =
+          localeVal === 'en' || localeVal === 'mm' || localeVal === 'th'
+            ? (localeVal as Locale)
+            : null;
+        if (restoredLocale !== null) {
+          setMemoryLocale(restoredLocale);
+          useLocaleStore.setState({ locale: restoredLocale });
         }
 
         if (token !== null) {
           setMemoryToken(token);
           const user = await fetchMe();
           setUser(user, token);
+          // Sync locale to backend now that the auth token is in memory.
+          if (restoredLocale !== null) {
+            apiClient.patch('/api/v1/profile/locale', { locale: restoredLocale }).catch(() => {});
+          }
         }
       } catch (error: unknown) {
         const status = (error as { status?: number }).status;
