@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, type Dispatch, type SetStateAction } from 'react';
-import { Alert, Platform } from 'react-native';
+import { Alert, Platform, useWindowDimensions } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import {
@@ -56,6 +56,11 @@ interface UseMenuScreenResult {
   restaurantStatus: RestaurantStatus | null;
   useStockSystem: boolean;
   menuView: MenuView;
+  // Computed layout + selection
+  numColumns: number;
+  itemWidthPct: `${number}%`;
+  activeCategory: MenuCategory | null;
+  totalCount: number;
   // Tab + search
   selectedCategoryId: number | 'all';
   searchQuery: string;
@@ -477,9 +482,19 @@ export function useMenuScreen(): UseMenuScreenResult {
   }, [addItemCategoryId, addItemForm, mutateAddItem]);
 
 
+  const { width } = useWindowDimensions();
+  const numColumns  = width >= 1400 ? 4 : width >= 900 ? 3 : 2;
+  const itemWidthPct = `${Math.floor(100 / numColumns)}%` as `${number}%`;
+  const activeCategory = useMemo(
+    () => selectedCategoryId !== 'all' ? categories.find((c) => c.id === selectedCategoryId) ?? null : null,
+    [categories, selectedCategoryId],
+  );
+  const totalCount = useMemo(() => categories.reduce((sum, c) => sum + c.items.length, 0), [categories]);
+
   return {
     categories, filteredItems, guardedItemIds, isLoading, isError,
     hasMissingSystemCategories, restaurantStatus, useStockSystem, menuView,
+    numColumns, itemWidthPct, activeCategory, totalCount,
     selectedCategoryId, searchQuery, handleSelectCategory, handleSearchChange,
     showAddCategoryModal, newCategoryName, setShowAddCategoryModal,
     handleNewCategoryNameChange, handleConfirmAddCategory,

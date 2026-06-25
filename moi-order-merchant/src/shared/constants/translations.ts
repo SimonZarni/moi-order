@@ -93,7 +93,7 @@ export type TranslationKey =
   | 'login_sign_in' | 'login_signing_in' | 'login_show_password' | 'login_hide_password'
   | 'login_or_continue' | 'login_phone_instead' | 'login_no_account' | 'login_register'
   // ── Menu ──────────────────────────────────────────────────────────────────
-  | 'menu_title' | 'menu_add_category' | 'menu_search_placeholder' | 'menu_all_category'
+  | 'menu_title' | 'menu_add_category' | 'menu_search_placeholder' | 'menu_all_category' | 'menu_categories_label'
   | 'menu_no_items_search' | 'menu_no_items_empty' | 'menu_no_items_keyword' | 'menu_no_items_empty_hint'
   | 'menu_system_warn'
   | 'menu_add_item' | 'menu_new_category_title' | 'menu_rename_category_title' | 'menu_delete_category_title'
@@ -418,6 +418,7 @@ const EN: Translations = {
   menu_add_category: 'Add Category',
   menu_search_placeholder: 'Search items…',
   menu_all_category: 'All',
+  menu_categories_label: 'Categories',
   menu_no_items_search: 'No items match your search',
   menu_no_items_empty: 'No items yet',
   menu_no_items_keyword: 'Try a different keyword',
@@ -842,6 +843,7 @@ const MY: Translations = {
   menu_add_category: 'အမျိုးအစား ထည့်ရန်',
   menu_search_placeholder: 'ပစ္စည်းများ ရှာရန်…',
   menu_all_category: 'အားလုံး',
+  menu_categories_label: 'အမျိုးအစားများ',
   menu_no_items_search: 'ရှာဖွေမှုနှင့် ကိုက်ညီသော ပစ္စည်း မရှိပါ',
   menu_no_items_empty: 'ပစ္စည်း မရှိသေးပါ',
   menu_no_items_keyword: 'ကီးဝေါ့ အခြားတစ်ခု ကြိုးစားပါ',
