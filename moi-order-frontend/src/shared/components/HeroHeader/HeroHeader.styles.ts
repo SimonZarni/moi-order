@@ -69,7 +69,8 @@ export const styles = StyleSheet.create({
     color: colours.textOnDark,
     letterSpacing: -0.8,
     lineHeight: 78,
-    marginBottom: -22,
+    marginTop: -18,
+    marginBottom: -10,
   },
   subtitle: {
     fontSize: typography.xs,
