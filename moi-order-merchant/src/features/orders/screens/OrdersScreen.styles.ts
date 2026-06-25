@@ -14,6 +14,9 @@ export const styles = StyleSheet.create({
   content: {
     paddingTop: spacing.md,
     paddingBottom: spacing.xxl,
+    maxWidth: 920,
+    alignSelf: 'center',
+    width: '100%',
   },
   skeletonPad: {
     paddingHorizontal: spacing.md,

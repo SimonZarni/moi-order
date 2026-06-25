@@ -5,8 +5,9 @@ import { typography } from '../../../shared/theme/typography';
 import { radius } from '../../../shared/theme/radius';
 
 export const styles = StyleSheet.create({
-  safe:    { flex: 1, backgroundColor: colours.backgroundLight },
+  safe:    { flex: 1, backgroundColor: colours.surfaceMuted },
   flex:    { flex: 1 },
+  listContent: { maxWidth: 920, alignSelf: 'center', width: '100%', paddingBottom: spacing.xl },
 
   // ── Page header ───────────────────────────────────────────────────────────
   header: {

@@ -102,5 +102,8 @@ export const styles = StyleSheet.create({
   scrollContent: {
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
+    maxWidth: 920,
+    alignSelf: 'center',
+    width: '100%',
   },
 });

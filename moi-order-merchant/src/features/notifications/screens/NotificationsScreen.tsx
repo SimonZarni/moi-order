@@ -139,6 +139,7 @@ export function NotificationsScreen({ onPressNotification }: NotificationsScreen
       {!isLoading && !isError && (
         <FlatList
           style={styles.flex}
+          contentContainerStyle={styles.listContent}
           data={notifications}
           keyExtractor={(item) => String(item.id)}
           renderItem={renderItem}

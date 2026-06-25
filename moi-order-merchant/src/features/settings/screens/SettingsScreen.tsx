@@ -19,6 +19,9 @@ export function SettingsScreen({ onChangePassword, onOperatingHours }: SettingsS
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      <View style={styles.pageHeader}>
+        <Text style={styles.pageTitle}>{t('settings_title')}</Text>
+      </View>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         <Text style={styles.sectionHeader}>{t('settings_preferences')}</Text>
         <View style={styles.card}>

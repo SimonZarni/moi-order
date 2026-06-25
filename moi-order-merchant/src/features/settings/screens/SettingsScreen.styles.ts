@@ -5,9 +5,24 @@ import { typography } from '../../../shared/theme/typography';
 import { radius } from '../../../shared/theme/radius';
 
 export const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colours.surface },
+  safe: { flex: 1, backgroundColor: colours.surfaceMuted },
+  pageHeader: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+    backgroundColor: colours.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
+  },
+  pageTitle: {
+    fontSize: typography.display,
+    fontWeight: '800',
+    color: colours.textOnLight,
+    letterSpacing: -0.8,
+    lineHeight: 60,
+  },
   scroll: { flex: 1 },
-  scrollContent: { paddingBottom: spacing.xxl },
+  scrollContent: { paddingBottom: spacing.xxl, maxWidth: 920, alignSelf: 'center', width: '100%' },
 
   sectionHeader: {
     fontSize: typography.xs,

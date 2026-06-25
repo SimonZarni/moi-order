@@ -6,7 +6,7 @@ import { typography } from '../../../shared/theme/typography';
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colours.backgroundLight,
+    backgroundColor: colours.surfaceMuted,
   },
   pageHeader: {
     flexDirection: 'row',
@@ -15,6 +15,9 @@ export const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     paddingBottom: spacing.sm,
     gap: spacing.sm,
+    backgroundColor: colours.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
   },
   pageTitle: {
     fontSize: typography.xl,
@@ -71,6 +74,9 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.xl,
     gap: spacing.sm,
+    maxWidth: 920,
+    alignSelf: 'center',
+    width: '100%',
   },
   card: {
     backgroundColor: colours.surface,

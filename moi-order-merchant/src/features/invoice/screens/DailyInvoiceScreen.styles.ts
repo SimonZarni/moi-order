@@ -6,7 +6,7 @@ import { typography } from '../../../shared/theme/typography';
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colours.backgroundLight,
+    backgroundColor: colours.surfaceMuted,
   },
   header: {
     paddingHorizontal: spacing.lg,
@@ -36,6 +36,9 @@ export const styles = StyleSheet.create({
   scrollContent: {
     padding: spacing.md,
     paddingBottom: spacing.xxl,
+    maxWidth: 920,
+    alignSelf: 'center',
+    width: '100%',
   },
   qrBanner: {
     backgroundColor: '#fff8e1',
@@ -116,7 +119,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colours.backgroundLight,
+    backgroundColor: colours.surfaceMuted,
   },
   emptyText: {
     fontSize: typography.sm,
