@@ -55,6 +55,15 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
+  collapseBtn: {
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 6,
+    marginLeft: 2,
+  },
+
   // ── Section headers ───────────────────────────────────────────────────────────
   sectionHeader: {
     fontSize: typography.xxs,

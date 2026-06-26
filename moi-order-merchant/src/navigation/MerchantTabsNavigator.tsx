@@ -35,6 +35,7 @@ import { ChangePasswordScreen } from '../features/settings/screens/ChangePasswor
 import { OperatingHoursScreen } from '../features/settings/screens/OperatingHoursScreen';
 import { WebSidebar } from '../shared/components/WebSidebar/WebSidebar';
 import { colours } from '../shared/theme/colours';
+import { radius } from '../shared/theme/radius';
 import { spacing } from '../shared/theme/spacing';
 import { typography } from '../shared/theme/typography';
 import { WEB_SIDEBAR_WIDTH } from '../shared/constants/config';
@@ -282,6 +283,7 @@ function WebMerchantLayout(): React.JSX.Element {
   const [chatCompletedAt, setChatCompletedAt] = useState<string | null>(null);
   const [chatOrderStatus, setChatOrderStatus] = useState<string>('');
   const [sidebarOpen, setSidebarOpen]       = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [settingsSubView, setSettingsSubView] = useState<SettingsSubView>('list');
   const [sessionMenuParams, setSessionMenuParams] = useState<{ openingHourId: number; label: string } | null>(null);
   const [editSessionMenuItemId, setEditSessionMenuItemId] = useState<number | null>(null);
@@ -490,7 +492,7 @@ function WebMerchantLayout(): React.JSX.Element {
     }
   };
 
-  const showSidebar = isDesktop || sidebarOpen;
+  const showSidebar = (!isDesktop && sidebarOpen) || (isDesktop && !sidebarCollapsed);
 
   return (
     <View style={webStyles.layout}>
@@ -499,11 +501,26 @@ function WebMerchantLayout(): React.JSX.Element {
           activeScreen={sidebarActiveScreen}
           onNavigate={handleNavigate}
           onLogout={logout}
+          onCollapse={isDesktop
+            ? () => setSidebarCollapsed(true)
+            : () => setSidebarOpen(false)}
           isAlarmEnabled={isAlarmEnabled}
           onAlarmToggle={toggleAlarm}
           // onAlarmTest={() => triggerAlarm(true)}
           // diagnostic={{ wsStatus, wsError, channelStatus, channelError, pusherKey, audioStatus, audioError }}
         />
+      )}
+
+      {/* Floating expand button — desktop only, when sidebar is collapsed */}
+      {isDesktop && sidebarCollapsed && (
+        <Pressable
+          style={webStyles.sidebarExpandBtn}
+          onPress={() => setSidebarCollapsed(false)}
+          accessibilityLabel="Open navigation menu"
+          accessibilityRole="button"
+        >
+          <Ionicons name="menu-outline" size={18} color="rgba(255,255,255,0.8)" />
+        </Pressable>
       )}
 
       {/* Backdrop — tapping it closes the sidebar on mobile */}
@@ -516,7 +533,7 @@ function WebMerchantLayout(): React.JSX.Element {
         />
       )}
 
-      <View style={[webStyles.content, !isDesktop && webStyles.contentMobile]}>
+      <View style={[webStyles.content, !isDesktop && webStyles.contentMobile, isDesktop && sidebarCollapsed && webStyles.contentCollapsed]}>
         {/* Mobile top bar with hamburger + bell — only shown on narrow viewports */}
         {!isDesktop && (
           <View style={webStyles.mobileTopBar}>
@@ -568,6 +585,21 @@ const webStyles = StyleSheet.create({
   },
   contentMobile: {
     marginLeft: 0,
+  },
+  contentCollapsed: {
+    marginLeft: 0,
+  },
+  sidebarExpandBtn: {
+    position: 'absolute' as const,
+    top: spacing.md,
+    left: spacing.md,
+    width: 36,
+    height: 36,
+    borderRadius: radius.md,
+    backgroundColor: colours.backgroundDark,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    zIndex: 20,
   },
   contentInner: {
     flex: 1,

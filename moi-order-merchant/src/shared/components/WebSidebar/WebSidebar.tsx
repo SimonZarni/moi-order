@@ -41,6 +41,7 @@ interface WebSidebarProps {
   activeScreen: WebScreen;
   onNavigate: (screen: WebScreen) => void;
   onLogout: () => void;
+  onCollapse?: () => void;
   pendingCount?: number;
   isAlarmEnabled?: boolean;
   onAlarmToggle?: () => void;
@@ -52,6 +53,7 @@ export function WebSidebar({
   activeScreen,
   onNavigate,
   onLogout,
+  onCollapse,
   pendingCount = 0,
   isAlarmEnabled = true,
   onAlarmToggle,
@@ -87,6 +89,16 @@ export function WebSidebar({
           onPress={handleNavPress('Notifications')}
           iconColour="rgba(255,255,255,0.55)"
         />
+        {onCollapse != null && (
+          <Pressable
+            style={styles.collapseBtn}
+            onPress={onCollapse}
+            accessibilityLabel="Collapse sidebar"
+            accessibilityRole="button"
+          >
+            <Ionicons name="chevron-back-outline" size={16} color="rgba(255,255,255,0.45)" />
+          </Pressable>
+        )}
       </View>
 
       <View style={styles.navItems}>
