@@ -48,19 +48,12 @@ export async function registerMerchantWebPush(): Promise<void> {
 
     const existing = await registration.pushManager.getSubscription();
 
+    // Always unsubscribe any existing browser subscription before resubscribing.
+    // Reusing an existing subscription silently breaks when the VAPID key pair
+    // rotates — the old subscription was encrypted for the old public key and the
+    // backend's 403 response is the only signal that the keys are mismatched.
     if (existing) {
-      // Already subscribed in the browser — re-sync keys with the backend in case the
-      // row was deleted (e.g. merchant used a different browser or subscription expired).
-      const p256dh = existing.getKey('p256dh');
-      const auth = existing.getKey('auth');
-      if (!p256dh || !auth) return;
-      activeEndpoint = existing.endpoint;
-      await pushSubscriptionsApi.store({
-        endpoint: existing.endpoint,
-        p256dh_key: arrayBufferToBase64(p256dh),
-        auth_key: arrayBufferToBase64(auth),
-      });
-      return;
+      await existing.unsubscribe();
     }
 
     const subscription = await registration.pushManager.subscribe({
