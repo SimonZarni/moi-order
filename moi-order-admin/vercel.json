@@ -1,4 +1,9 @@
 {
+  "build": {
+    "env": {
+      "VITE_VAPID_PUBLIC_KEY": "BPXAZDqWLiu_Si4a2ksyyRohE5urwrdQgjK12BOHC8WBvoWJlaMNn0Gvc5M2YTivE3xvMki65X54J-tM5mhG25w"
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",
