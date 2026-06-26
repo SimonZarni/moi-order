@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import * as Location from 'expo-location';
-import * as SecureStore from 'expo-secure-store';
 import { AppState, Linking } from 'react-native';
 
 export type CustomerLocationPermission = 'loading' | 'granted' | 'denied';
@@ -19,12 +18,6 @@ export interface UseCustomerLocationResult {
 
 // 30 minutes — generous window for restaurant discovery; avoids cold GPS on fresh grant.
 const LAST_KNOWN_MAX_AGE_MS = 30 * 60 * 1000;
-
-// On Android, getForegroundPermissionsAsync() returns 'undetermined' even after the
-// user denies once (when canAskAgain=true), so we cannot distinguish "never asked"
-// from "denied once" via status alone. This flag ensures the OS dialog fires at most
-// once automatically per install — subsequent prompts are user-initiated only.
-const FOOD_LOCATION_ASKED_KEY = 'food_location_asked';
 
 async function resolveCoords(): Promise<CustomerCoords> {
   // Fast path: any fix cached in the last 30 min is accurate enough for restaurant
@@ -62,20 +55,13 @@ export function useCustomerLocation(): UseCustomerLocationResult {
     isFetchingRef.current = true;
     setPermissionStatus('loading');
     try {
-      // Always check the existing status WITHOUT prompting first.
       const { status: existing } = await Location.getForegroundPermissionsAsync();
-
       let granted = existing === 'granted';
 
       if (!granted) {
-        // Only auto-prompt when this install has never triggered the OS dialog.
-        // Prevents the dialog re-appearing on every FoodScreen mount after denial.
-        const alreadyAsked = await SecureStore.getItemAsync(FOOD_LOCATION_ASKED_KEY);
-        if (!alreadyAsked) {
-          await SecureStore.setItemAsync(FOOD_LOCATION_ASKED_KEY, '1');
-          const { status } = await Location.requestForegroundPermissionsAsync();
-          granted = status === 'granted';
-        }
+        // Always ask — Android's own canAskAgain=false handles permanent denial.
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        granted = status === 'granted';
       }
 
       if (!granted) {
@@ -83,16 +69,12 @@ export function useCustomerLocation(): UseCustomerLocationResult {
         return;
       }
 
-      // Permission confirmed — remain in 'loading' while GPS acquires so the screen
-      // shows the spinner rather than flashing the empty list. GPS failure must NOT
-      // revert to 'denied' — permission IS granted.
       try {
         const coords = await resolveCoords();
         setLocation(coords);
         setLocationError(false);
         setPermissionStatus('granted');
       } catch {
-        // GPS unavailable after grant. silentCheck() retries on next AppState 'active'.
         setLocationError(true);
         setPermissionStatus('granted');
       }
@@ -129,11 +111,10 @@ export function useCustomerLocation(): UseCustomerLocationResult {
 
   const requestPermission = useCallback(async () => {
     try {
-      const { status } = await Location.getForegroundPermissionsAsync();
+      const { status, canAskAgain } = await Location.getForegroundPermissionsAsync();
 
       if (status === 'granted') {
-        // Permission already granted — retry GPS acquisition only.
-        // Used by the "Retry" button when GPS failed after permission was granted.
+        // Retry GPS — used by the "Retry" button when GPS failed after permission was granted.
         isFetchingRef.current = true;
         setPermissionStatus('loading');
         try {
@@ -149,14 +130,34 @@ export function useCustomerLocation(): UseCustomerLocationResult {
         return;
       }
 
-      // The OS dialog was already shown automatically on the first visit
-      // (guarded by FOOD_LOCATION_ASKED_KEY). Re-calling requestForegroundPermissionsAsync()
-      // here loops the dialog because Android keeps canAskAgain=true across multiple
-      // denials until its own system limit — identical to the loop reported on the
-      // FoodScreen. Open Settings directly so the user can grant manually.
-      // This matches the pattern in usePlaceDetailScreen which only prompts once
-      // (when UNDETERMINED) and never re-prompts after any denial.
-      await Linking.openSettings();
+      if (!canAskAgain) {
+        // Android permanently denied — only Settings can undo this.
+        await Linking.openSettings();
+        return;
+      }
+
+      // Show the OS permission dialog. Android tracks its own "don't ask again"
+      // threshold via canAskAgain; we let it handle loop prevention naturally.
+      isFetchingRef.current = true;
+      setPermissionStatus('loading');
+      try {
+        const { status: newStatus } = await Location.requestForegroundPermissionsAsync();
+        if (newStatus === 'granted') {
+          try {
+            const coords = await resolveCoords();
+            setLocation(coords);
+            setLocationError(false);
+            setPermissionStatus('granted');
+          } catch {
+            setLocationError(true);
+            setPermissionStatus('granted');
+          }
+        } else {
+          setPermissionStatus('denied');
+        }
+      } finally {
+        isFetchingRef.current = false;
+      }
     } catch {
       setPermissionStatus('denied');
     }
