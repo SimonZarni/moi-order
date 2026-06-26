@@ -214,6 +214,7 @@ export interface ServiceSubmission {
 
 export interface TicketVariant {
   id: number;
+  is_active: boolean;
   name: string;
   description: string | null;
   adult_price: number;        // whole THB
@@ -229,6 +230,7 @@ export interface TicketImage {
 
 export interface Ticket {
   id: number;
+  is_active: boolean;
   name: string;
   highlight_description: string;
   description: string;

@@ -13,6 +13,7 @@ class TicketVariantResource extends JsonResource
     {
         return [
             'id'          => $this->id,
+            'is_active'   => $this->is_active,
             'name'        => $this->name,
             'description' => $this->description,
             'adult_price' => $this->adult_price,

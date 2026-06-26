@@ -19,6 +19,7 @@ class TicketResource extends JsonResource
     {
         return [
             'id'                    => $this->id,
+            'is_active'             => $this->is_active,
             'name'                  => $this->name,
             'highlight_description' => $this->highlight_description,
             'description'           => $this->description,
