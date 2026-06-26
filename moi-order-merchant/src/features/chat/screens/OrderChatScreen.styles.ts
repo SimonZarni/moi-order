@@ -363,6 +363,25 @@ export const styles = StyleSheet.create({
     color: colours.warning,
   },
 
+  // ── Hover reply button (web desktop only) ─────────────────────────────────
+  hoverReplyBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colours.surface,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'flex-end',
+    marginHorizontal: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+
   // ── Highlight flash overlay (inside bubble) ────────────────────────────────
   bubbleHighlight: {
     borderRadius: radius.xl,

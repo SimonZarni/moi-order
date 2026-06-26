@@ -94,6 +94,8 @@ interface BubbleProps {
 }
 
 function AnimatedBubble({ msg, isNew, isHighlighted, onPhotoPress, onReply, onLongPress, onPressQuote }: BubbleProps): React.JSX.Element {
+  const [isHovered, setIsHovered] = useState(false);
+
   if (msg.sender_type === 'system') {
     return (
       <View style={styles.systemNotice}>
@@ -176,11 +178,13 @@ function AnimatedBubble({ msg, isNew, isHighlighted, onPhotoPress, onReply, onLo
   return (
     // Outer: entrance (native thread — zero JS cost per frame)
     <Animated.View style={{ opacity: entranceOpacity, transform: [{ translateX: entranceSlide }] }}>
-      {/* Long-press wrapper — does not interfere with inner swipe PanResponder */}
+      {/* Long-press + hover wrapper — does not interfere with inner swipe PanResponder */}
       <Pressable
         style={{ position: 'relative' }}
         onLongPress={onLongPress !== undefined ? () => onLongPress(msg) : undefined}
         delayLongPress={400}
+        onHoverIn={IS_WEB ? () => setIsHovered(true) : undefined}
+        onHoverOut={IS_WEB ? () => setIsHovered(false) : undefined}
         accessibilityRole="none"
       >
         <Animated.View style={[styles.replyHintLeft,  { opacity: leftHintOpacity }]}>
@@ -199,6 +203,18 @@ function AnimatedBubble({ msg, isNew, isHighlighted, onPhotoPress, onReply, onLo
             { transform: [{ translateX: swipeX }] },
           ]}
         >
+          {/* Hover reply button — web only, left side for merchant bubbles */}
+          {IS_WEB && isMerchant && isHovered && onLongPress !== undefined && (
+            <Pressable
+              style={styles.hoverReplyBtn}
+              onPress={() => onReply(msg)}
+              accessibilityRole="button"
+              accessibilityLabel="Reply to message"
+            >
+              <Ionicons name="return-up-back-outline" size={15} color={colours.primary} />
+            </Pressable>
+          )}
+
           <View style={[styles.bubble, isMerchant ? styles.bubbleMerchant : styles.bubbleOther]}>
             {!isMerchant && <Text style={styles.senderName}>{msg.sender_name}</Text>}
 
@@ -252,6 +268,18 @@ function AnimatedBubble({ msg, isNew, isHighlighted, onPhotoPress, onReply, onLo
               style={[StyleSheet.absoluteFillObject, styles.bubbleHighlight, { opacity: highlightOpacity }]}
             />
           </View>
+
+          {/* Hover reply button — web only, right side for customer bubbles */}
+          {IS_WEB && !isMerchant && isHovered && onLongPress !== undefined && (
+            <Pressable
+              style={styles.hoverReplyBtn}
+              onPress={() => onReply(msg)}
+              accessibilityRole="button"
+              accessibilityLabel="Reply to message"
+            >
+              <Ionicons name="return-up-back-outline" size={15} color={colours.primary} />
+            </Pressable>
+          )}
         </Animated.View>
       </Pressable>
     </Animated.View>
