@@ -8,6 +8,7 @@ use App\DTOs\ChangePasswordDTO;
 use App\DTOs\AppleAuthDTO;
 use App\DTOs\GoogleAuthDTO;
 use App\DTOs\LineAuthDTO;
+use App\DTOs\RemoveEmailDTO;
 use App\DTOs\SendEmailOtpDTO;
 use App\DTOs\UpdateEmailDTO;
 use App\DTOs\UpdatePhoneDTO;
@@ -16,6 +17,7 @@ use App\Enums\EmailOtpPurpose;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\DeleteAccountRequest;
+use App\Http\Requests\RemoveEmailRequest;
 use App\Http\Requests\TriggerReminderRequest;
 use App\Http\Requests\UpdateSimulatedDateRequest;
 use App\Http\Requests\LinkAppleRequest;
@@ -227,6 +229,25 @@ class ProfileController extends Controller
         $user = $this->profileService->updateEmail(
             $request->user(),
             UpdateEmailDTO::fromRequest($request),
+        );
+
+        return response()->json(['data' => new UserResource($user)]);
+    }
+
+    /** POST /api/v1/profile/email/request-removal-otp */
+    public function requestEmailRemovalOtp(Request $request): JsonResponse
+    {
+        $result = $this->profileService->requestEmailRemovalOtp($request->user());
+
+        return response()->json(['data' => $result]);
+    }
+
+    /** DELETE /api/v1/profile/email */
+    public function removeEmail(RemoveEmailRequest $request): JsonResponse
+    {
+        $user = $this->profileService->removeEmail(
+            $request->user(),
+            RemoveEmailDTO::fromRequest($request),
         );
 
         return response()->json(['data' => new UserResource($user)]);

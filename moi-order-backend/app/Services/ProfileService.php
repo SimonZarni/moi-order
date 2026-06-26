@@ -7,6 +7,8 @@ namespace App\Services;
 use App\Contracts\FileStorageInterface;
 use App\Contracts\UserActivityLogInterface;
 use App\DTOs\ChangePasswordDTO;
+use App\DTOs\RemoveEmailDTO;
+use App\DTOs\SendEmailOtpDTO;
 use App\DTOs\UpdateEmailDTO;
 use App\DTOs\UpdatePhoneDTO;
 use App\DTOs\UpdateProfileDTO;
@@ -158,6 +160,55 @@ class ProfileService
         return $user->fresh();
     }
 
+    /** @return array{expires_in: int, resend_after: int} */
+    public function requestEmailRemovalOtp(User $user): array
+    {
+        if ($user->email === null || $this->isSocialPlaceholderEmail($user->email)) {
+            throw new DomainException('account.no_email_to_remove', 409);
+        }
+
+        $this->assertHasAlternativeLoginMethod($user);
+
+        $dto = new SendEmailOtpDTO(
+            email:   $user->email,
+            purpose: EmailOtpPurpose::EmailRemoval,
+        );
+
+        return $this->emailOtpService->send($dto);
+    }
+
+    public function removeEmail(User $user, RemoveEmailDTO $dto): User
+    {
+        if ($user->email === null || $this->isSocialPlaceholderEmail($user->email)) {
+            throw new DomainException('account.no_email_to_remove', 409);
+        }
+
+        $this->assertHasAlternativeLoginMethod($user);
+
+        $verifyDto = new VerifyEmailOtpDTO(
+            email:   $user->email,
+            otp:     $dto->otp,
+            purpose: EmailOtpPurpose::EmailRemoval,
+        );
+
+        $verifiedToken = $this->emailOtpService->verify($verifyDto);
+        $this->emailOtpService->consumeVerifiedToken($user->email, $verifiedToken, EmailOtpPurpose::EmailRemoval);
+
+        $user->update([
+            'email'             => null,
+            'email_verified_at' => null,
+            'password'          => null,
+        ]);
+
+        // Revoke all other sessions — those devices relied on email+password login.
+        $currentTokenId = $user->currentAccessToken()->id;
+        $user->tokens()->where('id', '!=', $currentTokenId)->delete();
+
+        $this->activityLog->record($user->fresh(), UserActivityEvent::EmailRemoved);
+
+        return $user->fresh();
+    }
+
     public function updateEmail(User $user, UpdateEmailDTO $dto): User
     {
         $verifyDto = new VerifyEmailOtpDTO(
@@ -264,6 +315,18 @@ class ProfileService
             // retain their user_id FK but the user is no longer queryable.
             $user->delete();
         });
+    }
+
+    private function assertHasAlternativeLoginMethod(User $user): void
+    {
+        $hasAlternative = $user->phone_number !== null
+            || $user->google_id !== null
+            || $user->apple_id !== null
+            || $user->line_id !== null;
+
+        if (!$hasAlternative) {
+            throw new DomainException('account.minimum_login_method', 409);
+        }
     }
 
     private function isSocialPlaceholderEmail(?string $email): bool

@@ -43,8 +43,10 @@ Route::delete('/profile/link/apple',  [ProfileController::class, 'unlinkApple'])
 Route::delete('/profile/link/line',   [ProfileController::class, 'unlinkLine']);
 Route::post('/profile/phone/request-otp', [ProfileController::class, 'requestPhoneOtp']);
 Route::put('/profile/phone',               [ProfileController::class, 'updatePhone']);
-Route::post('/profile/email/request-otp', [ProfileController::class, 'requestEmailOtp']);
-Route::put('/profile/email',               [ProfileController::class, 'updateEmail']);
+Route::post('/profile/email/request-otp',         [ProfileController::class, 'requestEmailOtp']);
+Route::put('/profile/email',                       [ProfileController::class, 'updateEmail']);
+Route::post('/profile/email/request-removal-otp', [ProfileController::class, 'requestEmailRemovalOtp']);
+Route::delete('/profile/email',                    [ProfileController::class, 'removeEmail']);
 Route::patch('/profile/simulated-date',  [ProfileController::class, 'updateSimulatedDate']);
 Route::post('/profile/trigger-reminder', [ProfileController::class, 'triggerReminder']);
 

@@ -12,6 +12,11 @@ export function UpdateEmailScreen(): React.JSX.Element {
     otpSent, expiresIn, isSendingOtp, isUpdating,
     handleEmailChange, handleOtpChange,
     handleRequestOtp, handleUpdateEmail, handleBack,
+    canRemoveEmail, currentEmail,
+    removeOtp, removeOtpError, removeBannerError,
+    removeSent, removeExpiresIn,
+    isRequestingRemoval, isRemoving,
+    handleRequestRemovalOtp, handleRemoveOtpChange, handleConfirmRemoval,
   } = useUpdateEmailScreen();
 
   return (
@@ -101,6 +106,69 @@ export function UpdateEmailScreen(): React.JSX.Element {
                     {isUpdating ? 'Updating…' : 'Confirm Update'}
                   </Text>
                 </Pressable>
+              </View>
+            )}
+
+            {canRemoveEmail && (
+              <View style={styles.removeSection}>
+                <Text style={styles.removeTitle}>Remove email</Text>
+                <Text style={styles.removeHint}>
+                  {removeSent
+                    ? `Enter the code sent to ${currentEmail ?? ''} to confirm. Your email and password login will be permanently removed.`
+                    : `Remove ${currentEmail ?? ''} from your account. Email login and password will also be removed. You must have another login method (phone, Google, Apple, or LINE) to proceed.`}
+                </Text>
+
+                {!!removeBannerError && (
+                  <View style={styles.removeBanner}>
+                    <Ionicons name="alert-circle-outline" size={16} color="#c5000f" />
+                    <Text style={styles.removeBannerText}>{removeBannerError}</Text>
+                  </View>
+                )}
+
+                {!removeSent ? (
+                  <Pressable
+                    style={[styles.removeBtn, isRequestingRemoval && styles.removeBtnDisabled]}
+                    onPress={handleRequestRemovalOtp}
+                    disabled={isRequestingRemoval}
+                    accessibilityLabel="Send removal verification code"
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.removeBtnText}>
+                      {isRequestingRemoval ? 'Sending…' : 'Send Removal Code'}
+                    </Text>
+                  </Pressable>
+                ) : (
+                  <View>
+                    {removeExpiresIn !== null && (
+                      <Text style={styles.expiryText}>
+                        Code expires in {Math.floor(removeExpiresIn / 60)} minutes
+                      </Text>
+                    )}
+                    <TextInput
+                      style={[styles.input, removeOtpError !== null && styles.inputError]}
+                      value={removeOtp}
+                      onChangeText={handleRemoveOtpChange}
+                      placeholder="123456"
+                      keyboardType="number-pad"
+                      maxLength={6}
+                      returnKeyType="done"
+                      accessibilityLabel="Removal verification code"
+                    />
+                    {removeOtpError !== null && <Text style={styles.errorText}>{removeOtpError}</Text>}
+
+                    <Pressable
+                      style={[styles.removeConfirmBtn, isRemoving && styles.removeConfirmBtnDisabled]}
+                      onPress={handleConfirmRemoval}
+                      disabled={isRemoving}
+                      accessibilityLabel="Confirm email removal"
+                      accessibilityRole="button"
+                    >
+                      <Text style={styles.removeConfirmBtnText}>
+                        {isRemoving ? 'Removing…' : 'Confirm Removal'}
+                      </Text>
+                    </Pressable>
+                  </View>
+                )}
               </View>
             )}
 

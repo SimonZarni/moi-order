@@ -81,4 +81,27 @@ export const styles = StyleSheet.create({
 
   backRow: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.md },
   backLink: { fontSize: typography.sm, color: colours.textMuted },
+
+  // ── Remove email danger zone ───────────────────────────────────────────
+  removeSection: { marginTop: spacing.xl, paddingTop: spacing.lg, borderTopWidth: 1, borderTopColor: colours.border },
+  removeTitle: { fontSize: typography.sm, fontWeight: '700', color: colours.danger, marginBottom: spacing.xs },
+  removeHint:  { fontSize: typography.sm, color: colours.textMuted, lineHeight: 20, marginBottom: spacing.md },
+  removeBtn: {
+    borderWidth: 1.5, borderColor: colours.danger, borderRadius: radius.md,
+    paddingVertical: spacing.sm + 2, alignItems: 'center',
+  },
+  removeBtnDisabled: { opacity: 0.5 },
+  removeBtnText: { color: colours.danger, fontSize: typography.sm, fontWeight: '700' },
+  removeBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.xs,
+    backgroundColor: '#fff1f2', borderRadius: radius.sm,
+    padding: spacing.sm, marginBottom: spacing.md,
+  },
+  removeBannerText: { flex: 1, fontSize: typography.sm, color: colours.danger },
+  removeConfirmBtn: {
+    backgroundColor: colours.danger, borderRadius: radius.md,
+    paddingVertical: spacing.md, alignItems: 'center', marginTop: spacing.sm,
+  },
+  removeConfirmBtnDisabled: { opacity: 0.6 },
+  removeConfirmBtnText: { color: colours.textOnDark, fontSize: typography.md, fontWeight: '700' },
 });

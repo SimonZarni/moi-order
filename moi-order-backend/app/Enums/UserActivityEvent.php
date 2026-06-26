@@ -23,6 +23,7 @@ enum UserActivityEvent: string
 
     // ── Contact info ──────────────────────────────────────────────────────────
     case EmailChanged = 'email_changed';
+    case EmailRemoved = 'email_removed';
     case PhoneChanged = 'phone_changed';
 
     // ── Admin-triggered account actions ───────────────────────────────────────
@@ -44,6 +45,7 @@ enum UserActivityEvent: string
             self::LineLinked      => 'LINE account connected',
             self::LineUnlinked    => 'LINE account disconnected',
             self::EmailChanged    => 'Email address changed',
+            self::EmailRemoved    => 'Email address removed',
             self::PhoneChanged    => 'Phone number changed',
             self::AccountBanned   => 'Account banned',
             self::AccountSuspended => 'Account suspended',
@@ -68,6 +70,7 @@ enum UserActivityEvent: string
             self::LineLinked,
             self::LineUnlinked,
             self::EmailChanged,
+            self::EmailRemoved,
             self::PhoneChanged    => 'social',
 
             self::AccountBanned,
