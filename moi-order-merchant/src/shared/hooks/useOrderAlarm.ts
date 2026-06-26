@@ -224,6 +224,18 @@ export function useOrderAlarm(): UseOrderAlarmResult {
     };
   }, []);
 
+  // When the merchant switches back to the tab after a new order arrived in the
+  // background, the AudioContext was suspended so _pendingAlarm was set but never
+  // consumed. Play it immediately on tab focus instead of waiting for a click.
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const handler = () => {
+      if (document.visibilityState === 'visible') attemptUnlock();
+    };
+    document.addEventListener('visibilitychange', handler);
+    return () => { document.removeEventListener('visibilitychange', handler); };
+  }, []);
+
   const unlockAudio = useCallback(() => { attemptUnlock(); }, []);
 
   const triggerAlarm = useCallback((fromGesture = false) => {

@@ -18,13 +18,19 @@ self.addEventListener('push', (event) => {
     payload = { title: 'Moi Order', body: event.data.text() };
   }
 
+  const type = payload.data?.type ?? '';
+  const isOrderAlert = type === 'new_order' || type === 'payment_confirmed';
+
   const title = payload.title ?? 'Moi Order';
   const options = {
     body: payload.body ?? '',
     icon: '/icon-192.png?v=2',
     badge: '/notification-badge.png?v=2',
     data: payload.data ?? {},
-    requireInteraction: false,
+    // New orders stay on screen until the merchant taps — chat messages auto-dismiss.
+    requireInteraction: isOrderAlert,
+    // Vibrate even in silent mode on Android: three pulses for orders, one for chat.
+    vibrate: isOrderAlert ? [300, 150, 300, 150, 300] : [150],
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
