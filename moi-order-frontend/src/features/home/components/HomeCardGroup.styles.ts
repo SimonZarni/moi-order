@@ -61,7 +61,7 @@ export const styles = StyleSheet.create({
     borderRadius: radius.lg,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.xs,
-    minHeight: 90,
+    minHeight: 100,
   },
 
   tileDimmed: {
@@ -69,7 +69,10 @@ export const styles = StyleSheet.create({
   },
 
   tileIconWrap: {
-    marginBottom: spacing.xs,
+    flex: 1,
+    alignSelf: 'stretch',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   tileLabel: {

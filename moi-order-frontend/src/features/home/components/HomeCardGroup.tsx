@@ -80,7 +80,7 @@ export function HomeCardGroup({
                   iconType={child.icon_type}
                   iconUrl={child.icon_url}
                   iconColor={child.icon_color}
-                  size={32}
+                  size={44}
                 />
               </View>
               <Text

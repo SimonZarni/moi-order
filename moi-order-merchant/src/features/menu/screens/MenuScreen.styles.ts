@@ -76,7 +76,8 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     color: colours.textOnLight,
     paddingVertical: 0,
-  },
+    outlineWidth: 0,
+  } as object,
 
   // ── Warning banner ────────────────────────────────────────────────────────
   warnBanner: {
