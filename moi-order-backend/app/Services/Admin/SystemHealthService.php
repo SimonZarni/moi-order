@@ -209,7 +209,7 @@ class SystemHealthService
         $ageSeconds  = $heartbeatAt !== null ? (int) now()->diffInSeconds($heartbeatAt) : null;
 
         $depths = [];
-        foreach (['default', 'notifications'] as $queue) {
+        foreach (['default'] as $queue) {
             try {
                 $depth = (int) Redis::llen("queues:{$queue}");
             } catch (Throwable) {
