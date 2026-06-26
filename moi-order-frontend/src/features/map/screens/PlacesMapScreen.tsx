@@ -210,26 +210,6 @@ export function PlacesMapScreen(): React.JSX.Element {
             </>
           )}
 
-          {/* Selection ring — rendered as a Mapbox layer so the PointAnnotation
-              key never changes on selection (which caused the image to disappear). */}
-          {selectedPlace?.latitude != null && selectedPlace?.longitude != null && (
-            <MapboxGL.ShapeSource
-              id="selected-place-ring"
-              shape={{ type: 'Feature', geometry: { type: 'Point', coordinates: [selectedPlace.longitude, selectedPlace.latitude] }, properties: {} }}
-            >
-              <MapboxGL.CircleLayer
-                id="selected-place-ring-layer"
-                style={{
-                  circleRadius: 30,
-                  circleColor: 'transparent',
-                  circleStrokeWidth: 3,
-                  circleStrokeColor: MAP_COLORS.primary,
-                  circleOpacity: 1,
-                }}
-              />
-            </MapboxGL.ShapeSource>
-          )}
-
           {displayedPlaces.map((place) => (
             <PlaceMarker key={place.id} place={place}
               isSelected={selectedPlace?.id === place.id}

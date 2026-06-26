@@ -29,6 +29,11 @@ const TAB_BAR_ROUTES = new Set<string>([
   'PrivacyPolicy', 'TermsAndConditions', 'PdpaNotice',
 ]);
 
+// Stack screens that are children of the Map tab. Navigating to these must NOT
+// reset isBottomSheetOpen — otherwise the tab bar reappears when returning to Map
+// with a place card still open.
+const MAP_CHILD_ROUTES = new Set<string>(['PlaceDetail']);
+
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
 interface TabItem {
@@ -184,9 +189,11 @@ export function RootFloatingTabBar({ navigationRef }: { navigationRef: NavRef })
   const bottom      = TAB_BAR_BOTTOM_OFFSET + insets.bottom;
   const shouldHide  = !isVisible || (activeRouteName === 'Map' && (isFullscreen || isBottomSheetOpen));
 
-  // Reset map overlay state when leaving the Map tab.
+  // Reset map overlay state when genuinely leaving the Map tab.
+  // Skip reset for MAP_CHILD_ROUTES (e.g. PlaceDetail) — those are stack screens
+  // pushed on top of Map; the place card is still open on return.
   useEffect(() => {
-    if (activeRouteName !== 'Map') {
+    if (activeRouteName !== 'Map' && !MAP_CHILD_ROUTES.has(activeRouteName)) {
       setFullscreen(false);
       setBottomSheetOpen(false);
     }
