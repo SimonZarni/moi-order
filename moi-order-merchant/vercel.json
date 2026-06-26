@@ -10,7 +10,7 @@
       "EXPO_PUBLIC_APPLE_WEB_REDIRECT_URI": "https://merchant.moiorder.com/auth/apple/callback",
       "EXPO_PUBLIC_LINE_WEB_REDIRECT_URI":  "https://merchant.moiorder.com/auth/line/callback",
       "EXPO_PUBLIC_LINE_CHANNEL_ID":        "2008805625",
-      "EXPO_PUBLIC_VAPID_PUBLIC_KEY":       "BPXAZDqWLiu_Si4a2ksyyRohE5urwrdQgjK12BOHC8WBvoWJlaMNn0Gvc5M2YTivE3xvMki65X54J-tM5mhG25w"
+      "EXPO_PUBLIC_VAPID_PUBLIC_KEY":       "BPKFGQsU8-NGGN2n9uvsu7EI50noRmQ0wEmq6ufQqOP2hTyUk2r3x6Zrm0QDEaF44X7u024YfVJN3BQbz5AHW_I"
     }
   },
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]

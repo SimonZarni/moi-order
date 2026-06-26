@@ -1,7 +1,7 @@
 {
   "build": {
     "env": {
-      "VITE_VAPID_PUBLIC_KEY": "BPXAZDqWLiu_Si4a2ksyyRohE5urwrdQgjK12BOHC8WBvoWJlaMNn0Gvc5M2YTivE3xvMki65X54J-tM5mhG25w"
+      "VITE_VAPID_PUBLIC_KEY": "BPKFGQsU8-NGGN2n9uvsu7EI50noRmQ0wEmq6ufQqOP2hTyUk2r3x6Zrm0QDEaF44X7u024YfVJN3BQbz5AHW_I"
     }
   },
   "headers": [
