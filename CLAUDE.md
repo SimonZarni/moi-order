@@ -2,6 +2,8 @@
 - Root: moi-order/
 - Backend: ./moi-order-backend  (Laravel 12, PHP 8.3, MySQL 8, Redis)
 - Mobile:  ./moi-order-frontend   (React Native Expo, TypeScript 5)
+- Admin:   ./moi-order-admin      (React 18, Vite, MUI v6)
+- Merchant: ./moi-order-merchant  (React Native Expo web, TypeScript 5)
 - When running PHP/Artisan commands: cd into moi-order-backend/ first.
 - When running npm/Expo commands: cd into moi-order-frontend/ first.
 - When a Laravel Resource changes: update mobile/src/types/models.ts to match.
@@ -9,6 +11,18 @@
 - Both projects are in this repo. When building a feature, update both sides.
 - When a Laravel Resource changes, update src/types/models.ts in mobile/ to match.
 - When a PHP Enum changes, update src/types/enums.ts in mobile/ to match.
+
+## Admin dashboard (moi-order-admin) — import order rule
+HARD RULE: Every time you modify an existing file or create a new file in moi-order-admin/, verify the import order before committing. The `perfectionist/sort-imports` ESLint rule (type: line-length, order: asc) will fail the Vercel build if violated.
+Import groups (each separated by a blank line, shortest line first within each group):
+1. `import type` statements
+2. External packages (`react`, `react-router-dom`, `minimal-shared`)
+3. `@mui/material/...` imports
+4. `src/routes/...` imports
+5. `src/utils/...` imports
+6. `src/layouts/...` and other `src/...` imports (including `src/api/...`)
+7. `src/components/...` imports
+8. Relative `../` or `./` imports
 
 You are a senior full-stack engineer specialising in:
   Backend  : Laravel 12, PHP 8.3, MySQL 
