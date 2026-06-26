@@ -144,40 +144,43 @@ export function PlaceBottomSheet({
       {/* Keep content mounted so dragging back up has no white-flash re-mount cost.
           Height 0 + overflow hidden hides it at peek without unmounting. */}
       <View style={{ flex: isPeeking ? 0 : 1, overflow: 'hidden' }}>
-        <BottomSheetScrollView contentContainerStyle={styles.scroll}>
-          {galleryImages.length > 0 ? (
-            <View style={styles.slideWrap}>
-              <FlatList
-                ref={galleryRef}
-                data={galleryImages}
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                keyExtractor={(_, i) => String(i)}
-                renderItem={({ item }) => (
-                  <Image source={{ uri: item }} style={[styles.slideImage, { width }]} contentFit="cover" />
-                )}
-                getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
-                onViewableItemsChanged={onViewableItemsChanged}
-                viewabilityConfig={VIEWABILITY_CONFIG}
-                onScrollBeginDrag={() => { if (intervalRef.current) clearInterval(intervalRef.current); }}
-                onMomentumScrollEnd={startSlideTimer}
-                scrollEventThrottle={16}
-              />
-              {galleryImages.length > 1 && (
-                <View style={styles.slideDots}>
-                  {galleryImages.map((_, i) => (
-                    <View key={i} style={[styles.slideDot, i === slideIdx && styles.slideDotActive]} />
-                  ))}
-                </View>
-              )}
-            </View>
-          ) : (
-            <View style={[styles.cover, styles.coverPlaceholder]}>
-              <Text style={styles.coverPlaceholderText}>📍</Text>
-            </View>
-          )}
 
+        {/* Gallery lives OUTSIDE BottomSheetScrollView so horizontal swipes on the
+            image carousel don't propagate to the sheet and drag it up/down. */}
+        {galleryImages.length > 0 ? (
+          <View style={styles.slideWrap}>
+            <FlatList
+              ref={galleryRef}
+              data={galleryImages}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(_, i) => String(i)}
+              renderItem={({ item }) => (
+                <Image source={{ uri: item }} style={[styles.slideImage, { width }]} contentFit="cover" />
+              )}
+              getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
+              onViewableItemsChanged={onViewableItemsChanged}
+              viewabilityConfig={VIEWABILITY_CONFIG}
+              onScrollBeginDrag={() => { if (intervalRef.current) clearInterval(intervalRef.current); }}
+              onMomentumScrollEnd={startSlideTimer}
+              scrollEventThrottle={16}
+            />
+            {galleryImages.length > 1 && (
+              <View style={styles.slideDots}>
+                {galleryImages.map((_, i) => (
+                  <View key={i} style={[styles.slideDot, i === slideIdx && styles.slideDotActive]} />
+                ))}
+              </View>
+            )}
+          </View>
+        ) : (
+          <View style={[styles.cover, styles.coverPlaceholder]}>
+            <Text style={styles.coverPlaceholderText}>📍</Text>
+          </View>
+        )}
+
+        <BottomSheetScrollView contentContainerStyle={styles.scroll}>
           <View style={styles.content}>
             <View style={styles.headerRow}>
               <View style={styles.headerLeft}>

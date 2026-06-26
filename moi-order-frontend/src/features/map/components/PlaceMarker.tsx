@@ -44,11 +44,10 @@ export const PlaceMarker = React.memo(function PlaceMarker(
   return (
     <MapboxGL.PointAnnotation
       id={`marker-${place.id}`}
-      key={`marker-${place.id}-${isSelected ? 's' : 'n'}-${imgReady ? '1' : '0'}`}
+      key={`marker-${place.id}-${imgReady ? '1' : '0'}`}
       coordinate={[place.longitude, place.latitude]}
       anchor={{ x: 0.5, y: 1 }}
       onSelected={() => onPress(place)}
-      selected={isSelected}
     >
       <View
         style={styles.pressable}
@@ -56,14 +55,13 @@ export const PlaceMarker = React.memo(function PlaceMarker(
         accessibilityRole="button"
         accessibilityLabel={`View ${place.name_en}`}
       >
-        <View style={[styles.bubble, isSelected && styles.bubbleSelected]}>
+        <View style={styles.bubble}>
           {uri ? (
             <Image
               source={{ uri }}
               style={styles.coverImage}
               resizeMode="cover"
               onLoad={() => {
-                // Remember this URI so subsequent remounts skip the loading state.
                 loadedImageUris.add(uri);
                 setImgReady(true);
               }}
@@ -74,14 +72,7 @@ export const PlaceMarker = React.memo(function PlaceMarker(
             </View>
           )}
         </View>
-
-        {isSelected && (
-          <View style={styles.labelBubble}>
-            <Text style={styles.labelText} numberOfLines={1}>{place.name_en}</Text>
-          </View>
-        )}
-
-        <View style={[styles.tail, isSelected && styles.tailSelected]} />
+        <View style={styles.tail} />
       </View>
     </MapboxGL.PointAnnotation>
   );

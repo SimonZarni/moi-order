@@ -28,6 +28,7 @@ interface Props {
   onTabPress:             (tabId: string) => void;
   activeTagCount:         number;
   onFilterPress:          () => void;
+  showTabs?:              boolean;
 }
 
 export function MapSearchBar({
@@ -37,6 +38,7 @@ export function MapSearchBar({
   isGeoLoading, isGoogleLoading,
   activeTab, onTabPress,
   activeTagCount, onFilterPress,
+  showTabs = false,
 }: Props): React.JSX.Element {
   const inputRef    = useRef<TextInput>(null);
   const focusScale  = useSharedValue(0);
@@ -119,8 +121,8 @@ export function MapSearchBar({
         </Pressable>
       </View>
 
-      {/* ── Nearby / All tabs (shown when no dropdown) ── */}
-      {!showDropdown && (
+      {/* ── Nearby / All tabs (hidden by default — controlled by showTabs prop) ── */}
+      {showTabs && !showDropdown && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.tabsRow} keyboardShouldPersistTaps="handled"
           decelerationRate="fast">

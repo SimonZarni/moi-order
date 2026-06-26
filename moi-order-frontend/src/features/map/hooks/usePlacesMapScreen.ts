@@ -104,6 +104,7 @@ export interface UsePlacesMapScreenResult {
   handleShowTagFilter:        () => void;
   handleApplyTags:            (tagIds: number[]) => void;
   handleDismissTagFilter:     () => void;
+  markNavigatingToDetail:     () => void;
 }
 
 export function usePlacesMapScreen(): UsePlacesMapScreenResult {
@@ -114,6 +115,9 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const cameraInitializedRef  = useRef(false);
   // Tracks which cover_image URLs have been prefetched to avoid duplicate calls.
   const prefetchedRef = useRef(new Set<string>());
+  // Set to true before navigating to PlaceDetail so the focus cleanup skips
+  // clearing state and the re-focus skips the GPS fly-to. Cleared on re-focus.
+  const navigatingToDetailRef = useRef(false);
 
   const [gpsCoords, setGpsCoords]           = useState<[number, number] | null>(null);
   const [userLocation, setUserLocation]     = useState<UserLocation | null>(null);
@@ -124,7 +128,7 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   const [drivingRoute, setDrivingRoute]     = useState<DirectionsResult | null>(null);
   const [walkingRoute, setWalkingRoute]     = useState<DirectionsResult | null>(null);
   const [isLoadingRoutes, setIsLoadingRoutes] = useState(false);
-  const [activeTab, setActiveTab]           = useState<string | null>(TAB_NEARBY);
+  const [activeTab, setActiveTab]           = useState<string | null>(TAB_ALL);
   const [activeCategories, setActiveCategories] = useState<number[]>([]);
   const [activeTags, setActiveTags]         = useState<number[]>([]);
   const [isFABOpen, setIsFABOpen]           = useState(false);
@@ -286,9 +290,18 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
   // ── Reset nav bar and search state when screen loses focus ──────────────
   useFocusEffect(
     useCallback(() => {
-      // On each visit, allow a single fly-to GPS on first position update.
-      cameraInitializedRef.current = false;
+      // Returning from PlaceDetail: keep camera position and selected place intact.
+      // Any other visit (tab switch, initial mount): allow GPS fly-to and clear state.
+      if (!navigatingToDetailRef.current) {
+        cameraInitializedRef.current = false;
+      }
+      navigatingToDetailRef.current = false;
+
       return () => {
+        // Skip cleanup when navigating to PlaceDetail — state is preserved so
+        // the user returns to exactly where they were on back navigation.
+        if (navigatingToDetailRef.current) return;
+
         setMapFullscreen(false);
         setMapBottomSheetOpen(false);
         setIsFullscreen(false);
@@ -573,6 +586,10 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     });
   }, [userLocation, gpsCoords]);
 
+  const markNavigatingToDetail = useCallback(() => {
+    navigatingToDetailRef.current = true;
+  }, []);
+
   const handleSearchChange = useCallback((q: string) => setSearchQuery(q), []);
   const handleClearSearch  = useCallback(() => {
     setSearchQuery('');
@@ -602,5 +619,6 @@ export function usePlacesMapScreen(): UsePlacesMapScreenResult {
     handleUseCurrentGPS, handleUseMapLocation, handleDismissLocationOptions,
     handleToggleFAB, handleSelectCategory,
     handleShowTagFilter, handleApplyTags, handleDismissTagFilter,
+    markNavigatingToDetail,
   };
 }

@@ -62,11 +62,15 @@ export function PlacesMapScreen(): React.JSX.Element {
     handleUseCurrentGPS, handleUseMapLocation, handleDismissLocationOptions,
     handleToggleFAB, handleSelectCategory,
     handleShowTagFilter, handleApplyTags, handleDismissTagFilter,
+    markNavigatingToDetail,
   } = usePlacesMapScreen();
 
   const handleReadMore = useCallback(() => {
-    if (selectedPlace) navigation.navigate('PlaceDetail', { placeId: selectedPlace.id });
-  }, [selectedPlace, navigation]);
+    if (selectedPlace) {
+      markNavigatingToDetail();
+      navigation.navigate('PlaceDetail', { placeId: selectedPlace.id });
+    }
+  }, [selectedPlace, navigation, markNavigatingToDetail]);
 
   const topControlsAnim  = useRef(new Animated.Value(0)).current;
   const buttonsRightAnim = useRef(new Animated.Value(0)).current;
@@ -117,6 +121,7 @@ export function PlacesMapScreen(): React.JSX.Element {
             onTabPress={handleTabPress}
             activeTagCount={activeTags.length}
             onFilterPress={handleShowTagFilter}
+            showTabs={false}
           />
         </Animated.View>
 
@@ -203,6 +208,26 @@ export function PlacesMapScreen(): React.JSX.Element {
                 <MapboxGL.LineLayer id="route-line-layer" style={ROUTE_LINE} />
               </MapboxGL.ShapeSource>
             </>
+          )}
+
+          {/* Selection ring — rendered as a Mapbox layer so the PointAnnotation
+              key never changes on selection (which caused the image to disappear). */}
+          {selectedPlace?.latitude != null && selectedPlace?.longitude != null && (
+            <MapboxGL.ShapeSource
+              id="selected-place-ring"
+              shape={{ type: 'Feature', geometry: { type: 'Point', coordinates: [selectedPlace.longitude, selectedPlace.latitude] }, properties: {} }}
+            >
+              <MapboxGL.CircleLayer
+                id="selected-place-ring-layer"
+                style={{
+                  circleRadius: 30,
+                  circleColor: 'transparent',
+                  circleStrokeWidth: 3,
+                  circleStrokeColor: MAP_COLORS.primary,
+                  circleOpacity: 1,
+                }}
+              />
+            </MapboxGL.ShapeSource>
           )}
 
           {displayedPlaces.map((place) => (
