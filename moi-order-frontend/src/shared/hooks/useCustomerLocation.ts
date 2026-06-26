@@ -17,8 +17,8 @@ export interface UseCustomerLocationResult {
   requestPermission: () => Promise<void>;
 }
 
-// 5 minutes — stale enough to be fast, fresh enough for food delivery.
-const LAST_KNOWN_MAX_AGE_MS = 5 * 60 * 1000;
+// 30 minutes — generous window for restaurant discovery; avoids cold GPS on fresh grant.
+const LAST_KNOWN_MAX_AGE_MS = 30 * 60 * 1000;
 
 // On Android, getForegroundPermissionsAsync() returns 'undetermined' even after the
 // user denies once (when canAskAgain=true), so we cannot distinguish "never asked"
@@ -27,13 +27,21 @@ const LAST_KNOWN_MAX_AGE_MS = 5 * 60 * 1000;
 const FOOD_LOCATION_ASKED_KEY = 'food_location_asked';
 
 async function resolveCoords(): Promise<CustomerCoords> {
-  // Fast path: return a recent cached fix instantly so the restaurant query
-  // fires without waiting for a cold GPS acquisition.
+  // Fast path: any fix cached in the last 30 min is accurate enough for restaurant
+  // discovery and avoids a cold GPS acquisition entirely.
   const last = await Location.getLastKnownPositionAsync({ maxAge: LAST_KNOWN_MAX_AGE_MS });
   if (last) {
     return { latitude: last.coords.latitude, longitude: last.coords.longitude };
   }
-  const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+  // Guard: on Android, calling getCurrentPositionAsync() with location services
+  // disabled triggers the OS "Enable Location Services" system dialog. When the user
+  // dismisses it, AppState fires 'active' → silentCheck → resolveCoords → dialog again
+  // — an infinite loop. Bail early so we surface locationError instead.
+  const servicesOn = await Location.hasServicesEnabledAsync();
+  if (!servicesOn) throw new Error('location_services_disabled');
+  // Accuracy.Low (network/wifi-based) resolves in ~1 s even on a cold device,
+  // unlike Balanced which waits for GPS and fails immediately after a fresh grant.
+  const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
   return { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
 }
 
