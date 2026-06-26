@@ -20,20 +20,14 @@ export interface UseCustomerLocationResult {
 const LAST_KNOWN_MAX_AGE_MS = 30 * 60 * 1000;
 
 async function resolveCoords(): Promise<CustomerCoords> {
-  // Fast path: any fix cached in the last 30 min is accurate enough for restaurant
-  // discovery and avoids a cold GPS acquisition entirely.
   const last = await Location.getLastKnownPositionAsync({ maxAge: LAST_KNOWN_MAX_AGE_MS });
   if (last) {
     return { latitude: last.coords.latitude, longitude: last.coords.longitude };
   }
-  // Guard: on Android, calling getCurrentPositionAsync() with location services
-  // disabled triggers the OS "Enable Location Services" system dialog. When the user
-  // dismisses it, AppState fires 'active' → silentCheck → resolveCoords → dialog again
-  // — an infinite loop. Bail early so we surface locationError instead.
-  const servicesOn = await Location.hasServicesEnabledAsync();
-  if (!servicesOn) throw new Error('location_services_disabled');
-  // Accuracy.Low (network/wifi-based) resolves in ~1 s even on a cold device,
-  // unlike Balanced which waits for GPS and fails immediately after a fresh grant.
+  // Accuracy.Low (network/wifi-based) resolves in ~1 s even on a cold device.
+  // When services are off, getCurrentPositionAsync triggers the OS "Enable Location
+  // Services" dialog — callers that should NOT trigger it (silentCheck) guard with
+  // hasServicesEnabledAsync() before calling here.
   const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
   return { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
 }
@@ -90,14 +84,22 @@ export function useCustomerLocation(): UseCustomerLocationResult {
     try {
       const { status } = await Location.getForegroundPermissionsAsync();
       if (status === 'granted') {
+        // Guard against the infinite-loop: AppState 'active' fires after the OS
+        // "Enable Location Services" dialog is dismissed. Without this check,
+        // resolveCoords() would call getCurrentPositionAsync() → show the dialog
+        // again → loop. We surface locationError and let the user retry explicitly.
+        const servicesOn = await Location.hasServicesEnabledAsync();
+        if (!servicesOn) {
+          setPermissionStatus('granted');
+          setLocationError(true);
+          return;
+        }
         try {
           const coords = await resolveCoords();
           setLocation(coords);
           setPermissionStatus('granted');
           setLocationError(false);
         } catch {
-          // GPS still unavailable — update permission status to reflect reality
-          // (user may have just enabled it in Settings) but keep locationError set.
           setPermissionStatus('granted');
           setLocationError(true);
         }

@@ -16,7 +16,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Ionicons } from '@expo/vector-icons';
 import { colours } from '@/shared/theme/colours';
@@ -245,7 +244,7 @@ export function OrderChatScreen(): React.JSX.Element {
   const s = useStrings();
   const {
     restaurantName, orderNumber, messages, isLoading, isError,
-    sendError, text, isSending, isChatLocked, inputBarPadding,
+    sendError, text, isSending, isChatLocked, topInset, inputBarPadding,
     selectedImages, selectedPhoto, listRef, replyingTo, pressedMessage,
     handleBack, handleTextChange, handleSend, handleSetReply,
     handlePickImage, handleRemoveImage, handlePhotoPress, handlePhotoClose,
@@ -270,8 +269,10 @@ export function OrderChatScreen(): React.JSX.Element {
   const canSend = !isSending && (text.trim().length > 0 || selectedImages.length > 0);
 
   return (
-    <SafeAreaView style={styles.root} edges={['top']}>
+    <View style={styles.root}>
       <StatusBar backgroundColor={colours.backgroundDark} barStyle="light-content" />
+      {/* marginTop pushes content below the status bar; the dark root shows behind it */}
+      <View style={[styles.content, { marginTop: topInset }]}>
       <View style={styles.header}>
         <Pressable style={styles.backBtn} onPress={handleBack} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="chevron-back" size={22} color={colours.textOnDark} />
@@ -381,6 +382,8 @@ export function OrderChatScreen(): React.JSX.Element {
         )}
       </KeyboardAvoidingView>
 
+      </View>{/* content */}
+
       {/* ── Long-press message menu ─────────────────────────────────────────── */}
       <Modal visible={pressedMessage !== null} transparent animationType="fade" onRequestClose={handleCloseMenu}>
         <Pressable style={styles.menuOverlay} onPress={handleCloseMenu} accessibilityRole="button" accessibilityLabel="Close menu">
@@ -428,6 +431,6 @@ export function OrderChatScreen(): React.JSX.Element {
           </Pressable>
         </Pressable>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }

@@ -26,6 +26,7 @@ export interface UseOrderChatScreenResult {
   text: string;
   isSending: boolean;
   isChatLocked: boolean;
+  topInset: number;
   inputBarPadding: number;
   selectedImages: SelectedImage[];
   selectedPhoto: string | null;
@@ -67,7 +68,7 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route      = useRoute<Route>();
   const { orderId, orderNumber, restaurantName, completedAt, orderStatus } = route.params;
-  const { bottom: bottomInset } = useSafeAreaInsets();
+  const { bottom: bottomInset, top: topInset } = useSafeAreaInsets();
 
   const queryClient = useQueryClient();
   const { messages, isLoading, isError, liveOrderStatus, liveCompletedAt } = useOrderChatData(orderId, { orderStatus, completedAt: completedAt ?? null });
@@ -219,6 +220,7 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
     text,
     isSending,
     isChatLocked,
+    topInset,
     inputBarPadding,
     selectedImages,
     selectedPhoto,
