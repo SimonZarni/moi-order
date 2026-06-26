@@ -9,7 +9,6 @@ import { FOOD_ORDER_STATUS, FOOD_PAYMENT_METHOD } from '@/types/enums';
 import { LINE_OA_URL, LINE_OA_MESSAGE_URL, ORDER_PAYMENT_TIMEOUT_MS, CHAT_LOCK_AFTER_COMPLETION_MS } from '@/shared/constants/config';
 import { ERROR_CODES } from '@/shared/constants/errorCodes';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
-import { formatPrice } from '@/shared/utils/formatCurrency';
 import { cancelFoodOrder, completeFoodOrder, notifyLinePayment } from '@/shared/api/foodOrders';
 import { ApiError } from '@/types/models';
 import { useLocaleStore, Locale } from '@/shared/store/localeStore';
@@ -119,28 +118,6 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
   const handleInvoiceOpen  = useCallback(() => setInvoiceVisible(true), []);
   const handleInvoiceClose = useCallback(() => setInvoiceVisible(false), []);
 
-  const buildOrderDetailsMessage = useCallback((): string => {
-    if (!order) return '';
-    const num  = order.order_number ?? String(order.id);
-    const rest = order.restaurant_name ?? '';
-    const lines: string[] = [
-      `--- Order ${num} ---`,
-      `Restaurant: ${rest}`,
-      '',
-      'Items:',
-    ];
-    (order.items ?? []).forEach((item) => {
-      const price = formatPrice(item.subtotal_cents);
-      const opts  = item.selected_options.map((o) => o.name).join(', ');
-      lines.push(`• ${item.name} x${item.quantity}${opts ? ` (${opts})` : ''} — ${price}`);
-    });
-    lines.push('');
-    lines.push(`Total: ${formatPrice(order.total_cents)}`);
-    lines.push('');
-    lines.push('I am ready to pay. Please confirm my order.');
-    return lines.join('\n');
-  }, [order]);
-
   const handlePromptPayPress = useCallback(async () => {
     try {
       await notifyLinePayment(orderId);
@@ -162,16 +139,14 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
         return;
       }
     }
-    // Open the Moi Order OA chat directly with the order details pre-filled.
-    // /oaMessage/@id opens the specific OA chat; /msg/text shows a "Share with" picker.
-    const message   = buildOrderDetailsMessage();
-    const lineDeepLink = `${LINE_OA_MESSAGE_URL}/?text=${encodeURIComponent(message)}`;
-    Linking.openURL(lineDeepLink).catch(() =>
+    // Open the OA chat directly without pre-filling text — notifyLinePayment already
+    // notified the merchant. ?text= would auto-fill the input box, which is unexpected.
+    Linking.openURL(LINE_OA_MESSAGE_URL).catch(() =>
       Linking.openURL(LINE_OA_URL).catch(() =>
         Alert.alert('Cannot open LINE', 'Please open LINE and search for Moi Order to complete your payment.'),
       ),
     );
-  }, [orderId, buildOrderDetailsMessage]);
+  }, [orderId]);
 
   const handleChatPress = useCallback(() => {
     navigation.navigate('OrderChat', {
