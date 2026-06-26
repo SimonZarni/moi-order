@@ -4,13 +4,8 @@ import { radius } from '../../../shared/theme/radius';
 import { spacing } from '../../../shared/theme/spacing';
 import { typography } from '../../../shared/theme/typography';
 
-const CHAT_BG      = '#0a1f12';
-const FROST        = 'rgba(255,255,255,0.08)';
-const FROST_BORDER = 'rgba(255,255,255,0.12)';
-const FROST_TEXT   = 'rgba(255,255,255,0.45)';
-
 export const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colours.backgroundDark },
+  safe: { flex: 1, backgroundColor: colours.surface },
 
   // ── Header ─────────────────────────────────────────────────────────────────
   topBar: {
@@ -18,10 +13,10 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.surface,
     gap: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: FROST_BORDER,
+    borderBottomColor: colours.divider,
   },
   backButton: {
     width: 38,
@@ -29,21 +24,21 @@ export const styles = StyleSheet.create({
     borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: FROST,
+    backgroundColor: colours.surfaceMuted,
     borderWidth: 1,
-    borderColor: FROST_BORDER,
+    borderColor: colours.divider,
   },
   headerInfo: { flex: 1 },
   topBarTitle: {
     fontSize: typography.md,
     fontWeight: '700',
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     lineHeight: Platform.select({ web: 20, default: 44 }),
   },
   orderPill: {
     alignSelf: 'flex-start',
     marginTop: 3,
-    backgroundColor: colours.primary + '22',
+    backgroundColor: colours.primary + '18',
     borderRadius: radius.full,
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -58,7 +53,7 @@ export const styles = StyleSheet.create({
   },
 
   // ── Body ───────────────────────────────────────────────────────────────────
-  body: { flex: 1, backgroundColor: CHAT_BG },
+  body: { flex: 1, backgroundColor: colours.backgroundLight },
   list: { flex: 1 },
   listContent: {
     paddingHorizontal: spacing.md,
@@ -77,7 +72,7 @@ export const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: typography.sm,
-    color: FROST_TEXT,
+    color: colours.textSubtle,
     textAlign: 'center',
     marginTop: 8,
   },
@@ -86,18 +81,18 @@ export const styles = StyleSheet.create({
   // ── System notice pill ─────────────────────────────────────────────────────
   systemNotice: {
     alignSelf: 'center',
-    backgroundColor: FROST,
+    backgroundColor: colours.surfaceMuted,
     borderRadius: radius.full,
     paddingHorizontal: spacing.md,
     paddingVertical: 4,
     marginVertical: spacing.xs,
     borderWidth: 1,
-    borderColor: FROST_BORDER,
+    borderColor: colours.divider,
   },
   systemNoticeText: {
     fontSize: typography.xxs,
     lineHeight: Platform.select({ web: 16, default: 30 }),
-    color: FROST_TEXT,
+    color: colours.textSubtle,
     textAlign: 'center',
   },
 
@@ -117,10 +112,10 @@ export const styles = StyleSheet.create({
     borderBottomRightRadius: 4,
   },
   bubbleOther: {
-    backgroundColor: FROST,
+    backgroundColor: colours.surface,
     borderBottomLeftRadius: 4,
     borderWidth: 1,
-    borderColor: FROST_BORDER,
+    borderColor: colours.divider,
   },
   senderName: {
     fontSize: typography.xxs,
@@ -134,9 +129,9 @@ export const styles = StyleSheet.create({
     lineHeight: Platform.select({ web: 20, default: 42 }),
   },
   bubbleTextMerchant: { color: colours.backgroundDark },
-  bubbleTextOther: { color: '#ffffff' },
+  bubbleTextOther: { color: colours.textOnLight },
   bubbleLinkMerchant: { color: colours.backgroundDark, textDecorationLine: 'underline' } as const,
-  bubbleLinkOther: { color: colours.primaryLight, textDecorationLine: 'underline' } as const,
+  bubbleLinkOther: { color: colours.primary, textDecorationLine: 'underline' } as const,
   bubbleFooter: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -148,7 +143,7 @@ export const styles = StyleSheet.create({
     lineHeight: Platform.select({ web: 16, default: 30 }),
   },
   bubbleTimeMerchant: { color: 'rgba(15,61,37,0.6)' },
-  bubbleTimeOther: { color: FROST_TEXT },
+  bubbleTimeOther: { color: colours.textSubtle },
 
   // ── Swipe-to-reply hints ───────────────────────────────────────────────────
   replyHintLeft: {
@@ -177,9 +172,9 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.surface,
     borderTopWidth: 1,
-    borderTopColor: FROST_BORDER,
+    borderTopColor: colours.divider,
   },
   replyBarIndicator: {
     width: 3,
@@ -197,36 +192,36 @@ export const styles = StyleSheet.create({
   replyBarText: {
     fontSize: typography.xxs,
     lineHeight: Platform.select({ web: 14, default: 18 }),
-    color: FROST_TEXT,
+    color: colours.textSubtle,
   },
 
   // ── Quoted reply inside bubble ─────────────────────────────────────────────
   replyQuote: {
     borderLeftWidth: 3,
-    borderLeftColor: 'rgba(255,255,255,0.35)',
+    borderLeftColor: colours.primary,
     borderRadius: 4,
     paddingLeft: spacing.sm,
     paddingRight: spacing.xs,
     paddingVertical: spacing.xs,
     marginBottom: 6,
     gap: 2,
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    backgroundColor: colours.primaryBg,
   },
   replyQuoteMerchant: {
     borderLeftColor: 'rgba(0,0,0,0.3)',
-    backgroundColor: 'rgba(0,0,0,0.22)',
+    backgroundColor: 'rgba(0,0,0,0.15)',
   },
   replyQuoteSender: {
     fontSize: typography.xxs,
     lineHeight: Platform.select({ web: 15, default: 20 }),
     fontWeight: '700',
-    color: 'rgba(255,255,255,0.7)',
+    color: colours.primary,
   },
   replyQuoteSenderMerchant: { color: colours.backgroundDark },
   replyQuoteText: {
     fontSize: typography.xxs,
     lineHeight: Platform.select({ web: 14, default: 18 }),
-    color: 'rgba(255,255,255,0.45)',
+    color: colours.textMuted,
   },
   replyQuoteTextMerchant: { color: 'rgba(15,61,37,0.65)' },
 
@@ -237,9 +232,9 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.surface,
     borderTopWidth: 1,
-    borderTopColor: FROST_BORDER,
+    borderTopColor: colours.divider,
   },
   attachBtn: {
     width: 38,
@@ -247,21 +242,21 @@ export const styles = StyleSheet.create({
     borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: FROST,
+    backgroundColor: colours.surfaceMuted,
     borderWidth: 1,
-    borderColor: FROST_BORDER,
+    borderColor: colours.divider,
   },
   textInput: {
     flex: 1,
-    backgroundColor: FROST,
+    backgroundColor: colours.surfaceMuted,
     borderRadius: radius.xl,
     paddingHorizontal: spacing.md,
     paddingVertical: 8,
     fontSize: typography.sm,
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     maxHeight: 120,
     borderWidth: 1,
-    borderColor: FROST_BORDER,
+    borderColor: colours.divider,
   },
   sendBtn: {
     width: 38,
@@ -271,16 +266,16 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sendBtnDisabled: { opacity: 0.3 },
+  sendBtnDisabled: { opacity: 0.35 },
 
   // ── Image preview strip ────────────────────────────────────────────────────
   imagePreviewStrip: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.xs,
     paddingBottom: spacing.xs,
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.surface,
     borderTopWidth: 1,
-    borderTopColor: FROST_BORDER,
+    borderTopColor: colours.divider,
   },
   imagePreviewItem: {
     position: 'relative',
@@ -291,7 +286,7 @@ export const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: radius.md,
-    backgroundColor: FROST,
+    backgroundColor: colours.divider,
   },
   imagePreviewRemove: {
     position: 'absolute',
@@ -309,9 +304,9 @@ export const styles = StyleSheet.create({
   sendErrorBanner: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
-    backgroundColor: 'rgba(220,38,38,0.15)',
+    backgroundColor: colours.error + '12',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(220,38,38,0.25)',
+    borderTopColor: colours.error + '33',
   },
   sendErrorText: {
     fontSize: typography.xxs,
@@ -324,9 +319,9 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    backgroundColor: 'rgba(220,38,38,0.12)',
+    backgroundColor: colours.error + '12',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(220,38,38,0.2)',
+    borderTopColor: colours.error + '25',
   },
   chatLockedText: {
     flex: 1,
@@ -340,9 +335,9 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    backgroundColor: 'rgba(217,119,6,0.12)',
+    backgroundColor: colours.warning + '14',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(217,119,6,0.2)',
+    borderTopColor: colours.warning + '33',
   },
   chatWarningText: {
     flex: 1,
@@ -356,9 +351,9 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    backgroundColor: 'rgba(217,119,6,0.12)',
+    backgroundColor: colours.warning + '14',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(217,119,6,0.2)',
+    borderBottomColor: colours.warning + '33',
   },
   noticeText: {
     flex: 1,
@@ -382,9 +377,9 @@ export const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: FROST,
+    backgroundColor: 'rgba(255,255,255,0.15)',
     borderWidth: 1,
-    borderColor: FROST_BORDER,
+    borderColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -291,7 +291,7 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.topBar}>
         <Pressable style={styles.backButton} onPress={onBack} accessibilityLabel="Go back" accessibilityRole="button">
-          <Ionicons name="arrow-back" size={20} color={colours.textOnDark} />
+          <Ionicons name="arrow-back" size={20} color={colours.textOnLight} />
         </Pressable>
         <View style={styles.headerInfo}>
           <Text style={styles.topBarTitle}>{t('chat_title')}</Text>
@@ -323,7 +323,7 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
             <Ionicons
               name={isNetworkError ? 'wifi-outline' : 'alert-circle-outline'}
               size={44}
-              color="rgba(255,255,255,0.25)"
+              color={colours.textSubtle}
             />
             <Text style={styles.emptyText}>
               {isNetworkError ? t('chat_check_internet') : t('chat_cannot_load')}
@@ -331,7 +331,7 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
           </Pressable>
         ) : messages.length === 0 ? (
           <Pressable style={styles.emptyWrap} onPress={Keyboard.dismiss}>
-            <Ionicons name="chatbubbles-outline" size={44} color="rgba(255,255,255,0.25)" />
+            <Ionicons name="chatbubbles-outline" size={44} color={colours.textSubtle} />
             <Text style={styles.emptyText}>{t('chat_no_messages')}</Text>
           </Pressable>
         ) : (
@@ -419,7 +419,7 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
               <TextInput
                 style={styles.textInput}
                 placeholder={t('chat_type_message')}
-                placeholderTextColor="rgba(255,255,255,0.3)"
+                placeholderTextColor={colours.textSubtle}
                 value={text}
                 onChangeText={handleTextChange}
                 multiline
