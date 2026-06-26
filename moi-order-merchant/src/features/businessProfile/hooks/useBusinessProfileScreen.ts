@@ -7,7 +7,7 @@ import { useBusinessProfileForm } from './useBusinessProfileForm';
 import type { MerchantStackParamList } from '../../../types/navigation';
 import type { BusinessProfile } from '../../../types/models';
 import type { KycDocType } from '../../../types/enums';
-import { extractApiError, type ApiError } from '../../../api/client';
+import { extractApiError } from '../../../api/client';
 import { normalizePickedImage } from '../../../shared/utils/imageUtils';
 import { DOMAIN_MESSAGES, MESSAGES } from '../../../shared/constants/messages';
 
@@ -23,7 +23,7 @@ export interface UseBusinessProfileScreenResult {
   handleStartEditPhone: () => void;
   handleCancelEditPhone: () => void;
   handleChangePhone: (val: string) => void;
-  handleSavePhone: () => Promise<void>;
+  handleSavePhone: () => void;
   // email editing
   isEditingEmail: boolean;
   emailValue: string;
@@ -32,7 +32,7 @@ export interface UseBusinessProfileScreenResult {
   handleStartEditEmail: () => void;
   handleCancelEditEmail: () => void;
   handleChangeEmail: (val: string) => void;
-  handleSaveEmail: () => Promise<void>;
+  handleSaveEmail: () => void;
   // document upload
   handleUploadDocument: (type: KycDocType) => Promise<void>;
   uploadingDocType: KycDocType | null;
@@ -58,26 +58,22 @@ export function useBusinessProfileScreen(): UseBusinessProfileScreenResult {
     form.handleStartEditEmail(profile?.user.email ?? '');
   }, [form, profile]);
 
-  const handleSavePhone = useCallback(async () => {
+  const handleSavePhone = useCallback(() => {
     if (!form.validate()) return;
     const phone = form.values.business_phone.trim() || null;
-    try {
-      await updatePhone.mutateAsync(phone);
-      form.handleCancelEdit();
-    } catch (err) {
-      form.applyApiError(err as ApiError);
-    }
+    updatePhone.mutate(phone, {
+      onSuccess: () => form.handleCancelEdit(),
+      onError: (err) => form.applyApiError(extractApiError(err)),
+    });
   }, [form, updatePhone]);
 
-  const handleSaveEmail = useCallback(async () => {
+  const handleSaveEmail = useCallback(() => {
     if (!form.validate()) return;
     const email = form.values.email.trim();
-    try {
-      await updateEmail.mutateAsync(email);
-      form.handleCancelEdit();
-    } catch (err) {
-      form.applyApiError(err as ApiError);
-    }
+    updateEmail.mutate(email, {
+      onSuccess: () => form.handleCancelEdit(),
+      onError: (err) => form.applyApiError(extractApiError(err)),
+    });
   }, [form, updateEmail]);
 
   const handleUploadDocument = useCallback(
