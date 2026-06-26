@@ -334,6 +334,8 @@ useEffect(() => {
 
 ## Critical ESLint Rule: Import Sorting
 
+**HARD RULE: Every time you modify an existing file or create a new file in this project, verify the import order matches the groups below before committing. The `perfectionist/sort-imports` rule will fail the Vercel build if violated.**
+
 Rule: `perfectionist/sort-imports` with `type: 'line-length', order: 'asc'`
 
 **Groups (each separated by blank line):**
