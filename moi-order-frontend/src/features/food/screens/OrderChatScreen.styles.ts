@@ -283,6 +283,55 @@ export const styles = StyleSheet.create({
     color: colours.textOnLight,
   },
   replyQuoteTextCustomer: { color: 'rgba(255,255,255,0.80)' },
+  // Long-press message menu
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.xl,
+  },
+  menuCard: {
+    width: '78%',
+    backgroundColor: colours.card,
+    borderRadius: radius.xl,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 24,
+    elevation: 12,
+  },
+  menuPreviewWrap: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    gap: 4,
+  },
+  menuPreviewText: {
+    fontSize: typography.sm,
+    lineHeight: 40,
+    color: colours.textMuted,
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: colours.divider,
+  },
+  menuOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  menuOptionText: {
+    fontSize: typography.md,
+    lineHeight: 44,
+    fontWeight: '600',
+    color: colours.primary,
+  },
+  menuOptionDestructive: {
+    color: colours.destructive,
+  },
   // Photo lightbox
   photoOverlay: {
     flex: 1,

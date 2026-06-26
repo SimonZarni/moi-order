@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { RootStackParamList } from '@/types/navigation';
 import { FoodOrder } from '@/types/models';
 import { FOOD_ORDER_STATUS, FOOD_PAYMENT_METHOD } from '@/types/enums';
-import { LINE_OA_URL, ORDER_PAYMENT_TIMEOUT_MS, CHAT_LOCK_AFTER_COMPLETION_MS } from '@/shared/constants/config';
+import { LINE_OA_URL, LINE_OA_MESSAGE_URL, ORDER_PAYMENT_TIMEOUT_MS, CHAT_LOCK_AFTER_COMPLETION_MS } from '@/shared/constants/config';
 import { ERROR_CODES } from '@/shared/constants/errorCodes';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { formatPrice } from '@/shared/utils/formatCurrency';
@@ -162,9 +162,10 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
         return;
       }
     }
-    // Open LINE with pre-filled order details so the user can paste into the OA chat.
+    // Open the Moi Order OA chat directly with the order details pre-filled.
+    // /oaMessage/@id opens the specific OA chat; /msg/text shows a "Share with" picker.
     const message   = buildOrderDetailsMessage();
-    const lineDeepLink = `https://line.me/R/msg/text/?${encodeURIComponent(message)}`;
+    const lineDeepLink = `${LINE_OA_MESSAGE_URL}/?text=${encodeURIComponent(message)}`;
     Linking.openURL(lineDeepLink).catch(() =>
       Linking.openURL(LINE_OA_URL).catch(() =>
         Alert.alert('Cannot open LINE', 'Please open LINE and search for Moi Order to complete your payment.'),

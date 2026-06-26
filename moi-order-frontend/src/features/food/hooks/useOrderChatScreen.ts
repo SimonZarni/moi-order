@@ -31,6 +31,7 @@ export interface UseOrderChatScreenResult {
   selectedPhoto: string | null;
   listRef: React.RefObject<FlatList | null>;
   replyingTo: OrderChatMessage | null;
+  pressedMessage: OrderChatMessage | null;
   handleBack: () => void;
   handleTextChange: (v: string) => void;
   handleSend: () => void;
@@ -40,6 +41,10 @@ export interface UseOrderChatScreenResult {
   handlePhotoPress: (uri: string) => void;
   handlePhotoClose: () => void;
   handleLongPress: (msg: OrderChatMessage) => void;
+  handleCloseMenu: () => void;
+  handleMenuReply: () => void;
+  handleMenuCopyText: () => void;
+  handleMenuDelete: () => void;
 }
 
 function computeIsChatLocked(
@@ -75,9 +80,12 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
   const [selectedImages, setSelectedImages]   = useState<SelectedImage[]>([]);
   const [selectedPhoto, setSelectedPhoto]     = useState<string | null>(null);
   const [replyingTo, setReplyingTo]           = useState<OrderChatMessage | null>(null);
+  const [pressedMessage, setPressedMessage]   = useState<OrderChatMessage | null>(null);
   const listRef = useRef<FlatList>(null);
   const replyingToRef = useRef<OrderChatMessage | null>(null);
   replyingToRef.current = replyingTo;
+  const pressedMessageRef = useRef<OrderChatMessage | null>(null);
+  pressedMessageRef.current = pressedMessage;
 
   const isChatLocked = computeIsChatLocked(liveOrderStatus, liveCompletedAt);
 
@@ -176,26 +184,28 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
   const handlePhotoPress = useCallback((uri: string) => setSelectedPhoto(uri), []);
   const handlePhotoClose = useCallback(() => setSelectedPhoto(null), []);
 
-  const handleLongPress = useCallback((msg: OrderChatMessage) => {
-    const isOwn = msg.sender_type === 'customer';
-    const options: Array<{ text: string; onPress?: () => void; style?: 'cancel' | 'destructive' }> = [];
-    if (msg.body) {
-      options.push({ text: 'Copy text', onPress: () => { void Share.share({ message: msg.body ?? '' }); } });
-    }
-    if (isOwn) {
-      options.push({
-        text: 'Delete message',
-        style: 'destructive',
-        onPress: () => {
-          Alert.alert('Delete message', 'This will remove the message for everyone.', [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Delete', style: 'destructive', onPress: () => deleteMessage({ orderId, messageId: msg.id }) },
-          ]);
-        },
-      });
-    }
-    options.push({ text: 'Cancel', style: 'cancel' });
-    Alert.alert('', '', options);
+  const handleLongPress  = useCallback((msg: OrderChatMessage) => setPressedMessage(msg), []);
+  const handleCloseMenu  = useCallback(() => setPressedMessage(null), []);
+
+  const handleMenuReply  = useCallback(() => {
+    if (pressedMessageRef.current !== null) setReplyingTo(pressedMessageRef.current);
+    setPressedMessage(null);
+  }, []);
+
+  const handleMenuCopyText = useCallback(() => {
+    const body = pressedMessageRef.current?.body;
+    if (body) void Share.share({ message: body });
+    setPressedMessage(null);
+  }, []);
+
+  const handleMenuDelete = useCallback(() => {
+    const msg = pressedMessageRef.current;
+    setPressedMessage(null);
+    if (msg === null) return;
+    Alert.alert('Delete message', 'This will remove the message for everyone.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: () => deleteMessage({ orderId, messageId: msg.id }) },
+    ]);
   }, [orderId, deleteMessage]);
 
   return {
@@ -214,6 +224,7 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
     selectedPhoto,
     listRef,
     replyingTo,
+    pressedMessage,
     handleBack,
     handleTextChange,
     handleSend,
@@ -223,5 +234,9 @@ export function useOrderChatScreen(): UseOrderChatScreenResult {
     handlePhotoPress,
     handlePhotoClose,
     handleLongPress,
+    handleCloseMenu,
+    handleMenuReply,
+    handleMenuCopyText,
+    handleMenuDelete,
   };
 }

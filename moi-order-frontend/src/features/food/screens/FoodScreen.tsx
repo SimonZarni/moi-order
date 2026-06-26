@@ -113,9 +113,9 @@ export function FoodScreen(): React.JSX.Element {
               style={styles.locationGateBtn}
               onPress={() => { void requestLocationPermission(); }}
               accessibilityRole="button"
-              accessibilityLabel="Enable location access"
+              accessibilityLabel="Open settings to enable location"
             >
-              <Text style={styles.locationGateBtnText}>Enable Location</Text>
+              <Text style={styles.locationGateBtnText}>Open Settings</Text>
             </Pressable>
           </View>
         </View>

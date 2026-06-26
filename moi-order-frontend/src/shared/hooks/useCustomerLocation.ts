@@ -121,7 +121,7 @@ export function useCustomerLocation(): UseCustomerLocationResult {
 
   const requestPermission = useCallback(async () => {
     try {
-      const { status, canAskAgain } = await Location.getForegroundPermissionsAsync();
+      const { status } = await Location.getForegroundPermissionsAsync();
 
       if (status === 'granted') {
         // Permission already granted — retry GPS acquisition only.
@@ -141,33 +141,14 @@ export function useCustomerLocation(): UseCustomerLocationResult {
         return;
       }
 
-      if (!canAskAgain) {
-        await Linking.openSettings();
-        return;
-      }
-
-      // 'denied' with canAskAgain=true — re-prompt natively.
-      // Guard silentCheck for the same reason as initialFetch.
-      isFetchingRef.current = true;
-      setPermissionStatus('loading');
-      try {
-        const { status: newStatus } = await Location.requestForegroundPermissionsAsync();
-        if (newStatus === 'granted') {
-          try {
-            const coords = await resolveCoords();
-            setLocation(coords);
-            setLocationError(false);
-            setPermissionStatus('granted');
-          } catch {
-            setLocationError(true);
-            setPermissionStatus('granted');
-          }
-        } else {
-          setPermissionStatus('denied');
-        }
-      } finally {
-        isFetchingRef.current = false;
-      }
+      // The OS dialog was already shown automatically on the first visit
+      // (guarded by FOOD_LOCATION_ASKED_KEY). Re-calling requestForegroundPermissionsAsync()
+      // here loops the dialog because Android keeps canAskAgain=true across multiple
+      // denials until its own system limit — identical to the loop reported on the
+      // FoodScreen. Open Settings directly so the user can grant manually.
+      // This matches the pattern in usePlaceDetailScreen which only prompts once
+      // (when UNDETERMINED) and never re-prompts after any denial.
+      await Linking.openSettings();
     } catch {
       setPermissionStatus('denied');
     }

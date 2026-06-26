@@ -8,6 +8,12 @@ import { usePlaceFavorite } from '@/features/places/hooks/usePlaceFavorite';
 import { useAuthStore } from '@/shared/store/authStore';
 import { Place, PlaceImage, ApiError } from '@/types/models';
 
+// On Android, getForegroundPermissionsAsync() may return 'undetermined' even after
+// the user denies once (canAskAgain=true), so the UNDETERMINED check alone would
+// re-trigger the OS dialog on every PlaceDetailScreen entry. This module-level flag
+// ensures the dialog fires at most once per app process ("once per app open").
+let locationDialogShownThisSession = false;
+
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
   const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -88,9 +94,11 @@ export function usePlaceDetailScreen(placeId: number): UsePlaceDetailScreenResul
     async function fetchDistance(): Promise<void> {
       const { status: currentStatus } = await Location.getForegroundPermissionsAsync();
       let status = currentStatus;
-      // Only show the system dialog the very first time (undetermined).
-      // If the user already denied, respect that decision and never prompt again.
-      if (currentStatus === Location.PermissionStatus.UNDETERMINED) {
+      // Only show the OS dialog when status is undetermined AND we haven't shown it
+      // yet this session. The module-level flag prevents Android from re-prompting on
+      // every entry — the OS may return 'undetermined' after denial (canAskAgain=true).
+      if (currentStatus === Location.PermissionStatus.UNDETERMINED && !locationDialogShownThisSession) {
+        locationDialogShownThisSession = true;
         const result = await Location.requestForegroundPermissionsAsync();
         status = result.status;
       }

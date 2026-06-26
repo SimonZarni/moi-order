@@ -413,6 +413,9 @@ export interface AppStrings {
     replyTo:         string;
     cancelReply:     string;
     photo:           string;
+    reply:           string;
+    copyText:        string;
+    deleteMessage:   string;
   };
 }
 
@@ -771,6 +774,9 @@ const en: AppStrings = {
     replyTo:         'Reply to',
     cancelReply:     'Cancel reply',
     photo:           'Photo',
+    reply:           'Reply',
+    copyText:        'Copy text',
+    deleteMessage:   'Delete message',
   },
 };
 
@@ -1129,6 +1135,9 @@ const mm: AppStrings = {
     replyTo:         'ပြန်ဆိုရန်',
     cancelReply:     'ပြန်ဆိုမှု ပယ်ဖျက်ရန်',
     photo:           'ဓာတ်ပုံ',
+    reply:           'ပြန်ဆို',
+    copyText:        'စာသား ကူးယူရန်',
+    deleteMessage:   'မက်ဆေ့ ဖျက်ရန်',
   },
 };
 
@@ -1487,6 +1496,9 @@ const th: AppStrings = {
     replyTo:         'ตอบกลับ',
     cancelReply:     'ยกเลิกการตอบกลับ',
     photo:           'รูปภาพ',
+    reply:           'ตอบกลับ',
+    copyText:        'คัดลอกข้อความ',
+    deleteMessage:   'ลบข้อความ',
   },
 };
 

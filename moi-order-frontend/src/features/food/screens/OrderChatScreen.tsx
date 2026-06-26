@@ -245,13 +245,19 @@ export function OrderChatScreen(): React.JSX.Element {
   const {
     restaurantName, orderNumber, messages, isLoading, isError,
     sendError, text, isSending, isChatLocked, inputBarPadding,
-    selectedImages, selectedPhoto, listRef, replyingTo,
+    selectedImages, selectedPhoto, listRef, replyingTo, pressedMessage,
     handleBack, handleTextChange, handleSend, handleSetReply,
     handlePickImage, handleRemoveImage, handlePhotoPress, handlePhotoClose,
-    handleLongPress,
+    handleLongPress, handleCloseMenu, handleMenuReply, handleMenuCopyText, handleMenuDelete,
   } = useOrderChatScreen();
 
   const [showNoticeBanner, setShowNoticeBanner] = useState(true);
+
+  // Keep last non-null pressedMessage so the card content stays stable
+  // while the Modal's fade-out animation is still running.
+  const lastMenuMessageRef = useRef<typeof pressedMessage>(null);
+  if (pressedMessage !== null) lastMenuMessageRef.current = pressedMessage;
+  const menuMessage = lastMenuMessageRef.current;
 
   const initialIdsRef    = useRef<Set<number>>(new Set());
   const hasSeededInitial = useRef(false);
@@ -372,6 +378,45 @@ export function OrderChatScreen(): React.JSX.Element {
           </>
         )}
       </KeyboardAvoidingView>
+
+      {/* ── Long-press message menu ─────────────────────────────────────────── */}
+      <Modal visible={pressedMessage !== null} transparent animationType="fade" onRequestClose={handleCloseMenu}>
+        <Pressable style={styles.menuOverlay} onPress={handleCloseMenu} accessibilityRole="button" accessibilityLabel="Close menu">
+          <Pressable style={styles.menuCard} onPress={() => {}} accessibilityRole="none">
+            <View style={styles.menuPreviewWrap}>
+              {menuMessage?.image_url !== null && menuMessage?.image_url !== undefined && (
+                <Ionicons name="image-outline" size={14} color={colours.textMuted} style={{ marginBottom: 2 }} />
+              )}
+              <Text style={styles.menuPreviewText} numberOfLines={3}>
+                {menuMessage?.body ?? '📷 Photo'}
+              </Text>
+            </View>
+            <View style={styles.menuDivider} />
+            <Pressable style={styles.menuOption} onPress={handleMenuReply} accessibilityRole="button" accessibilityLabel="Reply to message">
+              <Ionicons name="return-up-back-outline" size={18} color={colours.primary} />
+              <Text style={styles.menuOptionText}>{s.chat.reply}</Text>
+            </Pressable>
+            {menuMessage?.body != null && (
+              <>
+                <View style={styles.menuDivider} />
+                <Pressable style={styles.menuOption} onPress={handleMenuCopyText} accessibilityRole="button" accessibilityLabel="Copy text">
+                  <Ionicons name="copy-outline" size={18} color={colours.primary} />
+                  <Text style={styles.menuOptionText}>{s.chat.copyText}</Text>
+                </Pressable>
+              </>
+            )}
+            {menuMessage?.sender_type === 'customer' && (
+              <>
+                <View style={styles.menuDivider} />
+                <Pressable style={styles.menuOption} onPress={handleMenuDelete} accessibilityRole="button" accessibilityLabel="Delete message">
+                  <Ionicons name="trash-outline" size={18} color={colours.destructive} />
+                  <Text style={[styles.menuOptionText, styles.menuOptionDestructive]}>{s.chat.deleteMessage}</Text>
+                </Pressable>
+              </>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       <Modal visible={selectedPhoto !== null} transparent animationType="fade" onRequestClose={handlePhotoClose}>
         <Pressable style={styles.photoOverlay} onPress={handlePhotoClose} accessibilityRole="button" accessibilityLabel="Close photo">
