@@ -145,7 +145,7 @@ export function EmailVerificationScreen({
               accessibilityRole="button"
             >
               {step === 'confirming'
-                ? <ActivityIndicator color={colours.backgroundDark} />
+                ? <ActivityIndicator color={colours.white} />
                 : <Text style={styles.primaryBtnText}>Verify & Set Password</Text>}
             </Pressable>
           </>
