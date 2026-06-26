@@ -34,13 +34,12 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import { fDate, fDateTime } from 'src/utils/format-time';
 
+import { usersApi } from 'src/api/users';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
-
-import { usersApi } from 'src/api/users';
 
 import { useUsersView } from '../hooks/useUsersView';
 
