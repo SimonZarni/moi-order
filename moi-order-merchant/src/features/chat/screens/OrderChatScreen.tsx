@@ -346,6 +346,14 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
 
   const [showNoticeBanner, setShowNoticeBanner] = useState(true);
 
+  // Keep the last non-null pressedMessage so the card content stays stable
+  // during the Modal's fade-out animation (pressedMessage → null triggers
+  // a re-render while the modal is still visible, causing the fallback
+  // '📷 Photo' text to flash briefly before the modal fully closes).
+  const lastMenuMessageRef = useRef<typeof pressedMessage>(null);
+  if (pressedMessage !== null) lastMenuMessageRef.current = pressedMessage;
+  const menuMessage = lastMenuMessageRef.current;
+
   const initialIdsRef    = useRef<Set<number>>(new Set());
   const hasSeededInitial = useRef(false);
   if (!hasSeededInitial.current && messages.length > 0) {
@@ -525,11 +533,11 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
         <Pressable style={styles.menuOverlay} onPress={handleCloseMenu} accessibilityRole="button" accessibilityLabel="Close menu">
           <Pressable style={styles.menuCard} onPress={() => {}} accessibilityRole="none">
             <View style={styles.menuPreviewWrap}>
-              {pressedMessage?.image_url !== null && pressedMessage?.image_url !== undefined && (
+              {menuMessage?.image_url !== null && menuMessage?.image_url !== undefined && (
                 <Ionicons name="image-outline" size={14} color={colours.textSubtle} style={{ marginBottom: 2 }} />
               )}
               <Text style={styles.menuPreviewText} numberOfLines={3}>
-                {pressedMessage?.body ?? '📷 Photo'}
+                {menuMessage?.body ?? '📷 Photo'}
               </Text>
             </View>
             <View style={styles.menuDivider} />
