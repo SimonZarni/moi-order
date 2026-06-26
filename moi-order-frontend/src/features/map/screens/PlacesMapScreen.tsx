@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useRef } from 'react';
-import { ActivityIndicator, Animated, Platform, Pressable, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, Image, Platform, Pressable, Text, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import MapboxGL from '@rnmapbox/maps';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -72,12 +72,51 @@ export function PlacesMapScreen(): React.JSX.Element {
     }
   }, [selectedPlace, navigation, markNavigatingToDetail]);
 
+  const insets = useSafeAreaInsets();
+  // TAB_BAR_BOTTOM_OFFSET(14) + TAB_BAR_HEIGHT(67) + insets.bottom + 8pt gap
+  const loadingBarBottom = 89 + insets.bottom;
+
   const topControlsAnim  = useRef(new Animated.Value(0)).current;
   const buttonsRightAnim = useRef(new Animated.Value(0)).current;
   const loadingAnim      = useRef(new Animated.Value(0)).current;
 
+  // Image-ready tracking: prefetch all cover images once per data-set.
+  // loadedOnceRef resets on tab-switch / re-fetch so new images are prefetched too.
+  // It does NOT reset on viewport pans (displayedPlaces length change without loading flag).
+  const loadedOnceRef = useRef(false);
+  const [imagesReady, setImagesReady] = useState(false);
+
+  useEffect(() => {
+    if (isLoadingPlaces || isTabSwitching) {
+      loadedOnceRef.current = false;
+      setImagesReady(false);
+      return;
+    }
+    if (loadedOnceRef.current) return;
+
+    const uris = displayedPlaces
+      .map(p => p.cover_image)
+      .filter((u): u is string => Boolean(u));
+
+    if (uris.length === 0) {
+      loadedOnceRef.current = true;
+      setImagesReady(true);
+      return;
+    }
+
+    let cancelled = false;
+    Promise.all(uris.map(uri => Image.prefetch(uri).catch(() => false)))
+      .finally(() => {
+        if (!cancelled) {
+          loadedOnceRef.current = true;
+          setImagesReady(true);
+        }
+      });
+    return () => { cancelled = true; };
+  }, [isLoadingPlaces, isTabSwitching, displayedPlaces]);
+
   const topControlsHidden = isFullscreen || isBottomSheetFullyExpanded;
-  const isLoading         = isLoadingPlaces || isTabSwitching;
+  const isLoading         = isLoadingPlaces || isTabSwitching || !imagesReady;
 
   useEffect(() => {
     Animated.parallel([
@@ -234,12 +273,14 @@ export function PlacesMapScreen(): React.JSX.Element {
           </View>
         )}
 
-        {/* Loading bar — always mounted so enter/exit animation plays */}
+        {/* Loading bar — always mounted so enter/exit animation plays.
+            Positioned dynamically to float 8pt above the floating tab bar. */}
         <Animated.View
           pointerEvents="none"
           style={[
             styles.loadingBar,
             {
+              bottom: loadingBarBottom,
               opacity: loadingAnim,
               transform: [{
                 translateY: loadingAnim.interpolate({ inputRange: [0, 1], outputRange: [14, 0] }),
