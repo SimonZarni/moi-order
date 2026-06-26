@@ -192,36 +192,29 @@ export function ProfileScreen(): React.JSX.Element {
             </View>
           </Pressable>
 
-          {/* § Become a Merchant */}
-          {user?.is_merchant ? (
-            <View style={styles.card} accessibilityRole="none">
-              <View style={styles.row}>
-                <View style={[styles.iconBadge, styles.iconBadgeAmber]}>
-                  <Ionicons name="storefront-outline" size={16} color={colours.secondary} />
-                </View>
-                <Text style={[styles.rowLabel, styles.rowLabelBold]}>{s.profile.merchantApproved}</Text>
+          {/* § Merchant Account */}
+          <Pressable
+            style={styles.card}
+            onPress={handleGoToBecomeMerchant}
+            accessibilityLabel={user?.is_merchant ? s.profile.merchantApproved : s.profile.becomeMerchant}
+            accessibilityRole="button"
+          >
+            <View style={styles.row}>
+              <View style={[styles.iconBadge, styles.iconBadgeAmber]}>
+                <Ionicons name="storefront-outline" size={16} color={colours.secondary} />
+              </View>
+              <Text style={[styles.rowLabel, styles.rowLabelBold]}>
+                {user?.is_merchant ? s.profile.merchantApproved : s.profile.becomeMerchant}
+              </Text>
+              {user?.is_merchant ? (
                 <View style={styles.approvedBadge}>
                   <Text style={styles.approvedBadgeText}>{s.profile.approvedBadge}</Text>
                 </View>
-              </View>
-              <Text style={styles.merchantHintText}>{s.profile.merchantDashboardHint}</Text>
-            </View>
-          ) : (
-            <Pressable
-              style={styles.card}
-              onPress={handleGoToBecomeMerchant}
-              accessibilityLabel={s.profile.becomeMerchant}
-              accessibilityRole="button"
-            >
-              <View style={styles.row}>
-                <View style={[styles.iconBadge, styles.iconBadgeAmber]}>
-                  <Ionicons name="storefront-outline" size={16} color={colours.secondary} />
-                </View>
-                <Text style={[styles.rowLabel, styles.rowLabelBold]}>{s.profile.becomeMerchant}</Text>
+              ) : (
                 <Ionicons name="chevron-forward" size={18} color={colours.textMuted} />
-              </View>
-            </Pressable>
-          )}
+              )}
+            </View>
+          </Pressable>
 
           {/* § Personal Info */}
           <View style={styles.sectionRow}>
