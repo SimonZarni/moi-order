@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  Animated, FlatList, Modal, PanResponder,
-  Pressable, StatusBar, Text, View,
-  useWindowDimensions,
-  type ViewToken,
-} from 'react-native';
+import { FlatList, Modal, Pressable, StatusBar, Text, View, useWindowDimensions, type ViewToken } from 'react-native';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, {
+  runOnJS, useAnimatedStyle, useSharedValue,
+  withSpring, withTiming,
+} from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import { styles } from './PlacePhotoViewer.styles';
 
@@ -18,17 +18,18 @@ interface Props {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const DISMISS_THRESHOLD_PX = 100;
-const DISMISS_VELOCITY      = 1.5;
+const DISMISS_THRESHOLD_PX = 80;
+const DISMISS_VELOCITY_PPS = 800;
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export function PlacePhotoViewer({ images, initialIndex, onClose }: Props): React.JSX.Element {
   const { width, height } = useWindowDimensions();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const listRef       = useRef<FlatList>(null);
-  const translateY    = useRef(new Animated.Value(0)).current;
-  const backdropOpacity = useRef(new Animated.Value(1)).current;
+  const listRef = useRef<FlatList>(null);
+
+  const translateY      = useSharedValue(0);
+  const backdropOpacity = useSharedValue(1);
 
   useEffect(() => {
     StatusBar.setHidden(true, 'fade');
@@ -41,38 +42,42 @@ export function PlacePhotoViewer({ images, initialIndex, onClose }: Props): Reac
     }
   }, [initialIndex, width, images.length]);
 
-  const animateClose = useCallback(() => {
-    Animated.parallel([
-      Animated.timing(translateY, { toValue: height, duration: 240, useNativeDriver: true }),
-      Animated.timing(backdropOpacity, { toValue: 0, duration: 240, useNativeDriver: true }),
-    ]).start(onClose);
-  }, [translateY, backdropOpacity, height, onClose]);
+  // Stable ref so gesture worklet can call it via runOnJS without stale closure.
+  const closeRef = useRef(onClose);
+  useEffect(() => { closeRef.current = onClose; }, [onClose]);
+  const callClose = useCallback(() => closeRef.current(), []);
 
-  const panResponder = useRef(
-    PanResponder.create({
-      // Let touches start without claiming — only claim on clear vertical swipe.
-      onStartShouldSetPanResponder: () => false,
-      onMoveShouldSetPanResponder: (_, gs) =>
-        Math.abs(gs.dy) > 8 && Math.abs(gs.dy) > Math.abs(gs.dx),
+  // Pan gesture that activates only on clear vertical swipe so horizontal
+  // FlatList scrolling is never stolen. failOffsetX kicks in when the user
+  // moves horizontally before vertically — RNGH then lets FlatList handle it.
+  const panGesture = Gesture.Pan()
+    .activeOffsetY([-8, 8])
+    .failOffsetX([-15, 15])
+    .onUpdate((e) => {
+      translateY.value = e.translationY;
+      backdropOpacity.value = Math.max(0, 1 - Math.abs(e.translationY) / (height * 0.5));
+    })
+    .onEnd((e) => {
+      const shouldDismiss =
+        Math.abs(e.translationY) > DISMISS_THRESHOLD_PX ||
+        Math.abs(e.velocityY) > DISMISS_VELOCITY_PPS;
 
-      onPanResponderMove: (_, gs) => {
-        translateY.setValue(gs.dy);
-        const opacity = Math.max(0, 1 - Math.abs(gs.dy) / (height * 0.55));
-        backdropOpacity.setValue(opacity);
-      },
+      if (shouldDismiss) {
+        const toY = e.translationY > 0 ? height : -height;
+        translateY.value = withTiming(toY, { duration: 230 });
+        backdropOpacity.value = withTiming(0, { duration: 230 }, () => runOnJS(callClose)());
+      } else {
+        translateY.value = withSpring(0, { damping: 22, stiffness: 220 });
+        backdropOpacity.value = withTiming(1, { duration: 160 });
+      }
+    });
 
-      onPanResponderRelease: (_, gs) => {
-        if (Math.abs(gs.dy) > DISMISS_THRESHOLD_PX || Math.abs(gs.vy) > DISMISS_VELOCITY) {
-          animateClose();
-        } else {
-          Animated.parallel([
-            Animated.spring(translateY,      { toValue: 0, useNativeDriver: true }),
-            Animated.timing(backdropOpacity, { toValue: 1, duration: 150, useNativeDriver: true }),
-          ]).start();
-        }
-      },
-    }),
-  ).current;
+  const containerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: backdropOpacity.value,
+  }));
 
   const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
     const idx = viewableItems[0]?.index;
@@ -85,56 +90,58 @@ export function PlacePhotoViewer({ images, initialIndex, onClose }: Props): Reac
       transparent
       animationType="fade"
       statusBarTranslucent
-      onRequestClose={animateClose}
+      onRequestClose={callClose}
     >
-      <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]} />
+      {/* GestureHandlerRootView is required inside Modal for RNGH gestures to work */}
+      <GestureHandlerRootView style={styles.root}>
+        <Animated.View style={[styles.backdrop, backdropStyle]} />
 
-      <Animated.View
-        style={[styles.container, { transform: [{ translateY }] }]}
-        {...panResponder.panHandlers}
-      >
-        <FlatList
-          ref={listRef}
-          data={images}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(_, i) => String(i)}
-          renderItem={({ item }) => (
-            <View style={{ width, height }}>
-              <Image source={{ uri: item }} style={styles.image} contentFit="contain" />
-            </View>
-          )}
-          getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
-          scrollEventThrottle={16}
-        />
+        <GestureDetector gesture={panGesture}>
+          <Animated.View style={[styles.container, containerStyle]}>
+            <FlatList
+              ref={listRef}
+              data={images}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(_, i) => String(i)}
+              renderItem={({ item }) => (
+                <View style={{ width, height }}>
+                  <Image source={{ uri: item }} style={styles.image} contentFit="contain" />
+                </View>
+              )}
+              getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
+              onViewableItemsChanged={onViewableItemsChanged}
+              viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
+              scrollEventThrottle={16}
+            />
 
-        <Pressable
-          style={styles.closeBtn}
-          onPress={animateClose}
-          accessibilityRole="button"
-          accessibilityLabel="Close photo viewer"
-        >
-          <Text style={styles.closeBtnText}>✕</Text>
-        </Pressable>
+            <Pressable
+              style={styles.closeBtn}
+              onPress={callClose}
+              accessibilityRole="button"
+              accessibilityLabel="Close photo viewer"
+            >
+              <Text style={styles.closeBtnText}>✕</Text>
+            </Pressable>
 
-        {images.length > 1 && (
-          <>
-            <View style={styles.counter}>
-              <Text style={styles.counterText}>
-                {currentIndex + 1} / {images.length}
-              </Text>
-            </View>
-            <View style={styles.dots}>
-              {images.map((_, i) => (
-                <View key={i} style={[styles.dot, i === currentIndex && styles.dotActive]} />
-              ))}
-            </View>
-          </>
-        )}
-      </Animated.View>
+            {images.length > 1 && (
+              <>
+                <View style={styles.counter}>
+                  <Text style={styles.counterText}>
+                    {currentIndex + 1} / {images.length}
+                  </Text>
+                </View>
+                <View style={styles.dots}>
+                  {images.map((_, i) => (
+                    <View key={i} style={[styles.dot, i === currentIndex && styles.dotActive]} />
+                  ))}
+                </View>
+              </>
+            )}
+          </Animated.View>
+        </GestureDetector>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
