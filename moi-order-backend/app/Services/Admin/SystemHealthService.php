@@ -96,15 +96,19 @@ class SystemHealthService
 
     private function pingThaiBulkSms(): void
     {
-        $response = Http::timeout(5)->get(
-            'https://www.thaibulksms.com/api/wallet.php',
+        // POST with a dummy msisdn — a 4xx response means the API is alive and
+        // rejected our probe payload (expected). Only 5xx or a network failure
+        // means the service is actually down.
+        $response = Http::asForm()->timeout(5)->acceptJson()->post(
+            'https://otp.thaibulksms.com/v2/otp/request',
             [
                 'key'    => config('services.thaibulksms.key'),
                 'secret' => config('services.thaibulksms.secret'),
+                'msisdn' => '66000000000',
             ]
         );
 
-        if (! $response->successful()) {
+        if ($response->serverError()) {
             throw new \RuntimeException("HTTP {$response->status()}");
         }
     }
