@@ -13,7 +13,7 @@
     <!-- iOS "Add to Home Screen" -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Moi Order" />
+    <meta name="apple-mobile-web-app-title" content="Moi Merchant" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <!-- Favicon -->
@@ -22,6 +22,18 @@
     <link rel="icon" href="/favicon.ico" />
 
     <title>Moi Order Merchant</title>
+
+    <!-- Register SW immediately so the browser qualifies for PWA install prompt -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function (err) {
+            console.warn('[SW] Registration failed:', err);
+          });
+        });
+      }
+    </script>
+
     <!-- Apple Sign In JS SDK (required for web Apple auth popup) -->
     <script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
     <style>
