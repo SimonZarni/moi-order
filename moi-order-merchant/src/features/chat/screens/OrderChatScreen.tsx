@@ -23,6 +23,13 @@ type Route = RouteProp<MerchantStackParamList, 'OrderChat'>;
 // scope so the flag is stable across renders.
 const IS_WEB = Platform.OS === 'web';
 
+// Hover interactions only make sense on desktop browsers (pointer: fine = mouse).
+// On Android/iOS PWA, Platform.OS is still 'web' but there is no mouse hover.
+const IS_DESKTOP_WEB =
+  IS_WEB &&
+  typeof window !== 'undefined' &&
+  window.matchMedia?.('(pointer: fine)').matches === true;
+
 // ── Notice banner ─────────────────────────────────────────────────────────────
 
 interface NoticeBannerProps {
@@ -177,14 +184,20 @@ function AnimatedBubble({ msg, isNew, isHighlighted, onPhotoPress, onReply, onLo
 
   return (
     // Outer: entrance (native thread — zero JS cost per frame)
-    <Animated.View style={{ opacity: entranceOpacity, transform: [{ translateX: entranceSlide }] }}>
-      {/* Long-press + hover wrapper — does not interfere with inner swipe PanResponder */}
+    // onMouseEnter/onMouseLeave track hover for desktop web — these DOM events
+    // do NOT fire when the cursor moves between children (unlike onHoverIn/Out
+    // on Pressable which fires "out" when entering a nested Pressable child).
+    <Animated.View
+      style={{ opacity: entranceOpacity, transform: [{ translateX: entranceSlide }] }}
+      // @ts-ignore — RN Web forwards unknown props to the DOM element
+      onMouseEnter={IS_DESKTOP_WEB ? () => setIsHovered(true) : undefined}
+      onMouseLeave={IS_DESKTOP_WEB ? () => setIsHovered(false) : undefined}
+    >
+      {/* Long-press wrapper — does not interfere with inner swipe PanResponder */}
       <Pressable
         style={{ position: 'relative' }}
         onLongPress={onLongPress !== undefined ? () => onLongPress(msg) : undefined}
         delayLongPress={400}
-        onHoverIn={IS_WEB ? () => setIsHovered(true) : undefined}
-        onHoverOut={IS_WEB ? () => setIsHovered(false) : undefined}
         accessibilityRole="none"
       >
         <Animated.View style={[styles.replyHintLeft,  { opacity: leftHintOpacity }]}>
@@ -203,8 +216,8 @@ function AnimatedBubble({ msg, isNew, isHighlighted, onPhotoPress, onReply, onLo
             { transform: [{ translateX: swipeX }] },
           ]}
         >
-          {/* Hover reply button — web only, left side for merchant bubbles */}
-          {IS_WEB && isMerchant && isHovered && onLongPress !== undefined && (
+          {/* Hover reply button — desktop web only, left side for merchant bubbles */}
+          {IS_DESKTOP_WEB && isMerchant && isHovered && onLongPress !== undefined && (
             <Pressable
               style={styles.hoverReplyBtn}
               onPress={() => onReply(msg)}
@@ -269,8 +282,8 @@ function AnimatedBubble({ msg, isNew, isHighlighted, onPhotoPress, onReply, onLo
             />
           </View>
 
-          {/* Hover reply button — web only, right side for customer bubbles */}
-          {IS_WEB && !isMerchant && isHovered && onLongPress !== undefined && (
+          {/* Hover reply button — desktop web only, right side for customer bubbles */}
+          {IS_DESKTOP_WEB && !isMerchant && isHovered && onLongPress !== undefined && (
             <Pressable
               style={styles.hoverReplyBtn}
               onPress={() => onReply(msg)}
