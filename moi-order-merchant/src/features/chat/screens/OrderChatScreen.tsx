@@ -291,11 +291,13 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.topBar}>
         <Pressable style={styles.backButton} onPress={onBack} accessibilityLabel="Go back" accessibilityRole="button">
-          <Ionicons name="arrow-back" size={20} color={colours.textOnLight} />
+          <Ionicons name="arrow-back" size={20} color={colours.textOnDark} />
         </Pressable>
         <View style={styles.headerInfo}>
           <Text style={styles.topBarTitle}>{t('chat_title')}</Text>
-          <Text style={styles.topBarSub}>{orderNumber ?? `Order #${orderId}`}</Text>
+          <View style={styles.orderPill}>
+            <Text style={styles.orderPillText}>{orderNumber ?? `#${orderId}`}</Text>
+          </View>
         </View>
       </View>
 
@@ -321,7 +323,7 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
             <Ionicons
               name={isNetworkError ? 'wifi-outline' : 'alert-circle-outline'}
               size={44}
-              color={colours.textSubtle}
+              color="rgba(255,255,255,0.25)"
             />
             <Text style={styles.emptyText}>
               {isNetworkError ? t('chat_check_internet') : t('chat_cannot_load')}
@@ -329,7 +331,7 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
           </Pressable>
         ) : messages.length === 0 ? (
           <Pressable style={styles.emptyWrap} onPress={Keyboard.dismiss}>
-            <Ionicons name="chatbubbles-outline" size={44} color={colours.textSubtle} />
+            <Ionicons name="chatbubbles-outline" size={44} color="rgba(255,255,255,0.25)" />
             <Text style={styles.emptyText}>{t('chat_no_messages')}</Text>
           </Pressable>
         ) : (
