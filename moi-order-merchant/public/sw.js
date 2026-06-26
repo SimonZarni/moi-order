@@ -21,8 +21,8 @@ self.addEventListener('push', (event) => {
   const title = payload.title ?? 'Moi Order';
   const options = {
     body: payload.body ?? '',
-    icon: '/icon-192.png',
-    badge: '/notification-badge.png',
+    icon: '/icon-192.png?v=2',
+    badge: '/notification-badge.png?v=2',
     data: payload.data ?? {},
     requireInteraction: false,
   };
