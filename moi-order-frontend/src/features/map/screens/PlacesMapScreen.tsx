@@ -74,8 +74,10 @@ export function PlacesMapScreen(): React.JSX.Element {
 
   const topControlsAnim  = useRef(new Animated.Value(0)).current;
   const buttonsRightAnim = useRef(new Animated.Value(0)).current;
+  const loadingAnim      = useRef(new Animated.Value(0)).current;
 
   const topControlsHidden = isFullscreen || isBottomSheetFullyExpanded;
+  const isLoading         = isLoadingPlaces || isTabSwitching;
 
   useEffect(() => {
     Animated.parallel([
@@ -91,6 +93,14 @@ export function PlacesMapScreen(): React.JSX.Element {
       }),
     ]).start();
   }, [topControlsHidden, isFullscreen, topControlsAnim, buttonsRightAnim]);
+
+  useEffect(() => {
+    Animated.timing(loadingAnim, {
+      toValue: isLoading ? 1 : 0,
+      duration: 320,
+      useNativeDriver: true,
+    }).start();
+  }, [isLoading, loadingAnim]);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -224,12 +234,22 @@ export function PlacesMapScreen(): React.JSX.Element {
           </View>
         )}
 
-        {(isLoadingPlaces || isTabSwitching) && (
-          <View style={styles.loadingOverlay}>
-            <ActivityIndicator color={MAP_COLORS.primary} size="small" />
-            <Text style={styles.loadingText}>Loading places…</Text>
-          </View>
-        )}
+        {/* Loading bar — always mounted so enter/exit animation plays */}
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.loadingBar,
+            {
+              opacity: loadingAnim,
+              transform: [{
+                translateY: loadingAnim.interpolate({ inputRange: [0, 1], outputRange: [14, 0] }),
+              }],
+            },
+          ]}
+        >
+          <ActivityIndicator color={MAP_COLORS.primary} size="small" />
+          <Text style={styles.loadingText}>Loading places…</Text>
+        </Animated.View>
 
         {isError && (
           <View style={styles.errorBanner}>

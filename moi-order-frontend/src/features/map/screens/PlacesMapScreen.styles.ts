@@ -32,10 +32,10 @@ export const styles = StyleSheet.create({
   locationBannerText: { color: MAP_COLORS.white, fontSize: 13, fontWeight: '600', flex: 1 },
   locationBannerHint: { color: MAP_COLORS.textMuted, fontSize: 11 },
 
-  loadingOverlay: {
-    position: 'absolute', bottom: 120, alignSelf: 'center',
+  loadingBar: {
+    position: 'absolute', bottom: 32, alignSelf: 'center',
     backgroundColor: MAP_COLORS.surface, borderRadius: 20,
-    paddingHorizontal: 20, paddingVertical: 12,
+    paddingHorizontal: 18, paddingVertical: 10,
     flexDirection: 'row', alignItems: 'center', gap: 8,
     shadowColor: MAP_COLORS.black, shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15, shadowRadius: 8, elevation: 6,
