@@ -1,5 +1,5 @@
-import React from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Image, Text, View } from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
 import { CATEGORY_EMOJI } from '@/shared/theme/mapTheme';
 import { styles } from './PlaceMarker.styles';
@@ -18,23 +18,35 @@ interface Props {
 export const PlaceMarker = React.memo(function PlaceMarker(
   { place, isSelected, onPress }: Props,
 ): React.JSX.Element | null {
+  // PointAnnotation bitmaps the view at mount. refresh() forces a new snapshot:
+  //   • onLoad  → image pixels are rendered → fresh snapshot captures them
+  //   • isSelected effect → styles updated → fresh snapshot captures the new size/colour
+  // MarkerView was tried but its onTouchEnd stopPropagation blocks map panning.
+  const annotationRef = useRef<MapboxGL.PointAnnotation>(null);
+
+  useEffect(() => {
+    // Give React Native one animation frame to commit the style change before
+    // asking Mapbox to re-snapshot, otherwise it captures the old styles.
+    const t = setTimeout(() => annotationRef.current?.refresh(), 50);
+    return () => clearTimeout(t);
+  }, [isSelected]);
+
   if (!place.latitude || !place.longitude) return null;
 
   const uri   = place.cover_image ?? null;
   const emoji = CATEGORY_EMOJI[(place.categories[0]?.name_en ?? '').toLowerCase()] ?? CATEGORY_EMOJI['default'];
 
-  // MarkerView renders as a live React Native view — no snapshotting, so images
-  // always display correctly regardless of cache / load timing. PointAnnotation
-  // bitmaps the view at mount time which races async image decoding.
   return (
-    <MapboxGL.MarkerView
+    <MapboxGL.PointAnnotation
+      ref={annotationRef}
+      id={`marker-${place.id}`}
       coordinate={[place.longitude, place.latitude]}
       anchor={{ x: 0.5, y: 1 }}
-      allowOverlap
+      onSelected={() => onPress(place)}
     >
-      <Pressable
+      <View
         style={styles.pressable}
-        onPress={() => onPress(place)}
+        collapsable={false}
         accessibilityRole="button"
         accessibilityLabel={`View ${place.name_en}`}
       >
@@ -44,6 +56,7 @@ export const PlaceMarker = React.memo(function PlaceMarker(
               source={{ uri }}
               style={styles.coverImage}
               resizeMode="cover"
+              onLoad={() => annotationRef.current?.refresh()}
             />
           ) : (
             <View style={styles.imageFallback}>
@@ -52,8 +65,8 @@ export const PlaceMarker = React.memo(function PlaceMarker(
           )}
         </View>
         <View style={[styles.tail, isSelected && styles.tailSelected]} />
-      </Pressable>
-    </MapboxGL.MarkerView>
+      </View>
+    </MapboxGL.PointAnnotation>
   );
 }, (prev, next) =>
   prev.place.id === next.place.id &&

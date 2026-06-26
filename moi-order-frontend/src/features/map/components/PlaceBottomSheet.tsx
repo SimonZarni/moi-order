@@ -8,6 +8,7 @@ import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { MAP_COLORS } from '@/shared/theme/mapTheme';
 import { useStrings } from '@/shared/i18n';
 import { formatDistance, formatDuration } from '@/shared/api/mapbox';
+import { PlacePhotoViewer } from './PlacePhotoViewer';
 import { styles } from './PlaceBottomSheet.styles';
 import type { Place, Tag } from '@/types/models';
 import type { DirectionsResult } from '@/shared/api/mapbox';
@@ -44,6 +45,7 @@ export function PlaceBottomSheet({
   const activeIndexRef = useRef(0);
   const [slideIdx, setSlideIdx] = useState(0);
   const [snapIdx, setSnapIdx] = useState(START_INDEX);
+  const [photoViewerIndex, setPhotoViewerIndex] = useState<number | null>(null);
   const isPeeking = snapIdx === 0;
   const coverImage = detail?.cover_image ?? place.cover_image;
   const hasRoutes  = !!(drivingRoute || walkingRoute);
@@ -98,6 +100,7 @@ export function PlaceBottomSheet({
   }, [detail]);
 
   return (
+    <>
     <BottomSheet
       ref={sheetRef}
       snapPoints={SNAP_POINTS}
@@ -156,8 +159,14 @@ export function PlaceBottomSheet({
               pagingEnabled
               showsHorizontalScrollIndicator={false}
               keyExtractor={(_, i) => String(i)}
-              renderItem={({ item }) => (
-                <Image source={{ uri: item }} style={[styles.slideImage, { width }]} contentFit="cover" />
+              renderItem={({ item, index }) => (
+                <Pressable
+                  onPress={() => setPhotoViewerIndex(index)}
+                  accessibilityRole="button"
+                  accessibilityLabel="View photo fullscreen"
+                >
+                  <Image source={{ uri: item }} style={[styles.slideImage, { width }]} contentFit="cover" />
+                </Pressable>
               )}
               getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
               onViewableItemsChanged={onViewableItemsChanged}
@@ -295,5 +304,13 @@ export function PlaceBottomSheet({
         </BottomSheetScrollView>
       </View>
     </BottomSheet>
+    {photoViewerIndex !== null && (
+      <PlacePhotoViewer
+        images={galleryImages}
+        initialIndex={photoViewerIndex}
+        onClose={() => setPhotoViewerIndex(null)}
+      />
+    )}
+    </>
   );
 }
