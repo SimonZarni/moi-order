@@ -119,6 +119,20 @@ export async function updateEmail(email: string, otp: string): Promise<User> {
   return response.data.data;
 }
 
+export async function requestVerificationOtp(): Promise<EmailOtpResult> {
+  const response = await apiClient.post<ApiResponse<EmailOtpResult>>(
+    '/api/v1/profile/email/request-verification-otp',
+  );
+  return response.data.data;
+}
+
+export async function verifyCurrentEmail(otp: string): Promise<User> {
+  const response = await apiClient.post<ApiResponse<User>>('/api/v1/profile/email/verify-current', {
+    otp,
+  });
+  return response.data.data;
+}
+
 export async function requestEmailRemovalOtp(): Promise<EmailOtpResult> {
   const response = await apiClient.post<ApiResponse<EmailOtpResult>>(
     '/api/v1/profile/email/request-removal-otp',

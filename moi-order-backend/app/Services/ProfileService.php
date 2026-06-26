@@ -161,6 +161,51 @@ class ProfileService
     }
 
     /** @return array{expires_in: int, resend_after: int} */
+    public function requestVerificationOtp(User $user): array
+    {
+        if ($user->email === null || $this->isSocialPlaceholderEmail($user->email)) {
+            throw new DomainException('account.no_email_to_verify', 409);
+        }
+
+        if ($user->email_verified_at !== null) {
+            throw new DomainException('account.email_already_verified', 409);
+        }
+
+        $dto = new SendEmailOtpDTO(
+            email:   $user->email,
+            purpose: EmailOtpPurpose::AccountVerification,
+        );
+
+        return $this->emailOtpService->send($dto);
+    }
+
+    public function verifyCurrentEmail(User $user, string $otp): User
+    {
+        if ($user->email === null || $this->isSocialPlaceholderEmail($user->email)) {
+            throw new DomainException('account.no_email_to_verify', 409);
+        }
+
+        if ($user->email_verified_at !== null) {
+            throw new DomainException('account.email_already_verified', 409);
+        }
+
+        $verifyDto = new VerifyEmailOtpDTO(
+            email:   $user->email,
+            otp:     $otp,
+            purpose: EmailOtpPurpose::AccountVerification,
+        );
+
+        $verifiedToken = $this->emailOtpService->verify($verifyDto);
+        $this->emailOtpService->consumeVerifiedToken($user->email, $verifiedToken, EmailOtpPurpose::AccountVerification);
+
+        $user->update(['email_verified_at' => now()]);
+
+        $this->activityLog->record($user->fresh(), UserActivityEvent::EmailVerified);
+
+        return $user->fresh();
+    }
+
+    /** @return array{expires_in: int, resend_after: int} */
     public function requestEmailRemovalOtp(User $user): array
     {
         if ($user->email === null || $this->isSocialPlaceholderEmail($user->email)) {
@@ -221,7 +266,8 @@ class ProfileService
         $this->emailOtpService->consumeVerifiedToken($dto->email, $verifiedToken, EmailOtpPurpose::EmailUpdate);
 
         $oldEmail = $user->email;
-        $user->update(['email' => $dto->email]);
+        // OTP proves ownership of the new address — mark it verified immediately.
+        $user->update(['email' => $dto->email, 'email_verified_at' => now()]);
 
         $this->activityLog->record($user->fresh(), UserActivityEvent::EmailChanged, [
             'old_email' => $oldEmail,

@@ -96,6 +96,11 @@ class AdminUserService
             $user->update($changes);
         }
 
+        // Password reset by admin invalidates all existing sessions immediately.
+        if ($dto->password !== null) {
+            $user->tokens()->delete();
+        }
+
         return $user->fresh();
     }
 

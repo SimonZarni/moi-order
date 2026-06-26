@@ -18,6 +18,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\DeleteAccountRequest;
 use App\Http\Requests\RemoveEmailRequest;
+use App\Http\Requests\VerifyCurrentEmailRequest;
 use App\Http\Requests\TriggerReminderRequest;
 use App\Http\Requests\UpdateSimulatedDateRequest;
 use App\Http\Requests\LinkAppleRequest;
@@ -229,6 +230,25 @@ class ProfileController extends Controller
         $user = $this->profileService->updateEmail(
             $request->user(),
             UpdateEmailDTO::fromRequest($request),
+        );
+
+        return response()->json(['data' => new UserResource($user)]);
+    }
+
+    /** POST /api/v1/profile/email/request-verification-otp */
+    public function requestVerificationOtp(Request $request): JsonResponse
+    {
+        $result = $this->profileService->requestVerificationOtp($request->user());
+
+        return response()->json(['data' => $result]);
+    }
+
+    /** POST /api/v1/profile/email/verify-current */
+    public function verifyCurrentEmail(VerifyCurrentEmailRequest $request): JsonResponse
+    {
+        $user = $this->profileService->verifyCurrentEmail(
+            $request->user(),
+            $request->string('otp')->toString(),
         );
 
         return response()->json(['data' => new UserResource($user)]);

@@ -6,6 +6,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   requestEmailUpdateOtp,
   updateEmail,
+  requestVerificationOtp,
+  verifyCurrentEmail,
   requestEmailRemovalOtp,
   removeEmail,
   EmailOtpResult,
@@ -17,7 +19,22 @@ import { RootStackParamList } from '@/types/navigation';
 import { MESSAGES } from '@/shared/constants/messages';
 
 export interface UseUpdateEmailScreenResult {
-  // ── Update flow ───────────────────────────────────────────────────────────
+  // ── Shared ────────────────────────────────────────────────────────────────
+  currentEmail: string | null;
+  isEmailVerified: boolean;
+  canRemoveEmail: boolean;
+  // ── Verify current email ──────────────────────────────────────────────────
+  verifySent: boolean;
+  verifyOtp: string;
+  verifyOtpError: string | null;
+  verifyBannerError: string;
+  verifyExpiresIn: number | null;
+  isRequestingVerify: boolean;
+  isVerifying: boolean;
+  handleRequestVerifyOtp: () => void;
+  handleVerifyOtpChange: (value: string) => void;
+  handleConfirmVerify: () => void;
+  // ── Update email ──────────────────────────────────────────────────────────
   email: string;
   otp: string;
   emailError: string | null;
@@ -32,10 +49,7 @@ export interface UseUpdateEmailScreenResult {
   handleOtpChange: (value: string) => void;
   handleRequestOtp: () => void;
   handleUpdateEmail: () => void;
-  handleBack: () => void;
-  // ── Removal flow ──────────────────────────────────────────────────────────
-  canRemoveEmail: boolean;
-  currentEmail: string | null;
+  // ── Remove email ──────────────────────────────────────────────────────────
   removeOtp: string;
   removeOtpError: string | null;
   removeBannerError: string;
@@ -46,6 +60,8 @@ export interface UseUpdateEmailScreenResult {
   handleRequestRemovalOtp: () => void;
   handleRemoveOtpChange: (value: string) => void;
   handleConfirmRemoval: () => void;
+  // ── Navigation ────────────────────────────────────────────────────────────
+  handleBack: () => void;
 }
 
 const PLACEHOLDER_SUFFIX = '@users.moiorder.local';
@@ -55,7 +71,14 @@ export function useUpdateEmailScreen(): UseUpdateEmailScreenResult {
   const queryClient = useQueryClient();
   const { updateUser, user } = useAuthStore();
 
-  // ── Update flow state ────────────────────────────────────────────────────
+  // ── Verify flow state ─────────────────────────────────────────────────────
+  const [verifySent, setVerifySent]               = useState(false);
+  const [verifyOtp, setVerifyOtp]                 = useState('');
+  const [verifyOtpError, setVerifyOtpError]       = useState<string | null>(null);
+  const [verifyBannerError, setVerifyBannerError] = useState('');
+  const [verifyExpiresIn, setVerifyExpiresIn]     = useState<number | null>(null);
+
+  // ── Update flow state ─────────────────────────────────────────────────────
   const [email, setEmail]             = useState('');
   const [otp, setOtp]                 = useState('');
   const [emailError, setEmailError]   = useState<string | null>(null);
@@ -65,21 +88,52 @@ export function useUpdateEmailScreen(): UseUpdateEmailScreenResult {
   const [expiresIn, setExpiresIn]     = useState<number | null>(null);
   const [resendAfter, setResendAfter] = useState<number | null>(null);
 
-  // ── Removal flow state ───────────────────────────────────────────────────
+  // ── Removal flow state ────────────────────────────────────────────────────
   const [removeOtp, setRemoveOtp]                 = useState('');
   const [removeOtpError, setRemoveOtpError]       = useState<string | null>(null);
   const [removeBannerError, setRemoveBannerError] = useState('');
   const [removeSent, setRemoveSent]               = useState(false);
   const [removeExpiresIn, setRemoveExpiresIn]     = useState<number | null>(null);
 
-  // Treat placeholder and null email the same — user has no real email
+  // ── Derived ───────────────────────────────────────────────────────────────
   const currentEmail = (user?.email && !user.email.endsWith(PLACEHOLDER_SUFFIX))
     ? user.email
     : null;
+  const isEmailVerified = currentEmail !== null && user?.email_verified_at !== null;
+  const canRemoveEmail  = currentEmail !== null;
 
-  const canRemoveEmail = currentEmail !== null;
+  // ── Verify mutations ──────────────────────────────────────────────────────
+  const { mutate: sendVerifyOtp, isPending: isRequestingVerify } = useMutation({
+    mutationFn: () => requestVerificationOtp(),
+    onSuccess: (result: EmailOtpResult) => {
+      setVerifyBannerError('');
+      setVerifySent(true);
+      setVerifyExpiresIn(result.expires_in);
+      setVerifyOtp('');
+      setVerifyOtpError(null);
+    },
+    onError: (error: ApiError) => {
+      setVerifyBannerError(error.message ?? MESSAGES.genericError);
+    },
+  });
 
-  // ── Update mutations ─────────────────────────────────────────────────────
+  const { mutate: submitVerify, isPending: isVerifying } = useMutation({
+    mutationFn: () => verifyCurrentEmail(verifyOtp.trim()),
+    onSuccess: (updatedUser: User) => {
+      queryClient.setQueryData(QUERY_KEYS.AUTH.ME, updatedUser);
+      updateUser(updatedUser);
+      navigation.goBack();
+    },
+    onError: (error: ApiError) => {
+      if (error.status === 422 && error.errors !== undefined) {
+        setVerifyOtpError(error.errors['otp']?.[0] ?? null);
+      } else {
+        setVerifyBannerError(error.message ?? MESSAGES.genericError);
+      }
+    },
+  });
+
+  // ── Update mutations ──────────────────────────────────────────────────────
   const { mutate: sendOtp, isPending: isSendingOtp } = useMutation({
     mutationFn: () => requestEmailUpdateOtp(email.trim().toLowerCase()),
     onSuccess: (result: EmailOtpResult) => {
@@ -117,7 +171,7 @@ export function useUpdateEmailScreen(): UseUpdateEmailScreenResult {
     },
   });
 
-  // ── Removal mutations ────────────────────────────────────────────────────
+  // ── Removal mutations ─────────────────────────────────────────────────────
   const { mutate: sendRemovalOtp, isPending: isRequestingRemoval } = useMutation({
     mutationFn: () => requestEmailRemovalOtp(),
     onSuccess: (result: EmailOtpResult) => {
@@ -148,7 +202,25 @@ export function useUpdateEmailScreen(): UseUpdateEmailScreenResult {
     },
   });
 
-  // ── Update handlers ──────────────────────────────────────────────────────
+  // ── Verify handlers ───────────────────────────────────────────────────────
+  const handleRequestVerifyOtp = useCallback((): void => {
+    sendVerifyOtp();
+  }, [sendVerifyOtp]);
+
+  const handleVerifyOtpChange = useCallback((value: string): void => {
+    setVerifyOtp(value);
+    setVerifyOtpError(null);
+  }, []);
+
+  const handleConfirmVerify = useCallback((): void => {
+    if (!verifyOtp.trim()) {
+      setVerifyOtpError('Verification code is required.');
+      return;
+    }
+    submitVerify();
+  }, [verifyOtp, submitVerify]);
+
+  // ── Update handlers ───────────────────────────────────────────────────────
   const handleEmailChange = useCallback((value: string): void => {
     setEmail(value);
     setEmailError(null);
@@ -186,11 +258,7 @@ export function useUpdateEmailScreen(): UseUpdateEmailScreenResult {
     submitUpdate();
   }, [otp, submitUpdate]);
 
-  const handleBack = useCallback((): void => {
-    navigation.goBack();
-  }, [navigation]);
-
-  // ── Removal handlers ─────────────────────────────────────────────────────
+  // ── Removal handlers ──────────────────────────────────────────────────────
   const handleRequestRemovalOtp = useCallback((): void => {
     sendRemovalOtp();
   }, [sendRemovalOtp]);
@@ -208,7 +276,24 @@ export function useUpdateEmailScreen(): UseUpdateEmailScreenResult {
     submitRemoval();
   }, [removeOtp, submitRemoval]);
 
+  const handleBack = useCallback((): void => {
+    navigation.goBack();
+  }, [navigation]);
+
   return {
+    currentEmail,
+    isEmailVerified,
+    canRemoveEmail,
+    verifySent,
+    verifyOtp,
+    verifyOtpError,
+    verifyBannerError,
+    verifyExpiresIn,
+    isRequestingVerify,
+    isVerifying,
+    handleRequestVerifyOtp,
+    handleVerifyOtpChange,
+    handleConfirmVerify,
     email,
     otp,
     emailError,
@@ -223,9 +308,6 @@ export function useUpdateEmailScreen(): UseUpdateEmailScreenResult {
     handleOtpChange,
     handleRequestOtp,
     handleUpdateEmail,
-    handleBack,
-    canRemoveEmail,
-    currentEmail,
     removeOtp,
     removeOtpError,
     removeBannerError,
@@ -236,5 +318,6 @@ export function useUpdateEmailScreen(): UseUpdateEmailScreenResult {
     handleRequestRemovalOtp,
     handleRemoveOtpChange,
     handleConfirmRemoval,
+    handleBack,
   };
 }
