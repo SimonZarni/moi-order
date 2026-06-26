@@ -1,3 +1,4 @@
+import type { ApiError } from 'src/types';
 import type { SelectChangeEvent } from '@mui/material/Select';
 
 import { useParams } from 'react-router-dom';
@@ -518,11 +519,11 @@ export function UserDetailView() {
         setUser((prev) => prev ? { ...prev, ...updated } : prev);
         setEditProfileOpen(false);
       })
-      .catch((err) => {
-        const apiErrors = err?.response?.data?.errors ?? {};
+      .catch((err: ApiError) => {
+        const apiErrors = err?.errors ?? {};
         const flat: Record<string, string> = {};
         Object.entries(apiErrors).forEach(([k, v]) => { flat[k] = Array.isArray(v) ? v[0] : String(v); });
-        if (Object.keys(flat).length === 0) flat.general = err?.response?.data?.message ?? 'Failed to save.';
+        if (Object.keys(flat).length === 0) flat.general = err?.message ?? 'Failed to save.';
         setEditErrors(flat);
       })
       .finally(() => setEditSaving(false));

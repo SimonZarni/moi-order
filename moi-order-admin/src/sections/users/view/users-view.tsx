@@ -1,3 +1,4 @@
+import type { ApiError } from 'src/types';
 import type { UserData } from 'src/api/users';
 import type { SelectChangeEvent } from '@mui/material/Select';
 
@@ -140,11 +141,11 @@ function CreateUserDialog({ open, onClose, onCreated }: CreateUserDialogProps) {
       ...(phone.trim() ? { phone_number: phone.trim() } : {}),
     })
       .then((user) => { onCreated(user); handleClose(); })
-      .catch((err) => {
-        const apiErrors = err?.response?.data?.errors ?? {};
+      .catch((err: ApiError) => {
+        const apiErrors = err?.errors ?? {};
         const flat: Record<string, string> = {};
         Object.entries(apiErrors).forEach(([k, v]) => { flat[k] = Array.isArray(v) ? v[0] : String(v); });
-        if (Object.keys(flat).length === 0) flat.general = err?.response?.data?.message ?? 'Failed to create user.';
+        if (Object.keys(flat).length === 0) flat.general = err?.message ?? 'Failed to create user.';
         setErrors(flat);
       })
       .finally(() => setSaving(false));
