@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator, Animated, FlatList, Image, Keyboard, KeyboardAvoidingView,
-  Modal, PanResponder, Platform, Pressable, ScrollView, Text, TextInput, View,
+  Modal, PanResponder, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -86,11 +86,14 @@ function ReplyBar({ replyingTo, photoLabel, onCancel, cancelLabel, replyToLabel 
 interface BubbleProps {
   msg: OrderChatMessage;
   isNew: boolean;
+  isHighlighted: boolean;
   onPhotoPress: (uri: string) => void;
   onReply: (msg: OrderChatMessage) => void;
+  onLongPress?: (msg: OrderChatMessage) => void;
+  onPressQuote: (replyToId: number) => void;
 }
 
-function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): React.JSX.Element {
+function AnimatedBubble({ msg, isNew, isHighlighted, onPhotoPress, onReply, onLongPress, onPressQuote }: BubbleProps): React.JSX.Element {
   if (msg.sender_type === 'system') {
     return (
       <View style={styles.systemNotice}>
@@ -114,6 +117,15 @@ function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): Rea
     ]).start();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ── Highlight flash (jump-to-message) ─────────────────────────────────────
+  const highlightOpacity = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (!isHighlighted) return;
+    highlightOpacity.setValue(1);
+    Animated.timing(highlightOpacity, { toValue: 0, duration: 900, useNativeDriver: true }).start();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHighlighted]);
 
   // ── Bidirectional swipe-to-reply (JS driver) ───────────────────────────────
   // Right swipe (+dx) → left hint visible   Left swipe (−dx) → right hint visible
@@ -164,7 +176,13 @@ function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): Rea
   return (
     // Outer: entrance (native thread — zero JS cost per frame)
     <Animated.View style={{ opacity: entranceOpacity, transform: [{ translateX: entranceSlide }] }}>
-      <View style={{ position: 'relative' }}>
+      {/* Long-press wrapper — does not interfere with inner swipe PanResponder */}
+      <Pressable
+        style={{ position: 'relative' }}
+        onLongPress={onLongPress !== undefined ? () => onLongPress(msg) : undefined}
+        delayLongPress={400}
+        accessibilityRole="none"
+      >
         <Animated.View style={[styles.replyHintLeft,  { opacity: leftHintOpacity }]}>
           <Ionicons name="return-up-back-outline"    size={18} color={colours.primary} />
         </Animated.View>
@@ -185,14 +203,20 @@ function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): Rea
             {!isMerchant && <Text style={styles.senderName}>{msg.sender_name}</Text>}
 
             {hasReply && (
-              <View style={[styles.replyQuote, isMerchant && styles.replyQuoteMerchant]}>
-                <Text style={[styles.replyQuoteSender, isMerchant && styles.replyQuoteSenderMerchant]}>
-                  {msg.reply_to_sender_name}
-                </Text>
-                <Text style={[styles.replyQuoteText, isMerchant && styles.replyQuoteTextMerchant]} numberOfLines={1}>
-                  {msg.reply_to_body ?? '📷 Photo'}
-                </Text>
-              </View>
+              <Pressable
+                onPress={() => onPressQuote(msg.reply_to_id!)}
+                accessibilityRole="button"
+                accessibilityLabel="Jump to original message"
+              >
+                <View style={[styles.replyQuote, isMerchant && styles.replyQuoteMerchant]}>
+                  <Text style={[styles.replyQuoteSender, isMerchant && styles.replyQuoteSenderMerchant]}>
+                    {msg.reply_to_sender_name}
+                  </Text>
+                  <Text style={[styles.replyQuoteText, isMerchant && styles.replyQuoteTextMerchant]} numberOfLines={1}>
+                    {msg.reply_to_body ?? '📷 Photo'}
+                  </Text>
+                </View>
+              </Pressable>
             )}
 
             {msg.image_url !== null && (
@@ -221,9 +245,15 @@ function AnimatedBubble({ msg, isNew, onPhotoPress, onReply }: BubbleProps): Rea
                 />
               )}
             </View>
+
+            {/* Green flash highlight overlay — fades in 900ms after jump-to-message */}
+            <Animated.View
+              pointerEvents="none"
+              style={[StyleSheet.absoluteFillObject, styles.bubbleHighlight, { opacity: highlightOpacity }]}
+            />
           </View>
         </Animated.View>
-      </View>
+      </Pressable>
     </Animated.View>
   );
 }
@@ -267,8 +297,10 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
   const {
     messages, isLoading, isError, isNetworkError, sendError, text, isSending, inputBarPadding,
     selectedImages, selectedPhoto, listRef, isChatLocked, isCompletedButNotLocked, replyingTo,
+    pressedMessage, highlightedId,
     handleTextChange, handleSend, handleSetReply, handleAttachPress, handleRemoveImage,
     handlePhotoPress, handlePhotoClose,
+    handleLongPress, handleCloseMenu, handleMenuReply, handleQuotePress, handleScrollToIndexFailed,
   } = useOrderChatScreen(orderId, orderStatus, completedAt);
 
   const [showNoticeBanner, setShowNoticeBanner] = useState(true);
@@ -346,8 +378,11 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
               <AnimatedBubble
                 msg={item}
                 isNew={!initialIdsRef.current.has(item.id)}
+                isHighlighted={highlightedId === item.id}
                 onPhotoPress={handlePhotoPress}
                 onReply={handleSetReply}
+                onLongPress={isChatLocked ? undefined : handleLongPress}
+                onPressQuote={handleQuotePress}
               />
             )}
             style={styles.list}
@@ -357,6 +392,7 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
             ]}
             onContentSizeChange={scrollToEndOnWeb}
             onLayout={scrollToEndOnWeb}
+            onScrollToIndexFailed={handleScrollToIndexFailed}
             accessibilityRole="list"
             showsVerticalScrollIndicator={false}
             keyboardDismissMode="on-drag"
@@ -442,6 +478,32 @@ export function OrderChatContent({ orderId, orderNumber, completedAt, orderStatu
           </>
         )}
       </KeyboardAvoidingView>
+
+      {/* ── Long-press reply menu ───────────────────────────────────────────── */}
+      <Modal visible={pressedMessage !== null} transparent animationType="fade" onRequestClose={handleCloseMenu}>
+        <Pressable style={styles.menuOverlay} onPress={handleCloseMenu} accessibilityRole="button" accessibilityLabel="Close menu">
+          <Pressable style={styles.menuCard} onPress={() => {}} accessibilityRole="none">
+            <View style={styles.menuPreviewWrap}>
+              {pressedMessage?.image_url !== null && pressedMessage?.image_url !== undefined && (
+                <Ionicons name="image-outline" size={14} color={colours.textSubtle} style={{ marginBottom: 2 }} />
+              )}
+              <Text style={styles.menuPreviewText} numberOfLines={3}>
+                {pressedMessage?.body ?? '📷 Photo'}
+              </Text>
+            </View>
+            <View style={styles.menuDivider} />
+            <Pressable
+              style={styles.menuOption}
+              onPress={handleMenuReply}
+              accessibilityRole="button"
+              accessibilityLabel="Reply to message"
+            >
+              <Ionicons name="return-up-back-outline" size={18} color={colours.primary} />
+              <Text style={styles.menuOptionText}>Reply</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       <Modal visible={selectedPhoto !== null} transparent animationType="fade" onRequestClose={handlePhotoClose}>
         <Pressable style={styles.photoOverlay} onPress={handlePhotoClose} accessibilityRole="button" accessibilityLabel="Close photo">

@@ -106,6 +106,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     gap: 4,
+    overflow: 'hidden',
   },
   bubbleMerchant: {
     backgroundColor: colours.primary,
@@ -360,6 +361,59 @@ export const styles = StyleSheet.create({
     fontSize: typography.xxs,
     lineHeight: Platform.select({ web: 14, default: 18 }),
     color: colours.warning,
+  },
+
+  // ── Highlight flash overlay (inside bubble) ────────────────────────────────
+  bubbleHighlight: {
+    borderRadius: radius.xl,
+    backgroundColor: colours.primary + '44',
+  },
+
+  // ── Long-press reply menu ──────────────────────────────────────────────────
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.xl,
+  },
+  menuCard: {
+    width: '75%',
+    backgroundColor: colours.surface,
+    borderRadius: radius.xl,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 24,
+    elevation: 12,
+  },
+  menuPreviewWrap: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    gap: 4,
+  },
+  menuPreviewText: {
+    fontSize: typography.sm,
+    lineHeight: Platform.select({ web: 20, default: 42 }),
+    color: colours.textMuted,
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: colours.divider,
+  },
+  menuOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  menuOptionText: {
+    fontSize: typography.md,
+    lineHeight: Platform.select({ web: 20, default: 44 }),
+    fontWeight: '600',
+    color: colours.primary,
   },
 
   // ── Photo fullscreen overlay ───────────────────────────────────────────────

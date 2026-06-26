@@ -49,6 +49,8 @@ interface UseOrderChatScreenResult {
   isChatLocked: boolean;
   isCompletedButNotLocked: boolean;
   replyingTo: OrderChatMessage | null;
+  pressedMessage: OrderChatMessage | null;
+  highlightedId: number | null;
   handleTextChange: (v: string) => void;
   handleSend: () => void;
   handleSetReply: (msg: OrderChatMessage | null) => void;
@@ -56,6 +58,11 @@ interface UseOrderChatScreenResult {
   handleRemoveImage: (index: number) => void;
   handlePhotoPress: (uri: string) => void;
   handlePhotoClose: () => void;
+  handleLongPress: (msg: OrderChatMessage) => void;
+  handleCloseMenu: () => void;
+  handleMenuReply: () => void;
+  handleQuotePress: (replyToId: number) => void;
+  handleScrollToIndexFailed: (info: { index: number; averageItemLength: number }) => void;
 }
 
 export function useOrderChatScreen(
@@ -68,6 +75,8 @@ export function useOrderChatScreen(
   const { bottom: bottomInset } = useSafeAreaInsets();
   const [text, setText]                     = useState('');
   const [sendError, setSendError]           = useState<string | null>(null);
+  const [pressedMessage, setPressedMessage] = useState<OrderChatMessage | null>(null);
+  const [highlightedId, setHighlightedId]   = useState<number | null>(null);
   const [isSending, setIsSending]           = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
@@ -292,6 +301,38 @@ useEffect(() => {
   const handlePhotoPress = useCallback((uri: string) => setSelectedPhoto(uri), []);
   const handlePhotoClose = useCallback(() => setSelectedPhoto(null), []);
 
+  const handleLongPress = useCallback((msg: OrderChatMessage) => {
+    setPressedMessage(msg);
+  }, []);
+
+  const handleCloseMenu = useCallback(() => setPressedMessage(null), []);
+
+  const handleMenuReply = useCallback(() => {
+    if (pressedMessage !== null) setReplyingTo(pressedMessage);
+    setPressedMessage(null);
+  }, [pressedMessage]);
+
+  const handleQuotePress = useCallback((replyToId: number) => {
+    const index = messages.findIndex((m) => m.id === replyToId);
+    if (index === -1) return;
+    // Native list is inverted (reversed data), web is chronological.
+    const listIndex = Platform.OS === 'web' ? index : messages.length - 1 - index;
+    try {
+      listRef.current?.scrollToIndex({ index: listIndex, animated: true, viewPosition: 0.5 });
+    } catch {
+      listRef.current?.scrollToOffset({ offset: listIndex * 80, animated: true });
+    }
+    setHighlightedId(replyToId);
+    setTimeout(() => setHighlightedId(null), 900);
+  }, [messages]);
+
+  const handleScrollToIndexFailed = useCallback(
+    ({ index, averageItemLength }: { index: number; averageItemLength: number }) => {
+      listRef.current?.scrollToOffset({ offset: index * averageItemLength, animated: true });
+    },
+    [],
+  );
+
   const isChatLocked = computeIsChatLocked(orderStatus, completedAt);
   const isCompletedButNotLocked = orderStatus === ORDER_STATUS.Completed && !isChatLocked;
 
@@ -299,7 +340,9 @@ useEffect(() => {
     messages, isLoading, isError, isNetworkError, sendError, text, isSending,
     inputBarPadding, selectedImages, selectedPhoto, listRef,
     isChatLocked, isCompletedButNotLocked, replyingTo,
+    pressedMessage, highlightedId,
     handleTextChange, handleSend, handleSetReply, handleAttachPress, handleRemoveImage,
     handlePhotoPress, handlePhotoClose,
+    handleLongPress, handleCloseMenu, handleMenuReply, handleQuotePress, handleScrollToIndexFailed,
   };
 }
