@@ -95,6 +95,15 @@ export function navigateToCardScreen(
     case HOME_CARD_NAV_SCREEN.RescueTeamList:
       navigation.navigate('RescueTeamList');
       break;
+    // Legacy key still stored in DB for existing cards — bridge to specific screens
+    case 'SafetyLocationList':
+    case 'safety-location-list': {
+      const cat = (navigationParams?.category ?? navigationParams?.type) as string | undefined;
+      if (cat === 'hospital')        navigation.navigate('HospitalList');
+      else if (cat === 'police_station') navigation.navigate('PoliceStationList');
+      else if (cat === 'rescue')     navigation.navigate('RescueTeamList');
+      break;
+    }
     default:
       // Internal route key unknown to this app version — safe no-op
       break;
