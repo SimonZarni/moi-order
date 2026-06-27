@@ -7,7 +7,7 @@ import { radius } from '../../../shared/theme/radius';
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.surface,
   },
   stepIndicatorRow: {
     flexDirection: 'row',
@@ -15,7 +15,9 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.divider,
     position: 'relative',
   },
   stepIndicator: {
@@ -41,10 +43,10 @@ export const styles = StyleSheet.create({
     height: 36,
     borderRadius: radius.full,
     borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.2)',
+    borderColor: colours.divider,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: colours.surfaceMuted,
   },
   stepDotActive: {
     borderColor: colours.primary,
@@ -58,7 +60,7 @@ export const styles = StyleSheet.create({
   stepDotText: {
     fontSize: typography.sm,
     fontWeight: '700',
-    color: 'rgba(255,255,255,0.35)',
+    color: colours.textSubtle,
   },
   stepDotTextActive: {
     color: colours.white,

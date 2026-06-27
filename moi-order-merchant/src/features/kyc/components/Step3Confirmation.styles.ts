@@ -28,14 +28,14 @@ export const styles = StyleSheet.create({
   title: {
     fontSize: typography.xxl,
     fontWeight: '800',
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     textAlign: 'center',
     marginBottom: spacing.md,
     letterSpacing: -0.5,
   },
   body: {
     fontSize: typography.md,
-    color: 'rgba(255,255,255,0.4)',
+    color: colours.textMuted,
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: spacing.lg,
@@ -55,13 +55,13 @@ export const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontSize: typography.sm,
-    color: 'rgba(255,255,255,0.6)',
+    color: colours.textMuted,
     lineHeight: 20,
     fontWeight: '500',
   },
   logoutButton: {
     borderWidth: 1.5,
-    borderColor: colours.dividerDark,
+    borderColor: colours.divider,
     borderRadius: radius.full,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.xl,
@@ -71,7 +71,7 @@ export const styles = StyleSheet.create({
   },
   logoutText: {
     fontSize: typography.md,
-    color: 'rgba(255,255,255,0.4)',
+    color: colours.textMuted,
     fontWeight: '600',
   },
 });

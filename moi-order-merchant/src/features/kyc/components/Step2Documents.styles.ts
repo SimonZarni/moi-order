@@ -27,23 +27,23 @@ export const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: typography.xl,
     fontWeight: '800',
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     marginBottom: spacing.xs,
     letterSpacing: -0.4,
   },
   subtitle: {
     fontSize: typography.sm,
-    color: 'rgba(255,255,255,0.4)',
+    color: colours.textMuted,
     marginBottom: spacing.lg,
     lineHeight: 20,
   },
   card: {
-    backgroundColor: colours.backgroundMid,
+    backgroundColor: colours.surfaceMuted,
     borderRadius: radius.xl,
     padding: spacing.md,
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colours.dividerDark,
+    borderColor: colours.divider,
   },
   cardUploaded: {
     borderWidth: 1.5,
@@ -62,12 +62,12 @@ export const styles = StyleSheet.create({
   cardTitle: {
     fontSize: typography.md,
     fontWeight: '700',
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     marginBottom: spacing.xs,
   },
   cardDesc: {
     fontSize: typography.xs,
-    color: 'rgba(255,255,255,0.4)',
+    color: colours.textMuted,
     lineHeight: 18,
   },
   preview: {
@@ -75,7 +75,7 @@ export const styles = StyleSheet.create({
     height: 120,
     borderRadius: radius.lg,
     marginBottom: spacing.sm,
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.divider,
   },
   uploadButton: {
     borderWidth: 1,

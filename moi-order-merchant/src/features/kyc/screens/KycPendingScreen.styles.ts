@@ -7,13 +7,11 @@ import { radius } from '../../../shared/theme/radius';
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colours.backgroundDark,
+    backgroundColor: colours.surface,
   },
   container: {
     padding: spacing.lg,
-    backgroundColor: colours.backgroundMid,
-    borderTopLeftRadius: radius.sheet,
-    borderTopRightRadius: radius.sheet,
+    backgroundColor: colours.surface,
     flex: 1,
     maxWidth: 480,
     width: '100%',
@@ -35,7 +33,7 @@ export const styles = StyleSheet.create({
   title: {
     fontSize: typography.xxl,
     fontWeight: '800',
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     marginBottom: spacing.md,
     letterSpacing: -0.5,
   },
@@ -49,18 +47,18 @@ export const styles = StyleSheet.create({
   badgeText: {
     fontSize: typography.sm,
     fontWeight: '700',
-    color: colours.textOnDark,
+    color: colours.textOnLight,
   },
   businessName: {
     fontSize: typography.lg,
     fontWeight: '700',
-    color: colours.textOnDark,
+    color: colours.textOnLight,
     marginBottom: spacing.xs,
     letterSpacing: -0.3,
   },
   meta: {
     fontSize: typography.xs,
-    color: 'rgba(255,255,255,0.4)',
+    color: colours.textMuted,
     marginBottom: spacing.lg,
   },
   infoBox: {
@@ -73,7 +71,7 @@ export const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: typography.sm,
-    color: 'rgba(255,255,255,0.65)',
+    color: colours.textMuted,
     lineHeight: 22,
     fontWeight: '500',
   },
@@ -98,7 +96,7 @@ export const styles = StyleSheet.create({
   },
   rejectedHelp: {
     fontSize: typography.sm,
-    color: 'rgba(255,255,255,0.4)',
+    color: colours.textMuted,
     lineHeight: 20,
     marginBottom: spacing.lg,
   },
@@ -135,7 +133,7 @@ export const styles = StyleSheet.create({
   },
   logoutButton: {
     borderWidth: 1.5,
-    borderColor: colours.dividerDark,
+    borderColor: colours.divider,
     borderRadius: radius.full,
     padding: spacing.md,
     alignItems: 'center',
@@ -145,7 +143,7 @@ export const styles = StyleSheet.create({
   },
   logoutText: {
     fontSize: typography.md,
-    color: 'rgba(255,255,255,0.4)',
+    color: colours.textMuted,
     fontWeight: '600',
   },
 });
