@@ -49,6 +49,7 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
+    lineHeight: 27,
   },
   requiredStar: {
     fontSize: typography.xxs,
@@ -248,6 +249,7 @@ export const styles = StyleSheet.create({
     color: colours.danger,
     fontWeight: '500',
     marginTop: spacing.xs,
+    lineHeight: 33,
   },
   addressCard: {
     flexDirection: 'row',
@@ -293,12 +295,12 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     fontWeight: '500',
     color: colours.textOnLight,
-    lineHeight: 18,
+    lineHeight: 39,
   },
   addressSecondary: {
     fontSize: typography.xs,
     color: colours.textMuted,
-    lineHeight: 16,
+    lineHeight: 33,
   },
   changeBtn: {
     fontSize: typography.sm,
@@ -321,6 +323,6 @@ export const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.xs,
     color: colours.textMuted,
-    lineHeight: 18,
+    lineHeight: 33,
   },
 });

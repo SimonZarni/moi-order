@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 1,
     textTransform: 'uppercase',
     marginBottom: spacing.xs,
-    lineHeight: 20,
+    lineHeight: 33,
   },
   picker: {
     borderRadius: radius.lg,
@@ -61,13 +61,13 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     fontWeight: '600',
     color: colours.textOnLight,
-    lineHeight: 22,
+    lineHeight: 39,
   },
   hint: {
     fontSize: typography.xs,
     color: colours.textMuted,
     marginTop: 2,
-    lineHeight: 18,
+    lineHeight: 33,
   },
   hintUploaded: {
     color: colours.success,
@@ -77,5 +77,6 @@ export const styles = StyleSheet.create({
     color: colours.danger,
     marginTop: 4,
     marginLeft: spacing.xs,
+    lineHeight: 33,
   },
 });

@@ -42,13 +42,15 @@ export const styles = StyleSheet.create({
   eyebrow: {
     fontSize: typography.xxs, fontWeight: '700', color: P.gold,
     letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 4,
+    lineHeight: 27,
   },
   heroTitle: {
     fontSize: 26, fontWeight: '900', color: '#ffffff',
-    letterSpacing: -0.8, lineHeight: 32,
+    letterSpacing: -0.8, lineHeight: 78,
   },
   heroSub: {
     fontSize: typography.xs, color: 'rgba(255,255,255,0.48)', marginTop: 5,
+    lineHeight: 33,
   },
 
   // ── Body ─────────────────────────────────────────────────────────────────
@@ -64,7 +66,7 @@ export const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: typography.xxs, fontWeight: '700', color: P.textMuted,
-    letterSpacing: 2, textTransform: 'uppercase',
+    letterSpacing: 2, textTransform: 'uppercase', lineHeight: 27,
   },
   sectionLine: { flex: 1, height: 1, backgroundColor: 'rgba(0,0,0,0.07)' },
 
@@ -128,32 +130,32 @@ export const styles = StyleSheet.create({
   // ── Month tile text ───────────────────────────────────────────────────────
   monthNum: {
     fontSize: typography.xxs, fontWeight: '700', color: P.textMuted,
-    letterSpacing: 1, marginBottom: 2,
+    letterSpacing: 1, marginBottom: 2, lineHeight: 27,
   },
   monthName: {
-    fontSize: typography.lg, fontWeight: '800', color: P.textDark,
+    fontSize: typography.lg, fontWeight: '800', color: P.textDark, lineHeight: 51,
   },
   monthYear: {
-    fontSize: typography.xxs, color: P.textMuted, marginTop: 2,
+    fontSize: typography.xxs, color: P.textMuted, marginTop: 2, lineHeight: 27,
   },
 
   // ── Day tile text ─────────────────────────────────────────────────────────
   dayLabel: {
     fontSize: typography.xxs, fontWeight: '700', color: P.textMuted,
-    letterSpacing: 1, textTransform: 'uppercase', marginBottom: 2,
+    letterSpacing: 1, textTransform: 'uppercase', marginBottom: 2, lineHeight: 27,
   },
   dayNum: {
-    fontSize: typography.lg, fontWeight: '900', color: P.textDark,
+    fontSize: typography.lg, fontWeight: '900', color: P.textDark, lineHeight: 51,
   },
   dayMonth: {
-    fontSize: typography.xs, color: P.textMuted,
+    fontSize: typography.xs, color: P.textMuted, lineHeight: 33,
   },
   todayBadge: {
     marginTop: 4, backgroundColor: P.gold,
     borderRadius: radius.full, paddingHorizontal: 6, paddingVertical: 2,
   },
   todayText: {
-    fontSize: typography.xxs, fontWeight: '700', color: '#ffffff',
+    fontSize: typography.xxs, fontWeight: '700', color: '#ffffff', lineHeight: 27,
   },
 
   // ── Error banner ──────────────────────────────────────────────────────────
@@ -161,7 +163,7 @@ export const styles = StyleSheet.create({
     backgroundColor: 'rgba(220,38,38,0.08)',
     borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.lg,
   },
-  errorText: { fontSize: typography.sm, color: '#dc2626', fontWeight: '600' },
+  errorText: { fontSize: typography.sm, color: '#dc2626', fontWeight: '600', lineHeight: 39 },
 
   // ── Purchase footer ───────────────────────────────────────────────────────
   footer: {
@@ -184,6 +186,6 @@ export const styles = StyleSheet.create({
   },
   purchaseBtnDisabled: { opacity: 0.4 },
   purchaseBtnText: {
-    fontSize: typography.md, fontWeight: '800', color: '#ffffff', letterSpacing: 0.4,
+    fontSize: typography.md, fontWeight: '800', color: '#ffffff', letterSpacing: 0.4, lineHeight: 45,
   },
 });

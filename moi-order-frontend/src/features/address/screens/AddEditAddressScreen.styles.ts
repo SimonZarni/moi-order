@@ -37,6 +37,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     marginTop: spacing.sm,
+    lineHeight: 27,
   },
   required: { color: colours.danger },
   pillRow: {
@@ -61,6 +62,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     fontWeight: '600',
     color: colours.textMuted,
+    lineHeight: 39,
   },
   pillTextActive: { color: colours.white },
   input: {
@@ -79,6 +81,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.xs,
     color: colours.danger,
     marginTop: -spacing.xs,
+    lineHeight: 33,
   },
   mapBtn: {
     flexDirection: 'row',
@@ -136,6 +139,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     fontWeight: '500',
     color: colours.textOnLight,
+    lineHeight: 39,
   },
   saveBtn: {
     backgroundColor: colours.primary,

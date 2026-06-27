@@ -35,14 +35,14 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.textOnDark,
     letterSpacing: -0.3,
-    lineHeight: 26,
+    lineHeight: 51,
     includeFontPadding: false,
   },
   headerSubtitle: {
     fontSize: typography.xs,
     color: colours.tertiary,
     marginTop: 2,
-    lineHeight: 18,
+    lineHeight: 33,
     includeFontPadding: false,
   },
 
@@ -69,7 +69,7 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
     marginBottom: spacing.sm,
     marginTop: spacing.sm,
-    lineHeight: 20,
+    lineHeight: 33,
     includeFontPadding: false,
   },
 
@@ -86,13 +86,13 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.textOnLight,
     marginBottom: spacing.xs,
-    lineHeight: 24,
+    lineHeight: 45,
     includeFontPadding: false,
   },
   cardBody: {
     fontSize: typography.sm,
     color: colours.textOnLight,
-    lineHeight: 22,
+    lineHeight: 39,
     includeFontPadding: false,
   },
 
@@ -109,7 +109,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.xs,
     fontWeight: '700',
     color: colours.badgeText,
-    lineHeight: 18,
+    lineHeight: 33,
     includeFontPadding: false,
   },
 
@@ -124,7 +124,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.sm,
     color: colours.textOnLight,
-    lineHeight: 24,
+    lineHeight: 39,
     includeFontPadding: false,
   },
 
@@ -141,7 +141,7 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.white,
     letterSpacing: 0.5,
-    lineHeight: 26,
+    lineHeight: 39,
     includeFontPadding: false,
   },
   secondaryBtn: {
@@ -158,7 +158,7 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.primary,
     letterSpacing: 0.5,
-    lineHeight: 26,
+    lineHeight: 39,
     includeFontPadding: false,
   },
   destructiveBtn: {
@@ -174,7 +174,7 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: colours.destructive,
     letterSpacing: 0.5,
-    lineHeight: 26,
+    lineHeight: 39,
     includeFontPadding: false,
   },
   btnDisabled: {
@@ -193,7 +193,7 @@ export const styles = StyleSheet.create({
   errorBannerText: {
     fontSize: typography.xs,
     color: colours.danger,
-    lineHeight: 20,
+    lineHeight: 33,
     includeFontPadding: false,
   },
 
@@ -204,7 +204,7 @@ export const styles = StyleSheet.create({
     color: colours.textMuted,
     marginTop: spacing.sm,
     marginBottom: spacing.xs,
-    lineHeight: 18,
+    lineHeight: 33,
     includeFontPadding: false,
   },
   notesBody: {
@@ -213,7 +213,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colours.light,
     borderRadius: radius.lg,
     padding: spacing.sm,
-    lineHeight: 22,
+    lineHeight: 39,
     includeFontPadding: false,
   },
 });

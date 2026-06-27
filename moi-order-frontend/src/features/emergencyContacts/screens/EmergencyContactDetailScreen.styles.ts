@@ -19,7 +19,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     color: colours.textMuted,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 39,
   },
 
   heroImage: {
@@ -36,11 +36,12 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.textOnLight,
     marginBottom: spacing.sm,
+    lineHeight: 66,
   },
   description: {
     fontSize: typography.sm,
     color: colours.textMuted,
-    lineHeight: 22,
+    lineHeight: 39,
     marginBottom: spacing.lg,
   },
 
@@ -68,10 +69,12 @@ export const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.sm,
     color: colours.textOnLight,
+    lineHeight: 39,
   },
   infoTextLink: {
     flex: 1,
     fontSize: typography.sm,
     color: colours.primary,
+    lineHeight: 39,
   },
 });

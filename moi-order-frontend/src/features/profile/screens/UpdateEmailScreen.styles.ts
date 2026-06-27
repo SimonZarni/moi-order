@@ -24,8 +24,9 @@ export const styles = StyleSheet.create({
   heroLabel: {
     fontSize: typography.xs, fontWeight: '700', color: colours.tertiary,
     letterSpacing: 4, textTransform: 'uppercase', marginBottom: spacing.sm,
+    lineHeight: 33,
   },
-  heroTitle: { fontSize: typography.xl, fontWeight: '800', color: colours.textOnDark },
+  heroTitle: { fontSize: typography.xl, fontWeight: '800', color: colours.textOnDark, lineHeight: 66 },
 
   card: {
     flex: 1, backgroundColor: colours.backgroundLight,
@@ -40,9 +41,9 @@ export const styles = StyleSheet.create({
     paddingBottom: spacing.lg,
     borderBottomWidth: 1, borderBottomColor: colours.border,
   },
-  currentLabel: { fontSize: typography.xs, color: colours.textMuted, fontWeight: '600', letterSpacing: 0.5, textTransform: 'uppercase' },
-  currentEmail: { fontSize: typography.md, color: colours.textOnLight, fontWeight: '600', flex: 1 },
-  currentNone:  { fontSize: typography.md, color: colours.textMuted, fontStyle: 'italic' },
+  currentLabel: { fontSize: typography.xs, color: colours.textMuted, fontWeight: '600', letterSpacing: 0.5, textTransform: 'uppercase', lineHeight: 33 },
+  currentEmail: { fontSize: typography.md, color: colours.textOnLight, fontWeight: '600', flex: 1, lineHeight: 45 },
+  currentNone:  { fontSize: typography.md, color: colours.textMuted, fontStyle: 'italic', lineHeight: 45 },
   verifiedBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: 'rgba(16,185,129,0.12)',
@@ -64,8 +65,8 @@ export const styles = StyleSheet.create({
   sectionDot: {
     width: 8, height: 8, borderRadius: 4,
   },
-  sectionTitle: { fontSize: typography.sm, fontWeight: '700' },
-  sectionHint:  { fontSize: typography.sm, color: colours.textMuted, lineHeight: 20, marginBottom: spacing.md },
+  sectionTitle: { fontSize: typography.sm, fontWeight: '700', lineHeight: 39 },
+  sectionHint:  { fontSize: typography.sm, color: colours.textMuted, lineHeight: 39, marginBottom: spacing.md },
 
   // Section accent colours
   verifyDot:   { backgroundColor: '#10b981' },
@@ -76,7 +77,7 @@ export const styles = StyleSheet.create({
   removeTitle: { color: colours.danger },
 
   // ── Shared form elements ──────────────────────────────────────────────────
-  label: { fontSize: typography.sm, fontWeight: '600', color: colours.textOnLight, marginBottom: spacing.xs },
+  label: { fontSize: typography.sm, fontWeight: '600', color: colours.textOnLight, marginBottom: spacing.xs, lineHeight: 39 },
 
   input: {
     backgroundColor: colours.card,
@@ -87,7 +88,7 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   inputError: { borderColor: colours.danger },
-  errorText:  { fontSize: typography.xs, color: colours.danger, marginBottom: spacing.sm },
+  errorText:  { fontSize: typography.xs, color: colours.danger, marginBottom: spacing.sm, lineHeight: 33 },
 
   expiryText: {
     fontSize: typography.xs, color: colours.tertiary,
@@ -119,7 +120,7 @@ export const styles = StyleSheet.create({
   sendBtnText:     { color: colours.textOnDark, fontSize: typography.md, fontWeight: '700' },
 
   otpSection:  { marginTop: spacing.sm },
-  otpHint:     { fontSize: typography.sm, color: colours.textMuted, marginBottom: spacing.md, lineHeight: 20 },
+  otpHint:     { fontSize: typography.sm, color: colours.textMuted, marginBottom: spacing.md, lineHeight: 39 },
 
   confirmBtn: {
     backgroundColor: colours.primary, borderRadius: radius.md,
@@ -149,7 +150,7 @@ export const styles = StyleSheet.create({
     backgroundColor: '#fff1f2', borderRadius: radius.sm,
     padding: spacing.sm, marginBottom: spacing.md,
   },
-  bannerText: { flex: 1, fontSize: typography.sm, color: colours.danger },
+  bannerText: { flex: 1, fontSize: typography.sm, color: colours.danger, lineHeight: 39 },
 
   // ── Footer ────────────────────────────────────────────────────────────────
   backRow:  { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.xl },

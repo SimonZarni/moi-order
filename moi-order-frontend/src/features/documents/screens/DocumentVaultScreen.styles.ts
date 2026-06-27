@@ -44,11 +44,13 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: colours.textOnDark,
     letterSpacing: -0.3,
+    lineHeight: 51,
   },
   headerSubtitle: {
     fontSize: typography.xs,
     color: colours.tertiary,
     marginTop: 1,
+    lineHeight: 33,
   },
 
   // ── Body sheet ────────────────────────────────────────────────────────────
@@ -83,7 +85,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.xs,
     color: colours.primary,
-    lineHeight: 18,
+    lineHeight: 33,
     fontWeight: '500',
   },
 
@@ -103,7 +105,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.xs,
     color: colours.warning,
-    lineHeight: 18,
+    lineHeight: 33,
     fontWeight: '500',
   },
 
@@ -123,7 +125,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.xs,
     color: colours.textMuted,
-    lineHeight: 18,
+    lineHeight: 33,
   },
 
   // ── Upload button ─────────────────────────────────────────────────────────
@@ -157,6 +159,7 @@ export const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginBottom: spacing.sm,
     marginTop: spacing.xs,
+    lineHeight: 27,
   },
 
   // ── Empty state ───────────────────────────────────────────────────────────
@@ -174,7 +177,7 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     color: colours.textMuted,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 39,
     maxWidth: 260,
   },
 });

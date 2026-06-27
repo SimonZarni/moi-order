@@ -24,16 +24,17 @@ export const styles = StyleSheet.create({
   heroLabel: {
     fontSize: typography.xs, fontWeight: '700', color: colours.tertiary,
     letterSpacing: 4, textTransform: 'uppercase', marginBottom: spacing.sm,
+    lineHeight: 33,
   },
-  heroTitle: { fontSize: typography.xl, fontWeight: '800', color: colours.textOnDark },
+  heroTitle: { fontSize: typography.xl, fontWeight: '800', color: colours.textOnDark, lineHeight: 66 },
 
   card: {
     flex: 1, backgroundColor: colours.backgroundLight,
     borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl,
     padding: spacing.lg, paddingTop: spacing.xl,
   },
-  title: { fontSize: typography.lg, fontWeight: '700', color: colours.textOnLight, marginBottom: spacing.xs },
-  subtitle: { fontSize: typography.sm, color: colours.textMuted, marginBottom: spacing.lg },
+  title: { fontSize: typography.lg, fontWeight: '700', color: colours.textOnLight, marginBottom: spacing.xs, lineHeight: 51 },
+  subtitle: { fontSize: typography.sm, color: colours.textMuted, marginBottom: spacing.lg, lineHeight: 39 },
 
   eyeBtn: { paddingHorizontal: spacing.sm, paddingVertical: spacing.xs },
   eyeText: { fontSize: typography.sm, color: colours.primary, fontWeight: '600' },

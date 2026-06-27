@@ -24,8 +24,9 @@ export const styles = StyleSheet.create({
   heroLabel: {
     fontSize: typography.xs, fontWeight: '700', color: colours.tertiary,
     letterSpacing: 4, textTransform: 'uppercase', marginBottom: spacing.sm,
+    lineHeight: 33,
   },
-  heroTitle: { fontSize: typography.xl, fontWeight: '800', color: colours.textOnDark },
+  heroTitle: { fontSize: typography.xl, fontWeight: '800', color: colours.textOnDark, lineHeight: 66 },
 
   card: {
     flex: 1, backgroundColor: colours.backgroundLight,
@@ -33,8 +34,8 @@ export const styles = StyleSheet.create({
     padding: spacing.lg, paddingTop: spacing.xl,
   },
 
-  label: { fontSize: typography.sm, fontWeight: '600', color: colours.textOnLight, marginBottom: spacing.xs },
-  hint:  { fontSize: typography.sm, color: colours.textMuted, marginBottom: spacing.lg, lineHeight: 20 },
+  label: { fontSize: typography.sm, fontWeight: '600', color: colours.textOnLight, marginBottom: spacing.xs, lineHeight: 39 },
+  hint:  { fontSize: typography.sm, color: colours.textMuted, marginBottom: spacing.lg, lineHeight: 39 },
 
   input: {
     backgroundColor: colours.card,
@@ -46,7 +47,7 @@ export const styles = StyleSheet.create({
   },
   inputError: { borderColor: colours.danger },
 
-  errorText: { fontSize: typography.xs, color: colours.danger, marginBottom: spacing.sm },
+  errorText: { fontSize: typography.xs, color: colours.danger, marginBottom: spacing.sm, lineHeight: 33 },
 
   sendBtn: {
     backgroundColor: colours.primary, borderRadius: radius.md,
@@ -62,8 +63,8 @@ export const styles = StyleSheet.create({
   },
 
   otpSection: { marginTop: spacing.sm },
-  otpLabel: { fontSize: typography.sm, fontWeight: '600', color: colours.textOnLight, marginBottom: spacing.xs },
-  otpHint: { fontSize: typography.sm, color: colours.textMuted, marginBottom: spacing.md, lineHeight: 20 },
+  otpLabel: { fontSize: typography.sm, fontWeight: '600', color: colours.textOnLight, marginBottom: spacing.xs, lineHeight: 39 },
+  otpHint: { fontSize: typography.sm, color: colours.textMuted, marginBottom: spacing.md, lineHeight: 39 },
 
   confirmBtn: {
     backgroundColor: colours.primary, borderRadius: radius.md,
@@ -77,7 +78,7 @@ export const styles = StyleSheet.create({
     backgroundColor: '#fff1f2', borderRadius: radius.sm,
     padding: spacing.sm, marginBottom: spacing.md,
   },
-  bannerText: { flex: 1, fontSize: typography.sm, color: colours.danger },
+  bannerText: { flex: 1, fontSize: typography.sm, color: colours.danger, lineHeight: 39 },
 
   backRow: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.md },
   backLink: { fontSize: typography.sm, color: colours.textMuted },
