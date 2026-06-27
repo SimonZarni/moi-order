@@ -1,5 +1,5 @@
-import type { HomeCard } from 'src/types';
 import type { DragEndEvent } from '@dnd-kit/core';
+import type { HomeCard, HomeCardRoute } from 'src/types';
 
 import { CSS } from '@dnd-kit/utilities';
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
@@ -27,6 +27,7 @@ import { useRouter } from 'src/routes/hooks';
 
 import { homeCardsApi } from 'src/api/home-cards';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { homeCardRoutesApi } from 'src/api/home-card-routes';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
@@ -321,6 +322,13 @@ export function HomeCardsView() {
   const [reorderIds, setReorderIds] = useState<number[]>([]);
   const [savingOrder, setSavingOrder] = useState(false);
 
+  // ── Route management ───────────────────────────────────────────────────────
+  const [routes, setRoutes]                 = useState<HomeCardRoute[]>([]);
+  const [routesLoading, setRoutesLoading]   = useState(false);
+  const [manageRoutesOpen, setManageRoutesOpen] = useState(false);
+  const [deleteRouteId, setDeleteRouteId]   = useState<number | null>(null);
+  const [deletingRoute, setDeletingRoute]   = useState(false);
+
   const fetchCards = useCallback(() => {
     setLoading(true);
     homeCardsApi
@@ -333,6 +341,26 @@ export function HomeCardsView() {
   useEffect(() => {
     fetchCards();
   }, [fetchCards]);
+
+  useEffect(() => {
+    setRoutesLoading(true);
+    homeCardRoutesApi
+      .list()
+      .then(setRoutes)
+      .finally(() => setRoutesLoading(false));
+  }, []);
+
+  const handleDeleteRoute = useCallback(() => {
+    if (deleteRouteId === null) return;
+    setDeletingRoute(true);
+    homeCardRoutesApi
+      .remove(deleteRouteId)
+      .then(() => {
+        setRoutes((prev) => prev.filter((r) => r.id !== deleteRouteId));
+        setDeleteRouteId(null);
+      })
+      .finally(() => setDeletingRoute(false));
+  }, [deleteRouteId]);
 
   // ── Derived hierarchy ──────────────────────────────────────────────────────
 
@@ -472,6 +500,15 @@ export function HomeCardsView() {
             <>
               <Button
                 variant="outlined"
+                color="error"
+                startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
+                disabled={routesLoading}
+                onClick={() => setManageRoutesOpen(true)}
+              >
+                Manage Routes
+              </Button>
+              <Button
+                variant="outlined"
                 startIcon={<Iconify icon="carbon:chevron-sort" />}
                 disabled={loading || activeRootCards.length < 2}
                 onClick={handleEnterReorder}
@@ -572,7 +609,61 @@ export function HomeCardsView() {
         </Scrollbar>
       </Card>
 
-      {/* Delete confirm dialog */}
+      {/* Manage Routes dialog */}
+      <Dialog open={manageRoutesOpen} onClose={() => setManageRoutesOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Navigation Routes</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+            Keys must be PascalCase to match mobile screen names (e.g. SafetyLocationList).
+            Delete wrong routes, then re-create with the correct key via the card edit form.
+          </Typography>
+          {routesLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : routes.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">No routes yet.</Typography>
+          ) : routes.map((route) => (
+            <Box key={route.id} sx={{ display: 'flex', alignItems: 'center', py: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle2">{route.label_en}</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                  key: {route.key} · {route.type}
+                </Typography>
+              </Box>
+              <IconButton
+                size="small"
+                color="error"
+                onClick={() => setDeleteRouteId(route.id)}
+                aria-label={`Delete route ${route.label_en}`}
+              >
+                <Iconify icon="solar:trash-bin-trash-bold" width={18} />
+              </IconButton>
+            </Box>
+          ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setManageRoutesOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete route confirm dialog */}
+      <Dialog open={deleteRouteId !== null} onClose={() => setDeleteRouteId(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>Delete this route?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            Home cards using this route will lose their navigation destination. This cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteRouteId(null)} disabled={deletingRoute}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={handleDeleteRoute} disabled={deletingRoute}>
+            {deletingRoute ? 'Deleting…' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete card confirm dialog */}
       <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)} maxWidth="xs" fullWidth>
         <DialogTitle>Delete Card?</DialogTitle>
         <DialogContent>
