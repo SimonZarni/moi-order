@@ -95,7 +95,7 @@ export const styles = StyleSheet.create({
     flex: 1, borderRadius: 16, padding: 12,
     alignItems: 'center', gap: 2, borderWidth: 1,
   },
-  routeCardDrive: { backgroundColor: MAP_COLORS.primaryLight, borderColor: MAP_COLORS.primary },
+  routeCardDrive: { backgroundColor: MAP_COLORS.surfaceAlt, borderColor: MAP_COLORS.border },
   routeCardWalk:  { backgroundColor: MAP_COLORS.surfaceAlt, borderColor: MAP_COLORS.border },
   routeCardIcon:  { fontSize: 22 },
   routeCardTime:  { fontSize: 16, fontWeight: '700', color: MAP_COLORS.textPrimary },
