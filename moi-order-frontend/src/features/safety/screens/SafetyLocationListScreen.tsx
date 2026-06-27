@@ -67,10 +67,17 @@ export function SafetyLocationListScreen(): React.JSX.Element {
         onRefresh={handleRefresh}
         accessibilityRole="list"
         ListEmptyComponent={
-          isLoading ? null : (
+          isLoading ? (
+            <View style={styles.empty}>
+              <ActivityIndicator size="large" color={accentColor} />
+            </View>
+          ) : (
             <View style={styles.empty}>
               <Text style={styles.emptyText}>
                 {isError ? 'Unable to load. Pull down to retry.' : 'No locations available.'}
+              </Text>
+              <Text style={[styles.emptyText, { fontSize: 11, marginTop: 4, opacity: 0.5 }]}>
+                {`category: ${category} | error: ${String(isError)}`}
               </Text>
             </View>
           )

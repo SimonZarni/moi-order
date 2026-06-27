@@ -27,6 +27,7 @@ export function useSafetyLocations(category: SafetyCategoryValue): UseSafetyLoca
       last.meta.current_page < last.meta.last_page ? last.meta.current_page + 1 : undefined,
     initialPageParam: 1,
     staleTime: CACHE_TTL.REFERENCE_DATA,
+    refetchOnMount: true,
     select: (data) => ({ ...data, locations: data.pages.flatMap((p) => p.data) }),
   });
 
