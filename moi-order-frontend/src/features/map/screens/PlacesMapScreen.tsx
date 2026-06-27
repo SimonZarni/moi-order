@@ -264,6 +264,38 @@ export function PlacesMapScreen(): React.JSX.Element {
               isSelected={selectedPlace?.id === place.id}
               onPress={handleMarkerPress} />
           ))}
+
+          {/* Android tap detection — invisible circles at each marker coordinate.
+              MarkerView content has pointerEvents="none" so MapboxMapView owns all
+              touches (pan works). Mapbox's own hit-test fires onPress for taps. */}
+          {Platform.OS === 'android' && (
+            <MapboxGL.ShapeSource
+              id="place-tap-targets"
+              shape={{
+                type: 'FeatureCollection',
+                features: displayedPlaces
+                  .filter(p => p.latitude && p.longitude)
+                  .map(p => ({
+                    type: 'Feature' as const,
+                    geometry: {
+                      type: 'Point' as const,
+                      coordinates: [p.longitude!, p.latitude!],
+                    },
+                    properties: { placeId: p.id },
+                  })),
+              }}
+              onPress={(e) => {
+                const placeId = (e.features[0]?.properties as { placeId?: number } | null)?.placeId;
+                const found = displayedPlaces.find(p => p.id === placeId);
+                if (found) handleMarkerPress(found);
+              }}
+            >
+              <MapboxGL.CircleLayer
+                id="place-tap-circles"
+                style={{ circleRadius: 50, circleOpacity: 0, circleStrokeWidth: 0 }}
+              />
+            </MapboxGL.ShapeSource>
+          )}
         </MapboxGL.MapView>
 
         {userLocation && !userLocation.isGPS && (

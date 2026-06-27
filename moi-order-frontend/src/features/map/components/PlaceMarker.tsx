@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Image, Platform, Pressable, Text, View } from 'react-native';
+import { Image, Platform, Text, View } from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
 import { CATEGORY_EMOJI } from '@/shared/theme/mapTheme';
 import { styles } from './PlaceMarker.styles';
@@ -56,11 +56,11 @@ export const PlaceMarker = React.memo(function PlaceMarker(
     </View>
   );
 
-  // ── Android: MarkerView + Pressable ───────────────────────────────────────
-  // Pressable uses RN's own touch system which works through MarkerView's native
-  // FrameLayout. Pan on markers is blocked by the FrameLayout — this is a known
-  // Android architectural limitation shared by both MarkerView and PointAnnotation.
-  // Fixing pan-on-markers requires ShapeSource + SymbolLayer (no RN view overlay).
+  // ── Android: MarkerView, touch-transparent ────────────────────────────────
+  // pointerEvents="none" prevents any RN responder from claiming ACTION_DOWN,
+  // so MapboxMapView owns all touches and pan works from anywhere on the marker.
+  // Tap detection is handled by an invisible ShapeSource.CircleLayer in
+  // PlacesMapScreen — Mapbox's own hit-test fires onPress without touching RN.
   if (Platform.OS === 'android') {
     return (
       <MapboxGL.MarkerView
@@ -68,9 +68,9 @@ export const PlaceMarker = React.memo(function PlaceMarker(
         coordinate={[place.longitude, place.latitude]}
         anchor={{ x: 0.5, y: 1 }}
       >
-        <Pressable onPress={() => onPress(place)}>
+        <View pointerEvents="none">
           {content}
-        </Pressable>
+        </View>
       </MapboxGL.MarkerView>
     );
   }
