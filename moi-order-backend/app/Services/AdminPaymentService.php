@@ -89,7 +89,7 @@ class AdminPaymentService
     public function confirm(Payment $payment): Payment
     {
         if ($payment->status !== PaymentStatus::Pending) {
-            throw new \DomainException('payment.not_confirmable', 409);
+            throw new \App\Exceptions\DomainException('payment.not_confirmable');
         }
 
         DB::transaction(function () use ($payment): void {

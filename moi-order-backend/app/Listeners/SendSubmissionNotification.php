@@ -9,6 +9,7 @@ use App\Events\SubmissionStatusChanged;
 use App\Events\UserNotificationReceived;
 use App\Notifications\SubmissionStatusNotification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Principle: SRP — one reaction: notify the user when their submission status changes.
@@ -34,7 +35,14 @@ class SendSubmissionNotification
 
         DB::afterCommit(function () use ($submission): void {
             $submission->user->notify(new SubmissionStatusNotification($submission));
-            event(new UserNotificationReceived($submission->user));
+            try {
+                event(new UserNotificationReceived($submission->user));
+            } catch (\Throwable $e) {
+                Log::warning('broadcast.user_notification_failed', [
+                    'user_id' => $submission->user->id,
+                    'error'   => $e->getMessage(),
+                ]);
+            }
         });
     }
 }

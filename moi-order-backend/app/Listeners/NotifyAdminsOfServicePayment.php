@@ -9,6 +9,7 @@ use App\Events\AdminNotificationReceived;
 use App\Models\User;
 use App\Notifications\Admin\NewPaymentNotification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Principle: SRP — one reaction: notify all admins when a service submission payment
@@ -47,7 +48,14 @@ class NotifyAdminsOfServicePayment
                     'user_name'     => $userName,
                     'object_name'   => $serviceName,
                 ]));
-                event(new AdminNotificationReceived($admin, 'new_payment'));
+                try {
+                    event(new AdminNotificationReceived($admin, 'new_payment'));
+                } catch (\Throwable $e) {
+                    Log::warning('broadcast.admin_notification_failed', [
+                        'admin_id' => $admin->id,
+                        'error'    => $e->getMessage(),
+                    ]);
+                }
             });
         });
     }

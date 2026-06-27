@@ -9,6 +9,7 @@ use App\Events\TicketOrderStatusChanged;
 use App\Events\UserNotificationReceived;
 use App\Notifications\TicketOrderStatusNotification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Principle: SRP — one reaction: notify the user when their ticket order status changes.
@@ -31,7 +32,14 @@ class SendTicketOrderNotification
 
         DB::afterCommit(function () use ($order): void {
             $order->user->notify(new TicketOrderStatusNotification($order));
-            event(new UserNotificationReceived($order->user));
+            try {
+                event(new UserNotificationReceived($order->user));
+            } catch (\Throwable $e) {
+                Log::warning('broadcast.user_notification_failed', [
+                    'user_id' => $order->user->id,
+                    'error'   => $e->getMessage(),
+                ]);
+            }
         });
     }
 }
