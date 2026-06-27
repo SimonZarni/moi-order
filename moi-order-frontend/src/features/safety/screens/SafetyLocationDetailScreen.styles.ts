@@ -8,8 +8,8 @@ import { typography } from '@/shared/theme/typography';
 const CREAM = '#F5F0E8';
 
 export const styles = StyleSheet.create({
-  root:   { flex: 1, backgroundColor: colours.dark },
-  scroll: { flex: 1 },
+  root:   { flex: 1, backgroundColor: CREAM },
+  scroll: { flex: 1, backgroundColor: CREAM },
 
   // ── Loading / error states ─────────────────────────────────────────────────
   compactHeader: {
