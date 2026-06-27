@@ -124,9 +124,17 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
   // int_id is the integer PK — backend broadcasts to merchant.{user_id} (integer FK).
   // user.id is the UUID and PHP casts it to 0, so it never matches.
   const userId = useAuthStore((s) => s.user?.int_id ?? null);
-  const onNewOrder = options?.onNewOrder;
-  const onNewChatMessage = options?.onNewChatMessage;
-  const onCashOutConfirmed = options?.onCashOutConfirmed;
+
+  // Store callbacks in refs so they can update between renders without causing
+  // the Pusher useEffect to tear down and rebuild the connection. Previously,
+  // including onNewOrder (= triggerAlarm) in handleNewOrder's useCallback deps
+  // caused a full Pusher reconnect every time isEnabled changed in useOrderAlarm.
+  const onNewOrderRef        = useRef(options?.onNewOrder);
+  const onNewChatMessageRef  = useRef(options?.onNewChatMessage);
+  const onCashOutConfirmedRef = useRef(options?.onCashOutConfirmed);
+  onNewOrderRef.current        = options?.onNewOrder;
+  onNewChatMessageRef.current  = options?.onNewChatMessage;
+  onCashOutConfirmedRef.current = options?.onCashOutConfirmed;
 
   const pusherRef  = useRef<PusherInstance | null>(null);
   const channelRef = useRef<PusherChannel | null>(null);
@@ -136,19 +144,19 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS() });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ANALYTICS });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT });
-      onNewOrder?.();
+      onNewOrderRef.current?.();
     },
-    [queryClient, onNewOrder],
+    [queryClient],
   );
 
   const handleNotificationCreated = useCallback(
     (data: NotificationCreatedPayload) => {
       void queryClient.invalidateQueries({ queryKey: ['notifications'] });
       if (data.type === 'chat_message') {
-        onNewChatMessage?.();
+        onNewChatMessageRef.current?.();
       }
     },
-    [queryClient, onNewChatMessage],
+    [queryClient],
   );
 
   const handleOrderStatusUpdated = useCallback(
@@ -162,9 +170,9 @@ export function useMerchantWebSocket(options?: UseMerchantWebSocketOptions): voi
   const handleCashOutConfirmed = useCallback(
     (_data: CashOutConfirmedPayload) => {
       void queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      onCashOutConfirmed?.();
+      onCashOutConfirmedRef.current?.();
     },
-    [queryClient, onCashOutConfirmed],
+    [queryClient],
   );
 
   useEffect(() => {

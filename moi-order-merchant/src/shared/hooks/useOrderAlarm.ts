@@ -20,6 +20,35 @@ let _audio: HTMLAudioElement | null = null;
 let _audioUrl: string | null = null;
 const _listeners = new Set<() => void>();
 
+// ── Heartbeat ─────────────────────────────────────────────────────────────────
+// Browsers (Chrome in particular) auto-suspend an AudioContext that produces no
+// audio output. Once suspended, ctx.resume() requires a user gesture — so an
+// order alarm that fires while the context is silent never plays until the next
+// click. A near-silent 1 ms oscillator every 25 s prevents this auto-suspension.
+let _heartbeatId: ReturnType<typeof setInterval> | null = null;
+
+function startHeartbeat(): void {
+  if (_heartbeatId !== null || !_ctx) return;
+  _heartbeatId = setInterval(() => {
+    if (!_ctx || _ctx.state !== 'running') { stopHeartbeat(); return; }
+    try {
+      const osc = _ctx.createOscillator();
+      const g   = _ctx.createGain();
+      osc.connect(g);
+      g.connect(_ctx.destination);
+      g.gain.value = 0;           // inaudible — only purpose is to keep context alive
+      osc.start();
+      osc.stop(_ctx.currentTime + 0.001);
+    } catch { /* ignore */ }
+  }, 25_000);
+}
+
+function stopHeartbeat(): void {
+  if (_heartbeatId === null) return;
+  clearInterval(_heartbeatId);
+  _heartbeatId = null;
+}
+
 function _notify(): void { _listeners.forEach((fn) => fn()); }
 
 function _subscribe(cb: () => void): () => void {
@@ -35,6 +64,26 @@ function getCtx(): AudioContext | null {
   if (!_ctx) {
     try {
       _ctx = new Ctor();
+      // Track state changes so _unlocked stays accurate and the heartbeat
+      // starts/stops in sync with the actual AudioContext state.
+      _ctx.onstatechange = () => {
+        if (!_ctx) return;
+        if (_ctx.state === 'running') {
+          if (!_unlocked) { _unlocked = true; _audioError = null; _notify(); }
+          startHeartbeat();
+          // Play any alarm that was queued while the context was suspended.
+          if (_pendingAlarm)     { _pendingAlarm     = false; playBeeps(_ctx); }
+          if (_pendingChatAlarm) { _pendingChatAlarm = false; playChatBeeps(_ctx); }
+        } else {
+          stopHeartbeat();
+          if (_unlocked) { _unlocked = false; _notify(); }
+          // If there is a pending alarm and the page has sticky user activation,
+          // ctx.resume() will succeed even outside a direct gesture handler.
+          if ((_pendingAlarm || _pendingChatAlarm) && _ctx.state === 'suspended') {
+            void _ctx.resume().catch(() => {});
+          }
+        }
+      };
     } catch (err) {
       _audioError = `AudioContext creation failed: ${err instanceof Error ? err.message : String(err)}`;
       _notify();
@@ -65,6 +114,7 @@ function attemptUnlock(): void {
   if (!ctx) return;
   if (ctx.state === 'running') {
     if (!_unlocked) { _unlocked = true; _audioError = null; _notify(); }
+    startHeartbeat();
     // We are inside a synchronous window click/keydown handler — fromGesture = true is safe.
     if (_pendingAlarm)     { _pendingAlarm     = false; playSound(ctx, true); }
     if (_pendingChatAlarm) { _pendingChatAlarm = false; playChatBeeps(ctx);  }
@@ -76,6 +126,7 @@ function attemptUnlock(): void {
         _unlocked = true;
         _audioError = null;
         _notify();
+        startHeartbeat();
         // .then() is outside the user gesture window — use beeps only.
         if (_pendingAlarm)     { _pendingAlarm     = false; playSound(ctx, false); }
         if (_pendingChatAlarm) { _pendingChatAlarm = false; playChatBeeps(ctx);    }
