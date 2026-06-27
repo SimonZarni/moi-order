@@ -85,3 +85,4 @@ Route::get('/app-config', [AppConfigController::class, 'index']);
 
 // Safety locations — intentionally public — hospitals, police stations, rescue
 Route::get('/safety-locations', [SafetyLocationController::class, 'index']);
+Route::get('/safety-locations/{id}', [SafetyLocationController::class, 'show'])->whereNumber('id');

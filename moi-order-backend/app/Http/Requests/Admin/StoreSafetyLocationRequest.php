@@ -23,6 +23,7 @@ class StoreSafetyLocationRequest extends FormRequest
             'fb_page_link' => $this->nullify($this->fb_page_link),
             'gmap_link'    => $this->nullify($this->gmap_link),
             'description'  => $this->nullify($this->description),
+            'sub_category' => $this->nullify($this->sub_category),
         ]);
     }
 
@@ -31,6 +32,8 @@ class StoreSafetyLocationRequest extends FormRequest
         return [
             'name'         => ['required', 'string', 'max:255'],
             'category'     => ['required', 'string', Rule::enum(SafetyCategory::class)],
+            'sub_category' => ['nullable', 'string', 'max:100'],
+            'sort_order'   => ['nullable', 'integer', 'min:0'],
             'phone'        => ['nullable', 'string', 'max:100'],
             'location'     => ['nullable', 'string', 'max:500'],
             'fb_page_link' => ['nullable', 'string', 'max:500'],

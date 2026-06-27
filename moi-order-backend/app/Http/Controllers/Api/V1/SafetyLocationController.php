@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Contracts\FileStorageInterface;
 use App\Enums\SafetyCategory;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\SafetyLocationResource;
+use App\Models\SafetyLocation;
 use App\Services\SafetyLocationService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -16,7 +17,6 @@ class SafetyLocationController extends Controller
 {
     public function __construct(
         private readonly SafetyLocationService $service,
-        private readonly FileStorageInterface  $storage,
     ) {}
 
     /** GET /api/v1/safety-locations — intentionally public */
@@ -40,5 +40,13 @@ class SafetyLocationController extends Controller
                 'total'        => $paginator->total(),
             ],
         ]);
+    }
+
+    /** GET /api/v1/safety-locations/{id} — intentionally public */
+    public function show(int $id): JsonResponse
+    {
+        $location = SafetyLocation::findOrFail($id);
+
+        return response()->json(['data' => new SafetyLocationResource($location)]);
     }
 }

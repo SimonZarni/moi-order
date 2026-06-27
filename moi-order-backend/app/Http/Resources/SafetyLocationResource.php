@@ -25,6 +25,8 @@ class SafetyLocationResource extends JsonResource
             'name'            => $this->name,
             'category'        => $this->category->value,
             'category_label'  => $this->category->label(),
+            'sub_category'    => $this->sub_category,
+            'sort_order'      => $this->sort_order ?? 0,
             'phone'           => $this->phone,
             'location'        => $this->location,
             'fb_page_link'    => $this->fb_page_link,

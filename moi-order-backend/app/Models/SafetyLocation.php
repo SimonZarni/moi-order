@@ -15,6 +15,8 @@ class SafetyLocation extends Model
     protected $fillable = [
         'name',
         'category',
+        'sub_category',
+        'sort_order',
         'phone',
         'location',
         'fb_page_link',
@@ -30,6 +32,7 @@ class SafetyLocation extends Model
     {
         return [
             'category'    => SafetyCategory::class,
+            'sort_order'  => 'integer',
             'latitude'    => 'float',
             'longitude'   => 'float',
             'photo_paths' => 'array',

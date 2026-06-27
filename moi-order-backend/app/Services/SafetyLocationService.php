@@ -20,7 +20,7 @@ class SafetyLocationService
 
     public function list(?SafetyCategory $category, ?string $search, int $perPage = 20): LengthAwarePaginator
     {
-        $query = SafetyLocation::orderBy('name');
+        $query = SafetyLocation::orderBy('sort_order')->orderBy('name');
 
         if ($category !== null) {
             $query->byCategory($category);
@@ -43,6 +43,8 @@ class SafetyLocationService
         return SafetyLocation::create([
             'name'         => $data['name'],
             'category'     => $data['category'],
+            'sub_category' => $data['sub_category'] ?? null,
+            'sort_order'   => $data['sort_order'] ?? 0,
             'phone'        => $data['phone'] ?? null,
             'location'     => $data['location'] ?? null,
             'fb_page_link' => $data['fb_page_link'] ?? null,
@@ -57,17 +59,21 @@ class SafetyLocationService
     /** @param array<string, mixed> $data */
     public function update(SafetyLocation $location, array $data): SafetyLocation
     {
-        $location->update(array_filter([
-            'name'         => $data['name'] ?? null,
-            'category'     => $data['category'] ?? null,
-            'phone'        => $data['phone'] ?? null,
-            'location'     => $data['location'] ?? null,
-            'fb_page_link' => $data['fb_page_link'] ?? null,
-            'gmap_link'    => $data['gmap_link'] ?? null,
-            'description'  => $data['description'] ?? null,
-            'latitude'     => $data['latitude'] ?? null,
-            'longitude'    => $data['longitude'] ?? null,
-        ], fn ($v) => $v !== null));
+        $updates = [];
+        $scalar  = ['name', 'category', 'sub_category', 'phone', 'location',
+                    'fb_page_link', 'gmap_link', 'description', 'latitude', 'longitude'];
+        foreach ($scalar as $key) {
+            if (array_key_exists($key, $data)) {
+                $updates[$key] = $data[$key];
+            }
+        }
+        if (array_key_exists('sort_order', $data)) {
+            $updates['sort_order'] = $data['sort_order'] ?? 0;
+        }
+
+        if (! empty($updates)) {
+            $location->update($updates);
+        }
 
         return $location->fresh();
     }

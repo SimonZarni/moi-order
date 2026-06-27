@@ -1,0 +1,91 @@
+import { StyleSheet } from 'react-native';
+
+import { colours } from '@/shared/theme/colours';
+import { radius } from '@/shared/theme/radius';
+import { spacing } from '@/shared/theme/spacing';
+import { typography } from '@/shared/theme/typography';
+
+export const styles = StyleSheet.create({
+  root:             { flex: 1, backgroundColor: colours.backgroundDark },
+  list:             { flex: 1, backgroundColor: colours.backgroundLight },
+  contentContainer: {
+    paddingHorizontal: spacing.md,
+    paddingBottom:     spacing.xxl + spacing.lg,
+    backgroundColor:   colours.backgroundLight,
+  },
+
+  card: {
+    backgroundColor: colours.card,
+    borderRadius:    radius.md,
+    marginTop:       spacing.md,
+    overflow:        'hidden',
+    shadowColor:     '#000',
+    shadowOffset:    { width: 0, height: 1 },
+    shadowOpacity:   0.06,
+    shadowRadius:    4,
+    elevation:       2,
+  },
+  cardPressed: { opacity: 0.88 },
+
+  coverImage: {
+    width:           '100%',
+    height:          140,
+    backgroundColor: colours.backgroundDark,
+  },
+  coverPlaceholder: {
+    width:           '100%',
+    height:          100,
+    backgroundColor: colours.backgroundDark,
+    alignItems:      'center',
+    justifyContent:  'center',
+  },
+
+  cardBody: {
+    padding: spacing.md,
+  },
+  cardTitle: {
+    fontSize:     typography.md,
+    fontWeight:   '700',
+    color:        colours.textOnLight,
+    marginBottom: spacing.xs,
+    lineHeight:   44,
+  },
+  cardSubCategory: {
+    fontSize:     typography.sm,
+    fontWeight:   '600',
+    marginBottom: spacing.xs,
+    lineHeight:   20,
+  },
+  cardLocation: {
+    fontSize:  typography.sm,
+    color:     colours.textMuted,
+    lineHeight: 20,
+  },
+  cardPhone: {
+    fontSize:  typography.sm,
+    color:     colours.primary,
+    marginTop: spacing.xs,
+    lineHeight: 20,
+  },
+  cardChevron: {
+    position: 'absolute',
+    right:    spacing.md,
+    bottom:   spacing.md,
+  },
+
+  empty: {
+    marginTop:       spacing.xxl,
+    alignItems:      'center',
+    paddingHorizontal: spacing.xl,
+  },
+  emptyText: {
+    fontSize:   typography.md,
+    color:      colours.textMuted,
+    textAlign:  'center',
+  },
+
+  footer: {
+    paddingVertical: spacing.md,
+    alignItems:      'center',
+  },
+});

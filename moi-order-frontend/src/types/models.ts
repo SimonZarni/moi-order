@@ -582,6 +582,8 @@ export interface SafetyLocation {
   name:             string;
   category:         SafetyCategoryValue;
   category_label:   string;
+  sub_category:     string | null;
+  sort_order:       number;
   phone:            string | null;
   location:         string | null;
   fb_page_link:     string | null;

@@ -51,7 +51,8 @@ const CATEGORY_COLOURS: Record<SafetyCategory, string> = {
 };
 
 const EMPTY_FORM: SafetyLocationPayload = {
-  name: '', category: 'hospital', phone: '', location: '', fb_page_link: '', gmap_link: '', description: '', latitude: null, longitude: null,
+  name: '', category: 'hospital', sub_category: '', sort_order: 0,
+  phone: '', location: '', fb_page_link: '', gmap_link: '', description: '', latitude: null, longitude: null,
 };
 
 // ----------------------------------------------------------------------
@@ -105,6 +106,7 @@ export function SafetyDetailView() {
     setEditItem(item);
     setForm({
       name: item.name, category: item.category,
+      sub_category: item.sub_category ?? '', sort_order: item.sort_order ?? 0,
       phone: item.phone ?? '', location: item.location ?? '',
       fb_page_link: item.fb_page_link ?? '', gmap_link: item.gmap_link ?? '',
       description: item.description ?? '',
@@ -119,6 +121,8 @@ export function SafetyDetailView() {
     setSaveError('');
     const payload: SafetyLocationPayload = {
       ...form,
+      sub_category: form.sub_category || null,
+      sort_order:   form.sort_order ?? 0,
       phone:        form.phone        || null,
       location:     form.location     || null,
       fb_page_link: form.fb_page_link || null,
@@ -280,6 +284,7 @@ export function SafetyDetailView() {
                 <TableHead>
                   <TableRow>
                     <TableCell>Name</TableCell>
+                    <TableCell sx={{ width: 60 }}>Order</TableCell>
                     <TableCell>Phone</TableCell>
                     <TableCell>Location</TableCell>
                     <TableCell>Links</TableCell>
@@ -290,7 +295,7 @@ export function SafetyDetailView() {
                 <TableBody>
                   {rows.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                      <TableCell colSpan={7} align="center" sx={{ py: 6, color: 'text.secondary' }}>
                         No {catLabel} records yet.
                       </TableCell>
                     </TableRow>
@@ -312,6 +317,11 @@ export function SafetyDetailView() {
                           )}
                           <Box>
                             <Typography variant="subtitle2">{row.name}</Typography>
+                            {row.sub_category && (
+                              <Typography variant="caption" color="primary" noWrap sx={{ maxWidth: 180, display: 'block', fontWeight: 600 }}>
+                                {row.sub_category}
+                              </Typography>
+                            )}
                             {row.description && (
                               <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: 180, display: 'block' }}>
                                 {row.description}
@@ -320,6 +330,7 @@ export function SafetyDetailView() {
                           </Box>
                         </Box>
                       </TableCell>
+                      <TableCell sx={{ width: 60, color: 'text.secondary', fontSize: 13 }}>{row.sort_order}</TableCell>
                       <TableCell>{row.phone ?? '—'}</TableCell>
                       <TableCell sx={{ maxWidth: 160 }}>
                         <Typography variant="body2" noWrap>{row.location ?? '—'}</Typography>
@@ -386,6 +397,21 @@ export function SafetyDetailView() {
         <DialogContent>
           <Stack spacing={2} sx={{ pt: 1 }}>
             <TextField label="Name *" value={form.name} onChange={field('name')} fullWidth />
+            <TextField
+              label="Sub Category"
+              value={form.sub_category ?? ''}
+              onChange={field('sub_category')}
+              fullWidth
+              placeholder="e.g. General Hospital, Trauma Center"
+            />
+            <TextField
+              label="Sort Order"
+              value={form.sort_order ?? 0}
+              onChange={(e) => setForm((p) => ({ ...p, sort_order: parseInt(e.target.value, 10) || 0 }))}
+              type="number"
+              fullWidth
+              helperText="Lower numbers appear first in mobile"
+            />
             <TextField label="Phone" value={form.phone ?? ''} onChange={field('phone')} fullWidth />
             <TextField label="Location" value={form.location ?? ''} onChange={field('location')} fullWidth placeholder="e.g. No.15, Main Rd, Pattaya" />
             <TextField label="Facebook Page URL" value={form.fb_page_link ?? ''} onChange={field('fb_page_link')} fullWidth />

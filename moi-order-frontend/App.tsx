@@ -82,6 +82,8 @@ import { UpdatePhoneScreen } from '@/features/profile/screens/UpdatePhoneScreen'
 import { UpdateEmailScreen } from '@/features/profile/screens/UpdateEmailScreen';
 import { EmergencyContactListScreen } from '@/features/emergencyContacts/screens/EmergencyContactListScreen';
 import { EmergencyContactDetailScreen } from '@/features/emergencyContacts/screens/EmergencyContactDetailScreen';
+import { SafetyLocationListScreen } from '@/features/safety/screens/SafetyLocationListScreen';
+import { SafetyLocationDetailScreen } from '@/features/safety/screens/SafetyLocationDetailScreen';
 import { FoodScreen } from '@/features/food/screens/FoodScreen';
 import { RestaurantDetailScreen } from '@/features/food/screens/RestaurantDetailScreen';
 import { MenuItemDetailScreen } from '@/features/food/screens/MenuItemDetailScreen';
@@ -296,6 +298,8 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="UpdateEmail"                   component={guardedScreen(UpdateEmailScreen)} options={{ headerShown: false }} />
       <Stack.Screen name="EmergencyContactList"          component={guardedScreen(EmergencyContactListScreen)} />
       <Stack.Screen name="EmergencyContactDetail"        component={guardedScreen(EmergencyContactDetailScreen)} />
+      <Stack.Screen name="SafetyLocationList"            component={guardedScreen(SafetyLocationListScreen)} />
+      <Stack.Screen name="SafetyLocationDetail"          component={guardedScreen(SafetyLocationDetailScreen)} />
       <Stack.Screen name="Food"                          component={FoodScreen} />
       <Stack.Screen name="RestaurantDetail"              component={RestaurantDetailScreen} />
       <Stack.Screen name="MenuItemDetail"                component={MenuItemDetailScreen} />

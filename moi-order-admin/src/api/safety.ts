@@ -13,6 +13,8 @@ export type SafetyLocationData = {
   name:             string;
   category:         SafetyCategory;
   category_label:   string;
+  sub_category:     string | null;
+  sort_order:       number;
   phone:            string | null;
   location:         string | null;
   fb_page_link:     string | null;
@@ -31,15 +33,17 @@ type Meta = { current_page: number; last_page: number; per_page: number; total: 
 type ListParams = { page?: number; per_page?: number; category?: SafetyCategory; search?: string };
 
 export type SafetyLocationPayload = {
-  name:          string;
-  category:      SafetyCategory;
-  phone?:        string | null;
-  location?:     string | null;
-  fb_page_link?: string | null;
-  gmap_link?:    string | null;
-  description?:  string | null;
-  latitude?:     number | null;
-  longitude?:    number | null;
+  name:           string;
+  category:       SafetyCategory;
+  sub_category?:  string | null;
+  sort_order?:    number;
+  phone?:         string | null;
+  location?:      string | null;
+  fb_page_link?:  string | null;
+  gmap_link?:     string | null;
+  description?:   string | null;
+  latitude?:      number | null;
+  longitude?:     number | null;
 };
 
 export const safetyApi = {

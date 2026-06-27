@@ -99,6 +99,10 @@ export type RootStackParamList = {
   EmergencyContactList:   { type: import('./enums').EmergencyContactType };
   EmergencyContactDetail: { contactId: number };
 
+  // ── Safety Locations ──────────────────────────────────────────────────────
+  SafetyLocationList:   { category: import('./models').SafetyCategoryValue };
+  SafetyLocationDetail: { locationId: number };
+
   // ── System
   Maintenance: { message: string; details: string; retryAfter?: number };
 
