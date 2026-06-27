@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\User;
+use App\Notifications\Admin\NewFoodOrderNotification;
+use App\Notifications\Admin\NewKycNotification;
 use App\Notifications\Admin\NewPaymentNotification;
 use App\Notifications\Admin\NewSubmissionNotification;
 use App\Notifications\Admin\NewTicketOrderNotification;
@@ -26,8 +28,10 @@ class NotificationService
     // than JSON_EXTRACT on the `data` text column, which can silently fail if JSON
     // parsing returns NULL (NULL NOT IN (...) = NULL → row incorrectly included).
     private const ADMIN_ONLY_CLASSES = [
-        NewSubmissionNotification::class,
+        NewFoodOrderNotification::class,
+        NewKycNotification::class,
         NewPaymentNotification::class,
+        NewSubmissionNotification::class,
         NewTicketOrderNotification::class,
     ];
 
