@@ -30,7 +30,7 @@ const CATEGORY_ICONS: Record<string, React.ComponentProps<typeof Ionicons>['name
 
 export function SafetyLocationListScreen(): React.JSX.Element {
   const {
-    locations, category, isLoading, isError, isRefreshing,
+    locations, category, isLoading, isError, errorMessage, isRefreshing,
     hasNextPage, isFetchingNextPage,
     handleEndReached, handleRefresh, handleLocationPress, handleBack,
   } = useSafetyLocationListScreen();
@@ -77,7 +77,7 @@ export function SafetyLocationListScreen(): React.JSX.Element {
                 {isError ? 'Unable to load. Pull down to retry.' : 'No locations available.'}
               </Text>
               <Text style={[styles.emptyText, { fontSize: 11, marginTop: 4, opacity: 0.5 }]}>
-                {`category: ${category} | error: ${String(isError)}`}
+                {`cat:${category} err:${String(isError)} msg:${errorMessage ?? 'none'}`}
               </Text>
             </View>
           )

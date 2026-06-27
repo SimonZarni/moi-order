@@ -18,6 +18,7 @@ export interface UseSafetyLocationListScreenResult {
   category:            SafetyCategoryValue;
   isLoading:           boolean;
   isError:             boolean;
+  errorMessage:        string | null;
   isRefreshing:        boolean;
   hasNextPage:         boolean;
   isFetchingNextPage:  boolean;
@@ -33,7 +34,7 @@ export function useSafetyLocationListScreen(): UseSafetyLocationListScreenResult
   const category   = SCREEN_CATEGORY[route.name] ?? 'hospital';
 
   const {
-    locations, isLoading, isError, isRefreshing,
+    locations, isLoading, isError, errorMessage, isRefreshing,
     hasNextPage, isFetchingNextPage, fetchNextPage, refetch,
   } = useSafetyLocations(category);
 
@@ -48,7 +49,7 @@ export function useSafetyLocationListScreen(): UseSafetyLocationListScreenResult
   const handleBack = useCallback((): void => { navigation.goBack(); }, [navigation]);
 
   return {
-    locations, category, isLoading, isError, isRefreshing,
+    locations, category, isLoading, isError, errorMessage, isRefreshing,
     hasNextPage, isFetchingNextPage,
     handleEndReached, handleRefresh, handleLocationPress, handleBack,
   };

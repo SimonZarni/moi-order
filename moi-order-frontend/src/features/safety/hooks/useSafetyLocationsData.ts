@@ -11,6 +11,7 @@ export interface UseSafetyLocationsResult {
   locations:          SafetyLocation[];
   isLoading:          boolean;
   isError:            boolean;
+  errorMessage:       string | null;
   isRefreshing:       boolean;
   hasNextPage:        boolean;
   isFetchingNextPage: boolean;
@@ -31,10 +32,13 @@ export function useSafetyLocations(category: SafetyCategoryValue): UseSafetyLoca
     select: (data) => ({ ...data, locations: data.pages.flatMap((p) => p.data) }),
   });
 
+  const err = query.error as { message?: string; status?: number } | null;
+
   return {
     locations:          query.data?.locations ?? [],
     isLoading:          query.isLoading,
     isError:            query.isError,
+    errorMessage:       err ? `${err.status ?? '?'}: ${err.message ?? 'unknown'}` : null,
     isRefreshing:       query.isRefetching && !query.isFetchingNextPage,
     hasNextPage:        query.hasNextPage ?? false,
     isFetchingNextPage: query.isFetchingNextPage,
