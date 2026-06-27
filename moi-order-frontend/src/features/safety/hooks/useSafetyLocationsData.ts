@@ -26,7 +26,7 @@ export function useSafetyLocations(category: SafetyCategoryValue): UseSafetyLoca
     getNextPageParam: (last) =>
       last.meta.current_page < last.meta.last_page ? last.meta.current_page + 1 : undefined,
     initialPageParam: 1,
-    staleTime: CACHE_TTL.STATIC_DATA,
+    staleTime: CACHE_TTL.REFERENCE_DATA,
     select: (data) => ({ ...data, locations: data.pages.flatMap((p) => p.data) }),
   });
 
@@ -54,7 +54,7 @@ export function useSafetyLocationDetail(id: number): UseSafetyLocationDetailResu
   const query = useQuery({
     queryKey: QUERY_KEYS.SAFETY_LOCATIONS.DETAIL(id),
     queryFn:  () => getSafetyLocation(id),
-    staleTime: CACHE_TTL.STATIC_DATA,
+    staleTime: CACHE_TTL.REFERENCE_DATA,
   });
 
   return {

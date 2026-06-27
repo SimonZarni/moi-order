@@ -86,7 +86,7 @@ export const QUERY_KEYS = {
     MENU_CATEGORIES: ['merchant', 'menu-categories'] as const,
   },
   SAFETY_LOCATIONS: {
-    LIST:   (category: string) => ['safety-locations', 'list', category] as const,
-    DETAIL: (id: number)       => ['safety-locations', 'detail', id] as const,
+    LIST:   (category: string) => ['safety-locations', 'v2', 'list', category] as const,
+    DETAIL: (id: number)       => ['safety-locations', 'v2', 'detail', id] as const,
   },
 } as const;
