@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Image, Platform, Text, View } from 'react-native';
+import { Image, Platform, Pressable, Text, View } from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
 import { CATEGORY_EMOJI } from '@/shared/theme/mapTheme';
 import { styles } from './PlaceMarker.styles';
@@ -21,6 +21,7 @@ export const PlaceMarker = React.memo(function PlaceMarker(
   const annotationRef = useRef<MapboxGL.PointAnnotation>(null);
 
   useEffect(() => {
+    if (Platform.OS !== 'ios') return;
     const t = setTimeout(() => annotationRef.current?.refresh(), 50);
     return () => clearTimeout(t);
   }, [isSelected]);
@@ -43,7 +44,7 @@ export const PlaceMarker = React.memo(function PlaceMarker(
             source={{ uri }}
             style={styles.coverImage}
             resizeMode="cover"
-            onLoad={() => annotationRef.current?.refresh()}
+            onLoad={Platform.OS === 'ios' ? () => annotationRef.current?.refresh() : undefined}
           />
         ) : (
           <View style={styles.imageFallback}>
@@ -55,10 +56,26 @@ export const PlaceMarker = React.memo(function PlaceMarker(
     </View>
   );
 
-  // ── Both platforms: PointAnnotation ──────────────────────────────────────
-  // onSelected is Mapbox's own hit-test — bypasses the RN touch system so
-  // MapboxMapView owns all touches and panning is never blocked by markers.
-  // onLoad → refresh() re-bitmaps after the async Image finishes loading.
+  // ── Android: MarkerView + Pressable ───────────────────────────────────────
+  // Pressable uses RN's own touch system which works through MarkerView's native
+  // FrameLayout. Pan on markers is blocked by the FrameLayout — this is a known
+  // Android architectural limitation shared by both MarkerView and PointAnnotation.
+  // Fixing pan-on-markers requires ShapeSource + SymbolLayer (no RN view overlay).
+  if (Platform.OS === 'android') {
+    return (
+      <MapboxGL.MarkerView
+        id={`marker-${place.id}`}
+        coordinate={[place.longitude, place.latitude]}
+        anchor={{ x: 0.5, y: 1 }}
+      >
+        <Pressable onPress={() => onPress(place)}>
+          {content}
+        </Pressable>
+      </MapboxGL.MarkerView>
+    );
+  }
+
+  // ── iOS: PointAnnotation ──────────────────────────────────────────────────
   return (
     <MapboxGL.PointAnnotation
       ref={annotationRef}
