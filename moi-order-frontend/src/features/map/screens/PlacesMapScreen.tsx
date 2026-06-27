@@ -259,7 +259,9 @@ export function PlacesMapScreen(): React.JSX.Element {
             </>
           )}
 
-          {displayedPlaces.map((place) => (
+          {/* Gate on imagesReady so PointAnnotation's first bitmap snapshot always
+              captures the loaded image — prevents the emoji→photo flash. */}
+          {imagesReady && displayedPlaces.map((place) => (
             <PlaceMarker key={place.id} place={place}
               isSelected={selectedPlace?.id === place.id}
               onPress={handleMarkerPress} />
