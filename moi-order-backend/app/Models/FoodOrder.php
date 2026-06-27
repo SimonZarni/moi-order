@@ -118,6 +118,12 @@ class FoodOrder extends Model
         return $this->status === FoodOrderStatus::WaitingForPayment;
     }
 
+    /** Builds the full order summary the user pre-sends to the OA chat (identical content to admin notification). */
+    public function linePayUserSendText(): string
+    {
+        return $this->linePayNotificationText();
+    }
+
     /** Builds the LINE push message text the admin receives when a customer initiates payment. */
     public function linePayNotificationText(): string
     {

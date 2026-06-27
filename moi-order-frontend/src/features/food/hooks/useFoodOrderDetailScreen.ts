@@ -119,8 +119,10 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
   const handleInvoiceClose = useCallback(() => setInvoiceVisible(false), []);
 
   const handlePromptPayPress = useCallback(async () => {
+    let preFilled: string | null = null;
     try {
-      await notifyLinePayment(orderId);
+      const result = await notifyLinePayment(orderId);
+      preFilled = result.pre_filled_message;
     } catch (e: unknown) {
       const code = (e as ApiError)?.code;
       if (code === ERROR_CODES.LINE_NOT_FOLLOWING) {
@@ -139,9 +141,12 @@ export function useFoodOrderDetailScreen(): UseFoodOrderDetailScreenResult {
         return;
       }
     }
-    // Open the OA chat directly without pre-filling text — notifyLinePayment already
-    // notified the merchant. ?text= would auto-fill the input box, which is unexpected.
-    Linking.openURL(LINE_OA_MESSAGE_URL).catch(() =>
+    // Open the OA chat with the full order summary pre-filled in the input box.
+    // The user taps Send once — the message appears as sent by them, not the bot.
+    const url = preFilled
+      ? `${LINE_OA_MESSAGE_URL}/?${encodeURIComponent(preFilled)}`
+      : LINE_OA_MESSAGE_URL;
+    Linking.openURL(url).catch(() =>
       Linking.openURL(LINE_OA_URL).catch(() =>
         Alert.alert('Cannot open LINE', 'Please open LINE and search for Moi Order to complete your payment.'),
       ),

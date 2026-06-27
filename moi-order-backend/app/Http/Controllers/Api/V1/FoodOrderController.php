@@ -133,16 +133,10 @@ class FoodOrderController extends Controller
         // Always notify the admin group — customer LINE status must never block this.
         $this->lineMessaging->pushToAdmin($order->linePayNotificationText());
 
-        // Best-effort push to customer — silently skip if they haven't linked LINE or
-        // haven't followed the OA (pushToUser already swallows all LINE API errors).
-        $lineId = $order->user?->line_id;
-        if ($lineId && $this->lineMessaging->isFollowing($lineId)) {
-            $this->lineMessaging->pushToUser($lineId, $order->linePayCustomerText());
-        }
+        // The customer will send the full order summary themselves via the pre-filled LINE URL.
+        // No separate bot push to the customer — that would create a duplicate message.
 
-        $preFilled = 'I have ordered ' . ($order->order_number ?? '#' . $order->id) . ' and ready to pay via LINE.';
-
-        return response()->json(['pre_filled_message' => $preFilled], 200);
+        return response()->json(['pre_filled_message' => $order->linePayUserSendText()], 200);
     }
 
     /** POST /api/v1/food-orders/{id}/review */
