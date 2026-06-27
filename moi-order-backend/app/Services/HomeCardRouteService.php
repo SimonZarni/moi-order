@@ -26,4 +26,9 @@ class HomeCardRouteService
             'is_active' => true,
         ]);
     }
+
+    public function destroy(HomeCardRoute $route): void
+    {
+        $route->delete();
+    }
 }

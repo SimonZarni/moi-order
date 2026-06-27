@@ -234,6 +234,24 @@ export function HomeCardFormView({ mode, card }: Props) {
       .finally(() => setDeletingIcon(false));
   }, [deleteIconId, icons, form.icon_key, update]);
 
+  // ── Manage / Delete Route dialog ────────────────────────────────────────────
+  const [manageRoutesOpen,    setManageRoutesOpen]    = useState(false);
+  const [deleteRouteId,       setDeleteRouteId]       = useState<number | null>(null);
+  const [deletingRoute,       setDeletingRoute]       = useState(false);
+
+  const handleDeleteRoute = useCallback(() => {
+    if (deleteRouteId === null) return;
+    setDeletingRoute(true);
+    homeCardRoutesApi.remove(deleteRouteId)
+      .then(() => {
+        const deleted = routes.find((r) => r.id === deleteRouteId);
+        if (deleted && form.navigation_screen === deleted.key) update('navigation_screen', '');
+        setRoutes((prev) => prev.filter((r) => r.id !== deleteRouteId));
+        setDeleteRouteId(null);
+      })
+      .finally(() => setDeletingRoute(false));
+  }, [deleteRouteId, routes, form.navigation_screen, update]);
+
   // ── Create Route dialog ─────────────────────────────────────────────────────
   const [createRouteOpen, setCreateRouteOpen] = useState(false);
   const [newRouteLabelEn, setNewRouteLabelEn] = useState('');
@@ -822,6 +840,13 @@ export function HomeCardFormView({ mode, card }: Props) {
                       <FormHelperText>{fieldErrors.navigation_screen}</FormHelperText>
                     )}
                   </FormControl>
+                  <Button
+                    size="small"
+                    sx={{ mt: 0.5, color: 'text.secondary', fontSize: 12 }}
+                    onClick={() => setManageRoutesOpen(true)}
+                  >
+                    Manage routes / delete wrong routes
+                  </Button>
                 </Grid>
 
                 <Grid size={{ xs: 12 }}>
@@ -1055,6 +1080,52 @@ export function HomeCardFormView({ mode, card }: Props) {
             onClick={handleSaveRoute}
           >
             {creatingRoute ? 'Saving…' : 'Save Route'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ── Manage Routes ── */}
+      <Dialog open={manageRoutesOpen} onClose={() => setManageRoutesOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Manage Routes</DialogTitle>
+        <DialogContent dividers>
+          {routes.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">No routes yet.</Typography>
+          ) : routes.map((route) => (
+            <Box key={route.id} sx={{ display: 'flex', alignItems: 'center', py: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle2">{route.label_en}</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                  key: {route.key} · {route.type}
+                </Typography>
+              </Box>
+              <IconButton
+                size="small"
+                color="error"
+                onClick={() => setDeleteRouteId(route.id)}
+                aria-label={`Delete route ${route.label_en}`}
+              >
+                <Iconify icon="solar:trash-bin-trash-bold" width={18} />
+              </IconButton>
+            </Box>
+          ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setManageRoutesOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ── Delete Route Confirm ── */}
+      <Dialog open={deleteRouteId !== null} onClose={() => setDeleteRouteId(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>Delete this route?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            Home cards using this route will lose their navigation destination. This cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteRouteId(null)} disabled={deletingRoute}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={handleDeleteRoute} disabled={deletingRoute}>
+            {deletingRoute ? 'Deleting…' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

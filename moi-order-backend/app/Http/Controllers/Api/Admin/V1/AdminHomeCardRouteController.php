@@ -29,4 +29,13 @@ class AdminHomeCardRouteController extends Controller
 
         return response()->json(['data' => new AdminHomeCardRouteResource($route)], 201);
     }
+
+    /** DELETE /api/admin/v1/home-card-routes/{id} */
+    public function destroy(int $id): JsonResponse
+    {
+        $route = \App\Models\HomeCardRoute::findOrFail($id);
+        $this->service->destroy($route);
+
+        return response()->json(null, 204);
+    }
 }

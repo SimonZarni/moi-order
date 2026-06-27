@@ -24,4 +24,7 @@ export const homeCardRoutesApi = {
     apiClient
       .post<{ data: HomeCardRoute }>('/home-card-routes', payload)
       .then((r) => r.data.data),
+
+  remove: (id: number) =>
+    apiClient.delete(`/home-card-routes/${id}`),
 };

@@ -447,8 +447,9 @@ Route::prefix('home-cards')->name('admin.home-cards.')->middleware('check.permis
 
 // ── Home Card Routes (tap destinations) ───────────────────────────────────────
 Route::prefix('home-card-routes')->name('admin.home-card-routes.')->middleware('check.permission:home_cards.manage')->group(function (): void {
-    Route::get('/',  [AdminHomeCardRouteController::class, 'index'])->name('index');
-    Route::post('/', [AdminHomeCardRouteController::class, 'store'])->name('store');
+    Route::get('/',       [AdminHomeCardRouteController::class, 'index'])->name('index');
+    Route::post('/',      [AdminHomeCardRouteController::class, 'store'])->name('store');
+    Route::delete('/{id}', [AdminHomeCardRouteController::class, 'destroy'])->name('destroy')->whereNumber('id');
 });
 
 // ── Home Card Icons ────────────────────────────────────────────────────────────
