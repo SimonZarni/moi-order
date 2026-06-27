@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { Image, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import MapboxGL from '@rnmapbox/maps';
 import { CATEGORY_EMOJI } from '@/shared/theme/mapTheme';
 import { styles } from './PlaceMarker.styles';
@@ -56,7 +57,8 @@ export const PlaceMarker = React.memo(function PlaceMarker(
               source={{ uri }}
               style={styles.coverImage}
               resizeMode="cover"
-              onLoad={() => annotationRef.current?.refresh()}
+              cachePolicy="memory-disk"
+            onLoad={() => setTimeout(() => annotationRef.current?.refresh(), 0)}
             />
           ) : (
             <View style={styles.imageFallback}>

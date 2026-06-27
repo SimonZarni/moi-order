@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Image, Platform, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Animated, Platform, Pressable, Text, View } from 'react-native';
+import { Image as ExpoImage } from 'expo-image';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import MapboxGL from '@rnmapbox/maps';
 import { useNavigation } from '@react-navigation/native';
@@ -105,7 +106,7 @@ export function PlacesMapScreen(): React.JSX.Element {
     }
 
     let cancelled = false;
-    Promise.all(uris.map(uri => Image.prefetch(uri).catch(() => false)))
+    Promise.all(uris.map(uri => ExpoImage.prefetch(uri, 'memory-disk').catch(() => false)))
       .finally(() => {
         if (!cancelled) {
           loadedOnceRef.current = true;
