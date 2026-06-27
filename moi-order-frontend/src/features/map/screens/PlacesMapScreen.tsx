@@ -81,43 +81,45 @@ export function PlacesMapScreen(): React.JSX.Element {
   const buttonsRightAnim = useRef(new Animated.Value(0)).current;
   const loadingAnim      = useRef(new Animated.Value(0)).current;
 
-  // Image-ready tracking: prefetch all cover images once per data-set.
-  // loadedOnceRef resets on tab-switch / re-fetch so new images are prefetched too.
-  // It does NOT reset on viewport pans (displayedPlaces length change without loading flag).
+  // Per-place image-ready tracking: each place ID enters the set as soon as its
+  // own prefetch resolves (or immediately if it has no cover image).
+  // PlaceMarkers mount one-by-one as images arrive instead of all-at-once.
+  // loadedOnceRef prevents re-running the prefetch loop on reference-only changes
+  // to displayedPlaces; it resets on tab-switch / re-fetch so new images prefetch.
   const loadedOnceRef = useRef(false);
-  const [imagesReady, setImagesReady] = useState(false);
+  const [readyPlaceIds, setReadyPlaceIds] = useState<Set<number>>(new Set<number>());
 
   useEffect(() => {
     if (isLoadingPlaces || isTabSwitching) {
       loadedOnceRef.current = false;
-      setImagesReady(false);
+      setReadyPlaceIds(new Set<number>());
       return;
     }
     if (loadedOnceRef.current) return;
-
-    const uris = displayedPlaces
-      .map(p => p.cover_image)
-      .filter((u): u is string => Boolean(u));
-
-    if (uris.length === 0) {
-      loadedOnceRef.current = true;
-      setImagesReady(true);
-      return;
-    }
+    loadedOnceRef.current = true;
 
     let cancelled = false;
-    Promise.all(uris.map(uri => ExpoImage.prefetch(uri, 'memory-disk').catch(() => false)))
-      .finally(() => {
-        if (!cancelled) {
-          loadedOnceRef.current = true;
-          setImagesReady(true);
-        }
-      });
+
+    for (const place of displayedPlaces) {
+      const uri = place.cover_image;
+      if (!uri) {
+        setReadyPlaceIds(prev => { const s = new Set<number>(prev); s.add(place.id); return s; });
+        continue;
+      }
+      ExpoImage.prefetch(uri, 'memory-disk')
+        .catch(() => {})
+        .finally(() => {
+          if (!cancelled) {
+            setReadyPlaceIds(prev => { const s = new Set<number>(prev); s.add(place.id); return s; });
+          }
+        });
+    }
+
     return () => { cancelled = true; };
   }, [isLoadingPlaces, isTabSwitching, displayedPlaces]);
 
   const topControlsHidden = isFullscreen || isBottomSheetFullyExpanded;
-  const isLoading         = isLoadingPlaces || isTabSwitching || !imagesReady;
+  const isLoading         = isLoadingPlaces || isTabSwitching || readyPlaceIds.size < displayedPlaces.length;
 
   useEffect(() => {
     Animated.parallel([
@@ -260,9 +262,10 @@ export function PlacesMapScreen(): React.JSX.Element {
             </>
           )}
 
-          {/* Gate on imagesReady so PointAnnotation's first bitmap snapshot always
-              captures the loaded image — prevents the emoji→photo flash. */}
-          {imagesReady && displayedPlaces.map((place) => (
+          {/* All markers mount immediately with the emoji placeholder.
+              onLoad→refresh() in PlaceMarker swaps to the photo once downloaded.
+              readyPlaceIds is used only by the loading indicator. */}
+          {displayedPlaces.map((place) => (
             <PlaceMarker key={place.id} place={place}
               isSelected={selectedPlace?.id === place.id}
               onPress={handleMarkerPress} />

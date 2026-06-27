@@ -207,7 +207,7 @@ export function MapFAB({
         )}
 
         {/* Arc item layer — renders above overlay */}
-        <View style={styles.arcArea} pointerEvents="box-none">
+        <View style={styles.arcArea} pointerEvents={isFABOpen ? 'box-none' : 'none'}>
           {categories.map((cat, i) => (
             <ArcItem
               key={cat.id}
