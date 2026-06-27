@@ -6,84 +6,127 @@ import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 
 export const styles = StyleSheet.create({
-  root:             { flex: 1, backgroundColor: colours.backgroundDark },
-  list:             { flex: 1, backgroundColor: colours.backgroundLight },
+  root: { flex: 1, backgroundColor: colours.dark },
+
+  // ── Header ─────────────────────────────────────────────────────────────────
+  header: {
+    flexDirection:     'row',
+    alignItems:        'center',
+    paddingHorizontal: spacing.sm,
+    paddingVertical:   spacing.sm,
+    backgroundColor:   colours.dark,
+  },
+  backBtn: {
+    width:           44,
+    height:          44,
+    alignItems:      'center',
+    justifyContent:  'center',
+  },
+  headerTitle: {
+    flex:       1,
+    fontSize:   typography.lg,
+    fontWeight: '700',
+    color:      colours.textOnDark,
+    lineHeight: 50,
+  },
+  headerSpacer: { width: 44 },
+
+  // ── List ───────────────────────────────────────────────────────────────────
+  list:             { flex: 1 },
   contentContainer: {
     paddingHorizontal: spacing.md,
+    paddingTop:        spacing.xs,
     paddingBottom:     spacing.xxl + spacing.lg,
-    backgroundColor:   colours.backgroundLight,
   },
 
+  // ── Card ───────────────────────────────────────────────────────────────────
   card: {
-    backgroundColor: colours.card,
-    borderRadius:    radius.md,
-    marginTop:       spacing.md,
-    overflow:        'hidden',
-    shadowColor:     '#000',
-    shadowOffset:    { width: 0, height: 1 },
-    shadowOpacity:   0.06,
-    shadowRadius:    4,
-    elevation:       2,
+    flexDirection:   'row',
+    alignItems:      'center',
+    backgroundColor: colours.secondary,
+    borderRadius:    radius.lg,
+    marginBottom:    spacing.sm,
+    padding:         spacing.sm,
   },
-  cardPressed: { opacity: 0.88 },
+  cardPressed: { opacity: 0.72 },
 
-  coverImage: {
-    width:           '100%',
-    height:          140,
-    backgroundColor: colours.backgroundDark,
+  // ── Thumbnail ──────────────────────────────────────────────────────────────
+  thumb: {
+    width:           64,
+    height:          64,
+    borderRadius:    radius.md,
+    backgroundColor: colours.dark,
   },
-  coverPlaceholder: {
-    width:           '100%',
-    height:          100,
-    backgroundColor: colours.backgroundDark,
+  thumbPlaceholder: {
+    width:           64,
+    height:          64,
+    borderRadius:    radius.md,
+    backgroundColor: colours.dark,
     alignItems:      'center',
     justifyContent:  'center',
   },
 
-  cardBody: {
-    padding: spacing.md,
+  // ── Info ───────────────────────────────────────────────────────────────────
+  info: {
+    flex:        1,
+    marginLeft:  spacing.sm,
+    marginRight: spacing.xs,
   },
-  cardTitle: {
+  name: {
     fontSize:     typography.md,
     fontWeight:   '700',
-    color:        colours.textOnLight,
-    marginBottom: spacing.xs,
+    color:        colours.textOnDark,
     lineHeight:   44,
   },
-  cardSubCategory: {
-    fontSize:     typography.sm,
-    fontWeight:   '600',
-    marginBottom: spacing.xs,
-    lineHeight:   20,
+  tagRow: {
+    flexDirection: 'row',
+    alignItems:    'center',
+    marginTop:     2,
   },
-  cardLocation: {
-    fontSize:  typography.sm,
-    color:     colours.textMuted,
-    lineHeight: 20,
+  tagDot: {
+    width:           6,
+    height:          6,
+    borderRadius:    radius.full,
+    backgroundColor: colours.success,
+    marginRight:     spacing.xs,
   },
-  cardPhone: {
-    fontSize:  typography.sm,
-    color:     colours.primary,
-    marginTop: spacing.xs,
-    lineHeight: 20,
+  tagText: {
+    fontSize:  typography.xs,
+    color:     'rgba(255,255,255,0.65)',
+    lineHeight: 18,
   },
-  cardChevron: {
-    position: 'absolute',
-    right:    spacing.md,
-    bottom:   spacing.md,
+  address: {
+    fontSize:  typography.xs,
+    color:     'rgba(255,255,255,0.4)',
+    lineHeight: 18,
+    marginTop:  2,
   },
 
-  empty: {
-    marginTop:       spacing.xxl,
+  // ── Call button ────────────────────────────────────────────────────────────
+  callBtn: {
+    width:           40,
+    height:          40,
+    borderRadius:    radius.full,
+    borderWidth:     1.5,
+    borderColor:     'rgba(255,255,255,0.35)',
     alignItems:      'center',
+    justifyContent:  'center',
+  },
+  callBtnPressed: { opacity: 0.55 },
+  callBtnSpacer:  { width: 40 },
+
+  // ── Empty / footer ─────────────────────────────────────────────────────────
+  empty: {
+    marginTop:         spacing.xxl,
+    alignItems:        'center',
     paddingHorizontal: spacing.xl,
   },
   emptyText: {
-    fontSize:   typography.md,
-    color:      colours.textMuted,
-    textAlign:  'center',
+    fontSize:  typography.md,
+    color:     'rgba(255,255,255,0.45)',
+    textAlign: 'center',
+    lineHeight: 44,
   },
-
   footer: {
     paddingVertical: spacing.md,
     alignItems:      'center',

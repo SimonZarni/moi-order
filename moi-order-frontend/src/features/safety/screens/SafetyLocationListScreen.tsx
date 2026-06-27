@@ -1,12 +1,10 @@
 import React from 'react';
-import { ActivityIndicator, FlatList, Image, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Linking, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useSafetyLocationListScreen } from '@/features/safety/hooks/useSafetyLocationListScreen';
-import { HeroHeader } from '@/shared/components/HeroHeader/HeroHeader';
 import { StandaloneFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
-import { colours } from '@/shared/theme/colours';
 import { SafetyLocation } from '@/types/models';
 import { styles } from './SafetyLocationListScreen.styles';
 
@@ -14,12 +12,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   hospital:       'Hospitals',
   police_station: 'Police Stations',
   rescue:         'Rescue Services',
-};
-
-const CATEGORY_ACCENT: Record<string, string> = {
-  hospital:       '#e53935',
-  police_station: '#1565c0',
-  rescue:         '#f57c00',
 };
 
 const CATEGORY_ICONS: Record<string, React.ComponentProps<typeof Ionicons>['name']> = {
@@ -30,36 +22,30 @@ const CATEGORY_ICONS: Record<string, React.ComponentProps<typeof Ionicons>['name
 
 export function SafetyLocationListScreen(): React.JSX.Element {
   const {
-    locations, category, isLoading, isError, errorMessage, isRefreshing,
-    hasNextPage, isFetchingNextPage,
+    locations, category, isLoading, isError,
+    isRefreshing, isFetchingNextPage,
     handleEndReached, handleRefresh, handleLocationPress, handleBack,
   } = useSafetyLocationListScreen();
 
-  const accentColor = CATEGORY_ACCENT[category] ?? colours.danger;
-  const title       = CATEGORY_LABELS[category] ?? 'Safety Locations';
-  const icon        = CATEGORY_ICONS[category] ?? 'shield-outline';
+  const title = CATEGORY_LABELS[category] ?? 'Safety Locations';
+  const icon  = CATEGORY_ICONS[category]  ?? 'shield-outline';
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <HeroHeader
-        accentColor={accentColor}
-        title={title}
-        subtitle="Tap a location for contact details and directions."
-        onBack={handleBack}
-        backLabel="Home"
-      />
+      <View style={styles.header}>
+        <Pressable onPress={handleBack} style={styles.backBtn} accessibilityLabel="Go back" accessibilityRole="button">
+          <Ionicons name="arrow-back" size={22} color="#fff" />
+        </Pressable>
+        <Text style={styles.headerTitle}>{title}</Text>
+        <View style={styles.headerSpacer} />
+      </View>
       <FlatList
         style={styles.list}
         contentContainerStyle={styles.contentContainer}
         data={locations}
-        keyExtractor={(item: SafetyLocation) => String(item.id)}
+        keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
-          <LocationCard
-            location={item}
-            accentColor={accentColor}
-            icon={icon}
-            onPress={handleLocationPress}
-          />
+          <LocationCard location={item} icon={icon} onPress={handleLocationPress} />
         )}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.4}
@@ -69,15 +55,12 @@ export function SafetyLocationListScreen(): React.JSX.Element {
         ListEmptyComponent={
           isLoading ? (
             <View style={styles.empty}>
-              <ActivityIndicator size="large" color={accentColor} />
+              <ActivityIndicator size="large" color="#fff" />
             </View>
           ) : (
             <View style={styles.empty}>
               <Text style={styles.emptyText}>
                 {isError ? 'Unable to load. Pull down to retry.' : 'No locations available.'}
-              </Text>
-              <Text style={[styles.emptyText, { fontSize: 11, marginTop: 4, opacity: 0.5 }]}>
-                {`cat:${category} err:${String(isError)} msg:${errorMessage ?? 'none'}`}
               </Text>
             </View>
           )
@@ -85,7 +68,7 @@ export function SafetyLocationListScreen(): React.JSX.Element {
         ListFooterComponent={
           isFetchingNextPage ? (
             <View style={styles.footer}>
-              <ActivityIndicator size="small" color={colours.primary} />
+              <ActivityIndicator size="small" color="#fff" />
             </View>
           ) : null
         }
@@ -98,13 +81,16 @@ export function SafetyLocationListScreen(): React.JSX.Element {
 // ── LocationCard ──────────────────────────────────────────────────────────────
 
 interface LocationCardProps {
-  location:    SafetyLocation;
-  accentColor: string;
-  icon:        React.ComponentProps<typeof Ionicons>['name'];
-  onPress:     (location: SafetyLocation) => void;
+  location: SafetyLocation;
+  icon:     React.ComponentProps<typeof Ionicons>['name'];
+  onPress:  (location: SafetyLocation) => void;
 }
 
-function LocationCard({ location, accentColor, icon, onPress }: LocationCardProps): React.JSX.Element {
+function LocationCard({ location, icon, onPress }: LocationCardProps): React.JSX.Element {
+  const handleCall = (): void => {
+    if (location.phone) Linking.openURL(`tel:${location.phone}`);
+  };
+
   return (
     <Pressable
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
@@ -113,29 +99,37 @@ function LocationCard({ location, accentColor, icon, onPress }: LocationCardProp
       accessibilityRole="button"
     >
       {location.cover_photo_url ? (
-        <Image source={{ uri: location.cover_photo_url }} style={styles.coverImage} resizeMode="cover" />
+        <Image source={{ uri: location.cover_photo_url }} style={styles.thumb} resizeMode="cover" />
       ) : (
-        <View style={styles.coverPlaceholder}>
-          <Ionicons name={icon} size={32} color={accentColor} />
+        <View style={styles.thumbPlaceholder}>
+          <Ionicons name={icon} size={24} color="rgba(255,255,255,0.4)" />
         </View>
       )}
-      <View style={styles.cardBody}>
-        <Text style={styles.cardTitle}>{location.name}</Text>
+      <View style={styles.info}>
+        <Text style={styles.name} numberOfLines={2}>{location.name}</Text>
         {location.sub_category ? (
-          <Text style={[styles.cardSubCategory, { color: accentColor }]}>
-            {location.sub_category}
-          </Text>
+          <View style={styles.tagRow}>
+            <View style={styles.tagDot} />
+            <Text style={styles.tagText} numberOfLines={1}>{location.sub_category}</Text>
+          </View>
         ) : null}
         {location.location ? (
-          <Text style={styles.cardLocation} numberOfLines={2}>{location.location}</Text>
-        ) : null}
-        {location.phone ? (
-          <Text style={styles.cardPhone}>{location.phone}</Text>
+          <Text style={styles.address} numberOfLines={1}>{location.location}</Text>
         ) : null}
       </View>
-      <View style={styles.cardChevron}>
-        <Ionicons name="chevron-forward" size={16} color={colours.textMuted} />
-      </View>
+      {location.phone ? (
+        <Pressable
+          style={({ pressed }) => [styles.callBtn, pressed && styles.callBtnPressed]}
+          onPress={handleCall}
+          accessibilityLabel={`Call ${location.name}`}
+          accessibilityRole="button"
+          hitSlop={8}
+        >
+          <Ionicons name="call-outline" size={18} color="#fff" />
+        </Pressable>
+      ) : (
+        <View style={styles.callBtnSpacer} />
+      )}
     </Pressable>
   );
 }
