@@ -24,13 +24,6 @@ class AdminTokenFromCookie
         // and is more reliable than $request->headers->get('Cookie') which Symfony may not expose.
         $cookieHeader = $_SERVER['HTTP_COOKIE'] ?? $request->headers->get('Cookie') ?? '';
 
-        \Illuminate\Support\Facades\Log::error('AdminTokenFromCookie', [
-            'running'             => true,
-            'has_auth'            => $request->hasHeader('Authorization'),
-            'cookie_from_server'  => $_SERVER['HTTP_COOKIE'] ?? null,
-            'cookie_from_headers' => $request->headers->get('Cookie'),
-            'cookie_used'         => $cookieHeader,
-        ]);
 
         if (! $request->hasHeader('Authorization')) {
             $token = $this->parseCookieHeader($cookieHeader);
