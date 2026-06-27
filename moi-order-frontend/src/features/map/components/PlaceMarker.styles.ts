@@ -32,6 +32,12 @@ export const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: MAP_COLORS.primaryLight,
   },
+  imageFallbackOverlay: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: MAP_COLORS.primaryLight,
+  },
   fallbackEmoji: { fontSize: 20 },
 
   tail: {

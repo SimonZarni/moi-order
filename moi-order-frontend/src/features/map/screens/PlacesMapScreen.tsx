@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Platform, Pressable, Text, View } from 'react-native';
-import { Image as ExpoImage } from 'expo-image';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import MapboxGL from '@rnmapbox/maps';
 import { useNavigation } from '@react-navigation/native';
@@ -81,45 +80,21 @@ export function PlacesMapScreen(): React.JSX.Element {
   const buttonsRightAnim = useRef(new Animated.Value(0)).current;
   const loadingAnim      = useRef(new Animated.Value(0)).current;
 
-  // Per-place image-ready tracking: each place ID enters the set as soon as its
-  // own prefetch resolves (or immediately if it has no cover image).
-  // PlaceMarkers mount one-by-one as images arrive instead of all-at-once.
-  // loadedOnceRef prevents re-running the prefetch loop on reference-only changes
-  // to displayedPlaces; it resets on tab-switch / re-fetch so new images prefetch.
-  const loadedOnceRef = useRef(false);
+  // Per-place image-ready tracking: each PlaceMarker fires onImageReady when its
+  // image loads (or immediately if it has no cover image). The loading bar stays
+  // visible until every displayed place has reported ready.
   const [readyPlaceIds, setReadyPlaceIds] = useState<Set<number>>(new Set<number>());
 
   useEffect(() => {
-    if (isLoadingPlaces || isTabSwitching) {
-      loadedOnceRef.current = false;
-      setReadyPlaceIds(new Set<number>());
-      return;
-    }
-    if (loadedOnceRef.current) return;
-    loadedOnceRef.current = true;
+    if (isLoadingPlaces || isTabSwitching) setReadyPlaceIds(new Set<number>());
+  }, [isLoadingPlaces, isTabSwitching]);
 
-    let cancelled = false;
-
-    for (const place of displayedPlaces) {
-      const uri = place.cover_image;
-      if (!uri) {
-        setReadyPlaceIds(prev => { const s = new Set<number>(prev); s.add(place.id); return s; });
-        continue;
-      }
-      ExpoImage.prefetch(uri, 'memory-disk')
-        .catch(() => {})
-        .finally(() => {
-          if (!cancelled) {
-            setReadyPlaceIds(prev => { const s = new Set<number>(prev); s.add(place.id); return s; });
-          }
-        });
-    }
-
-    return () => { cancelled = true; };
-  }, [isLoadingPlaces, isTabSwitching, displayedPlaces]);
+  const handleImageReady = useCallback((id: number): void => {
+    setReadyPlaceIds(prev => { const s = new Set<number>(prev); s.add(id); return s; });
+  }, []);
 
   const topControlsHidden = isFullscreen || isBottomSheetFullyExpanded;
-  const isLoading         = isLoadingPlaces || isTabSwitching;
+  const isLoading         = isLoadingPlaces || isTabSwitching || readyPlaceIds.size < displayedPlaces.length;
 
   useEffect(() => {
     Animated.parallel([
@@ -268,7 +243,8 @@ export function PlacesMapScreen(): React.JSX.Element {
           {displayedPlaces.map((place) => (
             <PlaceMarker key={place.id} place={place}
               isSelected={selectedPlace?.id === place.id}
-              onPress={handleMarkerPress} />
+              onPress={handleMarkerPress}
+              onImageReady={handleImageReady} />
           ))}
 
           {/* Android tap detection — invisible circles at each marker coordinate.
