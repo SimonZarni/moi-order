@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Admin\V1;
 
-use App\Contracts\FileStorageInterface;
 use App\Enums\SafetyCategory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreSafetyLocationRequest;
@@ -21,7 +20,6 @@ class AdminSafetyLocationController extends Controller
 {
     public function __construct(
         private readonly SafetyLocationService $service,
-        private readonly FileStorageInterface  $storage,
     ) {}
 
     /** GET /api/admin/v1/safety-locations */
@@ -48,7 +46,7 @@ class AdminSafetyLocationController extends Controller
     {
         $location = $this->service->create($request->validated());
 
-        return response()->json(['data' => new SafetyLocationResource($location, $this->storage)], 201);
+        return response()->json(['data' => new SafetyLocationResource($location)], 201);
     }
 
     /** GET /api/admin/v1/safety-locations/{id} */
@@ -56,7 +54,7 @@ class AdminSafetyLocationController extends Controller
     {
         $location = SafetyLocation::findOrFail($id);
 
-        return response()->json(['data' => new SafetyLocationResource($location, $this->storage)]);
+        return response()->json(['data' => new SafetyLocationResource($location)]);
     }
 
     /** PUT /api/admin/v1/safety-locations/{id} */
@@ -65,7 +63,7 @@ class AdminSafetyLocationController extends Controller
         $location = SafetyLocation::findOrFail($id);
         $updated  = $this->service->update($location, $request->validated());
 
-        return response()->json(['data' => new SafetyLocationResource($updated, $this->storage)]);
+        return response()->json(['data' => new SafetyLocationResource($updated)]);
     }
 
     /** DELETE /api/admin/v1/safety-locations/{id} */
@@ -83,7 +81,7 @@ class AdminSafetyLocationController extends Controller
         $location = SafetyLocation::findOrFail($id);
         $updated  = $this->service->addPhoto($location, $request->file('photo'));
 
-        return response()->json(['data' => new SafetyLocationResource($updated, $this->storage)]);
+        return response()->json(['data' => new SafetyLocationResource($updated)]);
     }
 
     /** DELETE /api/admin/v1/safety-locations/{id}/photos/{index} */
@@ -92,7 +90,7 @@ class AdminSafetyLocationController extends Controller
         $location = SafetyLocation::findOrFail($id);
         $updated  = $this->service->removePhoto($location, $index);
 
-        return response()->json(['data' => new SafetyLocationResource($updated, $this->storage)]);
+        return response()->json(['data' => new SafetyLocationResource($updated)]);
     }
 
     /** POST /api/admin/v1/safety-locations/{id}/cover */
@@ -102,7 +100,7 @@ class AdminSafetyLocationController extends Controller
         $location = SafetyLocation::findOrFail($id);
         $updated  = $this->service->setCoverPhoto($location, $request->file('photo'));
 
-        return response()->json(['data' => new SafetyLocationResource($updated, $this->storage)]);
+        return response()->json(['data' => new SafetyLocationResource($updated)]);
     }
 
     /** DELETE /api/admin/v1/safety-locations/{id}/cover */
@@ -111,7 +109,7 @@ class AdminSafetyLocationController extends Controller
         $location = SafetyLocation::findOrFail($id);
         $updated  = $this->service->removeCoverPhoto($location);
 
-        return response()->json(['data' => new SafetyLocationResource($updated, $this->storage)]);
+        return response()->json(['data' => new SafetyLocationResource($updated)]);
     }
 
     /** GET /api/admin/v1/safety-locations/export */

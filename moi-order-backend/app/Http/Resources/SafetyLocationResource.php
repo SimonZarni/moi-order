@@ -9,15 +9,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class SafetyLocationResource extends JsonResource
 {
-    public function __construct($resource, private readonly ?FileStorageInterface $storage = null)
-    {
-        parent::__construct($resource);
-    }
-
     public function toArray($request): array
     {
-        // Resolve storage from container when used via ::collection() (storage not injected).
-        $storage = $this->storage ?? app(FileStorageInterface::class);
+        $storage = app(FileStorageInterface::class);
 
         $photoPaths = $this->photo_paths ?? [];
         $photoUrls  = array_map(fn ($p) => $storage->url($p), $photoPaths);
