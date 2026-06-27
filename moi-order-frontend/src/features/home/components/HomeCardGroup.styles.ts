@@ -108,8 +108,9 @@ export const styles = StyleSheet.create({
     lineHeight: 18,       // typography.xxs (9) × 2.0
   },
   mmCardTitle: {
+    fontSize: 15,
     letterSpacing: 0,
-    lineHeight: 32,       // typography.lg (17) × 1.9
+    lineHeight: 44,       // typography.md (15) × 2.9 — Myanmar diacritics need ≥3× fontSize
     writingDirection: 'ltr',
   },
   mmCardSubtitle: {
