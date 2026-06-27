@@ -133,8 +133,10 @@ export function SafetyDetailView() {
       }
       setFormOpen(false);
       fetchRows();
-    } catch {
-      setSaveError('Failed to save. Please check your input.');
+    } catch (err) {
+      const e = err as { message?: string; errors?: Record<string, string[]> };
+      const firstFieldError = e?.errors ? Object.values(e.errors)[0]?.[0] : undefined;
+      setSaveError(firstFieldError ?? e?.message ?? 'Failed to save. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -378,9 +380,11 @@ export function SafetyDetailView() {
       {/* Create / Edit Dialog */}
       <Dialog open={formOpen} onClose={() => setFormOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{editItem ? `Edit — ${editItem.name}` : `Add ${catLabel}`}</DialogTitle>
+        {saveError && (
+          <Alert severity="error" sx={{ mx: 3, mt: 1 }}>{saveError}</Alert>
+        )}
         <DialogContent>
           <Stack spacing={2} sx={{ pt: 1 }}>
-            {saveError && <Alert severity="error">{saveError}</Alert>}
             <TextField label="Name *" value={form.name} onChange={field('name')} fullWidth />
             <TextField label="Phone" value={form.phone ?? ''} onChange={field('phone')} fullWidth />
             <TextField label="Location" value={form.location ?? ''} onChange={field('location')} fullWidth placeholder="e.g. No.15, Main Rd, Pattaya" />
