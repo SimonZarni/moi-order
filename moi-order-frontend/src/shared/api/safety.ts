@@ -15,11 +15,11 @@ type SafetyListResponse = {
 };
 
 export async function listSafetyLocations(params: SafetyListParams = {}): Promise<SafetyListResponse> {
-  const res = await apiClient.get<SafetyListResponse>('/safety-locations', { params });
+  const res = await apiClient.get<SafetyListResponse>('/api/v1/safety-locations', { params });
   return res.data;
 }
 
 export async function getSafetyLocation(id: number): Promise<SafetyLocation> {
-  const res = await apiClient.get<{ data: SafetyLocation }>(`/safety-locations/${id}`);
+  const res = await apiClient.get<{ data: SafetyLocation }>(`/api/v1/safety-locations/${id}`);
   return res.data.data;
 }
