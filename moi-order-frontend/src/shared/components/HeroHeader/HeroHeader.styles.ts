@@ -61,6 +61,8 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 2.5,
     textTransform: 'uppercase',
+    // lineHeight ≥ 4× fontSize: Burmese subscripts extend ~2× below baseline at this size
+    lineHeight: 36,
     marginBottom: 4,
   },
   title: {
@@ -68,14 +70,14 @@ export const styles = StyleSheet.create({
     fontWeight: '900',
     color: colours.textOnDark,
     letterSpacing: -0.8,
+    // lineHeight = 3× fontSize per Burmese diacritic rule (CLAUDE.md)
     lineHeight: 78,
-    marginTop: -18,
-    marginBottom: -10,
   },
   subtitle: {
     fontSize: typography.xs,
     color: colours.medium,
     marginTop: 4,
-    lineHeight: 18,
+    // lineHeight = 3× fontSize (11px) for Burmese subscripts
+    lineHeight: 33,
   },
 });
