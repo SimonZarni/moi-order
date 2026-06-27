@@ -11,7 +11,6 @@ use App\Models\SafetyLocation;
 use App\Services\SafetyLocationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class SafetyLocationController extends Controller
 {
@@ -20,7 +19,7 @@ class SafetyLocationController extends Controller
     ) {}
 
     /** GET /api/v1/safety-locations — intentionally public */
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): JsonResponse
     {
         $category = $request->filled('category')
             ? SafetyCategory::tryFrom($request->string('category')->toString())
@@ -32,7 +31,8 @@ class SafetyLocationController extends Controller
             perPage:  min($request->integer('per_page', 50), 100),
         );
 
-        return SafetyLocationResource::collection($paginator)->additional([
+        return response()->json([
+            'data' => SafetyLocationResource::collection($paginator->items()),
             'meta' => [
                 'current_page' => $paginator->currentPage(),
                 'last_page'    => $paginator->lastPage(),
