@@ -5,6 +5,8 @@ import { radius } from '@/shared/theme/radius';
 import { spacing } from '@/shared/theme/spacing';
 import { typography } from '@/shared/theme/typography';
 
+const CREAM = '#F5F0E8';
+
 export const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colours.dark },
 
@@ -32,36 +34,42 @@ export const styles = StyleSheet.create({
   headerSpacer: { width: 44 },
 
   // ── List ───────────────────────────────────────────────────────────────────
-  list:             { flex: 1 },
+  list:             { flex: 1, backgroundColor: CREAM },
   contentContainer: {
     paddingHorizontal: spacing.md,
-    paddingTop:        spacing.xs,
+    paddingTop:        spacing.md,
     paddingBottom:     spacing.xxl + spacing.lg,
+    backgroundColor:   CREAM,
   },
 
   // ── Card ───────────────────────────────────────────────────────────────────
   card: {
     flexDirection:   'row',
     alignItems:      'center',
-    backgroundColor: colours.secondary,
+    backgroundColor: colours.white,
     borderRadius:    radius.lg,
     marginBottom:    spacing.sm,
     padding:         spacing.sm,
+    shadowColor:     '#000',
+    shadowOffset:    { width: 0, height: 1 },
+    shadowOpacity:   0.07,
+    shadowRadius:    4,
+    elevation:       2,
   },
-  cardPressed: { opacity: 0.72 },
+  cardPressed: { opacity: 0.78 },
 
   // ── Thumbnail ──────────────────────────────────────────────────────────────
   thumb: {
     width:           64,
     height:          64,
     borderRadius:    radius.md,
-    backgroundColor: colours.dark,
+    backgroundColor: CREAM,
   },
   thumbPlaceholder: {
     width:           64,
     height:          64,
     borderRadius:    radius.md,
-    backgroundColor: colours.dark,
+    backgroundColor: CREAM,
     alignItems:      'center',
     justifyContent:  'center',
   },
@@ -73,33 +81,41 @@ export const styles = StyleSheet.create({
     marginRight: spacing.xs,
   },
   name: {
-    fontSize:     typography.md,
-    fontWeight:   '700',
-    color:        colours.textOnDark,
-    lineHeight:   44,
+    fontSize:   typography.md,
+    fontWeight: '700',
+    color:      colours.textOnLight,
+    lineHeight: 44,
   },
-  tagRow: {
+  category: {
+    fontSize:     typography.xs,
+    fontWeight:   '600',
+    color:        colours.primary,
+    lineHeight:   18,
+    marginBottom: 2,
+  },
+  phoneRow: {
     flexDirection: 'row',
     alignItems:    'center',
     marginTop:     2,
   },
-  tagDot: {
-    width:           6,
-    height:          6,
-    borderRadius:    radius.full,
-    backgroundColor: colours.success,
-    marginRight:     spacing.xs,
+  phone: {
+    fontSize:   typography.sm,
+    color:      colours.primary,
+    fontWeight: '500',
+    lineHeight: 20,
+    marginLeft: 4,
   },
-  tagText: {
-    fontSize:  typography.xs,
-    color:     'rgba(255,255,255,0.65)',
-    lineHeight: 18,
+  addressRow: {
+    flexDirection: 'row',
+    alignItems:    'center',
+    marginTop:     2,
   },
   address: {
     fontSize:  typography.xs,
-    color:     'rgba(255,255,255,0.4)',
+    color:     colours.textMuted,
     lineHeight: 18,
-    marginTop:  2,
+    marginLeft: 4,
+    flex:       1,
   },
 
   // ── Call button ────────────────────────────────────────────────────────────
@@ -108,9 +124,10 @@ export const styles = StyleSheet.create({
     height:          40,
     borderRadius:    radius.full,
     borderWidth:     1.5,
-    borderColor:     'rgba(255,255,255,0.35)',
+    borderColor:     colours.primary,
     alignItems:      'center',
     justifyContent:  'center',
+    backgroundColor: colours.infoBg,
   },
   callBtnPressed: { opacity: 0.55 },
   callBtnSpacer:  { width: 40 },
@@ -123,7 +140,7 @@ export const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize:  typography.md,
-    color:     'rgba(255,255,255,0.45)',
+    color:     colours.textMuted,
     textAlign: 'center',
     lineHeight: 44,
   },

@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { useSafetyLocationListScreen } from '@/features/safety/hooks/useSafetyLocationListScreen';
 import { StandaloneFloatingTabBar } from '@/shared/components/FloatingTabBar/FloatingTabBar';
+import { colours } from '@/shared/theme/colours';
 import { SafetyLocation } from '@/types/models';
 import { styles } from './SafetyLocationListScreen.styles';
 
@@ -55,7 +56,7 @@ export function SafetyLocationListScreen(): React.JSX.Element {
         ListEmptyComponent={
           isLoading ? (
             <View style={styles.empty}>
-              <ActivityIndicator size="large" color="#fff" />
+              <ActivityIndicator size="large" color={colours.primary} />
             </View>
           ) : (
             <View style={styles.empty}>
@@ -68,7 +69,7 @@ export function SafetyLocationListScreen(): React.JSX.Element {
         ListFooterComponent={
           isFetchingNextPage ? (
             <View style={styles.footer}>
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color={colours.primary} />
             </View>
           ) : null
         }
@@ -102,21 +103,29 @@ function LocationCard({ location, icon, onPress }: LocationCardProps): React.JSX
         <Image source={{ uri: location.cover_photo_url }} style={styles.thumb} resizeMode="cover" />
       ) : (
         <View style={styles.thumbPlaceholder}>
-          <Ionicons name={icon} size={24} color="rgba(255,255,255,0.4)" />
+          <Ionicons name={icon} size={26} color={colours.primary} />
         </View>
       )}
+
       <View style={styles.info}>
         <Text style={styles.name} numberOfLines={2}>{location.name}</Text>
         {location.sub_category ? (
-          <View style={styles.tagRow}>
-            <View style={styles.tagDot} />
-            <Text style={styles.tagText} numberOfLines={1}>{location.sub_category}</Text>
+          <Text style={styles.category} numberOfLines={1}>{location.sub_category}</Text>
+        ) : null}
+        {location.phone ? (
+          <View style={styles.phoneRow}>
+            <Ionicons name="call-outline" size={12} color={colours.primary} />
+            <Text style={styles.phone} numberOfLines={1}>{location.phone}</Text>
           </View>
         ) : null}
         {location.location ? (
-          <Text style={styles.address} numberOfLines={1}>{location.location}</Text>
+          <View style={styles.addressRow}>
+            <Ionicons name="location-outline" size={12} color={colours.textMuted} />
+            <Text style={styles.address} numberOfLines={1}>{location.location}</Text>
+          </View>
         ) : null}
       </View>
+
       {location.phone ? (
         <Pressable
           style={({ pressed }) => [styles.callBtn, pressed && styles.callBtnPressed]}
@@ -125,7 +134,7 @@ function LocationCard({ location, icon, onPress }: LocationCardProps): React.JSX
           accessibilityRole="button"
           hitSlop={8}
         >
-          <Ionicons name="call-outline" size={18} color="#fff" />
+          <Ionicons name="call-outline" size={18} color={colours.primary} />
         </Pressable>
       ) : (
         <View style={styles.callBtnSpacer} />
