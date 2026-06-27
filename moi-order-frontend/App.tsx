@@ -298,7 +298,9 @@ function AppShell(): React.JSX.Element {
       <Stack.Screen name="UpdateEmail"                   component={guardedScreen(UpdateEmailScreen)} options={{ headerShown: false }} />
       <Stack.Screen name="EmergencyContactList"          component={guardedScreen(EmergencyContactListScreen)} />
       <Stack.Screen name="EmergencyContactDetail"        component={guardedScreen(EmergencyContactDetailScreen)} />
-      <Stack.Screen name="SafetyLocationList"            component={guardedScreen(SafetyLocationListScreen)} />
+      <Stack.Screen name="HospitalList"                  component={guardedScreen(SafetyLocationListScreen)} />
+      <Stack.Screen name="PoliceStationList"             component={guardedScreen(SafetyLocationListScreen)} />
+      <Stack.Screen name="RescueTeamList"                component={guardedScreen(SafetyLocationListScreen)} />
       <Stack.Screen name="SafetyLocationDetail"          component={guardedScreen(SafetyLocationDetailScreen)} />
       <Stack.Screen name="Food"                          component={FoodScreen} />
       <Stack.Screen name="RestaurantDetail"              component={RestaurantDetailScreen} />

@@ -100,7 +100,9 @@ export type RootStackParamList = {
   EmergencyContactDetail: { contactId: number };
 
   // ── Safety Locations ──────────────────────────────────────────────────────
-  SafetyLocationList:   { category: import('./models').SafetyCategoryValue };
+  HospitalList:         undefined;
+  PoliceStationList:    undefined;
+  RescueTeamList:       undefined;
   SafetyLocationDetail: { locationId: number };
 
   // ── System
