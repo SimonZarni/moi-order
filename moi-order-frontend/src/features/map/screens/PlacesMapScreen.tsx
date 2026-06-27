@@ -119,7 +119,7 @@ export function PlacesMapScreen(): React.JSX.Element {
   }, [isLoadingPlaces, isTabSwitching, displayedPlaces]);
 
   const topControlsHidden = isFullscreen || isBottomSheetFullyExpanded;
-  const isLoading         = isLoadingPlaces || isTabSwitching || readyPlaceIds.size < displayedPlaces.length;
+  const isLoading         = isLoadingPlaces || isTabSwitching;
 
   useEffect(() => {
     Animated.parallel([
