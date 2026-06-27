@@ -3,6 +3,7 @@ import { Linking } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { EMERGENCY_CONTACT_TYPE, EmergencyContactType, HOME_CARD_NAV_SCREEN, HOME_CARD_ROUTE_TYPE } from '@/types/enums';
+import { SafetyCategoryValue } from '@/types/models';
 import { RootStackParamList } from '@/types/navigation';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -83,6 +84,14 @@ export function navigateToCardScreen(
       const validTypes: EmergencyContactType[] = Object.values(EMERGENCY_CONTACT_TYPE);
       if (typeParam && (validTypes as string[]).includes(typeParam)) {
         navigation.navigate('EmergencyContactList', { type: typeParam as EmergencyContactType });
+      }
+      break;
+    }
+    case HOME_CARD_NAV_SCREEN.SafetyLocationList: {
+      const categoryParam = navigationParams?.category as string | undefined;
+      const validCategories: SafetyCategoryValue[] = ['hospital', 'police_station', 'rescue'];
+      if (categoryParam && (validCategories as string[]).includes(categoryParam)) {
+        navigation.navigate('SafetyLocationList', { category: categoryParam as SafetyCategoryValue });
       }
       break;
     }
