@@ -134,6 +134,9 @@ export const styles = StyleSheet.create({
     backgroundColor: '#06C755',
     marginTop: spacing.sm,
   },
+  promptPayBtnPressed: {
+    backgroundColor: '#05a847',
+  },
   promptPayText: {
     fontSize: typography.md,
     fontWeight: '800',

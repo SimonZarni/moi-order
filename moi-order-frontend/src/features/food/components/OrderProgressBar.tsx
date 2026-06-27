@@ -293,7 +293,7 @@ export function OrderProgressBar({
           </View>
 
           <Pressable
-            style={styles.promptPayBtn}
+            style={({ pressed }) => [styles.promptPayBtn, pressed && styles.promptPayBtnPressed]}
             onPress={onPromptPayPress}
             accessibilityRole="button"
             accessibilityLabel="Pay via LINE"
@@ -306,7 +306,7 @@ export function OrderProgressBar({
 
       {canShowPromptPay && !copyMessage && (
         <Pressable
-          style={styles.promptPayBtn}
+          style={({ pressed }) => [styles.promptPayBtn, pressed && styles.promptPayBtnPressed]}
           onPress={onPromptPayPress}
           accessibilityRole="button"
           accessibilityLabel="Pay via LINE"
