@@ -8,9 +8,9 @@ import * as Updates from 'expo-updates';
  * Users mid-session are never interrupted — the update is already ready
  * the moment they reopen the app.
  *
- * checkOnLaunch: "ALWAYS" in app.config.js handles the initial launch case
- * at the native layer (before JS runs). This hook catches updates published
- * while the user is already inside the app.
+ * checkOnLaunch is "NEVER" in app.config.js — all update checking goes
+ * through this hook. After download, reloadAsync() applies the bundle
+ * immediately so Android doesn't miss it by staying warm in the background.
  *
  * Skipped entirely in development — Updates APIs throw in __DEV__ mode.
  */
@@ -23,8 +23,10 @@ export function useOtaUpdate(): void {
         const update = await Updates.checkForUpdateAsync();
         if (update.isAvailable) {
           await Updates.fetchUpdateAsync();
-          // Update is now cached. Expo applies it automatically on the
-          // next cold launch — no action or alert needed here.
+          // Reload immediately so the update applies on both iOS and Android.
+          // Android keeps apps alive in the background indefinitely, so waiting
+          // for the next cold launch means the cached update never fires.
+          await Updates.reloadAsync();
         }
       } catch {
         // Network error, EAS unreachable, or update server down.
