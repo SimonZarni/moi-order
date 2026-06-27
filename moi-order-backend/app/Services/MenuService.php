@@ -70,7 +70,7 @@ class MenuService
      */
     public function validateOpenReady(Restaurant $restaurant): void
     {
-        $restaurant->load('menuCategories.menuItems');
+        $restaurant->load(['menuCategories.menuItems', 'menuCategories.linkedItems']);
 
         foreach (MenuCategoryType::cases() as $type) {
             if (! $type->isRequired()) {
@@ -81,7 +81,10 @@ class MenuService
                 ->first(fn ($c) => $c->category_type === $type);
 
             $hasItems = $category !== null
-                && $category->menuItems->where('status', MenuItemStatus::Available)->isNotEmpty();
+                && (
+                    $category->menuItems->where('status', MenuItemStatus::Available)->isNotEmpty()
+                    || $category->linkedItems->where('status', MenuItemStatus::Available)->isNotEmpty()
+                );
 
             if (! $hasItems) {
                 throw new DomainException('menu.system_category_empty');
@@ -253,6 +256,14 @@ class MenuService
                 $this->syncOptionGroups($item, $data['option_groups']);
             }
 
+            if (! empty($data['also_add_to'])) {
+                $systemCatIds = $restaurant->menuCategories()
+                    ->whereIn('category_type', $data['also_add_to'])
+                    ->whereNull('opening_hour_id')
+                    ->pluck('id');
+                $item->systemCategories()->sync($systemCatIds);
+            }
+
             return $item->load('optionGroups.options');
         });
     }
@@ -285,6 +296,19 @@ class MenuService
 
             if (array_key_exists('option_groups', $data)) {
                 $this->syncOptionGroups($item, $data['option_groups'] ?? []);
+            }
+
+            if (! empty($data['also_add_to_synced'])) {
+                $types = $data['also_add_to'] ?? [];
+                if (empty($types)) {
+                    $item->systemCategories()->detach();
+                } else {
+                    $catIds = MenuCategory::where('restaurant_id', $item->restaurant_id)
+                        ->whereIn('category_type', $types)
+                        ->whereNull('opening_hour_id')
+                        ->pluck('id');
+                    $item->systemCategories()->sync($catIds);
+                }
             }
 
             return $item->load('optionGroups.options');

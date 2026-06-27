@@ -43,6 +43,7 @@ export interface AddItemForm {
   original_price: string;
   photo: { uri: string; name: string; type: string } | null;
   option_groups: OptionGroupInput[];
+  also_add_to: string[];
 }
 
 interface UseMenuScreenResult {
@@ -92,6 +93,7 @@ interface UseMenuScreenResult {
   handleUpdateItemStock: (itemId: number, quantity: number | null) => void;
   // Add item modal
   addItemCategoryId: number | null;
+  addItemCategoryType: string | null;
   addItemForm: AddItemForm;
   isAddingItem: boolean;
   handleOpenAddItem: (categoryId: number) => void;
@@ -105,17 +107,18 @@ interface UseMenuScreenResult {
   handleAddOption: (groupIndex: number) => void;
   handleRemoveOption: (groupIndex: number, optIndex: number) => void;
   handleOptionChange: (groupIndex: number, optIndex: number, field: 'name' | 'additional_price_cents', value: string | number) => void;
+  handleToggleAddItemSystemCategory: (type: string) => void;
   handleAddItemSubmit: () => void;
 }
 
 export const EMPTY_FORM: AddItemForm = {
-  name: '', description: '', price: '', original_price: '', photo: null, option_groups: [],
+  name: '', description: '', price: '', original_price: '', photo: null, option_groups: [], also_add_to: [],
 };
 
 const SYSTEM_SORT: Record<string, number> = { popular_picks: 0, promotions: 1, recommendations: 2 };
 const REQUIRED_SYSTEM_TYPES = ['popular_picks', 'recommendations'] as const;
 
-export async function buildItemFormData(form: AddItemForm): Promise<FormData> {
+export async function buildItemFormData(form: AddItemForm, isUpdate = false): Promise<FormData> {
   const fd = new FormData();
   fd.append('name', form.name.trim());
   if (form.description.trim()) fd.append('description', form.description.trim());
@@ -136,6 +139,12 @@ export async function buildItemFormData(form: AddItemForm): Promise<FormData> {
       fd.append(`option_groups[${gi}][options][${oi}][additional_price_cents]`, String(opt.additional_price_cents));
     });
   });
+  // For create: send also_add_to only if non-empty.
+  // For update: always send also_add_to_synced so backend knows to sync the pivot.
+  form.also_add_to.forEach((type, i) => {
+    fd.append(`also_add_to[${i}]`, type);
+  });
+  if (isUpdate) fd.append('also_add_to_synced', '1');
   if (form.photo !== null) {
     if (Platform.OS === 'web') {
       const blob = await fetch(form.photo.uri).then((r) => r.blob());
@@ -239,7 +248,8 @@ export function useMenuScreen(): UseMenuScreenResult {
   const [deletingCategoryName, setDeletingCategoryName] = useState('');
 
   // ── Item modals ───────────────────────────────────────────────────────────
-  const [addItemCategoryId, setAddItemCategoryId] = useState<number | null>(null);
+  const [addItemCategoryId,   setAddItemCategoryId]   = useState<number | null>(null);
+  const [addItemCategoryType, setAddItemCategoryType] = useState<string | null>(null);
   const [addItemForm, setAddItemForm] = useState<AddItemForm>(EMPTY_FORM);
 
   // ── Queries ───────────────────────────────────────────────────────────────
@@ -277,12 +287,22 @@ export function useMenuScreen(): UseMenuScreenResult {
     [categories],
   );
 
-  // Items shown in the grid — filtered by selected category tab + search query
+  // Items shown in the grid — filtered by selected category tab + search query.
+  // Deduplicate by ID when showing "all" since an item can appear in its primary
+  // category AND in a system category via the pivot.
   const filteredItems = useMemo<MenuItem[]>(() => {
-    const base =
-      selectedCategoryId === 'all'
-        ? categories.flatMap((c) => c.items)
-        : (categories.find((c) => c.id === selectedCategoryId)?.items ?? []);
+    let base: MenuItem[];
+    if (selectedCategoryId === 'all') {
+      const seen = new Set<number>();
+      base = [];
+      for (const cat of categories) {
+        for (const item of cat.items) {
+          if (!seen.has(item.id)) { seen.add(item.id); base.push(item); }
+        }
+      }
+    } else {
+      base = categories.find((c) => c.id === selectedCategoryId)?.items ?? [];
+    }
     if (!searchQuery.trim()) return base;
     const q = searchQuery.trim().toLowerCase();
     return base.filter((item) => item.name.toLowerCase().includes(q));
@@ -439,11 +459,25 @@ export function useMenuScreen(): UseMenuScreenResult {
   const addHandlers = makeOptionGroupHandlers(setAddItemForm);
 
   const handleOpenAddItem = useCallback((categoryId: number) => {
+    const cat = categories.find((c) => c.id === categoryId);
+    setAddItemCategoryType(cat?.category_type ?? null);
     setAddItemForm(EMPTY_FORM);
     setAddItemCategoryId(categoryId);
+  }, [categories]);
+
+  const handleCloseAddItem = useCallback(() => {
+    setAddItemCategoryId(null);
+    setAddItemCategoryType(null);
   }, []);
 
-  const handleCloseAddItem = useCallback(() => setAddItemCategoryId(null), []);
+  const handleToggleAddItemSystemCategory = useCallback((type: string) => {
+    setAddItemForm((prev) => ({
+      ...prev,
+      also_add_to: prev.also_add_to.includes(type)
+        ? prev.also_add_to.filter((t) => t !== type)
+        : [...prev.also_add_to, type],
+    }));
+  }, []);
 
   const handleAddItemFieldChange = useCallback(
     (field: 'name' | 'description' | 'price' | 'original_price', value: string) =>
@@ -489,7 +523,10 @@ export function useMenuScreen(): UseMenuScreenResult {
     () => selectedCategoryId !== 'all' ? categories.find((c) => c.id === selectedCategoryId) ?? null : null,
     [categories, selectedCategoryId],
   );
-  const totalCount = useMemo(() => categories.reduce((sum, c) => sum + c.items.length, 0), [categories]);
+  const totalCount = useMemo(() => {
+    const ids = new Set(categories.flatMap((c) => c.items.map((i) => i.id)));
+    return ids.size;
+  }, [categories]);
 
   return {
     categories, filteredItems, guardedItemIds, isLoading, isError,
@@ -503,10 +540,11 @@ export function useMenuScreen(): UseMenuScreenResult {
     deletingCategoryId, deletingCategoryName,
     handleOpenDeleteConfirm, handleConfirmDelete, handleCancelDelete,
     handleToggleItemStatus, handleDeleteItem, handleUpdateItemStock,
-    addItemCategoryId, addItemForm, isAddingItem,
+    addItemCategoryId, addItemCategoryType, addItemForm, isAddingItem,
     handleOpenAddItem, handleCloseAddItem,
     handleAddItemFieldChange, handleAddItemPhotoChange, handlePickAddPhoto,
     handleAddOptionGroup, handleRemoveOptionGroup, handleOptionGroupChange,
-    handleAddOption, handleRemoveOption, handleOptionChange, handleAddItemSubmit,
+    handleAddOption, handleRemoveOption, handleOptionChange,
+    handleToggleAddItemSystemCategory, handleAddItemSubmit,
   };
 }

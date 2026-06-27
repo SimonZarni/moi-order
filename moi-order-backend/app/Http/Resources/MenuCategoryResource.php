@@ -26,11 +26,15 @@ class MenuCategoryResource extends JsonResource
             'sort_order'      => $this->sort_order,
             'category_type'   => $this->category_type?->value,
             'is_system'       => $this->isSystem(),
-            'items'         => $this->whenLoaded('menuItems', fn () =>
-                $this->menuItems
-                    ->map(fn ($item) => (new MenuItemResource($item, $this->storage))->toArray($request))
-                    ->values()
-            ),
+            'items'         => $this->whenLoaded('menuItems', function () use ($request) {
+                $items = $this->menuItems;
+
+                if ($this->isSystem() && $this->relationLoaded('linkedItems')) {
+                    $items = $items->merge($this->linkedItems)->unique('id')->sortBy('sort_order')->values();
+                }
+
+                return $items->map(fn ($item) => (new MenuItemResource($item, $this->storage))->toArray($request))->values();
+            }),
         ];
     }
 }

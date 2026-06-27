@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Merchant;
 
+use App\Enums\MenuCategoryType;
 use App\Enums\MenuItemStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -34,6 +35,8 @@ class StoreMenuItemRequest extends FormRequest
             'option_groups.*.options'                 => ['required', 'array', 'min:1'],
             'option_groups.*.options.*.name'                    => ['required', 'string', 'max:100'],
             'option_groups.*.options.*.additional_price_cents'  => ['integer', 'min:0'],
+            'also_add_to'   => ['nullable', 'array', 'max:3'],
+            'also_add_to.*' => ['string', Rule::enum(MenuCategoryType::class)],
         ];
     }
 

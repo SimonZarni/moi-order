@@ -105,6 +105,7 @@ export interface MenuItemOptionGroup {
 
 export interface MenuItem {
   id: number;
+  menu_category_id: number;
   name: string;
   description: string | null;
   price_cents: number;
@@ -112,6 +113,7 @@ export interface MenuItem {
   status: MenuItemStatus;
   photo_url: string | null;
   stock_quantity: number | null;
+  system_category_types?: string[];
   option_groups: MenuItemOptionGroup[];
 }
 

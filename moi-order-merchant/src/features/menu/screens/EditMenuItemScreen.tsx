@@ -12,6 +12,12 @@ import { useEditMenuItemScreen } from '../hooks/useEditMenuItemScreen';
 import type { AddItemForm } from '../hooks/useMenuScreen';
 import type { StyleProp, TextStyle } from 'react-native';
 
+const SYSTEM_CATEGORY_CHIPS = [
+  { type: 'popular_picks',    label: 'Popular Picks' },
+  { type: 'promotions',       label: 'Promotions' },
+  { type: 'recommendations',  label: 'Recommendations' },
+] as const;
+
 interface EditMenuItemScreenProps {
   itemId: number;
   onBack: () => void;
@@ -20,11 +26,11 @@ interface EditMenuItemScreenProps {
 export function EditMenuItemScreen({ itemId, onBack }: EditMenuItemScreenProps): React.JSX.Element {
   const {
     item, isLoading, form, existingPhotoUrl, isSaving, saveError, canSubmit,
-    customerPriceCents, customerOriginalPriceCents, discountCents,
+    isSystemCategory, customerPriceCents, customerOriginalPriceCents, discountCents,
     handleFieldChange, handlePhotoChange, handlePickPhoto,
     handleAddOptionGroup, handleRemoveOptionGroup, handleOptionGroupChange,
     handleAddOption, handleRemoveOption, handleOptionChange,
-    handleSubmit,
+    handleToggleSystemCategory, handleSubmit,
   } = useEditMenuItemScreen({ itemId, onBack });
 
   if (isLoading && !item) {
@@ -166,6 +172,31 @@ export function EditMenuItemScreen({ itemId, onBack }: EditMenuItemScreenProps):
             </View>
           )}
         </View>
+
+        {/* ── Also appear in ──────────────────────────────────────────────── */}
+        {!isSystemCategory && (
+          <View style={styles.card}>
+            <Text style={styles.sectionLabel}>Also Appear In</Text>
+            <View style={styles.systemCatRow}>
+              {SYSTEM_CATEGORY_CHIPS.map(({ type, label }) => {
+                const selected = form.also_add_to.includes(type);
+                return (
+                  <Pressable
+                    key={type}
+                    style={[styles.systemCatChip, selected && styles.systemCatChipSelected]}
+                    onPress={() => handleToggleSystemCategory(type)}
+                    accessibilityRole="checkbox"
+                    accessibilityLabel={`Also appear in ${label}`}
+                    accessibilityState={{ checked: selected }}
+                  >
+                    {selected && <Ionicons name="checkmark" size={13} color={colours.primary} />}
+                    <Text style={[styles.systemCatChipText, selected && styles.systemCatChipTextSelected]}>{label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        )}
 
         {/* ── Options ─────────────────────────────────────────────────────── */}
         <View style={styles.card}>

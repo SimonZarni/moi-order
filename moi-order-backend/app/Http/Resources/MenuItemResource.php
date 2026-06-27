@@ -35,6 +35,12 @@ class MenuItemResource extends JsonResource
             'status'               => $this->status->value,
             'sort_order'           => $this->sort_order,
             'stock_quantity'       => $this->stock_quantity,
+            'system_category_types' => $this->whenLoaded('systemCategories', fn () =>
+                $this->systemCategories
+                    ->map(fn ($c) => $c->category_type?->value)
+                    ->filter()
+                    ->values()
+            ),
             'option_groups'        => $this->whenLoaded('optionGroups', fn () =>
                 $this->optionGroups->map(fn ($g) => [
                     'id'             => $g->id,

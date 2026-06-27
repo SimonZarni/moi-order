@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\MenuCategoryType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -54,5 +55,12 @@ class MenuCategory extends Model
     public function menuItems(): HasMany
     {
         return $this->hasMany(MenuItem::class)->orderBy('sort_order');
+    }
+
+    /** Items from custom categories that were also added to this system category via the pivot. */
+    public function linkedItems(): BelongsToMany
+    {
+        return $this->belongsToMany(MenuItem::class, 'menu_item_system_categories')
+            ->orderBy('menu_items.sort_order');
     }
 }

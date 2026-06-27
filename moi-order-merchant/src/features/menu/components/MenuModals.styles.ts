@@ -330,4 +330,49 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: colours.primary,
   },
+
+  // ── System category chips ──────────────────────────────────────────────────
+  systemCatSection: {
+    borderTopWidth: 1,
+    borderTopColor: colours.divider,
+    paddingTop: spacing.sm,
+    gap: spacing.xs,
+  },
+  systemCatLabel: {
+    fontSize: typography.xxs,
+    fontWeight: '700',
+    color: colours.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  systemCatRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  systemCatChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    backgroundColor: colours.surfaceMuted,
+    minHeight: 36,
+  },
+  systemCatChipSelected: {
+    borderColor: colours.primary,
+    backgroundColor: colours.primary + '18',
+  },
+  systemCatChipText: {
+    fontSize: typography.xs,
+    fontWeight: '600',
+    color: colours.textMuted,
+  },
+  systemCatChipTextSelected: {
+    color: colours.primary,
+    fontWeight: '700',
+  },
 });

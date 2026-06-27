@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\MenuItemStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -75,5 +76,10 @@ class MenuItem extends Model
     public function optionGroups(): HasMany
     {
         return $this->hasMany(MenuItemOptionGroup::class)->orderBy('sort_order');
+    }
+
+    public function systemCategories(): BelongsToMany
+    {
+        return $this->belongsToMany(MenuCategory::class, 'menu_item_system_categories');
     }
 }

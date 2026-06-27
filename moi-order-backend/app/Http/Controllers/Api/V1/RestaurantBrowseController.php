@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Contracts\FileStorageInterface;
+use App\Enums\MenuCategoryType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\RestaurantBrowseRequest;
 use App\Http\Resources\RestaurantResource;
@@ -48,7 +49,8 @@ class RestaurantBrowseController extends Controller
         $restaurant = Restaurant::with([
             'openingHours',
             'photos',
-            'menuCategories.menuItems' => fn ($q) => $q->with('optionGroups.options')->visibleToCustomer(),
+            'menuCategories.menuItems'    => fn ($q) => $q->with('optionGroups.options')->visibleToCustomer(),
+            'menuCategories.linkedItems'  => fn ($q) => $q->visibleToCustomer()->with('optionGroups.options'),
         ])->findOrFail($id);
 
         $activeHourId = $restaurant->getCurrentOpeningHourId();
@@ -65,6 +67,18 @@ class RestaurantBrowseController extends Controller
                 $restaurant->setRelation('menuCategories', $sessionCategories);
             }
         }
+
+        // Hide Promotions from customers when it has no visible items (direct or pivot-linked).
+        $restaurant->setRelation(
+            'menuCategories',
+            $restaurant->menuCategories
+                ->filter(fn ($cat) => !(
+                    $cat->category_type === MenuCategoryType::Promotions
+                    && $cat->menuItems->isEmpty()
+                    && (! $cat->relationLoaded('linkedItems') || $cat->linkedItems->isEmpty())
+                ))
+                ->values()
+        );
 
         return response()->json(['data' => new RestaurantResource($restaurant, $this->storage)]);
     }

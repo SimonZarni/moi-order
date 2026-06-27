@@ -234,4 +234,25 @@ export const styles = StyleSheet.create({
     fontSize: typography.sm,
     fontWeight: '600',
   },
+
+  // ── System category chips ──────────────────────────────────────────────────
+  systemCatRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
+  systemCatChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colours.divider,
+    backgroundColor: colours.surface,
+    minHeight: 36,
+  },
+  systemCatChipSelected: {
+    borderColor: colours.primary,
+    backgroundColor: colours.primary + '18',
+  },
+  systemCatChipText: { fontSize: typography.xs, fontWeight: '600', color: colours.textMuted },
+  systemCatChipTextSelected: { color: colours.primary, fontWeight: '700' },
 });

@@ -29,7 +29,8 @@ interface DeleteCatProps {
 }
 
 interface AddItemProps {
-  categoryId: number | null; form: AddItemForm; isSaving: boolean;
+  categoryId: number | null; categoryType: string | null; form: AddItemForm; isSaving: boolean;
+  alsoAddTo: string[]; onToggleSystemCategory: (type: string) => void;
   onFieldChange: (field: 'name' | 'description' | 'price' | 'original_price', value: string) => void;
   onPickPhoto: () => void;
   onAddOptionGroup: () => void;
@@ -105,6 +106,8 @@ export function MenuModals({ addCat, rename, deleteModal, addItem }: MenuModalsP
           <View style={styles.scrollWrap}>
             <ScrollView contentContainerStyle={styles.scrollCardContent} keyboardShouldPersistTaps="handled">
               <ItemForm t={t} form={addItem.form} isSaving={addItem.isSaving}
+                categoryType={addItem.categoryType} alsoAddTo={addItem.alsoAddTo}
+                onToggleSystemCategory={addItem.onToggleSystemCategory}
                 onFieldChange={addItem.onFieldChange} onPickPhoto={addItem.onPickPhoto}
                 onAddOptionGroup={addItem.onAddOptionGroup} onRemoveOptionGroup={addItem.onRemoveOptionGroup}
                 onOptionGroupChange={addItem.onOptionGroupChange} onAddOption={addItem.onAddOption}
@@ -122,9 +125,18 @@ export function MenuModals({ addCat, rename, deleteModal, addItem }: MenuModalsP
 
 // ── Item form ──────────────────────────────────────────────────────────────────
 
+const SYSTEM_CAT_CHIPS = [
+  { type: 'popular_picks',    label: 'Popular Picks' },
+  { type: 'promotions',       label: 'Promotions' },
+  { type: 'recommendations',  label: 'Recommendations' },
+] as const;
+
 interface ItemFormProps {
   t: ReturnType<typeof useTranslation>;
   form: AddItemForm; isSaving: boolean;
+  categoryType: string | null;
+  alsoAddTo: string[];
+  onToggleSystemCategory: (type: string) => void;
   onFieldChange: AddItemProps['onFieldChange'];
   onPickPhoto: () => void;
   onAddOptionGroup: () => void;
@@ -136,7 +148,7 @@ interface ItemFormProps {
   onCancel: () => void; onSubmit: () => void; submitLabel: string;
 }
 
-function ItemForm({ t, form, isSaving, onFieldChange, onPickPhoto, onAddOptionGroup, onRemoveOptionGroup, onOptionGroupChange, onAddOption, onRemoveOption, onOptionChange, onCancel, onSubmit, submitLabel }: ItemFormProps): React.JSX.Element {
+function ItemForm({ t, form, isSaving, categoryType, alsoAddTo, onToggleSystemCategory, onFieldChange, onPickPhoto, onAddOptionGroup, onRemoveOptionGroup, onOptionGroupChange, onAddOption, onRemoveOption, onOptionChange, onCancel, onSubmit, submitLabel }: ItemFormProps): React.JSX.Element {
   const FEE = 1 + PLATFORM_FEE_RATE;
   const priceCents    = form.price.trim() && !isNaN(parseFloat(form.price)) ? Math.round(parseFloat(form.price) * 100 * FEE) : null;
   const origCents     = form.original_price.trim() && !isNaN(parseFloat(form.original_price)) ? Math.round(parseFloat(form.original_price) * 100 * FEE) : null;
@@ -162,6 +174,30 @@ function ItemForm({ t, form, isSaving, onFieldChange, onPickPhoto, onAddOptionGr
       {discountCents > 0 && <Text style={styles.discountBadge}>✓ Discount: {formatPrice(discountCents)} off</Text>}
 
       <PhotoPreview photo={form.photo} onPick={onPickPhoto} t={t} />
+
+      {categoryType === null && (
+        <View style={styles.systemCatSection}>
+          <Text style={styles.systemCatLabel}>Also appear in</Text>
+          <View style={styles.systemCatRow}>
+            {SYSTEM_CAT_CHIPS.map(({ type, label }) => {
+              const selected = alsoAddTo.includes(type);
+              return (
+                <Pressable
+                  key={type}
+                  style={[styles.systemCatChip, selected && styles.systemCatChipSelected]}
+                  onPress={() => onToggleSystemCategory(type)}
+                  accessibilityRole="checkbox"
+                  accessibilityLabel={`Also appear in ${label}`}
+                  accessibilityState={{ checked: selected }}
+                >
+                  {selected && <Ionicons name="checkmark" size={13} color={colours.primary} />}
+                  <Text style={[styles.systemCatChipText, selected && styles.systemCatChipTextSelected]}>{label}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+      )}
 
       <View style={styles.divider} />
       <View style={styles.sectionRow}>

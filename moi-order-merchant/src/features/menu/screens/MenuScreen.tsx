@@ -29,10 +29,11 @@ export function MenuScreen({ onEditItem }: MenuScreenProps): React.JSX.Element {
     handleOpenRename, handleRenameNameChange, handleConfirmRename, handleCancelRename,
     deletingCategoryId, deletingCategoryName, handleOpenDeleteConfirm, handleConfirmDelete, handleCancelDelete,
     handleToggleItemStatus, handleDeleteItem, handleUpdateItemStock,
-    addItemCategoryId, addItemForm, isAddingItem,
+    addItemCategoryId, addItemCategoryType, addItemForm, isAddingItem,
     handleOpenAddItem, handleCloseAddItem, handleAddItemFieldChange, handlePickAddPhoto,
     handleAddOptionGroup, handleRemoveOptionGroup, handleOptionGroupChange,
-    handleAddOption, handleRemoveOption, handleOptionChange, handleAddItemSubmit,
+    handleAddOption, handleRemoveOption, handleOptionChange,
+    handleToggleAddItemSystemCategory, handleAddItemSubmit,
   } = useMenuScreen();
 
   if (isLoading) {
@@ -93,7 +94,7 @@ export function MenuScreen({ onEditItem }: MenuScreenProps): React.JSX.Element {
         addCat={{ show: showAddCategoryModal, name: newCategoryName, onChange: handleNewCategoryNameChange, onConfirm: handleConfirmAddCategory, onCancel: () => setShowAddCategoryModal(false) }}
         rename={{ id: renamingCategoryId, name: renamingCategoryName, isSaving: isRenamingCategory, onChange: handleRenameNameChange, onConfirm: handleConfirmRename, onCancel: handleCancelRename }}
         deleteModal={{ id: deletingCategoryId, name: deletingCategoryName, onConfirm: handleConfirmDelete, onCancel: handleCancelDelete }}
-        addItem={{ categoryId: addItemCategoryId, form: addItemForm, isSaving: isAddingItem, onFieldChange: handleAddItemFieldChange, onPickPhoto: handlePickAddPhoto, onAddOptionGroup: handleAddOptionGroup, onRemoveOptionGroup: handleRemoveOptionGroup, onOptionGroupChange: handleOptionGroupChange, onAddOption: handleAddOption, onRemoveOption: handleRemoveOption, onOptionChange: handleOptionChange, onClose: handleCloseAddItem, onSubmit: handleAddItemSubmit }}
+        addItem={{ categoryId: addItemCategoryId, categoryType: addItemCategoryType, form: addItemForm, isSaving: isAddingItem, alsoAddTo: addItemForm.also_add_to, onToggleSystemCategory: handleToggleAddItemSystemCategory, onFieldChange: handleAddItemFieldChange, onPickPhoto: handlePickAddPhoto, onAddOptionGroup: handleAddOptionGroup, onRemoveOptionGroup: handleRemoveOptionGroup, onOptionGroupChange: handleOptionGroupChange, onAddOption: handleAddOption, onRemoveOption: handleRemoveOption, onOptionChange: handleOptionChange, onClose: handleCloseAddItem, onSubmit: handleAddItemSubmit }}
       />
     </SafeAreaView>
   );

@@ -24,6 +24,7 @@ export interface UseEditMenuItemScreenResult {
   isSaving: boolean;
   saveError: string | null;
   canSubmit: boolean;
+  isSystemCategory: boolean;
   customerPriceCents: number;
   customerOriginalPriceCents: number | null;
   discountCents: number;
@@ -36,6 +37,7 @@ export interface UseEditMenuItemScreenResult {
   handleAddOption: (gi: number) => void;
   handleRemoveOption: (gi: number, oi: number) => void;
   handleOptionChange: (gi: number, oi: number, field: 'name' | 'additional_price_cents', value: string | number) => void;
+  handleToggleSystemCategory: (type: string) => void;
   handleSubmit: () => void;
 }
 
@@ -74,6 +76,11 @@ export function useEditMenuItemScreen({ itemId, onBack }: UseEditMenuItemScreenP
     return null;
   }, [categories, itemId, queryClient]);
 
+  const isSystemCategory = useMemo(() => {
+    const cat = (categories ?? []).find((c) => c.id === item?.menu_category_id);
+    return cat?.is_system ?? false;
+  }, [categories, item?.menu_category_id]);
+
   // Initialize form once when item resolves from cache
   useEffect(() => {
     if (!item) return;
@@ -92,6 +99,7 @@ export function useEditMenuItemScreen({ itemId, onBack }: UseEditMenuItemScreenP
         max_selections: g.max_selections,
         options: g.options.map((o) => ({ name: o.name, additional_price_cents: o.additional_price_cents })),
       })),
+      also_add_to: item.system_category_types ?? [],
     });
     setExistingPhotoUrl(item.photo_url);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -120,7 +128,7 @@ export function useEditMenuItemScreen({ itemId, onBack }: UseEditMenuItemScreenP
   // ── Mutation ───────────────────────────────────────────────────────────────
 
   const { mutate: mutateUpdate, isPending: isSaving } = useMutation({
-    mutationFn: async (f: AddItemForm) => updateMenuItem(itemId, await buildItemFormData(f)),
+    mutationFn: async (f: AddItemForm) => updateMenuItem(itemId, await buildItemFormData(f, true)),
     onSuccess: (updatedItem) => {
       setSaveError(null);
       queryClient.setQueryData<MenuCategory[]>(QUERY_KEYS.MENU_CATEGORIES, (old) => {
@@ -160,6 +168,15 @@ export function useEditMenuItemScreen({ itemId, onBack }: UseEditMenuItemScreenP
     if (photo) handlePhotoChange(photo);
   }, [handlePhotoChange]);
 
+  const handleToggleSystemCategory = useCallback((type: string) => {
+    setForm((prev) => ({
+      ...prev,
+      also_add_to: prev.also_add_to.includes(type)
+        ? prev.also_add_to.filter((t) => t !== type)
+        : [...prev.also_add_to, type],
+    }));
+  }, []);
+
   const handleAddOptionGroup    = useCallback(() => optHandlers.addOptionGroup(), [optHandlers]);
   const handleRemoveOptionGroup = useCallback((i: number) => optHandlers.removeOptionGroup(i), [optHandlers]);
   const handleOptionGroupChange = useCallback(
@@ -189,6 +206,7 @@ export function useEditMenuItemScreen({ itemId, onBack }: UseEditMenuItemScreenP
     isSaving,
     saveError,
     canSubmit: !!form.name.trim() && !!form.price.trim() && !isSaving,
+    isSystemCategory,
     customerPriceCents,
     customerOriginalPriceCents,
     discountCents,
@@ -201,6 +219,7 @@ export function useEditMenuItemScreen({ itemId, onBack }: UseEditMenuItemScreenP
     handleAddOption,
     handleRemoveOption,
     handleOptionChange,
+    handleToggleSystemCategory,
     handleSubmit,
   };
 }
