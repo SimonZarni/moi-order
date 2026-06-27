@@ -166,7 +166,8 @@ export const HOME_CARD_NAV_SCREEN = {
   CompanyServices:      'CompanyServices',
   EmergencyContactList: 'EmergencyContactList',
   PassportCiServices:   'PassportCiServices',
-  SafetyLocationList:   'SafetyLocationList',
+  SafetyLocationList:     'SafetyLocationList',
+  SafetyLocationListSlug: 'safety-location-list', // alias for routes created via admin UI (toSlug artefact)
 } as const;
 
 // Mirrors App\Enums\HomeCardIconType

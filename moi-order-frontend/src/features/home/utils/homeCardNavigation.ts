@@ -87,8 +87,10 @@ export function navigateToCardScreen(
       }
       break;
     }
-    case HOME_CARD_NAV_SCREEN.SafetyLocationList: {
-      const categoryParam = navigationParams?.category as string | undefined;
+    case HOME_CARD_NAV_SCREEN.SafetyLocationList:
+    case 'safety-location-list': {
+      // Accept both 'category' and 'type' param keys — admins may use either
+      const categoryParam = (navigationParams?.category ?? navigationParams?.type) as string | undefined;
       const validCategories: SafetyCategoryValue[] = ['hospital', 'police_station', 'rescue'];
       if (categoryParam && (validCategories as string[]).includes(categoryParam)) {
         navigation.navigate('SafetyLocationList', { category: categoryParam as SafetyCategoryValue });

@@ -65,6 +65,14 @@ function toSlug(value: string): string {
   return value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 }
 
+// Route keys must be PascalCase to match mobile screen names (e.g. SafetyLocationList)
+function toPascalCase(value: string): string {
+  return value
+    .split(/\s+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join('');
+}
+
 // ----------------------------------------------------------------------
 
 type FormState = {
@@ -264,7 +272,7 @@ export function HomeCardFormView({ mode, card }: Props) {
 
   const handleNewRouteLabelEnChange = useCallback((value: string) => {
     setNewRouteLabelEn(value);
-    setNewRouteKey(toSlug(value));
+    setNewRouteKey(toPascalCase(value));
   }, []);
 
   const handleCloseRouteDialog = useCallback(() => {
@@ -1040,7 +1048,7 @@ export function HomeCardFormView({ mode, card }: Props) {
               fullWidth label="Route Key"
               value={newRouteKey}
               onChange={(e) => setNewRouteKey(e.target.value)}
-              helperText="Must match the mobile screen name for internal routes"
+              helperText="Must be PascalCase and match the mobile screen name exactly (e.g. SafetyLocationList, not safety-location-list)"
             />
 
             <Box>
